@@ -76,7 +76,7 @@ public class ConversationReviewService(
                         attempt.MathCorrection,
                         attempt.Leaks,
                         attempt.WhatLeaked,
-                        attempt.WithholdsClose,
+                        attempt.MathComplete && !attempt.MathCloses,
                         attempt.Established,
                         attempt.SwitchesLanguage,
                         attempt.CandidateLanguage,

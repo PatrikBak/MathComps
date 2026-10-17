@@ -7,9 +7,8 @@ namespace MathComps.Infrastructure.Services.Defense.Dtos;
 /// <remarks>
 /// The evidence fields precede the verdict so the model writes its quotes before deciding.
 /// </remarks>
-/// <param name="Work">The candidate's own work in a sentence, in their terms: their opening plus whatever they
-/// volunteered later, never an answer that only filled in what the examiner asked. Empty when they have brought
-/// nothing yet.</param>
+/// <param name="Work">The candidate's own work in a sentence, in their terms: everything they wrote, their answers to
+/// the examiner's questions included. Empty when they have brought nothing yet.</param>
 /// <param name="Taken">Quoted parts of the candidate's work retained in the reply's question, excluding details
 /// already in the problem statement; empty when none remain.</param>
 /// <param name="Restates">

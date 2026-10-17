@@ -57,7 +57,7 @@ public class ExaminerConfigSnapshotProvider(IOptions<ExaminerSettings> settings)
             ["revision"] = BuildNoteSnapshot(notes.Revision),
             ["wrongClaim"] = BuildNoteSnapshot(notes.WrongClaim),
             ["leak"] = BuildNoteSnapshot(notes.Leak),
-            ["withheldClose"] = BuildNoteSnapshot(notes.WithheldClose),
+            ["earlyClose"] = BuildNoteSnapshot(notes.EarlyClose),
             ["languageSwitch"] = BuildNoteSnapshot(notes.LanguageSwitch),
             ["genderedAddress"] = BuildNoteSnapshot(notes.GenderedAddress),
             ["route"] = BuildNoteSnapshot(notes.Route),

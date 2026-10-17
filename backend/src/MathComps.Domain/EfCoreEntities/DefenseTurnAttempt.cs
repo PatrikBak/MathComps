@@ -68,6 +68,33 @@ public class DefenseTurnAttempt
     public required string MathCorrection { get; set; }
 
     /// <summary>
+    /// Whether the reply ended the examination: it had nothing more to ask, or left the rest to the candidate.
+    /// </summary>
+    /// <remarks>
+    /// False on an attempt recorded before the math check judged completeness.
+    /// </remarks>
+    public required bool MathCloses { get; set; }
+
+    /// <summary>
+    /// Whether the candidate's own turns already made a complete solution when the reply was checked.
+    /// </summary>
+    /// <remarks>
+    /// On an attempt recorded before the math check judged completeness, true only where the leak check found the
+    /// reply withholding the close. Together with <see cref="MathCloses"/> it is the withheld-close verdict on every
+    /// attempt: complete, and the reply asked on.
+    /// </remarks>
+    public required bool MathComplete { get; set; }
+
+    /// <summary>
+    /// What a complete solution still needed that no candidate turn argued, as the math check listed it; empty when
+    /// nothing was owed.
+    /// </summary>
+    /// <remarks>
+    /// Empty on an attempt recorded before the math check judged completeness.
+    /// </remarks>
+    public required string MathOwed { get; set; }
+
+    /// <summary>
     /// Whether the reply handed the candidate progress they should have reached themselves.
     /// </summary>
     public required bool Leaks { get; set; }
@@ -78,14 +105,14 @@ public class DefenseTurnAttempt
     public required string WhatLeaked { get; set; }
 
     /// <summary>
-    /// Whether the reply kept demanding more although the candidate's solution was already complete.
+    /// The complete argument the candidate had assembled, when the check that found a withheld close summarized it;
+    /// empty otherwise.
     /// </summary>
-    public required bool WithholdsClose { get; set; }
-
-    /// <summary>
-    /// The complete argument the candidate had assembled, when the close was withheld; empty otherwise.
-    /// </summary>
-    public required string Established { get; set; }
+    /// <remarks>
+    /// Only an attempt recorded before the math check judged completeness carries one. Later attempts leave it empty,
+    /// and <see cref="MathOwed"/> names what is still missing.
+    /// </remarks>
+    public string Established { get; set; } = "";
 
     /// <summary>
     /// Whether the reply was written in a different language from the candidate's latest turn.

@@ -13,7 +13,7 @@ namespace MathComps.Infrastructure.Services.Defense.Engine;
 
 /// <summary>
 /// Implements <see cref="IExaminer"/> over an <see cref="ILlmChatCaller"/> with concurrent guards and capped
-/// revisions. <see cref="NeedsSafeFallback"/> determines when the last draft needs a holding reply.
+/// revisions. <see cref="ExaminerAttempt.NeedsSafeFallback"/> determines when the last draft needs a holding reply.
 /// </summary>
 /// <param name="chatCaller">The chat caller backing every step.</param>
 /// <param name="settings">The per-step model configuration, the path to every note, and the revision cap.</param>
@@ -84,15 +84,13 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         }
 
         // Whether the loop ended on a fault the fallback exists for — a draft that must not ship.
-        var safeFallback = NeedsSafeFallback(attempts[^1]);
+        var safeFallback = attempts[^1].NeedsSafeFallback;
 
         // A still-flagged draft is replaced by a constrained fallback, re-verified for the record and shipped
         // regardless of its verdicts — the least-bad turn left when no clean draft came.
         if (safeFallback)
         {
-            // Generate the fallback under the holding note, whatever the surviving fault. A withheld close takes
-            // it too: ending the conversation is the one move no guard verifies, so it never ships from a fallback
-            // nothing can reject, and the conversation holds one more turn instead.
+            // Generate the fallback under the holding note, whatever the surviving fault.
             attempts.Add(await GenerateAndVerifyAsync(
                 problem, reference, conversation, candidateTurn, hintsNote,
                 WrapRevision(notes.Revision, notes.SafeHold), usage, cancellationToken));
@@ -258,7 +256,8 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="Revision">The wrapper every revision instruction is written into.</param>
     /// <param name="WrongClaim">The instruction for a reply the math-check found a wrong claim in.</param>
     /// <param name="Leak">The instruction for a reply the leak-check found hands away earned progress.</param>
-    /// <param name="WithheldClose">The instruction for a reply that keeps pressing a completed solution.</param>
+    /// <param name="EarlyClose">The instruction for a reply that ends the examination while a step is still
+    /// owed.</param>
     /// <param name="LanguageSwitch">The instruction for a reply that drifted out of the candidate's language.</param>
     /// <param name="GenderedAddress">The instruction for a reply whose wording assumes the candidate's gender.</param>
     /// <param name="Route">The revision instruction for a takeover.</param>
@@ -268,7 +267,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         string Revision,
         string WrongClaim,
         string Leak,
-        string WithheldClose,
+        string EarlyClose,
         string LanguageSwitch,
         string GenderedAddress,
         string Route,
@@ -489,7 +488,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
             await ReadNoteAsync(paths.Revision, ["notes"], cancellationToken),
             await ReadNoteAsync(paths.WrongClaim, ["correction"], cancellationToken),
             await ReadNoteAsync(paths.Leak, ["what_leaked"], cancellationToken),
-            await ReadNoteAsync(paths.WithheldClose, [], cancellationToken),
+            await ReadNoteAsync(paths.EarlyClose, ["owed"], cancellationToken),
             await ReadNoteAsync(paths.LanguageSwitch, [], cancellationToken),
             await ReadNoteAsync(paths.GenderedAddress, [], cancellationToken),
             await ReadNoteAsync(paths.Route, ["work"], cancellationToken),
@@ -559,9 +558,15 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
                 ["what_leaked"] = leakCheck.WhatLeaked.EnsureSentenceEnd(),
             }));
 
-        // A withheld close ratchets the conversation past its end, so tell the generator it is over.
-        if (leakCheck.WithholdsClose)
-            flagged.Add(notes.WithheldClose);
+        // An ending before the solution is complete tells the candidate they are done when they aren't, so send it
+        // back with what is still owed. The opposite case, a question on a solution the math-check calls complete,
+        // goes out as drafted: that verdict is wrong often enough that acting on it would end conversations on a
+        // gap, and one question too many costs the candidate far less.
+        if (mathCheck.ClosesEarly)
+            flagged.Add(FillTemplate(notes.EarlyClose, new Dictionary<string, string>
+            {
+                ["owed"] = mathCheck.Owed.EnsureSentenceEnd(),
+            }));
 
         // Bring a takeover back to the candidate's own work.
         if (routeCheck.TakesOver)
@@ -590,16 +595,4 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <returns>The revision note ready for the prompt.</returns>
     private static string WrapRevision(string revisionNote, string instructions) =>
         FillTemplate(revisionNote, new Dictionary<string, string> { ["notes"] = instructions });
-
-    /// <summary>
-    /// Checks whether a wrong claim, a leak, or a withheld close requires a holding reply.
-    /// </summary>
-    /// <remarks>
-    /// Language and route flags use the revision budget; the last challenge still advances the defense when
-    /// that budget runs out.
-    /// </remarks>
-    /// <param name="attempt">The judged attempt.</param>
-    /// <returns>True when the attempt must not ship as it stands.</returns>
-    private static bool NeedsSafeFallback(ExaminerAttempt attempt) =>
-        !attempt.MathCheck.Holds || attempt.LeakCheck.Leaks || attempt.LeakCheck.WithholdsClose;
 }

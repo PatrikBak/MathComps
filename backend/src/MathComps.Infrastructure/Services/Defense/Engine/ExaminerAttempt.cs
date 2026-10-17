@@ -26,4 +26,15 @@ public record ExaminerAttempt(
     LanguageCheckResult LanguageCheck,
     RouteCheckResult RouteCheck,
     IReadOnlyList<ExaminerStepCall> Calls,
-    int DurationMs);
+    int DurationMs)
+{
+    /// <summary>
+    /// Whether a wrong claim, a leak or an early close means the attempt must not ship as it stands and a holding
+    /// reply takes its place.
+    /// </summary>
+    /// <remarks>
+    /// Language and route flags use the revision budget; the last challenge still advances the defense when that
+    /// budget runs out.
+    /// </remarks>
+    public bool NeedsSafeFallback => !MathCheck.Holds || LeakCheck.Leaks || MathCheck.ClosesEarly;
+}
