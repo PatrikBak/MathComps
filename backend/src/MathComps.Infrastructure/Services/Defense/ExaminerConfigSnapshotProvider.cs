@@ -55,6 +55,7 @@ public class ExaminerConfigSnapshotProvider(IOptions<ExaminerSettings> settings)
         ExaminerNotesSettings notes) => new Dictionary<string, ExaminerNoteConfigSnapshot>
         {
             ["revision"] = BuildNoteSnapshot(notes.Revision),
+            ["turnSoFar"] = BuildNoteSnapshot(notes.TurnSoFar),
             ["wrongClaim"] = BuildNoteSnapshot(notes.WrongClaim),
             ["leak"] = BuildNoteSnapshot(notes.Leak),
             ["earlyClose"] = BuildNoteSnapshot(notes.EarlyClose),

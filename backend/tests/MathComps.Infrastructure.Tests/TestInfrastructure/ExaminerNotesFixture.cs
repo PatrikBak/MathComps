@@ -16,6 +16,7 @@ internal static class ExaminerNotesFixture
     public static ExaminerNotesSettings Shipped() => new()
     {
         Revision = Note("revision.txt"),
+        TurnSoFar = Note("turn-so-far.txt"),
         WrongClaim = Note("wrong-claim.txt"),
         Leak = Note("leak.txt"),
         EarlyClose = Note("early-close.txt"),

@@ -14,6 +14,13 @@ public class ExaminerNotesSettings
     public required string Revision { get; set; }
 
     /// <summary>
+    /// Path to the note a retry reads ahead of its revision instruction: every earlier draft of the turn in order,
+    /// each with every check's verdict on it. Unlike the other notes it holds several sections, each opened by a line
+    /// carrying its name in square brackets, one per section the engine reads.
+    /// </summary>
+    public required string TurnSoFar { get; set; }
+
+    /// <summary>
     /// Path to the instruction for a reply the math-check found a wrong claim in. Carries a <c>{correction}</c>
     /// placeholder for what the checker said is true instead.
     /// </summary>
