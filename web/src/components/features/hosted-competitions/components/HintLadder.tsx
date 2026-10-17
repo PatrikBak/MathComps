@@ -111,7 +111,6 @@ export function HintLadder({ hints }: HintLadderProps) {
             inert={rung !== index}
             className={cn(
               'math-typography math-reference col-start-1 row-start-1',
-              'transition-opacity duration-200 motion-reduce:transition-none',
               rung === index ? 'opacity-100' : 'opacity-0'
             )}
           >
