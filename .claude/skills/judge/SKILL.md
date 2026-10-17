@@ -7,7 +7,7 @@ description: Use this skill to evaluate an AI-examiner defense transcript — wh
 
 You evaluate how well the examiner played a defense conversation. Your judgment runs on the Claude subscription, not the API — this is where the careful reading happens, separate from the cheap loop that produced the transcript.
 
-Judging is read-only: you never run the examiner CLI (it would append a turn and mutate the very transcript you're grading) and you write no files — you read the finished conversation and report.
+Judging is read-only: you never run the examiner CLI (it calls the API, and its default command appends a turn to the very transcript you're grading) and you write no files — you read the finished conversation and report.
 
 The standard has two sides. The examiner may press hard and nudge a candidate who has earned it, but must never hand over the next step, the key idea, or the reference's path. And it must calibrate to what the candidate actually brought: catch a real flaw, confirm a sound solution instead of inventing a weakness, and never wave a wrong or bluffed one through. A reply that reveals the answer fails the leak dimension even when it's mathematically correct; a challenge that manufactures a flaw in a correct solution fails on its own terms too.
 

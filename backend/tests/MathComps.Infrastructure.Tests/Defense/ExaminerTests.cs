@@ -9,15 +9,17 @@ using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Moq;
 using MsOptions = Microsoft.Extensions.Options.Options;
 using ExaminerEngine = MathComps.Infrastructure.Services.Defense.Engine.Examiner;
+using Regex = System.Text.RegularExpressions.Regex;
+using RegexOptions = System.Text.RegularExpressions.RegexOptions;
 
 namespace MathComps.Infrastructure.Tests.Defense;
 
 /// <summary>
 /// Tests the examiner loop's guard dispatch through its public entry points with a fake chat caller: every guard runs
 /// on every reply, a flagged guard triggers regeneration — re-verified each time and capped, so a persistent flaw ships
-/// after the cap — a revision carries the specific correction back to the generator, a language switch and a guessed
-/// gender are sent back for a rewrite but never cost the reply its content, the turn sums the cost and tokens of every
-/// call it made, and a reply already written is judged the way a drafted one is.
+/// after the cap — a revision carries the specific correction back to the generator behind the turn so far, a language
+/// switch and a guessed gender are sent back for a rewrite but never cost the reply its content, the turn sums the cost
+/// and tokens of every call it made, and a reply already written is judged the way a drafted one is.
 /// </summary>
 public class ExaminerTests
 {
@@ -326,6 +328,30 @@ public class ExaminerTests
     }
 
     /// <summary>
+    /// An ending the math-check calls premature while naming nothing still owed ships as drafted, recorded as an ending
+    /// on a complete solution. The owed list is what the completeness verdict is decided from, and an early-close retry
+    /// would have no step to ask about.
+    /// </summary>
+    [Fact]
+    public async Task An_ending_on_a_solution_owing_nothing_ships_whatever_the_completeness_verdict_says()
+    {
+        // An ending every guard clears, which the math-check calls incomplete while listing nothing owed.
+        var caller = new Mock<ILlmChatCaller>();
+        SetupTextStep(caller, "a reply.");
+        SetupStep(caller, CleanMath() with { Closes = true, Complete = false, Owed = "" });
+        SetupStep(caller, CleanLeak());
+        SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
+
+        // Run the turn.
+        var outcome = await RunAsync(caller);
+
+        // The ending shipped as it was, its solution recorded complete.
+        Assert.Equal(0, outcome.Revisions);
+        Assert.True(outcome.Shipped.MathCheck.Complete);
+    }
+
+    /// <summary>
     /// A reply that drifted out of the candidate's language regenerates under a note pointing the generator back at
     /// their latest turn, and the loop stops once the fresh attempt comes back in it. The note withholds the language
     /// the checker named on purpose: between two close languages that label can be wrong, and feeding a wrong one
@@ -398,8 +424,9 @@ public class ExaminerTests
 
     /// <summary>
     /// A reply that decides whether the candidate is a man or a woman is sent back to be written without the word.
-    /// The note names neither the form the reply picked nor the language it picked it in: told which one it used, the
-    /// generator would simply swap in the other, which is the same guess the note exists to undo.
+    /// The instruction names neither the form the reply picked nor the language it picked it in: told which one it
+    /// used, the generator would simply swap in the other, which is the same guess the instruction exists to undo. The
+    /// draft itself is shown above the instruction, so the word is hers to find.
     /// </summary>
     [Fact]
     public async Task A_gendered_reply_regenerates_under_a_note_naming_no_form_of_its_own()
@@ -432,8 +459,7 @@ public class ExaminerTests
         // The regenerate's prompt said what the reply had assumed...
         Assert.Contains("man or a woman", generateRequests[1].SystemPrompt);
 
-        // ...and handed back neither the form it had picked nor the language the checker named.
-        Assert.DoesNotContain("Ukázal", generateRequests[1].SystemPrompt);
+        // ...and never handed back the language the checker named.
         Assert.DoesNotContain("Slovak", generateRequests[1].SystemPrompt);
     }
 
@@ -579,13 +605,178 @@ public class ExaminerTests
 
         // The first generate carried no revision note.
         Assert.Equal(2, generateRequests.Count);
-        Assert.DoesNotContain("REVISION REQUIRED", generateRequests[0].SystemPrompt);
+        Assert.DoesNotContain("fix this", generateRequests[0].SystemPrompt);
 
         // The regenerate carried both the math correction and the leak, so the generator knows every flaw to fix,
         // each closed off from the instruction that follows it — a guard writes a phrase and punctuates it or not
         // as it pleases, so the note can't assume it did.
         Assert.Contains("the bound is at most 1/2. Fix it.", generateRequests[1].SystemPrompt);
         Assert.Contains("named the two-corners counterexample. Redo the reply", generateRequests[1].SystemPrompt);
+    }
+
+    /// <summary>
+    /// A retry shows the generator the turn so far: every earlier draft in order, each with every check's verdict on
+    /// it, passes included, and then the revision instruction. The last draft lists only its passes, because the
+    /// instruction is built from its flags and states them, and saying each flag twice adds nothing. The first draft is
+    /// written blind, and the attempt records only the instruction, since the drafts are recorded as attempts of their
+    /// own.
+    /// </summary>
+    [Fact]
+    public async Task A_retry_shows_every_earlier_draft_with_every_checks_verdict_before_the_fix()
+    {
+        // A turn whose first three drafts are all sent back.
+        var (outcome, requests) = await RunFlaggedTurnAsync();
+
+        // The first draft was written with no history.
+        Assert.DoesNotContain("turn", requests[0].SystemPrompt);
+
+        // The third try ends on the first two drafts in order: every check's verdict under the first, only the passes
+        // under the second, and then the instruction it was generated under, which states the second's flags.
+        Assert.EndsWith($"""
+            turn draft 1 first draft math-wrong-claim the bound is at most 1/2.
+            leak-passed
+            language-gendered
+            route-passed
+
+            draft 2 second draft math-passed
+            language-passed {outcome.Attempts[2].RevisionNote}
+            """, requests[2].SystemPrompt);
+
+        // An attempt records the instruction alone.
+        Assert.Equal("", outcome.Attempts[0].RevisionNote);
+        Assert.DoesNotContain("draft 1", outcome.Attempts[2].RevisionNote);
+        Assert.DoesNotContain("second draft", outcome.Attempts[2].RevisionNote);
+    }
+
+    /// <summary>
+    /// The holding fallback is a retry too, so it is written with the whole turn in front of it, the last flagged draft
+    /// included.
+    /// </summary>
+    [Fact]
+    public async Task The_fallback_is_written_with_the_whole_turn_in_front_of_it()
+    {
+        // A turn whose first three drafts are all sent back, so the cap runs out and the fallback is written.
+        var (outcome, requests) = await RunFlaggedTurnAsync();
+
+        // The fallback ends on all three drafts in order, then the holding instruction it was generated under.
+        Assert.True(outcome.SafeFallback);
+        Assert.EndsWith($"""
+            turn draft 1 first draft math-wrong-claim the bound is at most 1/2.
+            leak-passed
+            language-gendered
+            route-passed
+
+            draft 2 second draft math-passed
+            leak-gave-away the pairing.
+            language-passed
+            route-took-over listed every case and counted.
+
+            draft 3 third draft math-passed
+            leak-gave-away the pairing again.
+            language-passed
+            route-took-over listed every case and counted. {outcome.Attempts[3].RevisionNote}
+            """, requests[3].SystemPrompt);
+
+        // The fallback records the holding instruction alone.
+        Assert.Contains("minimal holding reply", outcome.Attempts[3].RevisionNote);
+        Assert.DoesNotContain("draft 1", outcome.Attempts[3].RevisionNote);
+    }
+
+    /// <summary>
+    /// Every flaw a check can raise has its own line in the history, and a draft that raised them all passes nothing.
+    /// It shows its flags as the last draft too, since with no check passed it would otherwise stand over nothing.
+    /// </summary>
+    [Fact]
+    public async Task Every_flaw_a_check_can_raise_has_its_line_in_the_history()
+    {
+        // Capture each generate call's request as it lands.
+        var generateRequests = new List<ChatCallRequest>();
+        var caller = new Mock<ILlmChatCaller>();
+        caller.SetupSequence(mock => mock.CompleteTextAsync(
+                Capture.In(generateRequests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result("a draft with everything wrong."))
+            .ReturnsAsync(Result("a draft that leaks."))
+            .ReturnsAsync(Result("a clean draft."));
+
+        // The first draft trips every flag every check has, the second only leaks, and the third clears them all.
+        caller.SetupSequence(mock => mock.CompleteAsync<MathCheckResult>(
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(CleanMath() with
+            {
+                Holds = false,
+                Correction = "the bound is at most 1/2",
+                Closes = true,
+                Owed = "why the pairing covers every block",
+            }))
+            .ReturnsAsync(Result(CleanMath()))
+            .ReturnsAsync(Result(CleanMath()));
+        caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(CleanLeak() with { Leaks = true, WhatLeaked = "the pairing" }))
+            .ReturnsAsync(Result(CleanLeak() with { Leaks = true, WhatLeaked = "the pairing again" }))
+            .ReturnsAsync(Result(CleanLeak()));
+        caller.SetupSequence(mock => mock.CompleteAsync<LanguageCheckResult>(
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(CleanLanguage() with { SwitchesLanguage = true, GendersTheReader = true }))
+            .ReturnsAsync(Result(CleanLanguage()))
+            .ReturnsAsync(Result(CleanLanguage()));
+        caller.SetupSequence(mock => mock.CompleteAsync<RouteCheckResult>(
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(CleanRoute() with { TakesOver = true }))
+            .ReturnsAsync(Result(CleanRoute()))
+            .ReturnsAsync(Result(CleanRoute()));
+
+        // Run the turn.
+        await RunAsync(caller, turnSoFarNote: MarkedTurnSoFar());
+
+        // The second try shows that draft as the last one, its flags still listed above the instruction.
+        Assert.Contains("""
+            draft 1 a draft with everything wrong. math-wrong-claim the bound is at most 1/2.
+            math-ended-early why the pairing covers every block.
+            leak-gave-away the pairing.
+            language-switched
+            language-gendered
+            route-took-over listed every case and counted.
+            """, generateRequests[1].SystemPrompt);
+
+        // The third try shows the first draft with a line for each of the six flaws, and none saying a check passed.
+        Assert.Contains("""
+            draft 1 a draft with everything wrong. math-wrong-claim the bound is at most 1/2.
+            math-ended-early why the pairing covers every block.
+            leak-gave-away the pairing.
+            language-switched
+            language-gendered
+            route-took-over listed every case and counted.
+
+            draft 2
+            """, generateRequests[2].SystemPrompt);
+    }
+
+    /// <summary>
+    /// A turn-so-far note missing a section, holding one the engine never reads or one twice, dropping a placeholder or
+    /// carrying text above its first section is refused rather than run. Each would keep part of the note or of the
+    /// history out of every retry, and nothing downstream would flag it.
+    /// </summary>
+    [Fact]
+    public async Task A_turn_so_far_note_that_would_drop_part_of_the_history_is_refused()
+    {
+        // The section the engine reads under a name it doesn't know, which leaves one missing and one stray.
+        await RefusedNoteAsync(turnSoFarNote: MarkedTurnSoFar().Replace("[math-passed]", "[math-pass]"));
+
+        // A section the engine never reads.
+        await RefusedNoteAsync(turnSoFarNote: MarkedTurnSoFar() + "\n\n[spare]\nnothing reads this");
+
+        // A section the engine never reads, under a capitalized name.
+        await RefusedNoteAsync(turnSoFarNote: MarkedTurnSoFar() + "\n\n[Spare]\nnothing reads this");
+
+        // A section the engine reads, written twice.
+        await RefusedNoteAsync(turnSoFarNote: MarkedTurnSoFar() + "\n\n[leak-passed]\nleak-passed");
+
+        // A draft section without the draft's own text.
+        await RefusedNoteAsync(turnSoFarNote: MarkedTurnSoFar().Replace(" {reply}", ""));
+
+        // Text above the first section, which no section carries.
+        await RefusedNoteAsync(turnSoFarNote: "a preamble nothing reads\n\n" + MarkedTurnSoFar());
     }
 
     /// <summary>
@@ -920,9 +1111,11 @@ public class ExaminerTests
     /// </summary>
     /// <param name="caller">The fake chat caller with its steps set up.</param>
     /// <param name="reference">The reference solution the turn runs against.</param>
+    /// <param name="turnSoFarNote">Text to write into a stand-in for the shipped turn-so-far note; null leaves it the
+    /// shipped one.</param>
     /// <returns>The turn's outcome.</returns>
     private static async Task<ExaminerTurnOutcome> RunAsync(
-        Mock<ILlmChatCaller> caller, string reference = "reference")
+        Mock<ILlmChatCaller> caller, string reference = "reference", string? turnSoFarNote = null)
     {
         // A minimal transcript ending on a candidate turn.
         var transcript = Transcript.Parse("## Candidate\n\nmy defense");
@@ -930,16 +1123,67 @@ public class ExaminerTests
         // Run the loop under throwaway prompt templates and hand back its outcome.
         return await WithTempSettingsAsync(settings =>
             new ExaminerEngine(caller.Object, MsOptions.Create(settings))
-                .NextReplyAsync(new ExaminerInput("problem", reference, transcript), new ModelUsageAccumulator()));
+                .NextReplyAsync(new ExaminerInput("problem", reference, transcript), new ModelUsageAccumulator()),
+            turnSoFarNote: turnSoFarNote);
     }
 
     /// <summary>
-    /// Runs a turn with a stand-in for the shipped leak note, and hands back what reading that note threw. The
-    /// caller is strict: the notes are read before the first model call, so a refused note never reaches it.
+    /// Runs a turn whose first three drafts are each sent back for different flaws, so the revision cap runs out and the
+    /// holding fallback is written as a fourth generation. The marked note stands in for the shipped turn-so-far note.
     /// </summary>
-    /// <param name="leakNote">The stand-in note's text.</param>
+    /// <returns>The turn's outcome and the request behind each generation, in order.</returns>
+    private static async Task<(ExaminerTurnOutcome Outcome, List<ChatCallRequest> Requests)> RunFlaggedTurnAsync()
+    {
+        // Capture each generate call's request as it lands.
+        var requests = new List<ChatCallRequest>();
+        var caller = new Mock<ILlmChatCaller>();
+        caller.SetupSequence(mock => mock.CompleteTextAsync(
+                Capture.In(requests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result("first draft"))
+            .ReturnsAsync(Result("second draft"))
+            .ReturnsAsync(Result("third draft"))
+            .ReturnsAsync(Result("holding reply"));
+
+        // The first draft has a wrong claim and a guessed gender, the next two leak and take over, and the fallback is
+        // clean.
+        caller.SetupSequence(mock => mock.CompleteAsync<MathCheckResult>(
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(CleanMath() with { Holds = false, Correction = "the bound is at most 1/2" }))
+            .ReturnsAsync(Result(CleanMath()))
+            .ReturnsAsync(Result(CleanMath()))
+            .ReturnsAsync(Result(CleanMath()));
+        caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(CleanLeak()))
+            .ReturnsAsync(Result(CleanLeak() with { Leaks = true, WhatLeaked = "the pairing" }))
+            .ReturnsAsync(Result(CleanLeak() with { Leaks = true, WhatLeaked = "the pairing again" }))
+            .ReturnsAsync(Result(CleanLeak()));
+        caller.SetupSequence(mock => mock.CompleteAsync<LanguageCheckResult>(
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(CleanLanguage() with { GendersTheReader = true }))
+            .ReturnsAsync(Result(CleanLanguage()))
+            .ReturnsAsync(Result(CleanLanguage()))
+            .ReturnsAsync(Result(CleanLanguage()));
+        caller.SetupSequence(mock => mock.CompleteAsync<RouteCheckResult>(
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(CleanRoute()))
+            .ReturnsAsync(Result(CleanRoute() with { TakesOver = true }))
+            .ReturnsAsync(Result(CleanRoute() with { TakesOver = true }))
+            .ReturnsAsync(Result(CleanRoute()));
+
+        // Run the turn and hand back the outcome beside the requests.
+        return (await RunAsync(caller, turnSoFarNote: MarkedTurnSoFar()), requests);
+    }
+
+    /// <summary>
+    /// Runs a turn with a stand-in for a shipped note, and hands back what reading that note threw. The caller is
+    /// strict: the notes are read before the first model call, so a refused note never reaches it.
+    /// </summary>
+    /// <param name="leakNote">The stand-in leak note's text; null leaves it the shipped one.</param>
+    /// <param name="turnSoFarNote">The stand-in turn-so-far note's text; null leaves it the shipped one.</param>
     /// <returns>The exception the turn threw.</returns>
-    private static async Task<InvalidOperationException> RefusedNoteAsync(string leakNote)
+    private static async Task<InvalidOperationException> RefusedNoteAsync(
+        string? leakNote = null, string? turnSoFarNote = null)
     {
         // A caller nothing should call.
         var caller = new Mock<ILlmChatCaller>(MockBehavior.Strict);
@@ -951,7 +1195,7 @@ public class ExaminerTests
                     .NextReplyAsync(
                         new ExaminerInput("problem", "reference", Transcript.Parse("## Candidate\n\nmy defense")),
                         new ModelUsageAccumulator()),
-                leakNote));
+                leakNote, turnSoFarNote));
     }
 
     /// <summary>
@@ -962,10 +1206,12 @@ public class ExaminerTests
     /// <typeparam name="T">The body's result type.</typeparam>
     /// <param name="body">The work to run against the built settings.</param>
     /// <param name="leakNote">Text to write into a stand-in for the shipped leak note, for a test exercising how a
-    /// malformed note is read; null leaves every note the shipped one.</param>
+    /// malformed note is read; null leaves it the shipped one.</param>
+    /// <param name="turnSoFarNote">Text to write into a stand-in for the shipped turn-so-far note; null leaves it the
+    /// shipped one.</param>
     /// <returns>The body's result.</returns>
     private static async Task<T> WithTempSettingsAsync<T>(
-        Func<ExaminerSettings, Task<T>> body, string? leakNote = null)
+        Func<ExaminerSettings, Task<T>> body, string? leakNote = null, string? turnSoFarNote = null)
     {
         // A temp folder to hold the throwaway prompt files.
         var directory = Directory.CreateTempSubdirectory("examiner-loop-tests");
@@ -993,18 +1239,26 @@ public class ExaminerTests
                 MaxRevisions = RevisionCap,
             };
 
-            // Point the leak note at a stand-in when the test supplied one.
-            if (leakNote is not null)
+            // Writes a stand-in note beside the throwaway prompts, so it's cleaned up with them.
+            string StandIn(string name, string text)
             {
-                // The stand-in's path, beside the throwaway prompts so it's cleaned up with them.
-                var notePath = Path.Combine(directory.FullName, "leak-note.txt");
+                // The stand-in's path.
+                var notePath = Path.Combine(directory.FullName, name);
 
                 // Write the supplied text into it.
-                File.WriteAllText(notePath, leakNote);
+                File.WriteAllText(notePath, text);
 
-                // The leak note now reads from the stand-in.
-                settings.Notes.Leak = notePath;
+                // Hand back where it lives.
+                return notePath;
             }
+
+            // Point the leak note at a stand-in when the test supplied one.
+            if (leakNote is not null)
+                settings.Notes.Leak = StandIn("leak-note.txt", leakNote);
+
+            // Point the turn-so-far note at a stand-in when the test supplied one.
+            if (turnSoFarNote is not null)
+                settings.Notes.TurnSoFar = StandIn("turn-so-far-note.txt", turnSoFarNote);
 
             // Run the body against them.
             return await body(settings);
@@ -1014,6 +1268,37 @@ public class ExaminerTests
             // Drop the temp prompt files.
             directory.Delete(recursive: true);
         }
+    }
+
+    /// <summary>
+    /// A stand-in for the shipped turn-so-far note, built from it: the same sections, each reduced to its own name
+    /// followed by the placeholders the shipped one carries, on one line. A test can then pin what a retry shows without
+    /// pinning the wording or the layout the note ships with.
+    /// </summary>
+    /// <returns>The stand-in's text.</returns>
+    private static string MarkedTurnSoFar()
+    {
+        // The note as shipped.
+        var shipped = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Prompts", "Notes", "turn-so-far.txt"));
+
+        // Each section runs from its header to the next one, or to the end of the file.
+        var sectionPattern = new Regex(
+            @"^\[([a-z-]+)\]\r?\n(.*?)(?=^\[|\z)", RegexOptions.Multiline | RegexOptions.Singleline);
+
+        // Each section reduced to its name and its placeholders.
+        return sectionPattern.Replace(shipped, section =>
+        {
+            // The name the engine reads the section under.
+            var name = section.Groups[1].Value;
+
+            // The placeholders the shipped wording carries, in the order it carries them.
+            var placeholders = Regex.Matches(section.Groups[2].Value, @"\{\w+\}")
+                .Select(placeholder => placeholder.Value)
+                .Distinct();
+
+            // The section, with a blank line before the next one.
+            return $"[{name}]\n{name}{string.Concat(placeholders.Select(placeholder => $" {placeholder}"))}\n\n";
+        });
     }
 
     /// <summary>

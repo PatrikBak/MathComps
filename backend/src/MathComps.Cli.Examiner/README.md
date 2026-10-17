@@ -9,14 +9,14 @@ The engine lives in `MathComps.Infrastructure` (`Services/Defense`). Two drivers
 One turn is a loop, not one call.
 
 1. **Generate** writes the reply.
-2. **Math-check** verifies every claim in it against the reference. It also says whether the candidate's solution is complete yet and whether the reply ends the conversation. An ending while a step is still owed goes back as an early close. A reply that keeps asking on a solution the check calls complete ships as drafted.
+2. **Math-check** verifies every claim in it against the reference. It also says whether the candidate's solution is complete yet and whether the reply ends the conversation. An ending while a step is still owed goes back as an early close, and a solution on which the check lists nothing owed counts as complete. A reply that keeps asking on a solution the check calls complete ships as drafted.
 3. **Leak-check** looks for a step handed over unearned.
 4. **Language-check** says whether the reply drifted out of the language the candidate wrote in, and whether a word in it takes the candidate for a man or a woman.
 5. **Route-check** says whether the question left the candidate's own work to ask for a reference step.
 
-The guards run concurrently on every reply. When one flags it, the reply is regenerated with that flaw named and checked again, up to `Examiner.MaxRevisions` times.
+The guards run concurrently on every reply. When one flags it, the reply is regenerated with that flaw named and checked again, up to `Examiner.MaxRevisions` times. Each retry first sees every earlier draft of the turn with every check's verdict on it.
 
-What ships when the cap runs out depends on the flag. A wrong claim, a leak or an early close gets a constrained holding reply in place of the flagged draft. A language switch, a guessed gender or a route takeover ships the last draft as it stands, so its challenge still carries the exam forward.
+What ships when the cap runs out depends on the flag. A wrong claim, a leak or an early close gets a constrained holding reply in place of the flagged draft, and that reply ships whatever the checks say of it. A language switch, a guessed gender or a route takeover ships the last draft as it stands, so its challenge still carries the exam forward.
 
 ### Per-step models
 
@@ -28,9 +28,9 @@ Every step runs at `medium` effort except the math check, which runs a stronger 
 
 ### Output
 
-Each run prints the reply, every guard's verdict, the revision count, and the turn's cost, priced from what the provider billed each call.
+Each turn prints the reply, every guard's verdict, the revision count, and the turn's cost, priced from what the provider billed each call.
 
-Above that sits the breakdown the total can't give you: one line per call naming the step, its model and reasoning level, what it billed, how many output tokens were thinking, and how long it took. A revised turn also prints each rejected draft with the verdicts that sank it. The guards judge at the same time, so their durations overlap rather than adding up.
+Above that sits the breakdown the total can't give you: one line per call naming the step, its model and reasoning level, what it billed, how many output tokens were thinking, and how long it took. A revised turn also prints each rejected draft with the verdicts that sank it. The guards judge at the same time, so their durations overlap rather than adding up. `check` prints the same call lines and verdicts for the one reply it judges, and what the checks cost.
 
 ## Usage
 
@@ -100,6 +100,8 @@ One template per step in [`Prompts/`](../MathComps.Infrastructure/Prompts): `gen
 
 The user message is the conversation so far. The math-, leak- and route-checks get the proposed reply appended to it. The language check gets the candidate's latest turn and the proposed reply, and nothing else.
 
-[`Prompts/Notes/`](../MathComps.Infrastructure/Prompts/Notes) holds the shorter pieces that fill the generate prompt: one instruction per flaw a guard can raise, the wrapper that marks them to the examiner as a revision, the holding note a draft that outlasted the cap is replaced with, and the guidance for a reference carrying an `## AUTHOR'S HINTS` section.
+[`Prompts/Notes/`](../MathComps.Infrastructure/Prompts/Notes) holds the shorter pieces that fill the generate prompt: one instruction per flaw a guard can raise, the wrapper that marks them to the examiner as a revision, the wording a retry shows the turn's earlier drafts and every check's verdict on each in, the holding note a draft that outlasted the cap is replaced with, and the guidance for a reference carrying an `## AUTHOR'S HINTS` section.
 
-Every template and note has its own config key, so a run can swap one: `Examiner__Notes__Leak=/abs/path/note.txt` does for a note what `Examiner__Generate__Prompt` does for a whole template. Both take `{token}` holes, and a token nothing fills is refused when the turn reads the file.
+`turn-so-far.txt` is the one note split into sections, each opened by its name in square brackets on a line of its own. The engine reads a fixed set of them and refuses a file with one missing, unknown or written twice.
+
+Every template and note has its own config key, so a run can swap one: `Examiner__Notes__Leak=/abs/path/note.txt` does for a note what `Examiner__Generate__Prompt` does for a whole template. Both take `{token}` holes. A note carrying a token nothing fills, or missing one it needs, is refused when the turn reads it, while an unknown token in a template reaches the model as written.

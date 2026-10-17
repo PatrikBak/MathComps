@@ -1,0 +1,44 @@
+[turn]
+This is your turn so far, oldest draft first. Under each draft is what the checks said about it.
+
+{drafts}
+
+{fix}
+
+[draft]
+Draft {number}, as you wrote it:
+
+{reply}
+
+What the checks said about it:
+{verdicts}
+
+[math-passed]
+Math check: passed.
+
+[math-wrong-claim]
+Math check: flagged. One of your claims is wrong: {correction}
+
+[math-ended-early]
+Math check: flagged. You ended the conversation too soon. Still unargued: {owed}
+
+[leak-passed]
+Leak check: passed.
+
+[leak-gave-away]
+Leak check: flagged. You gave too much away: {what_leaked}
+
+[language-passed]
+Language check: passed.
+
+[language-switched]
+Language check: flagged. You weren't writing in the student's language.
+
+[language-gendered]
+Language check: flagged. One of your words takes the student for a man or a woman.
+
+[route-passed]
+Route check: passed.
+
+[route-took-over]
+Route check: flagged. You led them onto a route of your own. What they actually brought: {work}

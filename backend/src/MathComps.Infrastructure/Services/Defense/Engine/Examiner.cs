@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
@@ -42,6 +43,13 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// </summary>
     private static readonly Regex _placeholderPattern = new(@"\{(\w+)\}", RegexOptions.Compiled);
 
+    /// <summary>
+    /// Matches the line that opens a section of a note file: a name in square brackets, in any case, so a miscapitalized
+    /// name still opens a section of its own.
+    /// </summary>
+    private static readonly Regex _sectionHeaderPattern = new(
+        @"^\[([a-z-]+)\][ \t]*\r?$", RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase);
+
     /// <inheritdoc/>
     public async Task<ExaminerTurnOutcome> NextReplyAsync(
         ExaminerInput input, ModelUsageAccumulator usage, CancellationToken cancellationToken = default)
@@ -71,16 +79,17 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         var attempts = new List<ExaminerAttempt>
         {
             await GenerateAndVerifyAsync(
-                problem, reference, conversation, candidateTurn, hintsNote, revisionNote: "", usage,
+                problem, reference, conversation, candidateTurn, hintsNote, revisionNote: "", retryNote: "", usage,
                 cancellationToken),
         };
 
         // Regenerate while a check flags the reply, re-verifying each fresh attempt, until the cap runs out.
         while (BuildRevisionNote(attempts[^1], notes) is { } note && attempts.Count <= _settings.MaxRevisions)
         {
-            // Regenerate with the specific flaw called out, re-verifying the fresh attempt.
+            // Regenerate with the turn so far shown and the specific flaw called out, re-verifying the fresh attempt.
             attempts.Add(await GenerateAndVerifyAsync(
-                problem, reference, conversation, candidateTurn, hintsNote, note, usage, cancellationToken));
+                problem, reference, conversation, candidateTurn, hintsNote, note,
+                BuildRetryNote(attempts, note, notes, noteStatesLastFlags: true), usage, cancellationToken));
         }
 
         // Whether the loop ended on a fault the fallback exists for — a draft that must not ship.
@@ -90,10 +99,13 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // regardless of its verdicts — the least-bad turn left when no clean draft came.
         if (safeFallback)
         {
-            // Generate the fallback under the holding note, whatever the surviving fault.
+            // The holding instruction, whatever the surviving fault.
+            var holdingNote = WrapRevision(notes.Revision, notes.SafeHold);
+
+            // Generate the fallback under the holding instruction, with the whole turn shown first.
             attempts.Add(await GenerateAndVerifyAsync(
-                problem, reference, conversation, candidateTurn, hintsNote,
-                WrapRevision(notes.Revision, notes.SafeHold), usage, cancellationToken));
+                problem, reference, conversation, candidateTurn, hintsNote, holdingNote,
+                BuildRetryNote(attempts, holdingNote, notes, noteStatesLastFlags: false), usage, cancellationToken));
         }
 
         // Ship the trail, whether it ended on the fallback, and the turn's accrued cost.
@@ -138,7 +150,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
 
     /// <summary>
     /// Generates one reply and runs every guard over it. The turn's first pass and each revision run this same step,
-    /// differing only in the revision note fed to the generator.
+    /// differing only in what the generator is told about the retry.
     /// </summary>
     /// <param name="problem">The problem that fills the prompts.</param>
     /// <param name="reference">The reference solution that fills the prompts.</param>
@@ -147,20 +159,22 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="candidateTurn">The candidate's latest turn, the only context the language check reads.</param>
     /// <param name="hintsNote">The author's-hints guidance for the prompt, or empty for a reference without that
     /// section.</param>
-    /// <param name="revisionNote">The flaw to fix on a regenerate, or empty on the first pass.</param>
+    /// <param name="revisionNote">The flaw to fix on a regenerate, the instruction alone; empty on the first
+    /// pass.</param>
+    /// <param name="retryNote">The turn so far, then the revision note; empty on the first pass.</param>
     /// <param name="usage">The running spend each call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the calls.</param>
     /// <returns>The judged attempt.</returns>
     private async Task<ExaminerAttempt> GenerateAndVerifyAsync(
         string problem, string reference, string conversation, string candidateTurn, string hintsNote,
-        string revisionNote, ModelUsageAccumulator usage, CancellationToken cancellationToken)
+        string revisionNote, string retryNote, ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
         // Time the whole attempt: writing the draft, then judging it.
         var stopwatch = Stopwatch.StartNew();
 
         // Generate the reply.
         var (reply, generateCall) = await GenerateAsync(
-            problem, reference, conversation, hintsNote, revisionNote, usage, cancellationToken);
+            problem, reference, conversation, hintsNote, retryNote, usage, cancellationToken);
 
         // Verify it with every guard.
         var guards = await RunGuardsAsync(
@@ -217,9 +231,23 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // Await them all before reading their results.
         await Task.WhenAll(mathCheckTask, leakCheckTask, languageCheckTask, routeCheckTask);
 
+        // The math-check's run as it came back.
+        var mathRun = mathCheckTask.Result;
+
+        // The same run with the solution complete whenever the checker names nothing still owed: the owed list is what
+        // its completeness verdict is decided from, and an open solution with nothing on that list leaves no step to
+        // ask about.
+        var reconciledMathRun = mathRun with
+        {
+            Verdict = mathRun.Verdict with
+            {
+                Complete = mathRun.Verdict.Complete || string.IsNullOrWhiteSpace(mathRun.Verdict.Owed),
+            },
+        };
+
         // Hand back every guard's run.
         return new GuardRuns(
-            mathCheckTask.Result, leakCheckTask.Result, languageCheckTask.Result, routeCheckTask.Result);
+            reconciledMathRun, leakCheckTask.Result, languageCheckTask.Result, routeCheckTask.Result);
     }
 
     /// <summary>
@@ -254,6 +282,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// Every note the generate prompt can be filled with, read once for the turn.
     /// </summary>
     /// <param name="Revision">The wrapper every revision instruction is written into.</param>
+    /// <param name="TurnSoFar">The wording a retry shows the turn's earlier drafts and their verdicts in.</param>
     /// <param name="WrongClaim">The instruction for a reply the math-check found a wrong claim in.</param>
     /// <param name="Leak">The instruction for a reply the leak-check found hands away earned progress.</param>
     /// <param name="EarlyClose">The instruction for a reply that ends the examination while a step is still
@@ -265,6 +294,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="AuthorHints">The guidance for using the author's staged hints.</param>
     private sealed record Notes(
         string Revision,
+        TurnSoFarNote TurnSoFar,
         string WrongClaim,
         string Leak,
         string EarlyClose,
@@ -275,32 +305,63 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         string AuthorHints);
 
     /// <summary>
+    /// The wording a retry shows the turn so far in: a frame, a template for one draft, and for each check a line saying
+    /// it passed and a line per thing it can flag. The file holds one section per member, each opened by its name in
+    /// square brackets.
+    /// </summary>
+    /// <param name="Turn">The frame around the drafts and the revision instruction.</param>
+    /// <param name="Draft">One draft, with its verdict lines under it.</param>
+    /// <param name="MathPassed">The line for a draft the math-check cleared.</param>
+    /// <param name="MathWrongClaim">The line for a draft with a wrong claim in it.</param>
+    /// <param name="MathEndedEarly">The line for a draft that ended the examination while a step was owed.</param>
+    /// <param name="LeakPassed">The line for a draft the leak-check cleared.</param>
+    /// <param name="LeakGaveAway">The line for a draft that handed away earned progress.</param>
+    /// <param name="LanguagePassed">The line for a draft the language check cleared.</param>
+    /// <param name="LanguageSwitched">The line for a draft that drifted out of the candidate's language.</param>
+    /// <param name="LanguageGendered">The line for a draft whose wording assumed the candidate's gender.</param>
+    /// <param name="RoutePassed">The line for a draft the route check cleared.</param>
+    /// <param name="RouteTookOver">The line for a draft that left the candidate's argument for its own.</param>
+    private sealed record TurnSoFarNote(
+        string Turn,
+        string Draft,
+        string MathPassed,
+        string MathWrongClaim,
+        string MathEndedEarly,
+        string LeakPassed,
+        string LeakGaveAway,
+        string LanguagePassed,
+        string LanguageSwitched,
+        string LanguageGendered,
+        string RoutePassed,
+        string RouteTookOver);
+
+    /// <summary>
     /// Runs the generate step: the persona prompt (problem, reference, the author's-hints guidance when the reference
-    /// carries that section, and any revision note) becomes the system message, and the conversation so far becomes
-    /// the user message.
+    /// carries that section, and any retry note) becomes the system message, and the conversation so far becomes the
+    /// user message.
     /// </summary>
     /// <param name="problem">The problem that fills the prompt.</param>
     /// <param name="reference">The reference solution that fills the prompt.</param>
     /// <param name="conversation">The conversation so far, the examiner responds to.</param>
     /// <param name="hintsNote">The author's-hints guidance for the prompt, or empty for a reference without that
     /// section.</param>
-    /// <param name="revisionNote">The flaw to fix on a regenerate, or empty on the first pass.</param>
+    /// <param name="retryNote">The turn so far and the flaw to fix on a regenerate, or empty on the first pass.</param>
     /// <param name="usage">The running spend this call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the call.</param>
     /// <returns>The generated reply, and the call that wrote it.</returns>
     private async Task<(string Reply, ExaminerStepCall Call)> GenerateAsync(
-        string problem, string reference, string conversation, string hintsNote, string revisionNote,
+        string problem, string reference, string conversation, string hintsNote, string retryNote,
         ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
-        // Fill the persona prompt with the problem, the reference, the hints guidance, and the revision note
-        // (empty most turns).
+        // Fill the persona prompt with the problem, the reference, the hints guidance, and the retry note (empty
+        // most turns).
         var systemPrompt = FillTemplate(await ReadPromptAsync(_settings.Generate.Prompt, cancellationToken),
             new Dictionary<string, string>
             {
                 ["problem"] = problem,
                 ["reference"] = reference,
                 ["hints_note"] = hintsNote,
-                ["revision_note"] = revisionNote,
+                ["revision_note"] = retryNote,
             });
 
         // Time the call, so a slow turn can be traced to the step that spent it.
@@ -486,6 +547,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // Read them all, giving each the tokens it may carry.
         return new Notes(
             await ReadNoteAsync(paths.Revision, ["notes"], cancellationToken),
+            await ReadTurnSoFarNoteAsync(paths.TurnSoFar, cancellationToken),
             await ReadNoteAsync(paths.WrongClaim, ["correction"], cancellationToken),
             await ReadNoteAsync(paths.Leak, ["what_leaked"], cancellationToken),
             await ReadNoteAsync(paths.EarlyClose, ["owed"], cancellationToken),
@@ -497,37 +559,140 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     }
 
     /// <summary>
-    /// Reads one note, refusing an empty one and any placeholder nothing fills: braces nothing fills would reach
-    /// the model as literal text in the examiner's instructions, which no gate and no guard would flag. The text is
-    /// trimmed, so a file's trailing newline can't land in the middle of a joined revision instruction.
+    /// Reads one note and checks it: see <see cref="CheckNote"/>.
     /// </summary>
     /// <param name="path">The note's path.</param>
     /// <param name="tokens">The placeholder names this note may carry.</param>
     /// <param name="cancellationToken">A token to cancel the read.</param>
     /// <returns>The note's text.</returns>
     private async Task<string> ReadNoteAsync(
-        string path, IReadOnlyCollection<string> tokens, CancellationToken cancellationToken)
+        string path, IReadOnlyCollection<string> tokens, CancellationToken cancellationToken) =>
+        CheckNote(await ReadPromptAsync(path, cancellationToken), $"The examiner note at '{path}'", tokens);
+
+    /// <summary>
+    /// Reads the turn-so-far note, a file of named sections, and checks each section the way a whole note is checked.
+    /// A section the engine reads that the file lacks is refused, and so is one the file holds that the engine never
+    /// reads, whose wording would reach no retry with nothing to flag it.
+    /// </summary>
+    /// <param name="path">The note's path.</param>
+    /// <param name="cancellationToken">A token to cancel the read.</param>
+    /// <returns>The note's sections.</returns>
+    private async Task<TurnSoFarNote> ReadTurnSoFarNoteAsync(string path, CancellationToken cancellationToken)
     {
-        // The note as written, without the whitespace the file wraps it in.
-        var text = (await ReadPromptAsync(path, cancellationToken)).Trim();
+        // The file's sections by name. Each one read is taken out, so what is left at the end is read by nobody.
+        var sections = SplitSections(await ReadPromptAsync(path, cancellationToken), $"The examiner note at '{path}'");
+
+        // Takes one section out and checks it, giving it the tokens it may carry.
+        string Section(string name, params string[] tokens)
+        {
+            // A section the file doesn't hold has nothing to show.
+            if (!sections.Remove(name, out var text))
+                throw new InvalidOperationException($"The examiner note at '{path}' has no [{name}] section.");
+
+            // Hand back the section, checked.
+            return CheckNote(text, $"The [{name}] section of the examiner note at '{path}'", tokens);
+        }
+
+        // Read every section the engine uses.
+        var note = new TurnSoFarNote(
+            Section("turn", "drafts", "fix"),
+            Section("draft", "number", "reply", "verdicts"),
+            Section("math-passed"),
+            Section("math-wrong-claim", "correction"),
+            Section("math-ended-early", "owed"),
+            Section("leak-passed"),
+            Section("leak-gave-away", "what_leaked"),
+            Section("language-passed"),
+            Section("language-switched"),
+            Section("language-gendered"),
+            Section("route-passed"),
+            Section("route-took-over", "work"));
+
+        // A section left over is a misspelt name or one nothing reads.
+        if (sections.Keys.FirstOrDefault() is { } unread)
+            throw new InvalidOperationException(
+                $"The examiner note at '{path}' has a [{unread}] section nothing reads.");
+
+        // Hand back the note.
+        return note;
+    }
+
+    /// <summary>
+    /// Cuts a file of sections apart. A section opens on a line carrying its name in square brackets and runs to the
+    /// next such line or the end of the file. Text above the first one belongs to no section, so it is refused rather
+    /// than dropped where nothing would flag it. A name opening two sections is refused too.
+    /// </summary>
+    /// <param name="text">The file's text.</param>
+    /// <param name="description">What the refusal calls the file.</param>
+    /// <returns>Each section's text, untrimmed, by name.</returns>
+    private static Dictionary<string, string> SplitSections(string text, string description)
+    {
+        // Every line that opens a section, in file order.
+        var headers = _sectionHeaderPattern.Matches(text).ToList();
+
+        // Refuse text standing above the first section, which no section would carry to the model.
+        if (text[..(headers.FirstOrDefault()?.Index ?? text.Length)].Trim().Length > 0)
+            throw new InvalidOperationException($"{description} has text above its first section.");
+
+        // The first name that opens more than one section, which would leave all but one of them unread.
+        var repeated = headers
+            .GroupBy(header => header.Groups[1].Value)
+            .FirstOrDefault(group => group.Count() > 1);
+
+        // Refuse the repeated section by name.
+        if (repeated is not null)
+            throw new InvalidOperationException($"{description} has more than one [{repeated.Key}] section.");
+
+        // Where each section ends: at the next header, or at the end of the file for the last.
+        var ends = headers.Skip(1).Select(header => header.Index).Append(text.Length);
+
+        // Each section runs from the end of its header to where it ends.
+        return headers
+            .Zip(ends, (header, end) => (
+                Name: header.Groups[1].Value,
+                Text: text[(header.Index + header.Length)..end]))
+            .ToDictionary(section => section.Name, section => section.Text);
+    }
+
+    /// <summary>
+    /// Checks one note, refusing an empty one, any placeholder nothing fills, and any placeholder it should carry but
+    /// doesn't. Braces nothing fills would reach the model as literal text in the examiner's instructions, and a
+    /// missing placeholder would silently drop the value it shows, neither of which a gate or a guard would flag. The
+    /// text is trimmed, so a file's trailing newline can't land in the middle of a joined revision instruction.
+    /// </summary>
+    /// <param name="text">The note as the file holds it.</param>
+    /// <param name="description">What the refusal calls the note.</param>
+    /// <param name="tokens">The placeholder names this note carries.</param>
+    /// <returns>The note's text.</returns>
+    private static string CheckNote(string text, string description, IReadOnlyCollection<string> tokens)
+    {
+        // The note without the whitespace the file wraps it in.
+        var trimmed = text.Trim();
 
         // An empty note instructs the model in nothing. The revision note is the costly one: it would still read as
         // a note, so the loop would send every flagged draft back and burn its whole cap under no instruction.
-        if (text.Length == 0)
-            throw new InvalidOperationException($"The examiner note at '{path}' is empty.");
+        if (trimmed.Length == 0)
+            throw new InvalidOperationException($"{description} is empty.");
 
         // The note's first placeholder that nothing fills.
-        var unfilled = _placeholderPattern.Matches(text)
+        var unfilled = _placeholderPattern.Matches(trimmed)
             .Select(match => match.Groups[1].Value)
             .FirstOrDefault(token => !tokens.Contains(token));
 
         // Refuse a note carrying a hole nothing fills.
         if (unfilled is not null)
             throw new InvalidOperationException(
-                $"The examiner note at '{path}' carries a '{{{unfilled}}}' placeholder that nothing fills.");
+                $"{description} carries a '{{{unfilled}}}' placeholder that nothing fills.");
+
+        // The note's first placeholder that it should carry and doesn't.
+        var missing = tokens.FirstOrDefault(token => !trimmed.Contains($"{{{token}}}", StringComparison.Ordinal));
+
+        // Refuse a note that would drop the value meant for that placeholder.
+        if (missing is not null)
+            throw new InvalidOperationException($"{description} has no '{{{missing}}}' placeholder.");
 
         // Hand back the note.
-        return text;
+        return trimmed;
     }
 
     /// <summary>
@@ -595,4 +760,117 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <returns>The revision note ready for the prompt.</returns>
     private static string WrapRevision(string revisionNote, string instructions) =>
         FillTemplate(revisionNote, new Dictionary<string, string> { ["notes"] = instructions });
+
+    /// <summary>
+    /// Builds what the generator reads on a retry: every earlier draft of the turn in order, each with every check's
+    /// verdict on it, and then the revision note. Only the generator reads it: each check judges its draft alone.
+    /// </summary>
+    /// <param name="attempts">Every attempt so far, oldest first.</param>
+    /// <param name="revisionNote">The instruction for the retry.</param>
+    /// <param name="notes">The turn's notes: the wording the history is shown in.</param>
+    /// <param name="noteStatesLastFlags">Whether the instruction was built from the last draft's flags, which it then
+    /// already states. That draft lists only the checks it passed, so no flag is said twice.</param>
+    /// <returns>The note to feed the generator.</returns>
+    private static string BuildRetryNote(
+        IReadOnlyList<ExaminerAttempt> attempts, string revisionNote, Notes notes, bool noteStatesLastFlags)
+    {
+        // Each attempt as a numbered draft with its verdicts under it, a blank line between drafts. The last one leaves
+        // its flags to the instruction when that instruction states them.
+        var drafts = attempts
+            .Select((attempt, index) => FillTemplate(notes.TurnSoFar.Draft, new Dictionary<string, string>
+            {
+                ["number"] = (index + 1).ToString(CultureInfo.InvariantCulture),
+                ["reply"] = attempt.Reply,
+                ["verdicts"] = DescribeVerdicts(
+                    attempt, notes.TurnSoFar, flagsShown: !(noteStatesLastFlags && index == attempts.Count - 1)),
+            }))
+            .ToJoinedString("\n\n");
+
+        // The drafts, then the instruction for this retry.
+        return FillTemplate(notes.TurnSoFar.Turn, new Dictionary<string, string>
+        {
+            ["drafts"] = drafts,
+            ["fix"] = revisionNote,
+        });
+    }
+
+    /// <summary>
+    /// Writes out what every check said about one attempt: a line per thing a check flagged, or a line saying it passed
+    /// when it flagged nothing.
+    /// </summary>
+    /// <param name="attempt">The judged attempt.</param>
+    /// <param name="note">The wording the verdicts are written in.</param>
+    /// <param name="flagsShown">Whether the lines for what the checks flagged are written, or only the passes. The flags
+    /// are written anyway when no check passed, so the list is never empty.</param>
+    /// <returns>One line per verdict, in the order the checks run.</returns>
+    private static string DescribeVerdicts(ExaminerAttempt attempt, TurnSoFarNote note, bool flagsShown)
+    {
+        // Pull the verdicts the lines read.
+        var (_, _, mathCheck, leakCheck, languageCheck, routeCheck, _, _) = attempt;
+
+        // What the math-check flagged. A draft can trip both of its flags.
+        var math = new List<string>();
+
+        // A wrong claim, with the correction.
+        if (!mathCheck.Holds)
+            math.Add(FillTemplate(note.MathWrongClaim, new Dictionary<string, string>
+            {
+                ["correction"] = mathCheck.Correction.EnsureSentenceEnd(),
+            }));
+
+        // An ending before the solution is complete, with what is still owed.
+        if (mathCheck.ClosesEarly)
+            math.Add(FillTemplate(note.MathEndedEarly, new Dictionary<string, string>
+            {
+                ["owed"] = mathCheck.Owed.EnsureSentenceEnd(),
+            }));
+
+        // What the leak-check flagged.
+        var leak = new List<string>();
+
+        // Earned progress handed away, with what it was.
+        if (leakCheck.Leaks)
+            leak.Add(FillTemplate(note.LeakGaveAway, new Dictionary<string, string>
+            {
+                ["what_leaked"] = leakCheck.WhatLeaked.EnsureSentenceEnd(),
+            }));
+
+        // What the language check flagged. A draft can trip both of its flags.
+        var language = new List<string>();
+
+        // A drift out of the candidate's language.
+        if (languageCheck.SwitchesLanguage)
+            language.Add(note.LanguageSwitched);
+
+        // A word that guesses the candidate's gender.
+        if (languageCheck.GendersTheReader)
+            language.Add(note.LanguageGendered);
+
+        // What the route check flagged.
+        var route = new List<string>();
+
+        // A takeover, with what the candidate actually brought.
+        if (routeCheck.TakesOver)
+            route.Add(FillTemplate(note.RouteTookOver, new Dictionary<string, string>
+            {
+                ["work"] = routeCheck.Work.EnsureSentenceEnd(),
+            }));
+
+        // Each check's flags beside its passing line, in the order the checks run.
+        var checks = new[]
+        {
+            (Flags: math, Passed: note.MathPassed),
+            (Flags: leak, Passed: note.LeakPassed),
+            (Flags: language, Passed: note.LanguagePassed),
+            (Flags: route, Passed: note.RoutePassed),
+        };
+
+        // Hidden flags still show when no check passed, so the draft never stands over an empty list.
+        var showFlags = flagsShown || checks.All(check => check.Flags.Count > 0);
+
+        // Each check's passing line when it raised nothing, else its flags when those show.
+        return checks
+            .SelectMany(check => check.Flags.Count == 0 ? [check.Passed] : showFlags ? check.Flags : [])
+            .ToJoinedString("\n");
+    }
 }
