@@ -44,9 +44,11 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
 
     /// <inheritdoc/>
     public async Task<ExaminerTurnOutcome> NextReplyAsync(
-        string problem, string reference, Transcript transcript, ModelUsageAccumulator usage,
-        CancellationToken cancellationToken = default)
+        ExaminerInput input, ModelUsageAccumulator usage, CancellationToken cancellationToken = default)
     {
+        // The problem, its reference, and the conversation the turn replies to.
+        var (problem, reference, transcript) = input;
+
         // The examiner replies to the candidate — refuse a transcript that isn't waiting on us.
         transcript.EnsureAwaitingExaminer();
 
@@ -100,6 +102,42 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         return new ExaminerTurnOutcome(attempts, safeFallback, usage.Accrued);
     }
 
+    /// <inheritdoc/>
+    public async Task<ExaminerAttempt> CheckReplyAsync(
+        ExaminerInput input, string reply, ModelUsageAccumulator usage, CancellationToken cancellationToken = default)
+    {
+        // The problem, its reference, and the conversation the reply answers.
+        var (problem, reference, transcript) = input;
+
+        // The reply answers the candidate, so refuse a transcript that isn't waiting on the examiner.
+        transcript.EnsureAwaitingExaminer();
+
+        // The reply with its math in the project's dollar delimiters, the form every generated draft is judged in.
+        var normalizedReply = MathDelimiterNormalizer.Normalize(reply);
+
+        // Time the judging, the only part of an attempt this runs.
+        var stopwatch = Stopwatch.StartNew();
+
+        // Judge the reply with every guard, reading it in the conversation it answers.
+        var guards = await RunGuardsAsync(
+            problem, reference, transcript.ToMarkdown(), transcript.Turns[^1].Text, normalizedReply, usage,
+            cancellationToken);
+
+        // Stop the clock now that the reply is judged.
+        stopwatch.Stop();
+
+        // The reply as an attempt nothing generated: no revision note, and only the guards' calls behind it.
+        return new ExaminerAttempt(
+            normalizedReply,
+            RevisionNote: "",
+            guards.Math.Verdict,
+            guards.Leak.Verdict,
+            guards.Language.Verdict,
+            guards.Route.Verdict,
+            guards.Calls,
+            (int)stopwatch.ElapsedMilliseconds);
+    }
+
     /// <summary>
     /// Generates one reply and runs every guard over it. The turn's first pass and each revision run this same step,
     /// differing only in the revision note fed to the generator.
@@ -141,7 +179,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
             guards.Leak.Verdict,
             guards.Language.Verdict,
             guards.Route.Verdict,
-            [generateCall, guards.Math.Call, guards.Leak.Call, guards.Language.Call, guards.Route.Call],
+            [generateCall, .. guards.Calls],
             (int)stopwatch.ElapsedMilliseconds);
     }
 
@@ -197,7 +235,13 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         GuardRun<MathCheckResult> Math,
         GuardRun<LeakCheckResult> Leak,
         GuardRun<LanguageCheckResult> Language,
-        GuardRun<RouteCheckResult> Route);
+        GuardRun<RouteCheckResult> Route)
+    {
+        /// <summary>
+        /// The call each guard made, in the order the guards were started.
+        /// </summary>
+        public IReadOnlyList<ExaminerStepCall> Calls => [Math.Call, Leak.Call, Language.Call, Route.Call];
+    }
 
     /// <summary>
     /// One guard's verdict paired with the call that produced it, so an attempt can record what each guard said and

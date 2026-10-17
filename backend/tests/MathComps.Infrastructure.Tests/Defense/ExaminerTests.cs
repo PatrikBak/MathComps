@@ -1,3 +1,4 @@
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Defense;
@@ -12,11 +13,11 @@ using ExaminerEngine = MathComps.Infrastructure.Services.Defense.Engine.Examiner
 namespace MathComps.Infrastructure.Tests.Defense;
 
 /// <summary>
-/// Tests the examiner loop's guard dispatch through its public entry point with a fake chat caller: every guard runs on
-/// every reply, a flagged guard triggers regeneration — re-verified each time and capped, so a persistent flaw ships
+/// Tests the examiner loop's guard dispatch through its public entry points with a fake chat caller: every guard runs
+/// on every reply, a flagged guard triggers regeneration — re-verified each time and capped, so a persistent flaw ships
 /// after the cap — a revision carries the specific correction back to the generator, a language switch and a guessed
-/// gender are sent back for a rewrite but never cost the reply its content, and the turn sums the cost and tokens of
-/// every call it made.
+/// gender are sent back for a rewrite but never cost the reply its content, the turn sums the cost and tokens of every
+/// call it made, and a reply already written is judged the way a drafted one is.
 /// </summary>
 public class ExaminerTests
 {
@@ -37,8 +38,8 @@ public class ExaminerTests
     private const string ConfiguredModel = "test-model";
 
     /// <summary>
-    /// Every turn runs each guard independently: a clean reply is math-checked, leak-checked and language-checked once
-    /// each, with nothing revised.
+    /// Every turn runs each guard independently: a clean reply is judged once by every guard, with nothing revised, and
+    /// the shipped draft records the generate call followed by each guard's.
     /// </summary>
     [Fact]
     public async Task Every_guard_runs_on_every_turn()
@@ -65,6 +66,14 @@ public class ExaminerTests
         Assert.False(outcome.Shipped.LanguageCheck.SwitchesLanguage);
         Assert.False(outcome.Shipped.RouteCheck.TakesOver);
         Assert.Equal(0, outcome.Revisions);
+
+        // Every step a turn runs, generate first and the guards in the order they start.
+        ExaminerStep[] steps =
+            [ExaminerStep.Generate, ExaminerStep.MathCheck, ExaminerStep.LeakCheck, ExaminerStep.LanguageCheck,
+                ExaminerStep.RouteCheck];
+
+        // The shipped draft records a call for each of them, in that order.
+        Assert.Equal(steps, outcome.Shipped.Calls.Select(call => call.Step));
     }
 
     /// <summary>
@@ -571,7 +580,8 @@ public class ExaminerTests
             var examiner = new ExaminerEngine(caller.Object, MsOptions.Create(settings));
 
             // Run the turn.
-            await examiner.NextReplyAsync(problem, reference, transcript, new ModelUsageAccumulator());
+            await examiner.NextReplyAsync(
+                new ExaminerInput(problem, reference, transcript), new ModelUsageAccumulator());
 
             // The bool is ignored — the captured prompt is what the assertions inspect.
             return true;
@@ -804,11 +814,64 @@ public class ExaminerTests
 
             // It throws instead of calling the model.
             await Assert.ThrowsAsync<InvalidOperationException>(
-                () => examiner.NextReplyAsync("problem", "reference", transcript, new ModelUsageAccumulator()));
+                () => examiner.NextReplyAsync(
+                    new ExaminerInput("problem", "reference", transcript), new ModelUsageAccumulator()));
 
             // The bool is ignored — the assertion is the point.
             return true;
         });
+    }
+
+    /// <summary>
+    /// A reply already written is judged the way a drafted one is, and nothing is drafted: the math-check reads it,
+    /// with its math in dollars, as the proposed answer to the whole conversation, the language check reads it beside
+    /// the candidate's latest turn alone, and the attempt records only the guards' calls.
+    /// </summary>
+    [Fact]
+    public async Task A_checked_reply_is_judged_like_a_draft_without_drafting_one()
+    {
+        // A strict caller, so a generate call fails the test outright.
+        var caller = new Mock<ILlmChatCaller>(MockBehavior.Strict);
+
+        // Every guard clears the reply, the math-check and the language check keeping what they were asked to read.
+        var mathRequests = new List<ChatCallRequest>();
+        caller.Setup(mock => mock.CompleteAsync<MathCheckResult>(
+                Capture.In(mathRequests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(new MathCheckResult(Holds: true, Correction: "")));
+        SetupStep(caller, CleanLeak());
+        var languageRequests = new List<ChatCallRequest>();
+        caller.Setup(mock => mock.CompleteAsync<LanguageCheckResult>(
+                Capture.In(languageRequests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(CleanLanguage()));
+        SetupStep(caller, CleanRoute());
+
+        // A conversation holding an earlier exchange before the candidate's latest turn, which the reply answers.
+        var transcript = Transcript.Parse(
+            "## Candidate\n\nmy defense\n\n## Examiner\n\nan earlier question\n\n## Candidate\n\nmy answer");
+
+        // Check a reply whose math is bracket-delimited.
+        var attempt = await WithTempSettingsAsync(settings =>
+            new ExaminerEngine(caller.Object, MsOptions.Create(settings)).CheckReplyAsync(
+                new ExaminerInput("problem", "reference", transcript), @"Why is \(p^2+1\) odd?",
+                new ModelUsageAccumulator()));
+
+        // The reply comes back in dollars.
+        Assert.Equal("Why is $p^2+1$ odd?", attempt.Reply);
+
+        // The math-check read it in dollars, after the whole conversation.
+        Assert.Contains("an earlier question", mathRequests[0].UserPrompt);
+        Assert.EndsWith("Why is $p^2+1$ odd?", mathRequests[0].UserPrompt);
+
+        // The language check read it beside the candidate's latest turn, and nothing before that turn.
+        Assert.Contains("my answer", languageRequests[0].UserPrompt);
+        Assert.DoesNotContain("an earlier question", languageRequests[0].UserPrompt);
+
+        // Every guard's step, in the order the guards start.
+        ExaminerStep[] steps =
+            [ExaminerStep.MathCheck, ExaminerStep.LeakCheck, ExaminerStep.LanguageCheck, ExaminerStep.RouteCheck];
+
+        // The attempt records a call for each guard and no generate call.
+        Assert.Equal(steps, attempt.Calls.Select(call => call.Step));
     }
 
     /// <summary>
@@ -827,7 +890,7 @@ public class ExaminerTests
         // Run the loop under throwaway prompt templates and hand back its outcome.
         return await WithTempSettingsAsync(settings =>
             new ExaminerEngine(caller.Object, MsOptions.Create(settings))
-                .NextReplyAsync("problem", reference, transcript, new ModelUsageAccumulator()));
+                .NextReplyAsync(new ExaminerInput("problem", reference, transcript), new ModelUsageAccumulator()));
     }
 
     /// <summary>
@@ -846,7 +909,7 @@ public class ExaminerTests
             () => WithTempSettingsAsync(
                 settings => new ExaminerEngine(caller.Object, MsOptions.Create(settings))
                     .NextReplyAsync(
-                        "problem", "reference", Transcript.Parse("## Candidate\n\nmy defense"),
+                        new ExaminerInput("problem", "reference", Transcript.Parse("## Candidate\n\nmy defense")),
                         new ModelUsageAccumulator()),
                 leakNote));
     }

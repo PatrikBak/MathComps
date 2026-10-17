@@ -3,7 +3,6 @@ using System.Diagnostics;
 using MathComps.Cli.Examiner.Fixtures;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services.Ai;
-using MathComps.Infrastructure.Services.Defense.Dtos;
 using MathComps.Infrastructure.Services.Defense.Engine;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -58,8 +57,7 @@ public class ExaminerTurnCommand(IExaminer examiner)
         var stopwatch = Stopwatch.StartNew();
 
         // Run the loop to produce the next reply.
-        var outcome = await examiner.NextReplyAsync(
-            fixture.Problem, fixture.Reference, fixture.Transcript, new ModelUsageAccumulator());
+        var outcome = await examiner.NextReplyAsync(fixture, new ModelUsageAccumulator());
 
         // Stop the clock before the follow-up I/O.
         stopwatch.Stop();
@@ -96,17 +94,8 @@ public class ExaminerTurnCommand(IExaminer examiner)
         // The reply itself — printed plainly since it's arbitrary model text, not markup.
         AnsiConsole.WriteLine(outcome.Shipped.Reply);
 
-        // The math-check line: holds, or fails with the correction.
-        RenderMathCheck(outcome.Shipped.MathCheck);
-
-        // The leak-check line: clean, or a leak with what leaked.
-        RenderLeakCheck(outcome.Shipped.LeakCheck);
-
-        // The language-check line: the candidate's language, and whether the reply held it.
-        RenderLanguageCheck(outcome.Shipped.LanguageCheck);
-
-        // The route verdict and any reference step the question asks for.
-        RenderRouteCheck(outcome.Shipped.RouteCheck);
+        // Every guard's verdict on the shipped reply.
+        AttemptReport.RenderVerdicts(outcome.Shipped);
 
         // How many times a flagged check forced a regeneration.
         AnsiConsole.MarkupLine(outcome.Revisions == 0
@@ -138,22 +127,8 @@ public class ExaminerTurnCommand(IExaminer examiner)
             AnsiConsole.MarkupLineInterpolated(
                 $"\n[bold]Attempt {index + 1}[/] [grey]({label}, {attempt.DurationMs / 1000.0:0.0}s)[/]");
 
-            // One line per call: the step, how it was routed, what it billed, and what it kept the attempt waiting.
-            foreach (var call in attempt.Calls)
-            {
-                // The reasoning level, or a marker for a call that sent no reasoning field at all.
-                var effort = call.ReasoningEffort ?? "default";
-
-                // The counts, with the reasoning ones called out since they're what a level change moves, and how
-                // long the call took.
-                var spent =
-                    $"{call.Usage.PromptTokens} in, {call.Usage.CompletionTokens} out " +
-                    $"({call.Usage.ReasoningTokens} reasoning), {call.DurationMs / 1000.0:0.0}s";
-
-                // The call's line.
-                AnsiConsole.MarkupLineInterpolated(
-                    $"[grey]  {call.Step} — {call.Model}, reasoning {effort}, ${call.Usage.Cost:0.00000}, {spent}[/]");
-            }
+            // One line per call the attempt made.
+            AttemptReport.RenderCalls(attempt);
 
             // Show each rejected draft with its failed verdicts.
             if (index < outcome.Attempts.Count - 1)
@@ -177,7 +152,8 @@ public class ExaminerTurnCommand(IExaminer examiner)
         string.Join(" / ", reply.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(line => line.Trim()));
 
     /// <summary>
-    /// Names every guard verdict that rejected an attempt, in the order the guards are rendered for the shipped reply.
+    /// Names every guard verdict that rejected an attempt, in the order <see cref="AttemptReport.RenderVerdicts"/>
+    /// writes them for the shipped reply.
     /// </summary>
     /// <param name="attempt">The rejected attempt.</param>
     /// <returns>One phrase per failed verdict, each carrying what the guard reported.</returns>
@@ -195,103 +171,17 @@ public class ExaminerTurnCommand(IExaminer examiner)
         if (attempt.LeakCheck.WithholdsClose)
             yield return $"leak-check withholds the close — {attempt.LeakCheck.Established}";
 
-        // A guessed gender.
-        if (attempt.LanguageCheck.GendersTheReader)
-            yield return "language-check genders the reader";
-
         // A language switch, with the language the candidate wrote in.
         if (attempt.LanguageCheck.SwitchesLanguage)
             yield return
                 $"language-check switched — the candidate wrote in {attempt.LanguageCheck.CandidateLanguage}";
 
+        // A guessed gender.
+        if (attempt.LanguageCheck.GendersTheReader)
+            yield return "language-check genders the reader";
+
         // A takeover, with the reference step the question fished for.
         if (attempt.RouteCheck.TakesOver)
             yield return $"route-check takes over — fishes for: {attempt.RouteCheck.Restates}";
-    }
-
-    /// <summary>
-    /// Renders the math-check line: a pass when every claim held, or a fail carrying the correction.
-    /// </summary>
-    /// <param name="mathCheck">The math-check verdict.</param>
-    private static void RenderMathCheck(MathCheckResult mathCheck)
-    {
-        // Passed — every claim held.
-        if (mathCheck.Holds)
-        {
-            AnsiConsole.MarkupLine("[green]Math-check:[/] holds");
-            return;
-        }
-
-        // Failed — surface the correction.
-        AnsiConsole.MarkupLineInterpolated($"[red]Math-check:[/] fails — {mathCheck.Correction}");
-    }
-
-    /// <summary>
-    /// Renders the leak-check line: clean when the reply mis-pays nothing, a leak carrying what was given away, or a
-    /// withheld close carrying what the candidate established.
-    /// </summary>
-    /// <param name="leakCheck">The leak-check verdict on the reply.</param>
-    private static void RenderLeakCheck(LeakCheckResult leakCheck)
-    {
-        // Clean — nothing given away and no close withheld.
-        if (leakCheck is { Leaks: false, WithholdsClose: false })
-        {
-            AnsiConsole.MarkupLine("[green]Leak-check:[/] clean");
-            return;
-        }
-
-        // Leaking — surface what was given away.
-        if (leakCheck.Leaks)
-            AnsiConsole.MarkupLineInterpolated($"[red]Leak-check:[/] leaks — {leakCheck.WhatLeaked}");
-
-        // Withholding the close — surface what the candidate already established.
-        if (leakCheck.WithholdsClose)
-            AnsiConsole.MarkupLineInterpolated(
-                $"[red]Leak-check:[/] withholds the close — {leakCheck.Established}");
-    }
-
-    /// <summary>
-    /// Renders the language-check line: the language the candidate wrote in, whether the reply drifted out of it, and
-    /// whether its wording assumes the candidate's gender.
-    /// </summary>
-    /// <param name="languageCheck">The language-check verdict on the reply.</param>
-    private static void RenderLanguageCheck(LanguageCheckResult languageCheck)
-    {
-        // Drifted — the reply landed in some other language than the candidate's.
-        if (languageCheck.SwitchesLanguage)
-        {
-            AnsiConsole.MarkupLineInterpolated(
-                $"[red]Language-check:[/] switched — the candidate wrote in {languageCheck.CandidateLanguage}");
-            return;
-        }
-
-        // Matched the language but guessed who it is talking to.
-        if (languageCheck.GendersTheReader)
-        {
-            AnsiConsole.MarkupLineInterpolated(
-                $"[red]Language-check:[/] genders the reader — the candidate wrote in {languageCheck.CandidateLanguage}");
-            return;
-        }
-
-        // Matched — name the language it stayed in.
-        AnsiConsole.MarkupLineInterpolated($"[green]Language-check:[/] {languageCheck.CandidateLanguage}");
-    }
-
-    /// <summary>
-    /// Renders the route verdict and any reference step the question asks for.
-    /// </summary>
-    /// <param name="routeCheck">The route-check verdict on the reply.</param>
-    private static void RenderRouteCheck(RouteCheckResult routeCheck)
-    {
-        // Taken over — the question kept nothing of theirs and its answer is a line of the reference.
-        if (routeCheck.TakesOver)
-        {
-            AnsiConsole.MarkupLineInterpolated(
-                $"[red]Route-check:[/] takes over — fishes for: {routeCheck.Restates}");
-            return;
-        }
-
-        // Held — say the reply stayed on the candidate's route.
-        AnsiConsole.MarkupLine("[green]Route-check:[/] no takeover");
     }
 }

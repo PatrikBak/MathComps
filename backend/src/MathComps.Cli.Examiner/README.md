@@ -38,6 +38,9 @@ Above that sits the breakdown the total can't give you: one line per call naming
 # Write the next examiner reply into the fixture's transcript.
 dotnet run --project backend/src/MathComps.Cli.Examiner -- data/defense-fixtures/example
 
+# Judge the transcript's last examiner reply with every check, generating nothing.
+dotnet run --project backend/src/MathComps.Cli.Examiner -- check data/defense-fixtures/example
+
 # Rewind the transcript to its opening candidate turn.
 dotnet run --project backend/src/MathComps.Cli.Examiner -- strip data/defense-fixtures/example
 
@@ -46,6 +49,8 @@ dotnet run --project backend/src/MathComps.Cli.Examiner -- strip data/defense-fi
 ```
 
 The transcript's last turn must be a `## Candidate` turn, since the examiner replies to the candidate.
+
+`check` takes the opposite: its transcript ends on the `## Examiner` reply to judge, and the turns before it are what that reply answers. It writes nothing back, so a check's prompt or model can be tried on replies already on record, the same reply every run.
 
 **`strip` options:**
 

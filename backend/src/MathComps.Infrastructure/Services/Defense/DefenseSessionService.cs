@@ -507,7 +507,8 @@ public class DefenseSessionService(
         {
             // Run the loop to produce the examiner's reply.
             var outcome = await examiner.NextReplyAsync(
-                session.ProblemStatement, session.ProblemReference, transcript, usage, cancellationToken);
+                new ExaminerInput(session.ProblemStatement, session.ProblemReference, transcript), usage,
+                cancellationToken);
 
             // Stop the clock before the follow-up bookkeeping.
             stopwatch.Stop();
