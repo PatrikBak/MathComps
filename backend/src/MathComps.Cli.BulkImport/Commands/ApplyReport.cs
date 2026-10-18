@@ -35,10 +35,8 @@ public static class ApplyReport
         }
 
         // The problem-level counts.
-        AnsiConsole.MarkupLine(
-            $"\n[bold]Problems[/]: [green]{result.Applied.ProblemsInserted} inserted[/], "
-            + $"[yellow]{result.Applied.ProblemsUpdated} updated[/], "
-            + $"[blue]{result.Applied.ProblemsUnchanged} unchanged[/]");
+        RenderProblemCounts(
+            result.Applied.ProblemsInserted, result.Applied.ProblemsUpdated, result.Applied.ProblemsUnchanged);
 
         // The per-text outcomes, each tagged inserted or overwritten. Unchanged texts stay quiet — the count says it.
         foreach (var text in result.Applied.Texts.Where(text => text.Action != AppliedTextAction.Unchanged))
@@ -73,6 +71,18 @@ public static class ApplyReport
         // The closing applied banner.
         AnsiConsole.MarkupLine("\n[green bold]APPLIED[/]");
     }
+
+    /// <summary>
+    /// Writes the line tallying the problems an import inserts, updates and leaves unchanged.
+    /// </summary>
+    /// <param name="inserted">How many problems the import creates.</param>
+    /// <param name="updated">How many existing problems the import changes.</param>
+    /// <param name="unchanged">How many existing problems the import leaves as they are.</param>
+    public static void RenderProblemCounts(int inserted, int updated, int unchanged) =>
+        // Inserts green, updates yellow, the quiet unchanged blue.
+        AnsiConsole.MarkupLine(
+            $"\n[bold]Problems[/]: [green]{inserted} inserted[/], [yellow]{updated} updated[/], "
+            + $"[blue]{unchanged} unchanged[/]");
 
     /// <summary>
     /// Renders the non-blocking warnings the apply proceeded through, grouped by file.

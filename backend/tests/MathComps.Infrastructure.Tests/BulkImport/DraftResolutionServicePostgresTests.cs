@@ -228,17 +228,22 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
-    /// A brand-new problem importing its original plus translations is entirely quiet — every classifier reports
-    /// nothing on a net-new slug, so the translations are never mistaken for orphans.
+    /// A brand-new problem importing its original plus translations is a create in every language it carries, and
+    /// no text of it is classified, so the translations are never mistaken for orphans.
     /// </summary>
     [Fact]
-    public Task A_fresh_problem_with_translations_is_quiet() => RunTestAsync(async service =>
+    public Task A_fresh_problem_is_a_create_in_every_language() => RunTestAsync(async service =>
     {
         // Problem 3's slug ("74-csmo-a-iii-3") doesn't exist; import its Slovak original plus EN and CS texts.
         var preview = await PreviewAsync(
             service, Problem(3, Original(Language.SK), Translation(Language.EN), Translation(Language.CS)));
 
-        // Nothing lands on an existing slug, so there is nothing to report.
+        // The problem is created, in the three languages, in draft order.
+        var problem = Assert.Single(preview.Problems);
+        Assert.Equal(("74-csmo-a-iii-3", ResolutionAction.Create), (problem.Slug, problem.Action));
+        Assert.Equal([Language.SK, Language.EN, Language.CS], problem.Languages.ToList());
+
+        // Nothing lands on an existing slug, so no text is classified.
         Assert.Empty(preview.TextResolutions);
     });
 
@@ -476,6 +481,37 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
 
         // Identical content changes nothing, so it's classified unchanged rather than overwrite.
         Assert.Equal(DraftTextAction.UnchangedTranslation, ResolutionFor(preview, DocumentType.Statement).Action);
+    });
+
+    /// <summary>
+    /// An original landing on a half that holds no original, only a text in the original's language, takes its body
+    /// into that text the way a translation would, since that text is the one the import rewrites.
+    /// </summary>
+    [Fact]
+    public Task An_original_onto_a_half_without_one_lands_on_its_language() => RunTestAsync(async service =>
+    {
+        // A Slovak solution stored as a translation, the half holding no original.
+        await QueryAsync(async context =>
+        {
+            // The problem the solution hangs off.
+            var problemId = await context.Problems
+                .Where(problem => problem.Slug == SeededProblemSlug)
+                .Select(problem => problem.Id)
+                .SingleAsync();
+
+            // The solution row itself, its body the one the draft carries.
+            context.ProblemTexts.Add(
+                SeedText(problemId, DocumentType.Solution, Language.SK, isOriginal: false, markdown: "solution"));
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // Re-import the Slovak original with that same solution.
+        var preview = await PreviewAsync(service, Problem(1, Original(Language.SK, SeededBody, hasSolution: true)));
+
+        // The solution lands on the stored Slovak text, which already holds it.
+        Assert.Equal(DraftTextAction.UnchangedTranslation, ResolutionFor(preview, DocumentType.Solution).Action);
     });
 
     /// <summary>

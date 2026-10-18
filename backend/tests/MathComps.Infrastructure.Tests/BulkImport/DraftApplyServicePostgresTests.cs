@@ -1514,35 +1514,30 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A re-import refreshes the proposal's title and area and leaves the rest to the reviewers: the categories they
-    /// changed and their set-aside mark survive a draft still naming the categories it first came with.
+    /// A re-import refreshes the proposal's title, area and categories from the draft, and leaves the reviewers'
+    /// set-aside mark as it is.
     /// </summary>
     [Fact]
-    public Task A_reimport_refreshes_only_the_title_and_area() => RunTestAsync(async service =>
+    public Task A_reimport_refreshes_the_title_area_and_categories() => RunTestAsync(async service =>
     {
         // Import #14 at place 8, recommended for the elementary paper.
         await ApplyPoolAsync(service, Pick(8, new DraftProposal(
             14, "Chameleons", ProposalArea.Combinatorics, [HostedCompetitionCategory.Elementary])));
 
-        // The reviewers recommend it for the advanced paper instead, and set it aside.
+        // The reviewers set it aside.
         await QueryAsync(async context =>
         {
-            // The pick's proposal.
-            var proposal = await context.Proposals.SingleAsync();
+            // The pick's proposal, set aside.
+            (await context.Proposals.SingleAsync()).IsSetAside = true;
 
-            // Recommended for the advanced paper instead.
-            proposal.Recommended = [HostedCompetitionCategory.Advanced];
-
-            // Set aside.
-            proposal.IsSetAside = true;
-
-            // Persist their changes.
+            // Persist their change.
             await context.SaveChangesAsync();
         });
 
-        // Re-import it under a new title and area, the block still naming the elementary paper.
+        // Re-import it under a new title and area, recommended for the advanced and the intermediate papers.
         var second = await ApplyPoolAsync(service, Pick(8, new DraftProposal(
-            14, "Chameleons on the island", ProposalArea.Algebra, [HostedCompetitionCategory.Elementary])));
+            14, "Chameleons on the island", ProposalArea.Algebra,
+            [HostedCompetitionCategory.Advanced, HostedCompetitionCategory.Intermediate])));
 
         // The proposal moved, so the problem counts as updated.
         Assert.Equal(1, second.ProblemsUpdated);
@@ -1550,15 +1545,112 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         // Read back the proposal.
         await QueryAsync(async context =>
         {
-            // The title and the area are the draft's.
+            // The title, the area and the categories are the draft's, the categories in the order they run.
             var proposal = await context.Proposals.SingleAsync();
             Assert.Equal("Chameleons on the island", proposal.Title);
             Assert.Equal(ProposalArea.Algebra, proposal.Area);
+            Assert.Equal(
+                [HostedCompetitionCategory.Intermediate, HostedCompetitionCategory.Advanced], proposal.Recommended);
 
-            // The categories and the set-aside mark are still the reviewers'.
-            Assert.Equal([HostedCompetitionCategory.Advanced], proposal.Recommended);
+            // The set-aside mark is still the reviewers'.
             Assert.True(proposal.IsSetAside);
         });
+    });
+
+    /// <summary>
+    /// The dry run's problem outcomes are what applying then counts: a problem whose draft leaves out the fields it
+    /// stores is unchanged, a new slug is inserted, and an existing problem is updated when any one of its text,
+    /// solution link, authors or tags moves. Each update moves exactly one of them, so a comparison the preview
+    /// skipped would show as an unchanged problem apply counts as updated.
+    /// </summary>
+    [Fact]
+    public Task The_preview_predicts_the_problem_counts_apply_reports() => RunTestAsync(async service =>
+    {
+        // Five problems, tagged and linked where a later draft leaves out or moves the tags and the link.
+        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        [
+            new DraftProblemContent(1, HasSidecar: true, ["Jaromír Šimša"], "https://example.com/1", ["algebra"],
+                Proposal: null, [Original(Language.SK, "one")], Images: []),
+            Problem(2, Original(Language.SK, "two")),
+            ProblemWithTags(3, ["algebra"], Original(Language.SK, "three")),
+            Problem(4, Original(Language.SK, "four")),
+            ProblemWithLink(5, "https://example.com/5", Original(Language.SK, "five"))
+        ], Path.GetTempPath());
+
+        // The same five, the first leaving out its authors, link and tags, each of the rest moving one thing, plus a
+        // sixth the round doesn't hold yet.
+        DraftProblemContent[] problems =
+        [
+            ProblemBy(1, authors: null, Original(Language.SK, "one")),
+            Problem(2, Original(Language.SK, "two, corrected")),
+            ProblemWithTags(3, ["am-gm-inequality"], Original(Language.SK, "three")),
+            ProblemBy(4, ["Alice"], Original(Language.SK, "four")),
+            ProblemWithLink(5, "https://example.com/five", Original(Language.SK, "five")),
+            Problem(6, Original(Language.SK, "six"))
+        ];
+
+        // What the dry run says importing them does to each problem.
+        var predicted = ImmutableArray<ProblemResolution>.Empty;
+        await QueryAsync<IDraftResolutionService>(async (_, resolution) =>
+            predicted = (await resolution.PreviewAsync(CsmoTarget(), visibleSince: null, problems, Path.GetTempPath()))
+                .Problems);
+
+        // What applying them actually counts.
+        var result = await ApplyOpenAsync(service, CsmoTarget(), RoundDate, problems, Path.GetTempPath());
+
+        // The first is left as it was, the next four are updated, and the last is created.
+        Assert.Equal(
+            [
+                ResolutionAction.Reuse, ResolutionAction.Update, ResolutionAction.Update, ResolutionAction.Update,
+                ResolutionAction.Update, ResolutionAction.Create
+            ],
+            predicted.Select(problem => problem.Action).ToList());
+
+        // Applying counts the same.
+        Assert.Equal((1, 4, 1), (result.ProblemsInserted, result.ProblemsUpdated, result.ProblemsUnchanged));
+    });
+
+    /// <summary>
+    /// The dry run reads a moved proposal as an update the way applying counts one: a pick filed exactly as its block
+    /// says is unchanged, one recommended for other categories is updated, and a new one is inserted.
+    /// </summary>
+    [Fact]
+    public Task The_preview_predicts_a_proposal_update() => RunTestAsync(async service =>
+    {
+        // #14 and #15, both recommended for the elementary paper.
+        await ApplyPoolAsync(service,
+            Pick(8, new DraftProposal(14, "Chameleons", ProposalArea.Combinatorics,
+                [HostedCompetitionCategory.Elementary])),
+            Pick(9, new DraftProposal(15, "Lattice", ProposalArea.Geometry,
+                [HostedCompetitionCategory.Elementary])));
+
+        // #14 as it stands, #15 recommended for the advanced paper instead, and a new #16.
+        DraftProblemContent[] problems =
+        [
+            Pick(8, new DraftProposal(14, "Chameleons", ProposalArea.Combinatorics,
+                [HostedCompetitionCategory.Elementary])),
+            Pick(9, new DraftProposal(15, "Lattice", ProposalArea.Geometry,
+                [HostedCompetitionCategory.Advanced])),
+            Pick(10, new DraftProposal(16, "Coins", ProposalArea.NumberTheory, []))
+        ];
+
+        // What the dry run says importing them does to each problem.
+        var predicted = ImmutableArray<ProblemResolution>.Empty;
+        await QueryAsync<IDraftResolutionService>(async (_, resolution) =>
+            predicted = (await resolution.PreviewAsync(
+                new DraftTarget(HostedTaxonomy.ProposalsPath, 2026), HostedTaxonomy.ProposalsVisibleSince,
+                problems, Path.GetTempPath())).Problems);
+
+        // What applying them actually counts.
+        var result = await ApplyPoolAsync(service, problems);
+
+        // #14 is left as it was, #15 is updated, and #16 is created.
+        Assert.Equal(
+            [ResolutionAction.Reuse, ResolutionAction.Update, ResolutionAction.Create],
+            predicted.Select(problem => problem.Action).ToList());
+
+        // Applying counts the same.
+        Assert.Equal((1, 1, 1), (result.ProblemsInserted, result.ProblemsUpdated, result.ProblemsUnchanged));
     });
 
     /// <summary>
@@ -1703,6 +1795,18 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     private static DraftProblemContent ProblemWithTags(
         int order, ImmutableArray<string>? tags, params DraftTextContent[] texts) =>
         new(order, HasSidecar: true, ["Jaromír Šimša"], SolutionLink: null, Tags: tags, Proposal: null,
+            Texts: [.. texts], Images: []);
+
+    /// <summary>
+    /// Builds a draft problem carrying the given solution link and a single author.
+    /// </summary>
+    /// <param name="order">The problem's 1-based order.</param>
+    /// <param name="solutionLink">The <c>solutionLink:</c> the draft declares.</param>
+    /// <param name="texts">The problem's text variants.</param>
+    /// <returns>The configured problem content.</returns>
+    private static DraftProblemContent ProblemWithLink(
+        int order, string solutionLink, params DraftTextContent[] texts) =>
+        new(order, HasSidecar: true, ["Jaromír Šimša"], solutionLink, Tags: null, Proposal: null,
             Texts: [.. texts], Images: []);
 
     /// <summary>

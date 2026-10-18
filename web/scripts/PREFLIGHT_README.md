@@ -108,7 +108,7 @@ proposal:
   recommended: [intermediate] # elementary | intermediate | advanced, may be empty
 ```
 
-Every field is required, spelled as the API spells it. Two problems of one draft naming the same number are refused (`proposal-number-duplicate`). The first import writes the whole block. A re-import refreshes the title and the area, and leaves the categories to the reviewers. Leaving the block out of a re-import leaves the proposal untouched, like any absent key. Everything the block can clash with in the database is checked by the [bulk-import CLI](../../backend/src/MathComps.Cli.BulkImport/README.md#filling-the-pool).
+Every field is required, spelled as the API spells it. Two problems of one draft naming the same number are refused (`proposal-number-duplicate`). The first import writes the whole block. A re-import refreshes the title, the area and the categories. Leaving the block out of a re-import leaves the proposal untouched, like any absent key. Everything the block can clash with in the database is checked by the [bulk-import CLI](../../backend/src/MathComps.Cli.BulkImport/README.md#filling-the-pool).
 
 ## Images
 

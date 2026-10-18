@@ -4,7 +4,6 @@ using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Selection;
 using MathComps.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
-using MathComps.Domain.Taxonomy;
 using MathComps.Shared.Extensions;
 using MathComps.Domain.Tagging;
 
@@ -14,8 +13,8 @@ namespace MathComps.Infrastructure.BulkImport;
 /// EF Core implementation of <see cref="IDraftApplyService"/>. Spins up one tracking
 /// <see cref="MathCompsDbContext"/>, raises the competition node and season the draft's path names through the
 /// <see cref="ICompetitionTreeWriter"/>, uploads images through the <see cref="ITrackedFileUploader"/> (which skips
-/// ones already on remote storage) and rewrites their refs, then inserts or overwrites the problems and the proposals
-/// filing them, and saves once at the end.
+/// ones already on remote storage) and rewrites their refs, then inserts the new problems with the proposals filing
+/// them, carries out the <see cref="ProblemReimport"/> plan on the existing ones, and saves once at the end.
 /// </summary>
 /// <param name="dbContextFactory">Factory for the tracking write context.</param>
 /// <param name="tree">Raises the competition node and the season the draft names.</param>
@@ -69,20 +68,16 @@ public class DraftApplyService(
         // Each problem in turn.
         foreach (var problem in problems)
         {
-            // The stable slug this problem upserts on — its leading token is the season's edition (ročník), e.g. 75.
-            var slug = TaxonomySlugs.ProblemSlug(
-                Season.EditionFromStartYear(target.SeasonYear), target.CompetitionPath, problem.Order);
+            // The stable slug this problem upserts on.
+            var slug = target.ProblemSlug(problem.Order);
 
             // Upload the problem's images and build the relative-ref → media-ref map the markdown rewrite consumes.
             var (replacements, uploaded, skipped) = await UploadProblemImagesAsync(problem, slug, draftFolder);
             imagesUploaded += uploaded;
             imagesSkipped += skipped;
 
-            // The existing problem (with its texts, authors, and tags), or null when this slug is net-new.
-            var existing = await context.Problems
-                .Include(candidate => candidate.Texts)
-                .Include(candidate => candidate.ProblemAuthors)
-                .Include(candidate => candidate.ProblemTagsAll)
+            // The existing problem with its stored content, or null when this slug is net-new.
+            var existing = await ProblemReimport.IncludeStoredContent(context.Problems)
                 .SingleOrDefaultAsync(candidate => candidate.Slug == slug);
 
             // Insert a net-new problem, or reconcile an existing one against the draft.
@@ -274,11 +269,10 @@ public class DraftApplyService(
         IDictionary<string, Tag> tagsCache,
         ImmutableArray<AppliedText>.Builder appliedTexts)
     {
-        // A net-new problem with no original would land with only translations and no canonical original — forbidden.
-        if (!problem.Texts.Any(text => text.Original))
+        // A problem the import may not create, whose draft validation should have rejected.
+        if (problem.CreateConflict is { } conflict)
             throw new InvalidOperationException(
-                $"Refusing to insert '{slug}' with no original-language body — a translation-only drop requires the "
-                + "problem to already exist; validation should have rejected this draft.");
+                $"Refusing to insert '{slug}' ({conflict}) — validation should have rejected this draft.");
 
         // The new problem row.
         var newProblem = new Problem
@@ -290,22 +284,12 @@ public class DraftApplyService(
         };
         await context.Problems.AddAsync(newProblem);
 
-        // Each language variant contributes a statement (always), a solution and hints (when present).
+        // Each language variant in turn.
         foreach (var text in problem.Texts)
         {
-            // The statement half — rewrite its image refs and add it.
-            AddText(context, newProblem.Id, slug, DocumentType.Statement, text,
-                MarkdownImageRewriter.Rewrite(text.StatementMarkdown, replacements), appliedTexts);
-
-            // The solution half, only when the draft carries one.
-            if (text.SolutionMarkdown is { } solutionMarkdown)
-                AddText(context, newProblem.Id, slug, DocumentType.Solution, text,
-                    MarkdownImageRewriter.Rewrite(solutionMarkdown, replacements), appliedTexts);
-
-            // The hints, as the one document they are stored in, only when the draft carries any.
-            if (HintsDocument.Join(text.Hints) is { } hintsDocument)
-                AddText(context, newProblem.Id, slug, DocumentType.Hints, text,
-                    MarkdownImageRewriter.Rewrite(hintsDocument, replacements), appliedTexts);
+            // Add every half the variant writes: the statement, plus a solution and hints when the draft carries them.
+            foreach (var (documentType, markdown) in text.HalvesToWrite(replacements))
+                AddText(context, newProblem.Id, slug, documentType, text, markdown, appliedTexts);
         }
 
         // Assign the draft's authors when it declares any — a brand-new problem has none to clear, so null and the
@@ -344,18 +328,18 @@ public class DraftApplyService(
     }
 
     /// <summary>
-    /// Reconciles an existing problem with the draft: refreshes its solution link when the draft carries one,
-    /// upserts each text by <c>(document type, language)</c>, reconciles its authors and tags, and refreshes the
-    /// title and area of the proposal filing it when the draft carries a block.
+    /// Carries out the re-import of a draft problem onto the existing one, as <see cref="ProblemReimport"/> plans it:
+    /// writes each half, and takes the draft's solution link, authors, tags and proposal filing wherever they differ
+    /// from the stored ones.
     /// </summary>
     /// <param name="context">The write context.</param>
-    /// <param name="existing">The tracked existing problem, with texts and authors loaded.</param>
+    /// <param name="existing">The tracked existing problem, with its stored content loaded.</param>
     /// <param name="problem">The draft problem content.</param>
     /// <param name="replacements">The image-ref replacements to apply to each body.</param>
     /// <param name="authorsCache">The run-scoped author cache.</param>
     /// <param name="tagsCache">The run-scoped tag cache.</param>
     /// <param name="appliedTexts">The accumulator the written texts are recorded into.</param>
-    /// <returns>Whether anything actually changed — false when the draft matched the stored problem exactly.</returns>
+    /// <returns>Whether the re-import changes anything about the problem.</returns>
     private static async Task<bool> UpdateProblemAsync(
         MathCompsDbContext context,
         Problem existing,
@@ -365,76 +349,50 @@ public class DraftApplyService(
         IDictionary<string, Tag> tagsCache,
         ImmutableArray<AppliedText>.Builder appliedTexts)
     {
-        // The solution link is the only field on the problem row a re-import may change. A null link means the
-        // draft omitted the key — leave the stored link untouched, matching the authors/tags reconcilers.
-        var linkChanged = false;
-        if (problem.SolutionLink is { } solutionLink && existing.SolutionLink != solutionLink)
+        // The proposal filing the problem, read only when the draft files it.
+        var storedProposal = problem.Proposal is null
+            ? null
+            : await context.Proposals.SingleOrDefaultAsync(candidate => candidate.ProblemId == existing.Id);
+
+        // What re-importing the draft onto the problem does.
+        var plan = ProblemReimport.Plan(problem, existing, storedProposal, replacements);
+
+        // Take the draft's solution link where it differs.
+        if (plan.ChangesSolutionLink)
+            existing.SolutionLink = problem.SolutionLink;
+
+        // Write each half the draft carries.
+        foreach (var half in plan.Halves)
+            WriteHalf(context, existing, half, appliedTexts);
+
+        // Credit the draft's authors where they differ.
+        if (plan.ChangesAuthors && problem.Authors is { } authorNames)
+            await ReplaceAuthorsAsync(context, existing, authorNames, authorsCache);
+
+        // Tag the problem with the draft's tags where they differ.
+        if (plan.ChangesTags && problem.Tags is { } tagSlugs)
+            await ReplaceTagsAsync(context, existing, tagSlugs, tagsCache);
+
+        // File the problem the way the draft's block does, where the stored proposal files it differently. The number
+        // is fixed, and the set-aside mark and the deletion belong to the reviewers once the problem is in the pool.
+        if (plan.ChangesProposal && problem.Proposal is { } proposal)
         {
-            existing.SolutionLink = solutionLink;
-            linkChanged = true;
+            // A block lands only on a problem a proposal already files.
+            if (storedProposal is null)
+                throw new InvalidOperationException(
+                    $"Refusing to file '{existing.Slug}', which no proposal files — validation should have rejected "
+                    + "this draft.");
+
+            // Take the draft's title and area.
+            storedProposal.Title = proposal.Title;
+            storedProposal.Area = proposal.Area;
+
+            // Take the draft's categories, in the order they run.
+            storedProposal.Recommended = SelectionRules.InCategoryOrder(proposal.Recommended);
         }
 
-        // Upsert each variant's halves against the rows already present, noting whether any actually changed.
-        var textsChanged = false;
-        foreach (var text in problem.Texts)
-        {
-            // The statement half — rewrite its image refs and upsert it.
-            textsChanged |= UpsertText(context, existing, DocumentType.Statement, text,
-                MarkdownImageRewriter.Rewrite(text.StatementMarkdown, replacements), appliedTexts);
-
-            // The solution half, only when the draft carries one.
-            if (text.SolutionMarkdown is { } solutionMarkdown)
-                textsChanged |= UpsertText(context, existing, DocumentType.Solution, text,
-                    MarkdownImageRewriter.Rewrite(solutionMarkdown, replacements), appliedTexts);
-
-            // The hints, as the one document they are stored in, only when the draft carries any.
-            if (HintsDocument.Join(text.Hints) is { } hintsDocument)
-                textsChanged |= UpsertText(context, existing, DocumentType.Hints, text,
-                    MarkdownImageRewriter.Rewrite(hintsDocument, replacements), appliedTexts);
-        }
-
-        // Bring the author set into line with the draft.
-        var authorsChanged = await ReconcileAuthorsAsync(context, existing, problem.Authors, authorsCache);
-
-        // Bring the tag set into line with the draft (skipped entirely when the draft omits a tags key).
-        var tagsChanged = await ReconcileTagsAsync(context, existing, problem.Tags, tagsCache);
-
-        // Bring the proposal's title and area into line with the draft (skipped entirely when it carries no block).
-        var proposalChanged = await RefreshProposalAsync(context, existing.Id, problem.Proposal);
-
-        // Updated only if the link, some text, the author set, the tag set, or the proposal moved.
-        return linkChanged || textsChanged || authorsChanged || tagsChanged || proposalChanged;
-    }
-
-    /// <summary>
-    /// Writes the draft's title and area over those of the proposal filing an existing problem. Every other field
-    /// stays: <see cref="Proposal.Number"/> is fixed, and the categories, the set-aside mark and the deletion belong to
-    /// the reviewers once the problem is in the pool.
-    /// </summary>
-    /// <param name="context">The write context.</param>
-    /// <param name="problemId">The existing problem's id.</param>
-    /// <param name="proposal">The draft's block, or null when it carries none.</param>
-    /// <returns>Whether the title or the area changed.</returns>
-    private static async Task<bool> RefreshProposalAsync(
-        MathCompsDbContext context, Guid problemId, DraftProposal? proposal)
-    {
-        // A draft without a block leaves the proposal as it stands.
-        if (proposal is null)
-            return false;
-
-        // The proposal filing the problem, which validation saw before the run.
-        var stored = await context.Proposals.SingleAsync(candidate => candidate.ProblemId == problemId);
-
-        // Already filed under the draft's title and area.
-        if (stored.Title == proposal.Title && stored.Area == proposal.Area)
-            return false;
-
-        // Take the draft's title and area.
-        stored.Title = proposal.Title;
-        stored.Area = proposal.Area;
-
-        // The proposal moved.
-        return true;
+        // Updated only when the plan changes something.
+        return plan.ChangesAnything;
     }
 
     /// <summary>
@@ -472,55 +430,62 @@ public class DraftApplyService(
     }
 
     /// <summary>
-    /// Upserts one half of an existing problem: a clean add when the <c>(document type, language)</c> row is
-    /// absent, an in-place rewrite when its stored markdown differs, or a no-op when it already matches.
+    /// Writes one half of a re-import the way its plan says: adds the text, rewrites the stored one in place, or leaves
+    /// it, and records the outcome. A half the import may not write throws, since validation refuses its draft.
     /// </summary>
     /// <param name="context">The write context.</param>
     /// <param name="existing">The tracked existing problem, with its texts loaded.</param>
-    /// <param name="documentType">Which half this text is.</param>
-    /// <param name="text">The draft text variant.</param>
-    /// <param name="markdown">The rewritten markdown to store.</param>
+    /// <param name="half">The planned half.</param>
     /// <param name="appliedTexts">The accumulator to record into.</param>
-    /// <returns>Whether the row was added or rewritten — false when it already held this exact markdown.</returns>
-    private static bool UpsertText(
+    private static void WriteHalf(
         MathCompsDbContext context,
         Problem existing,
-        DocumentType documentType,
-        DraftTextContent text,
-        string markdown,
+        ReimportedHalf half,
         ImmutableArray<AppliedText>.Builder appliedTexts)
     {
-        // The same-language row for this half, if any.
-        var match = existing.Texts.FirstOrDefault(
-            candidate => candidate.DocumentType == documentType && candidate.Language == text.Language);
-
-        // No same-language row — add it, after ruling out a second original.
-        if (match is null)
+        // What the plan says writing the half does.
+        switch (half)
         {
-            // A different-language original already holds the one-original slot — forbidden.
-            if (text.Original && existing.Texts.Any(candidate => candidate.DocumentType == documentType
-                    && candidate.IsOriginal && candidate.Language != text.Language))
+            // A text the half lacks in this language: add it.
+            case { Action: DraftTextAction.AddOriginal or DraftTextAction.AddTranslation }:
+                AddText(context, existing.Id, existing.Slug, half.DocumentType, half.Text, half.Markdown, appliedTexts);
+                break;
+
+            // The stored text in this language with another body: rewrite it in place.
+            case
+            {
+                Action: DraftTextAction.OverwriteOriginal or DraftTextAction.OverwriteTranslation,
+                SameLanguageText: { } stored
+            }:
+                // The new body, stamped with when it changed.
+                stored.MarkdownText = half.Markdown;
+                stored.DateModified = DateTime.UtcNow;
+
+                // Record the overwrite.
+                appliedTexts.Add(new AppliedText(
+                    existing.Slug, half.DocumentType, half.Text.Language, AppliedTextAction.Overwritten));
+                break;
+
+            // The stored text already holds this body: record it as unchanged, its DateModified left as it is.
+            case { Action: DraftTextAction.UnchangedOriginal or DraftTextAction.UnchangedTranslation }:
+                appliedTexts.Add(new AppliedText(
+                    existing.Slug, half.DocumentType, half.Text.Language, AppliedTextAction.Unchanged));
+                break;
+
+            // A second original, which validation refuses, or a create's refusal, which a re-import never plans.
+            case
+            {
+                Action: DraftTextAction.SecondOriginal or DraftTextAction.NoOriginalForNewProblem
+                or DraftTextAction.NewProblemMissingMetadata
+            }:
                 throw new InvalidOperationException(
-                    $"Refusing to write a second original for '{existing.Slug}' "
-                    + $"{documentType.ToString().ToLowerInvariant()} — validation should have rejected this draft.");
+                    $"Refusing to write '{existing.Slug}' {half.DocumentType.ToString().ToLowerInvariant()} "
+                    + $"({half.Action}) — validation should have rejected this draft.");
 
-            // A clean add onto the existing problem — a real change.
-            AddText(context, existing.Id, existing.Slug, documentType, text, markdown, appliedTexts);
-            return true;
+            // Unhandled cases.
+            default:
+                throw new ArgumentOutOfRangeException(nameof(half), half.Action, "Unknown text action.");
         }
-
-        // The row already holds this exact markdown — leave it (and its DateModified) untouched.
-        if (match.MarkdownText == markdown)
-        {
-            appliedTexts.Add(new AppliedText(existing.Slug, documentType, text.Language, AppliedTextAction.Unchanged));
-            return false;
-        }
-
-        // The content differs — overwrite its markdown in place.
-        match.MarkdownText = markdown;
-        match.DateModified = DateTime.UtcNow;
-        appliedTexts.Add(new AppliedText(existing.Slug, documentType, text.Language, AppliedTextAction.Overwritten));
-        return true;
     }
 
     /// <summary>
@@ -565,35 +530,23 @@ public class DraftApplyService(
     }
 
     /// <summary>
-    /// Brings an existing problem's author set into line with the draft, gated on the nullable trigger: a null author
-    /// list (no <c>authors:</c> key) leaves the stored authors untouched, an empty list clears them, and a populated
-    /// list replaces them. A no-op when the authors and their order already match; otherwise the old rows are deleted
-    /// and flushed before the new ones are added, so the <c>(problem, ordinal)</c> unique index can't be transiently
+    /// Replaces an existing problem's authors with the draft's, in the draft's order. The old rows are deleted and
+    /// flushed before the new ones are added, so the <c>(problem, ordinal)</c> unique index can't be transiently
     /// violated within one statement batch.
     /// </summary>
     /// <param name="context">The write context.</param>
     /// <param name="existing">The tracked existing problem, with its authors loaded.</param>
-    /// <param name="authorNames">The draft's author names in order, or null when it declares no <c>authors:</c> key.</param>
+    /// <param name="authorNames">The draft's author names, in order.</param>
     /// <param name="authorsCache">The run-scoped author cache.</param>
-    /// <returns>Whether the author rows changed — false when absent or already matching the draft.</returns>
-    private static async Task<bool> ReconcileAuthorsAsync(
+    /// <returns>A task completing once the old rows are flushed and the new ones added.</returns>
+    private static async Task ReplaceAuthorsAsync(
         MathCompsDbContext context,
         Problem existing,
-        ImmutableArray<string>? authorNames,
+        ImmutableArray<string> authorNames,
         IDictionary<string, Author> authorsCache)
     {
-        // Absent (null) → leave the stored authors untouched.
-        if (authorNames is not { } names)
-            return false;
-
         // The authors the draft wants, in order.
-        var desired = await ResolveAuthorsAsync(context, names, authorsCache);
-
-        // Already correct — same authors, same order — so leave the rows alone.
-        var current = existing.ProblemAuthors.OrderBy(problemAuthor => problemAuthor.Ordinal)
-            .Select(problemAuthor => problemAuthor.AuthorId);
-        if (current.SequenceEqual(desired.Select(author => author.Id)))
-            return false;
+        var desired = await ResolveAuthorsAsync(context, authorNames, authorsCache);
 
         // Replace wholesale, re-adding in the draft's order with 1-based ordinals.
         await ReplaceJoinRowsAsync(
@@ -605,48 +558,31 @@ public class DraftApplyService(
                 AuthorId = author.Id,
                 Ordinal = index + 1
             }));
-
-        // The set moved.
-        return true;
     }
 
     /// <summary>
-    /// Brings an existing problem's tag set into line with the draft, gated on the nullable trigger: a null tags list
-    /// (no <c>tags:</c> key) leaves the stored tags untouched, an empty list clears them, and a populated list replaces
-    /// them. A no-op when the set already matches. Tags are written at the human-assigned convention — fit 1.0, no
-    /// confidence or justification — since every draft slug was reviewed before apply.
+    /// Replaces an existing problem's tags with the draft's. Tags are written at the human-assigned convention (fit
+    /// 1.0, no confidence or justification), since every draft slug was reviewed before apply.
     /// </summary>
     /// <param name="context">The write context.</param>
     /// <param name="existing">The tracked existing problem, with its tags loaded.</param>
-    /// <param name="draftTags">The draft's tag slugs, or null when it declares no <c>tags:</c> key.</param>
+    /// <param name="tagSlugs">The draft's tag slugs.</param>
     /// <param name="tagsCache">The run-scoped tag cache.</param>
-    /// <returns>Whether the tag rows changed — false when absent or already matching the draft.</returns>
-    private static async Task<bool> ReconcileTagsAsync(
+    /// <returns>A task completing once the old rows are flushed and the new ones added.</returns>
+    private static async Task ReplaceTagsAsync(
         MathCompsDbContext context,
         Problem existing,
-        ImmutableArray<string>? draftTags,
+        ImmutableArray<string> tagSlugs,
         IDictionary<string, Tag> tagsCache)
     {
-        // Absent (null) → leave the stored tags untouched.
-        if (draftTags is not { } slugs)
-            return false;
-
         // The tags the draft wants, get-or-created from the approved vocabulary.
-        var desired = await ResolveTagsAsync(context, DistinctCanonicalSlugs(slugs), tagsCache);
-
-        // Already correct — same set — so leave the rows alone.
-        var current = existing.ProblemTagsAll.Select(problemTag => problemTag.TagId).ToHashSet();
-        if (current.SetEquals(desired.Select(tag => tag.Id)))
-            return false;
+        var desired = await ResolveTagsAsync(context, DistinctCanonicalSlugs(tagSlugs), tagsCache);
 
         // Replace wholesale — the draft is the source of truth.
         await ReplaceJoinRowsAsync(
             context,
             existing.ProblemTagsAll,
             desired.Select(tag => NewProblemTag(existing.Id, tag.Id)));
-
-        // The set moved.
-        return true;
     }
 
     /// <summary>

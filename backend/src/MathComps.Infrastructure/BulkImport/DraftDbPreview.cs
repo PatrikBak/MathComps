@@ -6,15 +6,15 @@ using MathComps.Domain.Taxonomy;
 namespace MathComps.Infrastructure.BulkImport;
 
 /// <summary>
-/// What resolving a taxonomy entity the draft references does to it: reuse it unchanged, update it in place when a
-/// field differs, or create it when it is absent.
+/// What the import does to an entity the draft names: reuse it unchanged, update it in place when the draft differs
+/// from it, or create it when it is absent.
 /// </summary>
 public enum ResolutionAction
 {
     /// <summary>The entity already exists in the DB and is reused unchanged.</summary>
     Reuse,
 
-    /// <summary>The entity already exists but a field differs from the draft, so it is updated in place.</summary>
+    /// <summary>The entity already exists but differs from the draft, so it is updated in place.</summary>
     Update,
 
     /// <summary>The entity is absent and would need to be created.</summary>
@@ -38,7 +38,10 @@ public record EntityResolution(
 /// </summary>
 public enum DraftTextAction
 {
-    /// <summary>An original text adds the first original for this document type (none present yet).</summary>
+    /// <summary>
+    /// An original text adds the first original for this document type (none present yet, nor any text in its
+    /// language).
+    /// </summary>
     AddOriginal,
 
     /// <summary>An original text replaces the existing original in the same language, in place.</summary>
@@ -56,10 +59,16 @@ public enum DraftTextAction
     /// <summary>A translation adds a text onto the original (none in this language yet).</summary>
     AddTranslation,
 
-    /// <summary>A translation replaces an existing same-language translation, in place.</summary>
+    /// <summary>
+    /// A translation, or an original on a document type holding no original, replaces the existing same-language text
+    /// in place.
+    /// </summary>
     OverwriteTranslation,
 
-    /// <summary>A translation matches the existing same-language text byte-for-byte — importing changes nothing.</summary>
+    /// <summary>
+    /// A translation, or an original on a document type holding no original, matches the existing same-language text
+    /// byte-for-byte, so importing changes nothing.
+    /// </summary>
     UnchangedTranslation,
 
     /// <summary>
@@ -90,6 +99,19 @@ public record ProblemTextResolution(
     DocumentType DocumentType,
     Language Language,
     DraftTextAction Action);
+
+/// <summary>
+/// What importing one draft problem would do to its problem as a whole: create it, update it because the re-import
+/// changes something (<see cref="ProblemReimport.ChangesAnything"/>), or reuse it unchanged. Tallied, these are the
+/// problem counts the import reports.
+/// </summary>
+/// <param name="Slug">The would-be problem slug.</param>
+/// <param name="Action">Whether importing creates the problem, updates it in place, or leaves it as it is.</param>
+/// <param name="Languages">The languages of the draft's texts for the problem, in draft order.</param>
+public record ProblemResolution(
+    string Slug,
+    ResolutionAction Action,
+    ImmutableArray<Language> Languages);
 
 /// <summary>
 /// One existing competition node whose stored sort order no longer matches its registry position — applying the draft
@@ -183,16 +205,18 @@ public record PlaceHoldsNoProposal(string Slug) : ProposalConflict(Slug);
 
 /// <summary>
 /// A read-only snapshot of how a draft would land in the database: which taxonomy entities already exist versus
-/// would need creating, and — for every text variant whose problem slug already exists — what the import would do
-/// to it given that text's language and originality. Produced by querying only — no rows written.
+/// would need creating, whether each problem would be created, updated or left as it is, and what the import would do
+/// to every text variant whose problem slug already exists, given that text's language and originality. Produced by
+/// querying only, with no rows written.
 /// </summary>
 /// <param name="Entities">Exists-or-not for the competition node, season and round, in that order.</param>
 /// <param name="TextResolutions">
-/// One entry per draft text variant that lands on an already-existing problem slug, classifying the outcome
-/// (clean add, in-place overwrite, or a second-original conflict). A net-new problem slug contributes nothing —
-/// unless it carries no original body or no metadata sidecar, the net-new cases worth flagging
-/// (<see cref="DraftTextAction.NoOriginalForNewProblem"/>, <see cref="DraftTextAction.NewProblemMissingMetadata"/>).
+/// One entry per half a draft text variant writes onto an already-existing problem slug, classifying its outcome as
+/// a <see cref="DraftTextAction"/>. A net-new problem slug contributes nothing, unless it carries no original body or
+/// no metadata sidecar, the net-new cases worth flagging (<see cref="DraftTextAction.NoOriginalForNewProblem"/>,
+/// <see cref="DraftTextAction.NewProblemMissingMetadata"/>).
 /// </param>
+/// <param name="Problems">One entry per draft problem, in draft order.</param>
 /// <param name="MissingProblemOrders">
 /// The problem orders missing from the round once this import lands — the gaps in <c>1..N</c> of the union of the
 /// orders already in the DB and the draft's orders. Empty when the round would be contiguous, and always for a round
@@ -224,6 +248,7 @@ public record PlaceHoldsNoProposal(string Slug) : ProposalConflict(Slug);
 public record DraftDbPreview(
     ImmutableArray<EntityResolution> Entities,
     ImmutableArray<ProblemTextResolution> TextResolutions,
+    ImmutableArray<ProblemResolution> Problems,
     ImmutableArray<int> MissingProblemOrders,
     ImmutableArray<SortOrderChange> SortOrderChanges,
     ImmutableArray<TaxonomyOrphan> Orphans,

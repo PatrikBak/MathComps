@@ -42,8 +42,8 @@ public record AppliedText(
 /// the round.</param>
 /// <param name="Texts">One entry per statement/solution text written, across all problems and languages.</param>
 /// <param name="ProblemsInserted">How many problems were newly created.</param>
-/// <param name="ProblemsUpdated">How many existing problems had at least one field actually change.</param>
-/// <param name="ProblemsUnchanged">How many existing problems matched the draft exactly, so nothing was written.</param>
+/// <param name="ProblemsUpdated">How many existing problems the import changed.</param>
+/// <param name="ProblemsUnchanged">How many existing problems the import left as they were.</param>
 /// <param name="ImagesUploaded">How many images were pushed to remote storage.</param>
 /// <param name="ImagesSkipped">How many images were skipped because their bytes were already on remote storage.</param>
 /// <param name="SortOrderChanges">The existing taxonomy rows this run renumbered to match the registry — empty when
