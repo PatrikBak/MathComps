@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using MathComps.Domain.Localization;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Selection;
@@ -12,11 +11,10 @@ namespace MathComps.Infrastructure.BulkImport;
 /// <summary>
 /// EF Core implementation of <see cref="IDraftResolutionService"/>. Spins up a short-lived, no-tracking
 /// <see cref="MathCompsDbContext"/> per call and resolves each taxonomy entity with an <c>AnyAsync</c> existence
-/// probe; for the problem halves it loads the existing texts' <c>(document type, language, is-original, markdown)</c>
-/// for the slugs that already exist, reproduces the markdown the import would write (the same image-ref rewrite),
-/// then classifies each half in memory — including spotting a re-import that changes nothing. It also loads the
+/// probe. It loads the problems already at the draft's slugs with their stored content, and the proposals filing
+/// them, and reports for each the <see cref="ProblemReimport"/> plan the import would carry out. It also loads the
 /// round's full set of problem orders to check that the import would leave a round outside the proposals contiguous,
-/// and for a round of the proposals reads the proposals already filed at the draft's places and under its numbers.
+/// and for a round of the proposals reads the proposals already holding the draft's numbers.
 /// </summary>
 /// <param name="dbContextFactory">Factory for creating read-only database contexts.</param>
 /// <param name="metadata">The registry, source of the structural sort orders the preview reconciles against.</param>
@@ -53,34 +51,40 @@ public class DraftResolutionService(
             new EntityResolution("season", target.SeasonYear.ToString(), ToAction(seasonExists)),
             new EntityResolution("round", $"{target.CompetitionPath} {target.SeasonYear}", ToAction(roundExists)));
 
-        // Map each draft problem to its would-be slug so we can both probe the DB and report against it. The slug is
-        // keyed by the season's edition (ročník); derive it so the probe matches the persisted slug.
-        var editionNumber = Season.EditionFromStartYear(target.SeasonYear);
-        var slugByOrder = problems.ToDictionary(
-            problem => problem.Order,
-            problem => TaxonomySlugs.ProblemSlug(editionNumber, target.CompetitionPath, problem.Order));
+        // Map each draft problem to its would-be slug so we can both probe the DB and report against it.
+        var slugByOrder = problems.ToDictionary(problem => problem.Order, problem => target.ProblemSlug(problem.Order));
 
-        // Load the existing texts for the slugs that already exist — keyed by slug for the per-half lookup below.
+        // Load the problems already at the draft's slugs, with everything a re-import compares against, keyed by slug.
         var candidateSlugs = slugByOrder.Values.ToList();
-        var existingTextsBySlug = (await context.Problems.AsNoTracking()
-                .Where(problem => candidateSlugs.Contains(problem.Slug))
-                .Select(problem => new ExistingProblem(
-                    problem.Slug,
-                    problem.Texts
-                        .Select(text => new ExistingText(
-                            text.DocumentType, text.Language, text.IsOriginal, text.MarkdownText))
-                        .ToList()))
-                .ToListAsync())
-            .ToDictionary(existing => existing.Slug, existing => existing.Texts);
+        var existingBySlug = await ProblemReimport.IncludeStoredContent(context.Problems.AsNoTracking())
+            .Where(problem => candidateSlugs.Contains(problem.Slug))
+            .ToDictionaryAsync(problem => problem.Slug);
 
-        // Classify every text-variant half the draft writes (statement always; solution and hints when present).
-        var textResolutions = problems
-            .SelectMany(problem => ClassifyProblem(
-                slugByOrder[problem.Order],
-                problem,
-                draftFolder,
-                existingTextsBySlug.GetValueOrDefault(slugByOrder[problem.Order])))
-            .ToImmutableArray();
+        // The proposals filing the problems already at the draft's places, keyed by the place's slug.
+        var storedProposalBySlug = await context.Proposals.AsNoTracking()
+            .Include(proposal => proposal.Problem)
+            .Where(proposal => candidateSlugs.Contains(proposal.Problem.Slug))
+            .ToDictionaryAsync(proposal => proposal.Problem.Slug);
+
+        // What importing each problem does, to the problem as a whole and to each of its texts.
+        var problemPreviews = problems
+            .Select(problem =>
+            {
+                // The place the problem lands on.
+                var slug = slugByOrder[problem.Order];
+
+                // What importing does to whatever already sits there.
+                return PreviewProblem(
+                    slug, problem, existingBySlug.GetValueOrDefault(slug), storedProposalBySlug.GetValueOrDefault(slug),
+                    draftFolder);
+            })
+            .ToList();
+
+        // Every per-text outcome, in draft order.
+        var textResolutions = problemPreviews.SelectMany(preview => preview.Texts).ToImmutableArray();
+
+        // Every per-problem outcome, in draft order.
+        var problemResolutions = problemPreviews.Select(preview => preview.Problem).ToImmutableArray();
 
         // Contiguity is a post-import property: once this import lands, the problem orders of a round outside the
         // proposals — those already in the DB plus the draft's — must run 1..N with no gap. Loading every order in
@@ -124,12 +128,12 @@ public class DraftResolutionService(
 
         // Every reason a draft problem can't be filed in the pool the way the draft says.
         var proposalConflicts = await PreviewProposalConflictsAsync(
-            context, isProposalsRound, problems, slugByOrder, candidateSlugs, existingTextsBySlug.Keys.ToHashSet());
+            context, isProposalsRound, problems, slugByOrder, existingBySlug.Keys.ToHashSet(), storedProposalBySlug);
 
         // Hand back everything the preview found.
         return new DraftDbPreview(
-            resolutions, textResolutions, missingProblemOrders, sortOrderChanges, orphans, defendedRestatements,
-            countDisagreement, movesProposalsEmbargo, proposalConflicts);
+            resolutions, textResolutions, problemResolutions, missingProblemOrders, sortOrderChanges, orphans,
+            defendedRestatements, countDisagreement, movesProposalsEmbargo, proposalConflicts);
     }
 
     /// <summary>
@@ -140,16 +144,18 @@ public class DraftResolutionService(
     /// <param name="isProposalsRound">Whether the draft lands in a round of the proposals.</param>
     /// <param name="problems">The draft's problems.</param>
     /// <param name="slugByOrder">Each draft problem's would-be slug, keyed by its order.</param>
-    /// <param name="draftSlugs">Every draft problem's would-be slug.</param>
     /// <param name="takenSlugs">The would-be slugs a problem already holds.</param>
+    /// <param name="storedBySlug">
+    /// The proposals filing the problems already at the draft's places, with their problems, keyed by the place's slug.
+    /// </param>
     /// <returns>One conflict per thing refused, empty when the draft files cleanly.</returns>
     private static async Task<ImmutableArray<ProposalConflict>> PreviewProposalConflictsAsync(
         MathCompsDbContext context,
         bool isProposalsRound,
         IReadOnlyList<DraftProblemContent> problems,
         IReadOnlyDictionary<int, string> slugByOrder,
-        IReadOnlyList<string> draftSlugs,
-        IReadOnlySet<string> takenSlugs)
+        IReadOnlySet<string> takenSlugs,
+        IReadOnlyDictionary<string, Proposal> storedBySlug)
     {
         // Outside the proposals nothing is filed, so a block there has nowhere to go.
         if (!isProposalsRound)
@@ -160,18 +166,12 @@ public class DraftResolutionService(
                     .Select(problem => new ProposalOutsidePool(slugByOrder[problem.Order]))
             ];
 
-        // The proposals filing the problems already at the draft's places, keyed by the place's slug.
-        var storedBySlug = await context.Proposals.AsNoTracking()
-            .Where(proposal => draftSlugs.Contains(proposal.Problem.Slug))
-            .Select(proposal => new StoredProposal(proposal.Problem.Slug, proposal.Number, proposal.DeletedAt != null))
-            .ToDictionaryAsync(stored => stored.Slug);
-
         // The proposals holding the numbers the draft's blocks name, wherever their problems sit, keyed by number.
         var numbers = problems.Select(problem => problem.Proposal?.Number).OfType<int>().ToList();
         var holderByNumber = await context.Proposals.AsNoTracking()
+            .Include(proposal => proposal.Problem)
             .Where(proposal => numbers.Contains(proposal.Number))
-            .Select(proposal => new StoredProposal(proposal.Problem.Slug, proposal.Number, proposal.DeletedAt != null))
-            .ToDictionaryAsync(stored => stored.Number);
+            .ToDictionaryAsync(proposal => proposal.Number);
 
         // Classify each draft problem against what its place and its number already hold.
         return
@@ -315,14 +315,16 @@ public class DraftResolutionService(
     /// <param name="proposal">The draft's block, or null when it carries none.</param>
     /// <param name="isPlaceTaken">Whether a problem already holds the place.</param>
     /// <param name="stored">The proposal filing the problem at the place, or null when none does.</param>
-    /// <param name="holderByNumber">The proposals holding the numbers the draft names, keyed by number.</param>
+    /// <param name="holderByNumber">
+    /// The proposals holding the numbers the draft names, with their problems, keyed by number.
+    /// </param>
     /// <returns>The problem's conflicts, empty when it files cleanly.</returns>
     private static IEnumerable<ProposalConflict> ClassifyProposal(
         string slug,
         DraftProposal? proposal,
         bool isPlaceTaken,
-        StoredProposal? stored,
-        IReadOnlyDictionary<int, StoredProposal> holderByNumber)
+        Proposal? stored,
+        IReadOnlyDictionary<int, Proposal> holderByNumber)
     {
         // A new problem on a free place, with no block to file it in the pool.
         if (!isPlaceTaken && proposal is null)
@@ -333,176 +335,70 @@ public class DraftResolutionService(
             yield return new PlaceHoldsNoProposal(slug);
 
         // A taken place whose proposal the reviewers deleted.
-        if (stored is { IsDeleted: true })
+        if (stored is { DeletedAt: not null })
             yield return new ProposalDeleted(slug, stored.Number);
 
         // A taken place whose live proposal goes by another number than the block's.
-        if (stored is { IsDeleted: false } && proposal is not null && proposal.Number != stored.Number)
+        if (stored is { DeletedAt: null } && proposal is not null && proposal.Number != stored.Number)
             yield return new PlaceHoldsAnotherProposal(slug, stored.Number, proposal.Number);
 
         // Another problem's proposal holding the block's number.
         if (proposal is not null
             && holderByNumber.TryGetValue(proposal.Number, out var holder)
-            && holder.Slug != slug)
-            yield return new ProposalNumberTaken(slug, proposal.Number, holder.Slug);
+            && holder.Problem.Slug != slug)
+            yield return new ProposalNumberTaken(slug, proposal.Number, holder.Problem.Slug);
     }
 
     /// <summary>
-    /// Classifies every half a single problem would write, reproducing the markdown the import would store (the
-    /// same image-ref rewrite) so an unchanged re-import can be told apart from a real overwrite. A net-new problem
-    /// slug usually collides with nothing and contributes no resolutions — except the two create-time conflicts worth
-    /// flagging: a problem with no original body, and one with no <c>pN.yaml</c> sidecar.
+    /// Previews one draft problem. A slug the database lacks is a create, carrying the reason the import would refuse
+    /// it, if any. An existing problem takes the plan a re-import carries out, and is updated when the plan changes
+    /// anything.
     /// </summary>
     /// <param name="slug">The would-be problem slug.</param>
-    /// <param name="problem">The draft problem content — its text variants and image basenames.</param>
+    /// <param name="problem">The draft problem content.</param>
+    /// <param name="existing">
+    /// The problem already at the slug, with its stored content, or null when it is absent.
+    /// </param>
+    /// <param name="storedProposal">The proposal filing the problem at the slug, or null when none does.</param>
     /// <param name="draftFolder">The draft folder the image refs resolve against.</param>
-    /// <param name="existingTexts">The existing problem's texts, or null when the problem slug is absent.</param>
-    /// <returns>
-    /// One resolution per half of an already-existing problem; for a net-new slug, a single create-conflict
-    /// resolution or empty when the create is clean.
-    /// </returns>
-    private static IEnumerable<ProblemTextResolution> ClassifyProblem(
-        string slug,
-        DraftProblemContent problem,
-        string draftFolder,
-        IReadOnlyList<ExistingText>? existingTexts)
+    /// <returns>The problem's outcome and the outcome of each of its texts.</returns>
+    private static ProblemPreview PreviewProblem(
+        string slug, DraftProblemContent problem, Problem? existing, Proposal? storedProposal, string draftFolder)
     {
-        // A net-new slug collides with nothing — importing would create the problem. Most halves are the quiet
-        // create path (so we skip the image reads the body comparison would otherwise need), but two net-new shapes
-        // are still worth flagging.
-        if (existingTexts is null)
-        {
-            // No bodies to create — the preflight already flagged the empty group; nothing to classify here.
-            if (problem.Texts is not [var firstText, ..])
-                return [];
+        // The languages the draft writes the problem in.
+        var languages = problem.Texts.Select(text => text.Language).ToImmutableArray();
 
-            // Bodies but no original — the problem would land with only translations and no canonical original.
-            if (!problem.Texts.Any(text => text.Original))
-                return [new ProblemTextResolution(
-                    slug, DocumentType.Statement, firstText.Language, DraftTextAction.NoOriginalForNewProblem)];
+        // A slug the database lacks is a problem the import creates.
+        if (existing is null)
+            return new ProblemPreview(
+                new ProblemResolution(slug, ResolutionAction.Create, languages), CreateConflictOf(slug, problem));
 
-            // A fresh problem with no pN.yaml sidecar forgot its metadata (a re-import may omit it, but this slug
-            // doesn't exist yet, so this is a create).
-            if (!problem.HasSidecar)
-                return [new ProblemTextResolution(
-                    slug, DocumentType.Statement, firstText.Language, DraftTextAction.NewProblemMissingMetadata)];
+        // What re-importing the draft onto the stored problem does, its bodies sized off the draft's figures.
+        var plan = ProblemReimport.Plan(
+            problem, existing, storedProposal, ProblemImageRefs.BuildReplacements(problem.Images, slug, draftFolder));
 
-            // Otherwise a clean create — nothing to flag.
-            return [];
-        }
+        // Updated when the plan changes anything, left as it is otherwise.
+        var action = plan.ChangesAnything ? ResolutionAction.Update : ResolutionAction.Reuse;
 
-        // The image-ref → media-ref map the would-be markdown is rewritten against, sized off the draft's figures.
-        var replacements = ProblemImageRefs.BuildReplacements(problem.Images, slug, draftFolder);
-
-        // Classify each variant's halves against the rows already present.
-        return problem.Texts.SelectMany(text => ClassifyHalves(slug, text, replacements, existingTexts));
+        // The problem's outcome beside each half the plan writes.
+        return new ProblemPreview(
+            new ProblemResolution(slug, action, languages),
+            [.. plan.Halves.Select(half => new ProblemTextResolution(
+                slug, half.DocumentType, half.Text.Language, half.Action))]);
     }
 
     /// <summary>
-    /// Classifies the halves one text variant of an existing problem would write: a statement always, plus a
-    /// solution and a hints document when the draft carries them.
+    /// The reason the import would refuse to create a problem, flagged once against its first text. A problem with no
+    /// text at all gets none, since the preflight already reports its empty group.
     /// </summary>
-    /// <param name="slug">The problem slug.</param>
-    /// <param name="text">The draft text variant.</param>
-    /// <param name="replacements">The image-ref replacements the bodies are rewritten against.</param>
-    /// <param name="existingTexts">The existing problem's texts.</param>
-    /// <returns>One resolution per half the variant writes.</returns>
-    private static IEnumerable<ProblemTextResolution> ClassifyHalves(
-        string slug,
-        DraftTextContent text,
-        IReadOnlyDictionary<string, ResolvedImageRef> replacements,
-        IReadOnlyList<ExistingText> existingTexts)
-    {
-        // The statement half — classified against its rewritten body.
-        yield return Classify(slug, DocumentType.Statement, text,
-            MarkdownImageRewriter.Rewrite(text.StatementMarkdown, replacements), existingTexts);
-
-        // The solution half, only when the draft carries one.
-        if (text.SolutionMarkdown is { } solutionMarkdown)
-            yield return Classify(slug, DocumentType.Solution, text,
-                MarkdownImageRewriter.Rewrite(solutionMarkdown, replacements), existingTexts);
-
-        // The hints, as the one document they are stored in, only when the draft carries any.
-        if (HintsDocument.Join(text.Hints) is { } hintsDocument)
-            yield return Classify(slug, DocumentType.Hints, text,
-                MarkdownImageRewriter.Rewrite(hintsDocument, replacements), existingTexts);
-    }
-
-    /// <summary>
-    /// Decides what importing one half of an already-existing problem would do, from that text's originality and
-    /// language and whether its would-be body differs from the row it lands on.
-    /// </summary>
-    /// <param name="slug">The problem slug.</param>
-    /// <param name="documentType">The half being classified.</param>
-    /// <param name="text">The draft text variant — its language and whether it is the original.</param>
-    /// <param name="markdown">The would-be stored markdown for this half (image refs already rewritten).</param>
-    /// <param name="existingTexts">The existing problem's texts.</param>
-    /// <returns>The resolution for this half.</returns>
-    private static ProblemTextResolution Classify(
-        string slug,
-        DocumentType documentType,
-        DraftTextContent text,
-        string markdown,
-        IReadOnlyList<ExistingText> existingTexts)
-    {
-        // The texts already present for this half, the existing original among them, and the same-language row the
-        // import would land on (matched on language alone, regardless of originality).
-        var existingForDocument = existingTexts.Where(existing => existing.DocumentType == documentType).ToList();
-        var existingOriginal = existingForDocument.FirstOrDefault(existing => existing.IsOriginal);
-        var sameLanguageRow = existingForDocument.FirstOrDefault(existing => existing.Language == text.Language);
-
-        // Classify the original or the translation against the rows present.
-        var action = text.Original
-            ? ClassifyOriginal(existingOriginal, text.Language, markdown)
-            : ClassifyTranslation(sameLanguageRow, markdown);
-
-        // Pair it with the slug, half and language.
-        return new ProblemTextResolution(slug, documentType, text.Language, action);
-    }
-
-    /// <summary>
-    /// Classifies an original-draft half against an existing problem: a new original where none exists, an unchanged
-    /// or in-place overwrite of the same-language original, or a forbidden second original in a different language.
-    /// </summary>
-    /// <param name="existingOriginal">The existing original for this document type, or null when there is none.</param>
-    /// <param name="draftLanguage">The language the draft would write.</param>
-    /// <param name="markdown">The would-be stored markdown, compared against the existing original's body.</param>
-    /// <returns>The action this half would take.</returns>
-    private static DraftTextAction ClassifyOriginal(
-        ExistingText? existingOriginal, Language draftLanguage, string markdown)
-    {
-        // The problem exists but this half has no original yet — the import adds it cleanly.
-        if (existingOriginal is null)
-            return DraftTextAction.AddOriginal;
-
-        // A different-language original already holds the slot — a second original is forbidden.
-        if (existingOriginal.Language != draftLanguage)
-            return DraftTextAction.SecondOriginal;
-
-        // Same-language original — an identical body changes nothing, otherwise it's an in-place overwrite.
-        return existingOriginal.MarkdownText == markdown
-            ? DraftTextAction.UnchangedOriginal
-            : DraftTextAction.OverwriteOriginal;
-    }
-
-    /// <summary>
-    /// Classifies a translation half against an existing problem: a clean add when this language is new, otherwise
-    /// an unchanged or in-place overwrite of the same-language text.
-    /// </summary>
-    /// <param name="sameLanguageRow">The same-language text already present for this half, or null when none.</param>
-    /// <param name="markdown">The would-be stored markdown, compared against the existing text's body.</param>
-    /// <returns>The action this half would take.</returns>
-    private static DraftTextAction ClassifyTranslation(ExistingText? sameLanguageRow, string markdown)
-    {
-        // The problem exists and this language is new — a clean translation add.
-        if (sameLanguageRow is null)
-            return DraftTextAction.AddTranslation;
-
-        // A same-language text already exists — an identical body changes nothing, otherwise an in-place overwrite.
-        return sameLanguageRow.MarkdownText == markdown
-            ? DraftTextAction.UnchangedTranslation
-            : DraftTextAction.OverwriteTranslation;
-    }
+    /// <param name="slug">The would-be problem slug.</param>
+    /// <param name="problem">The draft problem content.</param>
+    /// <returns>The refusal, or nothing when the create is clean.</returns>
+    private static ImmutableArray<ProblemTextResolution> CreateConflictOf(string slug, DraftProblemContent problem) =>
+        // A first text to pin the refusal on, and a refusal to pin
+        problem is { Texts: [var firstText, ..], CreateConflict: { } conflict }
+            ? [new ProblemTextResolution(slug, DocumentType.Statement, firstText.Language, conflict)]
+            : [];
 
     /// <summary>
     /// Maps an existence flag to its resolution action.
@@ -515,26 +411,11 @@ public class DraftResolutionService(
         exists ? ResolutionAction.Reuse : ResolutionAction.Create;
 
     /// <summary>
-    /// A stored proposal reduced to what the pool's checks read.
+    /// What importing one draft problem does: to the problem as a whole, and to each of its texts.
     /// </summary>
-    /// <param name="Slug">The slug of the problem it files, naming that problem's place.</param>
-    /// <param name="Number"><inheritdoc cref="Proposal.Number" path="/summary"/></param>
-    /// <param name="IsDeleted">Whether the reviewers deleted it.</param>
-    private record StoredProposal(string Slug, int Number, bool IsDeleted);
-
-    /// <summary>
-    /// An existing problem reduced to the slug and the texts the preview classifies against.
-    /// </summary>
-    /// <param name="Slug">The problem's slug.</param>
-    /// <param name="Texts">Its texts, each reduced to the fields the classification needs.</param>
-    private record ExistingProblem(string Slug, IReadOnlyList<ExistingText> Texts);
-
-    /// <summary>
-    /// One existing problem text reduced to what the conflict and content checks read.
-    /// </summary>
-    /// <param name="DocumentType">Which half the text is.</param>
-    /// <param name="Language">The text's language.</param>
-    /// <param name="IsOriginal">Whether it is the canonical original.</param>
-    /// <param name="MarkdownText">The stored markdown body, compared against the would-be import to spot a no-op.</param>
-    private record ExistingText(DocumentType DocumentType, Language Language, bool IsOriginal, string? MarkdownText);
+    /// <param name="Problem">The problem's outcome.</param>
+    /// <param name="Texts">
+    /// The outcome of each text of an existing problem. For a new one, the reason its create is refused, or nothing.
+    /// </param>
+    private record ProblemPreview(ProblemResolution Problem, ImmutableArray<ProblemTextResolution> Texts);
 }

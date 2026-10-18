@@ -1,5 +1,6 @@
 using MathComps.Cli.BulkImport.Manifest;
 using MathComps.Infrastructure.BulkImport;
+using MathComps.Shared.Extensions;
 using Spectre.Console;
 using static Spectre.Console.Markup;
 
@@ -7,7 +8,8 @@ namespace MathComps.Cli.BulkImport.Commands;
 
 /// <summary>
 /// Renders a <see cref="ValidateResult"/> as a human-readable console report: the taxonomy being validated, the
-/// create-vs-reuse DB preview, the issues grouped by file, and a final pass/fail line.
+/// create-vs-reuse DB preview, the issues grouped by file, the problem counts apply would report for a passing
+/// draft, and a final pass/fail line.
 /// </summary>
 public static class ValidateReport
 {
@@ -30,6 +32,13 @@ public static class ValidateReport
         // The issues, grouped by file so a problem's errors sit together.
         RenderIssues(result.Issues);
 
+        // For a passing draft, the problem counts apply would report, predicted from the preview.
+        if (result is { Ok: true, DbPreview: not null })
+            ApplyReport.RenderProblemCounts(
+                result.DbPreview.Problems.Count(problem => problem.Action == ResolutionAction.Create),
+                result.DbPreview.Problems.Count(problem => problem.Action == ResolutionAction.Update),
+                result.DbPreview.Problems.Count(problem => problem.Action == ResolutionAction.Reuse));
+
         // Final verdict line — pass when no error-severity issue, fail otherwise.
         var errorCount = result.Issues.Count(issue => issue.Severity == VerdictSeverity.Error);
         var warningCount = result.Issues.Count(issue => issue.Severity == VerdictSeverity.Warning);
@@ -39,7 +48,9 @@ public static class ValidateReport
     }
 
     /// <summary>
-    /// Renders the create-vs-reuse preview and any problem-slug collisions.
+    /// Renders the create-vs-reuse preview: the taxonomy, every problem the import would create or update, every text
+    /// it would add, overwrite or refuse on an existing problem, a count of the texts it would leave unchanged, and the
+    /// re-sequencing.
     /// </summary>
     /// <param name="preview">The read-only DB preview.</param>
     private static void RenderDbPreview(DraftDbPreview preview)
@@ -56,15 +67,50 @@ public static class ValidateReport
             AnsiConsole.MarkupLine($"  [{color}]{action}[/] {entity.EntityKind} {Escape(entity.Identifier)}");
         }
 
-        // Per-half outcomes for slugs that already exist — clean adds, in-place overwrites, or hard conflicts.
+        // One line per problem the import would create or update, a new one naming the languages it is written in.
+        foreach (var problem in preview.Problems)
+        {
+            // The languages lower-cased, as everywhere else in the report.
+            var languages = problem.Languages.Select(language => language.ToString().ToLowerInvariant());
+
+            // The problem's line, or none for one the import leaves as it is.
+            var line = problem.Action switch
+            {
+                ResolutionAction.Create =>
+                    $"  [green]create[/] problem {Escape(problem.Slug)} ({languages.ToJoinedString()})",
+                ResolutionAction.Update => $"  [yellow]update[/] problem {Escape(problem.Slug)}",
+                ResolutionAction.Reuse => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(preview), problem.Action, "Unknown problem action.")
+            };
+
+            // Print the line, when the problem has one.
+            if (line is not null)
+                AnsiConsole.MarkupLine(line);
+        }
+
+        // One line per text of an existing problem that the import would add, overwrite or refuse.
         foreach (var resolution in preview.TextResolutions)
         {
-            // Colour and label by the action, then print the slug and which half it lands on.
+            // A text listed elsewhere, or only counted, has no line of its own.
+            if (LineFor(resolution.Action) is not { } line)
+                continue;
+
+            // The half the text lands on and its language, lower-cased.
             var half = resolution.DocumentType.ToString().ToLowerInvariant();
+            var language = resolution.Language.ToString().ToLowerInvariant();
+
+            // Print the text's line: its slug, half and language.
             AnsiConsole.MarkupLine(
-                $"  [{ColorFor(resolution.Action)}]{LabelFor(resolution.Action)}[/] "
-                + $"{Escape(resolution.Slug)} {half}");
+                $"  [{line.Color}]{line.Label}[/] {Escape(resolution.Slug)} {half} ({language})");
         }
+
+        // The texts a re-import would leave as they are, in one count.
+        var unchanged = preview.TextResolutions.Count(resolution => resolution.Action
+            is DraftTextAction.UnchangedOriginal or DraftTextAction.UnchangedTranslation);
+
+        // Print the count, when there are any.
+        if (unchanged > 0)
+            AnsiConsole.MarkupLine($"  [blue]unchanged[/] {unchanged} text(s)");
 
         // The sort-order reconciliation apply would perform to match the registry — informational, never blocking.
         foreach (var change in preview.SortOrderChanges)
@@ -73,35 +119,22 @@ public static class ValidateReport
     }
 
     /// <summary>
-    /// The console color for a resolution: red for the hard conflicts, yellow for in-place overwrites, and a
-    /// muted blue for the quiet paths (clean adds and unchanged re-imports).
+    /// The colour and label of a text's own line in the preview block: red for a refused second original, yellow for
+    /// an in-place overwrite, a muted blue for a clean add. An unchanged text gets none, since the block counts those
+    /// instead, and neither does a create the import refuses, which the issues report.
     /// </summary>
     /// <param name="action">The resolution action.</param>
-    /// <returns>The Spectre color name.</returns>
-    private static string ColorFor(DraftTextAction action) => action switch
+    /// <returns>The Spectre color name and the label, or null when the text gets no line.</returns>
+    private static (string Color, string Label)? LineFor(DraftTextAction action) => action switch
     {
-        DraftTextAction.SecondOriginal => "red",
-        DraftTextAction.OverwriteOriginal or DraftTextAction.OverwriteTranslation => "yellow",
-        DraftTextAction.AddOriginal or DraftTextAction.AddTranslation
-            or DraftTextAction.UnchangedOriginal or DraftTextAction.UnchangedTranslation => "blue",
-        _ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
-    };
-
-    /// <summary>
-    /// The short verb shown for a resolution in the preview block.
-    /// </summary>
-    /// <param name="action">The resolution action.</param>
-    /// <returns>A human-readable label.</returns>
-    private static string LabelFor(DraftTextAction action) => action switch
-    {
-        DraftTextAction.AddOriginal => "add original",
-        DraftTextAction.OverwriteOriginal => "overwrite original",
-        DraftTextAction.UnchangedOriginal => "unchanged original",
-        DraftTextAction.SecondOriginal => "second original",
-        DraftTextAction.AddTranslation => "add translation",
-        DraftTextAction.OverwriteTranslation => "overwrite translation",
-        DraftTextAction.UnchangedTranslation => "unchanged translation",
-        _ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
+        DraftTextAction.AddOriginal => ("blue", "add original"),
+        DraftTextAction.OverwriteOriginal => ("yellow", "overwrite original"),
+        DraftTextAction.SecondOriginal => ("red", "second original"),
+        DraftTextAction.AddTranslation => ("blue", "add translation"),
+        DraftTextAction.OverwriteTranslation => ("yellow", "overwrite translation"),
+        DraftTextAction.UnchangedOriginal or DraftTextAction.UnchangedTranslation
+            or DraftTextAction.NoOriginalForNewProblem or DraftTextAction.NewProblemMissingMetadata => null,
+        _ => throw new ArgumentOutOfRangeException(nameof(action), action, "Unknown text action.")
     };
 
     /// <summary>

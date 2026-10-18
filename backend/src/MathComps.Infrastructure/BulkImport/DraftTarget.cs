@@ -1,4 +1,5 @@
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Domain.Taxonomy;
 
 namespace MathComps.Infrastructure.BulkImport;
 
@@ -11,4 +12,14 @@ namespace MathComps.Infrastructure.BulkImport;
 /// <param name="SeasonYear">Calendar year the season starts in (e.g. 2024 for the 2024/2025 season).</param>
 public record DraftTarget(
     string CompetitionPath,
-    int SeasonYear);
+    int SeasonYear)
+{
+    /// <summary>
+    /// The slug the import gives the problem at a place in the draft's round, led by the season's edition.
+    /// </summary>
+    /// <param name="order">The problem's 1-based place in the round.</param>
+    /// <returns>The problem slug.</returns>
+    public string ProblemSlug(int order) =>
+        // The edition the season's start year makes, the competition's path, and the place
+        TaxonomySlugs.ProblemSlug(Season.EditionFromStartYear(SeasonYear), CompetitionPath, order);
+}

@@ -39,6 +39,8 @@ dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate 'data/prob
 
 - `--allow-restating` — report a rewrite of a defended problem's statement as a warning instead of refusing the folder.
 
+The report lists every problem the import would create, with its languages, every problem it would update, and every text it would add or overwrite on an existing problem. Texts it would leave unchanged collapse into one count. A passing draft's report also predicts the `Problems:` line `apply` prints.
+
 Exits `0` when every folder is clean, `1` when any folder errored, crashed, or nothing matched.
 
 ### apply
@@ -92,7 +94,7 @@ The import finds a pool problem by its place, the `N` of `pN`, so a pool problem
 - a number another problem's proposal holds, even one finalized into a round or deleted (`proposal-number-taken`);
 - a place holding a deleted proposal (`proposal-deleted`), another proposal (`proposal-place-taken`), or a problem no proposal files (`proposal-place-unfiled`).
 
-`apply` writes the proposal with its problem. A re-import refreshes its title and area. The categories, setting it aside and deleting it are the reviewers' after that.
+`apply` writes the proposal with its problem. A re-import refreshes its title, area and categories. Setting it aside and deleting it are the reviewers' after that.
 
 ## Setup
 
