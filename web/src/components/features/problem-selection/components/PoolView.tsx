@@ -42,6 +42,16 @@ const LISTS_PROBLEMS: Record<PoolViewMode, boolean> = {
 }
 
 /**
+ * Whether each layout of the pool shows the problems' statements, and so carries the language they are read in. The
+ * ratings table names each problem by its title alone, which has no languages.
+ */
+const SHOWS_STATEMENTS: Record<PoolViewMode, boolean> = {
+  problems: true,
+  ratings: false,
+  comments: false,
+}
+
+/**
  * Props for the {@link PoolView} component.
  */
 type PoolViewProps = {
@@ -119,7 +129,7 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
 
   return (
     <div>
-      {/* The way between the pool's lists, and over a list of problems the language its statements are read in */}
+      {/* The way between the pool's lists, and over the problems' statements the language they are read in */}
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <SegmentedSwitch
           value={mode}
@@ -130,7 +140,7 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
             label: modeLabels[candidate],
           }))}
         />
-        {LISTS_PROBLEMS[mode] && (
+        {SHOWS_STATEMENTS[mode] && (
           <LanguageSwitch language={language} onChange={onLanguageChange} unwritten={[]} />
         )}
       </div>
@@ -338,6 +348,7 @@ function PoolCard({ proposal, language }: PoolCardProps) {
     <ProposalCard
       proposal={proposal}
       language={language}
+      leadsToPage
       mark={null}
       actions={
         <>

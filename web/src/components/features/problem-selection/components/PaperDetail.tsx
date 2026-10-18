@@ -6,22 +6,34 @@ import { useRef } from 'react'
 import { CommentSection } from '@/components/features/comments/components/CommentSection'
 import { categoryTextClass } from '@/components/features/hosted-competitions/components/CategoryBadge'
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
+import { Tabs } from '@/components/shared/components/Tabs'
+import { cn } from '@/components/shared/utils/css-utils'
 import type { TableSort } from '@/components/shared/utils/table-sort'
 import { type Locale, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
+import { useDetailTab } from '../hooks/use-detail-tab'
 import { usePaperCommentCount } from '../hooks/use-paper-comment-count'
 import { DEFAULT_RATINGS_SORT, type RatingsColumn } from '../model/ratings-order'
 import { PAPER_TABS, type PaperTab } from '../model/selection-routes'
 import { type SlotPosition, unwrittenAcross } from '../model/selection-state'
 import type { Board, Paper, Proposal } from '../model/selection-types'
 import { SlotNumber } from './CategoryMarks'
-import { DetailHeading, DetailMissing, type DetailTabContent, DetailTabs } from './DetailFrame'
+import { DetailHeading, DetailMissing, type DetailTabContent } from './DetailFrame'
 import { LanguageSwitch } from './LanguageSwitch'
 import { ProposalBox } from './ProposalBody'
 import { ProposalCard } from './ProposalCard'
 import { RatingsTable } from './RatingsTable'
 import { BackLink } from './SelectionLinks'
 import { useLoadedSelection } from './SelectionWorkspaceProvider'
+
+/**
+ * Whether each tab of a paper's page shows its problems' statements, and so carries the language they are read in.
+ */
+const SHOWS_STATEMENTS: Record<PaperTab, boolean> = {
+  problems: true,
+  comments: false,
+  ratings: false,
+}
 
 /**
  * What a reader last chose on a paper's page, kept for the paper while its page is closed.
@@ -122,6 +134,12 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
   // The ratings panel
   const ratingsPanelRef = useRef<HTMLDivElement>(null)
 
+  // The tab showing, and the way to show another
+  const { tab, showTab } = useDetailTab({
+    tabs: PAPER_TABS,
+    pageOn: (shown) => ({ kind: 'paper', id: paper.id, tab: shown }),
+  })
+
   // What each tab holds
   const contents: Record<PaperTab, DetailTabContent<PaperTab>> = {
     problems: {
@@ -191,25 +209,30 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
       {/* The way out */}
       <BackLink />
 
-      {/* The paper's name and its board, and the language its problems are read in */}
+      {/* The paper's name and its board, and over its problems' statements the language they are read in */}
       <header className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <DetailHeading subjectId={paper.id} className={categoryTextClass(paper.category)}>
           {paper.name} <span className="ml-1 font-normal text-muted">{board.name}</span>
         </DetailHeading>
-        <LanguageSwitch
-          language={language}
-          onChange={(picked) => onChoice({ language: picked })}
-          unwritten={unwritten}
-        />
+        <div
+          // Hidden but holding its room on a tab without statements, so the tabs stay put as they switch
+          className={cn(!SHOWS_STATEMENTS[tab] && 'invisible')}
+        >
+          <LanguageSwitch
+            language={language}
+            onChange={(picked) => onChoice({ language: picked })}
+            unwritten={unwritten}
+          />
+        </div>
       </header>
 
       {/* The paper's tabs */}
       <div className="mt-4">
-        <DetailTabs
+        <Tabs
           ariaLabel={t('tabsLabel')}
-          tabs={PAPER_TABS}
-          contents={contents}
-          pageOn={(tab) => ({ kind: 'paper', id: paper.id, tab })}
+          selectedId={tab}
+          onSelect={showTab}
+          items={PAPER_TABS.map((id) => ({ id, ...contents[id] }))}
         />
       </div>
     </article>
@@ -252,6 +275,7 @@ function PaperProblem({ paper, index, proposal, language }: PaperProblemProps) {
       <ProposalCard
         proposal={proposal}
         language={language}
+        leadsToPage
         mark={<SlotNumber paper={paper} index={index} state="filled" />}
         actions={null}
         details={null}

@@ -4,18 +4,19 @@ import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { CommentSection } from '@/components/features/comments/components/CommentSection'
+import { Tabs } from '@/components/shared/components/Tabs'
 import type { Locale } from '@/i18n/i18n'
 
+import { useDetailTab } from '../hooks/use-detail-tab'
 import { useProposalTabCounts } from '../hooks/use-proposal-tab-counts'
 import { PROPOSAL_TABS, type ProposalTab } from '../model/selection-routes'
 import { resolveText, unwrittenAcross } from '../model/selection-state'
 import type { Proposal } from '../model/selection-types'
-import { DetailHeading, DetailMissing, type DetailTabContent, DetailTabs } from './DetailFrame'
+import { DetailHeading, DetailMissing, type DetailTabContent } from './DetailFrame'
 import { LanguageSwitch } from './LanguageSwitch'
 import { PlaceControl } from './PlaceControl'
 import { ProposalActionsMenu } from './ProposalActionsMenu'
-import { ProposalBody, ProposalBox } from './ProposalBody'
-import { ProposalChatTrigger } from './ProposalChatTrigger'
+import { ProposalCard } from './ProposalCard'
 import { ProposalConversations } from './ProposalConversations'
 import { ProposalFiling } from './ProposalFiling'
 import { BackLink } from './SelectionLinks'
@@ -90,6 +91,12 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
   // How many conversations and comments the problem carries
   const counts = useProposalTabCounts(proposal.id)
 
+  // The tab showing, and the way to show another
+  const { tab, showTab } = useDetailTab({
+    tabs: PROPOSAL_TABS,
+    pageOn: (shown) => ({ kind: 'proposal', id: proposal.id, tab: shown }),
+  })
+
   // What each tab holds
   const contents: Record<ProposalTab, DetailTabContent<ProposalTab>> = {
     conversations: {
@@ -122,49 +129,45 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
       {/* The way out */}
       <BackLink />
 
-      {/* Identity and the actions */}
-      <header className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-start">
+      {/* Identity and the language it is read in */}
+      <header className="mt-3 flex flex-col items-start gap-3 sm:flex-row">
         {/* The problem's name */}
         <DetailHeading subjectId={proposal.id} className="text-foreground sm:min-w-0 sm:flex-1">
           <span className="mr-1 font-normal tabular-nums text-muted">{`#${proposal.number}`}</span>{' '}
           {proposal.title}
         </DetailHeading>
 
-        {/* The actions */}
-        <div className="flex shrink-0 items-center gap-1.5">
-          {/* A conversation with Mathilda */}
-          <ProposalChatTrigger proposal={proposal} />
-
-          {/* Placing the problem */}
-          <PlaceControl proposal={proposal} />
-
-          {/* The rarer things done to the problem */}
-          <ProposalActionsMenu proposal={proposal} onDeleted={onDeleted} />
-        </div>
-      </header>
-
-      {/* What it is filed under and where it sits, and the language it is read in */}
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <ProposalFiling proposal={proposal} />
+        {/* The language */}
         <LanguageSwitch
           language={language}
           onChange={setLanguage}
           unwritten={unwrittenAcross([proposal])}
         />
-      </div>
+      </header>
 
-      {/* The statement, with the hints and the solution under it */}
-      <ProposalBox as="section" className="mt-4">
-        <ProposalBody proposal={proposal} language={language} />
-      </ProposalBox>
+      {/* The problem, with what it is filed under and what can be done to it */}
+      <ProposalCard
+        proposal={proposal}
+        language={language}
+        leadsToPage={false}
+        mark={null}
+        actions={
+          <>
+            <PlaceControl proposal={proposal} />
+            <ProposalActionsMenu proposal={proposal} onDeleted={onDeleted} />
+          </>
+        }
+        details={<ProposalFiling proposal={proposal} />}
+        className="mt-4"
+      />
 
       {/* Conversations and discussion */}
       <div className="mt-6">
-        <DetailTabs
+        <Tabs
           ariaLabel={t('tabsLabel')}
-          tabs={PROPOSAL_TABS}
-          contents={contents}
-          pageOn={(tab) => ({ kind: 'proposal', id: proposal.id, tab })}
+          selectedId={tab}
+          onSelect={showTab}
+          items={PROPOSAL_TABS.map((id) => ({ id, ...contents[id] }))}
         />
       </div>
     </article>
