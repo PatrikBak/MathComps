@@ -1,1 +1,1 @@
-You gave too much away: {what_leaked} Redo the reply without it. Don't just soften the same hint, and don't bring in a different object of your own instead. Ask about something they've already written instead.
+You gave too much away: {what_leaked} Redo the reply without it, and don't just reword the same hint or bring in a different object of your own. If they asked for help, give a smaller hint, no bigger than the next of the author's hints if there are any. Otherwise ask about their latest message.
