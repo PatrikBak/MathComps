@@ -6,7 +6,7 @@ using MathComps.Shared.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
 // Bootstrap the tool and run its sole command.
-return await CliApp.Create<Program>("Handouts")
+return await CliApp.Create<Program>()
     .RequireConfigFile("appsettings.json")
     .ConfigureServices((services, _) =>
     {

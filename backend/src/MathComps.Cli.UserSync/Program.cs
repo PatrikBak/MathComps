@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 // Bootstrap the tool and run its sole command.
-return await CliApp.Create<Program>("User Sync")
+return await CliApp.Create<Program>()
     .ConfigureServices((services, configuration) =>
     {
         // Configure logging to reduce noise.

@@ -5,7 +5,7 @@ using MathComps.Shared.Cli.Commands;
 using Microsoft.Extensions.DependencyInjection;
 
 // Bootstrap the tool and run its sole command — declare a hosted group from its manifest.
-return await CliApp.Create<Program>("Competitions")
+return await CliApp.Create<Program>()
     .RequireConfigFile("appsettings.json")
     .ConfigureServices((services, configuration) =>
     {

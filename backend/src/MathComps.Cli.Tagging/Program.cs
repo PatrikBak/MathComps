@@ -6,7 +6,7 @@ using MathComps.Shared.Cli.Commands;
 using Microsoft.Extensions.DependencyInjection;
 
 // Bootstrap the tool and run its sole command — tag a bulk-import draft in place.
-return await CliApp.Create<Program>("Tagging")
+return await CliApp.Create<Program>()
     .RequireConfigFile("appsettings.llm.json")
     .RequireConfigFile("appsettings.json")
     .ConfigureServices((services, configuration) =>
