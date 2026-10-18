@@ -132,13 +132,18 @@ public class DraftValidationPipeline(
                 // The half and language, lower-cased to match the rest of the report.
                 var changed = $"{restatement.Language} {restatement.DocumentType}".ToLowerInvariant();
 
-                // Refused by default, advisory once the run opts in.
+                // An error naming the flag that permits the rewrite, or a bare warning once the run passed that flag.
+                var (severity, optInHint) = allowRestating
+                    ? (VerdictSeverity.Warning, "")
+                    : (VerdictSeverity.Error, " Pass --allow-restating if the rewrite is intended.");
+
+                // Report the rewrite and what it does to the defenses.
                 previewIssues.Add(new VerdictError(
                     ManifestMeta.FileName, Half: null, Line: null, Col: null, "restates-defended-problem",
                     $"problem '{restatement.Slug}' already has {restatement.DefenseCount} defense(s) and its "
                     + $"{changed} would change. Rewriting it keeps those defenses attached, so they would read "
-                    + "back text nobody argued about. Pass --allow-restating if the rewrite is intended.",
-                    allowRestating ? VerdictSeverity.Warning : VerdictSeverity.Error));
+                    + $"back text nobody argued about.{optInHint}",
+                    severity));
             }
 
             // A draft for the proposals naming any other embargo, or none, would open the pool's round or move its lock.
