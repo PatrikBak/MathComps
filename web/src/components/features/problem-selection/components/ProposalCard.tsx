@@ -18,6 +18,11 @@ type ProposalCardProps = {
   proposal: Proposal
   /** The language the problem is being read in. */
   language: Locale
+  /**
+   * Whether the card leads to the problem's own page, its name opening the page and rows opening the page's tabs;
+   * false on that page, which names the problem and holds the tabs itself.
+   */
+  leadsToPage: boolean
   /** What stands in front of the problem's name, such as the slot it fills; null for nothing. */
   mark: ReactNode
   /** What can be done to the problem besides talking to Mathilda about it; null for nothing more. */
@@ -30,34 +35,46 @@ type ProposalCardProps = {
 
 /**
  * A problem as a card: its number and working name opening it in full, a conversation with
- * Mathilda, and its {@link ProposalBody} with rows for the tabs of the problem's page.
+ * Mathilda, and its {@link ProposalBody} with rows for the tabs of the problem's page. On the problem's own page
+ * the card goes without the name and the rows.
  */
 export function ProposalCard({
   proposal,
   language,
+  leadsToPage,
   mark,
   actions,
   details,
   className,
 }: ProposalCardProps) {
   return (
-    <ProposalBox as="article" className={className}>
+    <ProposalBox
+      // A problem standing on its own, or a part of the problem's own page
+      as={leadsToPage ? 'article' : 'section'}
+      className={className}
+    >
       {/* Header */}
       <header className="mb-3 space-y-1.5">
-        {/* Identity: the mark, the number and working name opening the problem in full, then what can be done to it */}
+        {/* Identity: the mark, the number and working name opening the problem in full where the card leads to its
+            page, then what can be done to it */}
         <div className="flex items-start gap-3">
           {mark}
-          <ProposalLink
-            proposalId={proposal.id}
-            // Named so whatever the problem was opened from can come back to it, focus and all, once it closes
-            {...OPEN_ID_ATTRIBUTE.stamp(proposal.id)}
-            className="min-w-0 flex-1 pt-1 text-foreground hyphens-none hover:text-link"
-            plain
+          {leadsToPage && (
+            <ProposalLink
+              proposalId={proposal.id}
+              // Named so whatever the problem was opened from can come back to it, focus and all, once it closes
+              {...OPEN_ID_ATTRIBUTE.stamp(proposal.id)}
+              className="min-w-0 flex-1 pt-1 text-foreground hyphens-none hover:text-link"
+              plain
+            >
+              <span className="mr-1 text-sm tabular-nums text-muted">{`#${proposal.number}`}</span>{' '}
+              <span className="font-medium">{proposal.title}</span>
+            </ProposalLink>
+          )}
+          <div
+            // In the top corner, with or without the name before it
+            className="ml-auto flex shrink-0 items-center gap-1"
           >
-            <span className="mr-1 text-sm tabular-nums text-muted">{`#${proposal.number}`}</span>{' '}
-            <span className="font-medium">{proposal.title}</span>
-          </ProposalLink>
-          <div className="flex shrink-0 items-center gap-1">
             <ProposalChatTrigger proposal={proposal} />
             {actions}
           </div>
@@ -67,9 +84,10 @@ export function ProposalCard({
         {details}
       </header>
 
-      {/* The statement, and the rows opening the problem's tabs after the hints and the solution */}
+      {/* The statement, and after the hints and the solution the rows opening the problem's tabs, where the card leads
+          to its page */}
       <ProposalBody proposal={proposal} language={language}>
-        <ProposalTabRows proposalId={proposal.id} />
+        {leadsToPage && <ProposalTabRows proposalId={proposal.id} />}
       </ProposalBody>
     </ProposalBox>
   )

@@ -1,14 +1,11 @@
 'use client'
 
-import { type ReactNode, useState } from 'react'
+import type { ReactNode } from 'react'
 
-import { type TabItem, Tabs } from '@/components/shared/components/Tabs'
+import type { TabItem } from '@/components/shared/components/Tabs'
 import { cn } from '@/components/shared/utils/css-utils'
-import { useAddressSync } from '@/hooks/use-address-sync'
-import { useInitialUrlState } from '@/hooks/use-initial-url-state'
 
 import { DETAIL_HEADING_ATTRIBUTE } from '../hooks/use-open-detail'
-import { type DetailPage, detailQuery, PAGE_PARAMS, tabOf } from '../model/selection-routes'
 import { BackLink } from './SelectionLinks'
 
 /**
@@ -63,49 +60,3 @@ export function DetailMissing({ message }: DetailMissingProps) {
  * What one tab of a page holds.
  */
 export type DetailTabContent<TTab extends string> = Omit<TabItem<TTab>, 'id'>
-
-/**
- * Props for the {@link DetailTabs} component.
- */
-type DetailTabsProps<TTab extends string> = {
-  /** Accessible name for the strip of tabs. */
-  ariaLabel: string
-  /** The page's tabs in the order they read, the first being the one it opens on by default. */
-  tabs: readonly [TTab, ...TTab[]]
-  /** What each tab holds. */
-  contents: Record<TTab, DetailTabContent<TTab>>
-  /** Gives the page on a tab. */
-  pageOn: (tab: TTab) => DetailPage
-}
-
-/**
- * A page's tabs, opening on the one the address names. The address keeps naming the tab on screen, so a link copied
- * from it opens the same one, every parameter the page does not write left as it stands.
- */
-export function DetailTabs<TTab extends string>({
-  ariaLabel,
-  tabs,
-  contents,
-  pageOn,
-}: DetailTabsProps<TTab>) {
-  // The tab the address opened the page on, the first when it names none
-  const addressedTab = useInitialUrlState((params) => tabOf(params, tabs))
-
-  // The tab showing, the addressed one at first
-  const [tab, setTab] = useState<TTab>(addressedTab)
-
-  // The page on the tab showing
-  const page = pageOn(tab)
-
-  // Keep the address naming the page and its tab
-  useAddressSync(detailQuery(page), PAGE_PARAMS[page.kind])
-
-  return (
-    <Tabs
-      ariaLabel={ariaLabel}
-      selectedId={tab}
-      onSelect={setTab}
-      items={tabs.map((id) => ({ id, ...contents[id] }))}
-    />
-  )
-}
