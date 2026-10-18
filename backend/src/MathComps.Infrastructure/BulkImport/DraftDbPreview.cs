@@ -109,17 +109,15 @@ public record SortOrderChange(string Path, int FromOrder, int ToOrder);
 public record TaxonomyOrphan(string Path);
 
 /// <summary>
-/// One stored text a re-import would rewrite on a problem students have already defended. Apply matches a problem by
-/// slug and overwrites its texts under the same id, so a draft regenerated after the problems were rearranged
-/// rewrites the text under an id every defense of the old problem still points at.
+/// One stored statement a re-import would rewrite on a problem students have already defended. Apply matches a
+/// problem by slug and overwrites its texts under the same id, so a draft regenerated after the problems were
+/// rearranged rewrites the statement under an id every defense of the old problem still points at.
 /// </summary>
-/// <param name="Slug">The problem slug whose text would change.</param>
-/// <param name="DocumentType">The half that would change (statement or solution; hints never count).</param>
-/// <param name="Language">The language of the text variant that would change.</param>
+/// <param name="Slug">The problem slug whose statement would change.</param>
+/// <param name="Language">The language of the statement variant that would change.</param>
 /// <param name="DefenseCount">How many defenses the problem already carries.</param>
 public record DefendedProblemRestatement(
     string Slug,
-    DocumentType DocumentType,
     Language Language,
     int DefenseCount);
 
@@ -210,7 +208,7 @@ public record PlaceHoldsNoProposal(string Slug) : ProposalConflict(Slug);
 /// non-empty blocks the import.
 /// </param>
 /// <param name="DefendedProblemRestatements">
-/// The texts this import would rewrite on problems that already carry a defense — empty in the normal case.
+/// The statements this import would rewrite on problems that already carry a defense — empty in the normal case.
 /// </param>
 /// <param name="HostedGroupCountDisagreement">
 /// How the round's post-import problem count would differ from what its group announces — null when the counts

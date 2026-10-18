@@ -26,8 +26,8 @@ public class DraftValidationPipeline(
     /// </summary>
     /// <param name="folder">Path to the draft folder.</param>
     /// <param name="allowRestating">
-    /// Whether rewriting the text of a problem that already carries a defense is permitted, reported as a warning
-    /// rather than refused.
+    /// Whether rewriting the statement of a problem that already carries a defense is permitted, reported as a
+    /// warning rather than refused.
     /// </param>
     /// <returns>The preflight manifest plus the aggregated result (issues + DB preview).</returns>
     public async Task<DraftValidationOutcome> RunAsync(string folder, bool allowRestating)
@@ -73,7 +73,7 @@ public class DraftValidationPipeline(
     /// <param name="manifest">The preflight manifest whose taxonomy and problems are previewed.</param>
     /// <param name="folder">The draft folder, against which the preview reproduces image references.</param>
     /// <param name="allowRestating">
-    /// Whether rewriting the text of a defended problem is permitted, reported as a warning rather than refused.
+    /// Whether rewriting the statement of a defended problem is permitted, reported as a warning rather than refused.
     /// </param>
     /// <returns>The preview (null when the database was unreachable) and the issues it produced.</returns>
     private async Task<(DraftDbPreview? Preview, IReadOnlyList<VerdictError> Issues)> PreviewDbAsync(
@@ -126,23 +126,22 @@ public class DraftValidationPipeline(
                     $"competition '{orphan.Path}' exists in the DB but not in metadata.shared.json — register it "
                     + "(or remove the row) before importing", VerdictSeverity.Error));
 
-            // A rewrite landing on a problem someone has already defended.
+            // A statement rewrite landing on a problem someone has already defended.
             foreach (var restatement in preview.DefendedProblemRestatements)
             {
-                // The half and language, lower-cased to match the rest of the report.
-                var changed = $"{restatement.Language} {restatement.DocumentType}".ToLowerInvariant();
+                // The language, lower-cased to match the rest of the report.
+                var language = restatement.Language.ToString().ToLowerInvariant();
 
                 // An error naming the flag that permits the rewrite, or a bare warning once the run passed that flag.
                 var (severity, optInHint) = allowRestating
                     ? (VerdictSeverity.Warning, "")
-                    : (VerdictSeverity.Error, " Pass --allow-restating if the rewrite is intended.");
+                    : (VerdictSeverity.Error, "; pass --allow-restating if intended");
 
-                // Report the rewrite and what it does to the defenses.
+                // Report the rewrite and how many defenses the problem carries.
                 previewIssues.Add(new VerdictError(
                     ManifestMeta.FileName, Half: null, Line: null, Col: null, "restates-defended-problem",
-                    $"problem '{restatement.Slug}' already has {restatement.DefenseCount} defense(s) and its "
-                    + $"{changed} would change. Rewriting it keeps those defenses attached, so they would read "
-                    + $"back text nobody argued about.{optInHint}",
+                    $"problem '{restatement.Slug}' has {restatement.DefenseCount} defense(s) and its {language} "
+                    + $"statement would change{optInHint}",
                     severity));
             }
 

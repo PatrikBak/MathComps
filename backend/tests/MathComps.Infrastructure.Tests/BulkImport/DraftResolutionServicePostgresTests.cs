@@ -573,9 +573,9 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
-    /// Rewriting the statement of a problem someone has already defended is surfaced, naming the half and language
-    /// that would change and how many defenses hang off it. A defense names its problem by id and a re-import keeps
-    /// that id, so the rewrite would leave those conversations pointing at text they were never argued about. Two
+    /// Rewriting the statement of a problem someone has already defended is surfaced, naming the language that would
+    /// change and how many defenses hang off it. A defense names its problem by id and a re-import keeps that id, so
+    /// the rewrite would file those conversations under whatever problem the new statement describes. Two
     /// conversations, since the count is what the refusal quotes.
     /// </summary>
     [Fact]
@@ -588,16 +588,15 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
         // Re-import its Slovak original with a different body.
         var preview = await PreviewAsync(service, Problem(1, Original(Language.SK)));
 
-        // The rewrite is reported against the statement, in the language it would change, with both defenses counted.
+        // The rewrite is reported in the language it would change, with both defenses counted.
         Assert.Equal(
-            new DefendedProblemRestatement(SeededProblemSlug, DocumentType.Statement, Language.SK, 2),
+            new DefendedProblemRestatement(SeededProblemSlug, Language.SK, 2),
             Assert.Single(preview.DefendedProblemRestatements));
     });
 
     /// <summary>
-    /// A translation counts as much as the original. A student defends a problem in the language they read it in, so
-    /// rewriting the English text strands the conversations held against English exactly as rewriting the Slovak
-    /// original strands the Slovak ones.
+    /// A translation counts as much as the original. A draft carrying only the English text, landed on the wrong
+    /// problem, still puts a different English problem under the id.
     /// </summary>
     [Fact]
     public Task A_changed_translation_on_a_defended_problem_is_flagged() => RunTestAsync(async service =>
@@ -610,7 +609,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
 
         // The rewrite is reported against the English statement.
         Assert.Equal(
-            new DefendedProblemRestatement(SeededProblemSlug, DocumentType.Statement, Language.EN, 1),
+            new DefendedProblemRestatement(SeededProblemSlug, Language.EN, 1),
             Assert.Single(preview.DefendedProblemRestatements));
     });
 
@@ -654,11 +653,11 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
-    /// The solution counts as much as the statement: a defense is argued against both halves, so rewriting the
-    /// reference solution alone is flagged the same way.
+    /// Rewriting the solution of a defended problem is quiet. Each session keeps the reference solution it was argued
+    /// against, and the statement alone says which problem the id holds, so a solution fix strands nothing.
     /// </summary>
     [Fact]
-    public Task A_changed_solution_on_a_defended_problem_is_flagged() => RunTestAsync(async service =>
+    public Task A_changed_solution_on_a_defended_problem_is_quiet() => RunTestAsync(async service =>
     {
         // A stored Slovak solution, so the draft's solution lands as a rewrite rather than a first add.
         await QueryAsync(async context =>
@@ -684,29 +683,28 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
         var preview = await PreviewAsync(
             service, Problem(1, Original(Language.SK, SeededBody, hasSolution: true)));
 
-        // Only the solution would change, and that alone is flagged.
-        Assert.Equal(
-            new DefendedProblemRestatement(SeededProblemSlug, DocumentType.Solution, Language.SK, 1),
-            Assert.Single(preview.DefendedProblemRestatements));
+        // The solution is a rewrite, and nothing is flagged.
+        Assert.Equal(DraftTextAction.OverwriteOriginal, ResolutionFor(preview, DocumentType.Solution).Action);
+        Assert.Empty(preview.DefendedProblemRestatements);
     });
 
     /// <summary>
-    /// Landing a solution onto a defended problem that has none is quiet. The check reads rewrites, and an added half
-    /// leaves everything the conversation was argued against where it is. Solutions routinely arrive after the
-    /// statements, so a guard that fired on adds would refuse that ordinary second pass.
+    /// Landing a statement in a new language on a defended problem is quiet. The check reads rewrites, and an added
+    /// translation leaves the problem the conversations were held about where it is. Translations routinely arrive
+    /// after the original, so a guard that fired on adds would refuse that ordinary second pass.
     /// </summary>
     [Fact]
-    public Task A_solution_added_to_a_defended_problem_is_quiet() => RunTestAsync(async service =>
+    public Task A_translation_added_to_a_defended_problem_is_quiet() => RunTestAsync(async service =>
     {
-        // One conversation held about the seeded problem, which carries a statement and no solution.
+        // One conversation held about the seeded problem, which has no Czech text.
         await SeedDefenseAsync(SeededProblemSlug);
 
-        // Re-import the statement it already holds, now with a solution beside it.
-        var preview = await PreviewAsync(
-            service, Problem(1, Original(Language.SK, SeededBody, hasSolution: true)));
+        // Import a Czech translation of it.
+        var preview = await PreviewAsync(service, Problem(1, Translation(Language.CS)));
 
-        // The solution is a clean add rather than a rewrite, so nothing is flagged.
-        Assert.Equal(DraftTextAction.AddOriginal, ResolutionFor(preview, DocumentType.Solution).Action);
+        // The translation is a clean add rather than a rewrite, so nothing is flagged.
+        Assert.Equal(
+            DraftTextAction.AddTranslation, ResolutionFor(preview, DocumentType.Statement, Language.CS).Action);
         Assert.Empty(preview.DefendedProblemRestatements);
     });
 

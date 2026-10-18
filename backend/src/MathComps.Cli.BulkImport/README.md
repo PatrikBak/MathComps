@@ -16,7 +16,7 @@ The draft format lives in [the draft format reference](../../../web/scripts/PREF
 
 `apply` upserts what the draft describes: the taxonomy and its sort order, the round, the problems, their texts, authors and tags, and a pool problem's proposal. Figures upload to R2 as each problem is written, and their refs are rewritten to the `media:` keys the site resolves. Only texts that actually changed are rewritten.
 
-A run that would change a defended problem's statement or solution is refused, since those defenses would then read back text nobody argued about. `--allow-restating` downgrades it to a warning, which is what a typo fix wants. The flag covers every folder the run matched, so a batch takes it all at once.
+A run that would change a defended problem's statement is refused, since a stale draft applied after a rearrangement would file those defenses under a different problem. A solution change goes through, as each defense keeps the solution it was argued against. `--allow-restating` downgrades the refusal to a warning, which is what a typo fix wants. The flag covers every folder the run matched, so a batch takes it all at once.
 
 Image uploads are deduplicated against a gitignored ledger (`data/problems/.r2-uploads.json`) mapping each storage key to a hash of the bytes last pushed under it. The report's `Images` line counts what was uploaded and skipped; delete the ledger to force a fresh upload of everything.
 
@@ -37,7 +37,7 @@ dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate ./my-draft
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate 'data/problems/skmo-2025-*'
 ```
 
-- `--allow-restating` — report a rewrite of a defended problem's text as a warning instead of refusing the folder.
+- `--allow-restating` — report a rewrite of a defended problem's statement as a warning instead of refusing the folder.
 
 Exits `0` when every folder is clean, `1` when any folder errored, crashed, or nothing matched.
 

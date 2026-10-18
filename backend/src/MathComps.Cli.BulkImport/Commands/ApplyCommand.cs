@@ -32,10 +32,10 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
         public required string[] Folders { get; set; }
 
         /// <summary>
-        /// Whether to proceed when the import would rewrite the text of a problem that already carries a defense.
+        /// Whether to proceed when the import would rewrite the statement of a problem that already carries a defense.
         /// </summary>
         [CommandOption("--allow-restating")]
-        [Description("Proceed when a problem that already has defenses would have its statement or solution rewritten.")]
+        [Description("Proceed when a problem that already has defenses would have its statement rewritten.")]
         public bool AllowRestating { get; set; }
     }
 
@@ -52,7 +52,7 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
     /// </summary>
     /// <param name="folder">The draft-folder path to import.</param>
     /// <param name="allowRestating">
-    /// Whether rewriting the text of a problem that already carries a defense is permitted.
+    /// Whether rewriting the statement of a problem that already carries a defense is permitted.
     /// </param>
     /// <returns>Whether the folder was imported — false when validation failed and it was skipped.</returns>
     private async Task<bool> ApplyFolderAsync(string folder, bool allowRestating)
