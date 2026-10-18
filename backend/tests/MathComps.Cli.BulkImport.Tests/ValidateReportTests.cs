@@ -67,11 +67,13 @@ public class ValidateReportTests
         // The terminal, to hand back afterwards.
         var terminal = AnsiConsole.Console;
 
-        // A colourless console writing into the buffer.
+        // A plain-text console writing into the buffer. Without the default enrichers, so a CI runner's environment
+        // can't turn ANSI back on.
         AnsiConsole.Console = AnsiConsole.Create(new AnsiConsoleSettings
         {
             Ansi = AnsiSupport.No,
             ColorSystem = ColorSystemSupport.NoColors,
+            Enrichment = new ProfileEnrichment { UseDefaultEnrichers = false },
             Out = new AnsiConsoleOutput(buffer)
         });
 
