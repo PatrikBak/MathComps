@@ -190,27 +190,27 @@ public class DraftResolutionService(
     }
 
     /// <summary>
-    /// Finds the rewrites that would land on a problem students have already defended. A defense names its problem by
-    /// id, and a re-import rewrites texts under the id the slug already holds, so rewriting one of those texts leaves
-    /// every defense of it pointing at a statement it was never argued about.
+    /// Finds the statement rewrites that would land on a problem students have already defended. A defense names its
+    /// problem by id, and a re-import rewrites texts under the id the slug already holds, so a statement rewritten
+    /// there files every defense of the id under a problem it may never have been about.
     /// </summary>
     /// <param name="context">The read-only context.</param>
     /// <param name="textResolutions">
     /// The per-text resolutions, whose overwrite outcomes name the texts that change.
     /// </param>
     /// <returns>
-    /// One entry per changed text on a defended problem; empty when nothing changes or nothing is defended.
+    /// One entry per changed statement on a defended problem; empty when nothing changes or nothing is defended.
     /// </returns>
     private static async Task<ImmutableArray<DefendedProblemRestatement>> PreviewDefendedRestatementsAsync(
         MathCompsDbContext context, ImmutableArray<ProblemTextResolution> textResolutions)
     {
-        // The texts whose stored body would change; an add, an unchanged re-import and a create conflict all leave
-        // whatever a defense was argued against exactly where it is. Hints are the examiner's material, never what
-        // a student argued against, so rewriting them strands nothing.
+        // The statements whose stored body would change; an add, an unchanged re-import and a create conflict all
+        // leave the problem a defense was held about exactly where it is. A session keeps its own copy of the
+        // statement and reference solution it was argued against, so a solution rewrite strands nothing.
         var rewrites = textResolutions
             .Where(resolution => resolution.Action
                 is DraftTextAction.OverwriteOriginal or DraftTextAction.OverwriteTranslation)
-            .Where(resolution => resolution.DocumentType != DocumentType.Hints)
+            .Where(resolution => resolution.DocumentType == DocumentType.Statement)
             .ToList();
 
         // Nothing would be rewritten, so no defense can be stranded.
@@ -234,7 +234,6 @@ public class DraftResolutionService(
                 .Where(resolution => defenseCountBySlug.ContainsKey(resolution.Slug))
                 .Select(resolution => new DefendedProblemRestatement(
                     resolution.Slug,
-                    resolution.DocumentType,
                     resolution.Language,
                     defenseCountBySlug[resolution.Slug]))
         ];

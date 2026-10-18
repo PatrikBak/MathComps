@@ -29,10 +29,10 @@ public class ValidateCommand(DraftValidationPipeline pipeline)
         public required string[] Folders { get; set; }
 
         /// <summary>
-        /// Whether to proceed when the import would rewrite the text of a problem that already carries a defense.
+        /// Whether to proceed when the import would rewrite the statement of a problem that already carries a defense.
         /// </summary>
         [CommandOption("--allow-restating")]
-        [Description("Proceed when a problem that already has defenses would have its statement or solution rewritten.")]
+        [Description("Proceed when a problem that already has defenses would have its statement rewritten.")]
         public bool AllowRestating { get; set; }
     }
 
