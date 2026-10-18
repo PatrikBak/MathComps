@@ -7,7 +7,7 @@ using MathComps.Shared.Cli.Commands;
 using Microsoft.Extensions.DependencyInjection;
 
 // Bootstrap the tool and run the requested command.
-return await CliApp.Create<Program>("Bulk Import")
+return await CliApp.Create<Program>()
     .RequireConfigFile("appsettings.json")
     .ConfigureServices((services, configuration) =>
     {

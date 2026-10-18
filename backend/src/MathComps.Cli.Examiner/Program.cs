@@ -4,7 +4,7 @@ using MathComps.Shared.Cli.Commands;
 
 // Bootstrap the tool and run it — the examiner turn as the default command, plus the reply check and the transcript
 // rewind.
-return await CliApp.Create<Program>("Examiner")
+return await CliApp.Create<Program>()
     .RequireConfigFile("appsettings.llm.json")
     .RequireConfigFile("appsettings.examiner.json")
     .ConfigureServices((services, configuration) =>

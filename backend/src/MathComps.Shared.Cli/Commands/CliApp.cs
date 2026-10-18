@@ -9,19 +9,13 @@ using Spectre.Console.Cli.Extensions.DependencyInjection;
 namespace MathComps.Shared.Cli.Commands;
 
 /// <summary>
-/// Fluent bootstrap shared by every CLI tool: it renders the banner, builds configuration from the
-/// JSON config files the tool declares plus its user secrets and environment variables, wires up
-/// dependency injection, and hands the resulting command app to <see cref="CliRunner"/>. Tools supply
-/// their banner text, the config files they require, their own service registrations, and their command
-/// list.
+/// Fluent bootstrap shared by every CLI tool: it builds configuration from the JSON config files the
+/// tool declares plus its user secrets and environment variables, wires up dependency injection, and
+/// hands the resulting command app to <see cref="CliRunner"/>. Tools supply the config files they
+/// require, their own service registrations, and their command list.
 /// </summary>
 public sealed class CliApp
 {
-    /// <summary>
-    /// The tool's banner text.
-    /// </summary>
-    private readonly string _bannerText;
-
     /// <summary>
     /// The tool's entry assembly, used to anchor its user-secrets store.
     /// </summary>
@@ -41,12 +35,10 @@ public sealed class CliApp
     /// <summary>
     /// Initializes a new bootstrap for a single tool.
     /// </summary>
-    /// <param name="bannerText">The tool's banner text.</param>
     /// <param name="userSecretsAssembly">The tool's entry assembly, anchoring its user-secrets store.</param>
-    private CliApp(string bannerText, Assembly userSecretsAssembly)
+    private CliApp(Assembly userSecretsAssembly)
     {
-        // Stash the banner and the assembly that owns the secrets; configuration is built later, at run time.
-        _bannerText = bannerText;
+        // Stash the assembly that owns the secrets; configuration is built later, at run time.
         _userSecretsAssembly = userSecretsAssembly;
     }
 
@@ -55,10 +47,9 @@ public sealed class CliApp
     /// <typeparamref name="TProgram"/> so each tool keeps its own secret store.
     /// </summary>
     /// <typeparam name="TProgram">The tool's <c>Program</c> type, used to locate its entry assembly.</typeparam>
-    /// <param name="bannerText">The tool's banner text.</param>
     /// <returns>The bootstrap, for fluent chaining.</returns>
-    public static CliApp Create<TProgram>(string bannerText) =>
-        new(bannerText, typeof(TProgram).Assembly);
+    public static CliApp Create<TProgram>() =>
+        new(typeof(TProgram).Assembly);
 
     /// <summary>
     /// Registers tool-specific services. The callback receives the built configuration so it can bind
@@ -130,7 +121,7 @@ public sealed class CliApp
     }
 
     /// <summary>
-    /// Runs the shared bootstrap — console setup, banner, configuration, and service registration —
+    /// Runs the shared bootstrap — console setup, configuration, and service registration —
     /// and returns the registrar the command app resolves dependencies from.
     /// </summary>
     /// <returns>The dependency-injection registrar wrapping the configured service collection.</returns>
@@ -144,9 +135,6 @@ public sealed class CliApp
         // every long line into continuation lines the reader has no way to rejoin. A terminal keeps its own width.
         if (Console.IsOutputRedirected)
             AnsiConsole.Profile.Width = 10_000;
-
-        // Render the tool's banner.
-        AnsiConsole.Write(new FigletText(_bannerText).Centered().Color(Color.Aqua));
 
         // Start from the tool's base directory so configuration is independent of the working directory.
         var configurationBuilder = new ConfigurationBuilder()
