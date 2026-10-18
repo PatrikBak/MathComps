@@ -5,6 +5,7 @@ import { ArrowUp } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { RefObject } from 'react'
 import { createPortal } from 'react-dom'
+import { type ContextProp, type ItemProps, Virtuoso } from 'react-virtuoso'
 
 import { CommentList } from '@/components/features/comments/components/CommentList'
 import {
@@ -39,6 +40,9 @@ import { PoolSkeleton } from './PoolSkeleton'
 import { ProposalBox } from './ProposalBody'
 import { DetailLink } from './SelectionLinks'
 import { useSelectionWorkspace } from './SelectionWorkspaceProvider'
+
+/** How far past the window's edges threads are drawn, in pixels, so a scroll finds them ready. */
+const THREADS_DRAWN_BEYOND = { top: 800, bottom: 1200 } as const
 
 /**
  * Props for the {@link PoolComments} component.
@@ -132,16 +136,7 @@ export function PoolComments({ countSlot }: PoolCommentsProps) {
           </div>
         ) : (
           // The threads
-          <div className="space-y-4">
-            {threads.map((thread) => (
-              <PoolThread
-                key={threadKeyOf(thread)}
-                thread={thread}
-                collapsed={collapsed}
-                countRef={countRef}
-              />
-            ))}
-          </div>
+          <PoolThreadList threads={threads} collapsed={collapsed} countRef={countRef} />
         )}
       </div>
     </div>
@@ -274,6 +269,64 @@ function WhatsNewButton({ onShow, countRef }: WhatsNewButtonProps) {
 }
 
 /**
+ * What every thread's place in {@link PoolThreadList} reaches through the list.
+ */
+type PoolThreadItemContext = {
+  /** The line over the pool, which takes the focus when a thread leaves holding it with none in its place. */
+  countRef: RefObject<HTMLParagraphElement | null>
+}
+
+/**
+ * Props for the {@link PoolThreadList} component.
+ */
+type PoolThreadListProps = PoolThreadItemContext & {
+  /** Every thread, in the order they are held in. */
+  threads: DiscussionThread<DiscussedSubject>[]
+  /** Which comments of the tab have their replies folded away. */
+  collapsed: UseCollapsedCommentsResult
+}
+
+/**
+ * Every thread, only those in or near the window drawn, since a list of long comments full of math takes a while to
+ * draw whole.
+ */
+function PoolThreadList({ threads, collapsed, countRef }: PoolThreadListProps) {
+  return (
+    // The threads in or near the window, the page scrolling them
+    <Virtuoso
+      useWindowScroll
+      data={threads}
+      context={{ countRef }}
+      components={{ Item: PoolThreadItem }}
+      increaseViewportBy={THREADS_DRAWN_BEYOND}
+      computeItemKey={(_index, thread) => threadKeyOf(thread)}
+      itemContent={(_index, thread) => <PoolThread thread={thread} collapsed={collapsed} />}
+    />
+  )
+}
+
+/**
+ * One thread's place in {@link PoolThreadList}, spaced from the next. A thread leaving the page while it holds the
+ * focus, deleted or scrolled far out of the window, hands it on as {@link useFocusHandOff} does, among the places of
+ * the threads still drawn.
+ */
+function PoolThreadItem({
+  children,
+  context,
+  item: _thread,
+  ...placement
+}: ItemProps<DiscussionThread<DiscussedSubject>> & ContextProp<PoolThreadItemContext>) {
+  // The focus handed on as the thread leaves the page holding it
+  const handOff = useFocusHandOff<HTMLDivElement>(context.countRef)
+
+  return (
+    <div {...placement} {...handOff} className="pb-4">
+      {children}
+    </div>
+  )
+}
+
+/**
  * Props for the {@link PoolThread} component.
  */
 type PoolThreadProps = {
@@ -281,17 +334,14 @@ type PoolThreadProps = {
   thread: DiscussionThread<DiscussedSubject>
   /** Which comments of the tab have their replies folded away. */
   collapsed: UseCollapsedCommentsResult
-  /** The line over the pool, which takes the focus when the thread leaves holding it with none in its place. */
-  countRef: RefObject<HTMLParagraphElement | null>
 }
 
 /**
  * One top-level comment with its replies, under a heading naming its problem or paper. It is replied to, edited,
  * deleted and reacted to in place, the way it is on its problem's or paper's own page, the reply shared with every
- * other thread in the tab. A thread leaving the list while it holds the focus hands it on as
- * {@link useFocusHandOff} does.
+ * other thread in the tab.
  */
-function PoolThread({ thread, collapsed, countRef }: PoolThreadProps) {
+function PoolThread({ thread, collapsed }: PoolThreadProps) {
   // The reader, whose comments and reactions are marked as theirs
   const { userId } = useAuth()
 
@@ -304,28 +354,23 @@ function PoolThread({ thread, collapsed, countRef }: PoolThreadProps) {
   // The reply, open in this thread while it is opened under one of its comments
   const reply = useCommentReply({ target, comments })
 
-  // The focus handed on as the thread leaves holding it
-  const handOff = useFocusHandOff<HTMLDivElement>(countRef)
-
   return (
-    <div {...handOff}>
-      <ProposalBox as="article">
-        {/* Where the thread was posted */}
-        <ThreadHeading subject={thread.subject} />
+    <ProposalBox as="article">
+      {/* Where the thread was posted */}
+      <ThreadHeading subject={thread.subject} />
 
-        {/* The comment and its replies */}
-        <div className="mt-3">
-          <CommentList
-            target={target}
-            comments={comments}
-            variant="inline"
-            showReactions
-            reply={reply}
-            collapsed={collapsed}
-          />
-        </div>
-      </ProposalBox>
-    </div>
+      {/* The comment and its replies */}
+      <div className="mt-3">
+        <CommentList
+          target={target}
+          comments={comments}
+          variant="inline"
+          showReactions
+          reply={reply}
+          collapsed={collapsed}
+        />
+      </div>
+    </ProposalBox>
   )
 }
 

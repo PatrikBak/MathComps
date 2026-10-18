@@ -22,6 +22,8 @@ import {
 import { SELECTION_PATH } from './support/competitions'
 import {
   addressedParam,
+  ALGEBRA,
+  BILINGUAL,
   DRAFT_BOARD,
   FIRST,
   GEOMETRY,
@@ -75,6 +77,12 @@ const OWN_REMARK = 'Maybe as the opener of the advanced paper?'
 
 /** What Zuzana says in {@link SET_ASIDE}'s discussion. */
 const SET_ASIDE_REMARK = 'Set aside until its solution is fixed.'
+
+/** A remark long enough that a few threads of it reach far past the bottom of the window. */
+const LONG_REMARK = Array.from(
+  { length: 40 },
+  (_unused, index) => `Point ${index + 1} of a long remark.`
+).join('\n\n')
 
 /** Where the pool's discussions are read, all of them at once. */
 const DISCUSSIONS_ADDRESS = `${BACKEND_ORIGIN}/problem-selection/comments`
@@ -917,6 +925,67 @@ test.describe("the pool's discussions", () => {
     await expect(
       page.getByRole('link', { name: `${ELEMENTARY.name} ${DRAFT_BOARD.name}` })
     ).toBeFocused()
+  })
+
+  test('comes back from a problem opened far down a long list to its thread, the threads far above it not drawn', async ({
+    page,
+  }) => {
+    // What the backend keeps
+    const memory = discussedSelection()
+
+    // Three long threads, each newer than every thread the selection starts with
+    ;[READY, ALGEBRA, BILINGUAL].forEach((proposal, index) => {
+      memory.discussions.set(threadKey('Proposal', proposal.id), [
+        commentOf(
+          `c-long-${proposal.number}`,
+          'Martin',
+          LONG_REMARK,
+          `2026-10-1${index + 1}T08:00:00.000Z`
+        ),
+      ])
+    })
+
+    // A selection whose problems and paper are discussed, three of them at length
+    await stubSelection(page, 'selection', memory)
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // The newest long thread on top
+    await expect(threadHeadings(page).first()).toHaveText(headingText(BILINGUAL), {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The heading of the geometry problem's thread, the oldest
+    const geometryLink = threadOf(page, GEOMETRY).getByRole('link').first()
+
+    // The page scrolled to its bottom until that thread is drawn, the bottom moving as threads coming into view are
+    // measured
+    await expect
+      .poll(async () => {
+        // The page at its bottom as it stands
+        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+
+        // Whether the thread is drawn yet
+        return geometryLink.count()
+      })
+      .toBe(1)
+
+    // The newest thread, far above, no longer drawn
+    await expect(threadOf(page, BILINGUAL)).toHaveCount(0)
+
+    // The geometry problem, opened from its thread's heading
+    await geometryLink.click()
+
+    // The geometry problem on its own page
+    await expect(headingOf(page, GEOMETRY)).toBeVisible()
+
+    // Back
+    await page.goBack()
+
+    // The thread again, in view, the focus on its heading
+    await expect(geometryLink).toBeFocused()
+    await expect(geometryLink).toBeInViewport()
   })
 
   test("takes a reply in place and a new comment from the problem's page, each thread held where it stood until the tab opens again", async ({
