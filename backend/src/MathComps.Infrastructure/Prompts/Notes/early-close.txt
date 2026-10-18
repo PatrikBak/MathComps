@@ -1,1 +1,1 @@
-You're ending too soon. Still unargued: {owed} Ask about the first of these, where it comes from or why it holds. Don't give the step away or hint at how it goes.
+You're ending too soon. Still unargued: {owed} Ask about the first of these, where it comes from or why it holds. If it's a case they never mentioned, don't name it: ask whether their argument covers every case. Don't give the step away or hint at how it goes.
