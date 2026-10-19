@@ -15,6 +15,7 @@ import {
   FIRST,
   FULL_DRAFT,
   FULL_DRAFT_FINALIZED,
+  GEOMETRY,
   headingOf,
   holdReads,
   isSlotWrite,
@@ -38,7 +39,6 @@ import {
   slotOf,
   statusLine,
   stubSelection,
-  UNWRITTEN,
   USED,
 } from './support/problem-selection'
 import { expect, test } from './support/test'
@@ -359,11 +359,11 @@ test.describe('placing a problem from the pool', () => {
     // An empty slot, waiting for a problem
     await slotOf(page, 'E3').getByRole('button').click()
 
-    // The last card's problem, put there
-    await putInButton(cardOf(page, UNWRITTEN), 'E3').click()
+    // The last card's problem, the advanced paper running last, put there
+    await putInButton(cardOf(page, GEOMETRY), 'E3').click()
 
     // Its card gone too
-    await expect(cardOf(page, UNWRITTEN)).toHaveCount(0)
+    await expect(cardOf(page, GEOMETRY)).toHaveCount(0)
 
     // The focus on the line counting the problems left, no card standing where the one gone stood
     await expect(problemCount(page, ON_OFFER_COUNT - 3)).toBeFocused()

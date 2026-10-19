@@ -1,17 +1,20 @@
 'use client'
 
-import { Search, X } from 'lucide-react'
+import { ArrowDownUp, Search, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { type ReactNode, type RefObject, useCallback, useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
 import { SegmentedSwitch } from '@/components/shared/components/SegmentedSwitch'
+import { WaitingChangeButton } from '@/components/shared/components/WaitingChangeButton'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { focusForReader } from '@/components/shared/utils/focus-utils'
 import type { TableSort } from '@/components/shared/utils/table-sort'
 import { useFocusHandOff } from '@/hooks/use-focus-hand-off'
+import { useResortableOrder } from '@/hooks/use-resortable-order'
+import { useShowFromTop } from '@/hooks/use-show-from-top'
 import type { Locale } from '@/i18n/i18n'
 
 import { usePoolViewMode } from '../hooks/use-pool-view-mode'
@@ -52,6 +55,16 @@ const SHOWS_STATEMENTS: Record<PoolViewMode, boolean> = {
 }
 
 /**
+ * Whether each layout of the pool keeps its problems where they stood until their order is set again, and so offers
+ * to set it. The ratings table orders its rows by the column picked.
+ */
+const HOLDS_ORDER: Record<PoolViewMode, boolean> = {
+  problems: true,
+  ratings: false,
+  comments: false,
+}
+
+/**
  * Props for the {@link PoolView} component.
  */
 type PoolViewProps = {
@@ -74,9 +87,14 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
   // Counted nouns, which decline with the number in front of them
   const tPlurals = useTranslations('plurals')
 
-  // The selection if its read has landed, what the pool is narrowed to with the ways of changing it, and the line
-  // saying how many problems or comments show
-  const { selection, poolFilters: filters, poolCountRef: countRef } = useSelectionWorkspace()
+  // The selection if its read has landed, what the pool is narrowed to with the ways of changing it, the line saying
+  // how many problems or comments show, and the slot waiting for a problem
+  const {
+    selection,
+    poolFilters: filters,
+    poolCountRef: countRef,
+    waitingSlot,
+  } = useSelectionWorkspace()
 
   // Which layout the pool shows, and the way to change it
   const { mode, showMode } = usePoolViewMode()
@@ -127,6 +145,25 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
     if (slot !== null) setCommentCountSlot(slot)
   }, [])
 
+  // The problems the filters let through, each kept where it stood when their order was last set, whether that
+  // order is out of date, and the way to set it again
+  const { shown, isOutOfOrder, resort } = useResortableOrder({
+    items: matches?.shown ?? [],
+    keyOf: (proposal) => proposal.id,
+    // The order set again as the filter changes, its search as the pool reads it, and as another board goes on screen
+    resetKey: JSON.stringify([
+      { ...filters.filter, query: filters.filter.query.trim() },
+      selection?.activeBoard?.id ?? null,
+    ]),
+  })
+
+  // The spot over the list the page comes back to, and the way to set the order again from there, the focus on the
+  // line over the pool
+  const { listRef, showFromTop: resortFromTop } = useShowFromTop({
+    show: resort,
+    focusTarget: countRef,
+  })
+
   return (
     <div>
       {/* The way between the pool's lists, and over the problems' statements the language they are read in */}
@@ -173,6 +210,9 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
             <PoolFilterBar filters={filters} matches={matches} />
           </div>
 
+          {/* The spot setting the order again brings the page back to, over the waiting slot and the count */}
+          <div ref={listRef} />
+
           {/* The slot waiting for a problem, kept in view while scrolling where a problem can be picked for it */}
           <WaitingBanner countRef={countRef} />
         </>
@@ -198,17 +238,30 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
         // Placeholder cards while the pool loads
         <PoolSkeleton />
       ) : (
-        // The layout asked for, handed the problems the filters let through, which the discussions leave unread
-        <PoolLayout
-          mode={mode}
-          proposals={matches?.shown ?? []}
-          language={language}
-          countRef={countRef}
-          commentCountSlot={commentCountSlot}
-          emptyLine={emptyLine}
-          ratingsSort={ratingsSort}
-          onRatingsSort={setRatingsSort}
-        />
+        // The layout asked for, under the offer to set the problems' order again where it holds them
+        <>
+          {/* The offer to set the order again, once it is out of date in a layout holding it, kept back while a
+              slot waits, whose banner holds the same spot */}
+          <WaitingChangeButton
+            label={t('resort')}
+            icon={ArrowDownUp}
+            isWaiting={HOLDS_ORDER[mode] && isOutOfOrder && waitingSlot === null}
+            onShow={resortFromTop}
+            fallbackRef={countRef}
+          />
+
+          {/* The layout, handed the problems the filters let through, which the discussions leave unread */}
+          <PoolLayout
+            mode={mode}
+            proposals={shown}
+            language={language}
+            countRef={countRef}
+            commentCountSlot={commentCountSlot}
+            emptyLine={emptyLine}
+            ratingsSort={ratingsSort}
+            onRatingsSort={setRatingsSort}
+          />
+        </>
       )}
     </div>
   )

@@ -29,7 +29,7 @@ function proposal(number: number, changes: Partial<Proposal> = {}): Proposal {
 }
 
 describe('matchPool', () => {
-  it('shows the live problems no round has taken, lowest number first', () => {
+  it('shows the live problems no round has taken', () => {
     // Problem 2 sits in a round; 3 and 1 sit in none
     const proposals = [proposal(3), proposal(2, { isUsed: true }), proposal(1)]
 
@@ -166,6 +166,100 @@ describe('matchPool', () => {
 
     // Only the two geometry problems counted
     expect(geometry.membershipCounts).toEqual({ selected: 1, notSelected: 1 })
+  })
+
+  it("runs paper by paper: each paper's slots in order, then the rest recommended for its category by area", () => {
+    // Problems recommended for elementary, for intermediate, for both, for advanced, or for nothing, in algebra unless
+    // told otherwise
+    const proposals = [
+      proposal(1, { recommended: ['elementary'], area: 'geometry' }),
+      proposal(2),
+      proposal(3, { recommended: ['intermediate'] }),
+      proposal(4, { area: 'numberTheory' }),
+      proposal(5, { recommended: ['elementary'] }),
+      proposal(6, { recommended: ['elementary', 'intermediate'] }),
+      proposal(7, { recommended: ['intermediate'] }),
+      proposal(8, { recommended: ['advanced'], area: 'combinatorics' }),
+    ]
+
+    // A board with no advanced paper, whose elementary paper holds 5 and 2 and whose intermediate paper holds 7
+    const board: Board = {
+      id: 'october',
+      name: 'October',
+      papers: [
+        { id: 'e', name: 'E', category: 'elementary', slots: ['p5', null, 'p2'] },
+        { id: 'i', name: 'I', category: 'intermediate', slots: ['p7'] },
+      ],
+      finalization: null,
+    }
+
+    // The pool, filtered by nothing
+    const matches = matchPool(proposals, OPEN_POOL_FILTER, board)
+
+    // The elementary slots, the rest for elementary, the intermediate slot, the rest for intermediate, then what no
+    // paper takes, each rest algebra first
+    expect(matches.shown.map((shown) => shown.number)).toEqual([5, 2, 6, 1, 7, 3, 8, 4])
+  })
+
+  it('runs a problem under the first of its categories the filter picked', () => {
+    // Problems 3 and 7 recommended for intermediate alone, problem 6 for elementary as well
+    const proposals = [
+      proposal(3, { recommended: ['intermediate'] }),
+      proposal(6, { recommended: ['elementary', 'intermediate'] }),
+      proposal(7, { recommended: ['intermediate'] }),
+    ]
+
+    // A board whose intermediate paper, after the elementary one, holds 7
+    const board: Board = {
+      id: 'october',
+      name: 'October',
+      papers: [
+        { id: 'e', name: 'E', category: 'elementary', slots: [null] },
+        { id: 'i', name: 'I', category: 'intermediate', slots: ['p7'] },
+      ],
+      finalization: null,
+    }
+
+    // The pool narrowed to intermediate
+    const matches = matchPool(
+      proposals,
+      { ...OPEN_POOL_FILTER, categories: ['intermediate'] },
+      board
+    )
+
+    // Problem 6 runs among intermediate's, after the slot and problem 3
+    expect(matches.shown.map((shown) => shown.number)).toEqual([7, 3, 6])
+  })
+
+  it("runs the picked category's slots first, then what the other papers hold in the board's order, then the rest", () => {
+    // Problems recommended for intermediate, problem 9 for elementary as well
+    const proposals = [
+      proposal(2, { recommended: ['intermediate'] }),
+      proposal(4, { recommended: ['intermediate'] }),
+      proposal(7, { recommended: ['intermediate'] }),
+      proposal(9, { recommended: ['elementary', 'intermediate'] }),
+    ]
+
+    // A board whose elementary paper holds 9 and 4, and whose intermediate paper, after it, holds 7
+    const board: Board = {
+      id: 'october',
+      name: 'October',
+      papers: [
+        { id: 'e', name: 'E', category: 'elementary', slots: ['p9', null, 'p4'] },
+        { id: 'i', name: 'I', category: 'intermediate', slots: ['p7'] },
+      ],
+      finalization: null,
+    }
+
+    // The pool narrowed to intermediate
+    const matches = matchPool(
+      proposals,
+      { ...OPEN_POOL_FILTER, categories: ['intermediate'] },
+      board
+    )
+
+    // The intermediate slot, then what the elementary paper holds slot by slot, then the problem no paper holds
+    expect(matches.shown.map((shown) => shown.number)).toEqual([7, 9, 4, 2])
   })
 
   it('finds a problem by its number, its name or a statement in any language, whatever the case', () => {

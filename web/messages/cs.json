@@ -1362,6 +1362,7 @@
       "emptySetAsideFiltered": "Těmto filtrům neodpovídá žádná odložená úloha.",
       "loading": "Načítám úlohy",
       "loadingComments": "Načítám komentáře",
+      "resort": "Znovu seřadit",
       "search": "Hledat úlohy",
       "searchPlaceholder": "Číslo, název nebo text",
       "setAsideCount": "{count, plural, one {# odložená úloha} few {# odložené úlohy} other {# odložených úloh}}",
