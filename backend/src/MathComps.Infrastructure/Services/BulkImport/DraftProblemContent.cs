@@ -4,7 +4,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Services.Selection;
 
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// One language variant a draft problem imports: its language, whether it is the original, and the statement,

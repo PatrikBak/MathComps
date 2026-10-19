@@ -1,6 +1,6 @@
 using MathComps.Domain.EfCoreEntities;
 
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// A service for previewing how a draft would land in the database, without changing anything. For the draft's

@@ -1,4 +1,4 @@
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// A draft image ref resolved for the markdown rewrite: the bare <c>media:</c> key plus the figure's intrinsic

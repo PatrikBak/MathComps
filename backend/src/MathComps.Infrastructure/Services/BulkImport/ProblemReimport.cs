@@ -5,7 +5,7 @@ using MathComps.Domain.Tagging;
 using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// One half a draft text writes onto a problem that already exists, with what writing it does to the stored texts.

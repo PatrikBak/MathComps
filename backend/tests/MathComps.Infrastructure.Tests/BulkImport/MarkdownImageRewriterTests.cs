@@ -1,4 +1,4 @@
-using MathComps.Infrastructure.BulkImport;
+using MathComps.Infrastructure.Services.BulkImport;
 
 namespace MathComps.Infrastructure.Tests.BulkImport;
 

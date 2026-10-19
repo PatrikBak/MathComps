@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// Rewrites a draft's relative image refs (e.g. <c>images/incircle.svg</c>) to their final <c>media:</c> refs

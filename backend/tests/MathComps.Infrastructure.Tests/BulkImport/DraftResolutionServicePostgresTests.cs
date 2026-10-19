@@ -1,8 +1,8 @@
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using MathComps.Domain.EfCoreEntities;
-using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.BulkImport;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MathComps.Domain.Localization;

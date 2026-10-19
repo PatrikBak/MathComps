@@ -1,5 +1,5 @@
 using MathComps.Cli.BulkImport.Manifest;
-using MathComps.Infrastructure.BulkImport;
+using MathComps.Infrastructure.Services.BulkImport;
 using Spectre.Console;
 using static Spectre.Console.Markup;
 

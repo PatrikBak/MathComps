@@ -3,7 +3,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
 
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// Brings one generation of the competition tree back in line with its registry positions. The preview side computes
