@@ -2,6 +2,7 @@ import type { HostedCompetitionCategory } from '@/components/features/hosted-com
 import { groupBy } from '@/components/shared/utils/collection-utils'
 import { type Locale, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
+import { STEPS_PER_POINT } from './rating-scale'
 import type {
   Board,
   Cycle,
@@ -284,8 +285,14 @@ export function averageScore(
     return score === null ? [] : [score]
   })
 
-  // The scores' average, none without a score
-  return scores.length === 0 ? null : scores.reduce((sum, score) => sum + score, 0) / scores.length
+  // None without a score
+  if (scores.length === 0) return null
+
+  // The scores summed in whole tenths, so two equal averages come out the same number
+  const tenths = scores.reduce((sum, score) => sum + Math.round(score * STEPS_PER_POINT), 0)
+
+  // Their average, back in whole scores
+  return tenths / (scores.length * STEPS_PER_POINT)
 }
 
 /**

@@ -3,7 +3,6 @@ import {
   type Proposal,
   RATING_ASPECTS,
   type RatingAspect,
-  type RatingScore,
   type RatingScores,
 } from '@/components/features/problem-selection/model/selection-types'
 import type { UserIdentity } from '@/components/features/profile/model/user-identity'
@@ -34,28 +33,20 @@ const CATEGORIES: HostedCompetitionCategory[] = ['elementary', 'intermediate', '
 /** The reader, as the backend names the reviewer reading the selection. */
 export const READER: UserIdentity = { id: 'selection-reader', username: READER_NAME, email: null }
 
-/** The shape of a whole number as written, in a number or a string, the only shape the backend reads as a score. */
-const WHOLE_NUMBER = /^[+-]?\d+$/
+/**
+ * The shape of a number as written, in a number or a string, that the backend reads as a score: a sign, digits with a
+ * point anywhere among them, and an exponent, but no spaces or digit grouping.
+ */
+const DECIMAL_NUMBER = /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/
 
-/** The smallest whole number the backend binds, which it holds in 32 bits. */
-const SMALLEST_BINDABLE_NUMBER = -(2 ** 31)
-
-/** The largest whole number the backend binds, which it holds in 32 bits. */
-const LARGEST_BINDABLE_NUMBER = 2 ** 31 - 1
+/** The largest size of number the backend binds, which it holds as a decimal. */
+const LARGEST_BINDABLE_SIZE = 79228162514264337593543950335
 
 /**
- * What a JSON parse hands a reviver beside a value.
+ * Every score the backend's rating scale holds, the tenths from 1 to 5. Built here rather than imported, so the fake
+ * refuses what the backend refuses whatever the app's own scale offers.
  */
-type ParseContext = {
-  /** The text a number, a string, a boolean or null was read from; absent for an object or an array. */
-  source?: string
-}
-
-/**
- * Every score the backend's rating scale holds, from its lowest to its highest. Written out rather than imported, so
- * the fake refuses what the backend refuses whatever the app's own scale offers.
- */
-const SCORES: RatingScore[] = [1, 2, 3, 4, 5]
+const SCORES: number[] = Array.from({ length: 41 }, (_slot, tenth) => (10 + tenth) / 10)
 
 /**
  * A proposal's recommendation for one category, as a write switches it.
@@ -129,62 +120,32 @@ function readRecommendation(body: string | null): Recommendation {
 }
 
 /**
- * Reads how each number in a JSON body was written, which parsing it loses: `4.0` and `4` parse alike.
- *
- * @param body - The body, which parses as JSON.
- *
- * @returns Each number's text, by the name of the field holding it.
- */
-function numbersAsWritten(body: string): Record<string, string> {
-  // Every number's text, gathered as the body is parsed
-  const written: Record<string, string> = {}
-
-  // The body parsed, each number's text kept under its field
-  JSON.parse(body, (key: string, value: unknown, context?: ParseContext) => {
-    // A number, with the text it was read from
-    if (typeof value === 'number' && context?.source !== undefined) written[key] = context.source
-
-    // The value as parsed
-    return value
-  })
-
-  // The numbers' texts
-  return written
-}
-
-/**
- * Reads the number a rating gives one aspect as the backend binds it: a whole number written plainly, in a number or
- * a string, that fits in 32 bits. Anything else is refused as a malformed body.
+ * Reads the number a rating gives one aspect as the backend binds it: a number written plainly, in a number or a
+ * string, that fits in a decimal. Anything else is refused as a malformed body.
  *
  * @param fields - The body's fields.
- * @param written - How each number in the body was written, by its field.
  * @param aspect - The aspect.
  *
  * @returns The number, or null where the body gives none.
  */
-function readNumber(
-  fields: Record<string, unknown>,
-  written: Record<string, string>,
-  aspect: RatingAspect
-): number | null {
+function readNumber(fields: Record<string, unknown>, aspect: RatingAspect): number | null {
   // The score sent, null where none was
   const sent = fields[aspect] ?? null
 
   // None given
   if (sent === null) return null
 
-  // The score as written: a number's own text, anything else as sent
-  const text = typeof sent === 'number' ? written[aspect] : sent
+  // The score as text: a number written out, anything else as sent
+  const text = typeof sent === 'number' ? String(sent) : sent
 
-  // Anything but a whole number written plainly, which the backend cannot bind
-  if (typeof text !== 'string' || !WHOLE_NUMBER.test(text)) refuseWith('MalformedRequest')
+  // Anything but a number written plainly, which the backend cannot bind
+  if (typeof text !== 'string' || !DECIMAL_NUMBER.test(text)) refuseWith('MalformedRequest')
 
   // The number written
   const number = Number(text)
 
-  // A whole number past 32 bits, which the backend cannot bind
-  if (number < SMALLEST_BINDABLE_NUMBER || number > LARGEST_BINDABLE_NUMBER)
-    refuseWith('MalformedRequest')
+  // A number past a decimal's size, which the backend cannot bind
+  if (Math.abs(number) > LARGEST_BINDABLE_SIZE) refuseWith('MalformedRequest')
 
   // The number
   return number
@@ -197,7 +158,7 @@ function readNumber(
  *
  * @returns The score, or null where none was given.
  */
-function scoreOnScale(number: number | null): RatingScore | null {
+function scoreOnScale(number: number | null): number | null {
   // None given
   if (number === null) return null
 
@@ -225,12 +186,9 @@ function readScores(body: string | null): RatingScores {
   // The fields sent
   const fields = readFields(body)
 
-  // How each number in the body was written
-  const written = numbersAsWritten(body)
-
   // Each aspect's number, both bound before either meets the scale, as the backend binds the whole body first
-  const beauty = readNumber(fields, written, 'beauty')
-  const difficulty = readNumber(fields, written, 'difficulty')
+  const beauty = readNumber(fields, 'beauty')
+  const difficulty = readNumber(fields, 'difficulty')
 
   // Each aspect's score
   return { beauty: scoreOnScale(beauty), difficulty: scoreOnScale(difficulty) }

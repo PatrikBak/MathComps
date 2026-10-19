@@ -21,14 +21,8 @@ export const RATING_ASPECTS = ['beauty', 'difficulty'] as const
 /** One aspect a reviewer rates a proposal on. */
 export type RatingAspect = (typeof RATING_ASPECTS)[number]
 
-/** Every score on the olympiad scale a rating runs on, lowest first. */
-export const RATING_SCORES = [1, 2, 3, 4, 5] as const
-
-/** One score on the rating scale. */
-export type RatingScore = (typeof RATING_SCORES)[number]
-
-/** A reviewer's score for each aspect, null for an aspect they give none. */
-export type RatingScores = Record<RatingAspect, RatingScore | null>
+/** A reviewer's score for each aspect, on the olympiad scale in tenths, null for an aspect they give none. */
+export type RatingScores = Record<RatingAspect, number | null>
 
 /** One reviewer's rating of a proposal, which scores at least one aspect. */
 export type ProposalRating = {

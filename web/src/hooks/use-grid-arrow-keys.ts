@@ -34,16 +34,6 @@ function gridKey(row: number, column: number): string {
 }
 
 /**
- * Options for {@link useGridArrowKeys}.
- */
-type UseGridArrowKeysOptions = {
-  /** How many items each row holds. */
-  rowLengths: readonly number[]
-  /** Whether up and down step to the row beside; where they don't, both keys are left to the items. */
-  stepsBetweenRows: boolean
-}
-
-/**
  * Return type for {@link useGridArrowKeys}.
  */
 type UseGridArrowKeysResult = {
@@ -54,18 +44,15 @@ type UseGridArrowKeysResult = {
 }
 
 /**
- * Arrow keys moving the focus across items laid out in rows: left and right along a row, and, where the grid steps
- * between rows, up and down to the row beside, landing on its last item where that row is shorter. An arrow
- * pointing past the grid's edge keeps the focus where it is, and every other key is left to the items.
+ * Arrow keys moving the focus across items laid out in rows: left and right along a row, up and down to the row
+ * beside, landing on its last item where that row is shorter. An arrow pointing past the grid's edge keeps the
+ * focus where it is, and every other key is left to the items.
  *
- * @param options - The grid's rows, and whether up and down step between them.
+ * @param rowLengths - How many items each row holds.
  *
  * @returns The refs the items take, and the way their keys move the focus.
  */
-export function useGridArrowKeys({
-  rowLengths,
-  stepsBetweenRows,
-}: UseGridArrowKeysOptions): UseGridArrowKeysResult {
+export function useGridArrowKeys(rowLengths: readonly number[]): UseGridArrowKeysResult {
   // Every item standing, by its name in the grid
   const items = useRef(new Map<string, HTMLElement>())
 
@@ -90,8 +77,8 @@ export function useGridArrowKeys({
     // How far the key moves the focus, for an arrow key
     const step = GRID_STEPS[event.key]
 
-    // Any other key is the items' own, and so are up and down where the grid keeps to its rows
-    if (step === undefined || (!stepsBetweenRows && step.rows !== 0)) return
+    // Any other key is the items' own
+    if (step === undefined) return
 
     // The arrow is the grid's, even where no item lies that way
     event.preventDefault()
