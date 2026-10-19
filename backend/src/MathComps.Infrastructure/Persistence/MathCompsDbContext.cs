@@ -1164,6 +1164,10 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
              .HasForeignKey(rating => rating.UserId)
              .OnDelete(DeleteBehavior.Cascade);
 
+            // Scores up to 5 in tenths need one digit either side of the point, which holds every score to a tenth
+            e.Property(rating => rating.Beauty).HasPrecision(2, 1);
+            e.Property(rating => rating.Difficulty).HasPrecision(2, 1);
+
             // DB-side invariants
             e.ToTable(t =>
             {

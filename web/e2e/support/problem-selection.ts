@@ -12,7 +12,6 @@ import type {
   Paper,
   Proposal,
   ProposalRating,
-  RatingScore,
   ReviewConversation,
   SelectionData,
 } from '@/components/features/problem-selection/model/selection-types'
@@ -193,10 +192,7 @@ export const OTHER_RATER = 'Martin'
  *
  * @returns The rating.
  */
-function ratingByOtherRater(
-  beauty: RatingScore | null,
-  difficulty: RatingScore | null
-): ProposalRating {
+function ratingByOtherRater(beauty: number | null, difficulty: number | null): ProposalRating {
   // The rating, from a reviewer who is not the reader
   return {
     rater: { id: 'other-rater', username: OTHER_RATER, email: null },
@@ -213,7 +209,10 @@ function ratingByOtherRater(
 export const ALGEBRA = proposalNumbered(8, {
   area: 'algebra',
   recommended: ['elementary', 'intermediate'],
-  ratings: [ratingByOtherRater(4, null), { rater: READER, isOwn: true, beauty: 5, difficulty: 2 }],
+  ratings: [
+    ratingByOtherRater(3.5, null),
+    { rater: READER, isOwn: true, beauty: 5, difficulty: 2 },
+  ],
 })
 
 /** Every problem the selection holds, lowest number first, {@link SET_ASIDE} and {@link USED} among them. */

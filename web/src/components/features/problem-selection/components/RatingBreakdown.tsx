@@ -7,8 +7,8 @@ import { describeUser } from '@/components/features/profile/model/user-identity'
 import { averageScore } from '../model/selection-state'
 import type { ProposalRating, RatingAspect } from '../model/selection-types'
 
-/** The most decimals an average shows. */
-const AVERAGE_FRACTION_DIGITS = 1
+/** A score as the selection shows it: always to a tenth, the scale's step, and an average to a hundredth. */
+export const SCORE_FORMAT = { minimumFractionDigits: 1, maximumFractionDigits: 2 } as const
 
 /**
  * Props for the {@link RatingBreakdown} component.
@@ -59,7 +59,7 @@ export function RatingBreakdown({ ratings, aspects }: RatingBreakdownProps) {
             </th>
             {aspects.map((aspect) => (
               <td key={aspect} className="px-1.5 text-right tabular-nums">
-                {rating[aspect] ?? <NoScore />}
+                {rating[aspect] === null ? <NoScore /> : <Score score={rating[aspect]} />}
               </td>
             ))}
           </tr>
@@ -78,7 +78,7 @@ export function RatingBreakdown({ ratings, aspects }: RatingBreakdownProps) {
 
             return (
               <td key={aspect} className="px-1.5 pt-0.5 text-right font-semibold tabular-nums">
-                {average === null ? <NoScore /> : <AverageScore average={average} />}
+                {average === null ? <NoScore /> : <Score score={average} />}
               </td>
             )
           })}
@@ -89,22 +89,22 @@ export function RatingBreakdown({ ratings, aspects }: RatingBreakdownProps) {
 }
 
 /**
- * Props for the {@link AverageScore} component.
+ * Props for the {@link Score} component.
  */
-type AverageScoreProps = {
-  /** The average. */
-  average: number
+type ScoreProps = {
+  /** The score, one reviewer's or an average. */
+  score: number
 }
 
 /**
- * An average score, in the reader's language and rounded for reading.
+ * A score, in the reader's language and rounded for reading.
  */
-export function AverageScore({ average }: AverageScoreProps) {
+export function Score({ score }: ScoreProps) {
   // Numbers in the reader's language
   const format = useFormatter()
 
-  // The average, rounded for reading
-  return format.number(average, { maximumFractionDigits: AVERAGE_FRACTION_DIGITS })
+  // The score, rounded for reading
+  return format.number(score, SCORE_FORMAT)
 }
 
 /**

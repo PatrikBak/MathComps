@@ -5,10 +5,7 @@ import {
   detailQuery,
   POOL_VIEW_PARAM,
 } from '@/components/features/problem-selection/model/selection-routes'
-import type {
-  Proposal,
-  RatingScore,
-} from '@/components/features/problem-selection/model/selection-types'
+import type { Proposal } from '@/components/features/problem-selection/model/selection-types'
 
 import { READER_NAME } from './support/comments'
 import { SELECTION_PATH } from './support/competitions'
@@ -109,19 +106,76 @@ function sortHeader(page: Page, name: string): Locator {
 }
 
 /**
- * One score in a problem's menu, under the aspect it scores.
+ * One aspect's bar of scores in a problem's menu.
  *
  * @param page - The page, with the menu open.
  * @param aspect - What the aspect is called.
- * @param score - The score.
  *
- * @returns The score's item.
+ * @returns The bar.
  */
-function scoreItem(page: Page, aspect: string, score: RatingScore): Locator {
-  // The score's item in the aspect's row
-  return page
-    .getByRole('group', { name: aspect })
-    .getByRole('menuitemradio', { name: String(score), exact: true })
+function scoreBar(page: Page, aspect: string): Locator {
+  // The slider named for the aspect
+  return page.getByRole('slider', { name: aspect })
+}
+
+/**
+ * A point on a bar of scores, from its top-left corner.
+ */
+type BarPoint = {
+  /** How far right of the bar's left edge. */
+  x: number
+  /** How far below the bar's top edge. */
+  y: number
+}
+
+/**
+ * Where a step sits along a bar of scores: in the middle of the stretch it fills past the step below, the bar running
+ * from no score at its left edge to 5 at its right.
+ *
+ * @param bar - The bar.
+ * @param score - The step.
+ *
+ * @returns The point.
+ */
+async function stepPoint(bar: Locator, score: number): Promise<BarPoint> {
+  // The bar settled where the menu's opening leaves it
+  await bar.click({ trial: true })
+
+  // The bar's box
+  const box = await bar.boundingBox()
+
+  // A bar that isn't on screen has no steps to press
+  if (box === null) throw new Error('The bar is not on screen')
+
+  // A quarter of a whole score short of the step, halfway down the bar
+  return { x: (box.width * (score - 0.25)) / 5, y: box.height / 2 }
+}
+
+/**
+ * Presses one step along a bar of scores.
+ *
+ * @param bar - The bar.
+ * @param score - The step.
+ */
+async function pressStep(bar: Locator, score: number): Promise<void> {
+  // The step clicked
+  await bar.click({ position: await stepPoint(bar, score) })
+}
+
+/**
+ * How much of a bar of scores its fill covers.
+ *
+ * @param bar - The bar.
+ *
+ * @returns The fill's width, as a share of the bar's.
+ */
+function fillShare(bar: Locator): Promise<number> {
+  // The fill's width over the bar's, the fill being the bar's first child
+  return bar.evaluate(
+    (element) =>
+      (element.firstElementChild?.getBoundingClientRect().width ?? 0) /
+      element.getBoundingClientRect().width
+  )
 }
 
 /**
@@ -159,15 +213,15 @@ test.describe('rating a problem', () => {
     // The menu on the problem's card
     await actionsButton(cardOf(page, FIRST), FIRST).click()
 
-    // A beauty of 4
-    await scoreItem(page, ratingsCopy.beauty, 4).click()
+    // A beauty of 3.5, the left half of the box holding 4
+    await pressStep(scoreBar(page, ratingsCopy.beauty), 3.5)
 
     // A difficulty of 2 straight after, the first write possibly still out
-    await scoreItem(page, ratingsCopy.difficulty, 2).click()
+    await pressStep(scoreBar(page, ratingsCopy.difficulty), 2)
 
-    // Both chosen, the menu still open
-    await expect(scoreItem(page, ratingsCopy.beauty, 4)).toBeChecked()
-    await expect(scoreItem(page, ratingsCopy.difficulty, 2)).toBeChecked()
+    // Both given, the menu still open
+    await expect(scoreBar(page, ratingsCopy.beauty)).toHaveAttribute('aria-valuenow', '3.5')
+    await expect(scoreBar(page, ratingsCopy.difficulty)).toHaveAttribute('aria-valuenow', '2')
 
     // Each write stating the whole rating as it then stood, the second keeping the first's beauty
     await expect
@@ -176,9 +230,13 @@ test.describe('rating a problem', () => {
         [
           'PUT',
           `${SELECTION_ENDPOINT}/proposals/${FIRST.id}/rating`,
-          { beauty: 4, difficulty: null },
+          { beauty: 3.5, difficulty: null },
         ],
-        ['PUT', `${SELECTION_ENDPOINT}/proposals/${FIRST.id}/rating`, { beauty: 4, difficulty: 2 }],
+        [
+          'PUT',
+          `${SELECTION_ENDPOINT}/proposals/${FIRST.id}/rating`,
+          { beauty: 3.5, difficulty: 2 },
+        ],
       ])
 
     // The menu, closed from the keyboard
@@ -188,7 +246,47 @@ test.describe('rating a problem', () => {
     await expect(ratingsMark(page, FIRST, 1)).toBeVisible()
   })
 
-  test('takes a score back when the one given is pressed again, and the rating with its last score', async ({
+  test('moves a score a tenth with the arrows beside it, the menu staying open', async ({
+    page,
+  }) => {
+    // A reviewer whose pool's first problem nobody has rated
+    await stubSelection(page, 'selection')
+
+    // Every write the page sends to a problem
+    const writes = recordWrites(page, isProposalWrite)
+
+    // The pool
+    await openPool(page)
+
+    // The menu on the problem's card
+    await actionsButton(cardOf(page, FIRST), FIRST).click()
+
+    // A beauty of 3.5 from the bar
+    await pressStep(scoreBar(page, ratingsCopy.beauty), 3.5)
+
+    // The arrow raising the beauty a tenth
+    const raise = page.getByRole('button', {
+      name: selectionText('ratings.raiseScore', { aspect: ratingsCopy.beauty }),
+    })
+
+    // Pressed twice
+    await raise.click()
+    await raise.click()
+
+    // On 3.7, the menu still open
+    await expect(scoreBar(page, ratingsCopy.beauty)).toHaveAttribute('aria-valuenow', '3.7')
+
+    // Each tenth written
+    await expect
+      .poll(() => writes().map((write) => write.postDataJSON()))
+      .toEqual([
+        { beauty: 3.5, difficulty: null },
+        { beauty: 3.6, difficulty: null },
+        { beauty: 3.7, difficulty: null },
+      ])
+  })
+
+  test('takes a score back with the cross beside it, and the rating with its last score', async ({
     page,
   }) => {
     // A reviewer who gave the algebra problem a beauty of 5 and a difficulty of 2, beside another reviewer's rating
@@ -203,22 +301,36 @@ test.describe('rating a problem', () => {
     // The menu on the problem's card
     await actionsButton(cardOf(page, ALGEBRA), ALGEBRA).click()
 
-    // The reader's scores chosen
-    await expect(scoreItem(page, ratingsCopy.beauty, 5)).toBeChecked()
-    await expect(scoreItem(page, ratingsCopy.difficulty, 2)).toBeChecked()
+    // The reader's scores on the bars
+    await expect(scoreBar(page, ratingsCopy.beauty)).toHaveAttribute('aria-valuenow', '5')
+    await expect(scoreBar(page, ratingsCopy.difficulty)).toHaveAttribute('aria-valuenow', '2')
 
-    // The beauty given, pressed again
-    await scoreItem(page, ratingsCopy.beauty, 5).click()
+    // The beauty's cross
+    await page
+      .getByRole('button', {
+        name: selectionText('ratings.clearScore', { aspect: ratingsCopy.beauty }),
+      })
+      .click()
 
-    // Chosen no more, the difficulty still standing
-    await expect(scoreItem(page, ratingsCopy.beauty, 5)).not.toBeChecked()
-    await expect(scoreItem(page, ratingsCopy.difficulty, 2)).toBeChecked()
+    // Given no more, the difficulty still standing
+    await expect(scoreBar(page, ratingsCopy.beauty)).toHaveAttribute(
+      'aria-valuetext',
+      ratingsCopy.noScore
+    )
+    await expect(scoreBar(page, ratingsCopy.difficulty)).toHaveAttribute('aria-valuenow', '2')
 
-    // Then the difficulty given, pressed again
-    await scoreItem(page, ratingsCopy.difficulty, 2).click()
+    // Then the difficulty's cross
+    await page
+      .getByRole('button', {
+        name: selectionText('ratings.clearScore', { aspect: ratingsCopy.difficulty }),
+      })
+      .click()
 
-    // Chosen no more either
-    await expect(scoreItem(page, ratingsCopy.difficulty, 2)).not.toBeChecked()
+    // Given no more either
+    await expect(scoreBar(page, ratingsCopy.difficulty)).toHaveAttribute(
+      'aria-valuetext',
+      ratingsCopy.noScore
+    )
 
     // Sent as the difficulty alone, then as a rating scoring nothing, which takes it back
     await expect
@@ -235,11 +347,64 @@ test.describe('rating a problem', () => {
     await expect(ratingsMark(page, ALGEBRA, 1)).toBeVisible()
   })
 
-  test('steps along a row of scores with the left arrow, and through every score in turn with the down arrow', async ({
+  test('sets the step a drag along a bar lets go on, with one write', async ({ page }) => {
+    // A reviewer whose pool's first problem nobody has rated
+    await stubSelection(page, 'selection')
+
+    // Every write the page sends to a problem
+    const writes = recordWrites(page, isProposalWrite)
+
+    // The pool
+    await openPool(page)
+
+    // The menu on the problem's card
+    await actionsButton(cardOf(page, FIRST), FIRST).click()
+
+    // The beauty's bar
+    const bar = scoreBar(page, ratingsCopy.beauty)
+
+    // The steps the drag goes down on and lets go on, once the menu has settled
+    const [from, to] = [await stepPoint(bar, 1), await stepPoint(bar, 4.5)]
+
+    // Where on the page the bar sits
+    const box = await bar.boundingBox()
+
+    // A bar that isn't on screen can't be dragged
+    if (box === null) throw new Error('The beauty bar is not on screen')
+
+    // Pressed on the lowest step
+    await page.mouse.move(box.x + from.x, box.y + from.y)
+    await page.mouse.down()
+
+    // Dragged along to 4.5, the press still held
+    await page.mouse.move(box.x + to.x, box.y + to.y, { steps: 8 })
+
+    // The bar filled to the step under the pointer, nine tenths of the way
+    await expect.poll(() => fillShare(bar)).toBeCloseTo(0.9)
+
+    // Nothing written while the press is held
+    expect(writes()).toHaveLength(0)
+
+    // Let go
+    await page.mouse.up()
+
+    // The step let go on given
+    await expect(bar).toHaveAttribute('aria-valuenow', '4.5')
+
+    // Written once, as the step let go on
+    await expect
+      .poll(() => writes().map((write) => write.postDataJSON()))
+      .toEqual([{ beauty: 4.5, difficulty: null }])
+  })
+
+  test('moves a score a tenth with the left and right arrows, half a score with Shift, and leaves up and down to the menu', async ({
     page,
   }) => {
-    // A reviewer who gave the algebra problem a beauty of 5
+    // A reviewer who gave the algebra problem a beauty of 5 and a difficulty of 2
     await stubSelection(page, 'selection')
+
+    // Every write the page sends to a problem
+    const writes = recordWrites(page, isProposalWrite)
 
     // The pool
     await openPool(page)
@@ -247,20 +412,78 @@ test.describe('rating a problem', () => {
     // The menu on the problem's card
     await actionsButton(cardOf(page, ALGEBRA), ALGEBRA).click()
 
-    // The beauty given, focused
-    await scoreItem(page, ratingsCopy.beauty, 5).focus()
+    // The beauty's bar, focused
+    await scoreBar(page, ratingsCopy.beauty).focus()
 
-    // Left along the beauty row, which the menu's own keys walk only up and down
+    // Left, a tenth down
     await page.keyboard.press('ArrowLeft')
 
-    // Onto the score below it
-    await expect(scoreItem(page, ratingsCopy.beauty, 4)).toBeFocused()
+    // On 4.9
+    await expect(scoreBar(page, ratingsCopy.beauty)).toHaveAttribute('aria-valuenow', '4.9')
+
+    // Left with Shift, half a score down
+    await page.keyboard.press('Shift+ArrowLeft')
+
+    // On 4.4
+    await expect(scoreBar(page, ratingsCopy.beauty)).toHaveAttribute('aria-valuenow', '4.4')
+
+    // Right, a tenth back up
+    await page.keyboard.press('ArrowRight')
+
+    // On 4.5
+    await expect(scoreBar(page, ratingsCopy.beauty)).toHaveAttribute('aria-valuenow', '4.5')
+
+    // Each move written, the difficulty kept
+    await expect
+      .poll(() => writes().map((write) => write.postDataJSON()))
+      .toEqual([
+        { beauty: 4.9, difficulty: 2 },
+        { beauty: 4.4, difficulty: 2 },
+        { beauty: 4.5, difficulty: 2 },
+      ])
 
     // Down, which the menu's own keys handle
     await page.keyboard.press('ArrowDown')
 
-    // Onto the next score in turn, still in the beauty row
-    await expect(scoreItem(page, ratingsCopy.beauty, 5)).toBeFocused()
+    // Onto the difficulty's bar
+    await expect(scoreBar(page, ratingsCopy.difficulty)).toBeFocused()
+  })
+
+  test('fills a bar to the score its arrow keys set while the mouse rests on another step', async ({
+    page,
+  }) => {
+    // A reviewer whose pool's first problem nobody has rated
+    await stubSelection(page, 'selection')
+
+    // The pool
+    await openPool(page)
+
+    // The menu on the problem's card
+    await actionsButton(cardOf(page, FIRST), FIRST).click()
+
+    // The beauty's bar
+    const bar = scoreBar(page, ratingsCopy.beauty)
+
+    // A beauty of 3.5 from the bar, the mouse left on it
+    await pressStep(bar, 3.5)
+
+    // A tenth up from the keyboard
+    await page.keyboard.press('ArrowRight')
+
+    // Where the 3.5 step sits, and where on the page the bar does
+    const [point, box] = [await stepPoint(bar, 3.5), await bar.boundingBox()]
+
+    // A bar that isn't on screen can't be hovered
+    if (box === null) throw new Error('The beauty bar is not on screen')
+
+    // The mouse nudged along that step, which a press would now give in place of 3.6
+    await page.mouse.move(box.x + point.x + 2, box.y + point.y)
+
+    // Another tenth up
+    await page.keyboard.press('ArrowRight')
+
+    // The bar filled to 3.7, not to the step under the mouse
+    await expect.poll(() => fillShare(bar)).toBeCloseTo(0.74)
   })
 
   test('shows who rated a problem and how, behind its count, with the average of each aspect', async ({
@@ -278,9 +501,9 @@ test.describe('rating a problem', () => {
     // The header, a row per reviewer with a dash for a score left out, and each aspect's average over who scored it
     await expect(page.getByRole('tooltip').getByRole('row')).toHaveText([
       `${ratingsCopy.name}${ratingsCopy.beauty}${ratingsCopy.difficulty}`,
-      `${OTHER_RATER}4–`,
-      `${READER_NAME}52`,
-      `${ratingsCopy.average}4.52`,
+      `${OTHER_RATER}3.5–`,
+      `${READER_NAME}5.02.0`,
+      `${ratingsCopy.average}4.252.0`,
     ])
   })
 })
@@ -365,8 +588,8 @@ test.describe('the ratings table', () => {
     // The difficulty alone, given by the reader alone, and its average
     await expect(page.getByRole('tooltip').getByRole('row')).toHaveText([
       `${ratingsCopy.name}${ratingsCopy.difficulty}`,
-      `${READER_NAME}2`,
-      `${ratingsCopy.average}2`,
+      `${READER_NAME}2.0`,
+      `${ratingsCopy.average}2.0`,
     ])
   })
 
@@ -390,7 +613,7 @@ test.describe('the ratings table', () => {
     // Ordered by beauty
     await sortHeader(page, ratingsCopy.beauty).click()
 
-    // 5, 4.5 and 3, then the problems nobody scored on beauty by number
+    // 5, 4.25 and 3, then the problems nobody scored on beauty by number
     await expect(rowHeadings(page)).toHaveText(
       [BILINGUAL, ALGEBRA, GEOMETRY, FIRST, OPENED, READY, UNWRITTEN].map(
         (proposal) => proposal.title
@@ -400,7 +623,7 @@ test.describe('the ratings table', () => {
     // Turned round
     await sortHeader(page, ratingsCopy.beauty).click()
 
-    // 3, 4.5 and 5, the problems nobody scored still last
+    // 3, 4.25 and 5, the problems nobody scored still last
     await expect(rowHeadings(page)).toHaveText(
       [GEOMETRY, ALGEBRA, BILINGUAL, FIRST, OPENED, READY, UNWRITTEN].map(
         (proposal) => proposal.title
@@ -435,7 +658,7 @@ test.describe('the ratings table', () => {
 
     // The paper's one problem, with its number, its beauty, its difficulty and how many rated it
     await expect(rowHeadings(page)).toHaveText([GEOMETRY.title])
-    await expect(rowOf(page, GEOMETRY).getByRole('cell')).toHaveText(['6', '3', '5', '1'])
+    await expect(rowOf(page, GEOMETRY).getByRole('cell')).toHaveText(['6', '3.0', '5.0', '1'])
 
     // Ordered by beauty
     await sortHeader(page, ratingsCopy.beauty).click()
