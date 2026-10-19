@@ -24,9 +24,8 @@ public static class HostedTaxonomy
     /// The node holding problems none of the site's competitions run.
     /// </summary>
     /// <remarks>
-    /// A problem written for a cycle and then swapped out is parked here, as is a candidate waiting to be
-    /// swapped in, and either keeps the row it has always had. Nothing is entered into it, so no hosted group
-    /// may claim its rounds.
+    /// A candidate waits here until finalizing a selection board moves it into a cycle's round, and keeps the row
+    /// it has always had. Nothing is entered into it, so no hosted group may claim its rounds.
     ///
     /// A proposal parked here is quoted by its <see cref="EfCoreEntities.Proposal.Number"/>, so the problem numbers
     /// in these rounds only say where the rows are stored, and may run with gaps.

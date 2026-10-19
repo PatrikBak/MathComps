@@ -6,7 +6,7 @@ using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Selection;
 
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// EF Core implementation of <see cref="IDraftResolutionService"/>. Spins up a short-lived, no-tracking

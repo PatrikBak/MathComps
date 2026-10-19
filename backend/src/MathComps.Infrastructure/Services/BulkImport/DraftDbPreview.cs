@@ -3,7 +3,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Domain.Taxonomy;
 
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// What the import does to an entity the draft names: reuse it unchanged, update it in place when the draft differs

@@ -5,7 +5,7 @@ using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Localization;
 using Microsoft.EntityFrameworkCore;
 
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// EF Core implementation of <see cref="ICompetitionTreeWriter"/>, ordering every generation it descends through

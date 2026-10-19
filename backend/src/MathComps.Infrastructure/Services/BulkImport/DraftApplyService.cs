@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using MathComps.Shared.Extensions;
 using MathComps.Domain.Tagging;
 
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// EF Core implementation of <see cref="IDraftApplyService"/>. Spins up one tracking

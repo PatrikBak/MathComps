@@ -1,6 +1,6 @@
 using MathComps.Domain.EfCoreEntities;
 
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// A service that commits a validated draft to the database and remote image storage. The mutating counterpart

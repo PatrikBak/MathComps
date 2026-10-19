@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// What writing one of the draft's text variants did to the database — the apply-time counterpart to the

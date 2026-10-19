@@ -1,6 +1,6 @@
 # Bulk Import CLI
 
-Imports authored problem drafts into the database and image storage, through `validate` (a dry run that writes nothing) and `apply` (the import). `swap` exchanges the positions of two problems already in the database.
+Imports authored problem drafts into the database and image storage, through `validate` (a dry run that writes nothing) and `apply` (the import).
 
 The draft format lives in [the draft format reference](../../../web/scripts/PREFLIGHT_README.md), which owns the folder layout, `_meta.yaml`, the image rules and the embargo field.
 
@@ -57,24 +57,6 @@ dotnet run --project backend/src/MathComps.Cli.BulkImport -- apply 'data/problem
 - `--allow-restating` — as above, and it applies to every folder in the run.
 
 A folder that fails validation writes nothing and the batch moves on. There is no transaction around the import itself, so a folder that crashes part-way can leave rows written and figures uploaded. Exits `0` only when every folder imported.
-
-### swap
-
-Exchange two problems' positions. Takes two slugs rather than folders.
-
-```bash
-# report what would move, writing nothing
-dotnet run --project backend/src/MathComps.Cli.BulkImport -- swap 75-csmo-a-iii-1 75-csmo-a-iii-3 --dry-run
-dotnet run --project backend/src/MathComps.Cli.BulkImport -- swap 75-csmo-a-iii-1 75-csmo-a-iii-3
-```
-
-- `--dry-run` — run every check and print what would move. Writes nothing.
-
-It moves the rows, so every defense, comment and self-assessment travels with the problem it belongs to, and each takes the slug its new position calls for. Figures keep resolving: the markdown holds their storage key. The two problems may sit in different competitions and seasons, which is what lets you trade one out of a MathComps cycle against a problem parked on `mathcomps-proposals`, the node holding problems no competition runs.
-
-This is how to rearrange a defended round. `apply` would rewrite text under the positions it finds, leaving every conversation on the problem that used to be there.
-
-It refuses a slug that names no problem, a slug two problems carry, the same slug twice, and a destination slug a third problem holds. It also refuses to put a problem missing a statement or solution in some language into a hosted round, and anything but a proposal still in the selection into a round a selection board filled. A problem keeps neither its embargo nor its hosted group, it inherits the destination round's. A problem leaving `mathcomps-proposals` also leaves every draft selection board it stood on. Exits `0` when the exchange went through, or a dry run came back clean.
 
 ## Embargoing a round
 

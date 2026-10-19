@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using MathComps.Cli.BulkImport.Manifest;
-using MathComps.Infrastructure.BulkImport;
+using MathComps.Infrastructure.Services.BulkImport;
 
 namespace MathComps.Cli.BulkImport.Commands;
 

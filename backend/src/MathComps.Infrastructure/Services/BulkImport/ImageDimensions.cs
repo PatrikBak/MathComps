@@ -1,7 +1,7 @@
 using SkiaSharp;
 using Svg.Skia;
 
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// Reads any supported figure's intrinsic pixel dimensions, dispatching by file extension to the SkiaSharp family:

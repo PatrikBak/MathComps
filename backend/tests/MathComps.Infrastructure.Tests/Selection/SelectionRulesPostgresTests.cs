@@ -10,8 +10,8 @@ namespace MathComps.Infrastructure.Tests.Selection;
 
 /// <summary>
 /// Covers the rule every selection write shares: it waits until no other selection write is running. Two writes
-/// interleaving could both take one pool problem, a finalize and a swap leaving a round a problem short, which
-/// breaks the competitions page for every reader and fails no other test.
+/// interleaving could both take one pool problem: two finalizes doing so leave a round a problem short, which breaks
+/// the competitions page for every reader and fails no other test.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class SelectionRulesPostgresTests(PostgresContainerFixture fixture)

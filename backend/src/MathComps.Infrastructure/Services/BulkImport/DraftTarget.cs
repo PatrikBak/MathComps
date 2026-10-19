@@ -1,7 +1,7 @@
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Taxonomy;
 
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// The competition and season a draft resolves against — the path addressing the competition plus the season
