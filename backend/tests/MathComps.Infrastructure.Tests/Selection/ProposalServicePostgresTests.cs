@@ -102,11 +102,11 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A score below one or past five is refused and writes nothing, whichever aspect it scores, while the ends of
-    /// the scale are taken.
+    /// A score below one, past five or between two tenths is refused and writes nothing, whichever aspect it scores,
+    /// while the ends of the scale and the tenths between them are taken and read back as given.
     /// </summary>
     [Fact]
-    public Task A_score_off_the_scale_is_refused() => RunTestAsync(async service =>
+    public Task A_score_off_the_scale_or_between_its_steps_is_refused() => RunTestAsync(async service =>
     {
         // A beauty below the scale
         await Assert.ThrowsAsync<ProposalRatingValueException>(
@@ -116,6 +116,14 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
         await Assert.ThrowsAsync<ProposalRatingValueException>(
             () => service.RateAsync(_pooledId, _raterId, beauty: 3, difficulty: 6));
 
+        // A difficulty a tenth past the scale
+        await Assert.ThrowsAsync<ProposalRatingValueException>(
+            () => service.RateAsync(_pooledId, _raterId, beauty: 3, difficulty: 5.1m));
+
+        // A beauty between two tenths
+        await Assert.ThrowsAsync<ProposalRatingValueException>(
+            () => service.RateAsync(_pooledId, _raterId, beauty: 2.35m, difficulty: 3));
+
         // Nothing written
         Assert.Empty(await RatingsAsync());
 
@@ -124,6 +132,12 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
 
         // The rating at the ends
         Assert.Equal([(_raterId, 1, 5)], await RatingsAsync());
+
+        // Tenths
+        await service.RateAsync(_pooledId, _raterId, beauty: 3.7m, difficulty: 4.2m);
+
+        // The rating on the tenths
+        Assert.Equal([(_raterId, 3.7m, 4.2m)], await RatingsAsync());
     });
 
     /// <summary>
@@ -225,7 +239,7 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     /// Reads every rating of the pooled proposal, the other reviewer's first.
     /// </summary>
     /// <returns>Each rating's reviewer and scores.</returns>
-    private async Task<List<(Guid, int?, int?)>> RatingsAsync()
+    private async Task<List<(Guid, decimal?, decimal?)>> RatingsAsync()
     {
         // The pooled proposal's ratings, by the reviewers' usernames
         var ratings = await QueryValueAsync(context => context.ProposalRatings

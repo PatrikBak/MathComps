@@ -1557,12 +1557,14 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
-                    b.Property<int?>("Beauty")
-                        .HasColumnType("integer")
+                    b.Property<decimal?>("Beauty")
+                        .HasPrecision(2, 1)
+                        .HasColumnType("numeric(2,1)")
                         .HasColumnName("beauty");
 
-                    b.Property<int?>("Difficulty")
-                        .HasColumnType("integer")
+                    b.Property<decimal?>("Difficulty")
+                        .HasPrecision(2, 1)
+                        .HasColumnType("numeric(2,1)")
                         .HasColumnName("difficulty");
 
                     b.HasKey("ProposalId", "UserId")

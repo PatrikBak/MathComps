@@ -370,7 +370,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // The first proposal's ratings: the reader's own, then the deleted reviewer's, which has no name to go by
         Assert.Equal(
             [
-                (new UserIdentityDto(_reviewerId, "Reviewer", "reviewer@example.com"), true, 4, 2),
+                (new UserIdentityDto(_reviewerId, "Reviewer", "reviewer@example.com"), true, 4.7m, 2),
                 (new UserIdentityDto(_goneReviewerId, null, null), false, 5, null),
             ],
             selection.Proposals
@@ -511,12 +511,12 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // And the latecomer's, held before they were preparing
         SeedConversation(context, _pool[1], _latecomerId, "Statement 1 in EN", now.AddDays(-2).AddHours(1), "Early");
 
-        // The live reviewer's rating of the first proposal, both scores given
+        // The live reviewer's rating of the first proposal, both scores given, the beauty on a tenth
         context.ProposalRatings.Add(new ProposalRating
         {
             ProposalId = _pool[1],
             UserId = _reviewerId,
-            Beauty = 4,
+            Beauty = 4.7m,
             Difficulty = 2,
         });
 

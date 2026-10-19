@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { sortByRatings } from '../ratings-order'
-import type { Proposal, ProposalRating, RatingScore } from '../selection-types'
+import type { Proposal, ProposalRating } from '../selection-types'
 
 /**
  * One reviewer's rating.
@@ -12,11 +12,7 @@ import type { Proposal, ProposalRating, RatingScore } from '../selection-types'
  *
  * @returns The rating, from a reviewer who is not the reader.
  */
-function rating(
-  rater: string,
-  beauty: RatingScore | null,
-  difficulty: RatingScore | null
-): ProposalRating {
+function rating(rater: string, beauty: number | null, difficulty: number | null): ProposalRating {
   // A rating from somebody else
   return { rater: { id: rater, username: rater, email: null }, isOwn: false, beauty, difficulty }
 }
@@ -74,5 +70,19 @@ describe('sortByRatings', () => {
 
     // The two 3s by number, 4.5, 5, and the unscored ones still last
     expect(order.map((candidate) => candidate.number)).toEqual([3, 6, 2, 4, 1, 5])
+  })
+
+  it('ties two averages of different tenths that come to the same score, the lower number first', () => {
+    // Both average 1.2, though 1.1 and 1.3 added as they stand come to a hair more than 1 and 1.4
+    const tied = [
+      proposal(8, [rating('Ann', 1.1, null), rating('Ben', 1.3, null)]),
+      proposal(7, [rating('Ann', 1, null), rating('Ben', 1.4, null)]),
+    ]
+
+    // Beauty from the highest
+    const order = sortByRatings(tied, { by: 'beauty', ascending: false })
+
+    // By number, as a tie
+    expect(order.map((candidate) => candidate.number)).toEqual([7, 8])
   })
 })

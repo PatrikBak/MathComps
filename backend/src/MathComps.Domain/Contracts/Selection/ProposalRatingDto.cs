@@ -13,5 +13,5 @@ namespace MathComps.Domain.Contracts.Selection;
 public record ProposalRatingDto(
     UserIdentityDto Rater,
     bool IsOwn,
-    int? Beauty,
-    int? Difficulty);
+    decimal? Beauty,
+    decimal? Difficulty);

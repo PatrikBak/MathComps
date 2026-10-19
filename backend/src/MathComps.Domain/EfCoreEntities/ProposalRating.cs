@@ -4,7 +4,7 @@ namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
 /// One reviewer's rating of a proposal: how beautiful and how difficult they find it, each on the olympiad scale
-/// from <see cref="MinScore"/> to <see cref="MaxScore"/>. A reviewer holds at most one per proposal.
+/// from <see cref="MinScore"/> to <see cref="MaxScore"/> in tenths. A reviewer holds at most one per proposal.
 /// </summary>
 /// <remarks>
 /// Either score can be left out, but not both, since a rating with neither says nothing.
@@ -20,6 +20,11 @@ public class ProposalRating
     /// The highest score on the scale.
     /// </summary>
     public const int MaxScore = 5;
+
+    /// <summary>
+    /// How many steps the scale takes from one whole score to the next, so a score times this is whole.
+    /// </summary>
+    public const int StepsPerPoint = 10;
 
     /// <summary>
     /// FK to the proposal rated.
@@ -45,11 +50,11 @@ public class ProposalRating
     /// How beautiful the reviewer finds the problem; null while they have not said.
     /// </summary>
     [Range(MinScore, MaxScore)]
-    public int? Beauty { get; set; }
+    public decimal? Beauty { get; set; }
 
     /// <summary>
     /// How difficult the reviewer finds the problem; null while they have not said.
     /// </summary>
     [Range(MinScore, MaxScore)]
-    public int? Difficulty { get; set; }
+    public decimal? Difficulty { get; set; }
 }

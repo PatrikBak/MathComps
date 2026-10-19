@@ -41,18 +41,21 @@ public interface IProposalService
     /// <param name="raterId">The reviewer rating it.</param>
     /// <param name="beauty">
     /// How beautiful the reviewer finds it, from <see cref="ProposalRating.MinScore"/> to
-    /// <see cref="ProposalRating.MaxScore"/>; null for no score.
+    /// <see cref="ProposalRating.MaxScore"/> in tenths; null for no score.
     /// </param>
     /// <param name="difficulty">
     /// How difficult the reviewer finds it, from <see cref="ProposalRating.MinScore"/> to
-    /// <see cref="ProposalRating.MaxScore"/>; null for no score.
+    /// <see cref="ProposalRating.MaxScore"/> in tenths; null for no score.
     /// </param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the change is saved.</returns>
-    /// <exception cref="ProposalRatingValueException">Thrown when a score is off the scale.</exception>
+    /// <exception cref="ProposalRatingValueException">
+    /// Thrown when a score is off the scale or between its steps.
+    /// </exception>
     /// <exception cref="SelectionTargetNotFoundException">Thrown when no live proposal has the id.</exception>
     Task RateAsync(
-        Guid proposalId, Guid raterId, int? beauty, int? difficulty, CancellationToken cancellationToken = default);
+        Guid proposalId, Guid raterId, decimal? beauty, decimal? difficulty,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deletes a proposal from the selection, emptying every slot it stands in. Its problem and conversations stay
@@ -78,6 +81,6 @@ public sealed class SelectionTargetNotFoundException() : Exception("Nothing in t
 public sealed class SelectionProposalUsedException() : Exception("A paper has already taken this problem");
 
 /// <summary>
-/// Thrown when a rating would hold a score off its scale.
+/// Thrown when a rating would hold a score off its scale or between its steps.
 /// </summary>
 public sealed class ProposalRatingValueException() : Exception("The rating is not valid");
