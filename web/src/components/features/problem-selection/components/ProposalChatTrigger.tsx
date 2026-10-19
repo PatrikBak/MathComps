@@ -5,7 +5,7 @@ import { useLocale } from 'next-intl'
 import { DefenseChatTrigger } from '@/components/features/defense/components/DefenseChatTrigger'
 import type { Locale } from '@/i18n/i18n'
 
-import { hasSolution } from '../model/selection-state'
+import { arguedText } from '../model/selection-state'
 import type { Proposal } from '../model/selection-types'
 
 /**
@@ -17,25 +17,26 @@ type ProposalChatTriggerProps = {
 }
 
 /**
- * A conversation with Mathilda about a problem, offered only where the problem has a solution in the site's
- * language for her to go by.
+ * A conversation with Mathilda about a problem, offered only where the problem has a solution for her to go by:
+ * in the site's language, or else in the language it was first written in. She talks in the site's language
+ * either way.
  */
 export function ProposalChatTrigger({ proposal }: ProposalChatTriggerProps) {
   // The site's language
   const siteLocale = useLocale() as Locale
 
-  // The problem's text in the site's language, if it has one
-  const siteText = proposal.texts[siteLocale]
+  // The problem's text Mathilda argues it from, if it has one
+  const text = arguedText(proposal, siteLocale)
 
-  // No solution in the site's language, so nothing for Mathilda to go by
-  if (siteText === undefined || !hasSolution(siteText)) return null
+  // No solution in the site's language or the original, so nothing for Mathilda to go by
+  if (text === null) return null
 
-  // The conversation, about the problem's statement in the site's language
+  // The conversation, about the statement Mathilda argues from
   return (
     <DefenseChatTrigger
       problem={{
         target: { kind: 'proposal', problemId: proposal.id },
-        statement: siteText.statement,
+        statement: text.statement,
       }}
     />
   )

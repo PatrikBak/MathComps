@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
+import type { Locale } from '@/i18n/i18n'
+
 import {
+  arguedText,
   averageScore,
   cycleMisfit,
   pickActiveBoard,
@@ -55,10 +58,11 @@ function board(id: string, isFinalized = false): Board {
  * A proposal holding the given texts and nothing else of note.
  *
  * @param texts - The proposal's text in each language it is written in.
+ * @param originalLanguage - The language it was first written in, or null where none of its texts is the original.
  *
  * @returns The proposal.
  */
-function proposal(texts: Proposal['texts']): Proposal {
+function proposal(texts: Proposal['texts'], originalLanguage: Locale | null = null): Proposal {
   // A geometry problem recommended for no category, neither set aside nor used
   return {
     id: 'p',
@@ -67,6 +71,7 @@ function proposal(texts: Proposal['texts']): Proposal {
     area: 'geometry',
     recommended: [],
     texts,
+    originalLanguage,
     isSetAside: false,
     isUsed: false,
     ratings: [],
@@ -239,6 +244,59 @@ describe('resolveText', () => {
     // Czech stands in, coming before English
     expect(resolved?.language).toBe('cs')
     expect(resolved?.text.statement).toBe('cs')
+  })
+})
+
+describe('arguedText', () => {
+  it("argues a problem in the reader's language wherever it is solved there, though the original is another", () => {
+    // First written in English, and translated into Slovak in full
+    const translated = proposal(
+      {
+        en: { statement: 'en', solution: 'R', hints: [] },
+        sk: { statement: 'sk', solution: 'R', hints: [] },
+      },
+      'en'
+    )
+
+    // The text argued for a reader in Slovak
+    const argued = arguedText(translated, 'sk')
+
+    // The Slovak one
+    expect(argued?.statement).toBe('sk')
+  })
+
+  it("falls back to the language the problem was first written in where the reader's is unsolved", () => {
+    // First written in English, with a Czech statement nobody has solved
+    const original = proposal(
+      {
+        en: { statement: 'en', solution: 'R', hints: [] },
+        cs: { statement: 'cs', solution: null, hints: [] },
+      },
+      'en'
+    )
+
+    // The text argued for a reader in Czech
+    const argued = arguedText(original, 'cs')
+
+    // The English one
+    expect(argued?.statement).toBe('en')
+  })
+
+  it('argues nothing where the original is unsolved too, whatever a third language holds', () => {
+    // First written in Slovak with no solution, and solved in English alone
+    const unsolved = proposal(
+      {
+        sk: { statement: 'sk', solution: null, hints: [] },
+        en: { statement: 'en', solution: 'R', hints: [] },
+      },
+      'sk'
+    )
+
+    // The text argued for a reader in Czech
+    const argued = arguedText(unsolved, 'cs')
+
+    // None
+    expect(argued).toBeNull()
   })
 })
 

@@ -82,9 +82,10 @@ public sealed class ProblemSelectionService(
             .ToListAsync(cancellationToken);
 
         // Every proposal not deleted and outside the groups that have opened, lowest number first, with where its
-        // problem sits, every text it carries and every rating it was given, by the raters' usernames with a rater
-        // showing none last. Split, because the texts and the ratings are two collections off one row: joined in a
-        // single query the database would return every pairing of them, each repeating the text.
+        // problem sits, every text it carries, the language it was first written in, and every rating it was given,
+        // by the raters' usernames with a rater showing none last. Split, because the texts and the ratings are two
+        // collections off one row: joined in a single query the database would return every pairing of them, each
+        // repeating the text.
         var proposals = await dbContext.Proposals
             .AsNoTracking()
             .AsSplitQuery()
@@ -104,6 +105,10 @@ public sealed class ProblemSelectionService(
                     .Select(text => new ProblemBody(
                         text.DocumentType, text.Language, text.MarkdownText ?? text.RawText))
                     .ToList(),
+                OriginalLanguage = proposal.Problem.Texts
+                    .Where(text => text.IsOriginal)
+                    .Select(text => (Language?)text.Language)
+                    .FirstOrDefault(),
                 Ratings = proposal.Ratings
                     .OrderBy(rating => rating.User.IsDeleted ? null : rating.User.Username)
                     .ThenBy(rating => rating.UserId)
@@ -199,6 +204,7 @@ public sealed class ProblemSelectionService(
                     proposal.Area,
                     proposal.Recommended,
                     TextsOf(proposal.Texts),
+                    proposal.OriginalLanguage,
                     proposal.IsSetAside,
                     IsUsed: !SelectionRules.IsInPool(proposal.CompetitionPath),
                     proposal.Ratings)),

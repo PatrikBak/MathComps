@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
@@ -12,8 +13,9 @@ namespace MathComps.Infrastructure.Services.Defense.Content;
 /// served from a cache that outlives an edit made while its competition is still running.
 /// </summary>
 /// <remarks>
-/// A problem resolves to content only in a language holding both its statement and its solution, while a statement
-/// with no solution beside it still counts among the statements it has.
+/// A problem resolves to content only in a language holding both its statement and its solution: the student's
+/// language where it holds both, and otherwise the language the problem was first written in. A statement with no
+/// solution beside it still counts among the statements it has.
 /// </remarks>
 /// <param name="dbContextFactory">Creates the contexts the lookups run on.</param>
 public sealed class ProblemDefenseContentResolver(IDbContextFactory<MathCompsDbContext> dbContextFactory)
@@ -26,11 +28,48 @@ public sealed class ProblemDefenseContentResolver(IDbContextFactory<MathCompsDbC
         // A fresh context for this lookup.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The problem's statement, solution and hints in this language. Markdown is what the site renders and what
-        // the examiner reads; the raw source is what a row without markdown carries.
+        // The problem in the student's language, or else in the language it was first written in.
+        return await ContentAsync(dbContext, target.ProblemId, text => text.Language == language, cancellationToken)
+            ?? await ContentAsync(dbContext, target.ProblemId, text => text.IsOriginal, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyDictionary<Language, string>> ResolveStatementsAsync(
+        ProblemTarget target, CancellationToken cancellationToken)
+    {
+        // A fresh context for this lookup.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The problem's statement in every language it is written in, each read the way a defense reads one, and
+        // only where the row holds one.
+        return await dbContext.ProblemTexts
+            .AsNoTracking()
+            .Where(text => text.ProblemId == target.ProblemId
+                && text.DocumentType == DocumentType.Statement
+                && (text.MarkdownText ?? text.RawText) != null)
+            .ToDictionaryAsync(text => text.Language, text => (text.MarkdownText ?? text.RawText)!, cancellationToken);
+    }
+
+    /// <summary>
+    /// Reads what the examiner is told about a problem out of its texts in one language.
+    /// </summary>
+    /// <param name="dbContext">The context the lookup runs on.</param>
+    /// <param name="problemId">The problem.</param>
+    /// <param name="inLanguage">Picks out the problem's texts in the one language to read.</param>
+    /// <param name="cancellationToken">Cancels the lookup.</param>
+    /// <returns>The problem's content, or null where the language picked lacks its statement or its solution.</returns>
+    private static async Task<DefenseProblemContent?> ContentAsync(
+        MathCompsDbContext dbContext,
+        Guid problemId,
+        Expression<Func<ProblemText, bool>> inLanguage,
+        CancellationToken cancellationToken)
+    {
+        // The problem's statement, solution and hints in the language picked. Markdown is what the site renders and
+        // what the examiner reads; the raw source is what a row without markdown carries.
         var texts = await dbContext.ProblemTexts
             .AsNoTracking()
-            .Where(text => text.ProblemId == target.ProblemId && text.Language == language)
+            .Where(text => text.ProblemId == problemId)
+            .Where(inLanguage)
             .Select(text => new { text.DocumentType, Body = text.MarkdownText ?? text.RawText })
             .ToListAsync(cancellationToken);
 
@@ -53,22 +92,5 @@ public sealed class ProblemDefenseContentResolver(IDbContextFactory<MathCompsDbC
 
         // Everything the examiner reads about the problem.
         return new DefenseProblemContent(statement, reference, hints);
-    }
-
-    /// <inheritdoc/>
-    public async Task<IReadOnlyDictionary<Language, string>> ResolveStatementsAsync(
-        ProblemTarget target, CancellationToken cancellationToken)
-    {
-        // A fresh context for this lookup.
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-
-        // The problem's statement in every language it is written in, each read the way a defense reads one, and
-        // only where the row holds one.
-        return await dbContext.ProblemTexts
-            .AsNoTracking()
-            .Where(text => text.ProblemId == target.ProblemId
-                && text.DocumentType == DocumentType.Statement
-                && (text.MarkdownText ?? text.RawText) != null)
-            .ToDictionaryAsync(text => text.Language, text => (text.MarkdownText ?? text.RawText)!, cancellationToken);
     }
 }
