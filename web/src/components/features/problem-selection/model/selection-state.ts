@@ -246,6 +246,30 @@ export function hasSolution(text: ProposalText): text is TextWithSolution {
 }
 
 /**
+ * The text Mathilda argues a proposal from: the one in the reader's language where it is solved there, or else
+ * the one it was first written in, where that is solved.
+ *
+ * @param proposal - The proposal.
+ * @param language - The language the reader is in.
+ *
+ * @returns The text, or null where neither the reader's language nor the original is solved.
+ */
+export function arguedText(proposal: Proposal, language: Locale): ProposalText | null {
+  // The proposal's text in the reader's language, if it has one
+  const readersText = proposal.texts[language]
+
+  // Argued in the reader's language wherever it is solved there
+  if (readersText !== undefined && hasSolution(readersText)) return readersText
+
+  // The proposal's text in the language it was first written in, if it has one
+  const originalText =
+    proposal.originalLanguage === null ? undefined : proposal.texts[proposal.originalLanguage]
+
+  // Argued in the original where it is solved there, and in no language otherwise
+  return originalText !== undefined && hasSolution(originalText) ? originalText : null
+}
+
+/**
  * The languages a round would refuse a proposal in.
  *
  * @param proposal - The proposal.

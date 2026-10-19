@@ -38,6 +38,7 @@ function proposal(number: number, ratings: ProposalRating[]): Proposal {
     area: 'algebra',
     recommended: [],
     texts: {},
+    originalLanguage: null,
     isSetAside: false,
     isUsed: false,
     ratings,

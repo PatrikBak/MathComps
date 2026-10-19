@@ -66,6 +66,8 @@ export type Proposal = {
   recommended: HostedCompetitionCategory[]
   /** Its text in each language it has a statement in. */
   texts: Partial<Record<Locale, ProposalText>>
+  /** The language it was first written in, which its other texts translate; null where none is the original. */
+  originalLanguage: Locale | null
   /** Whether the reviewers have set it aside, which leaves it in the selection. */
   isSetAside: boolean
   /** Whether a round has taken it out of the pool. */

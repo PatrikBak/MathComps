@@ -102,7 +102,8 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
     /// <summary>
     /// A proposal reads with its filing and with a text for every language it has a statement in: the solution
-    /// where one is written and null where not, and the hints split into the ladder.
+    /// where one is written and null where not, and the hints split into the ladder. The language it was first written
+    /// in comes with them.
     /// </summary>
     [Fact]
     public Task A_proposal_reads_with_its_filing_and_its_texts() => RunTestAsync(async service =>
@@ -123,6 +124,9 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
         // A text in English and Slovak, the two it has statements in
         Assert.Equal([Language.SK, Language.EN], proposal.Texts.Keys.Order());
+
+        // First written in English, the Slovak text a translation
+        Assert.Equal(Language.EN, proposal.OriginalLanguage);
 
         // The English text
         var english = proposal.Texts[Language.EN];

@@ -27,6 +27,7 @@ function proposal(id: string): Proposal {
     area: 'algebra',
     recommended: [],
     texts: {},
+    originalLanguage: null,
     isSetAside: false,
     isUsed: false,
     ratings: [],

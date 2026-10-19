@@ -116,6 +116,7 @@ function proposalNumbered(number: number, distinction: Partial<Proposal> = {}): 
     area: 'combinatorics',
     recommended: ['intermediate'],
     texts: { en: { statement: statementOf(number), solution: null, hints: [] } },
+    originalLanguage: 'en',
     isSetAside: false,
     isUsed: false,
     ratings: [],
@@ -139,7 +140,7 @@ export const BILINGUAL = proposalNumbered(2, {
 })
 
 /** A problem proposed before anybody wrote its statement, in any language. */
-export const UNWRITTEN = proposalNumbered(9, { texts: {} })
+export const UNWRITTEN = proposalNumbered(9, { texts: {}, originalLanguage: null })
 
 /** The pool's first problem. */
 export const FIRST = proposalNumbered(1)

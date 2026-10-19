@@ -58,7 +58,7 @@ public class ProblemText
     public required DateTime DateModified { get; set; }
 
     /// <summary>
-    /// Whether this text was automatically translated by AI (true) or is an original text (false).
+    /// Whether this text is in the language the problem was first written in (true) or is a translation (false).
     /// </summary>
     public required bool IsOriginal { get; set; }
 
