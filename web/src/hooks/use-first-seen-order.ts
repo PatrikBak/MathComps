@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 
+import { type NewcomerPlace, withNewcomers } from '@/components/shared/utils/first-seen-order'
+
 /**
  * The order a {@link useFirstSeenOrder} holds.
  */
@@ -22,15 +24,19 @@ type UseFirstSeenOrderOptions<TItem> = {
   keyOf: (item: TItem) => string
   /** A value whose change forgets the held order, so the list takes the order the items come in at that moment. */
   resetKey: unknown
+  /** Where an item seen for the first time goes. */
+  newcomerPlace: NewcomerPlace
 }
 
 /**
  * A list that keeps every item where it first appeared, however the order the items come in changes, so nothing on
- * screen moves under the reader. An item seen for the first time goes on top; everything else stays put.
+ * screen moves under the reader. An item seen for the first time goes on top or in place, as asked; everything else
+ * stays put.
  *
  * Say the items come in as A, B, C. Later C moves up and they come in as C, A, B: the list still reads A, B, C. Then
- * D comes in too, as D, C, A, B: the list reads D, A, B, C. Several newcomers at once go on top in the order they
- * come in. An item that drops out and comes back takes its old place again.
+ * D comes in too, as C, A, D, B. On top, the list reads D, A, B, C; in place, it reads A, D, B, C, since D comes in
+ * behind A. Several newcomers on top go in the order they come in. An item that drops out and comes back takes its
+ * old place again.
  *
  * Changing the reset key forgets the held order, and so does mounting afresh: the list then reads in the order the
  * items come in.
@@ -43,6 +49,7 @@ export function useFirstSeenOrder<TItem>({
   items,
   keyOf,
   resetKey,
+  newcomerPlace,
 }: UseFirstSeenOrderOptions<TItem>): TItem[] {
   // The keys shown so far, top to bottom, with the reset key they were shown under
   const [held, setHeld] = useState<HeldOrder>({ resetKey, seen: [] })
@@ -50,11 +57,15 @@ export function useFirstSeenOrder<TItem>({
   // The keys shown so far, forgotten once the reset key changes
   const seen = held.resetKey === resetKey ? held.seen : []
 
-  // The keys never shown before, in the order they come in
-  const newcomers = items.map(keyOf).filter((key) => !seen.includes(key))
+  // The keys in the order they come in now
+  const incoming = items.map(keyOf)
 
-  // The newcomers on top, everything shown before below them in its old place
-  const order = newcomers.length === 0 ? seen : [...newcomers, ...seen]
+  // The keys never shown before, in the order they come in
+  const newcomers = incoming.filter((key) => !seen.includes(key))
+
+  // Everything shown before in its old place, and the newcomers where they go
+  const order =
+    newcomers.length === 0 ? seen : withNewcomers(seen, incoming, newcomers, newcomerPlace)
 
   // Remembered for the renders to come, whenever this one changed it
   if (order !== held.seen || resetKey !== held.resetKey) setHeld({ resetKey, seen: order })

@@ -47,12 +47,12 @@ export function useShowFromTop({ show, focusTarget }: UseShowFromTopOptions): Us
     // The focus moved on before the control leaves, the page staying where it is
     focusForReader(focusTarget.current, { preventScroll: true })
 
-    // The list
-    const list = listRef.current
+    // How far below the top of the window the list's top stands, while the list is on the page
+    const listTop = listRef.current?.getBoundingClientRect().top
 
-    // The list's top brought back into view at once, where the page is scrolled past it
-    if (list !== null && list.getBoundingClientRect().top < scrollOffset) {
-      list.scrollIntoView({ block: 'start', behavior: 'instant' })
+    // The list's top brought back at once to rest clear of the header, where the page is scrolled past it
+    if (listTop !== undefined && listTop < scrollOffset) {
+      window.scrollBy({ top: listTop - scrollOffset, behavior: 'instant' })
     }
 
     // What was asked for, shown

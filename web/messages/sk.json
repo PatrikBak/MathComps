@@ -1362,6 +1362,7 @@
       "emptySetAsideFiltered": "Týmto filtrom nezodpovedá žiadna odložená úloha.",
       "loading": "Načítavam úlohy",
       "loadingComments": "Načítavam komentáre",
+      "resort": "Znova zoradiť",
       "search": "Hľadať úlohy",
       "searchPlaceholder": "Číslo, názov alebo text",
       "setAsideCount": "{count, plural, one {# odložená úloha} few {# odložené úlohy} other {# odložených úloh}}",

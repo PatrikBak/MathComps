@@ -59,6 +59,7 @@ export function usePoolThreads(): UsePoolThreadsResult {
     items: shown === null ? [] : threadsByActivity(shown.discussions),
     keyOf: threadKeyOf,
     resetKey: shown?.showings ?? 0,
+    newcomerPlace: 'top',
   })
 
   // The held threads, null until the first read has landed
