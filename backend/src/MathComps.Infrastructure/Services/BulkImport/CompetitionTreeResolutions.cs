@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using MathComps.Domain.EfCoreEntities;
 
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// What raising a competition path did: the node the path addresses, and what the walk down to it touched.

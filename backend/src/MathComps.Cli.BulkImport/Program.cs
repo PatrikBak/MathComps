@@ -1,7 +1,7 @@
 using MathComps.Cli.BulkImport.Commands;
 using MathComps.Cli.BulkImport.Validation;
-using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Extensions;
+using MathComps.Infrastructure.Services.BulkImport;
 using MathComps.Shared.Cli;
 using MathComps.Shared.Cli.Commands;
 using Microsoft.Extensions.DependencyInjection;

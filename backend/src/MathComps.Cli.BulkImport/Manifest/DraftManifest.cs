@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
-using MathComps.Infrastructure.BulkImport;
+using MathComps.Infrastructure.Services.BulkImport;
 
 namespace MathComps.Cli.BulkImport.Manifest;
 

@@ -2,7 +2,7 @@ using MathComps.Cli.BulkImport.Commands;
 using MathComps.Cli.BulkImport.Manifest;
 using MathComps.Cli.BulkImport.Preflight;
 using MathComps.Domain.Taxonomy;
-using MathComps.Infrastructure.BulkImport;
+using MathComps.Infrastructure.Services.BulkImport;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Shared.Extensions;
 

@@ -2,7 +2,7 @@ using MathComps.Cli.BulkImport.Commands;
 using MathComps.Cli.BulkImport.Manifest;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
-using MathComps.Infrastructure.BulkImport;
+using MathComps.Infrastructure.Services.BulkImport;
 using Spectre.Console;
 
 namespace MathComps.Cli.BulkImport.Tests;

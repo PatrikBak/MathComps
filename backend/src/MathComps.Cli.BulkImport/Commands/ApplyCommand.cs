@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Globalization;
 using MathComps.Cli.BulkImport.Validation;
-using MathComps.Infrastructure.BulkImport;
+using MathComps.Infrastructure.Services.BulkImport;
 using Spectre.Console.Cli;
 
 namespace MathComps.Cli.BulkImport.Commands;

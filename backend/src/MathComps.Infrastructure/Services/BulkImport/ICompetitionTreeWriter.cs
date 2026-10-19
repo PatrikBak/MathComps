@@ -1,7 +1,7 @@
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 
-namespace MathComps.Infrastructure.BulkImport;
+namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// Raises the archive's own rows for a competition path and a season, creating whatever the path names that is not
