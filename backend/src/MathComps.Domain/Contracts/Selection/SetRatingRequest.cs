@@ -7,4 +7,4 @@ namespace MathComps.Domain.Contracts.Selection;
 /// </summary>
 /// <param name="Beauty"><inheritdoc cref="ProposalRating.Beauty" path="/summary"/></param>
 /// <param name="Difficulty"><inheritdoc cref="ProposalRating.Difficulty" path="/summary"/></param>
-public record SetRatingRequest(int? Beauty, int? Difficulty);
+public record SetRatingRequest(decimal? Beauty, decimal? Difficulty);

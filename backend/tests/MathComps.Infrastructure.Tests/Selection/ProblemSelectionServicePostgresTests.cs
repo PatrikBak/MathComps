@@ -102,7 +102,8 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
     /// <summary>
     /// A proposal reads with its filing and with a text for every language it has a statement in: the solution
-    /// where one is written and null where not, and the hints split into the ladder.
+    /// where one is written and null where not, and the hints split into the ladder. The language it was first written
+    /// in comes with them.
     /// </summary>
     [Fact]
     public Task A_proposal_reads_with_its_filing_and_its_texts() => RunTestAsync(async service =>
@@ -123,6 +124,9 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
         // A text in English and Slovak, the two it has statements in
         Assert.Equal([Language.SK, Language.EN], proposal.Texts.Keys.Order());
+
+        // First written in English, the Slovak text a translation
+        Assert.Equal(Language.EN, proposal.OriginalLanguage);
 
         // The English text
         var english = proposal.Texts[Language.EN];
@@ -366,7 +370,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // The first proposal's ratings: the reader's own, then the deleted reviewer's, which has no name to go by
         Assert.Equal(
             [
-                (new UserIdentityDto(_reviewerId, "Reviewer", "reviewer@example.com"), true, 4, 2),
+                (new UserIdentityDto(_reviewerId, "Reviewer", "reviewer@example.com"), true, 4.7m, 2),
                 (new UserIdentityDto(_goneReviewerId, null, null), false, 5, null),
             ],
             selection.Proposals
@@ -507,12 +511,12 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // And the latecomer's, held before they were preparing
         SeedConversation(context, _pool[1], _latecomerId, "Statement 1 in EN", now.AddDays(-2).AddHours(1), "Early");
 
-        // The live reviewer's rating of the first proposal, both scores given
+        // The live reviewer's rating of the first proposal, both scores given, the beauty on a tenth
         context.ProposalRatings.Add(new ProposalRating
         {
             ProposalId = _pool[1],
             UserId = _reviewerId,
-            Beauty = 4,
+            Beauty = 4.7m,
             Difficulty = 2,
         });
 

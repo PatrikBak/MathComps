@@ -2,7 +2,7 @@
 
 import { MoreVertical } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
-import { Fragment, useId } from 'react'
+import { useId } from 'react'
 
 import { useCategoryName } from '@/components/features/hosted-competitions/hooks/use-category-name'
 import { HOSTED_COMPETITION_CATEGORIES } from '@/components/features/hosted-competitions/model/hosted-competition-types'
@@ -14,23 +14,19 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/shared/components/DropdownMenu'
-import { useGridArrowKeys } from '@/hooks/use-grid-arrow-keys'
 
 import { useProposalDeleteConfirmation } from '../hooks/use-proposal-delete-confirmation'
 import { useRate, useRecommend, useSetAside } from '../hooks/use-proposal-writes'
 import {
   type Proposal,
   RATING_ASPECTS,
-  RATING_SCORES,
   type RatingAspect,
-  type RatingScore,
   type RatingScores,
 } from '../model/selection-types'
+import { ScoreBar } from './ScoreBar'
 import { useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /**
@@ -165,16 +161,9 @@ type RatingRowsProps = {
 }
 
 /**
- * The reader's own rating of a problem, a labelled row of scores per aspect. Pressing a score gives it and keeps the
- * menu open, and pressing the one already given takes it back.
+ * The reader's own rating of a problem, a bar of scores per aspect.
  */
 function RatingRows({ proposal }: RatingRowsProps) {
-  // Rating copy
-  const t = useTranslations('problemSelection.ratings')
-
-  // The base each aspect label's id is built from
-  const labelId = useId()
-
   // The reader's rating of the problem, if they have rated it
   const ownRating = proposal.ratings.find((rating) => rating.isOwn)
 
@@ -184,56 +173,20 @@ function RatingRows({ proposal }: RatingRowsProps) {
     difficulty: ownRating?.difficulty ?? null,
   }
 
-  // Arrow-key focus along each aspect's row of scores, up and down left to the menu, which steps through every
-  // score in turn
-  const gridKeys = useGridArrowKeys({
-    rowLengths: RATING_ASPECTS.map(() => RATING_SCORES.length),
-    stepsBetweenRows: false,
-  })
-
   // Rating the problem, or taking the rating back
   const rate = useRate()
 
-  // A function which gives an aspect the score pressed, or takes the score back when it is the one given already
-  const pressScore = (aspect: RatingAspect, score: RatingScore) =>
-    rate.mutate({
-      proposalId: proposal.id,
-      scores: { ...ownScores, [aspect]: ownScores[aspect] === score ? null : score },
-    })
+  // A function which sets the reader's score for one aspect, keeping the other's, or takes it back
+  const setScore = (aspect: RatingAspect, score: number | null) =>
+    rate.mutate({ proposalId: proposal.id, scores: { ...ownScores, [aspect]: score } })
 
-  // A row per aspect
-  return RATING_ASPECTS.map((aspect, row) => (
-    <Fragment key={aspect}>
-      {/* The aspect */}
-      <p id={`${labelId}-${aspect}`} className="px-2 pt-1.5 pb-1 text-xs font-semibold text-muted">
-        {t(aspect)}
-      </p>
-
-      {/* The aspect's scores, the one given checked */}
-      <DropdownMenuRadioGroup
-        aria-labelledby={`${labelId}-${aspect}`}
-        value={ownScores[aspect] === null ? '' : String(ownScores[aspect])}
-        className="flex gap-1 px-2 pb-1.5"
-      >
-        {RATING_SCORES.map((score, column) => (
-          <DropdownMenuRadioItem
-            key={score}
-            ref={gridKeys.itemRef(row, column)}
-            value={String(score)}
-            className="size-8 justify-center text-xs font-semibold tabular-nums"
-            onKeyDown={(event) => gridKeys.moveFocus(event, row, column)}
-            onSelect={(event) => {
-              // The menu stays open
-              event.preventDefault()
-
-              // The score given, or taken back
-              pressScore(aspect, score)
-            }}
-          >
-            {score}
-          </DropdownMenuRadioItem>
-        ))}
-      </DropdownMenuRadioGroup>
-    </Fragment>
+  // A bar per aspect
+  return RATING_ASPECTS.map((aspect) => (
+    <ScoreBar
+      key={aspect}
+      aspect={aspect}
+      score={ownScores[aspect]}
+      onScore={(score) => setScore(aspect, score)}
+    />
   ))
 }

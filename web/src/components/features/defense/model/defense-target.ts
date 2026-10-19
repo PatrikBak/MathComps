@@ -164,7 +164,7 @@ export function isSubjectReachable(target: DefenseTarget, locale: Locale): boole
     case 'competition':
       return true
 
-    // A proposed problem is offered only in a language it is solved in, so the selection has already answered
+    // A proposal is offered only where it has a solution to argue from, so the selection has already answered
     case 'proposal':
       return true
 

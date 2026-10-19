@@ -22,7 +22,7 @@ import {
   RATING_ASPECTS,
   type RatingAspect,
 } from '../model/selection-types'
-import { AverageScore, NoScore, RatingBreakdown } from './RatingBreakdown'
+import { NoScore, RatingBreakdown, Score } from './RatingBreakdown'
 import { ProposalLink } from './SelectionLinks'
 
 /**
@@ -223,7 +223,7 @@ function AspectAverage({ ratings, aspect }: AspectAverageProps) {
           FOCUS_RING_CLASS
         )}
       >
-        <AverageScore average={average} />
+        <Score score={average} />
       </button>
     </Tooltip>
   )

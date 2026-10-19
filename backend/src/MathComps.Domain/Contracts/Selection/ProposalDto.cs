@@ -15,6 +15,10 @@ namespace MathComps.Domain.Contracts.Selection;
 /// <param name="Texts">
 /// Its text in every language it has a statement in, keyed by that language.
 /// </param>
+/// <param name="OriginalLanguage">
+/// The language it was first written in, which its other texts translate; null where none of its texts is marked
+/// <see cref="ProblemText.IsOriginal"/>.
+/// </param>
 /// <param name="IsSetAside"><inheritdoc cref="Proposal.IsSetAside" path="/summary"/></param>
 /// <param name="IsUsed">Whether a paper has taken it.</param>
 /// <param name="Ratings">
@@ -27,6 +31,7 @@ public record ProposalDto(
     ProposalArea Area,
     IReadOnlyList<HostedCompetitionCategory> Recommended,
     IReadOnlyDictionary<Language, ProposalTextDto> Texts,
+    Language? OriginalLanguage,
     bool IsSetAside,
     bool IsUsed,
     IReadOnlyList<ProposalRatingDto> Ratings);
