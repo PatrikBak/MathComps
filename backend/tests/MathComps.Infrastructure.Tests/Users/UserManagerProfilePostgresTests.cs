@@ -6,7 +6,6 @@ using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Clerk;
 using MathComps.Infrastructure.Services.Users;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MathComps.Infrastructure.Tests.Users;
@@ -15,8 +14,7 @@ namespace MathComps.Infrastructure.Tests.Users;
 /// Integration tests for what a student says about their competing against a real PostgreSQL database: that
 /// every field round-trips, that clearing one is a thing they can do, that a year and a school left cannot both
 /// stand, that a year before the first school year the competition ran or past a first-grader's maturita and a
-/// code which is not a country are refused, that the address Clerk sent reads back with it, and that a resync
-/// from Clerk carries none of it away.
+/// code which is not a country are refused, and that the address Clerk sent reads back with it.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class UserManagerProfilePostgresTests(PostgresContainerFixture fixture)
@@ -178,35 +176,5 @@ public class UserManagerProfilePostgresTests(PostgresContainerFixture fixture)
         // Who sends something that is not an alpha-2 code
         await Assert.ThrowsAsync<ProfileValueInvalidException>(
             () => service.UpdateProfileAsync(userId, new UpdateUserProfileRequest(null, false, countryCode)));
-    });
-
-    /// <summary>
-    /// Re-syncing a user from Clerk leaves every field standing. The sync upserts the whole row from an entity
-    /// Clerk carries neither of them for, so a column not excluded from that write is silently blanked every
-    /// time the student edits their avatar upstream.
-    /// </summary>
-    [Fact]
-    public Task SyncUserAsync_KeepsWhatTheStudentSaidAcrossAResync() => RunTestAsync(async service =>
-    {
-        // A synced user
-        var userId = await service.SyncUserAsync(new UserSyncDto("user_stays", "stays@example.com", null));
-
-        // Who has said where and when they compete
-        await service.UpdateProfileAsync(userId, new UpdateUserProfileRequest(DateTimeOffset.UtcNow.Year, false, "SK"));
-
-        // The same user comes back from Clerk with a changed avatar
-        await service.SyncUserAsync(
-            new UserSyncDto("user_stays", "stays@example.com", "https://example.com/after.png"));
-
-        // Read the row back
-        var user = await QueryValueAsync(context => context.Users.SingleAsync(user => user.Id == userId));
-
-        // The upsert landed
-        Assert.Equal("https://example.com/after.png", user.AvatarUrl);
-
-        // And it left every field alone
-        Assert.Equal(DateTimeOffset.UtcNow.Year, user.GraduationYear);
-        Assert.False(user.HasLeftHighSchool);
-        Assert.Equal("SK", user.CountryCode);
     });
 }

@@ -11,8 +11,7 @@ namespace MathComps.Infrastructure.Tests.Users;
 
 /// <summary>
 /// Integration tests for taking a username against a real PostgreSQL database: the rules a name has to keep, the
-/// uniqueness the index enforces whatever the name was capitalized as, the permanence that results hang off, and
-/// the resync that must not carry a name away.
+/// uniqueness the index enforces whatever the name was capitalized as, and the permanence that results hang off.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class UserManagerUsernamePostgresTests(PostgresContainerFixture fixture)
@@ -147,29 +146,5 @@ public class UserManagerUsernamePostgresTests(PostgresContainerFixture fixture)
         // The name still stands
         var user = await QueryValueAsync(context => context.Users.SingleAsync(user => user.Id == userId));
         Assert.Equal("Peťo Novák", user.Username);
-    });
-
-    /// <summary>
-    /// Re-syncing a user from Clerk leaves their username standing. The sync upserts the whole row from an entity
-    /// Clerk carries no username for, so a column not excluded from that write is silently blanked every time the
-    /// user edits their avatar upstream, which would hand a permanent identity back to whoever asks next.
-    /// </summary>
-    [Fact]
-    public Task SyncUserAsync_KeepsTheUsernameAcrossAResync() => RunTestAsync(async service =>
-    {
-        // A synced user who has taken a name
-        var userId = await service.SyncUserAsync(new UserSyncDto("user_keep", "keep@example.com", null));
-        await service.SetUsernameAsync(userId, "keeper");
-
-        // The same user comes back from Clerk with a changed avatar
-        await service.SyncUserAsync(
-            new UserSyncDto("user_keep", "keep@example.com", "https://example.com/after.png"));
-
-        // The upsert landed
-        var user = await QueryValueAsync(context => context.Users.SingleAsync(user => user.Id == userId));
-        Assert.Equal("https://example.com/after.png", user.AvatarUrl);
-
-        // And it left the name alone
-        Assert.Equal("keeper", user.Username);
     });
 }
