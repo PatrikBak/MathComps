@@ -3,7 +3,6 @@
 import { ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { categoryTextClass } from '@/components/features/hosted-competitions/components/CategoryBadge'
 import { Button } from '@/components/shared/components/Button'
 import {
   DropdownMenu,
@@ -12,15 +11,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/shared/components/DropdownMenu'
 import { cn } from '@/components/shared/utils/css-utils'
+import { hueTextStyle } from '@/components/shared/utils/hue-colors'
 import { useGridArrowKeys } from '@/hooks/use-grid-arrow-keys'
 
 import { useSelectionWrite } from '../hooks/use-selection-write'
 import { useWaitingSlotPlacement } from '../hooks/use-waiting-slot-placement'
 import { afterPlacement } from '../model/selection-edits'
-import { paperInitial, slotLabel } from '../model/selection-state'
+import { categoryHue, paperInitial, slotLabel } from '../model/selection-state'
 import type { PlacementWrite, Proposal } from '../model/selection-types'
 import { placeProposal } from '../services/selection-service'
-import { slotSquareClass, type SlotSquareState } from './CategoryMarks'
+import { slotSquareLook, type SlotSquareState } from './CategoryMarks'
 import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /**
@@ -46,8 +46,8 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
   // The slot waiting for a problem, and whether a write changing the slots is still out
   const { waitingSlot, isChangingSlots } = useSelectionWorkspace()
 
-  // The board on screen, and every proposal by id
-  const { activeBoard, proposalsById } = useLoadedSelection()
+  // The board on screen, every proposal by id, and the selection's categories
+  const { activeBoard, proposalsById, categories } = useLoadedSelection()
 
   // Putting the problem into a slot, shown ahead of the server
   const place = useSelectionWrite<PlacementWrite>({
@@ -141,10 +141,8 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
               {/* The paper, by its initial in its category's colour */}
               <span
                 title={paper.name}
-                className={cn(
-                  'w-4 shrink-0 text-xs font-semibold',
-                  categoryTextClass(paper.category)
-                )}
+                className="w-4 shrink-0 text-xs font-semibold"
+                style={hueTextStyle(categoryHue(categories, paper.category))}
               >
                 {paperInitial(paper.name)}
               </span>
@@ -172,6 +170,9 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
                   : occupant === undefined
                     ? 'empty'
                     : 'filled'
+
+                // How the slot's square looks for how the slot stands
+                const look = slotSquareLook(state, categoryHue(categories, paper.category))
 
                 return (
                   <DropdownMenuItem
@@ -202,8 +203,9 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
                       isOwnSlot
                         ? 'cursor-default focus:bg-brand/70 focus:text-brand-foreground data-[disabled]:opacity-100'
                         : 'focus:bg-foreground/15',
-                      slotSquareClass(state, paper.category)
+                      look.className
                     )}
+                    style={look.style}
                   >
                     {occupant === undefined ? index + 1 : `#${occupant.number}`}
                   </DropdownMenuItem>

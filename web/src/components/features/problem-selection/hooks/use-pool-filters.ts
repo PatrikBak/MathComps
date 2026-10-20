@@ -11,7 +11,13 @@ import {
   POOL_FILTER_PARAMS,
   toPoolFilterQuery,
 } from '../model/pool-filter-url'
-import { countActiveFilters, OPEN_POOL_FILTER, type PoolFilter } from '../model/pool-filters'
+import {
+  countActiveFilters,
+  OPEN_POOL_FILTER,
+  type PoolFilter,
+  withListedCategories,
+} from '../model/pool-filters'
+import type { SelectionCategory } from '../model/selection-types'
 
 /**
  * Return type for {@link usePoolFilters}.
@@ -31,16 +37,30 @@ export type UsePoolFiltersResult = {
  * Holds what the pool is narrowed to. All of it but {@link PoolFilter.membership} is carried in the address
  * beside the problem open over the pool, so a reload or a shared link comes back to the same pool, and a step back
  * or forward through history takes the pool to the filter that step's address holds, while the pool is hidden
- * behind a problem as well. {@link PoolFilter.membership} lasts until a reload, through every step in history.
+ * behind a problem as well. {@link PoolFilter.membership} lasts until a reload, through every step in history. Once
+ * the selection arrives, a category it doesn't list narrows nothing and leaves the address.
+ *
+ * @param categories - The selection's categories; null until its read lands.
  *
  * @returns The filter, the ways to change it, and how much of it narrows.
  */
-export function usePoolFilters(): UsePoolFiltersResult {
+export function usePoolFilters(
+  categories: readonly SelectionCategory[] | null
+): UsePoolFiltersResult {
   // What the address narrowed the pool to when the page opened
   const addressedFilter = useInitialUrlState(fromPoolFilterQuery)
 
-  // What the pool is narrowed to, the address's filter at first
-  const [filter, setFilter] = useState<PoolFilter>({ ...OPEN_POOL_FILTER, ...addressedFilter })
+  // What the pool is narrowed to as picked, the address's filter at first, whatever categories it names
+  const [pickedFilter, setPickedFilter] = useState<PoolFilter>({
+    ...OPEN_POOL_FILTER,
+    ...addressedFilter,
+  })
+
+  // What the pool is narrowed to: the picks, once the selection arrives with only the categories it lists
+  const filter = useMemo(
+    () => (categories === null ? pickedFilter : withListedCategories(pickedFilter, categories)),
+    [pickedFilter, categories]
+  )
 
   // The address carrying the filter as far as it can, every other parameter left as it stands
   useAddressSync(toPoolFilterQuery(filter), POOL_FILTER_PARAMS)
@@ -48,7 +68,7 @@ export function usePoolFilters(): UsePoolFiltersResult {
   // A function which takes the pool to the filter the address holds, keeping the board membership picked
   const followAddress = useCallback(
     () =>
-      setFilter((previous) => ({
+      setPickedFilter((previous) => ({
         ...previous,
         ...fromPoolFilterQuery(new URLSearchParams(window.location.search)),
       })),
@@ -61,12 +81,12 @@ export function usePoolFilters(): UsePoolFiltersResult {
   // A function which replaces one field, against whatever the filter is when the change lands
   const setField = useCallback(
     <TField extends keyof PoolFilter>(field: TField, value: PoolFilter[TField]) =>
-      setFilter((previous) => ({ ...previous, [field]: value })),
+      setPickedFilter((previous) => ({ ...previous, [field]: value })),
     []
   )
 
   // A function which opens every filter back up
-  const clearAll = useCallback(() => setFilter(OPEN_POOL_FILTER), [])
+  const clearAll = useCallback(() => setPickedFilter(OPEN_POOL_FILTER), [])
 
   // The filter, the ways to change it, and how much of it narrows, held steady while the filter stands
   return useMemo(

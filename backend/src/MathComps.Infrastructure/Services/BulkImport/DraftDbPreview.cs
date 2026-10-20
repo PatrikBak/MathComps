@@ -204,6 +204,15 @@ public record PlaceHoldsAnotherProposal(string Slug, int StoredNumber, int Draft
 public record PlaceHoldsNoProposal(string Slug) : ProposalConflict(Slug);
 
 /// <summary>
+/// A block recommending the problem for a category the pool's organization doesn't list.
+/// </summary>
+/// <param name="Slug"><inheritdoc cref="ProposalConflict.Slug" path="/summary"/></param>
+/// <param name="Category">The category's name, as the block gives it.</param>
+/// <param name="Listed">The names of the categories the organization does list, in the order they run.</param>
+public record ProposalCategoryUnknown(string Slug, string Category, IReadOnlyList<string> Listed)
+    : ProposalConflict(Slug);
+
+/// <summary>
 /// A read-only snapshot of how a draft would land in the database: which taxonomy entities already exist versus
 /// would need creating, whether each problem would be created, updated or left as it is, and what the import would do
 /// to every text variant whose problem slug already exists, given that text's language and originality. Produced by

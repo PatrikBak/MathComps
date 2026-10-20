@@ -2,8 +2,19 @@ import type {
   Board,
   Cycle,
   Proposal,
+  SelectionCategory,
 } from '@/components/features/problem-selection/model/selection-types'
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
+
+/**
+ * The categories the backend seeds for MathComps, in the order they run, each named after the hosted level it is.
+ * Written out, so the fake keeps those rows whatever order the app lists its levels in.
+ */
+export const SELECTION_CATEGORIES: SelectionCategory[] = [
+  { name: 'elementary', hostedCategory: 'elementary' },
+  { name: 'intermediate', hostedCategory: 'intermediate' },
+  { name: 'advanced', hostedCategory: 'advanced' },
+]
 
 /**
  * Every refusal the fake's selection writes give, past the sign-in, the membership and the rate limit, each against

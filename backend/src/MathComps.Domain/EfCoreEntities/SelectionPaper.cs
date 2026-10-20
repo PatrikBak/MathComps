@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using MathComps.Domain.Contracts.Competitions;
 
 namespace MathComps.Domain.EfCoreEntities;
 
@@ -35,10 +34,15 @@ public class SelectionPaper
     public required string Name { get; set; }
 
     /// <summary>
-    /// The category the paper fills, which picks the round it goes into when the board is finalized; null for a
-    /// paper outside the categories, which no round can take.
+    /// FK to the category the paper fills, one of its board's organization's; null for a paper outside the
+    /// categories.
     /// </summary>
-    public HostedCompetitionCategory? Category { get; set; }
+    public Guid? CategoryId { get; set; }
+
+    /// <summary>
+    /// Navigation to the category, null for a paper outside the categories.
+    /// </summary>
+    public OrganizationCategory? Category { get; set; }
 
     /// <summary>
     /// How many problems the paper asks.

@@ -48,11 +48,11 @@ export function useFinalizeChoice(
   finalize: SelectionWrite<FinalizationWrite>,
   onAnswered: () => void
 ): UseFinalizeChoiceResult {
-  // The cycles on offer
-  const { cycles } = useLoadedSelection()
+  // The cycles on offer, and the selection's categories
+  const { cycles, categories } = useLoadedSelection()
 
   // Each cycle with what keeps the papers out of its rounds
-  const options = cycles.map((cycle) => ({ cycle, misfit: cycleMisfit(board, cycle) }))
+  const options = cycles.map((cycle) => ({ cycle, misfit: cycleMisfit(board, cycle, categories) }))
 
   // The cycles the papers fit, by id
   const fittingIds = options

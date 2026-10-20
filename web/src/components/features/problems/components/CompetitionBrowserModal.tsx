@@ -7,6 +7,7 @@ import { GroupedVirtuoso } from 'react-virtuoso'
 
 import { Modal } from '@/components/shared/components/Modal'
 import { cn } from '@/components/shared/utils/css-utils'
+import { hueColor } from '@/components/shared/utils/hue-colors'
 
 import { useCompetitionBrowser } from '../hooks/use-competition-browser'
 import type {
@@ -14,16 +15,13 @@ import type {
   SeasonCompetitionsGroup,
 } from '../types/competition-browser-types'
 
-/** Golden angle in degrees — guarantees maximum hue separation between consecutive indices. */
-const GOLDEN_ANGLE = 137.508
-
 /**
- * Builds a color map for a list of seasons, assigning a distinct HSL color
- * to each group of sibling competitions using golden angle distribution.
+ * Builds a hue map for a list of seasons, giving each group of sibling competitions the next hue in the order the
+ * groups first appear.
  *
- * @param seasons The seasons to build the color map for.
+ * @param seasons The seasons to build the hue map for.
  *
- * @returns A map from color key to HSL color string.
+ * @returns A map from color key to its hue's index.
  */
 function buildHueMap(seasons: SeasonCompetitionsGroup[]): Map<string, number> {
   // Collect unique keys in order of first appearance
@@ -33,8 +31,8 @@ function buildHueMap(seasons: SeasonCompetitionsGroup[]): Map<string, number> {
     ),
   ]
 
-  // Assign golden-angle-spaced hues
-  return new Map(uniqueKeys.map((key, index) => [key, Math.round((index * GOLDEN_ANGLE) % 360)]))
+  // Each key the index it first appears at
+  return new Map(uniqueKeys.map((key, index) => [key, index]))
 }
 
 /**
@@ -115,7 +113,7 @@ type FlattenedCompetition = {
   season: SeasonCompetitionsGroup
   /** The competition */
   competition: CompetitionWithCount
-  /** The hue (0-360) the competition shares with its siblings */
+  /** The index of the hue the competition shares with its siblings */
   hue: number
 }
 
@@ -281,7 +279,7 @@ export function CompetitionBrowserModal({
                     {/* Color dot for visual grouping */}
                     <span
                       className="inline-block h-2 w-2 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: `hsl(${hue}, 55%, 62%)` }}
+                      style={{ backgroundColor: hueColor(hue) }}
                     />
 
                     {/* Competition chips, one per level down to the competition */}

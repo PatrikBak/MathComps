@@ -66,13 +66,26 @@ public record ProblemReimport(
             .Include(problem => problem.ProblemTagsAll).ThenInclude(problemTag => problemTag.Tag);
 
     /// <summary>
+    /// Makes a proposals query load what a plan compares a draft's block against beyond the proposal's own fields:
+    /// the categories it is recommended for, which a plan compares by name.
+    /// </summary>
+    /// <param name="proposals">The proposals query.</param>
+    /// <returns>The same proposals, carrying their recommendations.</returns>
+    public static IQueryable<Proposal> IncludeStoredRecommendations(IQueryable<Proposal> proposals) =>
+        // The recommendations with their categories
+        proposals.Include(proposal => proposal.Recommendations).ThenInclude(recommendation => recommendation.Category);
+
+    /// <summary>
     /// Decides what re-importing a draft problem onto the stored one does.
     /// </summary>
     /// <param name="problem">The draft problem content.</param>
     /// <param name="existing">
     /// The problem already at the draft problem's slug, loaded through <see cref="IncludeStoredContent"/>.
     /// </param>
-    /// <param name="storedProposal">The proposal filing that problem, or null when none does.</param>
+    /// <param name="storedProposal">
+    /// The proposal filing that problem, loaded through <see cref="IncludeStoredRecommendations"/>, or null when none
+    /// does.
+    /// </param>
     /// <param name="replacements">The image-ref replacements the draft's bodies are rewritten against.</param>
     /// <returns>The plan.</returns>
     public static ProblemReimport Plan(

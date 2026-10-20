@@ -712,6 +712,14 @@ describe('parseProblemMeta', () => {
     })
   })
 
+  it("accepts another organization's category names, which the bulk import checks", () => {
+    const result = parseProblemMeta(
+      'proposal:\n  number: 3\n  title: T\n  area: geometry\n  recommended: [C, B]'
+    )
+    expect(result.error).toBeNull()
+    expect(result.meta.proposal?.recommended).toEqual(['C', 'B'])
+  })
+
   it('accepts a proposal recommended for no category yet', () => {
     const result = parseProblemMeta(
       'proposal:\n  number: 19\n  title: T\n  area: algebra\n  recommended: []'
@@ -731,7 +739,8 @@ describe('parseProblemMeta', () => {
     ['a blank title', { title: ' ' }, '"proposal.title"'],
     ['a title past 200 characters', { title: 'x'.repeat(201) }, '"proposal.title"'],
     ['an area in the tag spelling', { area: 'number-theory' }, '"proposal.area"'],
-    ['a category outside the hosted ones', { recommended: ['olympiad'] }, '"proposal.recommended"'],
+    ['a category that is not a string', { recommended: [7] }, '"proposal.recommended"'],
+    ['a blank category', { recommended: [' '] }, '"proposal.recommended"'],
     [
       'a category named twice',
       { recommended: ['elementary', 'elementary'] },

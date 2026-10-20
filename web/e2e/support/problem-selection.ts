@@ -33,6 +33,7 @@ import {
   hasOpened,
   type HeldCycle,
   type HeldSelection,
+  SELECTION_CATEGORIES,
   SELECTION_WRITE_REFUSALS,
   SelectionWriteRefused,
   takesBoard,
@@ -274,7 +275,7 @@ export const ON_OFFER_COUNT = ON_OFFER.length
  *
  * @param index - Which of the fake's papers it is, which its id is built from.
  * @param name - What the paper is called.
- * @param category - The category it fills; null for a paper outside the categories.
+ * @param category - The category it fills, by name; null for a paper outside the categories.
  * @param slots - The problem in each slot, null where the slot stands empty.
  *
  * @returns The paper.
@@ -282,7 +283,7 @@ export const ON_OFFER_COUNT = ON_OFFER.length
 function paperOf(
   index: number,
   name: string,
-  category: HostedCompetitionCategory | null,
+  category: string | null,
   slots: (Proposal | null)[]
 ): Paper {
   // The paper, its id built from its index so every paper gets its own
@@ -300,7 +301,7 @@ function paperOf(
  * @param index - Which of the fake's cycles it is, which its id is built from.
  * @param name - What it is called.
  * @param days - How many days from now its rounds open.
- * @param categories - The categories of its rounds.
+ * @param categories - The hosted levels of its rounds.
  * @param problemCount - How many problems each of its rounds takes.
  *
  * @returns The cycle, its rounds still empty.
@@ -667,8 +668,9 @@ function heldConversations(memory: SelectionMemory, proposals: Proposal[]): Held
 }
 
 /**
- * The selection as the backend reads it: the problems, the boards, the cycles a board can go into, every
- * conversation held about the problems in the shape the list of them takes, and the languages the problems need.
+ * The selection as the backend reads it: the organization's categories, the problems, the boards, the cycles a board
+ * can go into, every conversation held about the problems in the shape the list of them takes, and the languages the
+ * problems need.
  *
  * @param memory - What the backend keeps.
  * @param readable - The problems, the boards and the cycles the read shows.
@@ -698,8 +700,10 @@ function selectionOf(
     })
   )
 
-  // The problems, the boards, the cycles, the conversations newest first, and the languages the problems need
+  // The categories, the problems, the boards, the cycles, the conversations newest first, and the languages the
+  // problems need
   return {
+    categories: SELECTION_CATEGORIES,
     proposals,
     boards,
     cycles,

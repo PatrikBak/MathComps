@@ -169,7 +169,7 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
         }, cancellationToken);
 
     /// <summary>
-    /// Reads a draft board with its papers and their slot rows, tracked.
+    /// Reads a draft board with its papers, their categories and their slot rows, tracked.
     /// </summary>
     /// <param name="dbContext">The write's context.</param>
     /// <param name="boardId">The board.</param>
@@ -185,6 +185,7 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
         var board = await dbContext.SelectionBoards
             .Include(candidate => candidate.HostedGroup)
             .Include(candidate => candidate.Papers).ThenInclude(paper => paper.Slots)
+            .Include(candidate => candidate.Papers).ThenInclude(paper => paper.Category)
             .FirstOrDefaultAsync(candidate => candidate.Id == boardId, cancellationToken)
             ?? throw new SelectionTargetNotFoundException();
 
@@ -277,9 +278,10 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
     }
 
     /// <summary>
-    /// Pairs a draft's papers one to one with the rounds of a group that still takes a board, by category.
+    /// Pairs a draft's papers one to one with the rounds of a group that still takes a board, by the hosted level each
+    /// paper's category is.
     /// </summary>
-    /// <param name="board">The board, with its papers and slot rows.</param>
+    /// <param name="board">The board, with its papers, their categories and slot rows.</param>
     /// <param name="group">The group.</param>
     /// <param name="rounds">The group's rounds, with their competitions and problems.</param>
     /// <param name="now">The instant the group's opening is read against.</param>
@@ -295,28 +297,29 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
                 group.OpensAt, group.ClosesAt, [.. rounds.Select(round => round.Problems.Count)], now))
             throw new SelectionFinalizeBlockedException();
 
-        // The category each round runs at
-        var roundCategories = rounds.Select(round => HostedTaxonomy.CategoryOf(round.Competition.Path)).ToList();
+        // The hosted level each round runs at
+        var roundLevels = rounds.Select(round => HostedTaxonomy.CategoryOf(round.Competition.Path)).ToList();
 
-        // The category each paper fills
-        var paperCategories = board.Papers.Select(paper => paper.Category).ToList();
+        // The hosted level each paper's category is
+        var paperLevels = board.Papers.Select(paper => paper.Category?.HostedCategory).ToList();
 
-        // Every round at a category of its own, and the papers filling exactly those categories, one each
-        if (roundCategories.Contains(null)
-            || roundCategories.Distinct().Count() != roundCategories.Count
-            || !paperCategories.Order().SequenceEqual(roundCategories.Order()))
+        // Every round at a hosted level of its own, and the papers' categories at exactly those levels, one each
+        if (roundLevels.Contains(null)
+            || roundLevels.Distinct().Count() != roundLevels.Count
+            || !paperLevels.Order().SequenceEqual(roundLevels.Order()))
             throw new SelectionFinalizeBlockedException();
 
         // Every paper asking as many problems as the group's competitions do, and every slot filled
         if (board.Papers.Any(paper => paper.SlotCount != group.ProblemCount || paper.Slots.Count != paper.SlotCount))
             throw new SelectionFinalizeBlockedException();
 
-        // Each paper with the round of its category
+        // Each paper with the round of its category's hosted level
         return
         [
             .. board.Papers.Select(paper => (
                 paper,
-                rounds.Single(round => HostedTaxonomy.CategoryOf(round.Competition.Path) == paper.Category))),
+                rounds.Single(round =>
+                    HostedTaxonomy.CategoryOf(round.Competition.Path) == paper.Category?.HostedCategory))),
         ];
     }
 

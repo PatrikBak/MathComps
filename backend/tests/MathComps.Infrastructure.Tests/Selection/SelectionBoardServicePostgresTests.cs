@@ -164,9 +164,9 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
             await SlotAsync(_octoberBoardId, HostedCompetitionCategory.Elementary, 3), SlotDirection.Down)));
 
     /// <summary>
-    /// Finalizing moves each paper's problems into the round of its category, in slot order and with the slugs
-    /// those positions call for. The board is then tied to the group, its slot rows gone, and the problems leave
-    /// every draft they still stood on.
+    /// Finalizing moves each paper's problems into the round of its category's hosted level, in slot order and with
+    /// the slugs those positions call for. The board is then tied to the group, its slot rows gone, and the problems
+    /// leave every draft they still stood on.
     /// </summary>
     [Fact]
     public Task Finalizing_moves_the_papers_into_the_cycles_rounds() => RunTestAsync(async service =>
@@ -236,12 +236,10 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     {
         // The November group opened an hour ago, its rounds still empty
         await QueryAsync(async context =>
-        {
             await context.HostedGroups
                 .Where(group => group.Id == _novemberId)
                 .ExecuteUpdateAsync(setters => setters.SetProperty(
-                    group => group.OpensAt, DateTimeOffset.UtcNow.AddHours(-1)));
-        });
+                    group => group.OpensAt, DateTimeOffset.UtcNow.AddHours(-1))));
 
         // The full October board into it
         await Assert.ThrowsAsync<SelectionFinalizeBlockedException>(
@@ -252,23 +250,18 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
-    /// Every paper has to fill a round of its own category, so a paper outside the categories leaves a round
-    /// with nothing to fill it.
+    /// Every paper has to fill the round of its category's hosted level, so a paper whose category is no hosted
+    /// level leaves a round with nothing to fill it.
     /// </summary>
     [Fact]
     public Task Finalizing_a_paper_no_round_fits_is_refused() => RunTestAsync(async service =>
     {
-        // The October board's advanced paper
-        var paperId = await PaperIdAsync(_octoberBoardId, HostedCompetitionCategory.Advanced);
-
-        // The paper taken out of the categories
+        // The advanced category made one no hosted round runs
         await QueryAsync(async context =>
-        {
-            await context.SelectionPapers
-                .Where(paper => paper.Id == paperId)
+            await context.OrganizationCategories
+                .Where(category => category.Name == "advanced")
                 .ExecuteUpdateAsync(setters =>
-                    setters.SetProperty(paper => paper.Category, (HostedCompetitionCategory?)null));
-        });
+                    setters.SetProperty(category => category.HostedCategory, (HostedCompetitionCategory?)null)));
 
         // So it pairs with no round
         await Assert.ThrowsAsync<SelectionFinalizeBlockedException>(
@@ -332,15 +325,13 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     {
         // Problem 4's Czech solution blanked to a single space
         await QueryAsync(async context =>
-        {
             await context.ProblemTexts
                 .Where(text => text.ProblemId == _proposals[4]
                     && text.DocumentType == DocumentType.Solution
                     && text.Language == Language.CS)
                 .ExecuteUpdateAsync(setters => setters
                     .SetProperty(text => text.MarkdownText, " ")
-                    .SetProperty(text => text.RawText, (string?)null));
-        });
+                    .SetProperty(text => text.RawText, (string?)null)));
 
         // Refused like a missing one
         await Assert.ThrowsAsync<SelectionProblemIncompleteException>(
@@ -371,12 +362,10 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     {
         // Problem 14, on no board, drifted onto the slug of the elementary round's first position
         await QueryAsync(async context =>
-        {
             await context.Problems
                 .Where(problem => problem.Id == _proposals[14])
                 .ExecuteUpdateAsync(setters =>
-                    setters.SetProperty(problem => problem.Slug, "76-mathcomps-elementary-october-1"));
-        });
+                    setters.SetProperty(problem => problem.Slug, "76-mathcomps-elementary-october-1")));
 
         // The October board, whose first elementary problem needs that slug
         await Assert.ThrowsAsync<ProblemSlugTakenException>(
@@ -433,11 +422,9 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     {
         // The spare board, as though it had been finalized into the September group
         await QueryAsync(async context =>
-        {
             await context.SelectionBoards
                 .Where(board => board.Id == _spareBoardId)
-                .ExecuteUpdateAsync(setters => setters.SetProperty(board => board.HostedGroupId, _septemberId));
-        });
+                .ExecuteUpdateAsync(setters => setters.SetProperty(board => board.HostedGroupId, _septemberId)));
 
         // Emptying the spare board's first elementary slot, refused for the opened group
         await Assert.ThrowsAsync<SelectionBoardOpenedException>(async () => await service.ClearSlotAsync(
@@ -487,39 +474,39 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     }
 
     /// <summary>
-    /// Addresses one slot of a board's paper of a category.
+    /// Addresses one slot of a board's paper at a hosted level.
     /// </summary>
     /// <param name="boardId">The board.</param>
-    /// <param name="category">The paper's category.</param>
+    /// <param name="level">The hosted level the paper's category is.</param>
     /// <param name="index">The slot, from zero.</param>
     /// <returns>The slot's address.</returns>
-    private async Task<SlotAddress> SlotAsync(Guid boardId, HostedCompetitionCategory category, int index) =>
-        // The address, naming the board's paper of that category
-        new(boardId, await PaperIdAsync(boardId, category), index);
+    private async Task<SlotAddress> SlotAsync(Guid boardId, HostedCompetitionCategory level, int index) =>
+        // The address, naming the board's paper at that level
+        new(boardId, await PaperIdAsync(boardId, level), index);
 
     /// <summary>
-    /// Reads the id of a board's paper of a category.
+    /// Reads the id of a board's paper at a hosted level.
     /// </summary>
     /// <param name="boardId">The board.</param>
-    /// <param name="category">The paper's category.</param>
+    /// <param name="level">The hosted level the paper's category is.</param>
     /// <returns>The paper's id.</returns>
-    private Task<Guid> PaperIdAsync(Guid boardId, HostedCompetitionCategory category) =>
-        // The board's one paper of that category
+    private Task<Guid> PaperIdAsync(Guid boardId, HostedCompetitionCategory level) =>
+        // The board's one paper of a category at that level
         QueryValueAsync(context => context.SelectionPapers
-            .Where(paper => paper.BoardId == boardId && paper.Category == category)
+            .Where(paper => paper.BoardId == boardId && paper.Category!.HostedCategory == level)
             .Select(paper => paper.Id)
             .SingleAsync());
 
     /// <summary>
-    /// Reads what stands in each slot of a draft's paper of a category.
+    /// Reads what stands in each slot of a draft's paper at a hosted level.
     /// </summary>
     /// <param name="boardId">The board.</param>
-    /// <param name="category">The paper's category.</param>
+    /// <param name="level">The hosted level the paper's category is.</param>
     /// <returns>The problem in each slot, null where it stands empty.</returns>
-    private async Task<IReadOnlyList<Guid?>> DraftSlotsAsync(Guid boardId, HostedCompetitionCategory category)
+    private async Task<IReadOnlyList<Guid?>> DraftSlotsAsync(Guid boardId, HostedCompetitionCategory level)
     {
-        // The board's paper of that category
-        var paperId = await PaperIdAsync(boardId, category);
+        // The board's paper at that level
+        var paperId = await PaperIdAsync(boardId, level);
 
         // The paper's slot rows
         var rows = await QueryValueAsync(context => context.SelectionSlots
@@ -537,23 +524,21 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     /// Puts a problem straight into a draft's slot row, standing in for a board the service never built.
     /// </summary>
     /// <param name="boardId">The board.</param>
-    /// <param name="category">The paper's category.</param>
+    /// <param name="level">The hosted level the paper's category is.</param>
     /// <param name="index">The slot, from zero.</param>
     /// <param name="problemId">The problem.</param>
     /// <returns>A task that completes once the row is written.</returns>
     private async Task SetDraftSlotAsync(
-        Guid boardId, HostedCompetitionCategory category, int index, Guid problemId)
+        Guid boardId, HostedCompetitionCategory level, int index, Guid problemId)
     {
         // The paper holding the slot
-        var paperId = await PaperIdAsync(boardId, category);
+        var paperId = await PaperIdAsync(boardId, level);
 
         // The row repointed
         await QueryAsync(async context =>
-        {
             await context.SelectionSlots
                 .Where(slot => slot.PaperId == paperId && slot.Position == index)
-                .ExecuteUpdateAsync(setters => setters.SetProperty(slot => slot.ProblemId, problemId));
-        });
+                .ExecuteUpdateAsync(setters => setters.SetProperty(slot => slot.ProblemId, problemId)));
     }
 
     /// <summary>

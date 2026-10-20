@@ -327,7 +327,6 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             Number = 21,
             Title = "Proposal 21",
             Area = ProposalArea.Algebra,
-            Recommended = [],
         });
 
         // Commit the seed.
@@ -823,7 +822,6 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 Number = 22,
                 Title = "Proposal 22",
                 Area = ProposalArea.Algebra,
-                Recommended = [],
             });
 
             // Commit the proposal

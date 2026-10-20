@@ -784,6 +784,24 @@ test.describe('finalizing a board', () => {
     await expect(finalizeButton(page)).not.toHaveAttribute('aria-disabled', 'true')
   })
 
+  test('offers no Finalize on a board with a paper no round takes', async ({ page }) => {
+    // A reviewer whose first draft's papers all go into rounds, and whose later one carries a spare paper outside
+    // the categories
+    await stubSelection(page, 'selection')
+
+    // The pool, the first draft on screen
+    await openPool(page)
+
+    // Offering Finalize
+    await expect(finalizeButton(page)).toBeVisible()
+
+    // The later draft, on screen
+    await pickBoard(page, DRAFT_BOARD, LATER_DRAFT)
+
+    // Offering none
+    await expect(finalizeButton(page)).toHaveCount(0)
+  })
+
   test('sends the board into the cycle picked, which takes its problems out of the pool and off every other draft', async ({
     page,
   }) => {

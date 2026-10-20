@@ -105,7 +105,7 @@ proposal:
   number: 14 # the number reviewers quote it by, unique across the pool
   title: Chameleons on the island # working name, at most 200 characters, never shown to a student
   area: combinatorics # algebra | combinatorics | geometry | numberTheory
-  recommended: [intermediate] # elementary | intermediate | advanced, may be empty
+  recommended: [intermediate] # the pool's organization's categories by name, may be empty
 ```
 
 Every field is required, spelled as the API spells it. Two problems of one draft naming the same number are refused (`proposal-number-duplicate`). The first import writes the whole block. A re-import refreshes the title, the area and the categories. Leaving the block out of a re-import leaves the proposal untouched, like any absent key. Everything the block can clash with in the database is checked by the [bulk-import CLI](../../backend/src/MathComps.Cli.BulkImport/README.md#filling-the-pool).

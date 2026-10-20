@@ -82,10 +82,10 @@ public sealed class ProblemSelectionService(
             .ToListAsync(cancellationToken);
 
         // Every proposal not deleted and outside the groups that have opened, lowest number first, with where its
-        // problem sits, every text it carries, the language it was first written in, and every rating it was given,
-        // by the raters' usernames with a rater showing none last. Split, because the texts and the ratings are two
-        // collections off one row: joined in a single query the database would return every pairing of them, each
-        // repeating the text.
+        // problem sits, the categories it is recommended for in the order they run, every text it carries, the
+        // language it was first written in, and every rating it was given, by the raters' usernames with a rater
+        // showing none last. Split, because its recommendations, texts and ratings are each a collection off one row:
+        // joined in a single query the database would return every pairing of them, each repeating the text.
         var proposals = await dbContext.Proposals
             .AsNoTracking()
             .AsSplitQuery()
@@ -97,7 +97,10 @@ public sealed class ProblemSelectionService(
                 proposal.Number,
                 proposal.Title,
                 proposal.Area,
-                proposal.Recommended,
+                Recommended = proposal.Recommendations
+                    .OrderBy(recommendation => recommendation.Category.Position)
+                    .Select(recommendation => recommendation.Category.Name)
+                    .ToList(),
                 proposal.IsSetAside,
                 CompetitionPath = proposal.Problem.Round.Competition.Path,
                 GroupOpensAt = (DateTimeOffset?)proposal.Problem.Round.HostedGroup!.OpensAt,
@@ -154,7 +157,7 @@ public sealed class ProblemSelectionService(
                     && (text.MarkdownText ?? text.RawText) == defense.DefenseSession.ProblemStatement)))
             .ToListAsync(cancellationToken);
 
-        // Every board with its papers and their slot rows, oldest first.
+        // Every board with its papers, each paper's category and slot rows, oldest first.
         var boards = await dbContext.SelectionBoards
             .AsNoTracking()
             .OrderBy(board => board.CreatedAt)
@@ -170,7 +173,8 @@ public sealed class ProblemSelectionService(
                     {
                         paper.Id,
                         paper.Name,
-                        paper.Category,
+                        Category = (string?)paper.Category!.Name,
+                        paper.Category!.HostedCategory,
                         paper.SlotCount,
                         Slots = paper.Slots.Select(slot => new { slot.Position, slot.ProblemId }).ToList(),
                     })
@@ -194,6 +198,14 @@ public sealed class ProblemSelectionService(
                 conversation.StartedAt))
             .ToList();
 
+        // The MathComps organization's categories, in the order they run.
+        var categories = await dbContext.OrganizationCategories
+            .AsNoTracking()
+            .Where(category => category.Organization.Slug == Organization.MathCompsSlug)
+            .OrderBy(category => category.Position)
+            .Select(category => new SelectionCategoryDto(category.Name, category.HostedCategory))
+            .ToListAsync(cancellationToken);
+
         // Whether the MathComps organization's problems need every language.
         var needsEveryLanguage = await dbContext.Organizations
             .Where(organization => organization.Slug == Organization.MathCompsSlug)
@@ -202,6 +214,7 @@ public sealed class ProblemSelectionService(
 
         // The selection.
         return new SelectionDto(
+            categories,
             [
                 .. selected.Select(proposal => new ProposalDto(
                     proposal.ProblemId,
@@ -229,11 +242,11 @@ public sealed class ProblemSelectionService(
                                 paper.Category,
                                 // The paper's slots, by whether its board has been finalized
                                 board.HostedGroupId is { } groupId
-                                    // A finalized paper's slots are its group's round of the paper's category,
-                                    // empty where the group runs none
+                                    // A finalized paper's slots are its group's round of the hosted level its
+                                    // category is, empty where the group runs none
                                     ? groupsById[groupId].Rounds
                                         .FirstOrDefault(round =>
-                                            HostedTaxonomy.CategoryOf(round.CompetitionPath) == paper.Category)
+                                            HostedTaxonomy.CategoryOf(round.CompetitionPath) == paper.HostedCategory)
                                         ?.Problems.Select(problemId => (Guid?)problemId).ToList()
                                     ?? [.. Enumerable.Repeat<Guid?>(null, paper.SlotCount)]
                                     // A draft paper's slots are its slot rows, an empty slot holding none

@@ -54,14 +54,14 @@ describe('fromPoolFilterQuery', () => {
     expect(read(toPoolFilterQuery(FULLY_NARROWED))).toEqual(FULLY_NARROWED)
   })
 
-  it('keeps only the options a facet has, in the order it lists them', () => {
-    // Read off an address naming categories out of order and twice, and values no facet has an option for
+  it('keeps only the areas the facet has, and each category once as the address names it', () => {
+    // Read off an address naming categories out of order and twice, and an area the facet has no option for
     const filter = read(
       'category=advanced&category=bogus&category=elementary&category=advanced&area=nope'
     )
 
-    // The real ones, once each and as the facets list them
-    expect(filter.categories).toEqual(['elementary', 'advanced'])
+    // Every category once, the selection's own categories not known yet, and no area
+    expect(filter.categories).toEqual(['advanced', 'bogus', 'elementary'])
     expect(filter.areas).toEqual([])
   })
 })

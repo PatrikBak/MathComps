@@ -1,6 +1,5 @@
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using System.Collections.Immutable;
-using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
@@ -1472,16 +1471,13 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// A pick written in English alone goes into the pool. Its problem lands with the English text as the original.
-    /// Its proposal is filed under the block's number, title, area and categories, the categories in the order they
-    /// run, live and not set aside.
+    /// Its proposal is filed under the block's number, title, area and categories, live and not set aside.
     /// </summary>
     [Fact]
     public Task An_english_only_pick_enters_the_pool_with_its_proposal() => RunTestAsync(async service =>
     {
-        // #14 at place 8, recommended for the advanced and the elementary papers.
-        var pick = Pick(8, new DraftProposal(
-            14, "Chameleons", ProposalArea.Combinatorics,
-            [HostedCompetitionCategory.Advanced, HostedCompetitionCategory.Elementary]));
+        // #14 at place 8, recommended for advanced and elementary.
+        var pick = Pick(8, new DraftProposal(14, "Chameleons", ProposalArea.Combinatorics, ["advanced", "elementary"]));
 
         // Import it.
         await ApplyPoolAsync(service, pick);
@@ -1498,14 +1494,13 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             Assert.Equal(2, texts.Count);
             Assert.All(texts, text => Assert.Equal((Language.EN, true), (text.Language, text.IsOriginal)));
 
-            // The proposal filing it carries the block, its categories in the order they run.
+            // The proposal filing it carries the block.
             var proposal = await context.Proposals.SingleAsync();
             Assert.Equal(problem.Id, proposal.ProblemId);
             Assert.Equal(14, proposal.Number);
             Assert.Equal("Chameleons", proposal.Title);
             Assert.Equal(ProposalArea.Combinatorics, proposal.Area);
-            Assert.Equal(
-                [HostedCompetitionCategory.Elementary, HostedCompetitionCategory.Advanced], proposal.Recommended);
+            Assert.Equal(["elementary", "advanced"], await RecommendedAsync(context));
 
             // It enters the pool live, for every reviewer to see.
             Assert.False(proposal.IsSetAside);
@@ -1522,7 +1517,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Import #14 at place 8, recommended for the elementary paper.
         await ApplyPoolAsync(service, Pick(8, new DraftProposal(
-            14, "Chameleons", ProposalArea.Combinatorics, [HostedCompetitionCategory.Elementary])));
+            14, "Chameleons", ProposalArea.Combinatorics, ["elementary"])));
 
         // The reviewers set it aside.
         await QueryAsync(async context =>
@@ -1534,10 +1529,9 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             await context.SaveChangesAsync();
         });
 
-        // Re-import it under a new title and area, recommended for the advanced and the intermediate papers.
+        // Re-import it under a new title and area, recommended for advanced and intermediate.
         var second = await ApplyPoolAsync(service, Pick(8, new DraftProposal(
-            14, "Chameleons on the island", ProposalArea.Algebra,
-            [HostedCompetitionCategory.Advanced, HostedCompetitionCategory.Intermediate])));
+            14, "Chameleons on the island", ProposalArea.Algebra, ["advanced", "intermediate"])));
 
         // The proposal moved, so the problem counts as updated.
         Assert.Equal(1, second.ProblemsUpdated);
@@ -1545,16 +1539,52 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         // Read back the proposal.
         await QueryAsync(async context =>
         {
-            // The title, the area and the categories are the draft's, the categories in the order they run.
+            // The title, the area and the categories are the draft's, elementary gone.
             var proposal = await context.Proposals.SingleAsync();
             Assert.Equal("Chameleons on the island", proposal.Title);
             Assert.Equal(ProposalArea.Algebra, proposal.Area);
-            Assert.Equal(
-                [HostedCompetitionCategory.Intermediate, HostedCompetitionCategory.Advanced], proposal.Recommended);
+            Assert.Equal(["intermediate", "advanced"], await RecommendedAsync(context));
 
             // The set-aside mark is still the reviewers'.
             Assert.True(proposal.IsSetAside);
         });
+    });
+
+    /// <summary>
+    /// A re-import naming the stored categories in either order leaves the proposal as it is. A proposal's categories
+    /// are a set, so comparing them in order would rewrite a proposal of several categories on every re-import.
+    /// </summary>
+    [Fact]
+    public Task A_reimport_naming_the_categories_in_any_order_changes_nothing() => RunTestAsync(async service =>
+    {
+        // Import #14 at place 8, recommended for advanced and elementary.
+        await ApplyPoolAsync(service, Pick(8, new DraftProposal(
+            14, "Chameleons", ProposalArea.Combinatorics, ["advanced", "elementary"])));
+
+        // Re-import it naming the two in the same order.
+        var sameOrder = await ApplyPoolAsync(service, Pick(8, new DraftProposal(
+            14, "Chameleons", ProposalArea.Combinatorics, ["advanced", "elementary"])));
+
+        // Re-import it naming them the other way round.
+        var otherOrder = await ApplyPoolAsync(service, Pick(8, new DraftProposal(
+            14, "Chameleons", ProposalArea.Combinatorics, ["elementary", "advanced"])));
+
+        // Both leave the problem unchanged.
+        Assert.Equal((1, 1), (sameOrder.ProblemsUnchanged, otherOrder.ProblemsUnchanged));
+    });
+
+    /// <summary>
+    /// A pick recommended for a category the pool's organization doesn't list is refused, never filed under the
+    /// categories that do resolve. A clean validate never lets one through, so this proves the guard behind it fires.
+    /// </summary>
+    [Fact]
+    public Task A_category_the_organization_does_not_list_is_rejected() => RunTestAsync(async service =>
+    {
+        // #14 at place 8, recommended for elementary and for a category nobody lists.
+        var pick = Pick(8, new DraftProposal(14, "Chameleons", ProposalArea.Combinatorics, ["elementary", "nowhere"]));
+
+        // Importing it is refused.
+        await Assert.ThrowsAsync<InvalidOperationException>(() => ApplyPoolAsync(service, pick));
     });
 
     /// <summary>
@@ -1619,18 +1649,14 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     {
         // #14 and #15, both recommended for the elementary paper.
         await ApplyPoolAsync(service,
-            Pick(8, new DraftProposal(14, "Chameleons", ProposalArea.Combinatorics,
-                [HostedCompetitionCategory.Elementary])),
-            Pick(9, new DraftProposal(15, "Lattice", ProposalArea.Geometry,
-                [HostedCompetitionCategory.Elementary])));
+            Pick(8, new DraftProposal(14, "Chameleons", ProposalArea.Combinatorics, ["elementary"])),
+            Pick(9, new DraftProposal(15, "Lattice", ProposalArea.Geometry, ["elementary"])));
 
-        // #14 as it stands, #15 recommended for the advanced paper instead, and a new #16.
+        // #14 as it stands, #15 recommended for advanced instead, and a new #16.
         DraftProblemContent[] problems =
         [
-            Pick(8, new DraftProposal(14, "Chameleons", ProposalArea.Combinatorics,
-                [HostedCompetitionCategory.Elementary])),
-            Pick(9, new DraftProposal(15, "Lattice", ProposalArea.Geometry,
-                [HostedCompetitionCategory.Advanced])),
+            Pick(8, new DraftProposal(14, "Chameleons", ProposalArea.Combinatorics, ["elementary"])),
+            Pick(9, new DraftProposal(15, "Lattice", ProposalArea.Geometry, ["advanced"])),
             Pick(10, new DraftProposal(16, "Coins", ProposalArea.NumberTheory, []))
         ];
 
@@ -1763,6 +1789,18 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     private static DraftProblemContent Pick(int order, DraftProposal proposal) =>
         new(order, HasSidecar: true, Authors: [], SolutionLink: null, Tags: null, proposal,
             Texts: [Original(Language.EN, "statement", "solution")], Images: []);
+
+    /// <summary>
+    /// Reads the categories the one proposal imported is recommended for.
+    /// </summary>
+    /// <param name="context">The reading context.</param>
+    /// <returns>The categories' names, in the order the categories run.</returns>
+    private static Task<List<string>> RecommendedAsync(MathCompsDbContext context) =>
+        // Every recommendation there is, the test having imported one proposal
+        context.ProposalRecommendations
+            .OrderBy(recommendation => recommendation.Category.Position)
+            .Select(recommendation => recommendation.Category.Name)
+            .ToListAsync();
 
     /// <summary>
     /// Builds a draft problem with a single author and no images.

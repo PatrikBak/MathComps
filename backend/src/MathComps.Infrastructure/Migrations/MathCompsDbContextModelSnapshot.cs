@@ -1053,6 +1053,52 @@ namespace MathComps.Infrastructure.Migrations
                     b.ToTable("organizations", (string)null);
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.OrganizationCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<HostedCompetitionCategory?>("HostedCategory")
+                        .HasColumnType("hosted_competition_category")
+                        .HasColumnName("hosted_category");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer")
+                        .HasColumnName("position");
+
+                    b.HasKey("Id")
+                        .HasName("pk_organization_categories");
+
+                    b.HasIndex("OrganizationId", "HostedCategory")
+                        .IsUnique()
+                        .HasDatabaseName("ux_organization_category_organization_id_hosted_category")
+                        .HasFilter("\"hosted_category\" IS NOT NULL");
+
+                    b.HasIndex("OrganizationId", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("ux_organization_category_organization_id_name");
+
+                    b.HasIndex("OrganizationId", "Position")
+                        .IsUnique()
+                        .HasDatabaseName("ux_organization_category_organization_id_position");
+
+                    b.ToTable("organization_categories", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_organization_category_position_non_negative", "\"position\" >= 0");
+                        });
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.OrganizationMember", b =>
                 {
                     b.Property<Guid>("OrganizationId")
@@ -1556,11 +1602,6 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("organization_id");
 
-                    b.PrimitiveCollection<List<HostedCompetitionCategory>>("Recommended")
-                        .IsRequired()
-                        .HasColumnType("hosted_competition_category[]")
-                        .HasColumnName("recommended");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -1637,6 +1678,25 @@ namespace MathComps.Infrastructure.Migrations
 
                             t.HasCheckConstraint("ck_proposal_rating_has_a_score", "\"beauty\" IS NOT NULL OR \"difficulty\" IS NOT NULL");
                         });
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProposalRecommendation", b =>
+                {
+                    b.Property<Guid>("ProposalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("proposal_id");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("category_id");
+
+                    b.HasKey("ProposalId", "CategoryId")
+                        .HasName("pk_proposal_recommendations");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("ix_proposal_recommendations_category_id");
+
+                    b.ToTable("proposal_recommendations", (string)null);
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Round", b =>
@@ -1761,9 +1821,9 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("board_id");
 
-                    b.Property<HostedCompetitionCategory?>("Category")
-                        .HasColumnType("hosted_competition_category")
-                        .HasColumnName("category");
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("category_id");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1781,6 +1841,9 @@ namespace MathComps.Infrastructure.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_selection_papers");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("ix_selection_papers_category_id");
 
                     b.HasIndex("BoardId", "Position")
                         .IsUnique()
@@ -2406,6 +2469,18 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("NewsArticle");
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.OrganizationCategory", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Organization", "Organization")
+                        .WithMany("Categories")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_organization_categories_organizations_organization_id");
+
+                    b.Navigation("Organization");
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.OrganizationMember", b =>
                 {
                     b.HasOne("MathComps.Domain.EfCoreEntities.Organization", "Organization")
@@ -2715,6 +2790,27 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProposalRecommendation", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.OrganizationCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_proposal_recommendations_organization_categories_category_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Proposal", "Proposal")
+                        .WithMany("Recommendations")
+                        .HasForeignKey("ProposalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_proposal_recommendations_proposals_proposal_id");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Proposal");
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Round", b =>
                 {
                     b.HasOne("MathComps.Domain.EfCoreEntities.Competition", "Competition")
@@ -2773,7 +2869,15 @@ namespace MathComps.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_selection_papers_selection_boards_board_id");
 
+                    b.HasOne("MathComps.Domain.EfCoreEntities.OrganizationCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_selection_papers_organization_categories_category_id");
+
                     b.Navigation("Board");
+
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.SelectionPaperComment", b =>
@@ -2915,6 +3019,8 @@ namespace MathComps.Infrastructure.Migrations
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Organization", b =>
                 {
+                    b.Navigation("Categories");
+
                     b.Navigation("Members");
                 });
 
@@ -2949,6 +3055,8 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("Ratings");
+
+                    b.Navigation("Recommendations");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Round", b =>

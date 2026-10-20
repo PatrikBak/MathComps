@@ -53,7 +53,7 @@ function board(id: string, slots: (string | null)[]): Board {
 }
 
 /**
- * A selection holding the given boards and proposals, and nothing else.
+ * A selection holding MathComps' categories and the given boards and proposals, and nothing else.
  *
  * @param boards - The boards.
  * @param proposals - The proposals.
@@ -61,8 +61,20 @@ function board(id: string, slots: (string | null)[]): Board {
  * @returns The selection.
  */
 function selection(boards: Board[], proposals: Proposal[]): SelectionData {
-  // The boards and the proposals, every other part of the selection empty, and every language needed
-  return { proposals, boards, cycles: [], conversations: [], needsEveryLanguage: true }
+  // MathComps' categories, the boards and the proposals, every other part of the selection empty, and every
+  // language needed
+  return {
+    categories: [
+      { name: 'elementary', hostedCategory: 'elementary' },
+      { name: 'intermediate', hostedCategory: 'intermediate' },
+      { name: 'advanced', hostedCategory: 'advanced' },
+    ],
+    proposals,
+    boards,
+    cycles: [],
+    conversations: [],
+    needsEveryLanguage: true,
+  }
 }
 
 /**
@@ -231,19 +243,26 @@ describe('afterDeletion', () => {
 })
 
 describe('afterRecommendation', () => {
-  it('keeps the categories in the order they run whichever one is switched on', () => {
-    // a, recommended for advanced alone
-    const before = selection([], [{ ...proposal('a'), recommended: ['advanced'] }])
+  it('keeps the categories in the order the organization runs them whichever one is switched on', () => {
+    // a, recommended for A alone, in a selection whose categories run C, B, A
+    const before: SelectionData = {
+      ...selection([], [{ ...proposal('a'), recommended: ['A'] }]),
+      categories: [
+        { name: 'C', hostedCategory: null },
+        { name: 'B', hostedCategory: null },
+        { name: 'A', hostedCategory: null },
+      ],
+    }
 
-    // Elementary goes on
+    // C goes on
     const after = afterRecommendation(before, {
       proposalId: 'a',
-      category: 'elementary',
+      category: 'C',
       isRecommended: true,
     })
 
-    // Elementary comes first, as the categories run
-    expect(after.proposals[0]?.recommended).toEqual(['elementary', 'advanced'])
+    // C comes first, as the categories run
+    expect(after.proposals[0]?.recommended).toEqual(['C', 'A'])
   })
 
   it('takes one category back and keeps the rest', () => {

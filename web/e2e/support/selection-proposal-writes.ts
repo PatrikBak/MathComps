@@ -1,4 +1,3 @@
-import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import {
   type Proposal,
   RATING_ASPECTS,
@@ -15,6 +14,7 @@ import {
   liveProposal,
   readFields,
   refuseWith,
+  SELECTION_CATEGORIES,
 } from './selection-writes'
 
 /**
@@ -23,12 +23,6 @@ import {
 export const PROPOSAL_WRITE_PATH = new RegExp(
   `^/problem-selection/proposals/(${GUID})(/set-aside|/recommended|/rating)?$`
 )
-
-/**
- * Every category, in the order the backend's enum declares them, which a proposal's recommendations keep. Written
- * out rather than imported, so the fake keeps the backend's order whatever the app's own list does.
- */
-const CATEGORIES: HostedCompetitionCategory[] = ['elementary', 'intermediate', 'advanced']
 
 /** The reader, as the backend names the reviewer reading the selection. */
 export const READER: UserIdentity = { id: 'selection-reader', username: READER_NAME, email: null }
@@ -52,8 +46,8 @@ const SCORES: number[] = Array.from({ length: 41 }, (_slot, tenth) => (10 + tent
  * A proposal's recommendation for one category, as a write switches it.
  */
 type Recommendation = {
-  /** The category. */
-  category: HostedCompetitionCategory
+  /** The category, by name. */
+  category: string
   /** Whether the proposal is recommended for it afterwards. */
   isRecommended: boolean
 }
@@ -95,9 +89,8 @@ function readSetAside(body: string | null): boolean {
 }
 
 /**
- * Reads which category a recommendation switches and which way, the category by its name in any letter case,
- * refusing a body missing either, as the backend does. The backend also takes the category's number, which the
- * page never sends.
+ * Reads which category a recommendation switches and which way, the category by its name, refusing a body missing
+ * either, as the backend does.
  *
  * @param body - The body as it went out; null when there was none.
  *
@@ -107,16 +100,13 @@ function readRecommendation(body: string | null): Recommendation {
   // The category and the flag sent
   const { category, isRecommended } = readFields(body)
 
-  // The category named, in lower case, where it is a name at all
-  const named = CATEGORIES.find(
-    (candidate) => typeof category === 'string' && candidate === category.toLowerCase()
-  )
-
-  // No category's name, or a flag that says neither way
-  if (named === undefined || typeof isRecommended !== 'boolean') refuseWith('MalformedRequest')
+  // No name, or a flag that says neither way
+  if (typeof category !== 'string' || typeof isRecommended !== 'boolean') {
+    refuseWith('MalformedRequest')
+  }
 
   // The switch
-  return { category: named, isRecommended }
+  return { category, isRecommended }
 }
 
 /**
@@ -246,7 +236,8 @@ function setAside(held: HeldSelection, proposalId: string, isSetAside: boolean):
 }
 
 /**
- * Recommends a proposal for one category or takes it back, as the backend does, leaving the others as they stand.
+ * Recommends a proposal for one category or takes it back, as the backend does, leaving the others as they stand. A
+ * name the organization doesn't list is refused like a proposal the backend doesn't hold.
  *
  * @param held - What the backend holds.
  * @param proposalId - The proposal.
@@ -262,8 +253,14 @@ function recommend(
   // The proposal, as it stands
   const proposal = liveProposal(held, proposalId)
 
+  // Every category the organization lists by name, in the order they run
+  const names = SELECTION_CATEGORIES.map((candidate) => candidate.name)
+
+  // A name the organization doesn't list, refused like a missing proposal
+  if (!names.includes(category)) refuseWith('SelectionTargetNotFound')
+
   // Every category recommended after the switch, in the order the categories run
-  const recommended = CATEGORIES.filter((candidate) =>
+  const recommended = names.filter((candidate) =>
     candidate === category ? isRecommended : proposal.recommended.includes(candidate)
   )
 

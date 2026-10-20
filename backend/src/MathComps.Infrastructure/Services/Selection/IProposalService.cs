@@ -1,4 +1,3 @@
-using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.EfCoreEntities;
 
 namespace MathComps.Infrastructure.Services.Selection;
@@ -24,14 +23,15 @@ public interface IProposalService
     /// they stand.
     /// </summary>
     /// <param name="proposalId">The proposal.</param>
-    /// <param name="category">The category.</param>
+    /// <param name="category">The category, by its <see cref="OrganizationCategory.Name"/>.</param>
     /// <param name="isRecommended">Whether the proposal should be recommended for <paramref name="category"/>.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the change is saved.</returns>
-    /// <exception cref="SelectionTargetNotFoundException">Thrown when no live proposal has the id.</exception>
+    /// <exception cref="SelectionTargetNotFoundException">
+    /// Thrown when no live proposal has the id, or its organization lists no category of the name.
+    /// </exception>
     Task SetRecommendedAsync(
-        Guid proposalId, HostedCompetitionCategory category, bool isRecommended,
-        CancellationToken cancellationToken = default);
+        Guid proposalId, string category, bool isRecommended, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Sets one reviewer's rating of a proposal to the scores given, replacing whatever they gave before. Leaving
@@ -70,9 +70,11 @@ public interface IProposalService
 }
 
 /// <summary>
-/// Thrown when an id names nothing the selection holds, a reviewer's conversation about a proposal included.
+/// Thrown when an id or a category's name names nothing the selection holds, a reviewer's conversation about a
+/// proposal included.
 /// </summary>
-public sealed class SelectionTargetNotFoundException() : Exception("Nothing in the selection answers to that id");
+public sealed class SelectionTargetNotFoundException()
+    : Exception("Nothing in the selection answers to that id or name");
 
 /// <summary>
 /// Thrown when a write would take or delete a problem a paper has already taken, which only the board holding it

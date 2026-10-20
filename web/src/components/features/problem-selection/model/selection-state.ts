@@ -12,6 +12,7 @@ import type {
   ProposalText,
   RatingAspect,
   ReviewConversation,
+  SelectionCategory,
   SelectionData,
   SlotAddress,
 } from './selection-types'
@@ -27,10 +28,13 @@ export type PaperOnBoard = {
 }
 
 /**
- * The selection as read: its boards, its cycles and the languages its problems need as they came, its papers looked up
- * by id, and its proposals and their conversations looked up by proposal id.
+ * The selection as read: its categories, its boards, its cycles and the languages its problems need as they came,
+ * its papers looked up by id, and its proposals and their conversations looked up by proposal id.
  */
-export type SelectionIndex = Pick<SelectionData, 'boards' | 'cycles' | 'needsEveryLanguage'> & {
+export type SelectionIndex = Pick<
+  SelectionData,
+  'categories' | 'boards' | 'cycles' | 'needsEveryLanguage'
+> & {
   /** Every paper on the boards, with the board holding it, by the paper's id. */
   papersById: ReadonlyMap<string, PaperOnBoard>
   /** Every proposal, by id. */
@@ -63,8 +67,9 @@ export function indexSelection(data: SelectionData): SelectionIndex {
     (conversation) => conversation.proposalId
   )
 
-  // The boards, the cycles and the languages needed as they came, with the lookups beside them
+  // The categories, the boards, the cycles and the languages needed as they came, with the lookups beside them
   return {
+    categories: data.categories,
     boards: data.boards,
     cycles: data.cycles,
     needsEveryLanguage: data.needsEveryLanguage,
@@ -72,6 +77,55 @@ export function indexSelection(data: SelectionData): SelectionIndex {
     proposalsById,
     conversationsByProposal,
   }
+}
+
+/**
+ * The hue a category wears, which is its index among the selection's categories.
+ *
+ * @param categories - The selection's categories, in the order they run.
+ * @param category - The category, by name; null for none.
+ *
+ * @returns The hue's index, from zero; null for no category, or one the selection doesn't list.
+ */
+export function categoryHue(
+  categories: readonly SelectionCategory[],
+  category: string | null
+): number | null {
+  // Where the category stands, -1 where nowhere
+  const place = categories.findIndex((candidate) => candidate.name === category)
+
+  // The place, or none where the category stands nowhere
+  return place === -1 ? null : place
+}
+
+/**
+ * The hosted level a category is, which picks the round a paper of that category goes into.
+ *
+ * @param category - The category, by name; null for none.
+ * @param categories - The selection's categories.
+ *
+ * @returns The level; null for no category, one the selection doesn't list, or one no hosted round runs.
+ */
+export function hostedLevelOf(
+  category: string | null,
+  categories: readonly SelectionCategory[]
+): HostedCompetitionCategory | null {
+  // The level of the category of that name, where the selection lists one
+  return categories.find((candidate) => candidate.name === category)?.hostedCategory ?? null
+}
+
+/**
+ * Whether every paper of a board goes into a round when the board is finalized: each fills a category that is a
+ * hosted level.
+ *
+ * @param board - The board.
+ * @param categories - The selection's categories.
+ *
+ * @returns True once every paper's category is a hosted level.
+ */
+export function mapsToRounds(board: Board, categories: readonly SelectionCategory[]): boolean {
+  // Every paper of a category at some level
+  return board.papers.every((paper) => hostedLevelOf(paper.category, categories) !== null)
 }
 
 /**
@@ -372,15 +426,15 @@ export function finalizeBlockers(
 }
 
 /**
- * What keeps a board's papers from pairing up with a cycle's rounds, one paper to each round of its category,
- * each paper as long as the rounds are.
+ * What keeps a board's papers from pairing up with a cycle's rounds, one paper to each round of its category's
+ * level, each paper as long as the rounds are.
  */
 export type CycleMisfit = {
-  /** Papers no round of the cycle is left for: no category, one the cycle lacks, or one an earlier paper took. */
+  /** Papers no round of the cycle is left for: no level, one the cycle lacks, or one an earlier paper took. */
   unmatched: Paper[]
   /** Papers whose slot count differs from the problem count the cycle's rounds take. */
   wrongSize: Paper[]
-  /** The categories of the cycle's rounds no paper fills. */
+  /** The levels of the cycle's rounds no paper fills. */
   uncovered: HostedCompetitionCategory[]
 }
 
@@ -389,25 +443,32 @@ export type CycleMisfit = {
  *
  * @param board - The board.
  * @param cycle - The cycle.
+ * @param categories - The selection's categories, which say the level of each paper's category.
  *
  * @returns The misfits, every list empty once the papers fit the rounds.
  */
-export function cycleMisfit(board: Board, cycle: Cycle): CycleMisfit {
-  // The papers left without a round, a round going to the first paper of its category and no other
-  const unmatched = board.papers.filter(
-    (paper, index) =>
-      paper.category === null ||
-      !cycle.categories.includes(paper.category) ||
-      board.papers.findIndex((other) => other.category === paper.category) !== index
-  )
+export function cycleMisfit(
+  board: Board,
+  cycle: Cycle,
+  categories: readonly SelectionCategory[]
+): CycleMisfit {
+  // The level of each paper's category, in the board's order
+  const levels = board.papers.map((paper) => hostedLevelOf(paper.category, categories))
+
+  // The papers left without a round, a round going to the first paper of its level and no other
+  const unmatched = board.papers.filter((_paper, index) => {
+    // The paper's level
+    const level = levels[index]
+
+    // No level, one the cycle runs no round in, or one an earlier paper took
+    return level === null || !cycle.categories.includes(level) || levels.indexOf(level) !== index
+  })
 
   // The papers of the wrong length, every round of the cycle taking the same number of problems
   const wrongSize = board.papers.filter((paper) => paper.slots.length !== cycle.problemCount)
 
-  // The categories of the rounds no paper stands for
-  const uncovered = cycle.categories.filter(
-    (category) => !board.papers.some((paper) => paper.category === category)
-  )
+  // The levels of the rounds no paper stands for
+  const uncovered = cycle.categories.filter((level) => !levels.includes(level))
 
   // Everything in the way
   return { unmatched, wrongSize, uncovered }

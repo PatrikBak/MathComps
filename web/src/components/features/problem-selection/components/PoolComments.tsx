@@ -17,7 +17,6 @@ import {
   convertToCommentData,
   countAllComments,
 } from '@/components/features/comments/utils/comment-utils'
-import { categoryTextClass } from '@/components/features/hosted-competitions/components/CategoryBadge'
 import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
@@ -25,6 +24,7 @@ import { WaitingChangeButton } from '@/components/shared/components/WaitingChang
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { focusForReader } from '@/components/shared/utils/focus-utils'
+import { hueTextStyle } from '@/components/shared/utils/hue-colors'
 import { useFocusHandOff } from '@/hooks/use-focus-hand-off'
 import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
 import { useShowFromTop } from '@/hooks/use-show-from-top'
@@ -37,10 +37,11 @@ import {
   type DiscussionThread,
   threadKeyOf,
 } from '../model/selection-discussions'
+import { categoryHue } from '../model/selection-state'
 import { PoolSkeleton } from './PoolSkeleton'
 import { ProposalBox } from './ProposalBody'
 import { DetailLink } from './SelectionLinks'
-import { useSelectionWorkspace } from './SelectionWorkspaceProvider'
+import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /** How far past the window's edges threads are drawn, in pixels, so a scroll finds them ready. */
 const THREADS_DRAWN_BEYOND = { top: 800, bottom: 1200 } as const
@@ -343,6 +344,9 @@ type ThreadHeadingProps = {
  * name, opening that page on its discussion.
  */
 function ThreadHeading({ subject }: ThreadHeadingProps) {
+  // The selection's categories, in the order they run
+  const { categories } = useLoadedSelection()
+
   // The heading by what the thread hangs off
   switch (subject.kind) {
     case 'proposal':
@@ -367,7 +371,8 @@ function ThreadHeading({ subject }: ThreadHeadingProps) {
             page={{ kind: 'paper', id: subject.paper.id, tab: 'comments' }}
             // Named so the list can come back to it, focus and all, once the paper closes
             {...OPEN_ID_ATTRIBUTE.stamp(subject.paper.id)}
-            className={cn('hover:underline', categoryTextClass(subject.paper.category))}
+            className="hover:underline"
+            style={hueTextStyle(categoryHue(categories, subject.paper.category))}
             plain
           >
             <span className="font-medium">{subject.paper.name}</span>{' '}

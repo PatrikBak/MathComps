@@ -1,4 +1,3 @@
-using MathComps.Domain.Contracts.Competitions;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Selection;
@@ -42,26 +41,45 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
         services.AddProblemSelectionServices();
 
     /// <summary>
-    /// A recommendation switches one category and leaves the rest standing, kept in the order the categories run
-    /// whichever order they were switched on in. Each switch writes the whole list back, so a write built from the
-    /// switched category alone would drop the rest, and one appending it would store them out of order.
+    /// A recommendation switches one category and leaves the rest standing, and switching on one already there
+    /// changes nothing. A write that replaced the proposal's categories with the one switched would drop the rest.
     /// </summary>
     [Fact]
     public Task A_recommendation_switches_one_category_and_keeps_the_rest() => RunTestAsync(async service =>
     {
         // Elementary switched on beside the advanced one already there
-        await service.SetRecommendedAsync(_pooledId, HostedCompetitionCategory.Elementary, isRecommended: true);
+        await service.SetRecommendedAsync(_pooledId, "elementary", isRecommended: true);
 
-        // Both stand, easiest first
-        Assert.Equal(
-            [HostedCompetitionCategory.Elementary, HostedCompetitionCategory.Advanced],
-            await RecommendedAsync());
+        // Both stand
+        Assert.Equal(["elementary", "advanced"], await RecommendedAsync());
+
+        // Advanced switched on again
+        await service.SetRecommendedAsync(_pooledId, "advanced", isRecommended: true);
+
+        // Both still stand
+        Assert.Equal(["elementary", "advanced"], await RecommendedAsync());
 
         // Advanced switched off
-        await service.SetRecommendedAsync(_pooledId, HostedCompetitionCategory.Advanced, isRecommended: false);
+        await service.SetRecommendedAsync(_pooledId, "advanced", isRecommended: false);
 
         // Leaving elementary alone
-        Assert.Equal([HostedCompetitionCategory.Elementary], await RecommendedAsync());
+        Assert.Equal(["elementary"], await RecommendedAsync());
+    });
+
+    /// <summary>
+    /// A proposal is recommended only for a category of its own organization. Another organization's category of
+    /// the name given would otherwise land on it, and the selection would show a category outside the organization's
+    /// own.
+    /// </summary>
+    [Fact]
+    public Task A_category_of_another_organization_is_refused() => RunTestAsync(async service =>
+    {
+        // The olympiad's category, switched on for MathComps' proposal, refused
+        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
+            () => service.SetRecommendedAsync(_pooledId, "C", isRecommended: true));
+
+        // The proposal still recommended for advanced alone
+        Assert.Equal(["advanced"], await RecommendedAsync());
     });
 
     /// <summary>
@@ -205,8 +223,10 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
         _pooledId = SelectionSeed.NewProposal(context, pool, 1, 1);
 
         // The pooled proposal recommended for advanced
-        context.Proposals.Local.Single(proposal => proposal.ProblemId == _pooledId).Recommended =
-            [HostedCompetitionCategory.Advanced];
+        SelectionSeed.Recommend(context, _pooledId, "advanced");
+
+        // Another organization, listing a category of its own
+        SelectionSeed.NewOrganization(context, "olympiad", "C");
 
         // An October group
         var october = SelectionSeed.NewGroup(context, season, "october", DateTimeOffset.UtcNow.AddDays(10));
@@ -227,13 +247,14 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     /// <summary>
     /// Reads what the pooled proposal is recommended for.
     /// </summary>
-    /// <returns>The categories.</returns>
-    private Task<List<HostedCompetitionCategory>> RecommendedAsync() =>
+    /// <returns>The categories' names, in the order the categories run.</returns>
+    private Task<List<string>> RecommendedAsync() =>
         // The pooled proposal's recommendations
-        QueryValueAsync(context => context.Proposals
-            .Where(proposal => proposal.ProblemId == _pooledId)
-            .Select(proposal => proposal.Recommended)
-            .SingleAsync());
+        QueryValueAsync(context => context.ProposalRecommendations
+            .Where(recommendation => recommendation.ProposalId == _pooledId)
+            .OrderBy(recommendation => recommendation.Category.Position)
+            .Select(recommendation => recommendation.Category.Name)
+            .ToListAsync());
 
     /// <summary>
     /// Reads every rating of the pooled proposal, the other reviewer's first.

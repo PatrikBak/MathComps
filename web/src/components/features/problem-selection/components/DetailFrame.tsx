@@ -15,7 +15,7 @@ type DetailHeadingProps = {
   /** The page's subject. */
   subjectId: string
   /** How the page sets its name, beside what every page's name shares. */
-  className: string
+  className?: string
   /** The name. */
   children: ReactNode
 }

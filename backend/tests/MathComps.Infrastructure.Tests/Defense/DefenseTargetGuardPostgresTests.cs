@@ -353,7 +353,6 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             Number = 1,
             Title = "Live proposal",
             Area = ProposalArea.Algebra,
-            Recommended = [],
         });
 
         // A second problem of the round.
@@ -373,7 +372,6 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             Number = 2,
             Title = "Deleted proposal",
             Area = ProposalArea.Algebra,
-            Recommended = [],
             DeletedAt = DateTimeOffset.UtcNow,
         });
 
@@ -417,7 +415,6 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             Number = 4,
             Title = "Picked proposal",
             Area = ProposalArea.Algebra,
-            Recommended = [],
         });
 
         // That entry, spent into the second round and no other.

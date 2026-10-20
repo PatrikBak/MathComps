@@ -1,4 +1,3 @@
-import { HOSTED_COMPETITION_CATEGORIES } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 
 import {
@@ -200,9 +199,9 @@ export function afterRecommendation(
   // The proposal recommended for each category standing afterwards, in the order the categories run
   return editProposal(data, proposalId, (proposal) => ({
     ...proposal,
-    recommended: HOSTED_COMPETITION_CATEGORIES.filter((candidate) =>
-      candidate === category ? isRecommended : proposal.recommended.includes(candidate)
-    ),
+    recommended: data.categories
+      .map((candidate) => candidate.name)
+      .filter((name) => (name === category ? isRecommended : proposal.recommended.includes(name))),
   }))
 }
 

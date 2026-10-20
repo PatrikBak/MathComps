@@ -1079,6 +1079,40 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
+    /// A pick recommended for a category the pool's organization doesn't list is refused, even when another
+    /// organization lists one of that name.
+    /// </summary>
+    [Fact]
+    public Task A_category_the_organization_does_not_list_is_refused() => RunTestAsync(async service =>
+    {
+        // Another organization, listing a category of its own.
+        await QueryAsync(async context =>
+        {
+            // The organization and its category.
+            SelectionSeed.NewOrganization(context, "olympiad", "C");
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // #14 at place 8, recommended for MathComps' elementary and the other organization's category.
+        var pick = Pick(8, number: 14) with
+        {
+            Proposal = new DraftProposal(14, "Proposal 14", ProposalArea.Algebra, ["elementary", "C"]),
+        };
+
+        // The preview of it.
+        var preview = await PreviewPoolAsync(service, pick);
+
+        // The other organization's category is refused, MathComps' own is not.
+        var unknown = Assert.IsType<ProposalCategoryUnknown>(Assert.Single(preview.ProposalConflicts));
+        Assert.Equal((PoolSlug(8), "C"), (unknown.Slug, unknown.Category));
+
+        // The refusal offers MathComps' categories instead, in the order they run.
+        Assert.Equal(["elementary", "intermediate", "advanced"], unknown.Listed);
+    });
+
+    /// <summary>
     /// A new pick at a free place under a free number, beside a re-import of a pick at its own place under its own
     /// number, files cleanly. These are the drafts that fill the pool, so none of its checks may fire on them.
     /// A re-import with no block files cleanly too, since leaving the block out leaves the proposal as it is.
@@ -1134,7 +1168,6 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
                     Number = filed,
                     Title = $"Proposal {filed}",
                     Area = ProposalArea.Algebra,
-                    Recommended = [],
                     DeletedAt = deletedAt,
                 });
 

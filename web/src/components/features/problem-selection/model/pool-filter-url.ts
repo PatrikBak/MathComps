@@ -1,12 +1,10 @@
-import { HOSTED_COMPETITION_CATEGORIES } from '@/components/features/hosted-competitions/model/hosted-competition-types'
-
 import type { PoolFilter } from './pool-filters'
 import { PROPOSAL_AREAS } from './selection-types'
 
 /** The query parameter carrying the search text. */
 const QUERY_PARAM = 'q'
 
-/** The query parameter naming a category a problem must be recommended for, once per category. */
+/** The query parameter naming a category a problem must be recommended for, by its name, once per category. */
 const CATEGORY_PARAM = 'category'
 
 /** The query parameter naming an area a problem must belong to, once per area. */
@@ -59,8 +57,8 @@ export function toPoolFilterQuery(filter: AddressedPoolFilter): string {
 }
 
 /**
- * Reads back what {@link toPoolFilterQuery} wrote. A value the filter has no option for is left out rather than
- * trusted, since a query string is somebody's typing.
+ * Reads back what {@link toPoolFilterQuery} wrote. An area the facet has no option for is left out rather than
+ * trusted, since a query string is somebody's typing. Each category is kept once, as named.
  *
  * @param params - The address's query parameters.
  *
@@ -73,10 +71,10 @@ export function fromPoolFilterQuery(params: URLSearchParams): AddressedPoolFilte
   // The areas the address names
   const areas = params.getAll(AREA_PARAM)
 
-  // The filter, each facet's picks among its own options and in the order it lists them
+  // The filter, the areas among their own options in the order the facet lists them, each category once
   return {
     query: params.get(QUERY_PARAM) ?? '',
-    categories: HOSTED_COMPETITION_CATEGORIES.filter((category) => categories.includes(category)),
+    categories: [...new Set(categories)],
     areas: PROPOSAL_AREAS.filter((area) => areas.includes(area)),
     isShowingSetAside: params.get(SET_ASIDE_PARAM) === '1',
   }

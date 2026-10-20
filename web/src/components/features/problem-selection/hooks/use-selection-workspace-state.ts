@@ -74,11 +74,11 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
   const { detail, paperBeneathId, openDetail, closeDetail, leaveDetail, poolCountRef } =
     useOpenDetail()
 
-  // What the pool is narrowed to, and the ways of changing it
-  const poolFilters = usePoolFilters()
-
   // The selection with its lookups by paper and by proposal, rebuilt only when a new read lands
   const index = useMemo(() => (data === undefined ? null : indexSelection(data)), [data])
+
+  // What the pool is narrowed to, and the ways of changing it
+  const poolFilters = usePoolFilters(index?.categories ?? null)
 
   // The board being filled, the slot on it waiting for a problem, and the ways to change both
   const { activeBoard, waitingSlot, selectBoard, toggleWaiting, stopWaiting } = useBoardPicking(

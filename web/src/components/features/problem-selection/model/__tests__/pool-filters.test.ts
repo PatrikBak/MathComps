@@ -1,7 +1,21 @@
 import { describe, expect, it } from 'vitest'
 
-import { matchPool, OPEN_POOL_FILTER } from '../pool-filters'
-import type { Board, Proposal } from '../selection-types'
+import { matchPool, OPEN_POOL_FILTER, withListedCategories } from '../pool-filters'
+import type { Board, Proposal, SelectionCategory } from '../selection-types'
+
+/** MathComps' categories, each a hosted level. */
+const MATHCOMPS: SelectionCategory[] = [
+  { name: 'elementary', hostedCategory: 'elementary' },
+  { name: 'intermediate', hostedCategory: 'intermediate' },
+  { name: 'advanced', hostedCategory: 'advanced' },
+]
+
+/** The olympiad's categories, easiest first, none of them a hosted level. */
+const OLYMPIAD: SelectionCategory[] = [
+  { name: 'C', hostedCategory: null },
+  { name: 'B', hostedCategory: null },
+  { name: 'A', hostedCategory: null },
+]
 
 /**
  * A live proposal in the pool, numbered and named after its number unless told otherwise.
@@ -34,7 +48,7 @@ describe('matchPool', () => {
     const proposals = [proposal(3), proposal(2, { isUsed: true }), proposal(1)]
 
     // The pool, filtered by nothing
-    const matches = matchPool(proposals, OPEN_POOL_FILTER, null)
+    const matches = matchPool(proposals, OPEN_POOL_FILTER, null, MATHCOMPS)
 
     // 1 and 3, in order
     expect(matches.shown.map((shown) => shown.number)).toEqual([1, 3])
@@ -49,7 +63,12 @@ describe('matchPool', () => {
     ]
 
     // The pool narrowed to the advanced category
-    const matches = matchPool(proposals, { ...OPEN_POOL_FILTER, categories: ['advanced'] }, null)
+    const matches = matchPool(
+      proposals,
+      { ...OPEN_POOL_FILTER, categories: ['advanced'] },
+      null,
+      MATHCOMPS
+    )
 
     // Only problem 1 shows
     expect(matches.shown.map((shown) => shown.number)).toEqual([1])
@@ -66,7 +85,12 @@ describe('matchPool', () => {
     })
 
     // The pool narrowed to geometry instead
-    const geometry = matchPool(proposals, { ...OPEN_POOL_FILTER, areas: ['geometry'] }, null)
+    const geometry = matchPool(
+      proposals,
+      { ...OPEN_POOL_FILTER, areas: ['geometry'] },
+      null,
+      MATHCOMPS
+    )
 
     // The areas still count the whole pool, their own filter left out
     expect(geometry.areaCounts).toEqual({
@@ -89,7 +113,8 @@ describe('matchPool', () => {
     const matches = matchPool(
       proposals,
       { ...OPEN_POOL_FILTER, categories: ['elementary', 'advanced'] },
-      null
+      null,
+      MATHCOMPS
     )
 
     // Any category picked lets a problem through
@@ -104,7 +129,8 @@ describe('matchPool', () => {
     const searched = matchPool(
       proposals,
       { ...OPEN_POOL_FILTER, query: 'nowhere', isShowingSetAside: true },
-      null
+      null,
+      MATHCOMPS
     )
 
     // Nothing shows
@@ -114,13 +140,18 @@ describe('matchPool', () => {
     expect(searched.setAsideCount).toBe(1)
 
     // The set-aside view, searched for nothing
-    const open = matchPool(proposals, { ...OPEN_POOL_FILTER, isShowingSetAside: true }, null)
+    const open = matchPool(
+      proposals,
+      { ...OPEN_POOL_FILTER, isShowingSetAside: true },
+      null,
+      MATHCOMPS
+    )
 
     // Only the set-aside problem shows
     expect(open.shown.map((shown) => shown.number)).toEqual([1])
 
     // The live view, searched for nothing
-    const live = matchPool(proposals, OPEN_POOL_FILTER, null)
+    const live = matchPool(proposals, OPEN_POOL_FILTER, null, MATHCOMPS)
 
     // Only the live problem shows
     expect(live.shown.map((shown) => shown.number)).toEqual([2])
@@ -143,7 +174,12 @@ describe('matchPool', () => {
     }
 
     // The pool narrowed to what the board holds
-    const selected = matchPool(proposals, { ...OPEN_POOL_FILTER, membership: 'selected' }, board)
+    const selected = matchPool(
+      proposals,
+      { ...OPEN_POOL_FILTER, membership: 'selected' },
+      board,
+      MATHCOMPS
+    )
 
     // Problems 1 and 3
     expect(selected.shown.map((shown) => shown.number)).toEqual([1, 3])
@@ -155,14 +191,20 @@ describe('matchPool', () => {
     const notSelected = matchPool(
       proposals,
       { ...OPEN_POOL_FILTER, membership: 'notSelected' },
-      board
+      board,
+      MATHCOMPS
     )
 
     // Problem 2 alone
     expect(notSelected.shown.map((shown) => shown.number)).toEqual([2])
 
     // The pool narrowed to geometry, on the board or off it
-    const geometry = matchPool(proposals, { ...OPEN_POOL_FILTER, areas: ['geometry'] }, board)
+    const geometry = matchPool(
+      proposals,
+      { ...OPEN_POOL_FILTER, areas: ['geometry'] },
+      board,
+      MATHCOMPS
+    )
 
     // Only the two geometry problems counted
     expect(geometry.membershipCounts).toEqual({ selected: 1, notSelected: 1 })
@@ -194,7 +236,7 @@ describe('matchPool', () => {
     }
 
     // The pool, filtered by nothing
-    const matches = matchPool(proposals, OPEN_POOL_FILTER, board)
+    const matches = matchPool(proposals, OPEN_POOL_FILTER, board, MATHCOMPS)
 
     // The elementary slots, the rest for elementary, the intermediate slot, the rest for intermediate, then what no
     // paper takes, each rest algebra first
@@ -224,7 +266,8 @@ describe('matchPool', () => {
     const matches = matchPool(
       proposals,
       { ...OPEN_POOL_FILTER, categories: ['intermediate'] },
-      board
+      board,
+      MATHCOMPS
     )
 
     // Problem 6 runs among intermediate's, after the slot and problem 3
@@ -255,11 +298,40 @@ describe('matchPool', () => {
     const matches = matchPool(
       proposals,
       { ...OPEN_POOL_FILTER, categories: ['intermediate'] },
-      board
+      board,
+      MATHCOMPS
     )
 
     // The intermediate slot, then what the elementary paper holds slot by slot, then the problem no paper holds
     expect(matches.shown.map((shown) => shown.number)).toEqual([7, 9, 4, 2])
+  })
+
+  it("runs an organization's own categories paper by paper, in the board's order", () => {
+    // Problems recommended for C, for B, for both, or for A
+    const proposals = [
+      proposal(1, { recommended: ['C'] }),
+      proposal(2, { recommended: ['B'] }),
+      proposal(3, { recommended: ['C', 'B'] }),
+      proposal(4, { recommended: ['A'] }),
+      proposal(5, { recommended: ['B'] }),
+    ]
+
+    // A board setting B out before C, whose B paper holds 5, with no A paper
+    const board: Board = {
+      id: 'home',
+      name: 'MO 77 home round',
+      papers: [
+        { id: 'b', name: 'B', category: 'B', slots: ['p5'] },
+        { id: 'c', name: 'C', category: 'C', slots: [null] },
+      ],
+      finalization: null,
+    }
+
+    // The pool, filtered by nothing
+    const matches = matchPool(proposals, OPEN_POOL_FILTER, board, OLYMPIAD)
+
+    // B's slot, the rest for B, then the rest for C, then what no paper takes
+    expect(matches.shown.map((shown) => shown.number)).toEqual([5, 2, 3, 1, 4])
   })
 
   it('finds a problem by its number, its name or a statement in any language, whatever the case', () => {
@@ -273,21 +345,24 @@ describe('matchPool', () => {
     const byNumber = matchPool(
       [trapezoid, proposal(70), proposal(1)],
       { ...OPEN_POOL_FILTER, query: '#7' },
-      null
+      null,
+      MATHCOMPS
     )
 
     // Searched by its name, in capitals
     const byName = matchPool(
       [trapezoid, proposal(1)],
       { ...OPEN_POOL_FILTER, query: 'TRAPEZ' },
-      null
+      null,
+      MATHCOMPS
     )
 
     // Searched by a word of its Slovak statement
     const byStatement = matchPool(
       [trapezoid, proposal(1)],
       { ...OPEN_POOL_FILTER, query: 'kruh' },
-      null
+      null,
+      MATHCOMPS
     )
 
     // Each search finds problem 7 alone
@@ -303,17 +378,33 @@ describe('matchPool', () => {
     })
 
     // Searched without the diacritics, the way a hurried reviewer types it
-    const bare = matchPool([circle, proposal(1)], { ...OPEN_POOL_FILTER, query: 'kruznica' }, null)
+    const bare = matchPool(
+      [circle, proposal(1)],
+      { ...OPEN_POOL_FILTER, query: 'kruznica' },
+      null,
+      MATHCOMPS
+    )
 
     // Searched with the diacritics, in capitals
     const accented = matchPool(
       [circle, proposal(1)],
       { ...OPEN_POOL_FILTER, query: 'KRUŽNICA' },
-      null
+      null,
+      MATHCOMPS
     )
 
     // Each search finds problem 4 alone
     expect(bare.shown.map((shown) => shown.number)).toEqual([4])
     expect(accented.shown.map((shown) => shown.number)).toEqual([4])
+  })
+})
+
+describe('withListedCategories', () => {
+  it("keeps the categories the selection lists, in the selection's order", () => {
+    // An address naming advanced, a category nobody lists, and elementary, in that order
+    const picked = { ...OPEN_POOL_FILTER, categories: ['advanced', 'nowhere', 'elementary'] }
+
+    // The categories the selection lists, in the order they run
+    expect(withListedCategories(picked, MATHCOMPS).categories).toEqual(['elementary', 'advanced'])
   })
 })
