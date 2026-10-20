@@ -4,9 +4,7 @@ import { HelpCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import React from 'react'
 
-import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
-import { Tooltip } from '@/components/shared/components/Tooltip'
-import { cn } from '@/components/shared/utils/css-utils'
+import { TooltipIcon } from '@/components/shared/components/TooltipIcon'
 
 /**
  * Props for the {@link HelpTooltip} component.
@@ -24,24 +22,18 @@ type HelpTooltipProps = {
 }
 
 /**
- * A small client component wrapper for {@link Tooltip} with '?' icon.
- *
- * The icon sits in a button rather than standing on its own, since an SVG takes no focus and what
- * it has to say would otherwise be reachable by pointer alone.
+ * A small client component wrapper for {@link TooltipIcon} with '?' icon.
  */
 export function HelpTooltip({ content, label }: HelpTooltipProps) {
   // Translations for the shared action labels
   const tActions = useTranslations('ui.actions')
 
   return (
-    <Tooltip placement="top" content={content}>
-      <button
-        type="button"
-        aria-label={tActions('moreInformationAbout', { subject: label })}
-        className={cn('inline-flex cursor-help rounded-full align-middle', FOCUS_RING_CLASS)}
-      >
-        <HelpCircle className="h-3.5 w-3.5 text-muted/80" aria-hidden="true" />
-      </button>
-    </Tooltip>
+    <TooltipIcon
+      icon={<HelpCircle className="h-3.5 w-3.5 text-muted/80" aria-hidden="true" />}
+      label={tActions('moreInformationAbout', { subject: label })}
+      content={content}
+      className="align-middle"
+    />
   )
 }
