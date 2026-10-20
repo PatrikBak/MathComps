@@ -27,10 +27,10 @@ export type PaperOnBoard = {
 }
 
 /**
- * The selection as read: its boards and cycles as they came, its papers looked up by id, and its proposals and
- * their conversations looked up by proposal id.
+ * The selection as read: its boards, its cycles and the languages its problems need as they came, its papers looked up
+ * by id, and its proposals and their conversations looked up by proposal id.
  */
-export type SelectionIndex = Pick<SelectionData, 'boards' | 'cycles'> & {
+export type SelectionIndex = Pick<SelectionData, 'boards' | 'cycles' | 'needsEveryLanguage'> & {
   /** Every paper on the boards, with the board holding it, by the paper's id. */
   papersById: ReadonlyMap<string, PaperOnBoard>
   /** Every proposal, by id. */
@@ -63,10 +63,11 @@ export function indexSelection(data: SelectionData): SelectionIndex {
     (conversation) => conversation.proposalId
   )
 
-  // The boards and cycles as they came, with the lookups beside them
+  // The boards, the cycles and the languages needed as they came, with the lookups beside them
   return {
     boards: data.boards,
     cycles: data.cycles,
+    needsEveryLanguage: data.needsEveryLanguage,
     papersById,
     proposalsById,
     conversationsByProposal,

@@ -1,3 +1,5 @@
+using MathComps.Domain.EfCoreEntities;
+
 namespace MathComps.Domain.Contracts.Selection;
 
 /// <summary>
@@ -12,8 +14,12 @@ namespace MathComps.Domain.Contracts.Selection;
 /// <param name="Conversations">
 /// Every conversation a reviewer held about a proposal in the selection, newest first.
 /// </param>
+/// <param name="NeedsEveryLanguage">
+/// <inheritdoc cref="Organization.NeedsEveryLanguage" path="/summary"/>
+/// </param>
 public record SelectionDto(
     IReadOnlyList<ProposalDto> Proposals,
     IReadOnlyList<SelectionBoardDto> Boards,
     IReadOnlyList<SelectionCycleDto> Cycles,
-    IReadOnlyList<ReviewConversationDto> Conversations);
+    IReadOnlyList<ReviewConversationDto> Conversations,
+    bool NeedsEveryLanguage);

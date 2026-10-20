@@ -141,6 +141,22 @@ export const BILINGUAL = proposalNumbered(2, {
 /** A problem proposed before anybody wrote its statement, in any language. */
 export const UNWRITTEN = proposalNumbered(9, { texts: {}, originalLanguage: null })
 
+/** {@link SLOVAK_ALONE}'s statement. */
+export const SLOVAK_ALONE_STATEMENT =
+  'Na kružnici leží sto bodov a dvaja hráči striedavo kreslia tetivy, ktoré sa nepretínajú.'
+
+/** A problem written and solved in Slovak alone, the way the olympiad's proposers write them. */
+export const SLOVAK_ALONE = proposalNumbered(10, {
+  texts: {
+    sk: {
+      statement: SLOVAK_ALONE_STATEMENT,
+      solution: 'Druhý hráč kreslí tetivu súmernú s tou, ktorú práve nakreslil prvý.',
+      hints: [],
+    },
+  },
+  originalLanguage: 'sk',
+})
+
 /** The pool's first problem. */
 export const FIRST = proposalNumbered(1)
 
@@ -591,6 +607,8 @@ export const OPENED_COMMENT: CommentDto = {
  * What the backend behind the selection keeps besides the problems, which every read about them answers out of.
  */
 type SelectionMemory = {
+  /** Whether the organization's problems need a text in every language; false where any one will do. */
+  needsEveryLanguage: boolean
   /** The conversations reviewers held with Mathilda before the test began, as many as are still held. */
   conversations: HeldConversation[]
   /** Each of the selection's discussions, by {@link threadKey}, oldest comment first. */
@@ -600,8 +618,8 @@ type SelectionMemory = {
 }
 
 /**
- * What the backend keeps as a test begins: {@link RECENT} and {@link EARLIER} about {@link OPENED}, and
- * {@link OPENED_COMMENT} under it.
+ * What the backend keeps as a test begins: an organization needing every language, as MathComps does,
+ * {@link RECENT} and {@link EARLIER} about {@link OPENED}, and {@link OPENED_COMMENT} under it.
  *
  * @param chat - The backend the chat with Mathilda talks to; null where the test talks to her nowhere.
  *
@@ -610,6 +628,7 @@ type SelectionMemory = {
 export function rememberedSelection(chat: HostedBackend | null): SelectionMemory {
   // The memory, fresh for each test so nothing one writes reaches the next
   return {
+    needsEveryLanguage: true,
     conversations: [RECENT, EARLIER],
     discussions: new Map([[threadKey('Proposal', OPENED.id), [OPENED_COMMENT]]]),
     chat,
@@ -648,8 +667,8 @@ function heldConversations(memory: SelectionMemory, proposals: Proposal[]): Held
 }
 
 /**
- * The selection as the backend reads it: the problems, the boards, the cycles a board can go into, and every
- * conversation held about the problems in the shape the list of them takes.
+ * The selection as the backend reads it: the problems, the boards, the cycles a board can go into, every
+ * conversation held about the problems in the shape the list of them takes, and the languages the problems need.
  *
  * @param memory - What the backend keeps.
  * @param readable - The problems, the boards and the cycles the read shows.
@@ -679,7 +698,7 @@ function selectionOf(
     })
   )
 
-  // The problems, the boards, the cycles, and the conversations newest first
+  // The problems, the boards, the cycles, the conversations newest first, and the languages the problems need
   return {
     proposals,
     boards,
@@ -687,6 +706,7 @@ function selectionOf(
     conversations: conversations.sort((first, second) =>
       second.startedAt.localeCompare(first.startedAt)
     ),
+    needsEveryLanguage: memory.needsEveryLanguage,
   }
 }
 
@@ -792,6 +812,8 @@ type SelectionReply =
   | 'winterOnOffer'
   /** With every problem in the selection but {@link OPENED}, which another reviewer deleted meanwhile. */
   | 'openedDeleted'
+  /** With every problem in the selection and {@link SLOVAK_ALONE}. */
+  | 'slovakAlone'
   /** Refused with the code an account off the MathComps organization's list earns. */
   | 'forbidden'
   /** Refused for good with no code at all, as an address the backend does not serve is. */
@@ -850,6 +872,10 @@ function selectionHeldAt(reply: SelectionReply): HeldSelection {
     // The full draft as first read, a second cycle it fits on offer
     case 'winterOnOffer':
       return { ...selectionHeldAt('fullDraft'), cycles: [OCTOBER, NOVEMBER, WINTER, DECEMBER] }
+
+    // Every problem as first read, and the one written in Slovak alone
+    case 'slovakAlone':
+      return { proposals: [...SELECTION, SLOVAK_ALONE], boards: BOARDS, cycles: CYCLES }
 
     // Every problem as first read but the deleted one, which no board held
     case 'openedDeleted':
@@ -986,6 +1012,7 @@ export async function stubSelection(
       case 'novemberFilled':
       case 'winterOnOffer':
       case 'openedDeleted':
+      case 'slovakAlone':
         return answerJson(route, 200, read())
 
       // Refused, in the shape the backend writes an authorization failure as

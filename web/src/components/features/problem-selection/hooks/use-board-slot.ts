@@ -12,7 +12,10 @@ import type { Proposal, SlotAddress } from '../model/selection-types'
 type UseBoardSlotResult = {
   /** The problem in the slot; undefined while the slot stands empty. */
   proposal: Proposal | undefined
-  /** The languages a round would refuse the slot's problem in; empty while the slot stands empty. */
+  /**
+   * The languages a round would refuse the slot's problem in; empty while the slot stands empty, and where any one
+   * text will do.
+   */
   missingLanguages: Locale[]
   /** Whether the slot is the one waiting for a problem from the pool. */
   isWaiting: boolean
@@ -40,8 +43,8 @@ export function useBoardSlot({ board, paper, index }: BoardSlot): UseBoardSlotRe
   // A function which makes the slot the waiting one, or lets it go when it already is
   const toggleWaiting = () => toggleWaitingSlot(address)
 
-  // Every proposal, by id
-  const { proposalsById } = useLoadedSelection()
+  // Every proposal by id, and whether the problems need every language
+  const { proposalsById, needsEveryLanguage } = useLoadedSelection()
 
   // The problem in the slot, by id; null when the slot stands empty
   const proposalId = paper.slots[index]
@@ -49,8 +52,9 @@ export function useBoardSlot({ board, paper, index }: BoardSlot): UseBoardSlotRe
   // The problem in the slot, where one is
   const proposal = proposalId === null ? undefined : proposalsById.get(proposalId)
 
-  // The languages a round would refuse the problem in, none while the slot stands empty
-  const missingLanguages = proposal === undefined ? [] : unreadyLanguages(proposal)
+  // The languages a round would refuse the problem in, none while the slot stands empty or any one text will do
+  const missingLanguages =
+    proposal === undefined || !needsEveryLanguage ? [] : unreadyLanguages(proposal)
 
   // The slot's problem, and whether it waits
   return { proposal, missingLanguages, isWaiting, toggleWaiting }

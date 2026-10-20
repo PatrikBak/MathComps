@@ -27,7 +27,7 @@ type ProposalFilingProps = {
 
 /**
  * One line saying what a problem is filed under, where it sits, whether it is on offer, what it still lacks, and how
- * many reviewers rated it.
+ * many reviewers rated it. Languages count as lacking only where the problems need every language.
  */
 export function ProposalFiling({ proposal }: ProposalFilingProps) {
   // Filing-line copy
@@ -36,17 +36,19 @@ export function ProposalFiling({ proposal }: ProposalFilingProps) {
   // What each area is called
   const areaName = useAreaName()
 
-  // Every board
-  const { boards } = useLoadedSelection()
+  // Every board, and whether the problems need every language
+  const { boards, needsEveryLanguage } = useLoadedSelection()
 
   // Every slot the problem fills, across every board
   const placements = placementsOf(boards, proposal.id)
 
-  // The languages nothing of the problem can be read in
-  const unwritten = unwrittenAcross([proposal])
+  // The languages nothing of the problem can be read in, none where any one text will do
+  const unwritten = needsEveryLanguage ? unwrittenAcross([proposal]) : []
 
-  // The languages the problem can be read in but has no solution in
-  const unsolved = unreadyLanguages(proposal).filter((language) => !unwritten.includes(language))
+  // The languages the problem can be read in but has no solution in, none where any one text will do
+  const unsolved = needsEveryLanguage
+    ? unreadyLanguages(proposal).filter((language) => !unwritten.includes(language))
+    : []
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
