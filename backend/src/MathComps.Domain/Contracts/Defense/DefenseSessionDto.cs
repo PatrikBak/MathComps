@@ -13,6 +13,7 @@ namespace MathComps.Domain.Contracts.Defense;
 /// <param name="Turns">The conversation's turns, in order.</param>
 /// <param name="Feedback"><inheritdoc cref="EfCoreEntities.DefenseSession.Feedback" path="/summary"/></param>
 /// <param name="Reports"><inheritdoc cref="EfCoreEntities.DefenseSession.Reports" path="/summary"/></param>
+/// <param name="IsGraded"><inheritdoc cref="DefenseSessionListItemDto" path="/param[@name='IsGraded']"/></param>
 public record DefenseSessionDto(
     Guid Id,
     DefenseTarget Target,
@@ -20,4 +21,5 @@ public record DefenseSessionDto(
     bool HasOlderStatement,
     IReadOnlyList<DefenseTurnDto> Turns,
     DefenseFeedbackDto? Feedback,
-    IReadOnlyList<DefenseTurnReportDto> Reports);
+    IReadOnlyList<DefenseTurnReportDto> Reports,
+    bool IsGraded);

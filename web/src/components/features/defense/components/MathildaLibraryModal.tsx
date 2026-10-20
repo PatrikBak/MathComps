@@ -112,7 +112,7 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
             problem={conversation.problem}
             onClose={clear}
             opening={{ kind: 'named', sessionId: selected.id }}
-            competition={conversation.competition}
+            entry={conversation.entry}
           />
         ) : selected !== null ? (
           // A chosen defense whose problem is not in hand yet, which is the run a competition one is read

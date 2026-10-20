@@ -70,7 +70,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     private readonly Guid _carolId = Guid.CreateVersion7();
 
     /// <summary>
-    /// A student already preparing the competitions when they sat the advanced round, which made it a test run.
+    /// Somebody already preparing the competitions when they sat the advanced round, which made it a preparer's run.
     /// </summary>
     private readonly Guid _preparerId = Guid.CreateVersion7();
 
@@ -259,7 +259,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// Only a run held to the gates is graded: an entry given up for the problems is no run whatever was argued
-    /// under it, a test run is nobody's to grade, and a student who never entered is no entrant however much they
+    /// under it, a preparer's run is nobody's to grade, and a student who never entered is no entrant however much they
     /// practised afterwards.
     /// </summary>
     [Fact]
@@ -277,7 +277,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Not Carol, who gave her entry up
         Assert.DoesNotContain(_carolId, graded);
 
-        // Not the preparer, whose run was a test run
+        // Not the preparer, whose run nobody grades
         Assert.DoesNotContain(_preparerId, graded);
 
         // Not the stranger, who never entered
@@ -350,7 +350,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// A student nobody grades on a problem still has their conversations on it listed, with no grading: an entry
-    /// given up, a test run, a student who never entered, and the practice group.
+    /// given up, a preparer's run, a student who never entered, and the practice group.
     /// </summary>
     [Fact]
     public Task A_student_nobody_grades_has_their_conversations_listed_ungraded() => RunTestAsync(async _ =>
@@ -371,7 +371,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Carol gave her entry up
         await AssertListedUngradedAsync(_carolId, _advancedFirstId);
 
-        // The preparer's run was a test run
+        // The preparer's run, which nobody grades
         await AssertListedUngradedAsync(_preparerId, _advancedFirstId);
 
         // The stranger never entered
@@ -1151,7 +1151,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Carol argued one of them anyway
         NewConversation(context, Guid.CreateVersion7(), _carolId, _advancedFirstId, _startedAt.AddMinutes(5));
 
-        // The preparer sat the advanced round as a test run
+        // The preparer sat the advanced round, which makes it a preparer's run
         context.HostedEntries.Add(NewEntry(_preparerId, _advancedRoundId, _startedAt));
 
         // Arguing a problem inside the clock

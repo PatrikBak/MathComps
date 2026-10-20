@@ -210,7 +210,7 @@ export function CompetitionProblemPanel({
             }
             // Nothing of the reader's own is being spent on a competition they never entered, so the
             // conversation is held on the same terms any other problem's is
-            competition={run === null ? null : { entry: run, isGraded }}
+            entry={run}
           />
         </Modal>
       )}

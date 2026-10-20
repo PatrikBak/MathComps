@@ -27,16 +27,14 @@ type DefenseHistoryMenuProps = {
   currentSessionId: string | null
   /** Opens an existing session. */
   onSelect: (session: DefenseSession) => void
-  /**
-   * Deletes a session; null where none of them can be dropped, which is what a graded run passes.
-   * Browsing the conversations is unaffected.
-   */
-  onDelete: ((sessionId: string) => Promise<void>) | null
+  /** Deletes a session. */
+  onDelete: (sessionId: string) => Promise<void>
 }
 
 /**
- * The header's history control: a dropdown listing this problem's past defenses, each resumable or
- * deletable. `modal={false}` keeps it from fighting the surrounding dialog's focus trap.
+ * The header's history control: a dropdown listing this problem's past defenses, each resumable, and
+ * deletable unless the student is graded on it. `modal={false}` keeps it from fighting the surrounding
+ * dialog's focus trap.
  * Memoized so composer keystrokes don't re-render the session rows.
  */
 export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
@@ -68,8 +66,8 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
 
   // Deletes the armed session
   const confirmDelete = async () => {
-    // Nothing armed, or nothing that can be dropped at all
-    if (sessionToDelete === null || onDelete === null) {
+    // Nothing armed
+    if (sessionToDelete === null) {
       return
     }
 
@@ -108,6 +106,9 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
             // The turn that spoke last
             const lastTurn = session.turns[session.turns.length - 1]
 
+            // Whether the student may drop it, which nobody may once they are graded on it
+            const isDroppable = !session.isGraded
+
             return (
               <div key={session.id} className="relative">
                 {/* Resume the session by selecting the row */}
@@ -116,7 +117,7 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
                   onKeyDown={(event) => {
                     // Delete on the focused row arms the confirmation, the keyboard path to the
                     // pointer-only overlay control
-                    if (onDelete !== null && event.key === 'Delete') {
+                    if (isDroppable && event.key === 'Delete') {
                       event.preventDefault()
                       askToDelete(session)
                     }
@@ -124,7 +125,7 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
                   className={cn(
                     'flex-col items-start gap-0.5',
                     // Room for the overlaid control, which only exists where there is one
-                    onDelete !== null && 'pr-12',
+                    isDroppable && 'pr-12',
                     session.id === currentSessionId && 'bg-brand/10'
                   )}
                 >
@@ -149,7 +150,7 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
                 </DropdownMenuItem>
 
                 {/* Delete the session, overlaid so its click never reaches the row's resume */}
-                {onDelete !== null && (
+                {isDroppable && (
                   <Button
                     variant="ghost"
                     size="icon"

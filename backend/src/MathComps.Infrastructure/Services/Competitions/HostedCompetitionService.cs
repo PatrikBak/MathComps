@@ -509,7 +509,7 @@ public sealed class HostedCompetitionService(
 
         // What an entry asks of the student's account, settled before anything is written. Only a graded run has
         // a result to name the student in, so only a graded one asks anything of the account. Whether the student
-        // prepares the competitions is read as the clock starts, so preparing them makes the run a test run.
+        // prepares the competitions is read as the clock starts, so preparing them makes the run a preparer's run.
         if (HostedEntryRules.IsGraded(group.ClosesAt, reader.PreparesCompetitions))
             await EnsureReadyToEnterAsync(dbContext, userId, cancellationToken);
 
@@ -885,7 +885,7 @@ public sealed class HostedCompetitionService(
 
     /// <summary>
     /// Throws unless the student may still say something about a round's solutions: they sat an entry into it
-    /// rather than giving it up, the run is no test run, and its grace has not run out, if it has ended at all.
+    /// rather than giving it up, the run is no preparer's run, and its grace has not run out, if it has ended at all.
     /// </summary>
     /// <remarks>
     /// Stricter than the read rule above, which lets anybody read a set out of embargo. What a student says
@@ -922,8 +922,8 @@ public sealed class HostedCompetitionService(
         // When the student started preparing the competitions, if they still do.
         var preparerSince = await members.GetMemberSinceAsync(userId, Organization.MathCompsSlug, cancellationToken);
 
-        // Nobody grades a test run, so a note under one has no reader.
-        if (HostedEntryRules.IsTestRun(preparerSince, startedAt))
+        // Nobody grades a preparer's run, so a note under one has no reader.
+        if (HostedEntryRules.IsPreparersRun(preparerSince, startedAt))
             throw new HostedEntryNotGradedException();
 
         // Where the entry stopped counting.

@@ -24,6 +24,7 @@ const NEWER: DefenseSession = {
   turns: [],
   feedback: null,
   reports: [],
+  isGraded: false,
 }
 
 /** An older conversation saved against the problem. */
@@ -35,6 +36,7 @@ const OLDER: DefenseSession = {
   turns: [],
   feedback: null,
   reports: [],
+  isGraded: false,
 }
 
 /**

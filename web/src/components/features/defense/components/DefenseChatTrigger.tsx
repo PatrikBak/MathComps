@@ -80,7 +80,7 @@ export function DefenseChatTrigger({ problem }: DefenseChatTriggerProps) {
             problem={problem}
             onClose={close}
             opening={{ kind: 'newest' }}
-            competition={null}
+            entry={null}
           />
         </Modal>
       )}

@@ -158,7 +158,7 @@ public sealed class HostedEntryAlreadySpentException() : Exception("This entry h
 public sealed class HostedEntryNotRunningException() : Exception("There is no entry to hand in");
 
 /// <summary>
-/// Thrown when a note for the graders is left or taken back under a test run, which nobody grades.
+/// Thrown when a note for the graders is left or taken back under a preparer's run, which nobody grades.
 /// </summary>
 public sealed class HostedEntryNotGradedException()
     : Exception("This entry is not being graded, so there is nobody to leave a note for");

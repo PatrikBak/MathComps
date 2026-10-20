@@ -550,12 +550,12 @@ internal static class HostedGrading
         /// </summary>
         /// <param name="entry">The entry.</param>
         /// <param name="preparerSince">
-        /// <inheritdoc cref="HostedEntryRules.IsTestRun" path="/param[@name='preparerSince']"/></param>
+        /// <inheritdoc cref="HostedEntryRules.IsPreparersRun" path="/param[@name='preparerSince']"/></param>
         /// <returns>The entry and its window; null when nobody grades it.</returns>
         public static GradedEntry? Of(SpentEntry entry, DateTimeOffset? preparerSince) =>
             // Graded only when the student sat the entry and somebody grades the run.
             entry.StartedAt is { } clockStartedAt
-            && HostedEntryRules.IsGraded(entry.ClosesAt, HostedEntryRules.IsTestRun(preparerSince, clockStartedAt))
+            && HostedEntryRules.IsGraded(entry.ClosesAt, HostedEntryRules.IsPreparersRun(preparerSince, clockStartedAt))
                 ? new GradedEntry(
                     entry.Id,
                     entry.UserId,

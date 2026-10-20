@@ -262,7 +262,7 @@ function HandoutDefenseRow({
  * name a competition still under embargo, and jumping to the competition's own area, which is where the
  * problem is read and where the entry it was argued under lives.
  *
- * The drop is offered only where the student is not graded on the run, per {@link DefenseCompetitionRun}.
+ * The drop is offered only where the student is not graded on the conversation.
  */
 function CompetitionDefenseRow({
   defense,
