@@ -10,7 +10,6 @@ using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Comments;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Localization;
-using MathComps.Infrastructure.Services.Organizations;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.Services.Selection;
@@ -22,15 +21,11 @@ namespace MathComps.Infrastructure.Services.Selection;
 /// </summary>
 /// <param name="dbContextFactory">Creates the context each read runs on.</param>
 /// <param name="localization">The names the taxonomy gives the groups' nodes.</param>
-/// <param name="members">
-/// Reads when each conversation's author became a member of the organization whose selection is read.
-/// </param>
 /// <param name="comments">Reads the discussions of what the selection holds.</param>
 /// <param name="finalization">Reads the cycles a board can be finalized into.</param>
 public sealed class ProblemSelectionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IMetadataLocalizationService localization,
-    IOrganizationMemberService members,
     ICommentService comments,
     IBoardFinalizationService finalization)
     : IProblemSelectionService
@@ -190,19 +185,6 @@ public sealed class ProblemSelectionService(
         // The groups that have not opened, by id.
         var groupsById = groups.ToDictionary(group => group.Id);
 
-        // When each conversation's author became a member of the organization, for those who still are.
-        var memberSince = await members.GetMemberSinceAsync(
-            [.. conversations.Select(conversation => conversation.Author.Id).Distinct()],
-            organizationSlug,
-            cancellationToken);
-
-        // Only the conversations the reviewers held.
-        var reviewersConversations = conversations
-            .Where(conversation => SelectionRules.IsReviewersConversation(
-                memberSince.TryGetValue(conversation.Author.Id, out var since) ? since : null,
-                conversation.StartedAt))
-            .ToList();
-
         // The organization's categories, in the order they run.
         var categories = await dbContext.OrganizationCategories
             .AsNoTracking()
@@ -271,7 +253,7 @@ public sealed class ProblemSelectionService(
                             : null)),
             ],
             cycles,
-            reviewersConversations,
+            conversations,
             needsEveryLanguage);
     }
 

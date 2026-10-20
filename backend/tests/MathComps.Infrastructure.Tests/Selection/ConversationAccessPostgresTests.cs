@@ -2,6 +2,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.ConversationReview;
+using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Selection;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,18 +10,18 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MathComps.Infrastructure.Tests.Selection;
 
 /// <summary>
-/// Covers <see cref="ProposalConversations"/>, which lets through only a conversation the reviewers held about a
-/// proposal the selection still holds, and a note on one.
+/// Covers <see cref="ConversationAccess"/> on a conversation and on a note on it, by the rule
+/// <see cref="IConversationAccess"/> states.
 /// </summary>
 /// <remarks>
 /// The seed holds one conversation per case, each with a note on it, keyed by the case's name.
 /// </remarks>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
-public class ProposalConversationsPostgresTests(PostgresContainerFixture fixture)
-    : PostgresTestBase<IProposalConversations>(fixture)
+public class ConversationAccessPostgresTests(PostgresContainerFixture fixture)
+    : PostgresTestBase<IConversationAccess>(fixture)
 {
     /// <summary>
-    /// The case of the reviewer's conversation about a proposal in the pool.
+    /// The case of the reviewer's conversation about a proposal in MathComps' pool.
     /// </summary>
     private const string Pool = "pool";
 
@@ -50,31 +51,55 @@ public class ProposalConversationsPostgresTests(PostgresContainerFixture fixture
     private const string DeletedProposal = "deleted proposal";
 
     /// <summary>
-    /// The case of a student's conversation about a proposal in the pool, held while the problem sat somewhere
-    /// students reach.
+    /// The case of a former reviewer's conversation about a proposal in MathComps' pool, its author now on no
+    /// organization's list.
     /// </summary>
-    private const string Student = "student";
+    private const string FormerMember = "former member";
 
     /// <summary>
-    /// The case of the latecomer's conversation about a proposal in the pool, held before their address was on the
-    /// MathComps organization's list.
+    /// The case of the commissioner's conversation about a proposal in the olympiad's pool.
     /// </summary>
-    private const string BeforeMembership = "before membership";
+    private const string Olympiad = "olympiad";
 
     /// <summary>
-    /// A reviewer, on the MathComps organization's list since well before any conversation.
+    /// The reviewer reading as a member of MathComps who is no admin.
+    /// </summary>
+    private const string ReviewerViewer = "reviewer";
+
+    /// <summary>
+    /// The reviewer reading as a member of MathComps who is an admin.
+    /// </summary>
+    private const string MemberAdminViewer = "member admin";
+
+    /// <summary>
+    /// An admin on no organization's list.
+    /// </summary>
+    private const string OutsideAdminViewer = "outside admin";
+
+    /// <summary>
+    /// The commissioner reading as a member of the olympiad who is no admin.
+    /// </summary>
+    private const string CommissionerViewer = "commissioner";
+
+    /// <summary>
+    /// A reviewer, on the MathComps organization's list.
     /// </summary>
     private readonly Guid _reviewerId = Guid.CreateVersion7();
 
     /// <summary>
-    /// A reviewer on the MathComps organization's list only since after their conversation.
+    /// A former reviewer, now on no organization's list.
     /// </summary>
-    private readonly Guid _latecomerId = Guid.CreateVersion7();
+    private readonly Guid _formerMemberId = Guid.CreateVersion7();
 
     /// <summary>
-    /// A student, whose address was never on the MathComps organization's list.
+    /// A member of the olympiad's commission, on its list alone.
     /// </summary>
-    private readonly Guid _studentId = Guid.CreateVersion7();
+    private readonly Guid _commissionerId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// An admin whose address is on no organization's list.
+    /// </summary>
+    private readonly Guid _outsideAdminId = Guid.CreateVersion7();
 
     /// <summary>
     /// Each case's conversation, by the case's name.
@@ -92,68 +117,89 @@ public class ProposalConversationsPostgresTests(PostgresContainerFixture fixture
         services.AddProblemSelectionServices();
 
     /// <summary>
-    /// A reviewer's conversation about a proposal the selection holds is reached, and so is a note on it.
+    /// Each viewer reaches exactly the conversations open to them, and the notes on those. A member reaches the
+    /// conversations about their organization's proposals the selection holds, whoever held them, and nothing about
+    /// another organization's, and an admin on no organization's list nothing about any. A deleted proposal's
+    /// conversations stay its organization's, reaching the admins among its members alone. An admin reaches every
+    /// conversation about a problem no organization holds, and no member who is no admin does. Whatever is refused
+    /// answers as though it were not there.
     /// </summary>
+    /// <param name="viewer">Who reads.</param>
     /// <param name="conversation">The case.</param>
+    /// <param name="reaches">Whether the viewer reaches it.</param>
     [Theory]
-    [InlineData(Pool)]
-    [InlineData(UnopenedGroup)]
-    public Task A_reviewers_conversation_about_a_proposal_is_reached(string conversation) =>
+    [InlineData(ReviewerViewer, Pool, true)]
+    [InlineData(ReviewerViewer, UnopenedGroup, true)]
+    [InlineData(ReviewerViewer, Archive, false)]
+    [InlineData(ReviewerViewer, Handout, false)]
+    [InlineData(ReviewerViewer, OpenedGroup, false)]
+    [InlineData(ReviewerViewer, DeletedProposal, false)]
+    [InlineData(ReviewerViewer, FormerMember, true)]
+    [InlineData(ReviewerViewer, Olympiad, false)]
+    [InlineData(MemberAdminViewer, Pool, true)]
+    [InlineData(MemberAdminViewer, Archive, true)]
+    [InlineData(MemberAdminViewer, DeletedProposal, true)]
+    [InlineData(MemberAdminViewer, Olympiad, false)]
+    [InlineData(OutsideAdminViewer, Pool, false)]
+    [InlineData(OutsideAdminViewer, UnopenedGroup, false)]
+    [InlineData(OutsideAdminViewer, Olympiad, false)]
+    [InlineData(OutsideAdminViewer, DeletedProposal, false)]
+    [InlineData(OutsideAdminViewer, Archive, true)]
+    [InlineData(OutsideAdminViewer, Handout, true)]
+    [InlineData(OutsideAdminViewer, OpenedGroup, true)]
+    [InlineData(CommissionerViewer, Olympiad, true)]
+    [InlineData(CommissionerViewer, Pool, false)]
+    public Task A_conversation_reaches_its_viewers_alone(string viewer, string conversation, bool reaches) =>
         RunTestAsync(async service =>
         {
-            // The conversation and the note on it, checked
-            var refusal = await Record.ExceptionAsync(async () =>
+            // The viewer, as the check is handed them
+            var asked = ViewerOf(viewer);
+
+            // The conversation, checked
+            var conversationRefusal = await Record.ExceptionAsync(
+                () => service.EnsureConversationAsync(_conversations[conversation], asked));
+
+            // And the note on it, checked on its own
+            var noteRefusal = await Record.ExceptionAsync(() => service.EnsureNoteAsync(_notes[conversation], asked));
+
+            // Both reached
+            if (reaches)
             {
                 // The conversation
-                await service.EnsureConversationAsync(_conversations[conversation]);
+                Assert.Null(conversationRefusal);
 
-                // The note on it
-                await service.EnsureNoteAsync(_notes[conversation]);
-            });
+                // And the note
+                Assert.Null(noteRefusal);
+            }
 
-            // Neither refused
-            Assert.Null(refusal);
+            // Or both refused as though they were not there
+            else
+            {
+                // The conversation as a missing conversation
+                Assert.IsType<DefenseSessionNotFoundException>(conversationRefusal);
+
+                // And the note as a missing note, so the answer never tells that a note is there
+                Assert.IsType<ReviewNoteNotFoundException>(noteRefusal);
+            }
         });
 
     /// <summary>
-    /// Every other conversation, and any note on it, is refused like a missing conversation: one about an archive
-    /// problem or a handout problem, one about a proposal taken by a group that has opened or about a deleted one, a
-    /// student's about a proposal in the pool, and a reviewer's held before their address was on the MathComps
-    /// organization's list.
-    /// </summary>
-    /// <param name="conversation">The case.</param>
-    [Theory]
-    [InlineData(Archive)]
-    [InlineData(Handout)]
-    [InlineData(OpenedGroup)]
-    [InlineData(DeletedProposal)]
-    [InlineData(Student)]
-    [InlineData(BeforeMembership)]
-    public Task Any_other_conversation_is_refused(string conversation) => RunTestAsync(async service =>
-    {
-        // The conversation, refused
-        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
-            () => service.EnsureConversationAsync(_conversations[conversation]));
-
-        // And the note on it
-        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
-            () => service.EnsureNoteAsync(_notes[conversation]));
-    });
-
-    /// <summary>
-    /// An id naming no conversation is refused like one outside the selection, and one naming no note as a note
-    /// that is gone.
+    /// An id naming no conversation is refused to a viewer who is no admin as a conversation that is gone, and one
+    /// naming no note as a note that is gone.
     /// </summary>
     [Fact]
     public Task An_id_naming_nothing_is_refused() => RunTestAsync(async service =>
     {
+        // The reviewer, who is no admin
+        var reviewer = ViewerOf(ReviewerViewer);
+
         // No conversation, refused
-        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
-            () => service.EnsureConversationAsync(Guid.CreateVersion7()));
+        await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
+            () => service.EnsureConversationAsync(Guid.CreateVersion7(), reviewer));
 
         // And no note
         await Assert.ThrowsAsync<ReviewNoteNotFoundException>(
-            () => service.EnsureNoteAsync(Guid.CreateVersion7()));
+            () => service.EnsureNoteAsync(Guid.CreateVersion7(), reviewer));
     });
 
     /// <inheritdoc/>
@@ -162,17 +208,21 @@ public class ProposalConversationsPostgresTests(PostgresContainerFixture fixture
         // The instant every conversation and membership is dated from
         var now = DateTimeOffset.UtcNow;
 
-        // The reviewer, the latecomer and the student
+        // The reviewer, the former reviewer, the commissioner and the admin on no list
         context.Users.AddRange(
             HostedSeed.NewUser(_reviewerId, "Reviewer"),
-            HostedSeed.NewUser(_latecomerId, "Latecomer"),
-            HostedSeed.NewUser(_studentId, "Student"));
+            HostedSeed.NewUser(_formerMemberId, "Former"),
+            HostedSeed.NewUser(_commissionerId, "Commissioner"),
+            HostedSeed.NewUser(_outsideAdminId, "Admin"));
 
         // The reviewer on the MathComps organization's list for a month
         SelectionSeed.NewMember(context, "reviewer@example.com", now.AddDays(-30));
 
-        // The latecomer on the MathComps organization's list only since yesterday
-        SelectionSeed.NewMember(context, "latecomer@example.com", now.AddDays(-1));
+        // The olympiad
+        var olympiadId = SelectionSeed.NewOrganization(context, Olympiad);
+
+        // The commissioner on the olympiad's list for a month
+        SelectionSeed.NewMember(context, olympiadId, "commissioner@example.com", now.AddDays(-30));
 
         // The season every round sits in
         var season = SelectionSeed.NewSeason(context);
@@ -186,6 +236,9 @@ public class ProposalConversationsPostgresTests(PostgresContainerFixture fixture
         // A deleted one
         var deleted = SelectionSeed.NewProposal(context, pool, 2, 2);
         context.Proposals.Local.Single(proposal => proposal.ProblemId == deleted).DeletedAt = now;
+
+        // A proposal in the olympiad's pool, its number one MathComps' pool uses too
+        var olympiadProposal = SelectionSeed.NewProposal(context, olympiadId, pool, 1, 3);
 
         // A group that opens next week
         var october = SelectionSeed.NewGroup(context, season, "october", now.AddDays(7));
@@ -220,8 +273,8 @@ public class ProposalConversationsPostgresTests(PostgresContainerFixture fixture
         SeedConversation(context, Archive, _reviewerId, archiveProblemId, now.AddDays(-2));
         SeedConversation(context, OpenedGroup, _reviewerId, opened, now.AddDays(-2));
         SeedConversation(context, DeletedProposal, _reviewerId, deleted, now.AddDays(-2));
-        SeedConversation(context, Student, _studentId, pooled, now.AddDays(-2));
-        SeedConversation(context, BeforeMembership, _latecomerId, pooled, now.AddDays(-2));
+        SeedConversation(context, FormerMember, _formerMemberId, pooled, now.AddDays(-2));
+        SeedConversation(context, Olympiad, _commissionerId, olympiadProposal, now.AddDays(-2));
 
         // A handout problem
         var handout = new Handout { Id = Guid.CreateVersion7(), ContentId = "handout-one" };
@@ -281,6 +334,20 @@ public class ProposalConversationsPostgresTests(PostgresContainerFixture fixture
         // Written
         await context.SaveChangesAsync();
     }
+
+    /// <summary>
+    /// Builds a viewer the cases name.
+    /// </summary>
+    /// <param name="viewer">The viewer's name.</param>
+    /// <returns>The viewer.</returns>
+    private ConversationViewer ViewerOf(string viewer) => viewer switch
+    {
+        ReviewerViewer => new ConversationViewer(_reviewerId, IsAdmin: false),
+        MemberAdminViewer => new ConversationViewer(_reviewerId, IsAdmin: true),
+        OutsideAdminViewer => new ConversationViewer(_outsideAdminId, IsAdmin: true),
+        CommissionerViewer => new ConversationViewer(_commissionerId, IsAdmin: false),
+        _ => throw new ArgumentOutOfRangeException(nameof(viewer), viewer, "Unknown viewer."),
+    };
 
     /// <summary>
     /// Tracks one case's conversation about a problem, kept by the case's name.

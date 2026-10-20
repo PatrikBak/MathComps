@@ -6,9 +6,9 @@ using MathComps.Infrastructure.Services.Users;
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Maps the endpoints for reading one defense conversation back and recording how far a reviewer has read it. An
-/// admin reaches every conversation, and the problem selection's reviewers the conversations the reviewers held about
-/// the proposals, through <see cref="ConversationReviewerExtensions.RequireConversationReviewer"/>.
+/// Maps the endpoints for reading one defense conversation back and recording how far a reviewer has read it, each
+/// open to whoever <see cref="ConversationReviewerExtensions.RequireConversationReviewer"/> lets reach the
+/// conversation.
 /// </summary>
 public static class ConversationReviewEndpoints
 {

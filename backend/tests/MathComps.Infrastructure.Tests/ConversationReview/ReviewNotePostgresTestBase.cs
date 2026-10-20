@@ -26,8 +26,11 @@ public abstract class ReviewNotePostgresTestBase<TService>(PostgresContainerFixt
         // Writing, revising and settling the notes.
         services.AddScoped<IReviewNoteService, ReviewNoteService>();
 
-        // The admin's feed of every note.
+        // The admin's feed of notes across the conversations.
         services.AddScoped<IAdminNoteService, AdminNoteService>();
+
+        // The reader of the organizations' lists.
+        services.AddOrganizationMembers();
 
         // The display names an archive problem is named by.
         services.AddSingleton<IMetadataLocalizationService, MetadataLocalizationService>();

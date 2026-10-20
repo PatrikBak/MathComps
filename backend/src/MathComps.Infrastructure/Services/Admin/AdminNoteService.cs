@@ -8,6 +8,8 @@ using MathComps.Infrastructure.Pagination;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Localization;
+using MathComps.Infrastructure.Services.Organizations;
+using MathComps.Infrastructure.Services.Selection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -17,12 +19,14 @@ namespace MathComps.Infrastructure.Services.Admin;
 /// Implements <see cref="IAdminNoteService"/> over the database.
 /// </summary>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
-/// <param name="paginationOptions">The bounds a page of the feed is cut by.</param>
 /// <param name="localization">The resolver of localized display names.</param>
+/// <param name="members">Reads the organizations a reviewer is a member of.</param>
+/// <param name="paginationOptions">The bounds a page of the feed is cut by.</param>
 public class AdminNoteService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
-    IOptions<PaginationOptions> paginationOptions,
-    IMetadataLocalizationService localization) : IAdminNoteService
+    IMetadataLocalizationService localization,
+    IOrganizationMemberService members,
+    IOptions<PaginationOptions> paginationOptions) : IAdminNoteService
 {
     /// <inheritdoc/>
     public async Task<PagedList<AdminNoteFeedItemDto>> GetFeedAsync(
@@ -38,13 +42,21 @@ public class AdminNoteService(
         // This read's own context, since reading the feed is a unit of work in itself.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Every note, save the ones whose conversation has lost its problem: the queue and the conversation
-        // itself both require one, so surfacing it here would offer a way into a conversation that can't be
-        // opened.
+        // The organizations the reviewer is a member of.
+        var organizationIds = await members.GetOrganizationIdsAsync(reviewerId, cancellationToken);
+
+        // The conversations the reviewer reads, short of the ones belonging to an organization they are no member of.
+        var reachableSessions = dbContext.DefenseSessions.WhereReachableByAdmin(
+            dbContext.Proposals, organizationIds, DateTimeOffset.UtcNow);
+
+        // Every note on a conversation the reviewer reads, save the ones whose conversation has lost its problem:
+        // the queue and the conversation itself both require one, so surfacing it here would offer a way into a
+        // conversation that can't be opened.
         var notes = dbContext.AdminNotes
             .AsNoTracking()
             .Where(note =>
-                note.Session.EnvironmentTarget != null || note.Session.ProblemTarget != null);
+                note.Session.EnvironmentTarget != null || note.Session.ProblemTarget != null)
+            .Where(note => reachableSessions.Any(session => session.Id == note.SessionId));
 
         // Leave out what has already been settled.
         if (openOnly)

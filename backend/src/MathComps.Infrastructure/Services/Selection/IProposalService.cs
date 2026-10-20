@@ -91,8 +91,7 @@ public interface IProposalService
 }
 
 /// <summary>
-/// Thrown when an id or a category's name names nothing the selection holds, a reviewer's conversation about a
-/// proposal included.
+/// Thrown when an id or a category's name names nothing the selection holds.
 /// </summary>
 public sealed class SelectionTargetNotFoundException()
     : Exception("Nothing in the selection answers to that id or name");

@@ -13,6 +13,7 @@ using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Organizations;
+using MathComps.Infrastructure.Services.Selection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -25,7 +26,9 @@ namespace MathComps.Infrastructure.Services.Admin;
 /// </summary>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
 /// <param name="localization">The resolver of localized display names.</param>
-/// <param name="members"><inheritdoc cref="HostedGrading.FindGradedEntryAsync" path="/param[@name='members']"/></param>
+/// <param name="members">
+/// Reads the organizations a reviewer is a member of, and when a student started preparing the competitions.
+/// </param>
 /// <param name="paginationOptions">The bounds a page of the queue is cut by.</param>
 public class AdminDefenseReviewService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
@@ -60,8 +63,12 @@ public class AdminDefenseReviewService(
         // This read's own context, since reading a page of the queue is a unit of work in itself.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Conversations held against a problem, narrowed by every filter the stored data can answer on its own.
-        var sessions = ApplySessionFilters(dbContext, filter);
+        // The organizations the reviewer is a member of.
+        var organizationIds = await members.GetOrganizationIdsAsync(reviewerId, cancellationToken);
+
+        // The conversations the reviewer reads held against a problem, narrowed by every filter the stored data can
+        // answer on its own.
+        var sessions = ApplySessionFilters(dbContext, filter, organizationIds);
 
         // Each of them paired with when it last moved and when this reviewer last read it, left-joined so one they
         // have never read still comes through. Whether it counts as unread is worked out here, once, and read back
@@ -184,15 +191,21 @@ public class AdminDefenseReviewService(
 
     /// <inheritdoc/>
     public async Task<AdminDefenseFilterOptionsDto> GetFilterOptionsAsync(
-        Language language, CancellationToken cancellationToken = default)
+        Guid reviewerId, Language language, CancellationToken cancellationToken = default)
     {
         // This read's own context, since reading what the filters can be set to is a unit of work in itself.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Everyone who has held a conversation, the busiest first. A student with none never appears. The grouped
-        // rows come back anonymous and take their contract's shape afterwards, since a projection straight into
-        // one doesn't survive being grouped over.
-        var userRows = await ReviewableSessions(dbContext)
+        // The organizations the reviewer is a member of.
+        var organizationIds = await members.GetOrganizationIdsAsync(reviewerId, cancellationToken);
+
+        // The conversations the reviewer reads.
+        var reviewable = ReviewableSessions(dbContext, organizationIds);
+
+        // Everyone who has held a conversation the reviewer reads, the busiest first. A student with none never
+        // appears. The grouped rows come back anonymous and take their contract's shape afterwards, since a
+        // projection straight into one doesn't survive being grouped over.
+        var userRows = await reviewable
             .GroupBy(session => new
             {
                 session.UserId,
@@ -227,10 +240,11 @@ public class AdminDefenseReviewService(
             })
             .ToListAsync(cancellationToken);
 
-        // And every archive problem, carrying what naming it takes: nothing on the reader's side can name a
-        // competition still under embargo.
+        // And every archive problem a conversation the reviewer reads was held against, carrying what naming it
+        // takes: nothing on the reader's side can name a competition still under embargo.
         var archiveRows = await dbContext.ProblemDefenses
             .AsNoTracking()
+            .Where(defense => reviewable.Any(session => session.Id == defense.DefenseSessionId))
             .GroupBy(defense => new
             {
                 defense.ProblemId,
@@ -283,8 +297,8 @@ public class AdminDefenseReviewService(
             .ThenBy(option => NamedDefenseTargets.Key(option.Target), StringComparer.Ordinal)
             .ToList();
 
-        // And every set of settings one has run on.
-        var promptVersions = await GetPromptVersionOptionsAsync(dbContext, cancellationToken);
+        // And every set of settings a conversation the reviewer reads has run on.
+        var promptVersions = await GetPromptVersionOptionsAsync(reviewable, cancellationToken);
 
         // Hand back every option list, since the queue needs them together the moment it opens.
         return new AdminDefenseFilterOptionsDto(students, problems, promptVersions);
@@ -292,15 +306,17 @@ public class AdminDefenseReviewService(
 
     /// <inheritdoc/>
     public async Task<AuthorConversationsDto> GetStudentConversationsAsync(
-        Guid userId, DefenseTarget target, CancellationToken cancellationToken = default)
+        Guid reviewerId, Guid userId, DefenseTarget target, CancellationToken cancellationToken = default)
     {
         // This read's own context, since listing one student's conversations is a unit of work in itself.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The student's conversations against the target, oldest first. The ids break ties so that two started in
-        // the same instant keep one order between reads.
-        var conversations = await dbContext.DefenseSessions
-            .AsNoTracking()
+        // The organizations the reviewer is a member of.
+        var organizationIds = await members.GetOrganizationIdsAsync(reviewerId, cancellationToken);
+
+        // The student's conversations against the target the reviewer reads, oldest first. The ids break ties so
+        // that two started in the same instant keep one order between reads.
+        var conversations = await ReviewableSessions(dbContext, organizationIds)
             .Where(session => session.UserId == userId)
             .Where(DefenseTargets.HeldAgainst(target))
             .OrderBy(session => session.CreatedAt)
@@ -370,15 +386,19 @@ public class AdminDefenseReviewService(
     }
 
     /// <summary>
-    /// The conversations the review surface reads: every one held against something. A conversation whose
+    /// The conversations the review surface reads: every one held against something, short of the ones belonging to
+    /// an organization the reviewer is no member of (<see cref="IConversationAccess"/>). A conversation whose
     /// target row never landed names no problem, so nothing here can say what it was about.
     /// </summary>
     /// <param name="dbContext">The context the query is built against.</param>
+    /// <param name="organizationIds">The organizations the reviewer is a member of.</param>
     /// <returns>The conversations, still unrun.</returns>
-    private static IQueryable<DefenseSession> ReviewableSessions(MathCompsDbContext dbContext) =>
+    private static IQueryable<DefenseSession> ReviewableSessions(
+        MathCompsDbContext dbContext, IReadOnlyList<Guid> organizationIds) =>
         dbContext.DefenseSessions
             .AsNoTracking()
-            .Where(session => session.EnvironmentTarget != null || session.ProblemTarget != null);
+            .Where(session => session.EnvironmentTarget != null || session.ProblemTarget != null)
+            .WhereReachableByAdmin(dbContext.Proposals, organizationIds, DateTimeOffset.UtcNow);
 
     /// <summary>
     /// Narrows the conversations to those the database can pick out from what is stored against them, which is
@@ -387,12 +407,13 @@ public class AdminDefenseReviewService(
     /// </summary>
     /// <param name="dbContext">The context the query is built against.</param>
     /// <param name="filter">Which conversations to keep.</param>
+    /// <param name="organizationIds">The organizations the reviewer is a member of.</param>
     /// <returns>The conversations these filters leave.</returns>
     private static IQueryable<DefenseSession> ApplySessionFilters(
-        MathCompsDbContext dbContext, AdminDefenseQueueFilter filter)
+        MathCompsDbContext dbContext, AdminDefenseQueueFilter filter, IReadOnlyList<Guid> organizationIds)
     {
-        // Conversations held against a problem, of either kind.
-        var sessions = ReviewableSessions(dbContext);
+        // Conversations the reviewer reads held against a problem, of either kind.
+        var sessions = ReviewableSessions(dbContext, organizationIds);
 
         // Whose conversations to read.
         if (filter.UserId is { } userId)
@@ -446,19 +467,19 @@ public class AdminDefenseReviewService(
     }
 
     /// <summary>
-    /// Reads every set of examiner settings a conversation has run on, keyed by the version the database hashes
-    /// out of the snapshot, so grouping here and filtering to one set are the same expression.
+    /// Reads every set of examiner settings one of the conversations has run on, keyed by the version the database
+    /// hashes out of the snapshot, so grouping here and filtering to one set are the same expression.
     /// </summary>
-    /// <param name="dbContext">The context the query is built against.</param>
+    /// <param name="reviewable">The conversations the reviewer reads.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The settings, most recently used first.</returns>
     private static async Task<IReadOnlyList<AdminDefensePromptVersionOptionDto>> GetPromptVersionOptionsAsync(
-        MathCompsDbContext dbContext, CancellationToken cancellationToken)
+        IQueryable<DefenseSession> reviewable, CancellationToken cancellationToken)
     {
         // Group the conversations by their settings and measure each group's span. The rows come back anonymous
         // and take their contract's shape afterwards, since a projection straight into one doesn't survive being
         // grouped over.
-        var rows = await ReviewableSessions(dbContext)
+        var rows = await reviewable
             .GroupBy(session => PostgresDbFunctions.ExaminerConfigVersion(session.ExaminerConfig))
             .Select(group => new
             {
@@ -481,7 +502,7 @@ public class AdminDefenseReviewService(
     /// <param name="dbContext">The operation's database context.</param>
     /// <param name="problemId">The problem.</param>
     /// <param name="userId">The student.</param>
-    /// <param name="conversations">Every conversation the student held against the problem.</param>
+    /// <param name="conversations">The student's conversations against the problem that the reviewer reads.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The grading, or null when nobody grades the student on the problem.</returns>
     private async Task<StudentGradingDto?> ReadGradingAsync(

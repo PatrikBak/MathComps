@@ -7,9 +7,8 @@ using MathComps.Infrastructure.Services.Users;
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Maps the endpoints for writing down what a reviewer notices in a defense conversation. An admin keeps notes on
-/// every conversation, and the problem selection's reviewers on the conversations the reviewers held about the
-/// proposals, through <see cref="ConversationReviewerExtensions.RequireConversationReviewer"/>.
+/// Maps the endpoints for writing down what a reviewer notices in a defense conversation, each open to whoever
+/// <see cref="ConversationReviewerExtensions.RequireConversationReviewer"/> lets reach the conversation.
 /// </summary>
 public static class ReviewNoteEndpoints
 {
@@ -32,8 +31,9 @@ public static class ReviewNoteEndpoints
             IReviewNoteService noteService,
             CancellationToken cancellationToken) =>
         {
-            // A note about no conversation has nowhere to live, and one saying nothing says nothing. Both are
-            // shapes the wire can express and the service's own contract can't, so they are refused here.
+            // A note saying nothing says nothing, a shape the wire can express and the service's own contract can't,
+            // so it is refused here. One about no conversation never gets this far, since the route's filter refuses
+            // a note naming none.
             if (request.SessionId is not { } sessionId || request.Content is not { } content)
                 throw new ReviewNoteValueException();
 

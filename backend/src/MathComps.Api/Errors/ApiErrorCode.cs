@@ -67,7 +67,7 @@ public enum ApiErrorCode
     MarkStatusRequiresAuthentication,
 
     /// <summary>
-    /// The referenced defense session does not exist (or belongs to another user).
+    /// The referenced defense session does not exist, or the caller may not reach it.
     /// </summary>
     DefenseSessionNotFound,
 
@@ -196,7 +196,7 @@ public enum ApiErrorCode
     ReviewNoteTarget,
 
     /// <summary>
-    /// No review note exists under the id.
+    /// No review note the caller may reach exists under the id.
     /// </summary>
     ReviewNoteNotFound,
 
@@ -226,7 +226,7 @@ public enum ApiErrorCode
     HostedGradeValue,
 
     /// <summary>
-    /// Nothing the problem selection holds answers to the id, a reviewer's conversation about a proposal included.
+    /// Nothing the problem selection holds answers to the id.
     /// </summary>
     SelectionTargetNotFound,
 

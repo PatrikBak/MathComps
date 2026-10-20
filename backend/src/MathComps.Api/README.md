@@ -1,6 +1,6 @@
 # MathComps API
 
-The main .NET Web API for the MathComps application. Provides endpoints for browsing problems, filtering, similarity search, and serving problem metadata, plus the signed-in surfaces, among them the AI defense conversations described in the [Examiner CLI README](../MathComps.Cli.Examiner/README.md). Behind the admin policy it also serves the review of those conversations, under `/admin/defense`: reading every student's back, recording which have been read, and keeping what gets noted down about them. The routes on one conversation also let in the problem selection's reviewers, for the conversations the reviewers held about the proposals.
+The main .NET Web API for the MathComps application. Provides endpoints for browsing problems, filtering, similarity search, and serving problem metadata, plus the signed-in surfaces, among them the AI defense conversations described in the [Examiner CLI README](../MathComps.Cli.Examiner/README.md). Behind the admin policy it also serves the review of those conversations, under `/admin/defense`: reading the students' back, recording which have been read, and keeping what gets noted down about them. A conversation about an organization's proposal reaches only that organization's members: an admin sees it only when on its list, and the routes on one conversation also let in the members who are no admins.
 
 ## Setup
 

@@ -4,6 +4,7 @@ using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Options;
+using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Admin;
 using MathComps.Infrastructure.Services.ConversationReview;
 using MathComps.Infrastructure.Services.Defense;
@@ -22,7 +23,8 @@ namespace MathComps.Infrastructure.Tests.Admin;
 /// orders and pages the conversations by when they were last spoken to, that its counts follow the filters, that
 /// whether a conversation counts as unread is derived from its turns rather than stored, that a row carries what has
 /// been written and said about it, that conversations group by the settings they ran on, that one held against a
-/// proposal goes by the proposal, and that one held against nothing at all stays out of reach entirely.
+/// proposal goes by the proposal, that one about another organization's proposal stays out of a non-member's reach
+/// until a group holding it opens, and that one held against nothing at all stays out of reach entirely.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fixture)
@@ -110,8 +112,11 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     [Fact]
     public Task Reading_a_conversation_holds_only_until_its_next_message() => RunTestAsync(async service =>
     {
-        // The one message the newest conversation holds is unread to begin with
-        Assert.Equal(1, (await GetConversationAsync(service, NewestSessionId)).UnreadStudentMessageCount);
+        // The newest conversation to begin with
+        var fresh = await GetConversationAsync(service, NewestSessionId);
+
+        // The one message it holds unread
+        Assert.Equal(1, fresh.UnreadStudentMessageCount);
 
         // Read it
         await ReviewAsync(review => review.MarkReadAsync(ReviewerId, NewestSessionId));
@@ -134,8 +139,11 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             await context.SaveChangesAsync();
         });
 
-        // Which brings it back with exactly the one new message against it
-        Assert.Equal(1, (await GetConversationAsync(service, NewestSessionId)).UnreadStudentMessageCount);
+        // The conversation after the new turn
+        var carriedOn = await GetConversationAsync(service, NewestSessionId);
+
+        // Back with exactly the one new message against it
+        Assert.Equal(1, carriedOn.UnreadStudentMessageCount);
 
         // Read it a second time
         await ReviewAsync(review => review.MarkReadAsync(ReviewerId, NewestSessionId));
@@ -266,9 +274,12 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // Pick it up from the reply, which the message before it shares a moment with
         await ReviewAsync(review => review.MarkUnreadFromAsync(ReviewerId, NewestSessionId, NewestReplyId));
 
-        // Both of them stand new, the stamp having landed on the opener before the pair, and the student's own
+        // The conversation as it was picked up
+        var pickedUp = await GetConversationAsync(service, NewestSessionId);
+
+        // Both of the pair stand new, the stamp having landed on the opener before them, and the student's own
         // message is the one of the two the count is over
-        Assert.Equal(1, (await GetConversationAsync(service, NewestSessionId)).UnreadStudentMessageCount);
+        Assert.Equal(1, pickedUp.UnreadStudentMessageCount);
     });
 
     /// <summary>
@@ -290,8 +301,11 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             () => ReviewAsync(review => review.MarkUnreadFromAsync(
                 ReviewerId, NewestSessionId, Guid.Parse("00000000-0000-0000-0000-0000000000bf"))));
 
-        // Neither of which moved the stamp the conversation already had
-        Assert.Equal(0, (await GetConversationAsync(service, NewestSessionId)).UnreadStudentMessageCount);
+        // The conversation after both refusals
+        var refused = await GetConversationAsync(service, NewestSessionId);
+
+        // Its stamp where the read left it, neither refusal having moved it
+        Assert.Equal(0, refused.UnreadStudentMessageCount);
     });
 
     /// <summary>
@@ -308,9 +322,15 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         await service.MarkManyReadAsync(
             ReviewerId, [NewestSessionId, OldestSessionId, missingId, NewestSessionId]);
 
+        // The newest conversation after the mark
+        var newest = await GetConversationAsync(service, NewestSessionId);
+
+        // And the oldest
+        var oldest = await GetConversationAsync(service, OldestSessionId);
+
         // Both real ones settled, rather than the missing id refusing the whole set
-        Assert.Equal(0, (await GetConversationAsync(service, NewestSessionId)).UnreadStudentMessageCount);
-        Assert.NotNull((await GetConversationAsync(service, OldestSessionId)).ReadAt);
+        Assert.Equal(0, newest.UnreadStudentMessageCount);
+        Assert.NotNull(oldest.ReadAt);
     });
 
     /// <summary>
@@ -352,15 +372,24 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // Where all four still stand
         Assert.Equal(4, other.TotalCount);
 
-        // And the detail carries each reviewer their own stamp
-        Assert.NotNull((await ReadDetailAsync(ReviewerId, NewestSessionId)).ReadAt);
-        Assert.Null((await ReadDetailAsync(OtherReviewerId, NewestSessionId)).ReadAt);
+        // The conversation's detail for the reviewer who read it
+        var readerDetail = await ReadDetailAsync(ReviewerId, NewestSessionId);
+
+        // And for the other reviewer
+        var otherDetail = await ReadDetailAsync(OtherReviewerId, NewestSessionId);
+
+        // Each carrying that reviewer's own stamp
+        Assert.NotNull(readerDetail.ReadAt);
+        Assert.Null(otherDetail.ReadAt);
 
         // The other reviewer puts it back to unread, which takes only their own stamp, and they never had one
         await ReviewAsync(review => review.MarkUnreadAsync(OtherReviewerId, NewestSessionId));
 
-        // So the first reviewer's still stands
-        Assert.NotNull((await ReadDetailAsync(ReviewerId, NewestSessionId)).ReadAt);
+        // The detail for the reviewer who read it, once more
+        var readerDetailAfter = await ReadDetailAsync(ReviewerId, NewestSessionId);
+
+        // Their stamp still standing
+        Assert.NotNull(readerDetailAfter.ReadAt);
     });
 
     /// <summary>
@@ -371,7 +400,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task Conversations_group_by_the_settings_they_ran_on() => RunTestAsync(async service =>
     {
         // Read what the filters can be set to
-        var options = await service.GetFilterOptionsAsync(Language.EN);
+        var options = await service.GetFilterOptionsAsync(ReviewerId, Language.EN);
 
         // Three versions across the four conversations that name a problem
         Assert.Equal(3, options.PromptVersions.Count);
@@ -652,7 +681,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task Filter_options_name_the_archive_problem_too() => RunTestAsync(async service =>
     {
         // What the filters can be set to
-        var options = await service.GetFilterOptionsAsync(Language.EN);
+        var options = await service.GetFilterOptionsAsync(ReviewerId, Language.EN);
 
         // The archive problem among them, carrying the one conversation held against it
         var option = Assert.Single(
@@ -671,7 +700,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task Filter_options_name_every_student_and_environment_with_their_counts() => RunTestAsync(async service =>
     {
         // Read what the filters can be set to
-        var options = await service.GetFilterOptionsAsync(Language.EN);
+        var options = await service.GetFilterOptionsAsync(ReviewerId, Language.EN);
 
         // Both students who held one, the one holding three ahead of the one holding one, and neither reviewer
         Assert.Equal(
@@ -705,7 +734,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         var target = new HandoutEnvironmentTarget(HandoutContentId, "problem-one");
 
         // Read the student's conversations on it
-        var read = await service.GetStudentConversationsAsync(StudentId, target);
+        var read = await service.GetStudentConversationsAsync(ReviewerId, StudentId, target);
 
         // Only their own there, the other student's and the other environment's left out
         Assert.Equal([OldestSessionId], read.Conversations.Select(conversation => conversation.Id));
@@ -757,6 +786,9 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             // The proposal in it, quoted by a number its problem's own row doesn't share
             problemId = SelectionSeed.NewProposal(context, round, number: 21, position: 3);
 
+            // The reviewer reading, on the list of MathComps, whose pool the proposal is in
+            await JoinAsync(context, SelectionSeed.MathCompsId(context));
+
             // The conversation
             context.DefenseSessions.Add(NewSession(sessionId, StudentId, ExaminerConfig, DefenseTargetKind.Problem));
 
@@ -781,7 +813,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         Assert.Equal((problemId, 21, "Proposal 21"), (proposal.ProblemId, proposal.Number, proposal.Title));
 
         // Read what the filters can be set to
-        var options = await service.GetFilterOptionsAsync(Language.EN);
+        var options = await service.GetFilterOptionsAsync(ReviewerId, Language.EN);
 
         // The proposal is offered among them, named the same way
         Assert.Contains(options.Problems, option => option.Target == proposal);
@@ -799,6 +831,177 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // Which names it the same way again
         Assert.Equal(proposal, detail.Target);
     });
+
+    /// <summary>
+    /// A conversation about another organization's proposal is left out of the queue, the filters' options and the
+    /// student's conversations for a reviewer on no list but MathComps'. Once the reviewer joins that organization
+    /// it is back in each.
+    /// </summary>
+    [Fact]
+    public Task Another_organizations_proposal_conversation_reaches_its_members_alone() => RunTestAsync(
+        async service =>
+        {
+            // The conversation about the olympiad's proposal
+            var sessionId = Guid.CreateVersion7();
+
+            // The olympiad, and the problem its proposal files, once they are written
+            var olympiadId = Guid.Empty;
+            var problemId = Guid.Empty;
+
+            // The student's conversation about a problem in the olympiad's pool, the reviewer on MathComps' list
+            await QueryAsync(async context =>
+            {
+                // The olympiad
+                olympiadId = SelectionSeed.NewOrganization(context, "olympiad");
+
+                // A round among the proposals
+                var round = SelectionSeed.NewProposalsRound(context, await context.Seasons.SingleAsync());
+
+                // The olympiad's proposal in it
+                problemId = SelectionSeed.NewProposal(context, olympiadId, round, number: 1, position: 3);
+
+                // The reviewer, on the list of MathComps alone
+                await JoinAsync(context, SelectionSeed.MathCompsId(context));
+
+                // The conversation
+                context.DefenseSessions.Add(
+                    NewSession(sessionId, StudentId, ExaminerConfig, DefenseTargetKind.Problem));
+
+                // With the one message the student opened it with
+                context.DefenseTurns.Add(NewTurn(sessionId, TranscriptRole.Candidate, "my defense", 0, Now));
+
+                // Held against that problem
+                context.ProblemDefenses.Add(new ProblemDefense { DefenseSessionId = sessionId, ProblemId = problemId });
+
+                // Written down
+                await context.SaveChangesAsync();
+            });
+
+            // Whether the queue, the filters' options and the student's conversations carry the conversation
+            async Task<(bool InQueue, bool InOptions, bool InStudents)> ReadAsync()
+            {
+                // The queue
+                var queue = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
+
+                // The filters' options
+                var options = await service.GetFilterOptionsAsync(ReviewerId, Language.EN);
+
+                // The student's conversations on the problem
+                var students = await service.GetStudentConversationsAsync(
+                    ReviewerId, StudentId, new ProblemTarget(problemId));
+
+                // Whether each carries the conversation
+                return (
+                    queue.Items.Any(conversation => conversation.Id == sessionId),
+                    options.Problems.Any(option => option.Target is NamedProposalTarget { ProblemId: var id }
+                        && id == problemId),
+                    students.Conversations.Any(conversation => conversation.Id == sessionId));
+            }
+
+            // What the reviewer reads before joining
+            var before = await ReadAsync();
+
+            // Left out of each
+            Assert.Equal((false, false, false), before);
+
+            // The reviewer joins the olympiad
+            await QueryAsync(async context =>
+            {
+                // On its list
+                await JoinAsync(context, olympiadId);
+
+                // Written down
+                await context.SaveChangesAsync();
+            });
+
+            // What the reviewer reads once a member
+            var after = await ReadAsync();
+
+            // Back in each
+            Assert.Equal((true, true, true), after);
+        });
+
+    /// <summary>
+    /// A conversation about another organization's proposal stays out of the queue of a reviewer on MathComps' list
+    /// alone until a group that has taken the proposal opens: while it waits in a group still to open, and after it
+    /// is deleted. Once the group opens, the conversation is the admins' like any other.
+    /// </summary>
+    /// <param name="placement">Where the proposal sits: <c>unopened</c>, <c>opened</c> or <c>deleted</c>.</param>
+    /// <param name="shown">Whether the queue shows the conversation.</param>
+    [Theory]
+    [InlineData("unopened", false)]
+    [InlineData("opened", true)]
+    [InlineData("deleted", false)]
+    public Task Another_organizations_proposal_conversation_stays_out_of_the_queue_until_its_group_opens(
+        string placement, bool shown) =>
+        RunTestAsync(async service =>
+        {
+            // The conversation about the olympiad's proposal
+            var sessionId = Guid.CreateVersion7();
+
+            // The student's conversation about the olympiad's proposal, the reviewer on MathComps' list
+            await QueryAsync(async context =>
+            {
+                // The olympiad
+                var olympiadId = SelectionSeed.NewOrganization(context, "olympiad");
+
+                // The season every round sits in
+                var season = await context.Seasons.SingleAsync();
+
+                // The round the proposal sits in: a group's still to open, a group's that has opened, or the pool
+                var round = placement switch
+                {
+                    "unopened" => SelectionSeed.NewGroup(context, season, "october", Now.AddDays(7)).Rounds.First(),
+                    "opened" => SelectionSeed.NewGroup(context, season, "november", Now.AddDays(-1)).Rounds.First(),
+                    "deleted" => SelectionSeed.NewProposalsRound(context, season),
+                    _ => throw new ArgumentOutOfRangeException(nameof(placement), placement, "Unknown placement."),
+                };
+
+                // The olympiad's proposal in it
+                var problemId = SelectionSeed.NewProposal(context, olympiadId, round, number: 1, position: 1);
+
+                // Deleted, where the case says so
+                if (placement == "deleted")
+                    context.Proposals.Local.Single(proposal => proposal.ProblemId == problemId).DeletedAt = Now;
+
+                // The reviewer, on the list of MathComps alone
+                await JoinAsync(context, SelectionSeed.MathCompsId(context));
+
+                // The conversation
+                context.DefenseSessions.Add(
+                    NewSession(sessionId, StudentId, ExaminerConfig, DefenseTargetKind.Problem));
+
+                // With the one message the student opened it with
+                context.DefenseTurns.Add(NewTurn(sessionId, TranscriptRole.Candidate, "my defense", 0, Now));
+
+                // Held against that problem
+                context.ProblemDefenses.Add(new ProblemDefense { DefenseSessionId = sessionId, ProblemId = problemId });
+
+                // Written down
+                await context.SaveChangesAsync();
+            });
+
+            // The reviewer's queue
+            var queue = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
+
+            // Showing the conversation or not, as the case says
+            Assert.Equal(shown, queue.Items.Any(conversation => conversation.Id == sessionId));
+        });
+
+    /// <summary>
+    /// Puts the reviewer's address on an organization's list, giving their account that address first.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="organizationId">The organization.</param>
+    /// <returns>A task that completes once the rows are tracked.</returns>
+    private static async Task JoinAsync(MathCompsDbContext context, Guid organizationId)
+    {
+        // The reviewer's account, given an address
+        (await context.Users.SingleAsync(user => user.Id == ReviewerId)).Email = "reviewer@example.com";
+
+        // The address on the list
+        SelectionSeed.NewMember(context, organizationId, "reviewer@example.com", Now.AddDays(-30));
+    }
 
     /// <summary>
     /// Runs one call through the review service, in a scope of its own.

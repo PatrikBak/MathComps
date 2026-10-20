@@ -543,9 +543,8 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Registers the problem selection: reading all of it and its discussions, changing what the reviewers record about
-    /// the proposals, filling and finalizing the boards, and telling the reviewers' conversations about the proposals
-    /// from every other conversation. Expects the DbContext from
-    /// <see cref="AddMathCompsDbContext"/>.
+    /// the proposals, filling and finalizing the boards, and settling who reaches a defense conversation. Expects the
+    /// DbContext from <see cref="AddMathCompsDbContext"/>.
     /// </summary>
     /// <param name="services">The service collection to add the selection services to.</param>
     /// <returns>The service collection for chaining.</returns>
@@ -554,7 +553,7 @@ public static class ServiceCollectionExtensions
         // A cycle is named after the node its rounds run under, so bring the metadata registry along.
         services.AddLocalization();
 
-        // The read and the check on a conversation pick out the reviewers' ones by when each author became a member.
+        // The check on a conversation reads whether the viewer is on its organization's list.
         services.AddOrganizationMembers();
 
         // The discussions are comment threads, read through the comment service.
@@ -563,8 +562,8 @@ public static class ServiceCollectionExtensions
         // The read.
         services.TryAddScoped<IProblemSelectionService, ProblemSelectionService>();
 
-        // Which conversations are the reviewers' ones about the proposals.
-        services.TryAddScoped<IProposalConversations, ProposalConversations>();
+        // Who reaches a defense conversation.
+        services.TryAddScoped<IConversationAccess, ConversationAccess>();
 
         // The changes to the proposals.
         services.TryAddScoped<IProposalService, ProposalService>();

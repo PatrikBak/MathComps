@@ -1,22 +1,20 @@
-using MathComps.Api.Constants;
-
 namespace MathComps.Api.Authorization;
 
 /// <summary>
-/// Extension methods opening a route on one defense conversation to the reviewers picking the competitions' problems.
+/// Extension methods opening a route on one defense conversation to whoever may reach the conversation.
 /// </summary>
 public static class ConversationReviewerExtensions
 {
     /// <summary>
-    /// Opens a route reading or writing against one defense conversation to the reviewers as well as the admins, for
-    /// the conversations the reviewers held about the proposals alone. The policy and the check on the conversation come
+    /// Opens a route reading or writing against one defense conversation to the signed-in callers
+    /// <see cref="ConversationAccessFilter"/> lets reach it. The sign-in and the check on the conversation come
     /// together, so a route can't take the one without the other.
     /// </summary>
     /// <param name="builder">The route.</param>
     /// <returns>The route, for chaining.</returns>
     public static RouteHandlerBuilder RequireConversationReviewer(this RouteHandlerBuilder builder) =>
-        // Admins and reviewers past the door, and the reviewers on to the reviewers' conversations alone
+        // Anybody signed in past the door, and on only to the conversations they may reach
         builder
-            .RequireAuthorization(AuthorizationPolicies.AdminOrOrganizationMember)
-            .AddEndpointFilter<ProposalConversationFilter>();
+            .RequireAuthorization()
+            .AddEndpointFilter<ConversationAccessFilter>();
 }

@@ -13,10 +13,10 @@ namespace MathComps.Api.Tests;
 public class GatedEndpointSecurityTests
 {
     /// <summary>
-    /// The admin routes the problem selection's reviewers reach their conversations about the proposals through, by
-    /// method and pattern.
+    /// The routes of the gated areas open to anybody signed in, by method and pattern: the ones on one conversation,
+    /// which decide for themselves who reaches the conversation they name.
     /// </summary>
-    private static readonly HashSet<string> _conversationRoutes =
+    private static readonly HashSet<string> _signedInRoutes =
     [
         "GET /admin/defense/sessions/{id:guid}",
         "PUT /admin/defense/sessions/{id:guid}/review",
@@ -31,9 +31,8 @@ public class GatedEndpointSecurityTests
 
     /// <summary>
     /// Every route of a gated area carries the area's policy and no other, and a rate limit, and none lets an
-    /// anonymous caller through. The admin routes the reviewers reach their conversations through carry
-    /// <see cref="AuthorizationPolicies.AdminOrOrganizationMember"/> instead, and they alone: a second policy beside
-    /// it would shut the reviewers out.
+    /// anonymous caller through. The routes open to anybody signed in carry the default policy alone instead: a
+    /// named one beside it would shut out the callers they are for.
     /// </summary>
     /// <param name="area">The path every route of the area starts with.</param>
     /// <param name="policy">The policy closing the area.</param>
@@ -56,10 +55,8 @@ public class GatedEndpointSecurityTests
             // The route's name
             var name = route.DisplayName;
 
-            // The policy it has to carry: the reviewers' own on their conversation routes, the area's elsewhere
-            var required = _conversationRoutes.Contains(MappedApi.NameOf(route))
-                ? AuthorizationPolicies.AdminOrOrganizationMember
-                : policy;
+            // The policy it has to carry: the default one on a route open to anybody signed in, the area's elsewhere
+            var required = _signedInRoutes.Contains(MappedApi.NameOf(route)) ? null : policy;
 
             // Every policy the route carries
             var policies = route.Metadata.GetOrderedMetadata<IAuthorizeData>()
@@ -69,7 +66,7 @@ public class GatedEndpointSecurityTests
             // Closed by that one policy alone
             Assert.True(
                 policies.Count > 0 && policies.All(carried => carried == required),
-                $"{name} requires {string.Join(", ", policies)} rather than the {required} policy alone.");
+                $"{name} requires {string.Join(", ", policies)} rather than the {required ?? "default"} policy alone.");
 
             // With nothing opening it back up
             Assert.True(route.Metadata.GetMetadata<IAllowAnonymous>() is null, $"{name} allows anonymous callers.");
