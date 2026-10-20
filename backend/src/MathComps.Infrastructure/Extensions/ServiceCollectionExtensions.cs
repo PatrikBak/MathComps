@@ -596,7 +596,8 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Adds the admin services: the queue of every student's defense conversations, the feed of the notes written
-    /// across them, and grading the hosted groups.
+    /// across them, and grading the hosted groups. Expects the competitions service from
+    /// <see cref="AddCompetitionServices"/>.
     /// </summary>
     /// <param name="services">The service collection to add the admin services to.</param>
     /// <returns>The service collection for chaining.</returns>

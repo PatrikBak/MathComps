@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 
+import type { NewcomerPlace } from '@/components/shared/utils/first-seen-order'
+
 import { useFirstSeenOrder } from './use-first-seen-order'
 
 /**
@@ -14,15 +16,17 @@ type UseResortableOrderOptions<TItem> = {
   keyOf: (item: TItem) => string
   /** A value whose change sets the order again, as asking for it does. */
   resetKey: string
+  /** Where an item that comes in since the order was last set goes. */
+  newcomerPlace: NewcomerPlace
 }
 
 /**
  * What {@link useResortableOrder} hands back.
  */
 type UseResortableOrderResult<TItem> = {
-  /** The items, each where it stood when the order was last set. */
+  /** The items on show, each where it stood when the order was last set. */
   shown: TItem[]
-  /** Whether the items come in in an order other than the one shown. */
+  /** Whether the items come in in an order other than the one shown, or some of them wait to be shown at all. */
   isOutOfOrder: boolean
   /** Sets the order again, to the one the items come in. */
   resort: () => void
@@ -30,8 +34,8 @@ type UseResortableOrderResult<TItem> = {
 
 /**
  * A list whose order is set at chosen moments and kept in between, so nothing moves while the reader works: as it
- * mounts, as the reset key changes, and when the reader asks. An item that comes in since goes where the order it
- * comes in puts it.
+ * mounts, as the reset key changes, and when the reader asks. An item that comes in since goes where the caller
+ * asks.
  *
  * @param options - {@link UseResortableOrderOptions}.
  *
@@ -41,6 +45,7 @@ export function useResortableOrder<TItem>({
   items,
   keyOf,
   resetKey,
+  newcomerPlace,
 }: UseResortableOrderOptions<TItem>): UseResortableOrderResult<TItem> {
   // How many times the reader has asked for the order to be set again
   const [sortings, setSortings] = useState(0)
@@ -50,11 +55,12 @@ export function useResortableOrder<TItem>({
     items,
     keyOf,
     resetKey: JSON.stringify([resetKey, sortings]),
-    newcomerPlace: 'inPlace',
+    newcomerPlace,
   })
 
-  // Whether any item stands elsewhere than the order it comes in would put it
-  const isOutOfOrder = shown.some((item, index) => item !== items[index])
+  // Whether any item waits to be shown, or stands elsewhere than the order it comes in would put it
+  const isOutOfOrder =
+    shown.length !== items.length || shown.some((item, index) => item !== items[index])
 
   // A function which sets the order again
   const resort = () => setSortings((count) => count + 1)

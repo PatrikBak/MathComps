@@ -96,6 +96,7 @@
       "finalize": {
         "confirm": "Make final",
         "message": "{count, plural, one {# student} other {# students}} will see their mark on P{number}.{unmarked, plural, =0 {} one { # student without a mark is left out.} other { # students without a mark are left out.}}",
+        "stillSolving": "{count, plural, one {# student who will see their mark is still solving.} other {# students who will see their mark are still solving.}}",
         "title": "Make P{number} final?"
       },
       "grid": {
@@ -111,6 +112,17 @@
       "groupSubtitle": "{name}, {opens} – {closes}",
       "loadFailed": "Couldn't load the grading",
       "progress": "<count>{graded}</count> of {total} graded, <count>{final}</count> final",
+      "run": {
+        "noteOpen": {
+          "label": "Can still comment",
+          "until": "Can still comment until {time}"
+        },
+        "solving": {
+          "label": "Still solving",
+          "until": "Solving until {time}"
+        }
+      },
+      "showWhatsNew": "Show what's new",
       "title": "Grading"
     }
   },

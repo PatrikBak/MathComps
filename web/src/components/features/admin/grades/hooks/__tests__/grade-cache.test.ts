@@ -50,14 +50,26 @@ function boardOf(name: string, problemId: string): GradingBoard {
     name: { sk: name, cs: name, en: name },
     opensAt: '2026-09-01T00:00:00Z',
     closesAt: '2026-09-14T22:00:00Z',
+    clockMinutes: 120,
+    noteGraceMinutes: 30,
     competitions: [
       {
         roundId: `${name}-round`,
         category: 'elementary',
         problems: [{ id: problemId, slug: problemId, number: 1 }],
         entrants: [
-          { user: { id: 'ada', username: 'Ada', email: null }, finishedAfterSeconds: 600 },
-          { user: { id: 'bruno', username: 'Bruno', email: null }, finishedAfterSeconds: 900 },
+          {
+            user: { id: 'ada', username: 'Ada', email: null },
+            startedAt: '2026-09-10T10:00:00Z',
+            finishedAt: null,
+            finishedAfterSeconds: 600,
+          },
+          {
+            user: { id: 'bruno', username: 'Bruno', email: null },
+            startedAt: '2026-09-10T10:00:00Z',
+            finishedAt: null,
+            finishedAfterSeconds: 900,
+          },
         ],
         grades: [
           { userId: 'ada', problemId, conversationCount: 1, grade: null },

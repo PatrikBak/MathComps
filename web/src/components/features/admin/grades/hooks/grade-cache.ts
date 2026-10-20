@@ -1,5 +1,7 @@
 import type { QueryClient, QueryKey } from '@tanstack/react-query'
 
+import { SECOND_MS } from '@/components/shared/utils/time-units'
+
 import { studentConversationsQueryKey } from '../../conversation/hooks/conversation-cache'
 import type { StudentConversations } from '../../conversation/model/student-conversations'
 import type { GradingBoard } from '../../grading-board/model/grading-types'
@@ -7,6 +9,9 @@ import type { Grade, PairIds } from '../model/grade-types'
 
 /** The prefix every group's board hangs off, so one call can match all of them. */
 const BOARD_QUERY_KEY = ['adminGrading', 'board'] as const
+
+/** How often a board that can still change is read again. */
+export const BOARD_REFRESH_MS = 30 * SECOND_MS
 
 /**
  * Builds the query key for one group's board.
@@ -17,6 +22,27 @@ const BOARD_QUERY_KEY = ['adminGrading', 'board'] as const
 export function gradingBoardQueryKey(groupSlug: string): QueryKey {
   // One board per group
   return [...BOARD_QUERY_KEY, groupSlug] as const
+}
+
+/**
+ * Drops every read of a board still out, putting back what the board held before it. A read landing after a change
+ * to a grade was shown would cover the change with the grade from before it.
+ *
+ * @param queryClient - The cache.
+ */
+export function cancelBoardReads(queryClient: QueryClient): void {
+  // Every group's board
+  void queryClient.cancelQueries({ queryKey: BOARD_QUERY_KEY })
+}
+
+/**
+ * Reads every board on screen again.
+ *
+ * @param queryClient - The cache.
+ */
+export function refreshBoards(queryClient: QueryClient): void {
+  // Every group's board, read again wherever one is on screen
+  void queryClient.invalidateQueries({ queryKey: BOARD_QUERY_KEY })
 }
 
 /**

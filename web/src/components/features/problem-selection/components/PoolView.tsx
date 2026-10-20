@@ -155,6 +155,8 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
       { ...filters.filter, query: filters.filter.query.trim() },
       selection?.activeBoard?.id ?? null,
     ]),
+    // A problem the filters let through after the order was set goes where the order it comes in puts it
+    newcomerPlace: 'inPlace',
   })
 
   // The spot over the list the page comes back to, and the way to set the order again from there, the focus on the

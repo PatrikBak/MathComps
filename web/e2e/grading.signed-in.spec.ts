@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { MINUTE_MS } from '@/components/shared/utils/time-units'
 import { ROUTES } from '@/i18n/i18n'
 
 import messages from '../messages/en.json'
@@ -47,6 +48,21 @@ function cellOf(page: Page, student: string, problemNumber: number): Locator {
 
   // The button in that problem's cell, past the place
   return row.getByRole('cell').nth(problemNumber).getByRole('button')
+}
+
+/**
+ * Writes an instant the way the board's clock and pen markers write a time.
+ *
+ * @param instant - The instant, in epoch milliseconds.
+ *
+ * @returns The hour and minute, in English, in the site's time zone.
+ */
+function clockTime(instant: number): string {
+  // The hour and minute, as the page writes them
+  return new Intl.DateTimeFormat('en', {
+    timeStyle: 'short',
+    timeZone: 'Europe/Bratislava',
+  }).format(instant)
 }
 
 /**
@@ -184,6 +200,105 @@ test.describe('the grading board', () => {
 
     // Its own students
     await expect(names).toHaveText(['Ada', 'Dora'])
+  })
+
+  test('holds the rows where they stood while a mark moves them, until the grader asks', async ({
+    page,
+  }) => {
+    // A backend serving the test group's board
+    await installGradingBackend(page, GROUP_SLUG)
+
+    // The board, opened
+    await page.goto(BOARD_PATH)
+
+    // Every student's name, top to bottom
+    const names = page.getByRole('rowheader')
+
+    // Sorted by total
+    await page.getByRole('button', { name: copy.grid.total }).click({ timeout: SETTLE_TIMEOUT_MS })
+
+    // From the best
+    await expect(names).toHaveText(['Bruno', 'Ada', 'Cyril'])
+
+    // Cyril's first problem, opened
+    await cellOf(page, 'Cyril', 1).click()
+
+    // The dialog the grade opens in
+    const dialog = page.getByRole('dialog')
+
+    // A 5, which puts him ahead of Ada's 4
+    await dialog
+      .getByRole('group', { name: gradeCopy.panel.mark })
+      .getByRole('button', { name: '5', exact: true })
+      .click({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The dialog closed
+    await page.keyboard.press('Escape')
+
+    // His row where it stood, with the mark in it
+    await expect(cellOf(page, 'Cyril', 1)).toHaveText('5')
+    await expect(names).toHaveText(['Bruno', 'Ada', 'Cyril'])
+
+    // The way to show the new order, asked for
+    await page.getByRole('button', { name: copy.showWhatsNew }).click()
+
+    // Which moves him up, takes the button away, and puts the focus on the progress line above the rows
+    await expect(names).toHaveText(['Bruno', 'Cyril', 'Ada'])
+    await expect(page.getByRole('button', { name: copy.showWhatsNew })).toHaveCount(0)
+    await expect(page.getByText(/ graded, /)).toBeFocused()
+  })
+
+  test('holds back a student who writes for the first time until the grader asks, counting them in the places meanwhile', async ({
+    page,
+  }) => {
+    // A backend serving the test group's board
+    const backend = await installGradingBackend(page, GROUP_SLUG)
+
+    // The board, opened
+    await page.goto(BOARD_PATH)
+
+    // Every student's name, top to bottom
+    const names = page.getByRole('rowheader')
+
+    // By name to begin with
+    await expect(names).toHaveText(['Ada', 'Bruno', 'Cyril'], { timeout: SETTLE_TIMEOUT_MS })
+
+    // Zora writes about the first problem for the first time, her name sorting her last, and another grader gives her
+    // a 7, the best total on the board
+    backend.enter('Zora', 'p1', 7)
+
+    // Cyril's first problem, opened
+    await cellOf(page, 'Cyril', 1).click()
+
+    // A 5 for him meanwhile, after which the board is read again
+    await page
+      .getByRole('dialog')
+      .getByRole('group', { name: gradeCopy.panel.mark })
+      .getByRole('button', { name: '5', exact: true })
+      .click({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The dialog closed
+    await page.keyboard.press('Escape')
+
+    // The way to show her, offered, with nobody moved meanwhile
+    const showWhatsNew = page.getByRole('button', { name: copy.showWhatsNew })
+    await expect(showWhatsNew).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+    await expect(names).toHaveText(['Ada', 'Bruno', 'Cyril'])
+
+    // Bruno's 6 placed behind her 7, though she isn't shown yet
+    await expect(
+      page
+        .getByRole('row')
+        .filter({ has: page.getByRole('rowheader', { name: 'Bruno' }) })
+        .getByRole('cell')
+        .first()
+    ).toHaveText('2')
+
+    // Asked for
+    await showWhatsNew.click()
+
+    // Which shows her in her place by name
+    await expect(names).toHaveText(['Ada', 'Bruno', 'Cyril', 'Zora'])
   })
 
   test('reads a pair whole, and walks every pair with a conversation', async ({ page }) => {
@@ -786,6 +901,123 @@ test.describe('a grade', () => {
         { pair: 'ada|p1', change: { internalComment: 'Check the case n = 1.' } },
         { pair: 'ada|p1', change: { internalComment: 'Check the case n = 1.' } },
       ])
+  })
+})
+
+test.describe('a round still running', () => {
+  test('marks who is still solving and who can still comment, and counts the solving before a column goes final', async ({
+    page,
+  }) => {
+    // The instant the test starts at
+    const now = Date.now()
+
+    // When Cyril's clock runs out, an hour and a half from now
+    const cyrilsClockEnds = now + 90 * MINUTE_MS
+
+    // When Ada's half hour of commenting closes, ten minutes from now
+    const adasCommentingCloses = now + 10 * MINUTE_MS
+
+    // A backend serving the test group's board, Cyril half an hour into his clock and Ada handed in twenty minutes ago
+    await installGradingBackend(page, GROUP_SLUG, {
+      clocks: {
+        cyril: { startedAt: new Date(now - 30 * MINUTE_MS).toISOString(), finishedAt: null },
+        ada: {
+          startedAt: new Date(now - 60 * MINUTE_MS).toISOString(),
+          finishedAt: new Date(now - 20 * MINUTE_MS).toISOString(),
+        },
+      },
+    })
+
+    // The board, opened
+    await page.goto(BOARD_PATH)
+
+    // The clock after Cyril's name
+    const cyrilsClock = page
+      .getByRole('rowheader', { name: 'Cyril' })
+      .getByRole('button', { name: copy.run.solving.label })
+
+    // Pointed at
+    await cyrilsClock.hover({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Saying when it runs out
+    await expect(cyrilsClock).toHaveAccessibleDescription(
+      copy.run.solving.until.replace('{time}', clockTime(cyrilsClockEnds))
+    )
+
+    // The pen after Ada's
+    const adasPen = page
+      .getByRole('rowheader', { name: 'Ada' })
+      .getByRole('button', { name: copy.run.noteOpen.label })
+
+    // Pointed at
+    await adasPen.hover()
+
+    // Saying when her commenting closes
+    await expect(adasPen).toHaveAccessibleDescription(
+      copy.run.noteOpen.until.replace('{time}', clockTime(adasCommentingCloses))
+    )
+
+    // Nothing after Bruno's, long done
+    await expect(page.getByRole('rowheader', { name: 'Bruno' }).getByRole('button')).toHaveCount(0)
+
+    // Cyril's second problem, opened
+    await cellOf(page, 'Cyril', 2).click()
+
+    // The dialog the grade opens in
+    const dialog = page.getByRole('dialog')
+
+    // The same clock after his name in the dialog
+    await expect(dialog.getByRole('button', { name: copy.run.solving.label })).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // A 3 for him, beside Ada's pre-graded 4
+    await dialog
+      .getByRole('group', { name: gradeCopy.panel.mark })
+      .getByRole('button', { name: '3', exact: true })
+      .click({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The dialog closed
+    await page.keyboard.press('Escape')
+
+    // The column of both marks, asked to be made final
+    await page.getByRole('button', { name: 'Make 2 marks on P2 final' }).click()
+
+    // The question
+    const question = page.getByRole('dialog')
+
+    // Saying who sees their mark, and counting Cyril as still solving but not Ada, who can only comment
+    await expect(question).toContainText('2 students will see their mark on P2.')
+    await expect(question).toContainText('1 student who will see their mark is still solving.')
+  })
+
+  test('shows a student who writes for the first time without a reload', async ({ page }) => {
+    // The clock under the test's hand, so the next read comes when the test says
+    await page.clock.install()
+
+    // A backend serving the test group's board, Cyril on his clock from now, which keeps the board read again
+    const backend = await installGradingBackend(page, GROUP_SLUG, {
+      clocks: { cyril: { startedAt: new Date().toISOString(), finishedAt: null } },
+    })
+
+    // The board, opened
+    await page.goto(BOARD_PATH)
+
+    // Every student on it so far
+    await expect(page.getByRole('rowheader')).toHaveText(['Ada', 'Bruno', 'Cyril'], {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Zora writes about the first problem for the first time
+    backend.enter('Zora', 'p1')
+
+    // Long enough for the board to be read again
+    await page.clock.fastForward('00:31')
+
+    // Once the read has landed, the way to show her offered
+    await expect(page.getByRole('button', { name: copy.showWhatsNew })).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
   })
 })
 

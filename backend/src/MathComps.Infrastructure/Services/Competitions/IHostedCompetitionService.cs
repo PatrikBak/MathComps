@@ -1,4 +1,5 @@
 using MathComps.Domain.Contracts.Competitions;
+using MathComps.Infrastructure.Options;
 
 namespace MathComps.Infrastructure.Services.Competitions;
 
@@ -13,6 +14,9 @@ namespace MathComps.Infrastructure.Services.Competitions;
 /// </remarks>
 public interface IHostedCompetitionService
 {
+    /// <inheritdoc cref="HostedCompetitionOptions.NoteGraceMinutes" path="/summary"/>
+    int NoteGraceMinutes { get; }
+
     /// <summary>
     /// Reads every group, with the entry the student currently holds in each competition and their own cells in its
     /// results once those are out.

@@ -96,6 +96,7 @@
       "finalize": {
         "confirm": "Finalizovat",
         "message": "{count, plural, one {# student uvidí své body} few {# studenti uvidí své body} other {# studentů uvidí své body}} z Ú{number}.{unmarked, plural, =0 {} one { # studenta bez bodů se to netýká.} other { # studentů bez bodů se to netýká.}}",
+        "stillSolving": "{count, plural, one {# z těch, co uvidí body, ještě řeší.} few {# z těch, co uvidí body, ještě řeší.} other {# z těch, co uvidí body, ještě řeší.}}",
         "title": "Finalizovat Ú{number}?"
       },
       "grid": {
@@ -111,6 +112,17 @@
       "groupSubtitle": "{name}, {opens} – {closes}",
       "loadFailed": "Hodnocení se nepodařilo načíst",
       "progress": "Ohodnoceno: <count>{graded}</count> z {total}, finální: <count>{final}</count>",
+      "run": {
+        "noteOpen": {
+          "label": "Ještě může komentovat",
+          "until": "Ještě může komentovat do {time}"
+        },
+        "solving": {
+          "label": "Ještě řeší",
+          "until": "Řeší do {time}"
+        }
+      },
+      "showWhatsNew": "Zobrazit, co je nového",
       "title": "Hodnocení"
     }
   },
