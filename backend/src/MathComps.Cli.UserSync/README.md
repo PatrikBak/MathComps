@@ -1,6 +1,6 @@
 # User Sync CLI
 
-Syncs all users from Clerk to the MathComps database. Reach for it when a new column landed on the User table, or when webhooks failed to fire for some users.
+Syncs all users from Clerk to the MathComps database. Reach for it when the sync starts writing a new column from Clerk, or when webhooks failed to fire for some users.
 
 ## How It Works
 

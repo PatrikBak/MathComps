@@ -75,21 +75,27 @@ public partial class UserManager(
             UpdatedAt = now
         };
 
-        // This cool little library compiles this onto a native upsert. The excluded columns are the ones the
-        // upstream user carries nothing for, so writing them from this entity would blank whatever is there.
+        // This cool little library compiles this onto a native upsert. A user we have never seen is inserted as
+        // Clerk described them. A user we already hold gets only the columns Clerk owns, which the update names one
+        // by one. Every other column is something the student said or the site recorded.
         await dbContext.Users
             .Upsert(userEntity)
             .On(user => user.ExternalId)
-            .Exclude(user => new
+            .WhenMatched((storedUser, syncedUser) => new User
             {
-                user.CreatedAt,
-                user.Id,
-                user.ConsentedToAiAt,
-                user.Username,
-                user.GraduationYear,
-                user.HasLeftHighSchool,
-                user.CountryCode
+                // The match key, written back as it stands
+                ExternalId = storedUser.ExternalId,
+
+                // What Clerk owns
+                Email = syncedUser.Email,
+                AvatarUrl = syncedUser.AvatarUrl,
+                UpdatedAt = syncedUser.UpdatedAt
             })
+            // A deleted user keeps what the deletion stripped, however late an update from Clerk arrives. The library
+            // translates a comparison but not a negation, so the `!` that IDE0100 asks for would throw at run time.
+#pragma warning disable IDE0100
+            .UpdateIf(storedUser => storedUser.IsDeleted == false)
+#pragma warning restore IDE0100
             .RunAsync(cancellationToken);
 
         // Return the user ID
