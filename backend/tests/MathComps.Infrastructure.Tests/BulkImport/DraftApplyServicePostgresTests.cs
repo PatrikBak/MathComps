@@ -1073,7 +1073,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
         // Import a tst problem — tst sits at registry order 2, the slot memo currently holds.
         var result = await ApplyOpenAsync(service,
-            new DraftTarget("tst-d1", 2024), RoundDate,
+            new DraftTarget("tst-d1", 2024, null), RoundDate,
             [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // Every competition, the new one included, now carries its registry order.
@@ -1178,7 +1178,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Import an imo problem, imo being a competition the registry gives no rounds at all.
         await ApplyOpenAsync(service,
-            new DraftTarget("imo", 2024), RoundDate,
+            new DraftTarget("imo", 2024, null), RoundDate,
             [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // The brand is the only row, and the round hangs off it.
@@ -1212,7 +1212,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
         // Then import csmo-a-i, which the registry orders ahead of iii.
         await ApplyOpenAsync(service,
-            new DraftTarget("csmo-a-i", 2024), RoundDate,
+            new DraftTarget("csmo-a-i", 2024, null), RoundDate,
             [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // Both sit where csmo's round list puts them, the unused s and ii slots left open between them.
@@ -1415,7 +1415,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Import a draft whose competition the registry doesn't carry.
         var refusal = await Assert.ThrowsAsync<InvalidOperationException>(() => ApplyOpenAsync(service,
-            new DraftTarget("notacomp-i", 2024), RoundDate,
+            new DraftTarget("notacomp-i", 2024, null), RoundDate,
             [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath()));
 
         // The refusal names the path it couldn't place.
@@ -1506,6 +1506,40 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             Assert.False(proposal.IsSetAside);
             Assert.Null(proposal.DeletedAt);
         });
+    });
+
+    /// <summary>
+    /// A pick enters the pool of the organization its draft names, which is what keeps the olympiad's proposals out of
+    /// MathComps' selection.
+    /// </summary>
+    [Fact]
+    public Task A_pick_enters_the_pool_its_draft_names() => RunTestAsync(async service =>
+    {
+        // The olympiad's id, once seeded
+        var olympiadId = Guid.Empty;
+
+        // The olympiad, beside MathComps
+        await QueryAsync(async context =>
+        {
+            // Its row
+            olympiadId = SelectionSeed.NewOrganization(context, "olympiad");
+
+            // Persist the seed
+            await context.SaveChangesAsync();
+        });
+
+        // #1 at place 8, through a draft for the olympiad's pool
+        await service.ApplyAsync(
+            new DraftTarget(HostedTaxonomy.ProposalsPath, 2026, "olympiad"), new DateOnly(2026, 9, 14),
+            HostedTaxonomy.ProposalsVisibleSince,
+            [Pick(8, new DraftProposal(1, "Chameleons", ProposalArea.Combinatorics, []))], Path.GetTempPath());
+
+        // The organization the proposal is filed under
+        var organizationId = await QueryValueAsync(context =>
+            context.Proposals.Select(proposal => proposal.OrganizationId).SingleAsync());
+
+        // The olympiad
+        Assert.Equal(olympiadId, organizationId);
     });
 
     /// <summary>
@@ -1664,8 +1698,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         var predicted = ImmutableArray<ProblemResolution>.Empty;
         await QueryAsync<IDraftResolutionService>(async (_, resolution) =>
             predicted = (await resolution.PreviewAsync(
-                new DraftTarget(HostedTaxonomy.ProposalsPath, 2026), HostedTaxonomy.ProposalsVisibleSince,
-                problems, Path.GetTempPath())).Problems);
+                new DraftTarget(HostedTaxonomy.ProposalsPath, 2026, Organization.MathCompsSlug),
+                HostedTaxonomy.ProposalsVisibleSince, problems, Path.GetTempPath())).Problems);
 
         // What applying them actually counts.
         var result = await ApplyPoolAsync(service, problems);
@@ -1748,7 +1782,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// Builds the draft target for the csmo-a-iii · 2024 round.
     /// </summary>
     /// <returns>The configured target.</returns>
-    private static DraftTarget CsmoTarget() => new("csmo-a-iii", 2024);
+    private static DraftTarget CsmoTarget() => new("csmo-a-iii", 2024, null);
 
     /// <summary>
     /// Applies a draft whose round is open to readers, which is what every test that isn't about the embargo
@@ -1777,7 +1811,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     private static Task<DraftApplyResult> ApplyPoolAsync(
         IDraftApplyService service, params DraftProblemContent[] problems) =>
         service.ApplyAsync(
-            new DraftTarget(HostedTaxonomy.ProposalsPath, 2026), new DateOnly(2026, 9, 14),
+            new DraftTarget(HostedTaxonomy.ProposalsPath, 2026, Organization.MathCompsSlug), new DateOnly(2026, 9, 14),
             HostedTaxonomy.ProposalsVisibleSince, problems, Path.GetTempPath());
 
     /// <summary>

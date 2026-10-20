@@ -68,13 +68,13 @@ The embargo hides the problems, not their figures. Those go to public storage th
 
 ## Filling the pool
 
-A draft for `mathcomps-proposals` fills the pool the problem selection picks from. A pool draft is written in English: `language: en`. It carries `visibleSince: 9999-01-01T00:00:00Z`, the instant every round of the pool is held back by, and `validate` refuses any other (`proposals-embargo`). Each `pN.yaml` carries a `proposal:` block, whose format is in [the draft format reference](../../../web/scripts/PREFLIGHT_README.md#a-problem-of-the-pool).
+A draft for `mathcomps-proposals` fills the pool the problem selection picks from. A pool draft is written in English: `language: en`. It carries `visibleSince: 9999-01-01T00:00:00Z`, the instant every round of the pool is held back by, and `validate` refuses any other (`proposals-embargo`). It names the organization whose pool it fills, `organization: <slug>`, and `validate` refuses a pool draft naming none or one no organization goes by, and any other draft naming one (`proposals-organization`). Every organization's problems share the pool's round, so a new problem takes a place none of them holds. Each `pN.yaml` carries a `proposal:` block, whose format is in [the draft format reference](../../../web/scripts/PREFLIGHT_README.md#a-problem-of-the-pool).
 
 The import finds a pool problem by its place, the `N` of `pN`, so a pool problem keeps the place it first took. `validate` refuses a draft that clashes with what the pool holds:
 
 - a new problem with no block (`missing-proposal`), or a block outside the pool (`proposal-outside-pool`);
-- a number another problem's proposal holds, even one finalized into a round or deleted (`proposal-number-taken`);
-- a place holding a deleted proposal (`proposal-deleted`), another proposal (`proposal-place-taken`), or a problem no proposal files (`proposal-place-unfiled`);
+- a number another problem's proposal in the same organization's pool holds, even one finalized into a round or deleted (`proposal-number-taken`);
+- a place holding another organization's proposal (`proposal-other-pool`), a deleted proposal (`proposal-deleted`), another proposal (`proposal-place-taken`), or a problem no proposal files (`proposal-place-unfiled`);
 - a category name the pool's organization doesn't list (`proposal-unknown-category`).
 
 `apply` writes the proposal with its problem. A re-import refreshes its title, area and categories. Setting it aside and deleting it are the reviewers' after that.

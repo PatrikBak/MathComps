@@ -82,7 +82,8 @@ public class DraftValidationPipeline(
         try
         {
             // Map the manifest's taxonomy onto the Infrastructure contract.
-            var target = new DraftTarget(manifest.Meta.CompetitionPath, manifest.Meta.Season.Year);
+            var target = new DraftTarget(
+                manifest.Meta.CompetitionPath, manifest.Meta.Season.Year, manifest.Meta.Organization);
 
             // Carry each problem's full content — the preview reproduces the bodies the import would store, so it
             // needs the markdown and images, not just the shape.
@@ -153,6 +154,12 @@ public class DraftValidationPipeline(
                     + $"{HostedTaxonomy.ProposalsVisibleSince.UtcDateTime:s}Z, the instant holding the pool back",
                     VerdictSeverity.Error));
 
+            // A pool draft naming no organization or one that doesn't exist, or any other draft naming one.
+            if (preview.OrganizationProblem is { } organizationProblem)
+                previewIssues.Add(new VerdictError(
+                    ManifestMeta.FileName, Half: null, Line: null, Col: null, "proposals-organization",
+                    OrganizationRefusal(organizationProblem, manifest.Meta.Organization), VerdictSeverity.Error));
+
             // One blocking issue per reason the pool refuses a draft problem.
             previewIssues.AddRange(preview.ProposalConflicts.Select(RefusalFor));
 
@@ -214,6 +221,23 @@ public class DraftValidationPipeline(
     }
 
     /// <summary>
+    /// Says what is wrong with the organization a draft names, and how to get past it.
+    /// </summary>
+    /// <param name="problem">What is wrong with the organization the draft names.</param>
+    /// <param name="organization">The slug the draft names, or null where it names none.</param>
+    /// <returns>The message of the issue blocking the import.</returns>
+    private static string OrganizationRefusal(DraftOrganizationProblem problem, string? organization) => problem switch
+    {
+        DraftOrganizationProblem.Missing =>
+            $"a draft for {HostedTaxonomy.ProposalsPath} must name the organization whose pool it fills, as "
+            + "organization: <slug>",
+        DraftOrganizationProblem.Unknown => $"no organization goes by '{organization}' — name one that exists",
+        DraftOrganizationProblem.OutsidePool =>
+            $"only a draft for {HostedTaxonomy.ProposalsPath} fills an organization's pool — drop the organization",
+        _ => throw new ArgumentOutOfRangeException(nameof(problem), problem, "Unknown organization problem."),
+    };
+
+    /// <summary>
     /// Turns one reason the pool refuses a draft problem into the issue blocking the import.
     /// </summary>
     /// <param name="conflict">What the pool refuses about the problem.</param>
@@ -237,7 +261,11 @@ public class DraftValidationPipeline(
 
             ProposalNumberTaken taken => ("proposal-number-taken",
                 $"problem '{slug}' names proposal #{taken.Number}, which problem '{taken.HolderSlug}' already holds "
-                + "— a proposal keeps its number for good, in a round or deleted"),
+                + "in the same pool — a proposal keeps its number for good, in a round or deleted"),
+
+            PlaceHoldsAnotherPoolsProposal another => ("proposal-other-pool",
+                $"problem '{slug}' is proposal #{another.Number} of {another.OrganizationSlug}'s pool, which a "
+                + "draft for another organization may not rewrite — give the problem another place"),
 
             ProposalDeleted deleted => ("proposal-deleted",
                 $"problem '{slug}' is proposal #{deleted.Number}, which the reviewers deleted — drop it from the "
@@ -253,7 +281,11 @@ public class DraftValidationPipeline(
 
             ProposalCategoryUnknown unknown => ("proposal-unknown-category",
                 $"problem '{slug}' is recommended for '{unknown.Category}', which the pool's organization doesn't "
-                + $"list as a category — name one of {string.Join(", ", unknown.Listed)}"),
+                + "list as a category — "
+                // An organization listing no categories leaves nothing to name
+                + (unknown.Listed.Count == 0
+                    ? "it lists none, so leave recommended empty"
+                    : $"name one of {string.Join(", ", unknown.Listed)}")),
 
             // Unhandled cases.
             _ => throw new ArgumentOutOfRangeException(nameof(conflict), conflict, "Unknown proposal conflict.")

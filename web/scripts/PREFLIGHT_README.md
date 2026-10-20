@@ -31,6 +31,8 @@ visibleSince: 2026-09-14T18:00:00Z # optional, when the round opens to readers
 language: sk # the draft's original language: sk | cs | en
 ```
 
+A draft for `mathcomps-proposals` also names the organization whose pool it fills, `organization: <slug>` (see [A problem of the pool](#a-problem-of-the-pool)).
+
 The path is the competition's slugs from the root of the taxonomy down to it, hyphen-joined, and it runs as deep as the taxonomy does: `csmo-a-iii` is round III of category A of the Czech-Slovak MO, `imo` is a competition that runs as one flat sitting, and however deep a competition sits, the path names every level. Every segment is lowercase alphanumeric — a path outside that alphabet is refused here. Each node on the path has to be registered in the taxonomy, which the [bulk-import CLI](../../backend/src/MathComps.Cli.BulkImport/README.md)'s `validate` step checks; the one the path ends at must be a leaf, since a competition carrying others below it is a container rather than a sitting problems belong to.
 
 `visibleSince` embargoes the round. The problems land in the database complete, and the archive begins serving them once that instant passes, with nobody having to flip anything. Omit it and the round is open the moment it is imported.
@@ -98,11 +100,11 @@ tags: # approved tag slugs; usually written by the Tagging CLI, hand-editable
 
 ### A problem of the pool
 
-In a draft for `mathcomps-proposals`, the pool the problem selection picks from, a `proposal:` block files each problem:
+In a draft for `mathcomps-proposals`, the pool the problem selection picks from, `_meta.yaml` names the organization whose pool the draft fills (`organization: mathcomps`), and a `proposal:` block files each problem:
 
 ```yaml
 proposal:
-  number: 14 # the number reviewers quote it by, unique across the pool
+  number: 14 # the number reviewers quote it by, unique within its organization's pool
   title: Chameleons on the island # working name, at most 200 characters, never shown to a student
   area: combinatorics # algebra | combinatorics | geometry | numberTheory
   recommended: [intermediate] # the pool's organization's categories by name, may be empty

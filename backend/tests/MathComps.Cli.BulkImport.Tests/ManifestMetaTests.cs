@@ -17,7 +17,7 @@ public class ManifestMetaTests
     {
         // Metadata holding the round back until 18:00 in Bratislava's summer time.
         var meta = new ManifestMeta(
-            "csmo-a-iii", new ManifestSeason(2026), "2026-09-14", "2026-09-14T18:00:00+02:00", Language.SK);
+            "csmo-a-iii", new ManifestSeason(2026), "2026-09-14", "2026-09-14T18:00:00+02:00", null, Language.SK);
 
         // The instant the metadata reads.
         var visibleSince = meta.VisibleSinceUtc;

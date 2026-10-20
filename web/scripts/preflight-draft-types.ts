@@ -35,6 +35,10 @@ export type ManifestMeta = {
    * archive starts serving it once the instant passes.
    */
   visibleSince: string | null
+  /**
+   * The slug of the organization whose pool the draft files its problems in, or `null` for a draft filing none.
+   */
+  organization: string | null
   /** The original language of this draft — the body whose `pN.<lang>.md` matches it is the original. */
   language: Locale
 }
@@ -55,7 +59,7 @@ export type ManifestText = {
 
 /** What a problem of the pool is filed under, from the `proposal:` block of its `pN.yaml`. */
 export type ManifestProposal = {
-  /** The number the reviewers quote it by, unique across the pool and never changed. */
+  /** The number the reviewers quote it by, unique within its organization's pool and never changed. */
   number: number
   /** Working name, never shown to a student. */
   title: string

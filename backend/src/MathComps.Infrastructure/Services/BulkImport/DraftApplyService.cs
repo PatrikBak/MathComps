@@ -84,7 +84,8 @@ public class DraftApplyService(
             {
                 // Insert the new problem with its texts, authors, and tags.
                 await InsertProblemAsync(
-                    context, problem, slug, round.Id, replacements, authorsCache, tagsCache, appliedTexts);
+                    context, problem, slug, round.Id, target.OrganizationSlug, replacements, authorsCache, tagsCache,
+                    appliedTexts);
 
                 // Count it as an insert.
                 problemsInserted++;
@@ -254,6 +255,7 @@ public class DraftApplyService(
     /// <param name="problem">The draft problem content.</param>
     /// <param name="slug">The problem slug.</param>
     /// <param name="roundId">The round the problem hangs off.</param>
+    /// <param name="organizationSlug"><inheritdoc cref="DraftTarget.OrganizationSlug" path="/summary"/></param>
     /// <param name="replacements">The image-ref replacements to apply to each body.</param>
     /// <param name="authorsCache">The run-scoped author cache.</param>
     /// <param name="tagsCache">The run-scoped tag cache.</param>
@@ -263,6 +265,7 @@ public class DraftApplyService(
         DraftProblemContent problem,
         string slug,
         Guid roundId,
+        string? organizationSlug,
         IReadOnlyDictionary<string, ResolvedImageRef> replacements,
         IDictionary<string, Author> authorsCache,
         IDictionary<string, Tag> tagsCache,
@@ -317,9 +320,9 @@ public class DraftApplyService(
         // File the problem in the pool when the draft says how.
         if (problem.Proposal is { } proposal)
         {
-            // The MathComps organization, whose pool the import files every proposal into.
+            // The organization the draft names, whose pool the proposal goes into.
             var organizationId = await context.Organizations
-                .Where(organization => organization.Slug == Organization.MathCompsSlug)
+                .Where(organization => organization.Slug == organizationSlug)
                 .Select(organization => organization.Id)
                 .SingleAsync();
 

@@ -59,7 +59,7 @@ Decide the shape. The tree nests as deep as the competition really does — thre
 
 Every slug is lowercase alphanumeric with **no hyphen in it** — a hyphen is what joins a slug to its parent's path, so one inside a slug would make the path ambiguous. Path composition throws on it, and a check constraint refuses the row underneath.
 
-**A problem belonging to no competition goes under `mathcomps-proposals`** — a candidate in the pool the problem selection fills a MathComps cycle from. It is registered already, so a draft just names it as its `competition`. Give that draft `visibleSince: 9999-01-01T00:00:00Z`, the embargo that hides the pool from students; `validate` refuses any other (`proposals-embargo`).
+**A problem belonging to no competition goes under `mathcomps-proposals`** — a candidate in an organization's pool, which the problem selection picks from. It is registered already, so a draft just names it as its `competition`. Give that draft `visibleSince: 9999-01-01T00:00:00Z`, the embargo that hides the pool from students; `validate` refuses any other (`proposals-embargo`). It also names the organization whose pool it fills, `organization: mathcomps` for MathComps' own; `validate` refuses a pool draft naming no organization that exists, and any other draft naming one (`proposals-organization`).
 
 Add a test row for any new competition/round/name to `MetadataLocalizationServiceTests` (display order, leaf/child shape, name resolution, `Registered_competition_has_no_issues`). A new root also needs its slug in `Shared_roots_are_in_display_order`; the parity sweep walks the registry itself, so it needs no edit.
 

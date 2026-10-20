@@ -162,7 +162,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     {
         // Preview a draft whose competition, round and season are all absent.
         var preview = await PreviewAsync(
-            service, new DraftTarget("newcomp-i", 2099), Problem(1, Original(Language.SK)));
+            service, new DraftTarget("newcomp-i", 2099, null), Problem(1, Original(Language.SK)));
 
         // Nothing exists yet, so all three would be created.
         Assert.Equal(ResolutionAction.Create, ActionFor(preview, "competition"));
@@ -182,7 +182,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     {
         // Same csmo-a-iii competition, but the 2025 season doesn't exist yet.
         var preview = await PreviewAsync(
-            service, new DraftTarget("csmo-a-iii", 2025), Problem(1, Original(Language.SK)));
+            service, new DraftTarget("csmo-a-iii", 2025, null), Problem(1, Original(Language.SK)));
 
         // The competition is reused; the season and the round it would run are both new.
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "competition"));
@@ -202,7 +202,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     {
         // "csmo-b-iii" differs from the seeded "csmo-a-iii" one segment in.
         var preview = await PreviewAsync(
-            service, new DraftTarget("csmo-b-iii", 2024), Problem(1, Original(Language.SK)));
+            service, new DraftTarget("csmo-b-iii", 2024, null), Problem(1, Original(Language.SK)));
 
         // The season still exists; the differently-addressed competition and its round do not.
         Assert.Equal(ResolutionAction.Create, ActionFor(preview, "competition"));
@@ -219,7 +219,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     {
         // "memo-i" is seeded, one level shallower than the csmo rounds beside it.
         var preview = await PreviewAsync(
-            service, new DraftTarget("memo-i", 2024), Problem(1, Original(Language.SK)));
+            service, new DraftTarget("memo-i", 2024, null), Problem(1, Original(Language.SK)));
 
         // All three exist, so all reuse — proving the shorter path matched the stored node.
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "competition"));
@@ -330,7 +330,8 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     {
         // Problem 4 of a proposals round that doesn't exist yet, which leaves 1 to 3 empty.
         var preview = await PreviewAsync(
-            service, new DraftTarget(HostedTaxonomy.ProposalsPath, 2024), Problem(4, Original(Language.SK)));
+            service, new DraftTarget(HostedTaxonomy.ProposalsPath, 2024, Organization.MathCompsSlug),
+            Problem(4, Original(Language.SK)));
 
         // Nothing to flag.
         Assert.Empty(preview.MissingProblemOrders);
@@ -890,7 +891,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
 
         // The draft carrying that one problem.
         var preview = await PreviewAsync(
-            service, new DraftTarget("memo-i", 2024), Problem(1, Original(Language.SK)));
+            service, new DraftTarget("memo-i", 2024, null), Problem(1, Original(Language.SK)));
 
         // Nothing to report.
         Assert.Null(preview.HostedGroupCountDisagreement);
@@ -1079,13 +1080,13 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
-    /// A pick recommended for a category the pool's organization doesn't list is refused, even when another
-    /// organization lists one of that name.
+    /// A pick recommended for a category the organization its draft names doesn't list is refused, even when another
+    /// organization lists one of that name. So the same pick is refused for a different category in each pool.
     /// </summary>
     [Fact]
-    public Task A_category_the_organization_does_not_list_is_refused() => RunTestAsync(async service =>
+    public Task A_category_the_drafts_organization_does_not_list_is_refused() => RunTestAsync(async service =>
     {
-        // Another organization, listing a category of its own.
+        // The olympiad, listing a category of its own.
         await QueryAsync(async context =>
         {
             // The organization and its category.
@@ -1095,21 +1096,28 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
             await context.SaveChangesAsync();
         });
 
-        // #14 at place 8, recommended for MathComps' elementary and the other organization's category.
+        // #14 at place 8, recommended for MathComps' elementary and the olympiad's category.
         var pick = Pick(8, number: 14) with
         {
             Proposal = new DraftProposal(14, "Proposal 14", ProposalArea.Algebra, ["elementary", "C"]),
         };
 
-        // The preview of it.
-        var preview = await PreviewPoolAsync(service, pick);
+        // The pick through a draft for MathComps' pool.
+        var mathComps = await PreviewPoolAsync(service, pick);
 
-        // The other organization's category is refused, MathComps' own is not.
-        var unknown = Assert.IsType<ProposalCategoryUnknown>(Assert.Single(preview.ProposalConflicts));
-        Assert.Equal((PoolSlug(8), "C"), (unknown.Slug, unknown.Category));
+        // The pick through a draft for the olympiad's pool.
+        var olympiad = await service.PreviewAsync(
+            OlympiadTarget(), HostedTaxonomy.ProposalsVisibleSince, [pick], _imageFolder);
 
-        // The refusal offers MathComps' categories instead, in the order they run.
-        Assert.Equal(["elementary", "intermediate", "advanced"], unknown.Listed);
+        // MathComps refuses the olympiad's category, offering its own in the order they run.
+        var mathCompsRefusal = Assert.IsType<ProposalCategoryUnknown>(Assert.Single(mathComps.ProposalConflicts));
+        Assert.Equal((PoolSlug(8), "C"), (mathCompsRefusal.Slug, mathCompsRefusal.Category));
+        Assert.Equal(["elementary", "intermediate", "advanced"], mathCompsRefusal.Listed);
+
+        // The olympiad refuses MathComps' category, offering its own.
+        var olympiadRefusal = Assert.IsType<ProposalCategoryUnknown>(Assert.Single(olympiad.ProposalConflicts));
+        Assert.Equal((PoolSlug(8), "elementary"), (olympiadRefusal.Slug, olympiadRefusal.Category));
+        Assert.Equal(["C"], olympiadRefusal.Listed);
     });
 
     /// <summary>
@@ -1132,8 +1140,99 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
         // Nothing is refused.
         Assert.Empty(preview.ProposalConflicts);
         Assert.False(preview.MovesProposalsEmbargo);
+        Assert.Null(preview.OrganizationProblem);
         Assert.Empty(bare.ProposalConflicts);
     });
+
+    /// <summary>
+    /// A draft names an organization exactly where it fills a pool, and one that exists. A pool draft naming none
+    /// would file its proposals under nobody, one naming a slug nothing goes by under nothing, and a draft outside the
+    /// pool fills no organization's pool at all.
+    /// </summary>
+    [Fact]
+    public Task A_draft_names_an_existing_organization_where_it_fills_a_pool_alone() => RunTestAsync(async service =>
+    {
+        // A pool draft naming no organization.
+        var unnamed = await service.PreviewAsync(
+            new DraftTarget(HostedTaxonomy.ProposalsPath, 2026, null), HostedTaxonomy.ProposalsVisibleSince,
+            [Pick(8, number: 14)], _imageFolder);
+
+        // A pool draft naming a slug no organization goes by.
+        var unknown = await service.PreviewAsync(
+            new DraftTarget(HostedTaxonomy.ProposalsPath, 2026, "nobody"), HostedTaxonomy.ProposalsVisibleSince,
+            [Pick(8, number: 14)], _imageFolder);
+
+        // A draft outside the pool naming MathComps.
+        var outside = await PreviewAsync(
+            service, new DraftTarget("csmo-a-iii", 2024, Organization.MathCompsSlug),
+            Problem(1, Original(Language.SK)));
+
+        // Each refused for its own reason.
+        Assert.Equal(
+            (DraftOrganizationProblem.Missing, DraftOrganizationProblem.Unknown, DraftOrganizationProblem.OutsidePool),
+            (unnamed.OrganizationProblem, unknown.OrganizationProblem, outside.OrganizationProblem));
+    });
+
+    /// <summary>
+    /// A number counts within its organization's pool, so the olympiad's draft names a number MathComps' pool already
+    /// holds and files cleanly.
+    /// </summary>
+    [Fact]
+    public Task A_number_another_pool_holds_is_free() => RunTestAsync(async service =>
+    {
+        // MathComps' pool, its place 1 holding proposal #21, and the olympiad beside it.
+        await SeedPoolProblemAsync(place: 1, number: 21);
+        await SeedOlympiadAsync();
+
+        // The olympiad's pick naming #21 at a free place.
+        var preview = await service.PreviewAsync(
+            OlympiadTarget(), HostedTaxonomy.ProposalsVisibleSince, [Pick(8, number: 21)], _imageFolder);
+
+        // Nothing is refused.
+        Assert.Empty(preview.ProposalConflicts);
+        Assert.Null(preview.OrganizationProblem);
+    });
+
+    /// <summary>
+    /// A place holding another organization's proposal is refused, whatever number the block names, since a draft
+    /// for one pool may not rewrite a problem of another.
+    /// </summary>
+    [Fact]
+    public Task A_place_another_pool_holds_is_refused() => RunTestAsync(async service =>
+    {
+        // MathComps' pool, its place 8 holding proposal #14, and the olympiad beside it.
+        await SeedPoolProblemAsync(place: 8, number: 14);
+        await SeedOlympiadAsync();
+
+        // The olympiad's pick naming #14 at place 8.
+        var preview = await service.PreviewAsync(
+            OlympiadTarget(), HostedTaxonomy.ProposalsVisibleSince, [Pick(8, number: 14)], _imageFolder);
+
+        // Refused for that alone, naming the pool the place is in.
+        Assert.Equal(
+            new PlaceHoldsAnotherPoolsProposal(PoolSlug(8), 14, Organization.MathCompsSlug),
+            Assert.Single(preview.ProposalConflicts));
+    });
+
+    /// <summary>
+    /// Seeds the olympiad, the organization beside MathComps, with nobody on its list.
+    /// </summary>
+    /// <returns>A task representing the seeding.</returns>
+    private Task SeedOlympiadAsync() =>
+        QueryAsync(async context =>
+        {
+            // The olympiad
+            SelectionSeed.NewOrganization(context, "olympiad");
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+    /// <summary>
+    /// Builds a draft target for the 2026 round of the pool, filling the olympiad's pool.
+    /// </summary>
+    /// <returns>The configured target.</returns>
+    private static DraftTarget OlympiadTarget() => new(HostedTaxonomy.ProposalsPath, 2026, "olympiad");
 
     /// <summary>
     /// Seeds the pool's round in the 2026 season, holding one problem at the given place under the slug the import
@@ -1179,13 +1278,13 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     /// Builds a draft target for the seeded csmo-a-iii · 2024 round.
     /// </summary>
     /// <returns>The configured target.</returns>
-    private static DraftTarget SeededTarget() => new("csmo-a-iii", 2024);
+    private static DraftTarget SeededTarget() => new("csmo-a-iii", 2024, null);
 
     /// <summary>
-    /// Builds a draft target for the 2026 round of the pool.
+    /// Builds a draft target for the 2026 round of the pool, filling MathComps' pool.
     /// </summary>
     /// <returns>The configured target.</returns>
-    private static DraftTarget PoolTarget() => new(HostedTaxonomy.ProposalsPath, 2026);
+    private static DraftTarget PoolTarget() => new(HostedTaxonomy.ProposalsPath, 2026, Organization.MathCompsSlug);
 
     /// <summary>
     /// Builds the slug the import gives a place in the 2026 round of the pool, whose edition is 76.

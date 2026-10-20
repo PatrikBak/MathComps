@@ -39,12 +39,14 @@ public record DraftManifest(
 /// The instant the round opens to readers, as an ISO-8601 timestamp carrying an explicit offset, or null when it
 /// is open from the moment it lands.
 /// </param>
+/// <param name="Organization"><inheritdoc cref="DraftTarget.OrganizationSlug" path="/summary"/></param>
 /// <param name="Language">The original language of the draft — the text variant in it is the original.</param>
 public record ManifestMeta(
     string CompetitionPath,
     ManifestSeason Season,
     string Date,
     string? VisibleSince,
+    string? Organization,
     Language Language)
 {
     /// <summary>

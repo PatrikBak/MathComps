@@ -37,7 +37,8 @@ public class ValidateReportTests
                 new ProblemResolution("74-csmo-a-iii-3", ResolutionAction.Create, [Language.SK, Language.EN])
             ],
             MissingProblemOrders: [], SortOrderChanges: [], Orphans: [], DefendedProblemRestatements: [],
-            HostedGroupCountDisagreement: null, MovesProposalsEmbargo: false, ProposalConflicts: []);
+            HostedGroupCountDisagreement: null, MovesProposalsEmbargo: false, OrganizationProblem: null,
+            ProposalConflicts: []);
 
         // The report on the preview.
         var report = RenderReport(new ValidateResult([], preview));
@@ -82,7 +83,8 @@ public class ValidateReportTests
         {
             // Render the report for a Slovak draft of the csmo-a-iii 2024 round.
             ValidateReport.Render(
-                new ManifestMeta("csmo-a-iii", new ManifestSeason(2024), "2024-03-15", null, Language.SK), result);
+                new ManifestMeta("csmo-a-iii", new ManifestSeason(2024), "2024-03-15", null, null, Language.SK),
+                result);
         }
         finally
         {
