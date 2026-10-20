@@ -299,8 +299,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             StartedAt = DateTimeOffset.UtcNow,
         });
 
-        // A round of the proposals node, which no group runs. It reads as released from a group the way an
-        // archive round does, and unlike one it is nobody's to grade.
+        // A round of the proposals node, which no group runs.
         var proposalsRoundId = Guid.CreateVersion7();
         context.Rounds.Add(new Round
         {
@@ -560,7 +559,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
     /// <summary>
     /// A conversation comes back under the statement it was started on, and is flagged once what it defends no
-    /// longer has that statement in any language. Listing and continuing each weigh that on their own, so both are read.
+    /// longer has that statement in any language. Listing and continuing each weigh that on their own, so both are
+    /// read.
     /// </summary>
     [Fact]
     public Task A_conversation_carries_its_statement_and_says_when_no_language_still_has_it() =>
@@ -767,8 +767,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // And it carries the statement its competition is still holding back from everybody else
         Assert.Equal(FakeDefenseContentResolver.Statement, sessions[0].Statement);
 
-        // Its round is one the student is graded on, which is what keeps it from being taken back; the handout
-        // one was argued under no round at all
+        // It started inside the owner's graded run, which is what keeps it from being taken back; the handout one
+        // was argued under no round at all
         Assert.True(sessions[0].IsGraded);
         Assert.False(sessions[1].IsGraded);
     });
@@ -1015,55 +1015,170 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
-    /// Releasing a round from its group, which a corrected manifest does, leaves the conversations already argued
-    /// under it refused. What the student argued when somebody was grading it is not theirs to drop because an
-    /// admin has since redrawn the program.
+    /// Every answer carrying a whole conversation says whether the student is graded on it: the start, the next turn
+    /// and the problem's history, each judged by when the conversation started.
     /// </summary>
     [Fact]
-    public Task A_released_rounds_conversation_stays_refused() => RunTestAsync(async service =>
+    public Task Every_answer_carrying_a_session_says_whether_it_is_graded() => RunTestAsync(async service =>
     {
-        // Argue the graded problem while its round still belongs to the group
+        // Argue the graded problem while the owner's clock runs
+        var graded = await service.StartAsync(_ownerId, ProblemRequest(_problemId, "my defense"));
+
+        // Which the start already says is graded
+        Assert.True(graded.IsGraded);
+
+        // The next turn
+        var continued = await service.ContinueAsync(_ownerId, graded.Id, "more");
+
+        // Says so too
+        Assert.True(continued.IsGraded);
+
+        // The owner then hands the entry in
+        await QueryAsync(async context =>
+        {
+            // The owner's entry
+            var entry = await context.HostedEntries.SingleAsync(
+                candidate => candidate.UserId == _ownerId && candidate.RoundId == _roundId);
+
+            // Closed now
+            entry.FinishedAt = DateTimeOffset.UtcNow;
+
+            // Commit the hand-in
+            await context.SaveChangesAsync();
+        });
+
+        // A conversation started after that
+        var late = await service.StartAsync(_ownerId, ProblemRequest(_problemId, "my defense"));
+
+        // Falls outside the entry, so nobody grades it
+        Assert.False(late.IsGraded);
+
+        // The problem's history, most recently active first
+        var listed = await service.ListAsync(_ownerId, new ProblemTarget(_problemId));
+
+        // Each read against when it started
+        Assert.Equal(
+            [(late.Id, false), (graded.Id, true)],
+            listed.Sessions.Select(session => (session.Id, session.IsGraded)));
+    });
+
+    /// <summary>
+    /// A run its owner started while already preparing the competitions is a preparer's run, which nobody grades,
+    /// so what they argued in it stays theirs to rewind and delete.
+    /// </summary>
+    [Fact]
+    public Task A_preparers_runs_conversation_can_be_rewound_and_deleted() => RunTestAsync(async service =>
+    {
+        // The owner goes on MathComps' list, which is what preparing the competitions takes
+        await MakeOwnerReviewerAsync();
+
+        // And only then starts the clock on their entry
+        await StartOwnersClockAtAsync(DateTimeOffset.UtcNow);
+
+        // Argue the problem inside that run
         var session = await service.StartAsync(
             _ownerId, ProblemRequest(_problemId, "my defense"));
 
-        // Then take the round out of the group, the way re-declaring a manifest that no longer names it does
+        // The listing reports it as nobody's to grade
+        var listed = Assert.Single(await service.ListAllAsync(_ownerId, Language.EN));
+        Assert.False(listed.IsGraded);
+
+        // Rewind to the examiner's opener
+        await service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 0);
+
+        // And drop it altogether
+        await service.DeleteAsync(_ownerId, session.Id);
+
+        // Which leaves nothing behind
+        Assert.Equal(0, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
+    });
+
+    /// <summary>
+    /// Joining MathComps' list after the student's clock started leaves the run they sat for real as it was, so the
+    /// conversation argued in it stays graded.
+    /// </summary>
+    [Fact]
+    public Task A_run_sat_before_joining_the_list_stays_refused() => RunTestAsync(async service =>
+    {
+        // Argue the problem under the seeded entry, whose clock is already running
+        var session = await service.StartAsync(
+            _ownerId, ProblemRequest(_problemId, "my defense"));
+
+        // The owner goes on MathComps' list only after that
+        await MakeOwnerReviewerAsync();
+
+        // The listing still reports the conversation as graded
+        var listed = Assert.Single(await service.ListAllAsync(_ownerId, Language.EN));
+        Assert.True(listed.IsGraded);
+
+        // And the delete is refused
+        await Assert.ThrowsAsync<DefenseGradedSessionImmutableException>(
+            () => service.DeleteAsync(_ownerId, session.Id));
+    });
+
+    /// <summary>
+    /// A group's problems go public once it closes, so a student who never entered it may argue them. Nobody grades
+    /// what they say, so the conversation stays theirs to rewind and delete.
+    /// </summary>
+    [Fact]
+    public Task A_closed_competitions_conversation_without_an_entry_can_be_rewound_and_deleted() =>
+        RunTestAsync(async service =>
+    {
+        // When the graded group closed
+        var closedAt = DateTimeOffset.UtcNow.AddMinutes(-1);
+
+        // Close the graded group then, and lift its round's embargo with it
         await QueryAsync(async context =>
         {
-            // The round as it stands
-            var round = await context.Rounds.SingleAsync(candidate => candidate.Id == _roundId);
+            // The round as it stands, with its group
+            var round = await context.Rounds
+                .Include(candidate => candidate.HostedGroup)
+                .SingleAsync(candidate => candidate.Id == _roundId);
 
-            // Cut loose from the group that was running it
-            round.HostedGroupId = null;
+            // Closed a minute ago
+            round.HostedGroup!.ClosesAt = closedAt;
+
+            // And public from the same instant
+            round.VisibleSince = closedAt;
 
             // Written down
             await context.SaveChangesAsync();
         });
 
-        // The delete is refused all the same, the round having been released after the fact
-        await Assert.ThrowsAsync<DefenseGradedSessionImmutableException>(
-            () => service.DeleteAsync(_ownerId, session.Id));
+        // The other user, who never entered, argues the problem
+        var session = await service.StartAsync(
+            _otherId, ProblemRequest(_problemId, "my defense"));
 
-        // And the listing says so, so the surface offers no control the backend would turn down
-        var listed = Assert.Single(await service.ListAllAsync(_ownerId, Language.EN));
-        Assert.True(listed.IsGraded);
+        // The listing reports it as nobody's to grade
+        var listed = Assert.Single(await service.ListAllAsync(_otherId, Language.EN));
+        Assert.False(listed.IsGraded);
+
+        // Rewind to the examiner's opener
+        await service.RewindAsync(_otherId, session.Id, keepThroughSequence: 0);
+
+        // And drop it altogether
+        await service.DeleteAsync(_otherId, session.Id);
+
+        // Which leaves nothing behind
+        Assert.Equal(0, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
     });
 
     /// <summary>
-    /// A proposal grades nobody either, and it reads to the database exactly as a round released from its group
-    /// does: neither is hosted and neither has a closing instant. A released round's conversation stays refused,
-    /// so the two are told apart by where the round sits and by nothing else.
+    /// A grade is read from what the student argued while their entry counted, so a conversation started after the
+    /// clock ran out is graded by nobody and stays theirs to rewind and delete.
     /// </summary>
     [Fact]
-    public Task A_proposals_conversation_can_be_rewound_and_deleted() => RunTestAsync(async service =>
+    public Task A_conversation_started_after_the_clock_ran_out_can_be_rewound_and_deleted() =>
+        RunTestAsync(async service =>
     {
-        // The owner reviews the proposals, which takes their address on the MathComps organization's list
-        await MakeOwnerReviewerAsync();
+        // The owner's three-hour clock started four hours ago, so it ran out an hour ago
+        await StartOwnersClockAtAsync(DateTimeOffset.UtcNow.AddHours(-4));
 
-        // Argue a problem parked among the proposals, which needs no entry
+        // Argue the problem now
         var session = await service.StartAsync(
-            _ownerId, ProblemRequest(_proposedProblemId, "my defense"));
+            _ownerId, ProblemRequest(_problemId, "my defense"));
 
-        // The listing reports it as nobody's to grade, so the surface offers the controls at all
+        // The listing reports it as nobody's to grade
         var listed = Assert.Single(await service.ListAllAsync(_ownerId, Language.EN));
         Assert.False(listed.IsGraded);
 
@@ -1116,8 +1231,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
     /// <summary>
     /// Once the paper's group opens, a reviewer's conversation about the proposal goes by the competition that set
-    /// it, as everything else about the problem does. It was argued before anybody could enter, so it still grades
-    /// nobody and stays the reviewer's to rewind and delete.
+    /// it, as everything else about the problem does. The reviewer holds no entry into the paper's round, so nobody
+    /// grades it.
     /// </summary>
     [Fact]
     public Task A_reviewers_conversation_goes_by_its_competition_once_its_paper_opens() =>
@@ -1127,27 +1242,10 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         await MakeOwnerReviewerAsync();
 
         // The owner's conversation about the problem while it sits in the pool
-        var session = await service.StartAsync(
-            _ownerId, ProblemRequest(_proposedProblemId, "my defense"));
+        await service.StartAsync(_ownerId, ProblemRequest(_proposedProblemId, "my defense"));
 
-        // When the paper's group opened
-        var opensAt = DateTimeOffset.UtcNow.AddDays(-1);
-
-        // A board took the problem into that paper
-        await MoveProposalIntoPaperAsync(opensAt);
-
-        // And the conversation dates from before the opening, as one held in the pool does
-        await QueryAsync(async context =>
-        {
-            // The owner's conversation
-            var held = await context.DefenseSessions.SingleAsync(candidate => candidate.Id == session.Id);
-
-            // Started a day before the group opened
-            held.CreatedAt = opensAt.AddDays(-1);
-
-            // Commit the date
-            await context.SaveChangesAsync();
-        });
+        // A board took the problem into a paper whose group opened yesterday
+        await MoveProposalIntoPaperAsync(DateTimeOffset.UtcNow.AddDays(-1));
 
         // Listing the owner's conversations
         var listed = Assert.Single(await service.ListAllAsync(_ownerId, Language.EN));
@@ -1158,15 +1256,6 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // And still reports it as nobody's to grade
         Assert.False(listed.IsGraded);
-
-        // So the owner can rewind it to the examiner's opener
-        await service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 0);
-
-        // And drop it altogether
-        await service.DeleteAsync(_ownerId, session.Id);
-
-        // Which leaves nothing behind
-        Assert.Equal(0, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
     });
 
     /// <summary>
@@ -2094,6 +2183,24 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         SelectionSeed.NewMember(context, "owner@example.com", DateTimeOffset.UtcNow);
 
         // Commit the membership
+        await context.SaveChangesAsync();
+    });
+
+    /// <summary>
+    /// Moves the start of the owner's clock on the graded round to a given instant.
+    /// </summary>
+    /// <param name="startedAt">When the clock starts.</param>
+    /// <returns>A task that completes once the entry is written.</returns>
+    private Task StartOwnersClockAtAsync(DateTimeOffset startedAt) => QueryAsync(async context =>
+    {
+        // The owner's entry
+        var entry = await context.HostedEntries.SingleAsync(
+            candidate => candidate.UserId == _ownerId && candidate.RoundId == _roundId);
+
+        // Its clock started then
+        entry.StartedAt = startedAt;
+
+        // Commit the start
         await context.SaveChangesAsync();
     });
 

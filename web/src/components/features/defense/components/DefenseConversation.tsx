@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useMemo } from 'react'
 
 import { CompetitionClock } from '@/components/features/hosted-competitions/components/CompetitionClock'
+import type { AreaEntry } from '@/components/features/hosted-competitions/model/hosted-competition-state'
 import { Button } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
 import { MATHILDA_NAME } from '@/constants/mathilda'
@@ -25,12 +26,7 @@ import {
   isSubjectReachable,
   toWireTarget,
 } from '../model/defense-target'
-import type {
-  DefenseCompetitionRun,
-  DefenseOpening,
-  DefenseProblem,
-  TurnRole,
-} from '../model/defense-types'
+import type { DefenseOpening, DefenseProblem, TurnRole } from '../model/defense-types'
 import { DefenseComposer } from './DefenseComposer'
 import { DefenseFeedbackDialogs } from './DefenseFeedbackDialogs'
 import { DefenseFeedbackPrompt } from './DefenseFeedbackPrompt'
@@ -53,10 +49,10 @@ type DefenseConversationProps = {
    */
   opening: DefenseOpening
   /**
-   * The competition run this defense is being argued inside, or null where nothing of the reader's own is
-   * being spent on it. What a graded one settles about the conversation is on {@link DefenseCompetitionRun}.
+   * The competition entry this defense is being argued inside, or null where nothing of the reader's own is
+   * being spent on it.
    */
-  competition: DefenseCompetitionRun | null
+  entry: AreaEntry | null
 }
 
 /**
@@ -104,7 +100,7 @@ function DefenseConversationForTarget({
   problem,
   onClose,
   opening,
-  competition,
+  entry,
 }: DefenseConversationProps) {
   // Defense-surface copy
   const t = useTranslations('defense')
@@ -131,6 +127,7 @@ function DefenseConversationForTarget({
     openingStatus,
     retrySessions,
     currentSessionId,
+    isGraded,
     currentFeedback,
     reports,
     conversationEpoch,
@@ -182,10 +179,7 @@ function DefenseConversationForTarget({
   })
 
   // Where this conversation stands against the entry's clock
-  const competitionMode = useDefenseCompetitionMode(competition?.entry ?? null, shownTurns)
-
-  // Whether the student is graded on the run this defense is argued inside
-  const isGraded = competition?.isGraded ?? false
+  const competitionMode = useDefenseCompetitionMode(entry, shownTurns)
 
   // Feedback, on one reply or on the whole conversation, is offered only on a saved one and never mid-turn;
   // a session id only ever names one the signed-in viewer owns, so there's no one else's to speak about.
@@ -193,7 +187,7 @@ function DefenseConversationForTarget({
   const canGiveFeedback = !isThinking && currentSessionId !== null && limits !== null
 
   // Rewinding takes the same conditions and one more, since it drops turns rather than speaking about them:
-  // what the student argued in a graded run is what they are marked on, so nothing inside one may rewrite it
+  // what the student argued in a graded conversation is what they are marked on, so nothing may rewrite it
   const canRewind = canGiveFeedback && !isGraded
 
   // Whether the conversation has enough behind it to be worth summing up, or was already summed up, which
@@ -241,16 +235,16 @@ function DefenseConversationForTarget({
             {MATHILDA_NAME}
           </span>
           <span className="hidden truncate text-xs text-muted sm:inline">
-            {t(competition === null ? 'roleTutor' : 'roleOpponent')}
+            {t(entry === null ? 'roleTutor' : 'roleOpponent')}
           </span>
         </div>
 
         {/* How long the entry has left, which the page behind this modal is no longer there to say */}
-        {competition?.entry.kind === 'sat' && (
+        {entry?.kind === 'sat' && (
           <CompetitionClock
-            endsAt={competition.entry.endsAt}
+            endsAt={entry.endsAt}
             now={competitionMode.now}
-            wasHandedIn={competition.entry.wasHandedIn}
+            wasHandedIn={entry.wasHandedIn}
           />
         )}
 
@@ -276,7 +270,7 @@ function DefenseConversationForTarget({
               sessions={sessions}
               currentSessionId={currentSessionId}
               onSelect={resume}
-              onDelete={isGraded ? null : turn.removeSession}
+              onDelete={turn.removeSession}
             />
           )}
 
@@ -375,7 +369,7 @@ function DefenseConversationForTarget({
             consentStatus: consent.status,
             isThinking,
             messagesLeft,
-            competition: competition === null ? null : { isGraded: competition.isGraded },
+            competition: entry === null ? null : { isGraded },
           })}
           draft={turn.draft}
           onDraftChange={turn.setDraft}

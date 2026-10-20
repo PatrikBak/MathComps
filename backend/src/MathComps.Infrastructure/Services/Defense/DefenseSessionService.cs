@@ -5,9 +5,11 @@ using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Ai;
+using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Engine;
 using MathComps.Infrastructure.Services.Localization;
+using MathComps.Infrastructure.Services.Organizations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -21,7 +23,6 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// while it runs), and persists the turns and one <see cref="DefenseSpend"/> row from the turn's cost — the gate held
 /// throughout so a user's concurrent turns can't each clear the spend check against the same pre-write total.
 /// </summary>
-/// <param name="limits">The input, message, and spend caps.</param>
 /// <param name="targetGuard">Says whether a student may argue what the target names.</param>
 /// <param name="contentResolver">Looks up what a new session's examiner is told about the problem.</param>
 /// <param name="examinerConfigSnapshotProvider">The examiner engine's config snapshot, stamped onto each new
@@ -30,21 +31,24 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
 /// <param name="examiner">The engine that produces the examiner's reply.</param>
 /// <param name="localization">Resolves the localized names a competition problem is listed under.</param>
+/// <param name="members">Reads when a student started preparing the competitions.</param>
+/// <param name="defenseLimits">The input, message, and spend caps.</param>
 public class DefenseSessionService(
-    IOptions<DefenseLimits> limits,
     IDefenseTargetGuard targetGuard,
     IDefenseContentResolver<DefenseTarget> contentResolver,
     IExaminerConfigSnapshotProvider examinerConfigSnapshotProvider,
     IDefenseUserTurnGate turnGate,
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IExaminer examiner,
-    IMetadataLocalizationService localization)
+    IMetadataLocalizationService localization,
+    IOrganizationMemberService members,
+    IOptions<DefenseLimits> defenseLimits)
     : IDefenseSessionService
 {
     /// <summary>
     /// The input, message, and spend caps.
     /// </summary>
-    private readonly DefenseLimits _limits = limits.Value;
+    private readonly DefenseLimits _limits = defenseLimits.Value;
 
     /// <summary>
     /// The examiner's config snapshot, ready to stamp onto each new session.
@@ -98,6 +102,10 @@ public class DefenseSessionService(
         if (!holdsHostedEntry)
             await EnsureUnderSpendCeilingAsync(dbContext, userId, cancellationToken);
 
+        // The entry the student is graded on for the target, if anybody grades them on it. Read before anything
+        // is written, so a read that fails leaves nothing saved.
+        var gradedEntry = await FindGradedEntryAsync(dbContext, userId, start.Request.Target, cancellationToken);
+
         // A fresh session holding the problem and its reference for this and later turns.
         var session = new DefenseSession
         {
@@ -128,7 +136,7 @@ public class DefenseSessionService(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Hand back the full conversation, argued against the statement the problem has this instant.
-        return ToSessionDto(session, start.Request.Target, hasOlderStatement: false);
+        return ToSessionDto(session, start.Request.Target, hasOlderStatement: false, gradedEntry);
     }
 
     /// <inheritdoc/>
@@ -203,6 +211,10 @@ public class DefenseSessionService(
         // cannot be read leaves nothing saved.
         var statements = await contentResolver.ResolveStatementsAsync(target, cancellationToken);
 
+        // The entry the student is graded on for the target, if anybody grades them on it. Read before the turn is
+        // written, so a read that fails leaves nothing saved.
+        var gradedEntry = await FindGradedEntryAsync(dbContext, userId, target, cancellationToken);
+
         // When the student sent the message, or the stamp of a reply in this same conversation that landed while it
         // waited, if that is later: the message goes in below that reply, and the stamps keep to turn order.
         var stampedAt = session.Turns.Select(turn => turn.CreatedAt).Append(sentAt).Max();
@@ -218,7 +230,8 @@ public class DefenseSessionService(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Hand back the grown conversation, flagged when no language still has its statement.
-        return ToSessionDto(session, target, !statements.Values.Contains(session.ProblemStatement));
+        return ToSessionDto(
+            session, target, !statements.Values.Contains(session.ProblemStatement), gradedEntry);
     }
 
     /// <inheritdoc/>
@@ -231,11 +244,10 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The user's sessions against this target, most recently active first: each conversation in order, the
-        // statement it is argued against and whether any language still has it, the student's answer for it, and
-        // what they hold against its replies. Every session in this list defends the target the caller named, so it
-        // rides into each one. Split, so the turns and the reports don't multiply out.
-        var sessions = await dbContext.DefenseSessions
+        // The user's sessions against this target, most recently active first: when each started, its conversation
+        // in order, the statement it is argued against, the student's answer for it, and what they hold against its
+        // replies. Split, so the turns and the reports don't multiply out.
+        var rows = await dbContext.DefenseSessions
             .AsNoTracking()
             .AsSplitQuery()
             .Where(session => session.UserId == userId)
@@ -243,23 +255,40 @@ public class DefenseSessionService(
             .OrderByDescending(session => session.Turns.Max(turn => turn.CreatedAt))
             // A tie goes to the session started later: ids are time-ordered v7 Guids.
             .ThenByDescending(session => session.Id)
-            .Select(session => new DefenseSessionDto(
+            .Select(session => new
+            {
                 session.Id,
-                target,
+                session.CreatedAt,
                 session.ProblemStatement,
-                !statements.Contains(session.ProblemStatement),
-                session.Turns
+                Turns = session.Turns
                     .OrderBy(turn => turn.Sequence)
                     .Select(turn => new DefenseTurnDto(turn.Id, turn.Role, turn.Content, turn.CreatedAt))
                     .ToList(),
-                session.Feedback == null
+                Feedback = session.Feedback == null
                     ? null
                     : new DefenseFeedbackDto(session.Feedback.Outcome, session.Feedback.Comment),
-                session.Reports
-                    .Select(report => new DefenseTurnReportDto(
-                        report.TurnId, report.Categories, report.Comment))
-                    .ToList()))
+                Reports = session.Reports
+                    .Select(report => new DefenseTurnReportDto(report.TurnId, report.Categories, report.Comment))
+                    .ToList(),
+            })
             .ToListAsync(cancellationToken);
+
+        // The entry the student is graded on for the target, if anybody grades them on it.
+        var gradedEntry = await FindGradedEntryAsync(dbContext, userId, target, cancellationToken);
+
+        // Each session against the target the caller named, flagged when no language still has its statement, and
+        // graded when it started while the student's graded entry was counting.
+        var sessions = rows
+            .Select(row => new DefenseSessionDto(
+                row.Id,
+                target,
+                row.ProblemStatement,
+                !statements.Contains(row.ProblemStatement),
+                row.Turns,
+                row.Feedback,
+                row.Reports,
+                gradedEntry?.Window.Holds(row.CreatedAt) == true))
+            .ToList();
 
         // Hand them back with the caps a further turn is held to.
         return new DefenseSessionListDto(
@@ -275,14 +304,15 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The deleted proposals, which the filter below reads. Held as their own value so the expression tree
-        // captures a set rather than the context around it, which the analyzer reads as disposed by the time the
-        // tree runs.
+        // The deleted proposals the filter below reads, and every entry the projection reads. Held as their own
+        // values so the expression tree captures a set rather than the context around it, which the analyzer reads
+        // as disposed by the time the tree runs.
         var deletedProposals = dbContext.Proposals.Where(proposal => proposal.DeletedAt != null);
+        var allEntries = dbContext.HostedEntries;
 
-        // The user's sessions, most recently active first, each with the columns of every target arm, the round
-        // it was argued under and when it started, its statement, last activity, and the student's most recent
-        // message.
+        // The user's sessions, most recently active first, each with the columns of every target arm, the entry
+        // the student spent into its problem's round and when it started, its statement, last activity, and the
+        // student's most recent message.
         var rows = await dbContext.DefenseSessions
             .AsNoTracking()
             .Where(session => session.UserId == userId)
@@ -307,15 +337,21 @@ public class DefenseSessionService(
                     session.ProblemTarget!.Problem.Round.Competition.Path,
                     session.ProblemTarget!.Problem.Round.Season.EditionNumber,
                     session.ProblemTarget!.Problem.Round.Season.StartYear),
-                new DefenseGrading(
-                    session.ProblemTarget == null
-                        ? null
-                        : new DefenseProblemRound(
-                            session.ProblemTarget.Problem.Round.Competition.Path,
-                            session.ProblemTarget.Problem.Round.HostedGroupId != null,
-                            session.ProblemTarget.Problem.Round.HostedGroup!.OpensAt,
-                            session.ProblemTarget.Problem.Round.HostedGroup!.ClosesAt),
-                    session.CreatedAt),
+                allEntries
+                    // The student's entry into the round the problem is set in, while a hosted group runs it.
+                    .Where(entry => entry.UserId == session.UserId
+                        && entry.RoundId == session.ProblemTarget!.Problem.RoundId
+                        && entry.Round.HostedGroupId != null)
+                    .Select(entry => new HostedGrading.SpentEntry(
+                        entry.Id,
+                        entry.UserId,
+                        entry.RoundId,
+                        entry.StartedAt,
+                        entry.FinishedAt,
+                        entry.Round.HostedGroup!.ClosesAt,
+                        entry.Round.HostedGroup.ClockMinutes))
+                    .FirstOrDefault(),
+                session.CreatedAt,
                 session.ProblemStatement,
                 session.Turns.Max(turn => turn.CreatedAt),
                 session.Turns
@@ -329,6 +365,9 @@ public class DefenseSessionService(
         var proposals = await NamedDefenseTargets.LoadProposalsAsync(
             dbContext, rows.Select(row => row.Target), cancellationToken);
 
+        // When the student started preparing the competitions, if they still do.
+        var preparerSince = await members.GetMemberSinceAsync(userId, Organization.MathCompsSlug, cancellationToken);
+
         // Name each one.
         return
         [
@@ -338,7 +377,9 @@ public class DefenseSessionService(
                 row.Statement,
                 row.LastActivityAt,
                 row.LastStudentMessage,
-                row.Grading.IsGraded)),
+                // Graded when it started while an entry somebody grades was counting.
+                row.Entry is { } entry
+                    && HostedGrading.GradedEntry.Of(entry, preparerSince)?.Window.Holds(row.StartedAt) == true)),
         ];
     }
 
@@ -424,35 +465,61 @@ public class DefenseSessionService(
     }
 
     /// <summary>
-    /// Throws when the student is graded on the round the session was argued under, which may then be neither
-    /// rewound nor deleted (<see cref="DefenseGradedSessionImmutableException"/>).
+    /// Finds the entry a student is graded on for what a target names, which only a problem can have.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="userId">The student.</param>
+    /// <param name="target">What their conversations defend.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The entry and the window its conversations count in, or null when nobody grades them on it.</returns>
+    private Task<HostedGrading.GradedEntry?> FindGradedEntryAsync(
+        MathCompsDbContext dbContext, Guid userId, DefenseTarget target, CancellationToken cancellationToken) =>
+        target switch
+        {
+            // A handout, argued under no entry at all.
+            HandoutEnvironmentTarget => Task.FromResult<HostedGrading.GradedEntry?>(null),
+
+            // A problem, graded where the student holds an entry somebody grades into its round.
+            ProblemTarget problem =>
+                HostedGrading.FindGradedEntryAsync(dbContext, members, problem.ProblemId, userId, cancellationToken),
+
+            // A target nothing here knows, which is a bug rather than a bad request.
+            _ => throw new ArgumentOutOfRangeException(nameof(target), target, "Unknown defense target."),
+        };
+
+    /// <summary>
+    /// Throws when the student is graded on the session, which may then be neither rewound nor deleted
+    /// (<see cref="DefenseGradedSessionImmutableException"/>).
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
     /// <param name="userId">The caller, so another user's session reads as missing rather than as refused.</param>
     /// <param name="sessionId">The session being acted on.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    private static async Task EnsureNotGradedAsync(
+    private async Task EnsureNotGradedAsync(
         MathCompsDbContext dbContext, Guid userId, Guid sessionId, CancellationToken cancellationToken)
     {
-        // What the caller's session was argued under, down to when the group its round runs in opens and closes,
-        // and when the session started. A session that isn't theirs matches nothing and falls through to whatever
-        // the caller was doing, which answers not-found on its own.
-        var grading = await dbContext.DefenseSessions
+        // The caller's session: the problem it argues, null for a handout, and when it started. A session that
+        // isn't theirs matches nothing and falls through to whatever the caller was doing, which answers
+        // not-found on its own.
+        var session = await dbContext.DefenseSessions
             .Where(DefenseSessionWrites.IsOwnedBy(userId, sessionId))
-            .Select(session => new DefenseGrading(
-                session.ProblemTarget == null
-                    ? null
-                    : new DefenseProblemRound(
-                        session.ProblemTarget.Problem.Round.Competition.Path,
-                        session.ProblemTarget.Problem.Round.HostedGroupId != null,
-                        session.ProblemTarget.Problem.Round.HostedGroup!.OpensAt,
-                        session.ProblemTarget.Problem.Round.HostedGroup!.ClosesAt),
-                session.CreatedAt))
+            .Select(candidate => new
+            {
+                ProblemId = (Guid?)candidate.ProblemTarget!.ProblemId,
+                candidate.CreatedAt,
+            })
             .FirstOrDefaultAsync(cancellationToken);
 
-        // Refused whenever the student is graded on the round it was argued under, whatever state that entry is
-        // in.
-        if (grading?.IsGraded == true)
+        // Missing, someone else's, or about a handout, none of which anybody grades.
+        if (session?.ProblemId is not { } problemId)
+            return;
+
+        // The entry the student's grade on the problem belongs to, if anybody grades them on it.
+        var entry =
+            await HostedGrading.FindGradedEntryAsync(dbContext, members, problemId, userId, cancellationToken);
+
+        // Refused when the conversation started while the student's graded entry was counting.
+        if (entry?.Window.Holds(session.CreatedAt) == true)
             throw new DefenseGradedSessionImmutableException();
     }
 
@@ -709,22 +776,30 @@ public class DefenseSessionService(
 
     /// <summary>
     /// Projects a session to its client shape: the statement it is argued against, its turns in order, what the
-    /// student said about the conversation, and what they hold against its replies.
+    /// student said about the conversation, what they hold against its replies, and whether they are graded on it.
     /// </summary>
     /// <param name="session">The session to project.</param>
     /// <param name="target">What the session defends.</param>
     /// <param name="hasOlderStatement">
     /// <inheritdoc cref="DefenseSessionDto" path="/param[@name='HasOlderStatement']"/></param>
+    /// <param name="gradedEntry">
+    /// The entry the student is graded on for what the session defends, null where nobody grades them on it.
+    /// </param>
     /// <returns>The session's client shape.</returns>
     private static DefenseSessionDto ToSessionDto(
-        DefenseSession session, DefenseTarget target, bool hasOlderStatement) =>
+        DefenseSession session,
+        DefenseTarget target,
+        bool hasOlderStatement,
+        HostedGrading.GradedEntry? gradedEntry) =>
+        // The client shape, graded when the session started while the student's graded entry was counting.
         new(session.Id,
             target,
             session.ProblemStatement,
             hasOlderStatement,
             ToTurnDtos(session.Turns),
             ToFeedbackDto(session.Feedback),
-            ToReportDtos(session.Reports));
+            ToReportDtos(session.Reports),
+            gradedEntry?.Window.Holds(session.CreatedAt) == true);
 
     /// <summary>
     /// Projects a session's feedback to its client shape.
@@ -760,7 +835,11 @@ public class DefenseSessionService(
     /// </summary>
     /// <param name="Id"><inheritdoc cref="DefenseSessionListItemDto" path="/param[@name='Id']"/></param>
     /// <param name="Target"><inheritdoc cref="NamedDefenseTargets.Columns" path="/summary"/></param>
-    /// <param name="Grading"><inheritdoc cref="DefenseGrading" path="/summary"/></param>
+    /// <param name="Entry">
+    /// The entry the student spent into the round the problem is set in, null for a handout, a round no hosted group
+    /// runs, and a round they never entered.
+    /// </param>
+    /// <param name="StartedAt"><inheritdoc cref="DefenseSession.CreatedAt" path="/summary"/></param>
     /// <param name="Statement"><inheritdoc cref="DefenseSessionListItemDto" path="/param[@name='Statement']"/></param>
     /// <param name="LastActivityAt">
     /// <inheritdoc cref="DefenseSessionListItemDto" path="/param[@name='LastActivityAt']"/></param>
@@ -769,7 +848,8 @@ public class DefenseSessionService(
     private sealed record ListRow(
         Guid Id,
         NamedDefenseTargets.Columns Target,
-        DefenseGrading Grading,
+        HostedGrading.SpentEntry? Entry,
+        DateTimeOffset StartedAt,
         string Statement,
         DateTimeOffset LastActivityAt,
         string? LastStudentMessage);

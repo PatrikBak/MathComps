@@ -123,7 +123,7 @@
     "DefenseContentNotFound": "This statement is no longer available.",
     "DefenseFeedbackCommentTooLong": "Your comment is too long.",
     "DefenseFeedbackValue": "That feedback doesn't say anything.",
-    "DefenseGradedSessionImmutable": "A conversation from a graded competition can't be rewound or deleted.",
+    "DefenseGradedSessionImmutable": "A conversation you're being graded on can't be rewound or deleted.",
     "DefenseMessageEmpty": "Your message is empty.",
     "DefenseMessageLimit": "This conversation has reached its message limit.",
     "DefenseMessageTooLong": "Your message is too long.",

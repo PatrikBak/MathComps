@@ -63,6 +63,9 @@ class FakeBackend implements DefenseConversationServices {
   /** Whether an abort rejects a held round-trip, as a real fetch does. */
   autoRejectOnAbort = true
 
+  /** Whether the student is graded on every session this backend mints. */
+  gradesNewSessions = false
+
   /** How many replies have been handed out, for distinct reply bodies. */
   private replyCount = 0
 
@@ -130,6 +133,7 @@ class FakeBackend implements DefenseConversationServices {
         ],
         feedback: null,
         reports: [],
+        isGraded: this.gradesNewSessions,
       }
 
       // Store it
@@ -488,6 +492,29 @@ describe('DefenseConversationModel', () => {
     const state = model.getSnapshot()
     expect(state.currentSessionId).toBe(stored.id)
     expect(state.turns).toEqual(stored.turns)
+  })
+
+  it('carries whether the open conversation is graded, which a fresh one never is', async () => {
+    // A model over a backend grading every conversation it mints
+    const { model, backend } = makeModel()
+    backend.gradesNewSessions = true
+
+    // A first turn, which mints one
+    const sent = model.send('answer', backend)
+    await flush()
+    backend.submitCalls[0].gate.resolve()
+    await sent
+
+    // Graded from the moment the reply opens it
+    expect(model.getSnapshot().isGraded).toBe(true)
+
+    // Step away to a fresh conversation, which nobody grades
+    model.startNew()
+    expect(model.getSnapshot().isGraded).toBe(false)
+
+    // And back to the graded one
+    model.resume(backend.store[0])
+    expect(model.getSnapshot().isGraded).toBe(true)
   })
 
   it('abandons an in-flight turn when another session is resumed', async () => {

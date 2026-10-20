@@ -123,7 +123,7 @@
     "DefenseContentNotFound": "Toto zadání už není k dispozici.",
     "DefenseFeedbackCommentTooLong": "Tvůj komentář je příliš dlouhý.",
     "DefenseFeedbackValue": "Tato zpětná vazba nic neříká.",
-    "DefenseGradedSessionImmutable": "Konverzace z hodnocené soutěže se nedá vrátit ani smazat.",
+    "DefenseGradedSessionImmutable": "Konverzace, která se ti hodnotí, se nedá vrátit ani smazat.",
     "DefenseMessageEmpty": "Tvoje zpráva je prázdná.",
     "DefenseMessageLimit": "Tato konverzace dosáhla limitu počtu zpráv.",
     "DefenseMessageTooLong": "Tvoje zpráva je příliš dlouhá.",

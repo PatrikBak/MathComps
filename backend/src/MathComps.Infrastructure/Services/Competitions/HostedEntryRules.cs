@@ -117,27 +117,27 @@ public static class HostedEntryRules
     }
 
     /// <summary>
-    /// Whether a student's run is a test run: they were already preparing the competitions when its clock started.
+    /// Whether a run is a preparer's run: its owner was already preparing the competitions when its clock started.
     /// Starting to prepare them later leaves a run they sat for real as it was.
     /// </summary>
     /// <param name="preparerSince">
     /// When the student started preparing the competitions, null where they do not.
     /// </param>
     /// <param name="startedAt">When the run's clock started.</param>
-    /// <returns>Whether the run is a test run.</returns>
-    public static bool IsTestRun(DateTimeOffset? preparerSince, DateTimeOffset startedAt) =>
+    /// <returns>Whether the run is a preparer's run.</returns>
+    public static bool IsPreparersRun(DateTimeOffset? preparerSince, DateTimeOffset startedAt) =>
         // Preparing by the time the clock started, which an account that does not prepare them never is
         preparerSince <= startedAt;
 
     /// <summary>
     /// Whether a student's run in a hosted group is one somebody grades: a group with no closing instant grades
-    /// nobody, and nobody grades a test run.
+    /// nobody, and nobody grades a preparer's run.
     /// </summary>
     /// <param name="groupClosesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
-    /// <param name="isTestRun"><inheritdoc cref="IsTestRun" path="/summary"/></param>
+    /// <param name="isPreparersRun"><inheritdoc cref="IsPreparersRun" path="/summary"/></param>
     /// <returns>Whether the run is graded.</returns>
-    public static bool IsGraded(DateTimeOffset? groupClosesAt, bool isTestRun) =>
-        groupClosesAt is not null && !isTestRun;
+    public static bool IsGraded(DateTimeOffset? groupClosesAt, bool isPreparersRun) =>
+        groupClosesAt is not null && !isPreparersRun;
 
     /// <summary>
     /// Whether a group's results are out to a reader: once the group has closed and the reader's own entry into it
