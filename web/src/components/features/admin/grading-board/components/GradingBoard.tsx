@@ -2,6 +2,7 @@
 
 import { ArrowDownUp, Check, CheckCheck } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
+import { useRef } from 'react'
 
 import { useCategoryName } from '@/components/features/hosted-competitions/hooks/use-category-name'
 import { useEntryWindowLabel } from '@/components/features/hosted-competitions/hooks/use-entry-window-label'
@@ -16,6 +17,7 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import type { TableSort } from '@/components/shared/utils/table-sort'
 import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
+import { useResortableOrder } from '@/hooks/use-resortable-order'
 import { useStepHotkeys } from '@/hooks/use-step-hotkeys'
 import type { Locale } from '@/i18n/i18n'
 
@@ -23,7 +25,6 @@ import { AdminConversationDialog } from '../../conversation/components/AdminConv
 import { type Grade, pairKey, scoreOf } from '../../grades/model/grade-types'
 import { type ColumnToFinalize, useColumnFinalizing } from '../hooks/use-column-finalizing'
 import { useGradingBoard } from '../hooks/use-grading-board'
-import { useHeldRows } from '../hooks/use-held-rows'
 import { type EntrantRun, IS_STILL_SOLVING } from '../model/entrant-run'
 import {
   type BoardRow,
@@ -68,11 +69,21 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
   // Walking the pairs from the keyboard
   useStepHotkeys(board.selection)
 
-  // The rows held where they stood, and the way to show them as the latest read has them
-  const heldRows = useHeldRows({
-    rows: board.rows,
-    roundId: board.competition?.roundId ?? null,
-    sort: board.sort,
+  // The line over the grid
+  const progressRef = useRef<HTMLParagraphElement>(null)
+
+  // The rows, each held where it stood when their order was last set so nothing moves under the grader while the
+  // board is read again, whether a change waits, the grid, and the way to show the latest rows from its top
+  const { shown, isChangeWaiting, listRef, resortFromTop } = useResortableOrder({
+    items: board.rows,
+    keyOf: (row) => row.user.id,
+    // The order set again as another competition comes on screen and as another order is asked for
+    resetKey: JSON.stringify([board.competition?.roundId ?? null, board.sort]),
+    // A student writing for the first time waits until the order is set again, unless the board has shown nobody
+    // since it was set
+    newcomerPlace: 'waiting',
+    // The focus on the line over the grid as the way to show the latest rows leaves
+    focusTarget: progressRef,
   })
 
   // Making a whole column final, once confirmed
@@ -135,7 +146,7 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
           {/* How far it has got */}
           <p
             // Takes the focus as the way to show the latest rows leaves
-            ref={heldRows.progressRef}
+            ref={progressRef}
             tabIndex={-1}
             // On a narrow screen, far enough above the grid for the button between them to cover neither
             className="mt-3 mb-5 text-xs text-muted focus:outline-none sm:mt-4 sm:text-sm md:mb-0"
@@ -152,16 +163,16 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
           <WaitingChangeButton
             label={t('showWhatsNew')}
             icon={ArrowDownUp}
-            isWaiting={heldRows.isOutOfOrder}
-            onShow={heldRows.showLatest}
-            fallbackRef={heldRows.progressRef}
+            isWaiting={isChangeWaiting}
+            onShow={resortFromTop}
+            fallbackRef={progressRef}
           />
 
           {/* Every student on every problem */}
-          <div ref={heldRows.gridRef}>
+          <div ref={listRef}>
             <GradingGrid
               competition={board.competition}
-              rows={heldRows.rows}
+              rows={shown}
               standings={board.rows}
               grades={board.grades}
               runs={board.runs}
