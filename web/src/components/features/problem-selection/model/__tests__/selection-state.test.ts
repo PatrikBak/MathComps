@@ -43,7 +43,7 @@ const OCTOBER: Cycle = {
  * A paper of the given category and length.
  *
  * @param name - What it is called.
- * @param category - The category it fills, or null for none.
+ * @param category - The category it fills.
  * @param length - How many slots it has.
  *
  * @returns The paper, every slot empty.
@@ -117,20 +117,19 @@ describe('averageScore', () => {
 
 describe('cycleMisfit', () => {
   it('names a paper no round is left for, and the round no paper fills', () => {
-    // A second elementary paper, a paper outside the categories, and one of a category no round runs
+    // A second elementary paper, and one of a category no round runs
     const second = paper('E2', 'elementary')
-    const school = paper('School', null)
     const olympiad = paper('C', 'C')
 
-    // What keeps a board of E, E2, School and C from pairing up with October's rounds
+    // What keeps a board of E, E2 and C from pairing up with October's rounds
     const misfit = cycleMisfit(
-      { ...board('board'), papers: [paper('E', 'elementary'), second, school, olympiad] },
+      { ...board('board'), papers: [paper('E', 'elementary'), second, olympiad] },
       OCTOBER,
       CATEGORIES
     )
 
-    // The second elementary paper, the school paper and the C paper have no round
-    expect(misfit.unmatched).toEqual([second, school, olympiad])
+    // The second elementary paper and the C paper have no round
+    expect(misfit.unmatched).toEqual([second, olympiad])
 
     // And no paper stands for the intermediate round or the advanced one
     expect(misfit.uncovered).toEqual(['intermediate', 'advanced'])

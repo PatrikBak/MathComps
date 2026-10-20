@@ -160,7 +160,7 @@ test.describe('the board being filled', () => {
       selectionText('board.progress', { filled: 3, total: 6 })
     )
 
-    // Its paper outside the categories, among the others
+    // Its C paper among the others
     await expect(boardPanel(page).getByRole('heading', { level: 3 })).toHaveText([
       'Elementary',
       'Advanced',

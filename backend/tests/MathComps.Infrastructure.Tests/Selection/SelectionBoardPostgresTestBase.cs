@@ -182,7 +182,7 @@ public abstract class SelectionBoardPostgresTestBase<TService>(PostgresContainer
     protected Task<Guid> PaperIdAsync(Guid boardId, HostedCompetitionCategory level) =>
         // The board's one paper of a category at that level
         QueryValueAsync(context => context.SelectionPapers
-            .Where(paper => paper.BoardId == boardId && paper.Category!.HostedCategory == level)
+            .Where(paper => paper.BoardId == boardId && paper.Category.HostedCategory == level)
             .Select(paper => paper.Id)
             .SingleAsync());
 
