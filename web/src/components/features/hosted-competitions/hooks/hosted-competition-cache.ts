@@ -1,5 +1,7 @@
 import type { QueryClient, QueryKey } from '@tanstack/react-query'
 
+import { dropReadsInFlight } from '@/lib/query-config'
+
 import { isCompetitionAddressedBy } from '../model/hosted-competition-state'
 import type {
   HostedCompetitionEntry,
@@ -165,29 +167,32 @@ export function writeCachedEntry(
   competitionSlug: string,
   entry: HostedCompetitionEntry
 ): void {
-  // The view rewritten with the entry on its own row
-  queryClient.setQueryData<HostedCompetitionsView>(
-    hostedCompetitionsViewQueryKey(readerKey),
-    (view) => {
-      // Nothing cached to write into
-      if (view === undefined) {
-        return view
-      }
+  // Where the view is cached
+  const key = hostedCompetitionsViewQueryKey(readerKey)
 
-      // The same view with the entry on its own competition
-      return {
-        ...view,
-        groups: view.groups.map((group) => ({
-          ...group,
-          competitions: group.competitions.map((competition) =>
-            isCompetitionAddressedBy(competition, competitionSlug)
-              ? { ...competition, entry }
-              : competition
-          ),
-        })),
-      }
+  // No read of the view that left before this write lands over it
+  dropReadsInFlight(queryClient, key)
+
+  // The view rewritten with the entry on its own row
+  queryClient.setQueryData<HostedCompetitionsView>(key, (view) => {
+    // Nothing cached to write into
+    if (view === undefined) {
+      return view
     }
-  )
+
+    // The same view with the entry on its own competition
+    return {
+      ...view,
+      groups: view.groups.map((group) => ({
+        ...group,
+        competitions: group.competitions.map((competition) =>
+          isCompetitionAddressedBy(competition, competitionSlug)
+            ? { ...competition, entry }
+            : competition
+        ),
+      })),
+    }
+  })
 }
 
 /**
@@ -218,6 +223,9 @@ export function writeCachedSelfAssessment(
     queryClient
       .getQueryData<HostedCompetitionProblem[]>(key)
       ?.find((problem) => problem.id === problemId)?.selfAssessment ?? null
+
+  // No read of the set that left before this write lands over it
+  dropReadsInFlight(queryClient, key)
 
   // The set with the claim on its own problem, every other one left where it was
   queryClient.setQueryData<HostedCompetitionProblem[]>(key, (problems) =>

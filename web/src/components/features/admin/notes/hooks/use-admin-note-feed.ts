@@ -63,7 +63,8 @@ export function useAdminNoteFeed(enabled: boolean): UseAdminNoteFeedResult {
     // The feed is an admin's own read, so it is made as them
     requireAuth: true,
     enabled,
-    cachePolicy: cachePolicy.userData,
+    // Read again when the feed opens gone stale, and held still while an admin reads back through it
+    cachePolicy: cachePolicy.onDemand,
   })
 
   // The pages read so far, which stay put across renders where the result object doesn't

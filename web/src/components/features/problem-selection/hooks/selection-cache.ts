@@ -3,15 +3,7 @@
 import { useAuth } from '@clerk/nextjs'
 import type { QueryClient, QueryKey } from '@tanstack/react-query'
 
-import { SECOND_MS } from '@/components/shared/utils/time-units'
-
 import { useSelectionOrganization } from './selection-organization'
-
-/**
- * How often the selection's reads run again while the page is in view, so what they show keeps up with the other
- * reviewers.
- */
-export const SELECTION_REFRESH_MS = 30 * SECOND_MS
 
 /**
  * The prefix every cached copy of a selection sits under, whichever organization's it is and whoever it was read as.

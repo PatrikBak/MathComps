@@ -42,8 +42,8 @@ export function useFetchComments(target: CommentTarget): UseFetchCommentsResult 
     requireAuth: false,
     // Only read once the key's reader is settled, or the thread lands under the wrong one
     enabled: isUserLoaded,
-    // A reply posted elsewhere should show up here promptly
-    ...cachePolicy.userData,
+    // A reply posted elsewhere shows up while the thread is open
+    cachePolicy: cachePolicy.live,
   })
 
   // The thread and the state of the read

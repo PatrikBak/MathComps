@@ -92,8 +92,8 @@ export function useEntryReader(): UseEntryReaderResult {
     requireAuth: true,
     // Nobody signed in has a profile to read, so the call is never made
     enabled: isSignedIn,
-    // A field filled in on the profile in another tab should show up here promptly
-    ...cachePolicy.userData,
+    // The reader's own profile, which their writes keep current
+    cachePolicy: cachePolicy.onDemand,
   })
 
   // Who is reading, and where their answers live

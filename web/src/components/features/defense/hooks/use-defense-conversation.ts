@@ -160,8 +160,8 @@ export function useDefenseConversation(
     requireAuth: true,
     // Only fetch once the key's user is settled, or the list lands under the wrong one
     enabled: isUserLoaded,
-    // Sessions are the user's own recent activity
-    ...cachePolicy.userData,
+    // Sessions are the user's own recent activity, which their writes keep current
+    cachePolicy: cachePolicy.onDemand,
   })
 
   // The conversation's state machine, created once for the mount's life

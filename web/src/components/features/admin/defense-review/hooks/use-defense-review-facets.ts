@@ -18,9 +18,8 @@ type UseDefenseReviewFacetsResult = {
 /**
  * Reads what the review queue's filters can be set to.
  *
- * Read once for the whole surface rather than alongside each page of the queue: the counts are over every
- * conversation, so an option reads as a standing fact instead of a number that moves whenever an unrelated
- * filter is picked.
+ * Read for the whole surface rather than alongside each page of the queue: the counts are over every
+ * conversation, so picking another filter leaves them where they are.
  *
  * @returns The options as described by {@link UseDefenseReviewFacetsResult}.
  */
@@ -35,7 +34,8 @@ export function useDefenseReviewFacets(): UseDefenseReviewFacetsResult {
     fetch: fetchDefenseReviewFilterOptions,
     // The counts are an admin's own read, so they are made as them
     requireAuth: true,
-    ...cachePolicy.userData,
+    // Students keep holding conversations, so a new one reaches the options while the queue is open
+    cachePolicy: cachePolicy.live,
   })
 
   // The options, once there are any

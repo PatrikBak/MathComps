@@ -237,6 +237,8 @@ export function useSingleProblem(
     queryKey: problemQueryKeys.single(locale, problemSlug, userId),
     // Nothing while no problem is singled out, then the problem the slug names
     queryFn: problemSlug === null ? skipToken : () => readProblem(problemSlug),
+    // Only an import or an admin edit moves a problem
+    ...cachePolicy.content,
     // Only run the query when enabled and the API client is ready
     enabled: enabled && api.state === 'ready',
   })
@@ -353,6 +355,9 @@ function useProblemSearchInfinite(
       // More pages remain while the items seen so far fall short of the total
       return page * pageSize < totalCount ? page + 1 : undefined
     },
+
+    // Only an import or an admin edit moves the problems a search finds
+    ...cachePolicy.content,
 
     // Only run when enabled and the API client is ready
     enabled: enabled && api.state === 'ready',

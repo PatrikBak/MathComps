@@ -6,6 +6,7 @@ import { useCallback, useMemo } from 'react'
 
 import type { ApiCaller } from '@/hooks/use-api'
 import { abortableCall, apiCallOf, readyApiCall, useApi } from '@/hooks/use-api'
+import { useRefreshHold } from '@/hooks/use-api-query'
 import { useQueryUiState } from '@/hooks/use-query-ui-state'
 import { unwrap } from '@/lib/api/api-error'
 import type { PagedList } from '@/lib/api/paged-list'
@@ -89,6 +90,9 @@ export function usePagedQuery<TItem>({
   // The ready caller, or null while it is still loading or nobody is signed in
   const apiCall = apiCallOf(api)
 
+  // The pages' own refreshes, held back while a write is out
+  const refreshHold = useRefreshHold(cachePolicy)
+
   // The pages themselves
   const query = useInfiniteQuery({
     queryKey,
@@ -101,6 +105,7 @@ export function usePagedQuery<TItem>({
       // More pages remain while the results seen so far fall short of the total
       lastPage.page * lastPage.pageSize < lastPage.totalCount ? lastPage.page + 1 : undefined,
     ...cachePolicy,
+    ...refreshHold,
     // Held shut until there is a caller, and until whatever else the call site asked for is true
     enabled: enabled && apiCall !== null,
   })

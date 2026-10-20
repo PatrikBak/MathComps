@@ -3,7 +3,7 @@ import { useQueries, useQuery } from '@tanstack/react-query'
 import { type ApiState, useApi } from '@/hooks/use-api'
 import { apiQueryOptions } from '@/hooks/use-api-query'
 import { useQueryUiState } from '@/hooks/use-query-ui-state'
-import { cachePolicy } from '@/lib/query-config'
+import { cachePolicy, type CachePolicyTier } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import type { CompetitionResults } from '../model/hosted-competition-types'
@@ -20,6 +20,7 @@ import { useEntryReader } from './use-entry-reader'
  * @param readerKey - Who is reading, since one row of the answer is marked as theirs.
  * @param isReaderKnown - Whether who is reading is settled yet.
  * @param competitionSlug - Which competition, by any of its slugs.
+ * @param tier - How the read keeps up with the grading that fills the results in.
  *
  * @returns The options, ready for `useQuery` or `useQueries`.
  */
@@ -27,7 +28,8 @@ function competitionResultsOptions(
   api: ApiState,
   readerKey: HostedCompetitionsReaderKey,
   isReaderKnown: boolean,
-  competitionSlug: string
+  competitionSlug: string,
+  tier: CachePolicyTier
 ) {
   // The results, read with whatever caller there is: they are public once the group has closed
   return apiQueryOptions(api, {
@@ -35,8 +37,8 @@ function competitionResultsOptions(
     fetch: (apiCall) => fetchCompetitionResults(apiCall, competitionSlug),
     // Read once the reader is settled
     enabled: isReaderKnown,
-    // Grading moves the results while they are open
-    ...cachePolicy.userData,
+    // Kept up with grading as far as the caller asks
+    cachePolicy: tier,
   })
 }
 
@@ -71,8 +73,10 @@ export function useCompetitionResults(
   // The API client, which results need nobody signed in behind
   const api = useApi({ requireAuth: false })
 
-  // The results themselves
-  const query = useQuery(competitionResultsOptions(api, readerKey, isReaderKnown, competitionSlug))
+  // The results themselves, kept up while the table is open, since grading goes on filling them in
+  const query = useQuery(
+    competitionResultsOptions(api, readerKey, isReaderKnown, competitionSlug, cachePolicy.live)
+  )
 
   // The rest of the group, read alongside the one showing
   usePreloadCompetitionResults(groupSlugs.filter((slug) => slug !== competitionSlug))
@@ -97,10 +101,11 @@ export function usePreloadCompetitionResults(competitionSlugs: string[]): void {
   // The API client, which results need nobody signed in behind
   const api = useApi({ requireAuth: false })
 
-  // Every competition's results, read side by side
+  // Every competition's results, read side by side without keeping up: nobody is looking at them yet, and
+  // opening a table reads that table again once it has gone stale
   useQueries({
     queries: competitionSlugs.map((slug) =>
-      competitionResultsOptions(api, readerKey, isReaderKnown, slug)
+      competitionResultsOptions(api, readerKey, isReaderKnown, slug, cachePolicy.onDemand)
     ),
   })
 }

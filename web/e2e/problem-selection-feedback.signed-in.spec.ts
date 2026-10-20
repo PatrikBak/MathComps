@@ -1,13 +1,14 @@
 import type { Locator, Page, Request } from '@playwright/test'
 import { createTranslator } from 'next-intl'
 
+import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
 import { MATHILDA_NAME } from '@/constants/mathilda'
 import { STEP_KEYS } from '@/hooks/use-step-hotkeys'
 
 import messages from '../messages/en.json'
 import { type AnswerGate, gateReads } from './support/answer-gate'
 import { BACKEND_ORIGIN, countDialogs } from './support/backend-routes'
-import { sendComment, stubNamedReader } from './support/comments'
+import { sendComment, stubNamedReader, threadKey } from './support/comments'
 import {
   actionsCopy,
   chatCopy,
@@ -52,6 +53,14 @@ const NEW_COMMENT = 'Too long for the elementary paper as it stands.'
 
 /** A reply a reviewer is part-way through in {@link OPENED}'s discussion. */
 const REPLY_DRAFT = 'Agreed, though the bound wants a line of proof.'
+
+/** What another reviewer writes into {@link OPENED}'s discussion while the pool is open on this one's screen. */
+const LATER_COMMENT: CommentDto = {
+  ...OPENED_COMMENT,
+  id: '00000000-0000-4000-8000-d00000000002',
+  content: 'Could go in as I3 as well.',
+  createdAt: '2026-09-29T09:00:00.000Z',
+}
 
 /** What the discussion's copy says. */
 const commentsCopy = messages.comments
@@ -224,6 +233,48 @@ test.describe('what reviewers said about a problem', () => {
 
     // The pool back, focus back on the row the problem was opened from
     await expect(commentsRow).toBeFocused()
+  })
+
+  test('counts a comment another reviewer writes while the pool is open, on the card and over the discussion', async ({
+    page,
+  }) => {
+    // The clock under the test's hand, so the next read comes when the test says
+    await page.clock.install()
+
+    // What the backend keeps, which another reviewer is about to add to
+    const memory = rememberedSelection(null)
+
+    // A reviewer whose selection holds a pool of problems, one of them discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The pool, every card drawn
+    await openPool(page)
+
+    // The discussed problem's card, counting the one comment
+    await expect(tabRowOn(cardOf(page, OPENED), 'comments', 1)).toBeVisible()
+
+    // Another reviewer's comment under the discussed problem, written somewhere else
+    memory.discussions.set(threadKey('Proposal', OPENED.id), [OPENED_COMMENT, LATER_COMMENT])
+
+    // Long enough for what is on screen to be read again
+    await page.clock.fastForward('00:31')
+
+    // The card's comments row, counting both
+    const commentsRow = tabRowOn(cardOf(page, OPENED), 'comments', 2)
+
+    // Once the read has landed
+    await expect(commentsRow).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Followed onto the discussion
+    await commentsRow.click()
+
+    // The discussion, holding the later comment
+    await expect(page.getByRole('tabpanel')).toContainText(LATER_COMMENT.content)
+
+    // The discussion's tab, counting both
+    await expect(selectedTab(page, selectionCopy.detail.tabsLabel)).toHaveText(
+      new RegExp(`${selectionCopy.detail.commentsTab}\\s*2$`)
+    )
   })
 
   test('opens a problem on its conversations, and names a tab picked in the address without a step of its own', async ({

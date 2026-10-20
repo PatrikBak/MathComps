@@ -9,12 +9,11 @@ import { useAddressSync } from '@/hooks/use-address-sync'
 import { useApiQuery } from '@/hooks/use-api-query'
 import { useInitialUrlState } from '@/hooks/use-initial-url-state'
 import { useSteppedSelection, type UseSteppedSelectionResult } from '@/hooks/use-stepped-selection'
-import { cachePolicy, hasFailedForGood } from '@/lib/query-config'
+import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import type { StudentProblem } from '../../conversation/hooks/use-student-conversations'
-import { BOARD_REFRESH_MS, gradingBoardQueryKey } from '../../grades/hooks/grade-cache'
-import { useIsGradeWriting } from '../../grades/hooks/use-update-grade'
+import { gradingBoardQueryKey } from '../../grades/hooks/grade-cache'
 import { pairKey, splitPairKey } from '../../grades/model/grade-types'
 import { type EntrantRun, isBoardLive } from '../model/entrant-run'
 import {
@@ -94,26 +93,19 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
   // Profile copy
   const tProfile = useTranslations('profile')
 
-  // Whether any change to a grade is still out
-  const isWriting = useIsGradeWriting()
-
   // The group, its competitions, entrants and grades
   const { data, uiState } = useApiQuery({
     queryKey: gradingBoardQueryKey(groupSlug),
     fetch: (apiCall) => fetchGradingBoard(apiCall, groupSlug),
     // The board is an admin's own read, so it is made as them
     requireAuth: true,
-    ...cachePolicy.userData,
-    // Read the board again every little while as long as anything on it can still change, except over a refusal
-    // that stands or while a grade write is out, since a read landing then could cover the write with the grade from
-    // before it
+    // Other graders mark the same board, so their marks keep arriving while it is open
+    cachePolicy: cachePolicy.live,
+    // On a timer only as long as anything on the board can still change
     refetchInterval: (query) =>
-      isWriting ||
-      hasFailedForGood(query.state) ||
-      query.state.data === undefined ||
-      !isBoardLive(query.state.data, Date.now())
+      query.state.data === undefined || !isBoardLive(query.state.data, Date.now())
         ? false
-        : BOARD_REFRESH_MS,
+        : cachePolicy.live.refetchInterval(query),
   })
 
   // The group, once it has arrived
