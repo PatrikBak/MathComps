@@ -1,8 +1,8 @@
 namespace MathComps.Domain.Contracts.Competitions;
 
 /// <summary>
-/// What a student's account already holds of what an entry asks for. The profile fields gate entry; the rules
-/// are accepted as part of spending one.
+/// What a student's account already holds of what an entry asks for. The profile fields gate a graded entry; the
+/// rules are accepted as part of spending one.
 /// </summary>
 /// <param name="HasUsername">
 /// Whether the student has chosen the permanent name the site calls them by.</param>

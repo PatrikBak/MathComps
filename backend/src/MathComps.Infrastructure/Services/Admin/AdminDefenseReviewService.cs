@@ -12,7 +12,7 @@ using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Localization;
-using MathComps.Infrastructure.Services.Users;
+using MathComps.Infrastructure.Services.Organizations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -25,12 +25,12 @@ namespace MathComps.Infrastructure.Services.Admin;
 /// </summary>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
 /// <param name="localization">The resolver of localized display names.</param>
-/// <param name="grants">Reads when a student started preparing the competitions.</param>
+/// <param name="members"><inheritdoc cref="HostedGrading.FindGradedEntryAsync" path="/param[@name='members']"/></param>
 /// <param name="paginationOptions">The bounds a page of the queue is cut by.</param>
 public class AdminDefenseReviewService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IMetadataLocalizationService localization,
-    IUserGrantService grants,
+    IOrganizationMemberService members,
     IOptions<PaginationOptions> paginationOptions)
     : IAdminDefenseReviewService
 {
@@ -492,7 +492,7 @@ public class AdminDefenseReviewService(
         CancellationToken cancellationToken)
     {
         // The entry the grade belongs to, if anybody grades the student on the problem.
-        var entry = await HostedGrading.FindGradedEntryAsync(dbContext, grants, problemId, userId, cancellationToken);
+        var entry = await HostedGrading.FindGradedEntryAsync(dbContext, members, problemId, userId, cancellationToken);
 
         // Nobody grades the student on the problem, so there is no grading to read.
         if (entry is null)

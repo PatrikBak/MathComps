@@ -70,7 +70,7 @@ public interface IProposalService
 }
 
 /// <summary>
-/// Thrown when an id names no board, paper, slot, live proposal or hosted group of the selection.
+/// Thrown when an id names nothing the selection holds, a reviewer's conversation about a proposal included.
 /// </summary>
 public sealed class SelectionTargetNotFoundException() : Exception("Nothing in the selection answers to that id");
 

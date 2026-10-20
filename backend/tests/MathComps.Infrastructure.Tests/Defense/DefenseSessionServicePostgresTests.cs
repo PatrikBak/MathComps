@@ -183,7 +183,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         services.AddSingleton<IDefenseUserTurnGate>(_gate);
 
         // What the guard asks about the student arguing.
-        services.AddUserGrants();
+        services.AddOrganizationMembers();
 
         // Says whether the target being argued may be argued at all.
         services.AddScoped<IDefenseTargetGuard, DefenseTargetGuard>();
@@ -324,6 +324,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         context.Proposals.Add(new Proposal
         {
             ProblemId = _proposedProblemId,
+            OrganizationId = SelectionSeed.MathCompsId(context),
             Number = 21,
             Title = "Proposal 21",
             Area = ProposalArea.Algebra,
@@ -779,8 +780,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     [Fact]
     public Task ListAll_names_a_proposals_conversation_by_its_number_and_title() => RunTestAsync(async service =>
     {
-        // The owner reviews the proposals, which takes the grant
-        await GrantOwnerPrepareCompetitionsAsync();
+        // The owner reviews the proposals, which takes their address on the MathComps organization's list
+        await MakeOwnerReviewerAsync();
 
         // The owner's conversation about a problem parked among the proposals
         var proposal = await service.StartAsync(_ownerId, ProblemRequest(_proposedProblemId, "my defense"));
@@ -818,6 +819,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             context.Proposals.Add(new Proposal
             {
                 ProblemId = _problemId,
+                OrganizationId = SelectionSeed.MathCompsId(context),
                 Number = 22,
                 Title = "Proposal 22",
                 Area = ProposalArea.Algebra,
@@ -845,8 +847,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     [Fact]
     public Task ListAll_leaves_out_a_conversation_about_a_deleted_proposal() => RunTestAsync(async service =>
     {
-        // The owner reviews the proposals, which takes the grant
-        await GrantOwnerPrepareCompetitionsAsync();
+        // The owner reviews the proposals, which takes their address on the MathComps organization's list
+        await MakeOwnerReviewerAsync();
 
         // The owner's conversation about a problem parked among the proposals
         await service.StartAsync(_ownerId, ProblemRequest(_proposedProblemId, "my defense"));
@@ -1054,8 +1056,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     [Fact]
     public Task A_proposals_conversation_can_be_rewound_and_deleted() => RunTestAsync(async service =>
     {
-        // The owner reviews the proposals, which takes the grant
-        await GrantOwnerPrepareCompetitionsAsync();
+        // The owner reviews the proposals, which takes their address on the MathComps organization's list
+        await MakeOwnerReviewerAsync();
 
         // Argue a problem parked among the proposals, which needs no entry
         var session = await service.StartAsync(
@@ -1084,8 +1086,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     public Task A_reviewers_conversation_stays_the_proposals_while_its_paper_has_not_opened() =>
         RunTestAsync(async service =>
     {
-        // The owner reviews the proposals, which takes the grant
-        await GrantOwnerPrepareCompetitionsAsync();
+        // The owner reviews the proposals, which takes their address on the MathComps organization's list
+        await MakeOwnerReviewerAsync();
 
         // The owner's conversation about the problem while it sits in the pool
         var session = await service.StartAsync(
@@ -1121,8 +1123,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     public Task A_reviewers_conversation_goes_by_its_competition_once_its_paper_opens() =>
         RunTestAsync(async service =>
     {
-        // The owner reviews the proposals, which takes the grant
-        await GrantOwnerPrepareCompetitionsAsync();
+        // The owner reviews the proposals, which takes their address on the MathComps organization's list
+        await MakeOwnerReviewerAsync();
 
         // The owner's conversation about the problem while it sits in the pool
         var session = await service.StartAsync(
@@ -2077,15 +2079,21 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
-    /// Makes the owner a reviewer of the proposals, which takes the grant to prepare the competitions.
+    /// Makes the owner a reviewer of the proposals, which takes their address on the MathComps organization's list.
     /// </summary>
-    /// <returns>A task that completes once the grant is written.</returns>
-    private Task GrantOwnerPrepareCompetitionsAsync() => QueryAsync(async context =>
+    /// <returns>A task that completes once the address is on the MathComps organization's list.</returns>
+    private Task MakeOwnerReviewerAsync() => QueryAsync(async context =>
     {
-        // The owner's grant
-        context.UserGrants.Add(new UserGrant { UserId = _ownerId, Capability = UserCapability.PrepareCompetitions });
+        // The owner's account
+        var owner = await context.Users.SingleAsync(user => user.Id == _ownerId);
 
-        // Commit the grant
+        // The owner's account given an address
+        owner.Email = "owner@example.com";
+
+        // The owner's address on the MathComps organization's list
+        SelectionSeed.NewMember(context, "owner@example.com", DateTimeOffset.UtcNow);
+
+        // Commit the membership
         await context.SaveChangesAsync();
     });
 

@@ -78,9 +78,10 @@ export type HostedState =
   /** Everything in place except the rules, which is a first entry ever. */
   | 'first-entry'
   /**
-   * Prepares competitions, with an account holding nothing but a name and no rules ever accepted. The site
-   * grants that to an account that hammers the examiner rather than competes, and the fields it is never
-   * asked for are part of what the grant is.
+   * Prepares competitions, with an account holding nothing but a name and the address on the
+   * MathComps organization's list, and no rules ever accepted. Such an account tries the papers
+   * and hammers the examiner rather than competes, and the fields it is never asked for are part
+   * of what preparing them means.
    */
   | 'prepares-competitions'
 
@@ -468,12 +469,13 @@ export function buildReadiness(state: HostedState): EntryReadiness {
         hasHiddenProfilePrompt: false,
       }
 
-    // Named and nothing else, and never shown the rules: a grant is what carries them past each of them
+    // Named, with the address on the MathComps organization's list, and never shown the rules:
+    // preparing competitions is what carries them past the rest
     case 'prepares-competitions':
       return {
         hasUsername: true,
         hasAnsweredGraduation: false,
-        hasEmail: false,
+        hasEmail: true,
         hasAcceptedRules: false,
         hasHiddenProfilePrompt: false,
       }

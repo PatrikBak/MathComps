@@ -28,7 +28,8 @@ public interface IProblemSelectionService
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The discussions, by what they hang off.</returns>
     /// <exception cref="CommentTargetNotFoundException">
-    /// Thrown when the viewer does not prepare the competitions, as though the discussions were not there.
+    /// Thrown when the viewer is no member of the organization picking the problems, as though the discussions were
+    /// not there.
     /// </exception>
     Task<SelectionDiscussionsDto> GetDiscussionsAsync(
         CommentViewer viewer, CancellationToken cancellationToken = default);

@@ -24,7 +24,7 @@ public abstract class ConversationReviewPostgresTestBase<TService>(PostgresConta
         services.AddPaginationOptions();
 
         // The reader of who prepares competitions.
-        services.AddUserGrants();
+        services.AddOrganizationMembers();
 
         // The admin's queue over the conversations.
         services.AddScoped<IAdminDefenseReviewService, AdminDefenseReviewService>();

@@ -419,7 +419,7 @@ describe('readAreaRun', () => {
     expect(run).toEqual({ ...entry, hasEnded: false, areNotesOpen: true })
   })
 
-  it('takes no note under an entry nobody will grade', () => {
+  it('takes no note from a reader who prepares competitions', () => {
     // An entry with an hour still to run, which takes notes from any ordinary reader
     const entry: AreaEntry = {
       kind: 'sat',
@@ -430,7 +430,7 @@ describe('readAreaRun', () => {
     // Read for somebody who prepares competitions
     const run = readAreaRun(entry, GRACE_MINUTES, NOW, true)
 
-    // Whose clock still runs, and whose note has nobody at the other end of it
+    // Whose clock still runs, and who leaves no note
     expect(run).toEqual({ ...entry, hasEnded: false, areNotesOpen: false })
   })
 })

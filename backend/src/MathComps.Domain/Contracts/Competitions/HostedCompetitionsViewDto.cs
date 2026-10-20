@@ -8,8 +8,8 @@ namespace MathComps.Domain.Contracts.Competitions;
 /// How long after an entry ends a student may still say something about their own solutions, in minutes.
 /// </param>
 /// <param name="PreparesCompetitions">
-/// Whether this reader holds <see cref="EfCoreEntities.UserCapability.PrepareCompetitions"/>. A fact about
-/// the reader rather than about any group.
+/// Whether this reader prepares the competitions (see <see cref="EfCoreEntities.Organization.MathCompsSlug"/>).
+/// A fact about the reader rather than about any group.
 /// </param>
 public record HostedCompetitionsViewDto(
     IReadOnlyList<HostedGroupDto> Groups, int NoteGraceMinutes, bool PreparesCompetitions);

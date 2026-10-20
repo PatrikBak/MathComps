@@ -7,7 +7,7 @@ using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Localization;
-using MathComps.Infrastructure.Services.Users;
+using MathComps.Infrastructure.Services.Organizations;
 using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -24,12 +24,12 @@ namespace MathComps.Infrastructure.Services.Competitions;
 /// <param name="localization">
 /// The node a competition runs under: its localized name, and the URL name it is addressed by.
 /// </param>
-/// <param name="grants">Reads whether a student prepares the competitions, and since when.</param>
+/// <param name="members">Reads whether a student prepares the competitions, and since when.</param>
 /// <param name="options">The terms a hosted competition runs on.</param>
 public sealed class HostedCompetitionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IMetadataLocalizationService localization,
-    IUserGrantService grants,
+    IOrganizationMemberService members,
     IOptions<HostedCompetitionOptions> options)
     : IHostedCompetitionService
 {
@@ -86,8 +86,8 @@ public sealed class HostedCompetitionService(
         var now = DateTimeOffset.UtcNow;
 
         // Whether the reader prepares competitions, which lifts every embargo and which only an account can do.
-        var preparesCompetitions = userId is { } holder
-            && await grants.HasAsync(holder, UserCapability.PrepareCompetitions, cancellationToken);
+        var preparesCompetitions = userId is not null
+            && await members.IsMemberAsync(userId.Value, Organization.MathCompsSlug, cancellationToken);
 
         // The reader's own cells in every competition they sat whose results are out, by round.
         var cells = await ReadCellsAsync(
@@ -237,8 +237,8 @@ public sealed class HostedCompetitionService(
         // The reader, with whether the embargo below reaches them at all.
         var reader = new HostedReader(
             userId,
-            userId is { } holder
-                && await grants.HasAsync(holder, UserCapability.PrepareCompetitions, cancellationToken));
+            userId is not null
+                && await members.IsMemberAsync(userId.Value, Organization.MathCompsSlug, cancellationToken));
 
         // One instant for everything this read weighs, so the embargo cannot lift between the check that lets
         // the reader in and the one that decides what the set carries.
@@ -329,7 +329,7 @@ public sealed class HostedCompetitionService(
         // about each.
         var gradings = await HostedGrading.ReadProblemGradingsAsync(
             dbContext,
-            grants,
+            members,
             [
                 .. entries.Select(entry => new HostedGrading.SpentEntry(
                     entry.Id,
@@ -475,7 +475,7 @@ public sealed class HostedCompetitionService(
         // The student, with whether the entry window below reaches them at all.
         var reader = new HostedReader(
             userId,
-            await grants.HasAsync(userId, UserCapability.PrepareCompetitions, cancellationToken));
+            await members.IsMemberAsync(userId, Organization.MathCompsSlug, cancellationToken));
 
         // Announced but not yet open, or past its window: either way there is no entry to take, unless the
         // student is one the window does not hold.
@@ -498,8 +498,8 @@ public sealed class HostedCompetitionService(
             throw new HostedCompetitionNotReadyException();
 
         // What an entry asks of the student's account, settled before anything is written. Only a graded run has
-        // a result to name the student in, so only a graded one asks anything of the account. The grant is read as
-        // the clock starts, so holding one makes the run a test run.
+        // a result to name the student in, so only a graded one asks anything of the account. Whether the student
+        // prepares the competitions is read as the clock starts, so preparing them makes the run a test run.
         if (HostedEntryRules.IsGraded(group.ClosesAt, reader.PreparesCompetitions))
             await EnsureReadyToEnterAsync(dbContext, userId, cancellationToken);
 
@@ -781,7 +781,7 @@ public sealed class HostedCompetitionService(
         CancellationToken cancellationToken)
     {
         // Where the entry stands on each problem.
-        var gradings = await HostedGrading.ReadProblemGradingsAsync(dbContext, grants, [entry], cancellationToken);
+        var gradings = await HostedGrading.ReadProblemGradingsAsync(dbContext, members, [entry], cancellationToken);
 
         // Nobody grades it, so there is no result to read.
         if (!gradings.IsGraded(entry.Id))
@@ -909,9 +909,8 @@ public sealed class HostedCompetitionService(
         if (entry.StartedAt is not { } startedAt)
             throw new HostedEntryNotRunningException();
 
-        // When the student started preparing the competitions, if they ever did.
-        var preparerSince = await grants.GetGrantedAtAsync(
-            userId, UserCapability.PrepareCompetitions, cancellationToken);
+        // When the student started preparing the competitions, if they still do.
+        var preparerSince = await members.GetMemberSinceAsync(userId, Organization.MathCompsSlug, cancellationToken);
 
         // Nobody grades a test run, so a note under one has no reader.
         if (HostedEntryRules.IsTestRun(preparerSince, startedAt))
@@ -1051,7 +1050,7 @@ public sealed class HostedCompetitionService(
         // Where the ones anybody grades stand on each problem of their rounds.
         var gradings = await HostedGrading.ReadProblemGradingsAsync(
             dbContext,
-            grants,
+            members,
             [
                 .. entriesWithResults.Select(entryInRound => new HostedGrading.SpentEntry(
                     entryInRound.Entry.Id,

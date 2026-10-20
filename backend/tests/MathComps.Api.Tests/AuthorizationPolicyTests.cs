@@ -2,6 +2,7 @@ using System.Security.Claims;
 using MathComps.Api.Constants;
 using MathComps.Api.Extensions;
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Infrastructure.Services.Organizations;
 using MathComps.Infrastructure.Services.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -18,9 +19,9 @@ namespace MathComps.Api.Tests;
 public class AuthorizationPolicyTests
 {
     /// <summary>
-    /// The account holding the grant to prepare the competitions.
+    /// The account on the MathComps organization's list.
     /// </summary>
-    private static readonly Guid _preparerId = Guid.CreateVersion7();
+    private static readonly Guid _reviewerId = Guid.CreateVersion7();
 
     /// <summary>
     /// Every account, by the subject it signs in under.
@@ -28,32 +29,32 @@ public class AuthorizationPolicyTests
     private static readonly Dictionary<string, Guid> _accounts = new()
     {
         ["student"] = Guid.CreateVersion7(),
-        ["preparer"] = _preparerId,
+        ["reviewer"] = _reviewerId,
         ["admin"] = Guid.CreateVersion7(),
     };
 
     /// <summary>
-    /// Each policy lets in exactly the callers it is for: the admins' one only the admins, the preparers' one only the
-    /// accounts holding the grant, and the one the reviewers reach their conversations through both of those, never a
-    /// student or anybody signed out.
+    /// Each policy lets in exactly the callers it is for: the admins' one only the admins, the members' one only the
+    /// accounts on the MathComps organization's list, and the one the reviewers reach their conversations through both
+    /// of those, never a student or anybody signed out.
     /// </summary>
     /// <param name="policy">The policy weighed.</param>
     /// <param name="caller">Who is asking: <c>anonymous</c>, or the subject of a <c>student</c>, a
-    /// <c>preparer</c> holding the grant, or an <c>admin</c> holding none.</param>
+    /// <c>reviewer</c> on the list, or an <c>admin</c> on none.</param>
     /// <param name="letsIn">Whether the policy lets the caller in.</param>
     [Theory]
     [InlineData(AuthorizationPolicies.Admin, "anonymous", false)]
     [InlineData(AuthorizationPolicies.Admin, "student", false)]
-    [InlineData(AuthorizationPolicies.Admin, "preparer", false)]
+    [InlineData(AuthorizationPolicies.Admin, "reviewer", false)]
     [InlineData(AuthorizationPolicies.Admin, "admin", true)]
-    [InlineData(AuthorizationPolicies.PreparesCompetitions, "anonymous", false)]
-    [InlineData(AuthorizationPolicies.PreparesCompetitions, "student", false)]
-    [InlineData(AuthorizationPolicies.PreparesCompetitions, "preparer", true)]
-    [InlineData(AuthorizationPolicies.PreparesCompetitions, "admin", false)]
-    [InlineData(AuthorizationPolicies.AdminOrPreparesCompetitions, "anonymous", false)]
-    [InlineData(AuthorizationPolicies.AdminOrPreparesCompetitions, "student", false)]
-    [InlineData(AuthorizationPolicies.AdminOrPreparesCompetitions, "preparer", true)]
-    [InlineData(AuthorizationPolicies.AdminOrPreparesCompetitions, "admin", true)]
+    [InlineData(AuthorizationPolicies.OrganizationMember, "anonymous", false)]
+    [InlineData(AuthorizationPolicies.OrganizationMember, "student", false)]
+    [InlineData(AuthorizationPolicies.OrganizationMember, "reviewer", true)]
+    [InlineData(AuthorizationPolicies.OrganizationMember, "admin", false)]
+    [InlineData(AuthorizationPolicies.AdminOrOrganizationMember, "anonymous", false)]
+    [InlineData(AuthorizationPolicies.AdminOrOrganizationMember, "student", false)]
+    [InlineData(AuthorizationPolicies.AdminOrOrganizationMember, "reviewer", true)]
+    [InlineData(AuthorizationPolicies.AdminOrOrganizationMember, "admin", true)]
     public async Task A_policy_lets_in_its_callers_alone(string policy, string caller, bool letsIn)
     {
         // Each subject resolving to its account
@@ -63,19 +64,19 @@ public class AuthorizationPolicyTests
                 .Setup(manager => manager.GetUserIdAsync(subject, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(userId);
 
-        // The grant standing against the preparer's account alone
-        var grants = new Mock<IUserGrantService>();
-        grants
-            .Setup(service => service.HasAsync(
-                _preparerId, UserCapability.PrepareCompetitions, It.IsAny<CancellationToken>()))
+        // The reviewer's address alone on the MathComps organization's list
+        var members = new Mock<IOrganizationMemberService>();
+        members
+            .Setup(service => service.IsMemberAsync(
+                _reviewerId, Organization.MathCompsSlug, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        // The policies as the API registers them, reading accounts and grants off the stand-ins
+        // The policies as the API registers them, reading accounts and the list off the stand-ins
         await using var services = new ServiceCollection()
             .AddLogging()
             .AddApiAuthorization()
             .AddScoped(_ => userManager.Object)
-            .AddScoped(_ => grants.Object)
+            .AddScoped(_ => members.Object)
             .BuildServiceProvider();
 
         // One request's worth of services

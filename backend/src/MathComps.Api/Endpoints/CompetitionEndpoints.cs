@@ -12,10 +12,9 @@ namespace MathComps.Api.Endpoints;
 /// solutions.
 /// </summary>
 /// <remarks>
-/// The problems route is the only place an embargoed problem is served, and it serves one only to a caller who
-/// has spent an entry into its competition. Everywhere else in the site an embargoed round stays invisible. Once
-/// a competition is over its set is something anybody may read, so that route also answers a caller with no
-/// account, as the groups list and the results do.
+/// The problems route serves an embargoed problem only to a caller who has spent an entry into its competition or
+/// who prepares the competitions. Once a competition is over its set is something anybody may read, so that route
+/// also answers a caller with no account, as the groups list and the results do.
 /// </remarks>
 public static class CompetitionEndpoints
 {

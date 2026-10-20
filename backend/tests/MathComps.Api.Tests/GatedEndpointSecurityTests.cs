@@ -32,14 +32,14 @@ public class GatedEndpointSecurityTests
     /// <summary>
     /// Every route of a gated area carries the area's policy and no other, and a rate limit, and none lets an
     /// anonymous caller through. The admin routes the reviewers reach their conversations through carry
-    /// <see cref="AuthorizationPolicies.AdminOrPreparesCompetitions"/> instead, and they alone: a second policy beside
+    /// <see cref="AuthorizationPolicies.AdminOrOrganizationMember"/> instead, and they alone: a second policy beside
     /// it would shut the reviewers out.
     /// </summary>
     /// <param name="area">The path every route of the area starts with.</param>
     /// <param name="policy">The policy closing the area.</param>
     [Theory]
     [InlineData("/admin", AuthorizationPolicies.Admin)]
-    [InlineData("/problem-selection", AuthorizationPolicies.PreparesCompetitions)]
+    [InlineData("/problem-selection", AuthorizationPolicies.OrganizationMember)]
     public void Every_gated_route_requires_its_policy_and_is_rate_limited(string area, string policy)
     {
         // The area's routes as the API maps them
@@ -58,7 +58,7 @@ public class GatedEndpointSecurityTests
 
             // The policy it has to carry: the reviewers' own on their conversation routes, the area's elsewhere
             var required = _conversationRoutes.Contains(MappedApi.NameOf(route))
-                ? AuthorizationPolicies.AdminOrPreparesCompetitions
+                ? AuthorizationPolicies.AdminOrOrganizationMember
                 : policy;
 
             // Every policy the route carries

@@ -1,25 +1,26 @@
 using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
-using MathComps.Infrastructure.Services.Users;
+using MathComps.Infrastructure.Services.Organizations;
 using System.Collections.Immutable;
 
 namespace MathComps.Infrastructure.Services.Comments;
 
 /// <summary>
-/// A <see cref="CommentThreadKind{TAnchor}"/> whose threads are open only to the accounts preparing the competitions,
-/// whichever thread it is.
+/// A <see cref="CommentThreadKind{TAnchor}"/> whose threads are open only to the reviewers, the members of the
+/// MathComps organization, whichever thread it is.
 /// </summary>
 /// <typeparam name="TAnchor">The anchor naming one of this kind's threads.</typeparam>
-/// <param name="grants"><inheritdoc cref="IUserGrantService" path="/summary"/></param>
-public abstract class PreparerCommentThreadKind<TAnchor>(IUserGrantService grants) : CommentThreadKind<TAnchor>
+/// <param name="members"><inheritdoc cref="IOrganizationMemberService" path="/summary"/></param>
+public abstract class ReviewerCommentThreadKind<TAnchor>(IOrganizationMemberService members)
+    : CommentThreadKind<TAnchor>
     where TAnchor : CommentAnchor
 {
     /// <inheritdoc />
     public override Task<bool> IsOpenAsync(
         MathCompsDbContext dbContext, CommentTarget target, CommentViewer? viewer) =>
-        // Open to the accounts preparing the competitions, whichever thread it is
-        IsPreparingCompetitionsAsync(viewer);
+        // Open to the reviewers, whichever thread it is
+        IsReviewerAsync(viewer);
 
     /// <inheritdoc />
     public override async Task<IQueryable<KeyValuePair<string, int>>> CountAsync(
@@ -35,8 +36,8 @@ public abstract class PreparerCommentThreadKind<TAnchor>(IUserGrantService grant
 
     /// <inheritdoc />
     protected override Task<bool> IsOpenToAsync(MathCompsDbContext dbContext, TAnchor anchor, CommentViewer? viewer) =>
-        // Open to the accounts preparing the competitions
-        IsPreparingCompetitionsAsync(viewer);
+        // Open to the reviewers
+        IsReviewerAsync(viewer);
 
     /// <summary>
     /// The query counting the active comments in each of several of this kind's threads, for a viewer already let in.
@@ -58,19 +59,18 @@ public abstract class PreparerCommentThreadKind<TAnchor>(IUserGrantService grant
         MathCompsDbContext dbContext, ImmutableList<Guid> ids);
 
     /// <summary>
-    /// The ids naming several of this kind's threads, for the accounts preparing the competitions alone.
+    /// The ids naming several of this kind's threads, for the reviewers alone.
     /// </summary>
     /// <param name="targetIds">The threads' target ids.</param>
     /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
     /// <returns>The ids that could name a thread, an id that is no GUID left out.</returns>
     /// <exception cref="CommentTargetNotFoundException">
-    /// Thrown when the viewer does not prepare the competitions, as though the threads were not there.
+    /// Thrown when the viewer is no reviewer, as though the threads were not there.
     /// </exception>
     private async Task<ImmutableList<Guid>> ReachableIdsAsync(ImmutableList<string> targetIds, CommentViewer? viewer)
     {
-        // Open to the accounts preparing the competitions alone, and refused like targets that are not there to
-        // anybody else
-        if (!await IsPreparingCompetitionsAsync(viewer))
+        // Open to the reviewers alone, and refused like targets that are not there to anybody else
+        if (!await IsReviewerAsync(viewer))
             throw new CommentTargetNotFoundException(TargetType, string.Join(", ", targetIds));
 
         // The ids that could name a thread
@@ -83,11 +83,11 @@ public abstract class PreparerCommentThreadKind<TAnchor>(IUserGrantService grant
     }
 
     /// <summary>
-    /// Whether a viewer is one of the accounts preparing the competitions.
+    /// Whether a viewer is one of the reviewers.
     /// </summary>
     /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
-    /// <returns>Whether they prepare the competitions.</returns>
-    private async Task<bool> IsPreparingCompetitionsAsync(CommentViewer? viewer) =>
-        // A signed-in account holding the PrepareCompetitions grant
-        viewer is not null && await grants.HasAsync(viewer.UserId, UserCapability.PrepareCompetitions);
+    /// <returns>Whether they are a reviewer.</returns>
+    private async Task<bool> IsReviewerAsync(CommentViewer? viewer) =>
+        // A signed-in account on the MathComps organization's list
+        viewer is not null && await members.IsMemberAsync(viewer.UserId, Organization.MathCompsSlug);
 }

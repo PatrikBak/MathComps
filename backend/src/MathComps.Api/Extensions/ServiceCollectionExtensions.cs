@@ -111,7 +111,8 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Adds the authorization policies endpoints require, and what reads a capability off the caller's account.
+    /// Adds the authorization policies endpoints require, and what looks the caller's account up on an organization's
+    /// list.
     /// </summary>
     /// <param name="services">The service collection to configure.</param>
     /// <returns>The configured service collection for chaining.</returns>
@@ -120,16 +121,15 @@ public static class ServiceCollectionExtensions
         // The policies, each by the accounts it lets in
         services.AddAuthorizationBuilder()
             .AddPolicy(AuthorizationPolicies.Admin, policy => policy.RequireRole(ClerkClaims.AdminRole))
-            .AddPolicy(AuthorizationPolicies.PreparesCompetitions, policy => policy
+            .AddPolicy(AuthorizationPolicies.OrganizationMember, policy => policy
                 .RequireAuthenticatedUser()
-                .AddRequirements(new UserCapabilityRequirement(UserCapability.PrepareCompetitions)))
-            .AddPolicy(AuthorizationPolicies.AdminOrPreparesCompetitions, policy => policy
+                .AddRequirements(new OrganizationMemberRequirement(Organization.MathCompsSlug)))
+            .AddPolicy(AuthorizationPolicies.AdminOrOrganizationMember, policy => policy
                 .RequireAuthenticatedUser()
-                .AddRequirements(
-                    new UserCapabilityRequirement(UserCapability.PrepareCompetitions, AdmitsAdmins: true)));
+                .AddRequirements(new OrganizationMemberRequirement(Organization.MathCompsSlug, AdmitsAdmins: true)));
 
-        // What reads a capability off the caller's account
-        services.AddScoped<IAuthorizationHandler, UserCapabilityHandler>();
+        // What looks the caller's account up on an organization's list
+        services.AddScoped<IAuthorizationHandler, OrganizationMemberHandler>();
 
         // Return the services for chaining
         return services;

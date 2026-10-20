@@ -41,7 +41,7 @@ public interface IHostedCompetitionService
 
     /// <summary>
     /// Takes a student's entry into one competition: their clock starts and, on a first entry ever, the rules are
-    /// accepted along with it.
+    /// accepted along with it, unless they prepare the competitions.
     /// </summary>
     /// <param name="userId">The student entering.</param>
     /// <param name="competitionSlug">What addresses the competition being entered.</param>
@@ -52,7 +52,8 @@ public interface IHostedCompetitionService
 
     /// <summary>
     /// Gives a student's entry up: the problems open to them and no clock is ever started. It spends the entry
-    /// exactly as sitting it would, the rules accepted along with it on a first entry ever.
+    /// exactly as sitting it would, the rules accepted along with it on a first entry ever, unless they prepare the
+    /// competitions.
     /// </summary>
     /// <param name="userId">The student giving it up.</param>
     /// <param name="competitionSlug">What addresses the competition being given up.</param>
@@ -74,9 +75,9 @@ public interface IHostedCompetitionService
 
     /// <summary>
     /// Reads one competition's problem set, with whatever the student has said about each and their own result on
-    /// it once the results are out. An embargoed set is served only to a student who has spent an entry into it,
-    /// and a competition still running only to an account; once it is over the set reads for anybody, carrying
-    /// nothing of anyone's own.
+    /// it once the results are out. An embargoed set is served only to a student who has spent an entry into it or
+    /// who prepares the competitions, and a competition still running only to an account; once it is over the set
+    /// reads for anybody, carrying nothing of anyone's own.
     /// </summary>
     /// <param name="userId">The student reading, null where the reader has no account.</param>
     /// <param name="competitionSlug">What addresses the competition whose problems these are.</param>
@@ -102,7 +103,8 @@ public interface IHostedCompetitionService
 
     /// <summary>
     /// Records what a student says about their own solution to one of a competition's problems, replacing
-    /// whatever they said about it before. Offered while their entry runs and for a short grace after it ends.
+    /// whatever they said about it before. Offered under a run somebody grades, while it runs and for a short grace
+    /// after it ends.
     /// </summary>
     /// <param name="userId">The student saying it.</param>
     /// <param name="competitionSlug">What addresses the competition the problem belongs to.</param>
@@ -156,7 +158,7 @@ public sealed class HostedEntryAlreadySpentException() : Exception("This entry h
 public sealed class HostedEntryNotRunningException() : Exception("There is no entry to hand in");
 
 /// <summary>
-/// Thrown when a note for the graders is left or taken back under an entry taken past a competition's gates.
+/// Thrown when a note for the graders is left or taken back under a test run, which nobody grades.
 /// </summary>
 public sealed class HostedEntryNotGradedException()
     : Exception("This entry is not being graded, so there is nobody to leave a note for");

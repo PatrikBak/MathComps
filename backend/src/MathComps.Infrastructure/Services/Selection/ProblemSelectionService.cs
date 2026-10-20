@@ -11,7 +11,7 @@ using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Comments;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Localization;
-using MathComps.Infrastructure.Services.Users;
+using MathComps.Infrastructure.Services.Organizations;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.Services.Selection;
@@ -23,12 +23,12 @@ namespace MathComps.Infrastructure.Services.Selection;
 /// </summary>
 /// <param name="dbContextFactory">Creates the context each read runs on.</param>
 /// <param name="localization">The names the taxonomy gives the groups' nodes.</param>
-/// <param name="grants">Reads when each conversation's author started preparing the competitions.</param>
+/// <param name="members">Reads when each conversation's author became a member of the MathComps organization.</param>
 /// <param name="comments">Reads the discussions of what the selection holds.</param>
 public sealed class ProblemSelectionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IMetadataLocalizationService localization,
-    IUserGrantService grants,
+    IOrganizationMemberService members,
     ICommentService comments)
     : IProblemSelectionService
 {
@@ -181,16 +181,16 @@ public sealed class ProblemSelectionService(
         // The groups that have not opened, by id.
         var groupsById = groups.ToDictionary(group => group.Id);
 
-        // When each conversation's author started preparing the competitions, for those who still do.
-        var preparerSince = await grants.GetGrantedAtAsync(
+        // When each conversation's author became a member of the MathComps organization, for those who still are.
+        var memberSince = await members.GetMemberSinceAsync(
             [.. conversations.Select(conversation => conversation.Author.Id).Distinct()],
-            UserCapability.PrepareCompetitions,
+            Organization.MathCompsSlug,
             cancellationToken);
 
         // Only the conversations the reviewers held.
         var reviewersConversations = conversations
             .Where(conversation => SelectionRules.IsReviewersConversation(
-                preparerSince.TryGetValue(conversation.Author.Id, out var since) ? since : null,
+                memberSince.TryGetValue(conversation.Author.Id, out var since) ? since : null,
                 conversation.StartedAt))
             .ToList();
 

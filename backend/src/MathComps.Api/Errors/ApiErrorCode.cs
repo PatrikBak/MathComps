@@ -159,7 +159,7 @@ public enum ApiErrorCode
     HostedEntryNotRunning,
 
     /// <summary>
-    /// A note for the graders was left or taken back under an entry taken past a competition's gates.
+    /// A note for the graders was left or taken back under a test run, which nobody grades.
     /// </summary>
     HostedEntryNotGraded,
 
@@ -226,7 +226,7 @@ public enum ApiErrorCode
     HostedGradeValue,
 
     /// <summary>
-    /// No board, paper, slot, live proposal or cycle of the problem selection answers to the id.
+    /// Nothing the problem selection holds answers to the id, a reviewer's conversation about a proposal included.
     /// </summary>
     SelectionTargetNotFound,
 

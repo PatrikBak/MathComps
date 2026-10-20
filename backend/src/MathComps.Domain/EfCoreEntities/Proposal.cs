@@ -24,6 +24,16 @@ public class Proposal
     public Problem Problem { get; set; } = null!;
 
     /// <summary>
+    /// FK to the organization whose pool it is in.
+    /// </summary>
+    public required Guid OrganizationId { get; set; }
+
+    /// <summary>
+    /// Navigation to the organization.
+    /// </summary>
+    public Organization Organization { get; set; } = null!;
+
+    /// <summary>
     /// The number the reviewers quote the problem by, unique across every proposal. It never changes, wherever the
     /// problem moves, so #21 stays #21 through a paper and back.
     /// </summary>

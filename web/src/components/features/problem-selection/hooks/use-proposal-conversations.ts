@@ -62,8 +62,7 @@ export function useProposalConversations(proposal: Proposal): UseProposalConvers
   // The open conversation, if it is among the problem's conversations
   const opened = conversations.find((conversation) => conversation.id === selection.openId) ?? null
 
-  // An open conversation the problem doesn't list, its holder having deleted it or the address naming one it
-  // never had, leaves nothing to read, so it closes
+  // An open conversation the problem doesn't list leaves nothing to read, so it closes
   if (selection.openId !== null && opened === null) selection.close()
 
   // The open conversation, as the address names it

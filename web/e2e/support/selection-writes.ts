@@ -6,8 +6,8 @@ import type {
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
 
 /**
- * Every refusal the fake's selection writes give, past the sign-in, the grant and the rate limit, each against the
- * status the backend answers it with.
+ * Every refusal the fake's selection writes give, past the sign-in, the membership and the rate limit, each against
+ * the status the backend answers it with.
  */
 export const SELECTION_WRITE_REFUSALS = {
   MalformedRequest: 400,

@@ -97,7 +97,7 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
         });
 
         // Who prepares competitions
-        services.AddUserGrants();
+        services.AddOrganizationMembers();
 
         // The service under test
         services.AddScoped<IHostedCompetitionService, HostedCompetitionService>();
@@ -163,34 +163,29 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
     });
 
     /// <summary>
-    /// A grant handed over once the group has closed moves nobody: Filip keeps his place and so does everybody below
-    /// him, and his own result still carries its grade and its conversation. Only a grant already held when the
-    /// clock started keeps a run off the results, as Ivo's does.
+    /// A student who starts preparing the competitions once the group has closed moves nobody: Filip keeps his place
+    /// and so does everybody below him, and his own result still carries its grade and its conversation. Only
+    /// preparing them already when the clock started keeps a run off the results, as Ivo's does.
     /// </summary>
     [Fact]
-    public Task A_grant_handed_over_after_the_close_moves_nobody() => RunTestAsync(async service =>
+    public Task Starting_to_prepare_after_the_close_moves_nobody() => RunTestAsync(async service =>
     {
-        // Every row's place before the grant
+        // Every row's place before Filip starts preparing the competitions
         var before = (await service.GetResultsAsync(null, RoundSlug)).Rows
             .Select(row => (row.Student.Username, row.Place))
             .ToList();
 
-        // Filip granted the capability six days after the group closed
+        // Filip put on the MathComps organization's list six days after the group closed
         await QueryAsync(async context =>
         {
-            // The grant
-            context.UserGrants.Add(new UserGrant
-            {
-                UserId = _filipId,
-                Capability = UserCapability.PrepareCompetitions,
-                GrantedAt = _startedAt.AddDays(25),
-            });
+            // Filip's address
+            SelectionSeed.NewMember(context, "filip@example.com", _startedAt.AddDays(25));
 
-            // Commit the grant
+            // Commit it
             await context.SaveChangesAsync();
         });
 
-        // The results after the grant
+        // The results once Filip is on the MathComps organization's list
         var after = await service.GetResultsAsync(null, RoundSlug);
 
         // Every row where it stood
@@ -446,12 +441,7 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
         var ivo = Student(context, ivoId, "Ivo", roundId);
         Conversation(context, ivo, _firstId, 10);
         Grade(context, ivo, _firstId, mark: 7, help: 0);
-        context.UserGrants.Add(new UserGrant
-        {
-            UserId = ivoId,
-            Capability = UserCapability.PrepareCompetitions,
-            GrantedAt = _startedAt.AddDays(-1),
-        });
+        SelectionSeed.NewMember(context, "ivo@example.com", _startedAt.AddDays(-1));
 
         // Jana: sat it and said nothing
         Student(context, Guid.CreateVersion7(), "Jana", roundId);

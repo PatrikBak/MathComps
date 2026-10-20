@@ -2,13 +2,13 @@ namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
 /// Something written down about a <see cref="DefenseSession"/> while reviewing it, against one reply or against the
-/// whole conversation. Unlike a <see cref="DefenseTurnReport"/>, which is the student's own verdict and at most one
-/// per reply, notes accumulate: a reply can be wrong in several ways and each gets said separately.
+/// whole conversation. Unlike a <see cref="DefenseTurnReport"/>, which is the conversation author's own verdict and
+/// at most one per reply, notes accumulate: a reply can be wrong in several ways and each gets said separately.
 /// </summary>
 /// <remarks>
 /// Notes are the record a later pass reads to find what keeps going wrong, which is why <see cref="Category"/>
-/// files them on the same axis a student's report uses and <see cref="ResolvedAt"/> separates what still stands
-/// from what a since-shipped fix already covers.
+/// files them on the same axis the conversation author's report uses and <see cref="ResolvedAt"/> separates what
+/// still stands from what a since-shipped fix already covers.
 /// </remarks>
 public class AdminNote
 {
@@ -18,7 +18,7 @@ public class AdminNote
     public Guid Id { get; set; } = Guid.CreateVersion7();
 
     /// <summary>
-    /// The reviewer who wrote it, as against the student whose conversation it is about.
+    /// The reviewer who wrote it, as against the author of the conversation it is about.
     /// </summary>
     public required Guid AuthorId { get; set; }
 

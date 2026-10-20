@@ -1,7 +1,7 @@
 using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
-using MathComps.Infrastructure.Services.Users;
+using MathComps.Infrastructure.Services.Organizations;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 
@@ -16,9 +16,9 @@ public sealed record SelectionPaperAnchor(Guid PaperId) : CommentAnchor;
 /// <summary>
 /// The reviewers' discussions of the papers on the selection's boards, named by the paper's id, one per paper.
 /// </summary>
-/// <param name="grants"><inheritdoc cref="IUserGrantService" path="/summary"/></param>
-public class SelectionPaperThreadKind(IUserGrantService grants)
-    : PreparerCommentThreadKind<SelectionPaperAnchor>(grants)
+/// <param name="members"><inheritdoc cref="IOrganizationMemberService" path="/summary"/></param>
+public class SelectionPaperThreadKind(IOrganizationMemberService members)
+    : ReviewerCommentThreadKind<SelectionPaperAnchor>(members)
 {
     /// <inheritdoc />
     public override CommentTargetType TargetType => CommentTargetType.SelectionPaper;

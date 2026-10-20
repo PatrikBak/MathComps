@@ -13,14 +13,14 @@ public static class AuthorizationPolicies
     public const string Admin = "Admin";
 
     /// <summary>
-    /// Restricts an endpoint to accounts holding <see cref="UserCapability.PrepareCompetitions"/>.
+    /// Restricts an endpoint to the members of the organization picking the problems, the one named by
+    /// <see cref="Organization.MathCompsSlug"/>.
     /// </summary>
-    public const string PreparesCompetitions = "PreparesCompetitions";
+    public const string OrganizationMember = "OrganizationMember";
 
     /// <summary>
-    /// Restricts an endpoint to users carrying the admin Role and to accounts holding
-    /// <see cref="UserCapability.PrepareCompetitions"/>. A route carrying it decides for itself what anybody but an
-    /// admin reaches through it.
+    /// Restricts an endpoint to users carrying the admin Role and to the accounts <see cref="OrganizationMember"/>
+    /// lets in. A route carrying it decides for itself what anybody but an admin reaches through it.
     /// </summary>
-    public const string AdminOrPreparesCompetitions = "AdminOrPreparesCompetitions";
+    public const string AdminOrOrganizationMember = "AdminOrOrganizationMember";
 }

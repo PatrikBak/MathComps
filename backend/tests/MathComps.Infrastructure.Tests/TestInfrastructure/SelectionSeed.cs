@@ -8,8 +8,8 @@ namespace MathComps.Infrastructure.Tests.TestInfrastructure;
 
 /// <summary>
 /// Seeds the problem selection: the pool's problems parked in a proposals round, the hosted groups a board can be
-/// finalized into, and the boards themselves. Every text is invented and named after what it is, so a wrong one
-/// reads as wrong.
+/// finalized into, the boards themselves, and the addresses on the MathComps organization's list. Every text is
+/// invented and named after what it is, so a wrong one reads as wrong.
 /// </summary>
 public static class SelectionSeed
 {
@@ -50,6 +50,27 @@ public static class SelectionSeed
         // The tracked season
         return season;
     }
+
+    /// <summary>
+    /// Reads the id of the MathComps organization, which the migrations create.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <returns>The id.</returns>
+    public static Guid MathCompsId(MathCompsDbContext context) =>
+        // The one organization the slug names
+        context.Organizations.Single(organization => organization.Slug == Organization.MathCompsSlug).Id;
+
+    /// <summary>
+    /// Tracks an address on the MathComps organization's list, which makes the account carrying it one of the people
+    /// preparing the competitions (see <see cref="Organization.MathCompsSlug"/>).
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="email"><inheritdoc cref="OrganizationMember.Email" path="/summary"/></param>
+    /// <param name="addedAt"><inheritdoc cref="OrganizationMember.AddedAt" path="/summary"/></param>
+    public static void NewMember(MathCompsDbContext context, string email, DateTimeOffset addedAt) =>
+        // The address on the list since the instant given
+        context.OrganizationMembers.Add(
+            new OrganizationMember { OrganizationId = MathCompsId(context), Email = email, AddedAt = addedAt });
 
     /// <summary>
     /// Tracks the round of the proposals node the pool's problems are parked in.
@@ -106,10 +127,11 @@ public static class SelectionSeed
             foreach (var documentType in new[] { DocumentType.Statement, DocumentType.Solution })
                 context.ProblemTexts.Add(NewText(problemId, documentType, language, number));
 
-        // The proposal filing the problem in the pool, under a number of its own
+        // The proposal filing the problem in MathComps' pool, under a number of its own
         context.Proposals.Add(new Proposal
         {
             ProblemId = problemId,
+            OrganizationId = MathCompsId(context),
             Number = number,
             Title = $"Proposal {number}",
             Area = ProposalArea.Algebra,
@@ -178,8 +200,14 @@ public static class SelectionSeed
     /// <returns>The board, its papers tracked beside it.</returns>
     public static SelectionBoard NewBoard(MathCompsDbContext context, string name, params Guid?[] slots)
     {
-        // The board
-        var board = new SelectionBoard { Id = Guid.CreateVersion7(), Name = name, CreatedAt = DateTimeOffset.UtcNow };
+        // The board, MathComps' own
+        var board = new SelectionBoard
+        {
+            Id = Guid.CreateVersion7(),
+            OrganizationId = MathCompsId(context),
+            Name = name,
+            CreatedAt = DateTimeOffset.UtcNow,
+        };
         context.SelectionBoards.Add(board);
 
         // The categories, in the order they run

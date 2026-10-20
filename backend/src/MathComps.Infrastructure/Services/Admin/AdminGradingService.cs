@@ -5,7 +5,7 @@ using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Localization;
-using MathComps.Infrastructure.Services.Users;
+using MathComps.Infrastructure.Services.Organizations;
 using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,11 +16,11 @@ namespace MathComps.Infrastructure.Services.Admin;
 /// </summary>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
 /// <param name="localization">The names the taxonomy gives the nodes a group's rounds run under.</param>
-/// <param name="grants">Reads when a student started preparing the competitions.</param>
+/// <param name="members"><inheritdoc cref="HostedGrading.FindGradedEntryAsync" path="/param[@name='members']"/></param>
 public class AdminGradingService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IMetadataLocalizationService localization,
-    IUserGrantService grants) : IAdminGradingService
+    IOrganizationMemberService members) : IAdminGradingService
 {
     /// <summary>
     /// A grade nobody has touched: no mark, no help, nothing written, nothing settled.
@@ -82,7 +82,7 @@ public class AdminGradingService(
         // student last wrote about each.
         var gradings = await HostedGrading.ReadProblemGradingsAsync(
             dbContext,
-            grants,
+            members,
             [
                 .. entries.Select(entry => new HostedGrading.SpentEntry(
                     entry.Id,
@@ -153,7 +153,7 @@ public class AdminGradingService(
 
         // The entry the grade belongs to, refused where there is nothing to grade.
         var entry = await HostedGrading.FindGradableEntryAsync(
-                dbContext, grants, problemId, userId, cancellationToken)
+                dbContext, members, problemId, userId, cancellationToken)
             ?? throw new HostedGradeTargetException();
 
         // One transaction for the read and the write, so the lock below spans both.

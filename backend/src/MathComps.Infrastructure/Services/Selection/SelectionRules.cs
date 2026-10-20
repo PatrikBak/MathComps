@@ -130,19 +130,19 @@ internal static class SelectionRules
         groupOpensAt is null || groupOpensAt > now;
 
     /// <summary>
-    /// Whether a conversation about a proposal the selection holds is one of the reviewers': its author holds the
-    /// grant to prepare the competitions, and held it when the conversation started. Only such an account reaches a
-    /// problem while the selection holds it, so any other conversation about one was held while the problem sat
-    /// somewhere students reach, or by somebody whose grant has since been revoked.
+    /// Whether a conversation about a proposal the selection holds is one of the reviewers': its author is a member
+    /// of the organization picking the problems, and was one when the conversation started. Only such an account
+    /// reaches a problem while the selection holds it, so anybody else's conversation about one was held while the
+    /// problem sat somewhere students reach, or by somebody whose address has since come off the list.
     /// </summary>
-    /// <param name="preparerSince">
-    /// When the author was handed the grant to prepare the competitions; null where they don't hold it.
+    /// <param name="memberSince">
+    /// When the author's address was put on the organization's list; null where it is not on it.
     /// </param>
     /// <param name="startedAt">When the conversation started.</param>
     /// <returns>Whether it is a reviewer's.</returns>
-    public static bool IsReviewersConversation(DateTimeOffset? preparerSince, DateTimeOffset startedAt) =>
-        // Granted by the time it started
-        preparerSince <= startedAt;
+    public static bool IsReviewersConversation(DateTimeOffset? memberSince, DateTimeOffset startedAt) =>
+        // A member by the time it started
+        memberSince <= startedAt;
 
     /// <summary>
     /// Whether a hosted group still takes a board: it has not opened, it closes at some point, and it runs rounds
