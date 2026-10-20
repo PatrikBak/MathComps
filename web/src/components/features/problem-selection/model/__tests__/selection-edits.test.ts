@@ -69,6 +69,7 @@ function selection(boards: Board[], proposals: Proposal[]): SelectionData {
       { name: 'intermediate', hostedCategory: 'intermediate' },
       { name: 'advanced', hostedCategory: 'advanced' },
     ],
+    leadCategories: [],
     proposals,
     boards,
     cycles: [],

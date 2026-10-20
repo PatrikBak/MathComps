@@ -28,12 +28,13 @@ export type PaperOnBoard = {
 }
 
 /**
- * The selection as read: its categories, its boards, its cycles and the languages its problems need as they came,
- * its papers looked up by id, and its proposals and their conversations looked up by proposal id.
+ * The selection as read: its categories, the reader's lead categories, its boards, its cycles and the languages its
+ * problems need as they came, its papers looked up by id, and its proposals and their conversations looked up by
+ * proposal id.
  */
 export type SelectionIndex = Pick<
   SelectionData,
-  'categories' | 'boards' | 'cycles' | 'needsEveryLanguage'
+  'categories' | 'leadCategories' | 'boards' | 'cycles' | 'needsEveryLanguage'
 > & {
   /** Every paper on the boards, with the board holding it, by the paper's id. */
   papersById: ReadonlyMap<string, PaperOnBoard>
@@ -67,9 +68,11 @@ export function indexSelection(data: SelectionData): SelectionIndex {
     (conversation) => conversation.proposalId
   )
 
-  // The categories, the boards, the cycles and the languages needed as they came, with the lookups beside them
+  // The categories, the reader's lead categories, the boards, the cycles and the languages needed as they came,
+  // with the lookups beside them
   return {
     categories: data.categories,
+    leadCategories: data.leadCategories,
     boards: data.boards,
     cycles: data.cycles,
     needsEveryLanguage: data.needsEveryLanguage,
@@ -126,6 +129,49 @@ export function hostedLevelOf(
 export function mapsToRounds(board: Board, categories: readonly SelectionCategory[]): boolean {
   // Every paper of a category at some level
   return board.papers.every((paper) => hostedLevelOf(paper.category, categories) !== null)
+}
+
+/**
+ * Whether the reader leads a paper's category, which is what lets them change its slots. A paper outside the
+ * categories has no leads.
+ *
+ * @param leadCategories - The names of the categories the reader leads.
+ * @param paper - The paper.
+ *
+ * @returns True when the reader leads the paper's category.
+ */
+export function isLeadOf(leadCategories: readonly string[], paper: Paper): boolean {
+  // The paper's category, where it has one, among the reader's
+  return paper.category !== null && leadCategories.includes(paper.category)
+}
+
+/**
+ * Whether the reader can put a problem onto a board: the problem is live in the pool, the board is a draft with a
+ * paper the reader leads, and the problem stands in no paper they do not lead, which a placement would
+ * change too.
+ *
+ * @param board - The board.
+ * @param proposal - The problem.
+ * @param leadCategories - The names of the categories the reader leads.
+ *
+ * @returns True when some slot of the board takes the problem from the reader.
+ */
+export function canPlaceOn(
+  board: Board,
+  proposal: Proposal,
+  leadCategories: readonly string[]
+): boolean {
+  // The paper the problem stands in on the board, where it stands in one
+  const holdingPaper = board.papers.find((paper) => paper.slots.includes(proposal.id))
+
+  // A live problem, a draft with a paper the reader leads, and no paper they do not lead to take the problem out of
+  return (
+    !proposal.isSetAside &&
+    !proposal.isUsed &&
+    board.finalization === null &&
+    board.papers.some((paper) => isLeadOf(leadCategories, paper)) &&
+    (holdingPaper === undefined || isLeadOf(leadCategories, holdingPaper))
+  )
 }
 
 /**

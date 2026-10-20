@@ -3,7 +3,7 @@ using MathComps.Domain.EfCoreEntities;
 namespace MathComps.Infrastructure.Services.Organizations;
 
 /// <summary>
-/// Reads who is on the organizations' lists.
+/// Reads who is on the organizations' lists, and which of an organization's categories each leads.
 /// </summary>
 /// <remarks>
 /// An account is a member of an organization while the address it carries is on that organization's list, however
@@ -54,4 +54,16 @@ public interface IOrganizationMemberService
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The <see cref="Organization.Id"/> of each, none for an account on no list.</returns>
     Task<IReadOnlyList<Guid>> GetOrganizationIdsAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Which of an organization's categories an account leads.
+    /// </summary>
+    /// <param name="userId">The account whose lead categories are read.</param>
+    /// <param name="organizationSlug">
+    /// The <see cref="Organization.Slug"/> of the organization whose categories are read.
+    /// </param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The <see cref="OrganizationCategory.Id"/> of each, none for an account leading nothing there.</returns>
+    Task<IReadOnlySet<Guid>> GetLeadCategoryIdsAsync(
+        Guid userId, string organizationSlug, CancellationToken cancellationToken = default);
 }

@@ -245,6 +245,8 @@ export const MATHCOMPS_ORGANIZATION_SLUG = 'mathcomps'
 export type SelectionData = {
   /** The categories the selection picks problems for, in the order they run. */
   categories: SelectionCategory[]
+  /** The names of the categories the reader leads, in the order they run. */
+  leadCategories: string[]
   /** Every proposal still in the selection, the set-aside and used ones included, lowest number first. */
   proposals: Proposal[]
   /** Every board still in the selection, oldest first. */

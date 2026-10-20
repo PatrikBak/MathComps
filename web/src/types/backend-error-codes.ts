@@ -50,6 +50,7 @@ export const BACKEND_ERROR_CODES = [
   'SelectionBoardOpened',
   'SelectionProposalUsed',
   'SelectionBoardFinalized',
+  'SelectionNotLead',
   'SelectionProblemIncomplete',
   'SelectionFinalizeBlocked',
   'ProposalRatingValue',

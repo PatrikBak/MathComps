@@ -17,7 +17,10 @@ public interface IProblemSelectionService
     /// <param name="organizationSlug">
     /// The <see cref="Organization.Slug"/> of the organization whose selection it is.
     /// </param>
-    /// <param name="reviewerId">The reviewer reading it, whose own ratings come back marked as theirs.</param>
+    /// <param name="reviewerId">
+    /// The reviewer reading it: their own ratings come back marked as theirs, and the categories they lead come
+    /// back named.
+    /// </param>
     /// <param name="language">The language the cycles are named in.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The selection.</returns>

@@ -3,10 +3,14 @@ using MathComps.Domain.EfCoreEntities;
 namespace MathComps.Domain.Contracts.Selection;
 
 /// <summary>
-/// The whole problem selection: the categories it picks problems for, its proposals, the boards still in play, the
-/// cycles a board can be finalized into, and the conversations reviewers held with the examiner about the proposals.
+/// The whole problem selection: the categories it picks problems for and the ones its reader leads, its proposals,
+/// the boards still in play, the cycles a board can be finalized into, and the conversations reviewers held with the
+/// examiner about the proposals.
 /// </summary>
 /// <param name="Categories">The categories the selection picks problems for, in the order they run.</param>
+/// <param name="LeadCategories">
+/// The <see cref="OrganizationCategory.Name"/> of each category the reader leads, in the order they run.
+/// </param>
 /// <param name="Proposals">
 /// Every proposal still in the selection, the set-aside ones included, lowest number first.
 /// </param>
@@ -20,6 +24,7 @@ namespace MathComps.Domain.Contracts.Selection;
 /// </param>
 public record SelectionDto(
     IReadOnlyList<SelectionCategoryDto> Categories,
+    IReadOnlyList<string> LeadCategories,
     IReadOnlyList<ProposalDto> Proposals,
     IReadOnlyList<SelectionBoardDto> Boards,
     IReadOnlyList<SelectionCycleDto> Cycles,

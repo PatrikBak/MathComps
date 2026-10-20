@@ -10,24 +10,27 @@ using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Comments;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Localization;
+using MathComps.Infrastructure.Services.Organizations;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
-/// Implements <see cref="IProblemSelectionService"/> over the database, the discussions through the comment service
-/// and the cycles through the finalization service. The selection read takes in every hosted group that has not
+/// Implements <see cref="IProblemSelectionService"/> over the database, the discussions through the comment service,
+/// the cycles through the finalization service and the reader's lead categories through the member service. The selection read takes in every hosted group that has not
 /// opened, since a finalized board's slots read off its group's rounds.
 /// </summary>
 /// <param name="dbContextFactory">Creates the context each read runs on.</param>
 /// <param name="localization">The names the taxonomy gives the groups' nodes.</param>
 /// <param name="comments">Reads the discussions of what the selection holds.</param>
 /// <param name="finalization">Reads the cycles a board can be finalized into.</param>
+/// <param name="members">Reads which categories the reader leads.</param>
 public sealed class ProblemSelectionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IMetadataLocalizationService localization,
     ICommentService comments,
-    IBoardFinalizationService finalization)
+    IBoardFinalizationService finalization,
+    IOrganizationMemberService members)
     : IProblemSelectionService
 {
     /// <summary>
@@ -193,6 +196,17 @@ public sealed class ProblemSelectionService(
             .Select(category => new SelectionCategoryDto(category.Name, category.HostedCategory))
             .ToListAsync(cancellationToken);
 
+        // The ids of the organization's categories the reader leads.
+        var leadCategoryIds = await members.GetLeadCategoryIdsAsync(reviewerId, organizationSlug, cancellationToken);
+
+        // The names of the categories the reader leads, in the order they run.
+        var leadCategories = await dbContext.OrganizationCategories
+            .AsNoTracking()
+            .Where(category => leadCategoryIds.Contains(category.Id))
+            .OrderBy(category => category.Position)
+            .Select(category => category.Name)
+            .ToListAsync(cancellationToken);
+
         // Whether the organization's problems need every language.
         var needsEveryLanguage = await dbContext.Organizations
             .Where(organization => organization.Slug == organizationSlug)
@@ -207,6 +221,7 @@ public sealed class ProblemSelectionService(
         // The selection.
         return new SelectionDto(
             categories,
+            leadCategories,
             [
                 .. selected.Select(proposal => new ProposalDto(
                     proposal.ProblemId,

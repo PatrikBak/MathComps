@@ -1,6 +1,7 @@
 using MathComps.Domain.Contracts.Selection;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Organizations;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.Services.Selection;
@@ -8,17 +9,26 @@ namespace MathComps.Infrastructure.Services.Selection;
 /// <summary>
 /// Implements <see cref="ISelectionBoardService"/> over the database, each change one write through
 /// <see cref="SelectionRules.RunWriteAsync"/>. A draft's slots are its <see cref="SelectionSlot"/> rows; a
-/// finalized board's are its group's rounds, which none of these changes reaches.
+/// finalized board's are its group's rounds, which none of these changes reaches. The account's lead categories are
+/// read before the write waits its turn, since no selection write changes them.
 /// </summary>
 /// <param name="dbContextFactory">Creates the context each change runs on.</param>
-public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> dbContextFactory)
+/// <param name="members">Reads which categories the account making a change leads.</param>
+public sealed class SelectionBoardService(
+    IDbContextFactory<MathCompsDbContext> dbContextFactory,
+    IOrganizationMemberService members)
     : ISelectionBoardService
 {
     /// <inheritdoc/>
-    public Task PlaceAsync(
-        string organizationSlug, SlotAddress slot, Guid proposalId, CancellationToken cancellationToken = default) =>
+    public async Task PlaceAsync(
+        string organizationSlug, Guid userId, SlotAddress slot, Guid proposalId,
+        CancellationToken cancellationToken = default)
+    {
+        // The categories the account leads
+        var leadCategoryIds = await members.GetLeadCategoryIdsAsync(userId, organizationSlug, cancellationToken);
+
         // The placement, as one selection write
-        SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
+        await SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
             // The board, which has to be a draft
             var board = await SelectionRules.ReadDraftAsync(
@@ -26,6 +36,9 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
 
             // The paper holding the slot
             var paper = PaperOf(board, slot);
+
+            // Only a lead of the paper's category fills its slot
+            RequireLead(paper, leadCategoryIds);
 
             // The proposal going in, from the same organization's pool as the board
             var proposal = await SelectionRules.ReadProposalAsync(
@@ -35,10 +48,15 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
             if (!SelectionRules.IsInPool(proposal.Problem.Round.Competition.Path))
                 throw new SelectionProposalUsedException();
 
-            // Where on this board the problem already stands, if anywhere
+            // Where else on this board the problem already stands, if anywhere
             var source = board.Papers
                 .SelectMany(candidate => candidate.Slots)
-                .FirstOrDefault(candidate => candidate.ProblemId == proposal.ProblemId);
+                .FirstOrDefault(candidate => candidate.ProblemId == proposal.ProblemId
+                    && (candidate.PaperId != paper.Id || candidate.Position != slot.Index));
+
+            // The paper the problem leaves changes too, so only a lead of its category moves the problem out
+            if (source is not null)
+                RequireLead(source.Paper, leadCategoryIds);
 
             // What stands in the slot now, read before anything moves
             var occupant = ProblemIdAt(paper, slot.Index);
@@ -46,16 +64,21 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
             // The problem takes the slot
             SetSlot(dbContext, paper, slot.Index, proposal.ProblemId);
 
-            // The problem's old slot on the board, if any and if not the same one, takes what stood in the new one
-            if (source is not null && (source.PaperId != paper.Id || source.Position != slot.Index))
+            // The problem's old slot on the board, if any, takes what stood in the new one
+            if (source is not null)
                 SetSlot(dbContext, source.Paper, source.Position, occupant);
         }, cancellationToken);
+    }
 
     /// <inheritdoc/>
-    public Task ClearSlotAsync(
-        string organizationSlug, SlotAddress slot, CancellationToken cancellationToken = default) =>
+    public async Task ClearSlotAsync(
+        string organizationSlug, Guid userId, SlotAddress slot, CancellationToken cancellationToken = default)
+    {
+        // The categories the account leads
+        var leadCategoryIds = await members.GetLeadCategoryIdsAsync(userId, organizationSlug, cancellationToken);
+
         // The clearing, as one selection write
-        SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
+        await SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
             // The board, which has to be a draft
             var board = await SelectionRules.ReadDraftAsync(
@@ -63,17 +86,25 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
 
             // The paper holding the slot
             var paper = PaperOf(board, slot);
+
+            // Only a lead of the paper's category empties its slot
+            RequireLead(paper, leadCategoryIds);
 
             // The slot emptied, its problem back in the pool
             SetSlot(dbContext, paper, slot.Index, null);
         }, cancellationToken);
+    }
 
     /// <inheritdoc/>
-    public Task MoveSlotAsync(
-        string organizationSlug, SlotAddress slot, SlotDirection direction,
-        CancellationToken cancellationToken = default) =>
+    public async Task MoveSlotAsync(
+        string organizationSlug, Guid userId, SlotAddress slot, SlotDirection direction,
+        CancellationToken cancellationToken = default)
+    {
+        // The categories the account leads
+        var leadCategoryIds = await members.GetLeadCategoryIdsAsync(userId, organizationSlug, cancellationToken);
+
         // The trade, as one selection write
-        SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
+        await SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
             // The board, which has to be a draft
             var board = await SelectionRules.ReadDraftAsync(
@@ -81,6 +112,9 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
 
             // The paper holding the slot
             var paper = PaperOf(board, slot);
+
+            // Only a lead of the paper's category reorders its slots
+            RequireLead(paper, leadCategoryIds);
 
             // The neighbour's index, one above or below the slot
             var neighbour = direction switch
@@ -102,6 +136,7 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
             SetSlot(dbContext, paper, slot.Index, there);
             SetSlot(dbContext, paper, neighbour, here);
         }, cancellationToken);
+    }
 
     /// <summary>
     /// Puts a problem into a draft's slot, or empties it.
@@ -158,6 +193,21 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
 
         // The paper holding the slot
         return paper;
+    }
+
+    /// <summary>
+    /// Refuses a change to a paper unless the account making it leads the paper's category.
+    /// </summary>
+    /// <param name="paper">The paper, with its category's id.</param>
+    /// <param name="leadCategoryIds">The ids of the categories the account leads.</param>
+    /// <exception cref="SelectionNotLeadException">
+    /// Thrown when the account does not lead the paper's category, or the paper has none and so no leads.
+    /// </exception>
+    private static void RequireLead(SelectionPaper paper, IReadOnlySet<Guid> leadCategoryIds)
+    {
+        // A paper outside the categories has no leads, and any other paper only its own category's
+        if (paper.CategoryId is not { } categoryId || !leadCategoryIds.Contains(categoryId))
+            throw new SelectionNotLeadException();
     }
 
     /// <summary>

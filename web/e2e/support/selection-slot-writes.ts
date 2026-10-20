@@ -43,14 +43,34 @@ type DraftSlot = {
 }
 
 /**
- * The board and the paper a slot names, refused the way the backend refuses them before any write.
+ * Refuses a write to a paper unless the writer leads the paper's category, as the backend does. A paper
+ * outside the categories has no leads.
+ *
+ * @param paper - The paper.
+ * @param leadCategories - The names of the categories the writer leads.
+ */
+function requireLead(paper: Paper, leadCategories: readonly string[]): void {
+  // A paper of one of the writer's categories, or refused
+  if (paper.category === null || !leadCategories.includes(paper.category)) {
+    refuseWith('SelectionNotLead')
+  }
+}
+
+/**
+ * The board and the paper a slot names, refused the way the backend refuses them before any write, a paper the
+ * writer does not lead included.
  *
  * @param held - What the backend holds.
  * @param slot - The slot.
+ * @param leadCategories - The names of the categories the writer leads.
  *
  * @returns The slot's board and paper.
  */
-function draftSlot(held: HeldSelection, slot: SlotAddress): DraftSlot {
+function draftSlot(
+  held: HeldSelection,
+  slot: SlotAddress,
+  leadCategories: readonly string[]
+): DraftSlot {
   // The board, which has to be a draft
   const board = draftBoard(held, slot.boardId)
 
@@ -61,6 +81,9 @@ function draftSlot(held: HeldSelection, slot: SlotAddress): DraftSlot {
 
   // A slot past either end of the paper names nothing
   if (slot.index < 0 || slot.index >= paper.slots.length) refuseWith('SelectionTargetNotFound')
+
+  // Only a lead of the paper's category changes it
+  requireLead(paper, leadCategories)
 
   // The board and the paper holding the slot
   return { board, paper }
@@ -179,17 +202,24 @@ function readDirection(body: string | null): SlotDirection {
 
 /**
  * Puts a proposal into a draft's slot, as the backend does. One already on the board trades places with whatever
- * held the slot, and one from the pool sends that problem back to it.
+ * held the slot, so the writer has to lead the paper it leaves as well, and one from the pool sends that problem
+ * back to it.
  *
  * @param held - What the backend holds.
  * @param slot - The slot.
  * @param proposalId - The proposal.
+ * @param leadCategories - The names of the categories the writer leads.
  *
  * @returns What the backend holds afterwards.
  */
-function place(held: HeldSelection, slot: SlotAddress, proposalId: string): HeldSelection {
+function place(
+  held: HeldSelection,
+  slot: SlotAddress,
+  proposalId: string,
+  leadCategories: readonly string[]
+): HeldSelection {
   // The board and the paper, refused where the backend refuses them
-  const { board } = draftSlot(held, slot)
+  const { board } = draftSlot(held, slot, leadCategories)
 
   // The proposal, which has to be live
   const proposal = liveProposal(held, proposalId)
@@ -209,6 +239,10 @@ function place(held: HeldSelection, slot: SlotAddress, proposalId: string): Held
   // One of the board's own problems trades places with the slot's, which empties its old place where the slot
   // stood empty
   if (source !== undefined) {
+    // The paper the problem leaves changes too, so only a lead of its category moves the problem out
+    requireLead(board.papers.find((paper) => paper.id === source.paperId)!, leadCategories)
+
+    // The problem and the slot's occupant trading places
     return withBoard(
       held,
       withSlots(board, [
@@ -227,12 +261,17 @@ function place(held: HeldSelection, slot: SlotAddress, proposalId: string): Held
  *
  * @param held - What the backend holds.
  * @param slot - The slot.
+ * @param leadCategories - The names of the categories the writer leads.
  *
  * @returns What the backend holds afterwards.
  */
-function clear(held: HeldSelection, slot: SlotAddress): HeldSelection {
+function clear(
+  held: HeldSelection,
+  slot: SlotAddress,
+  leadCategories: readonly string[]
+): HeldSelection {
   // The board and the paper, refused where the backend refuses them
-  const { board } = draftSlot(held, slot)
+  const { board } = draftSlot(held, slot, leadCategories)
 
   // The slot standing empty, whatever it held
   return withBoard(held, withSlots(board, [[slot, null]]))
@@ -244,12 +283,18 @@ function clear(held: HeldSelection, slot: SlotAddress): HeldSelection {
  * @param held - What the backend holds.
  * @param slot - The slot.
  * @param direction - Which neighbour.
+ * @param leadCategories - The names of the categories the writer leads.
  *
  * @returns What the backend holds afterwards.
  */
-function move(held: HeldSelection, slot: SlotAddress, direction: SlotDirection): HeldSelection {
+function move(
+  held: HeldSelection,
+  slot: SlotAddress,
+  direction: SlotDirection,
+  leadCategories: readonly string[]
+): HeldSelection {
   // The board and the paper, refused where the backend refuses them
-  const { board, paper } = draftSlot(held, slot)
+  const { board, paper } = draftSlot(held, slot, leadCategories)
 
   // The neighbour's position
   const neighbour: BoardPosition = { paperId: paper.id, index: slot.index + MOVE_OFFSET[direction] }
@@ -274,6 +319,7 @@ function move(held: HeldSelection, slot: SlotAddress, direction: SlotDirection):
  * at its move address. The body is read before anything else, so a body the backend cannot read is refused first.
  *
  * @param held - What the backend holds.
+ * @param leadCategories - The names of the categories the writer leads.
  * @param method - The write's HTTP method.
  * @param isMove - Whether it went to the slot's move address.
  * @param slot - The slot.
@@ -283,19 +329,20 @@ function move(held: HeldSelection, slot: SlotAddress, direction: SlotDirection):
  */
 export function slotWrite(
   held: HeldSelection,
+  leadCategories: readonly string[],
   method: string,
   isMove: boolean,
   slot: SlotAddress,
   body: string | null
 ): HeldSelection {
   // A trade, posted to the move address
-  if (isMove && method === 'POST') return move(held, slot, readDirection(body))
+  if (isMove && method === 'POST') return move(held, slot, readDirection(body), leadCategories)
 
   // A placement, put at the slot's own address
-  if (!isMove && method === 'PUT') return place(held, slot, readPlacement(body))
+  if (!isMove && method === 'PUT') return place(held, slot, readPlacement(body), leadCategories)
 
   // An emptying, deleted at the slot's own address
-  if (!isMove && method === 'DELETE') return clear(held, slot)
+  if (!isMove && method === 'DELETE') return clear(held, slot, leadCategories)
 
   // Nothing the app sends, so a fake that reaches here has drifted from the app
   throw new Error(`The backend routes no slot write as ${method}${isMove ? ' to a move' : ''}`)

@@ -17,7 +17,8 @@ namespace MathComps.Infrastructure.Tests.Selection;
 /// The seed is sixteen of MathComps' proposals, the October and November groups not yet open with empty rounds, a
 /// September group already open, the full October board and a part-filled spare one sharing problem 1 with it.
 /// Problem 15 is written in English alone, and problem 16 sits in a September round rather than in the pool. The
-/// olympiad has one proposal of its own in the same pool, on a board of its own.
+/// olympiad has one proposal of its own in the same pool, on a board of its own. Three accounts sit on MathComps'
+/// list: a lead of every one of its categories, a lead of the elementary one alone, and a member leading none.
 /// </remarks>
 /// <typeparam name="TService">The service the derived suite tests.</typeparam>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
@@ -28,6 +29,21 @@ public abstract class SelectionBoardPostgresTestBase<TService>(PostgresContainer
     /// The slug of the olympiad, the organization beside MathComps.
     /// </summary>
     protected const string OlympiadSlug = "olympiad";
+
+    /// <summary>
+    /// A MathComps member leading every one of its categories.
+    /// </summary>
+    protected Guid LeadId { get; } = Guid.CreateVersion7();
+
+    /// <summary>
+    /// A MathComps member leading its elementary category alone.
+    /// </summary>
+    protected Guid ElementaryLeadId { get; } = Guid.CreateVersion7();
+
+    /// <summary>
+    /// A MathComps member leading none of its categories.
+    /// </summary>
+    protected Guid MemberId { get; } = Guid.CreateVersion7();
 
     /// <summary>
     /// The proposals by their number.
@@ -82,6 +98,22 @@ public abstract class SelectionBoardPostgresTestBase<TService>(PostgresContainer
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
+        // The accounts the cases act as
+        context.Users.AddRange(
+            HostedSeed.NewUser(LeadId, "Lead"),
+            HostedSeed.NewUser(ElementaryLeadId, "Elementary"),
+            HostedSeed.NewUser(MemberId, "Member"));
+
+        // Each account's address on MathComps' list
+        foreach (var username in new[] { "lead", "elementary", "member" })
+            SelectionSeed.NewMember(context, $"{username}@example.com", DateTimeOffset.UtcNow);
+
+        // The first account made a lead of every MathComps category
+        SelectionSeed.NewLead(context, "lead@example.com", "elementary", "intermediate", "advanced");
+
+        // The second made a lead of the elementary category alone
+        SelectionSeed.NewLead(context, "elementary@example.com", "elementary");
+
         // The season every round sits in
         var season = SelectionSeed.NewSeason(context);
 

@@ -30,6 +30,7 @@ import {
   problemCount,
   READY,
   recordWrites,
+  rememberedSelection,
   SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
@@ -992,7 +993,164 @@ test.describe('a finalized board', () => {
   })
 })
 
+test.describe('a reader leading some categories or none', () => {
+  test('shows a reader leading nothing every slot read-only, and no way onto the board', async ({
+    page,
+  }) => {
+    // A reviewer leading none of the categories
+    await stubSelection(page, 'selection', { ...rememberedSelection(null), leadCategories: [] })
+
+    // The pool
+    await openPool(page)
+
+    // A filled slot, hovered
+    await slotOf(page, 'E1').hover()
+
+    // Showing its problem
+    await expect(slotOf(page, 'E1').getByRole('link', { name: FIRST.title })).toBeVisible()
+
+    // With no way to replace, move or empty it
+    await expect(slotOf(page, 'E1').getByRole('button')).toHaveCount(0)
+
+    // An empty slot
+    await expect(slotOf(page, 'A1')).toBeVisible()
+
+    // Which takes no picking
+    await expect(slotOf(page, 'A1').getByRole('button')).toHaveCount(0)
+
+    // A problem in the pool
+    await expect(cardOf(page, OPENED)).toBeVisible()
+
+    // Offering no way onto the board
+    await expect(placeButton(cardOf(page, OPENED))).toHaveCount(0)
+  })
+
+  test("lets a lead change only their own category's paper", async ({ page }) => {
+    // A reviewer leading the elementary category alone
+    await stubSelection(page, 'selection', {
+      ...rememberedSelection(null),
+      leadCategories: ['elementary'],
+    })
+
+    // The pool
+    await openPool(page)
+
+    // An elementary slot, hovered
+    await slotOf(page, 'E1').hover()
+
+    // Offering its actions
+    await expect(
+      slotOf(page, 'E1').getByRole('button', { name: selectionCopy.board.backToPool, exact: true })
+    ).toBeVisible()
+
+    // An intermediate slot, hovered
+    await slotOf(page, 'I2').hover()
+
+    // Showing its problem
+    await expect(slotOf(page, 'I2').getByRole('link', { name: READY.title })).toBeVisible()
+
+    // With no way to replace, move or empty it
+    await expect(slotOf(page, 'I2').getByRole('button')).toHaveCount(0)
+
+    // The problem the intermediate paper holds, whose placing would change that paper too
+    await expect(cardOf(page, READY)).toBeVisible()
+
+    // Offering no way onto the board
+    await expect(placeButton(cardOf(page, READY))).toHaveCount(0)
+
+    // A problem in the pool, its grid opened
+    await placeButton(cardOf(page, OPENED)).click()
+
+    // An elementary slot taking it
+    await expect(gridSlot(page, 'E2')).not.toHaveAttribute('aria-disabled', 'true')
+
+    // The other papers' slots taking nothing
+    await expect(gridSlot(page, 'I1')).toHaveAttribute('aria-disabled', 'true')
+    await expect(gridSlot(page, 'A1')).toHaveAttribute('aria-disabled', 'true')
+
+    // The problem, put into the elementary one
+    await gridSlot(page, 'E2').click()
+
+    // Where it stands
+    await expect(slotOf(page, 'E2').getByRole('link', { name: OPENED.title })).toBeVisible()
+  })
+
+  test('stops showing a slot as waiting once a read finds the reader no longer leads its paper', async ({
+    page,
+  }) => {
+    // The clock under the test's hand, so the next read comes when the test says
+    await page.clock.install()
+
+    // What the backend keeps, a reviewer leading every category for now
+    const memory = rememberedSelection(null)
+
+    // The selection, read out of it
+    await stubSelection(page, 'selection', memory)
+
+    // The pool
+    await openPool(page)
+
+    // The second elementary slot, waiting for a problem
+    await slotOf(page, 'E2').getByRole('button').click()
+
+    // Which the banner names
+    await expect(waitingBanner(page, DRAFT_BOARD, 'Elementary', 2)).toBeVisible()
+
+    // The reviewer leading the intermediate category alone from the next read
+    memory.leadCategories = ['intermediate']
+
+    // Long enough for the selection to be read again
+    await page.clock.fastForward(PAST_NEXT_READ)
+
+    // A problem in the pool offering the grid again, once that read has landed
+    await expect(placeButton(cardOf(page, OPENED))).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The banner gone with the waiting slot
+    await expect(waitingBanner(page, DRAFT_BOARD, 'Elementary', 2)).toHaveCount(0)
+  })
+})
+
 test.describe('a write the backend refuses', () => {
+  test('puts an emptied slot back when the reader stopped leading its paper meanwhile, and says why', async ({
+    page,
+  }) => {
+    // What the backend keeps, a reviewer leading every category for now
+    const memory = rememberedSelection(null)
+
+    // The selection, read out of it
+    await stubSelection(page, 'selection', memory)
+
+    // Every notice the page raises
+    const notices = await recordNotices(page)
+
+    // The pool
+    await openPool(page)
+
+    // The reviewer leading nothing any more, which the page has not read yet
+    memory.leadCategories = []
+
+    // Every read held from here, so the page has only the refusal to go on
+    const releaseReads = await holdReads(page)
+
+    // The first elementary problem, sent back to the pool all the same
+    await pressSlotAction(page, 'E1', selectionCopy.board.backToPool)
+
+    // Refused, the reader told why
+    await expect.poll(notices).toEqual([refusalCopy.SelectionNotLead])
+
+    // The problem back in its slot
+    await expect(slotOf(page, 'E1').getByRole('link', { name: FIRST.title })).toBeVisible()
+
+    // The read after the write, let through
+    releaseReads()
+
+    // Its slot offering no change any more, once that read has landed
+    await expect(slotOf(page, 'E1').getByRole('button')).toHaveCount(0)
+
+    // And no other notice raised
+    expect(notices()).toEqual([refusalCopy.SelectionNotLead])
+  })
+
   test('puts an emptied slot back when another reviewer finalized the board meanwhile, and says why', async ({
     page,
   }) => {

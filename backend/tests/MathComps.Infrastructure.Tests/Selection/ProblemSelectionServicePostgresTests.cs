@@ -17,7 +17,7 @@ namespace MathComps.Infrastructure.Tests.Selection;
 /// <summary>
 /// Covers <see cref="ProblemSelectionService"/>: the field mapping of the selection read, which proposals, boards and
 /// cycles it holds once groups open, which conversations it lists, which discussions the discussions read holds, and
-/// that each organization's selection holds its own alone.
+/// that each organization's selection holds its own alone and names the categories its reader leads.
 /// </summary>
 /// <remarks>
 /// The seed is a pool of three proposals with a draft holding one. The October group has not opened and its
@@ -186,6 +186,22 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         Assert.Equal(
             ["elementary", "intermediate", "advanced"],
             selection.Boards.Single(board => board.Finalization is null).Papers.Select(paper => paper.Category));
+    });
+
+    /// <summary>
+    /// The selection names the categories its reader leads, and none for a reader leading nothing there.
+    /// </summary>
+    [Fact]
+    public Task The_read_names_the_readers_lead_categories() => RunTestAsync(async service =>
+    {
+        // MathComps' advanced category, the one the reviewer leads
+        Assert.Equal(
+            ["advanced"],
+            (await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN)).LeadCategories);
+
+        // None of the olympiad's for its commissioner, who leads nothing
+        Assert.Empty(
+            (await service.GetSelectionAsync(OlympiadSlug, _commissionerId, Language.EN)).LeadCategories);
     });
 
     /// <summary>
@@ -515,6 +531,9 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
         // The live reviewer on the MathComps organization's list
         SelectionSeed.NewMember(context, "reviewer@example.com", DateTimeOffset.UtcNow.AddDays(-30));
+
+        // The reviewer made a lead of MathComps' advanced category
+        SelectionSeed.NewLead(context, "reviewer@example.com", "advanced");
 
         // The season every round sits in
         var season = SelectionSeed.NewSeason(context);

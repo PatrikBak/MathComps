@@ -17,7 +17,13 @@ import { useGridArrowKeys } from '@/hooks/use-grid-arrow-keys'
 import { useSelectionWrite } from '../hooks/use-selection-write'
 import { useWaitingSlotPlacement } from '../hooks/use-waiting-slot-placement'
 import { afterPlacement } from '../model/selection-edits'
-import { categoryHue, paperInitial, slotLabel } from '../model/selection-state'
+import {
+  canPlaceOn,
+  categoryHue,
+  isLeadOf,
+  paperInitial,
+  slotLabel,
+} from '../model/selection-state'
 import type { PlacementWrite, Proposal } from '../model/selection-types'
 import { placeProposal } from '../services/selection-service'
 import { slotSquareLook, type SlotSquareState } from './CategoryMarks'
@@ -33,8 +39,9 @@ type PlaceControlProps = {
 
 /**
  * Puts a problem onto the draft on screen. While a slot waits for a problem, it is one button naming that
- * slot; otherwise it opens the board as a small grid, a row per paper, each slot showing what it holds now.
- * A problem set aside or taken by a round offers no placing, and neither does a finalized board.
+ * slot; otherwise it opens the board as a small grid, a row per paper, each slot showing what it holds now. Only the
+ * papers the reader leads take the problem, and nothing shows where {@link canPlaceOn} keeps the problem off
+ * the board.
  */
 export function PlaceControl({ proposal }: PlaceControlProps) {
   // Placing copy
@@ -46,8 +53,8 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
   // The slot waiting for a problem, and whether a write changing the slots is still out
   const { waitingSlot, isChangingSlots } = useSelectionWorkspace()
 
-  // The board on screen, every proposal by id, and the selection's categories
-  const { activeBoard, proposalsById, categories } = useLoadedSelection()
+  // The board on screen, every proposal by id, the selection's categories and the reader's lead categories
+  const { activeBoard, proposalsById, categories, leadCategories } = useLoadedSelection()
 
   // Putting the problem into a slot, shown ahead of the server
   const place = useSelectionWrite<PlacementWrite>({
@@ -63,11 +70,8 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
   // Arrow keys moving across the grid, a row per paper of the board on screen
   const gridKeys = useGridArrowKeys(activeBoard?.papers.map((paper) => paper.slots.length) ?? [])
 
-  // Only a problem live in the pool can be placed
-  if (proposal.isSetAside || proposal.isUsed) return null
-
-  // Only a draft takes a problem, a finalized board's slots being its rounds
-  if (activeBoard === null || activeBoard.finalization !== null) return null
+  // Only a live problem goes onto a draft, for a reader leading one of its papers and any paper the problem leaves
+  if (activeBoard === null || !canPlaceOn(activeBoard, proposal, leadCategories)) return null
 
   // The waiting slot's paper, where a slot is waiting
   const waitingPaper =
@@ -174,6 +178,9 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
                 // How the slot's square looks for how the slot stands
                 const look = slotSquareLook(state, categoryHue(categories, paper.category))
 
+                // Whether the reader leads the slot's paper
+                const leadsPaper = isLeadOf(leadCategories, paper)
+
                 return (
                   <DropdownMenuItem
                     key={index}
@@ -182,10 +189,11 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
                     aria-label={label}
                     // Typing finds a slot by its name, the one a screen reader reads out
                     textValue={label}
-                    disabled={isChangingSlots}
+                    // Unavailable while a write changing the slots is out, and in a paper the reader does not lead
+                    disabled={isChangingSlots || !leadsPaper}
                     // The problem's own slot takes nothing, yet stays in reach of the arrow keys, which say where
-                    // the problem stands
-                    aria-disabled={isOwnSlot || isChangingSlots || undefined}
+                    // the problem stands. The attribute replaces the menu's own, so each unavailable slot sets it
+                    aria-disabled={isOwnSlot || !leadsPaper || isChangingSlots || undefined}
                     onKeyDown={(event) => gridKeys.moveFocus(event, paperIndex, index)}
                     onSelect={(event) => {
                       // The problem's own slot places nothing, so the grid stays open

@@ -85,6 +85,21 @@ public static class SelectionSeed
             new OrganizationMember { OrganizationId = organizationId, Email = email, AddedAt = addedAt });
 
     /// <summary>
+    /// Tracks a member of the MathComps organization made a lead of some of its categories.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="email"><inheritdoc cref="CategoryLead.Email" path="/summary"/></param>
+    /// <param name="categories">The categories by name, each one of MathComps'.</param>
+    public static void NewLead(MathCompsDbContext context, string email, params string[] categories) =>
+        // Lead of each category named
+        context.CategoryLeads.AddRange(categories.Select(category => new CategoryLead
+        {
+            OrganizationId = MathCompsId(context),
+            Email = email,
+            CategoryId = CategoryId(context, category),
+        }));
+
+    /// <summary>
     /// Tracks the round of the proposals node the pool's problems are parked in.
     /// </summary>
     /// <param name="context">The seeding context.</param>

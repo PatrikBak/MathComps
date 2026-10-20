@@ -5,6 +5,7 @@ import type { Locale } from '@/i18n/i18n'
 import {
   arguedText,
   averageScore,
+  canPlaceOn,
   cycleMisfit,
   mapsToRounds,
   pickActiveBoard,
@@ -189,6 +190,39 @@ describe('cycleMisfit', () => {
     // And nothing else stands in the way
     expect(misfit.unmatched).toEqual([])
     expect(misfit.uncovered).toEqual([])
+  })
+})
+
+describe('canPlaceOn', () => {
+  it('places a problem from the pool for a reader leading any paper on the board, and for no one else', () => {
+    // A draft with an elementary and an intermediate paper
+    const draft = {
+      ...board('draft'),
+      papers: [paper('E', 'elementary'), paper('I', 'intermediate')],
+    }
+
+    // A problem from the pool
+    const pooled = proposal({})
+
+    // An elementary lead places it, while a reader leading nothing, or a category the board lacks, does not
+    expect(canPlaceOn(draft, pooled, ['elementary'])).toBe(true)
+    expect(canPlaceOn(draft, pooled, [])).toBe(false)
+    expect(canPlaceOn(draft, pooled, ['C'])).toBe(false)
+  })
+
+  it('moves a problem out of a paper only for a reader leading that paper too', () => {
+    // A draft whose intermediate paper holds the problem
+    const draft = {
+      ...board('draft'),
+      papers: [paper('E', 'elementary'), { ...paper('I', 'intermediate'), slots: ['p', null] }],
+    }
+
+    // The problem the intermediate paper holds
+    const held = proposal({})
+
+    // An elementary lead cannot move it out of the intermediate paper, a lead of both can
+    expect(canPlaceOn(draft, held, ['elementary'])).toBe(false)
+    expect(canPlaceOn(draft, held, ['elementary', 'intermediate'])).toBe(true)
   })
 })
 

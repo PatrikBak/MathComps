@@ -9,8 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MathComps.Infrastructure.Tests.Organizations;
 
 /// <summary>
-/// Covers <see cref="OrganizationMemberService"/>: who is a member of an organization, since when, and which
-/// organizations an account is a member of.
+/// Covers <see cref="OrganizationMemberService"/>: who is a member of an organization, since when, which
+/// organizations an account is a member of, and which of an organization's categories it leads.
 /// </summary>
 /// <remarks>
 /// Membership is an account's address matched against a list, so the cases that matter are the near misses: the same
@@ -119,6 +119,63 @@ public class OrganizationMemberServicePostgresTests(PostgresContainerFixture fix
 
         // And none for the account with no address
         Assert.Empty(await members.GetOrganizationIdsAsync(_addresslessId));
+    });
+
+    /// <summary>
+    /// The categories an account leads come back whatever capitals its address carries, and only the asked
+    /// organization's. A match on the address as typed would refuse a lead the papers of the categories they lead,
+    /// and one reading every organization would name another organization's categories in MathComps' selection.
+    /// </summary>
+    [Fact]
+    public Task An_accounts_lead_categories_are_the_asked_organizations_alone() => RunTestAsync(async members =>
+    {
+        // The member made a lead of MathComps' elementary category, and of the other organization's one category
+        var (elementaryId, otherCategoryId) = await QueryValueAsync(async context =>
+        {
+            // MathComps' elementary category, which the migrations create
+            var elementary = await context.OrganizationCategories.SingleAsync(category =>
+                category.Organization.Slug == Organization.MathCompsSlug && category.Name == "elementary");
+
+            // The other organization
+            var other = await context.Organizations.SingleAsync(organization => organization.Slug == "other");
+
+            // The other organization's one category
+            var otherCategory = new OrganizationCategory { OrganizationId = other.Id, Position = 0, Name = "C" };
+            context.OrganizationCategories.Add(otherCategory);
+
+            // The member's address on the other organization's list too
+            SelectionSeed.NewMember(context, other.Id, "member@example.com", _addedAt);
+
+            // Lead of each
+            context.CategoryLeads.AddRange(
+                new CategoryLead
+                {
+                    OrganizationId = elementary.OrganizationId,
+                    Email = "member@example.com",
+                    CategoryId = elementary.Id,
+                },
+                new CategoryLead
+                {
+                    OrganizationId = other.Id,
+                    Email = "member@example.com",
+                    CategoryId = otherCategory.Id,
+                });
+
+            // Written
+            await context.SaveChangesAsync();
+
+            // The two categories
+            return (elementary.Id, otherCategory.Id);
+        });
+
+        // MathComps' elementary category alone, for MathComps
+        Assert.Equal([elementaryId], await members.GetLeadCategoryIdsAsync(_memberId, Organization.MathCompsSlug));
+
+        // The other organization's own, for it
+        Assert.Equal([otherCategoryId], await members.GetLeadCategoryIdsAsync(_memberId, "other"));
+
+        // And none for the outsider, who leads nothing
+        Assert.Empty(await members.GetLeadCategoryIdsAsync(_outsiderId, "other"));
     });
 
     /// <inheritdoc/>

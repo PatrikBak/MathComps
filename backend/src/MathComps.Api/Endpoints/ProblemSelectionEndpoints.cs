@@ -90,6 +90,8 @@ public static class ProblemSelectionEndpoints
             Guid paperId,
             int index,
             PlaceProposalRequest request,
+            HttpContext context,
+            IUserManager userManager,
             ISelectionBoardService boardService,
             CancellationToken cancellationToken) =>
         {
@@ -97,9 +99,12 @@ public static class ProblemSelectionEndpoints
             if (request.ProposalId is not { } proposalId)
                 throw new BadHttpRequestException("A placement must name the proposal.");
 
+            // The reviewer placing the proposal
+            var reviewerId = await userManager.RequireUserIdAsync(context);
+
             // Place it
             await boardService.PlaceAsync(
-                organization, new SlotAddress(boardId, paperId, index), proposalId, cancellationToken);
+                organization, reviewerId, new SlotAddress(boardId, paperId, index), proposalId, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -113,11 +118,17 @@ public static class ProblemSelectionEndpoints
             Guid boardId,
             Guid paperId,
             int index,
+            HttpContext context,
+            IUserManager userManager,
             ISelectionBoardService boardService,
             CancellationToken cancellationToken) =>
         {
+            // The reviewer emptying the slot
+            var reviewerId = await userManager.RequireUserIdAsync(context);
+
             // Empty it
-            await boardService.ClearSlotAsync(organization, new SlotAddress(boardId, paperId, index), cancellationToken);
+            await boardService.ClearSlotAsync(
+                organization, reviewerId, new SlotAddress(boardId, paperId, index), cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -132,6 +143,8 @@ public static class ProblemSelectionEndpoints
             Guid paperId,
             int index,
             MoveSlotRequest request,
+            HttpContext context,
+            IUserManager userManager,
             ISelectionBoardService boardService,
             CancellationToken cancellationToken) =>
         {
@@ -139,9 +152,12 @@ public static class ProblemSelectionEndpoints
             if (request.Direction is not { } direction)
                 throw new BadHttpRequestException("A move must say which way it goes.");
 
+            // The reviewer trading the slots
+            var reviewerId = await userManager.RequireUserIdAsync(context);
+
             // Trade them
             await boardService.MoveSlotAsync(
-                organization, new SlotAddress(boardId, paperId, index), direction, cancellationToken);
+                organization, reviewerId, new SlotAddress(boardId, paperId, index), direction, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();

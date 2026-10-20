@@ -181,6 +181,7 @@
     "SelectionBoardFinalized": "This selection has already gone into a competition, so its problems can't change.",
     "SelectionBoardOpened": "These competitions have already started, so their problems can't change.",
     "SelectionFinalizeBlocked": "This selection can't go into that competition. Every slot has to be filled and match its categories, and the competition has to still be waiting for problems.",
+    "SelectionNotLead": "Only the people in charge of this category can change its slots.",
     "SelectionProblemIncomplete": "Every problem in a competition needs a statement and a solution in every language.",
     "SelectionProposalUsed": "Another competition already has this problem.",
     "SelectionTargetNotFound": "This is no longer part of the selection. Refresh and try again.",
