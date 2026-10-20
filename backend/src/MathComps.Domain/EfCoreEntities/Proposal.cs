@@ -33,8 +33,8 @@ public class Proposal
     public Organization Organization { get; set; } = null!;
 
     /// <summary>
-    /// The number the reviewers quote the problem by, unique across every proposal. It never changes, wherever the
-    /// problem moves, so #21 stays #21 through a paper and back.
+    /// The number the reviewers quote the problem by, unique among its organization's proposals. It never changes,
+    /// wherever the problem moves, so #21 stays #21 through a paper and back.
     /// </summary>
     [Range(1, int.MaxValue)]
     public required int Number { get; set; }

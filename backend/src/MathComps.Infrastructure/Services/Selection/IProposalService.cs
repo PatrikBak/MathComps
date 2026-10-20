@@ -11,32 +11,46 @@ public interface IProposalService
     /// <summary>
     /// Sets a proposal aside, or brings it back.
     /// </summary>
+    /// <param name="organizationSlug">
+    /// The <see cref="Organization.Slug"/> of the organization whose pool the proposal is in.
+    /// </param>
     /// <param name="proposalId">The proposal.</param>
     /// <param name="isSetAside">Whether the proposal should be set aside.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the change is saved.</returns>
-    /// <exception cref="SelectionTargetNotFoundException">Thrown when no live proposal has the id.</exception>
-    Task SetAsideAsync(Guid proposalId, bool isSetAside, CancellationToken cancellationToken = default);
+    /// <exception cref="SelectionTargetNotFoundException">
+    /// Thrown when no live proposal of the organization's pool has the id.
+    /// </exception>
+    Task SetAsideAsync(
+        string organizationSlug, Guid proposalId, bool isSetAside, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Recommends a proposal for one category, or takes the recommendation back, leaving the other categories as
     /// they stand.
     /// </summary>
+    /// <param name="organizationSlug">
+    /// The <see cref="Organization.Slug"/> of the organization whose pool the proposal is in.
+    /// </param>
     /// <param name="proposalId">The proposal.</param>
     /// <param name="category">The category, by its <see cref="OrganizationCategory.Name"/>.</param>
     /// <param name="isRecommended">Whether the proposal should be recommended for <paramref name="category"/>.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the change is saved.</returns>
     /// <exception cref="SelectionTargetNotFoundException">
-    /// Thrown when no live proposal has the id, or its organization lists no category of the name.
+    /// Thrown when no live proposal of the organization's pool has the id, or the organization lists no category of
+    /// the name.
     /// </exception>
     Task SetRecommendedAsync(
-        Guid proposalId, string category, bool isRecommended, CancellationToken cancellationToken = default);
+        string organizationSlug, Guid proposalId, string category, bool isRecommended,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Sets one reviewer's rating of a proposal to the scores given, replacing whatever they gave before. Leaving
     /// out both scores takes the rating back.
     /// </summary>
+    /// <param name="organizationSlug">
+    /// The <see cref="Organization.Slug"/> of the organization whose pool the proposal is in.
+    /// </param>
     /// <param name="proposalId">The proposal.</param>
     /// <param name="raterId">The reviewer rating it.</param>
     /// <param name="beauty">
@@ -52,21 +66,28 @@ public interface IProposalService
     /// <exception cref="ProposalRatingValueException">
     /// Thrown when a score is off the scale or between its steps.
     /// </exception>
-    /// <exception cref="SelectionTargetNotFoundException">Thrown when no live proposal has the id.</exception>
+    /// <exception cref="SelectionTargetNotFoundException">
+    /// Thrown when no live proposal of the organization's pool has the id.
+    /// </exception>
     Task RateAsync(
-        Guid proposalId, Guid raterId, decimal? beauty, decimal? difficulty,
+        string organizationSlug, Guid proposalId, Guid raterId, decimal? beauty, decimal? difficulty,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deletes a proposal from the selection, emptying every slot it stands in. Its problem and conversations stay
     /// where they are, and the reviewers' discussion of it closes with it.
     /// </summary>
+    /// <param name="organizationSlug">
+    /// The <see cref="Organization.Slug"/> of the organization whose pool the proposal is in.
+    /// </param>
     /// <param name="proposalId">The proposal.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the deletion is saved.</returns>
-    /// <exception cref="SelectionTargetNotFoundException">Thrown when no live proposal has the id.</exception>
+    /// <exception cref="SelectionTargetNotFoundException">
+    /// Thrown when no live proposal of the organization's pool has the id.
+    /// </exception>
     /// <exception cref="SelectionProposalUsedException">Thrown when a paper has taken it.</exception>
-    Task DeleteAsync(Guid proposalId, CancellationToken cancellationToken = default);
+    Task DeleteAsync(string organizationSlug, Guid proposalId, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

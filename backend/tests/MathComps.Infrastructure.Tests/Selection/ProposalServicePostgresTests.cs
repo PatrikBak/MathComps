@@ -1,3 +1,4 @@
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Selection;
@@ -16,7 +17,7 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     : PostgresTestBase<IProposalService>(fixture)
 {
     /// <summary>
-    /// A proposal in the pool, standing on a draft board and recommended for the advanced category.
+    /// A proposal in MathComps' pool, standing on a draft board and recommended for the advanced category.
     /// </summary>
     private Guid _pooledId;
 
@@ -48,19 +49,19 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_recommendation_switches_one_category_and_keeps_the_rest() => RunTestAsync(async service =>
     {
         // Elementary switched on beside the advanced one already there
-        await service.SetRecommendedAsync(_pooledId, "elementary", isRecommended: true);
+        await service.SetRecommendedAsync(Organization.MathCompsSlug, _pooledId, "elementary", isRecommended: true);
 
         // Both stand
         Assert.Equal(["elementary", "advanced"], await RecommendedAsync());
 
         // Advanced switched on again
-        await service.SetRecommendedAsync(_pooledId, "advanced", isRecommended: true);
+        await service.SetRecommendedAsync(Organization.MathCompsSlug, _pooledId, "advanced", isRecommended: true);
 
         // Both still stand
         Assert.Equal(["elementary", "advanced"], await RecommendedAsync());
 
         // Advanced switched off
-        await service.SetRecommendedAsync(_pooledId, "advanced", isRecommended: false);
+        await service.SetRecommendedAsync(Organization.MathCompsSlug, _pooledId, "advanced", isRecommended: false);
 
         // Leaving elementary alone
         Assert.Equal(["elementary"], await RecommendedAsync());
@@ -76,7 +77,7 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     {
         // The olympiad's category, switched on for MathComps' proposal, refused
         await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
-            () => service.SetRecommendedAsync(_pooledId, "C", isRecommended: true));
+            () => service.SetRecommendedAsync(Organization.MathCompsSlug, _pooledId, "C", isRecommended: true));
 
         // The proposal still recommended for advanced alone
         Assert.Equal(["advanced"], await RecommendedAsync());
@@ -90,13 +91,13 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_rating_replaces_the_raters_own_and_leaves_the_rest() => RunTestAsync(async service =>
     {
         // The other reviewer's rating
-        await service.RateAsync(_pooledId, _otherRaterId, beauty: 2, difficulty: 3);
+        await service.RateAsync(Organization.MathCompsSlug, _pooledId, _otherRaterId, beauty: 2, difficulty: 3);
 
         // The rater's first rating
-        await service.RateAsync(_pooledId, _raterId, beauty: 4, difficulty: 1);
+        await service.RateAsync(Organization.MathCompsSlug, _pooledId, _raterId, beauty: 4, difficulty: 1);
 
         // Replaced, the difficulty now left out
-        await service.RateAsync(_pooledId, _raterId, beauty: 5, difficulty: null);
+        await service.RateAsync(Organization.MathCompsSlug, _pooledId, _raterId, beauty: 5, difficulty: null);
 
         // The rater's as replaced, the other reviewer's as given
         Assert.Equal([(_otherRaterId, 2, 3), (_raterId, 5, null)], await RatingsAsync());
@@ -110,10 +111,10 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     public Task Leaving_out_both_scores_takes_the_rating_back() => RunTestAsync(async service =>
     {
         // Rated
-        await service.RateAsync(_pooledId, _raterId, beauty: 3, difficulty: 4);
+        await service.RateAsync(Organization.MathCompsSlug, _pooledId, _raterId, beauty: 3, difficulty: 4);
 
         // Taken back
-        await service.RateAsync(_pooledId, _raterId, beauty: null, difficulty: null);
+        await service.RateAsync(Organization.MathCompsSlug, _pooledId, _raterId, beauty: null, difficulty: null);
 
         // No rating left
         Assert.Empty(await RatingsAsync());
@@ -128,31 +129,31 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     {
         // A beauty below the scale
         await Assert.ThrowsAsync<ProposalRatingValueException>(
-            () => service.RateAsync(_pooledId, _raterId, beauty: 0, difficulty: 3));
+            () => service.RateAsync(Organization.MathCompsSlug, _pooledId, _raterId, beauty: 0, difficulty: 3));
 
         // A difficulty past the scale
         await Assert.ThrowsAsync<ProposalRatingValueException>(
-            () => service.RateAsync(_pooledId, _raterId, beauty: 3, difficulty: 6));
+            () => service.RateAsync(Organization.MathCompsSlug, _pooledId, _raterId, beauty: 3, difficulty: 6));
 
         // A difficulty a tenth past the scale
         await Assert.ThrowsAsync<ProposalRatingValueException>(
-            () => service.RateAsync(_pooledId, _raterId, beauty: 3, difficulty: 5.1m));
+            () => service.RateAsync(Organization.MathCompsSlug, _pooledId, _raterId, beauty: 3, difficulty: 5.1m));
 
         // A beauty between two tenths
         await Assert.ThrowsAsync<ProposalRatingValueException>(
-            () => service.RateAsync(_pooledId, _raterId, beauty: 2.35m, difficulty: 3));
+            () => service.RateAsync(Organization.MathCompsSlug, _pooledId, _raterId, beauty: 2.35m, difficulty: 3));
 
         // Nothing written
         Assert.Empty(await RatingsAsync());
 
         // The ends of the scale
-        await service.RateAsync(_pooledId, _raterId, beauty: 1, difficulty: 5);
+        await service.RateAsync(Organization.MathCompsSlug, _pooledId, _raterId, beauty: 1, difficulty: 5);
 
         // The rating at the ends
         Assert.Equal([(_raterId, 1, 5)], await RatingsAsync());
 
         // Tenths
-        await service.RateAsync(_pooledId, _raterId, beauty: 3.7m, difficulty: 4.2m);
+        await service.RateAsync(Organization.MathCompsSlug, _pooledId, _raterId, beauty: 3.7m, difficulty: 4.2m);
 
         // The rating on the tenths
         Assert.Equal([(_raterId, 3.7m, 4.2m)], await RatingsAsync());
@@ -166,7 +167,7 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_delete_stamps_the_proposal_and_empties_its_slots() => RunTestAsync(async service =>
     {
         // Deleted
-        await service.DeleteAsync(_pooledId);
+        await service.DeleteAsync(Organization.MathCompsSlug, _pooledId);
 
         // The pooled proposal's deletion stamp, its row still there
         var deletedAt = await QueryValueAsync(context => context.Proposals
@@ -189,7 +190,8 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     [Fact]
     public Task A_used_proposal_cannot_be_deleted() => RunTestAsync(async service =>
         // Deleting the used proposal, refused
-        await Assert.ThrowsAsync<SelectionProposalUsedException>(() => service.DeleteAsync(_usedId)));
+        await Assert.ThrowsAsync<SelectionProposalUsedException>(
+            () => service.DeleteAsync(Organization.MathCompsSlug, _usedId)));
 
     /// <summary>
     /// A deleted proposal is gone from the selection, so it can't be set aside or rated. A change slipping through
@@ -199,15 +201,39 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_deleted_proposal_takes_no_change() => RunTestAsync(async service =>
     {
         // Deleted
-        await service.DeleteAsync(_pooledId);
+        await service.DeleteAsync(Organization.MathCompsSlug, _pooledId);
 
         // Setting the deleted proposal aside, refused
         await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
-            () => service.SetAsideAsync(_pooledId, isSetAside: true));
+            () => service.SetAsideAsync(Organization.MathCompsSlug, _pooledId, isSetAside: true));
 
         // And rating it, refused too
         await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
-            () => service.RateAsync(_pooledId, _raterId, beauty: 3, difficulty: null));
+            () => service.RateAsync(Organization.MathCompsSlug, _pooledId, _raterId, beauty: 3, difficulty: null));
+    });
+
+    /// <summary>
+    /// A proposal is reached through its own organization's selection alone, so a write naming another organization
+    /// is refused like one naming no proposal, and changes nothing.
+    /// </summary>
+    [Fact]
+    public Task A_change_through_another_organization_is_refused() => RunTestAsync(async service =>
+    {
+        // Setting the pooled proposal aside through the olympiad's selection, refused
+        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
+            () => service.SetAsideAsync("olympiad", _pooledId, isSetAside: true));
+
+        // Deleting the pooled proposal through the olympiad's selection, refused too
+        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(() => service.DeleteAsync("olympiad", _pooledId));
+
+        // The proposal as it stood
+        var proposal = await QueryValueAsync(context => context.Proposals
+            .Where(candidate => candidate.ProblemId == _pooledId)
+            .Select(candidate => new { candidate.IsSetAside, candidate.DeletedAt })
+            .SingleAsync());
+
+        // Neither set aside nor deleted
+        Assert.Equal((false, null), (proposal.IsSetAside, proposal.DeletedAt));
     });
 
     /// <inheritdoc/>

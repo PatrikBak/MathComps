@@ -14,21 +14,38 @@ namespace MathComps.Infrastructure.Tests.Selection;
 
 /// <summary>
 /// Covers <see cref="SelectionBoardService"/>: filling a draft's slots, finalizing a board into a hosted group's
-/// rounds, and refusing every change to a finalized board.
+/// rounds, refusing every change to a finalized board, and keeping each organization to its own boards and
+/// proposals.
 /// </summary>
 /// <remarks>
-/// The seed is sixteen proposals, the October and November groups not yet open with empty rounds, a September
-/// group already open, the full October board and a part-filled spare one sharing problem 1 with it.
-/// Problem 15 is written in English alone, and problem 16 sits in a September round rather than in the pool.
+/// The seed is sixteen of MathComps' proposals, the October and November groups not yet open with empty rounds, a
+/// September group already open, the full October board and a part-filled spare one sharing problem 1 with it.
+/// Problem 15 is written in English alone, and problem 16 sits in a September round rather than in the pool. The
+/// olympiad has one proposal of its own in the same pool, on a board of its own.
 /// </remarks>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture)
     : PostgresTestBase<ISelectionBoardService>(fixture)
 {
     /// <summary>
+    /// The slug of the olympiad, the organization beside MathComps.
+    /// </summary>
+    private const string OlympiadSlug = "olympiad";
+
+    /// <summary>
     /// The proposals by their number.
     /// </summary>
     private readonly Dictionary<int, Guid> _proposals = [];
+
+    /// <summary>
+    /// The olympiad's one proposal, in the pool beside MathComps' own.
+    /// </summary>
+    private Guid _olympiadProposalId;
+
+    /// <summary>
+    /// The olympiad's board, its one paper holding the olympiad's proposal.
+    /// </summary>
+    private Guid _olympiadBoardId;
 
     /// <summary>
     /// The round the pool's problems are parked in.
@@ -74,6 +91,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     {
         // Problem 13 into the October board's first elementary slot, which problem 1 holds
         await service.PlaceAsync(
+            Organization.MathCompsSlug,
             await SlotAsync(_octoberBoardId, HostedCompetitionCategory.Elementary, 0), _proposals[13]);
 
         // It stands there, and problem 1 is gone from the paper
@@ -96,6 +114,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     {
         // Problem 6, the second intermediate one, into the first elementary slot
         await service.PlaceAsync(
+            Organization.MathCompsSlug,
             await SlotAsync(_octoberBoardId, HostedCompetitionCategory.Elementary, 0), _proposals[6]);
 
         // It took problem 1's slot
@@ -119,6 +138,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
         {
             // Problem 1 to the last elementary slot of the spare board, which stands empty
             await service.PlaceAsync(
+                Organization.MathCompsSlug,
                 await SlotAsync(_spareBoardId, HostedCompetitionCategory.Elementary, 3), _proposals[1]);
 
             // Moved, its old slot emptied
@@ -128,12 +148,38 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
         });
 
     /// <summary>
+    /// A board and a proposal are each reached through their own organization's selection alone, so neither a write
+    /// naming another organization nor a proposal from another pool reaches the board.
+    /// </summary>
+    [Fact]
+    public Task A_placement_stays_inside_one_organization() => RunTestAsync(async service =>
+    {
+        // The spare board's last elementary slot, which stands empty
+        var slot = await SlotAsync(_spareBoardId, HostedCompetitionCategory.Elementary, 3);
+
+        // MathComps' board, reached through the olympiad's selection with the olympiad's own proposal, refused like a
+        // board that is not there
+        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
+            () => service.PlaceAsync(OlympiadSlug, slot, _olympiadProposalId));
+
+        // The olympiad's proposal, placed on MathComps' board, refused like a proposal that is not there
+        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
+            () => service.PlaceAsync(Organization.MathCompsSlug, slot, _olympiadProposalId));
+
+        // The slot as it stood
+        Assert.Equal(
+            [_proposals[1], _proposals[13], null, null],
+            await DraftSlotsAsync(_spareBoardId, HostedCompetitionCategory.Elementary));
+    });
+
+    /// <summary>
     /// A problem sitting in a hosted round has been taken by a paper, so no draft can take it again.
     /// </summary>
     [Fact]
     public Task A_draft_takes_no_problem_a_paper_has_taken() => RunTestAsync(async service =>
         // Problem 16, which sits in a September round
         await Assert.ThrowsAsync<SelectionProposalUsedException>(async () => await service.PlaceAsync(
+            Organization.MathCompsSlug,
             await SlotAsync(_spareBoardId, HostedCompetitionCategory.Advanced, 0), _proposals[16])));
 
     /// <summary>
@@ -145,6 +191,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     {
         // The spare board's second elementary slot one up
         await service.MoveSlotAsync(
+            Organization.MathCompsSlug,
             await SlotAsync(_spareBoardId, HostedCompetitionCategory.Elementary, 1), SlotDirection.Up);
 
         // The two traded
@@ -161,6 +208,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     public Task A_move_past_the_end_of_a_paper_is_refused() => RunTestAsync(async service =>
         // The last elementary slot one further down
         await Assert.ThrowsAsync<SelectionTargetNotFoundException>(async () => await service.MoveSlotAsync(
+            Organization.MathCompsSlug,
             await SlotAsync(_octoberBoardId, HostedCompetitionCategory.Elementary, 3), SlotDirection.Down)));
 
     /// <summary>
@@ -172,7 +220,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     public Task Finalizing_moves_the_papers_into_the_cycles_rounds() => RunTestAsync(async service =>
     {
         // The October board into the October group
-        await service.FinalizeAsync(_octoberBoardId, _octoberId);
+        await service.FinalizeAsync(Organization.MathCompsSlug, _octoberBoardId, _octoberId);
 
         // The first elementary problem sits first in the elementary round, on the slug that position calls for
         Assert.Equal(
@@ -213,7 +261,8 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     public Task Finalizing_a_board_with_an_empty_slot_is_refused() => RunTestAsync(async service =>
     {
         // The October board's last elementary slot emptied
-        await service.ClearSlotAsync(await SlotAsync(_octoberBoardId, HostedCompetitionCategory.Elementary, 3));
+        await service.ClearSlotAsync(
+            Organization.MathCompsSlug, await SlotAsync(_octoberBoardId, HostedCompetitionCategory.Elementary, 3));
 
         // Problem 4 back in the pool, the rest of the paper standing
         Assert.Equal(
@@ -222,7 +271,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
 
         // So the board no longer fills the group
         await Assert.ThrowsAsync<SelectionFinalizeBlockedException>(
-            () => service.FinalizeAsync(_octoberBoardId, _octoberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, _octoberBoardId, _octoberId));
 
         // And nothing moved
         Assert.Equal(_proposalsRoundId, await RoundOfAsync(_proposals[1]));
@@ -243,7 +292,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
 
         // The full October board into it
         await Assert.ThrowsAsync<SelectionFinalizeBlockedException>(
-            () => service.FinalizeAsync(_octoberBoardId, _novemberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, _octoberBoardId, _novemberId));
 
         // And nothing moved
         Assert.Equal(_proposalsRoundId, await RoundOfAsync(_proposals[1]));
@@ -265,7 +314,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
 
         // So it pairs with no round
         await Assert.ThrowsAsync<SelectionFinalizeBlockedException>(
-            () => service.FinalizeAsync(_octoberBoardId, _octoberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, _octoberBoardId, _octoberId));
     });
 
     /// <summary>
@@ -296,7 +345,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
 
         // Refused
         await Assert.ThrowsAsync<SelectionFinalizeBlockedException>(
-            () => service.FinalizeAsync(_octoberBoardId, _octoberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, _octoberBoardId, _octoberId));
     });
 
     /// <summary>
@@ -310,7 +359,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
 
         // Refused
         await Assert.ThrowsAsync<SelectionProblemIncompleteException>(
-            () => service.FinalizeAsync(_octoberBoardId, _octoberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, _octoberBoardId, _octoberId));
 
         // With nothing moved
         Assert.Equal(_proposalsRoundId, await RoundOfAsync(_proposals[1]));
@@ -335,7 +384,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
 
         // Refused like a missing one
         await Assert.ThrowsAsync<SelectionProblemIncompleteException>(
-            () => service.FinalizeAsync(_octoberBoardId, _octoberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, _octoberBoardId, _octoberId));
     });
 
     /// <summary>
@@ -349,7 +398,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
 
         // Refused
         await Assert.ThrowsAsync<SelectionProposalUsedException>(
-            () => service.FinalizeAsync(_octoberBoardId, _octoberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, _octoberBoardId, _octoberId));
     });
 
     /// <summary>
@@ -369,10 +418,25 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
 
         // The October board, whose first elementary problem needs that slug
         await Assert.ThrowsAsync<ProblemSlugTakenException>(
-            () => service.FinalizeAsync(_octoberBoardId, _octoberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, _octoberBoardId, _octoberId));
 
         // With nothing moved
         Assert.Equal(_proposalsRoundId, await RoundOfAsync(_proposals[1]));
+    });
+
+    /// <summary>
+    /// The hosted groups take MathComps' boards alone, so another organization's board finalized into one is refused
+    /// like a group that is not there, and nothing moves.
+    /// </summary>
+    [Fact]
+    public Task Another_organizations_board_finalizes_into_no_group() => RunTestAsync(async service =>
+    {
+        // The olympiad's board into the October group, refused
+        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
+            () => service.FinalizeAsync(OlympiadSlug, _olympiadBoardId, _octoberId));
+
+        // Its proposal still in the pool
+        Assert.Equal(_proposalsRoundId, await RoundOfAsync(_olympiadProposalId));
     });
 
     /// <summary>
@@ -382,20 +446,22 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     public Task A_finalized_board_takes_no_change() => RunTestAsync(async service =>
     {
         // The October board finalized
-        await service.FinalizeAsync(_octoberBoardId, _octoberId);
+        await service.FinalizeAsync(Organization.MathCompsSlug, _octoberBoardId, _octoberId);
 
         // Its first elementary slot
         var slot = await SlotAsync(_octoberBoardId, HostedCompetitionCategory.Elementary, 0);
 
         // Problem 13 put there, refused
-        await Assert.ThrowsAsync<SelectionBoardFinalizedException>(() => service.PlaceAsync(slot, _proposals[13]));
+        await Assert.ThrowsAsync<SelectionBoardFinalizedException>(() => service.PlaceAsync(
+            Organization.MathCompsSlug, slot, _proposals[13]));
 
         // The slot moved down, refused
         await Assert.ThrowsAsync<SelectionBoardFinalizedException>(
-            () => service.MoveSlotAsync(slot, SlotDirection.Down));
+            () => service.MoveSlotAsync(Organization.MathCompsSlug, slot, SlotDirection.Down));
 
         // The slot emptied, refused
-        await Assert.ThrowsAsync<SelectionBoardFinalizedException>(() => service.ClearSlotAsync(slot));
+        await Assert.ThrowsAsync<SelectionBoardFinalizedException>(() => service.ClearSlotAsync(
+            Organization.MathCompsSlug, slot));
     });
 
     /// <summary>
@@ -407,11 +473,11 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     public Task Finalizing_a_finalized_board_again_is_refused() => RunTestAsync(async service =>
     {
         // The October board finalized
-        await service.FinalizeAsync(_octoberBoardId, _octoberId);
+        await service.FinalizeAsync(Organization.MathCompsSlug, _octoberBoardId, _octoberId);
 
         // Finalizing the October board into the November group, refused
         await Assert.ThrowsAsync<SelectionBoardFinalizedException>(
-            () => service.FinalizeAsync(_octoberBoardId, _novemberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, _octoberBoardId, _novemberId));
     });
 
     /// <summary>
@@ -428,7 +494,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
 
         // Emptying the spare board's first elementary slot, refused for the opened group
         await Assert.ThrowsAsync<SelectionBoardOpenedException>(async () => await service.ClearSlotAsync(
-            await SlotAsync(_spareBoardId, HostedCompetitionCategory.Elementary, 0)));
+            Organization.MathCompsSlug, await SlotAsync(_spareBoardId, HostedCompetitionCategory.Elementary, 0)));
     });
 
     /// <inheritdoc/>
@@ -447,6 +513,15 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
 
         // Problem 15, written in English alone
         _proposals[15] = SelectionSeed.NewProposal(context, pool, 15, 15, Language.EN);
+
+        // The olympiad, listing a category of its own
+        var olympiadId = SelectionSeed.NewOrganization(context, OlympiadSlug, "C");
+
+        // Its proposal, in the same round
+        _olympiadProposalId = SelectionSeed.NewProposal(context, olympiadId, pool, 1, 20);
+
+        // Its board, holding the proposal
+        _olympiadBoardId = SelectionSeed.NewBoard(context, olympiadId, "Olympiad", _olympiadProposalId).Id;
 
         // The instant every group's opening is set against
         var now = DateTimeOffset.UtcNow;

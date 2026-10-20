@@ -2,13 +2,14 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.Tests.TestInfrastructure;
 
 /// <summary>
 /// Seeds the problem selection: the pool's problems parked in a proposals round, the hosted groups a board can be
-/// finalized into, the boards themselves, and the addresses on the MathComps organization's list. Every text is
-/// invented and named after what it is, so a wrong one reads as wrong.
+/// finalized into, the boards themselves, and the organizations picking the problems with the addresses on their
+/// lists. Every text is invented and named after what it is, so a wrong one reads as wrong.
 /// </summary>
 public static class SelectionSeed
 {
@@ -67,9 +68,21 @@ public static class SelectionSeed
     /// <param name="email"><inheritdoc cref="OrganizationMember.Email" path="/summary"/></param>
     /// <param name="addedAt"><inheritdoc cref="OrganizationMember.AddedAt" path="/summary"/></param>
     public static void NewMember(MathCompsDbContext context, string email, DateTimeOffset addedAt) =>
+        // The address on MathComps' list since the instant given
+        NewMember(context, MathCompsId(context), email, addedAt);
+
+    /// <summary>
+    /// Tracks an address on an organization's list, which makes the account carrying it a member.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="organizationId">The organization whose list it goes on.</param>
+    /// <param name="email"><inheritdoc cref="OrganizationMember.Email" path="/summary"/></param>
+    /// <param name="addedAt"><inheritdoc cref="OrganizationMember.AddedAt" path="/summary"/></param>
+    public static void NewMember(
+        MathCompsDbContext context, Guid organizationId, string email, DateTimeOffset addedAt) =>
         // The address on the list since the instant given
         context.OrganizationMembers.Add(
-            new OrganizationMember { OrganizationId = MathCompsId(context), Email = email, AddedAt = addedAt });
+            new OrganizationMember { OrganizationId = organizationId, Email = email, AddedAt = addedAt });
 
     /// <summary>
     /// Tracks the round of the proposals node the pool's problems are parked in.
@@ -95,9 +108,34 @@ public static class SelectionSeed
     }
 
     /// <summary>
-    /// Tracks one problem in a round, written in the languages given, and the proposal filing it in the pool.
+    /// Tracks one problem in a round, written in the languages given, and the proposal filing it in MathComps' pool.
     /// </summary>
     /// <param name="context">The seeding context.</param>
+    /// <param name="round">
+    /// <inheritdoc cref="NewProposal(MathCompsDbContext, Guid, Round, int, int, Language[])"
+    ///     path="/param[@name='round']"/>
+    /// </param>
+    /// <param name="number">
+    /// <inheritdoc cref="NewProposal(MathCompsDbContext, Guid, Round, int, int, Language[])"
+    ///     path="/param[@name='number']"/>
+    /// </param>
+    /// <param name="position"><inheritdoc cref="Problem.Number" path="/summary"/></param>
+    /// <param name="languages">
+    /// <inheritdoc cref="NewProposal(MathCompsDbContext, Guid, Round, int, int, Language[])"
+    ///     path="/param[@name='languages']"/>
+    /// </param>
+    /// <returns>The problem's id, which is also the proposal's.</returns>
+    public static Guid NewProposal(
+        MathCompsDbContext context, Round round, int number, int position, params Language[] languages) =>
+        // Filed in MathComps' pool
+        NewProposal(context, MathCompsId(context), round, number, position, languages);
+
+    /// <summary>
+    /// Tracks one problem in a round, written in the languages given, and the proposal filing it in an
+    /// organization's pool.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="organizationId">The organization whose pool the proposal is in.</param>
     /// <param name="round">The round it sits in.</param>
     /// <param name="number">
     /// The proposal's <see cref="Proposal.Number"/>, which its title and the problem's texts name too.
@@ -109,7 +147,12 @@ public static class SelectionSeed
     /// </param>
     /// <returns>The problem's id, which is also the proposal's.</returns>
     public static Guid NewProposal(
-        MathCompsDbContext context, Round round, int number, int position, params Language[] languages)
+        MathCompsDbContext context,
+        Guid organizationId,
+        Round round,
+        int number,
+        int position,
+        params Language[] languages)
     {
         // The problem, at its position in the round
         var problemId = Guid.CreateVersion7();
@@ -126,11 +169,11 @@ public static class SelectionSeed
             foreach (var documentType in new[] { DocumentType.Statement, DocumentType.Solution })
                 context.ProblemTexts.Add(NewText(problemId, documentType, language, number));
 
-        // The proposal filing the problem in MathComps' pool, under a number of its own
+        // The proposal filing the problem in the organization's pool, under a number of its own
         context.Proposals.Add(new Proposal
         {
             ProblemId = problemId,
-            OrganizationId = MathCompsId(context),
+            OrganizationId = organizationId,
             Number = number,
             Title = $"Proposal {number}",
             Area = ProposalArea.Algebra,
@@ -155,13 +198,14 @@ public static class SelectionSeed
     }
 
     /// <summary>
-    /// Tracks an organization other than MathComps, listing categories of its own that no hosted round runs, its
-    /// problems needing any one language.
+    /// Tracks an organization other than MathComps, whose members the caller puts on its list, listing categories of
+    /// its own that no hosted round runs, its problems needing any one language.
     /// </summary>
     /// <param name="context">The seeding context.</param>
     /// <param name="slug"><inheritdoc cref="Organization.Slug" path="/summary"/></param>
     /// <param name="categories">Its categories by name, in the order they run.</param>
-    public static void NewOrganization(MathCompsDbContext context, string slug, params string[] categories)
+    /// <returns>The organization's id.</returns>
+    public static Guid NewOrganization(MathCompsDbContext context, string slug, params string[] categories)
     {
         // The organization
         var organization = new Organization { Slug = slug, NeedsEveryLanguage = false };
@@ -175,6 +219,9 @@ public static class SelectionSeed
                 Position = position,
                 Name = categories[position],
             });
+
+        // Its id
+        return organization.Id;
     }
 
     /// <summary>
@@ -230,25 +277,44 @@ public static class SelectionSeed
     /// <param name="context">The seeding context.</param>
     /// <param name="name"><inheritdoc cref="SelectionBoard.Name" path="/summary"/></param>
     /// <param name="slots">
+    /// <inheritdoc cref="NewBoard(MathCompsDbContext, Guid, string, Guid?[])" path="/param[@name='slots']"/>
+    /// </param>
+    /// <returns>The board, its papers tracked beside it.</returns>
+    public static SelectionBoard NewBoard(MathCompsDbContext context, string name, params Guid?[] slots) =>
+        // MathComps' own
+        NewBoard(context, MathCompsId(context), name, slots);
+
+    /// <summary>
+    /// Tracks a draft board of an organization with one paper per category, each of four slots, filled from the ids
+    /// given.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="organizationId">The organization picking its papers.</param>
+    /// <param name="name"><inheritdoc cref="SelectionBoard.Name" path="/summary"/></param>
+    /// <param name="slots">
     /// What stands in each slot, paper after paper in the order the categories run; null for an empty slot.
     /// Missing trailing entries stand empty.
     /// </param>
     /// <returns>The board, its papers tracked beside it.</returns>
-    public static SelectionBoard NewBoard(MathCompsDbContext context, string name, params Guid?[] slots)
+    public static SelectionBoard NewBoard(
+        MathCompsDbContext context, Guid organizationId, string name, params Guid?[] slots)
     {
-        // The board, MathComps' own
+        // The board, the organization's own
         var board = new SelectionBoard
         {
             Id = Guid.CreateVersion7(),
-            OrganizationId = MathCompsId(context),
+            OrganizationId = organizationId,
             Name = name,
             CreatedAt = DateTimeOffset.UtcNow,
         };
         context.SelectionBoards.Add(board);
 
-        // MathComps' categories, in the order they run
-        var categories = context.OrganizationCategories
-            .Where(category => category.OrganizationId == board.OrganizationId)
+        // The organization's categories already written, tracked beside any the seed has yet to write
+        context.OrganizationCategories.Where(category => category.OrganizationId == organizationId).Load();
+
+        // All of them, in the order they run
+        var categories = context.OrganizationCategories.Local
+            .Where(category => category.OrganizationId == organizationId)
             .OrderBy(category => category.Position)
             .ToList();
 

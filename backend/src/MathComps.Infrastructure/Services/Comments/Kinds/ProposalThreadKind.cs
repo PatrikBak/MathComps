@@ -37,21 +37,36 @@ public class ProposalThreadKind(IOrganizationMemberService members)
 
     /// <inheritdoc />
     protected override IQueryable<KeyValuePair<string, int>> CountById(
-        MathCompsDbContext dbContext, ImmutableList<Guid> ids) =>
+        MathCompsDbContext dbContext, ImmutableList<Guid> threadIds) =>
         // Each standing proposal's active comments, keyed by its id
         dbContext.ProposalComments
-            .Where(link => ids.Contains(link.ProposalId) && link.Proposal.DeletedAt == null)
+            .Where(link => threadIds.Contains(link.ProposalId) && link.Proposal.DeletedAt == null)
             .Where(link => link.Comment.Status == CommentStatus.Active)
             .GroupBy(link => link.ProposalId)
             .Select(group => new KeyValuePair<string, int>(group.Key.ToString(), group.Count()));
 
     /// <inheritdoc />
     protected override IQueryable<KeyValuePair<string, Guid>> LinksById(
-        MathCompsDbContext dbContext, ImmutableList<Guid> ids) =>
+        MathCompsDbContext dbContext, ImmutableList<Guid> threadIds) =>
         // Each standing proposal's comments, keyed by its id
         dbContext.ProposalComments
-            .Where(link => ids.Contains(link.ProposalId) && link.Proposal.DeletedAt == null)
+            .Where(link => threadIds.Contains(link.ProposalId) && link.Proposal.DeletedAt == null)
             .Select(link => new KeyValuePair<string, Guid>(link.ProposalId.ToString(), link.CommentId));
+
+    /// <inheritdoc />
+    protected override IQueryable<Guid> InOrganizations(
+        MathCompsDbContext dbContext, ImmutableList<Guid> threadIds, IReadOnlyList<Guid> organizationIds) =>
+        // The proposals the ids name that sit in one of the organizations' pools
+        dbContext.Proposals
+            .Where(proposal => threadIds.Contains(proposal.ProblemId))
+            .Where(proposal => organizationIds.Contains(proposal.OrganizationId))
+            .Select(proposal => proposal.ProblemId);
+
+    /// <inheritdoc />
+    protected override Task<bool> IsOpenToAsync(
+        MathCompsDbContext dbContext, ProposalAnchor anchor, CommentViewer? viewer) =>
+        // Open to the reviewers of the organization whose pool the proposal is in
+        IsReachableAsync(dbContext, anchor.ProposalId, viewer);
 
     /// <inheritdoc />
     protected override async Task<ProposalAnchor> ResolveAsync(MathCompsDbContext dbContext, CommentTarget target)

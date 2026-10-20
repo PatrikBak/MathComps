@@ -1,13 +1,14 @@
 using MathComps.Api.Constants;
 using MathComps.Domain.Contracts.Selection;
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services.Selection;
 using MathComps.Infrastructure.Services.Users;
 
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Maps the endpoints of the problem selection: one read returning the whole of it, one returning its discussions,
-/// and one write per change a reviewer makes. Every route is gated by the
+/// Maps the endpoints of the MathComps organization's problem selection: one read returning the whole of it, one
+/// returning its discussions, and one write per change a reviewer makes. Every route is gated by the
 /// <see cref="AuthorizationPolicies.OrganizationMember"/> policy, since the proposals are problems no student
 /// may see.
 /// </summary>
@@ -47,7 +48,7 @@ public static class ProblemSelectionEndpoints
 
             // The selection, its cycles named in the caller's language
             var selection = await selectionService.GetSelectionAsync(
-                reviewerId, EndpointHelpers.GetRequestLanguage(), cancellationToken);
+                Organization.MathCompsSlug, reviewerId, EndpointHelpers.GetRequestLanguage(), cancellationToken);
 
             // Return it
             return Results.Ok(selection);
@@ -66,7 +67,8 @@ public static class ProblemSelectionEndpoints
             var viewer = await CommentEndpoints.RequireViewerAsync(userManager, context);
 
             // The discussions of every proposal and paper the selection holds
-            var discussions = await selectionService.GetDiscussionsAsync(viewer, cancellationToken);
+            var discussions = await selectionService.GetDiscussionsAsync(
+                Organization.MathCompsSlug, viewer, cancellationToken);
 
             // Return the discussions
             return Results.Ok(discussions);
@@ -88,7 +90,8 @@ public static class ProblemSelectionEndpoints
                 throw new BadHttpRequestException("A placement must name the proposal.");
 
             // Place it
-            await boardService.PlaceAsync(new SlotAddress(boardId, paperId, index), proposalId, cancellationToken);
+            await boardService.PlaceAsync(
+                Organization.MathCompsSlug, new SlotAddress(boardId, paperId, index), proposalId, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -105,7 +108,8 @@ public static class ProblemSelectionEndpoints
             CancellationToken cancellationToken) =>
         {
             // Empty it
-            await boardService.ClearSlotAsync(new SlotAddress(boardId, paperId, index), cancellationToken);
+            await boardService.ClearSlotAsync(
+                Organization.MathCompsSlug, new SlotAddress(boardId, paperId, index), cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -127,7 +131,8 @@ public static class ProblemSelectionEndpoints
                 throw new BadHttpRequestException("A move must say which way it goes.");
 
             // Trade them
-            await boardService.MoveSlotAsync(new SlotAddress(boardId, paperId, index), direction, cancellationToken);
+            await boardService.MoveSlotAsync(
+                Organization.MathCompsSlug, new SlotAddress(boardId, paperId, index), direction, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -147,7 +152,7 @@ public static class ProblemSelectionEndpoints
                 throw new BadHttpRequestException("A finalization must name the cycle.");
 
             // Finalize it
-            await boardService.FinalizeAsync(boardId, cycleId, cancellationToken);
+            await boardService.FinalizeAsync(Organization.MathCompsSlug, boardId, cycleId, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -167,7 +172,8 @@ public static class ProblemSelectionEndpoints
                 throw new BadHttpRequestException("The change must say whether the proposal is set aside.");
 
             // Change it
-            await proposalService.SetAsideAsync(proposalId, isSetAside, cancellationToken);
+            await proposalService.SetAsideAsync(
+                Organization.MathCompsSlug, proposalId, isSetAside, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -187,7 +193,8 @@ public static class ProblemSelectionEndpoints
                 throw new BadHttpRequestException("The change must name the category and say which way it goes.");
 
             // Change it
-            await proposalService.SetRecommendedAsync(proposalId, category, isRecommended, cancellationToken);
+            await proposalService.SetRecommendedAsync(
+                Organization.MathCompsSlug, proposalId, category, isRecommended, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -209,7 +216,12 @@ public static class ProblemSelectionEndpoints
 
             // Change it
             await proposalService.RateAsync(
-                proposalId, raterId, request.Beauty, request.Difficulty, cancellationToken);
+                Organization.MathCompsSlug,
+                proposalId,
+                raterId,
+                request.Beauty,
+                request.Difficulty,
+                cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -224,7 +236,7 @@ public static class ProblemSelectionEndpoints
             CancellationToken cancellationToken) =>
         {
             // Delete it
-            await proposalService.DeleteAsync(proposalId, cancellationToken);
+            await proposalService.DeleteAsync(Organization.MathCompsSlug, proposalId, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();

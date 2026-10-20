@@ -11,10 +11,11 @@ using static MathComps.Infrastructure.Tests.TestInfrastructure.HostedSeed;
 namespace MathComps.Infrastructure.Tests.Comments;
 
 /// <summary>
-/// Integration tests for a kind of discussion open only to the reviewers, the MathComps organization's members, as
-/// <see cref="ICommentService"/> keeps it against a real PostgreSQL database: that those accounts read it, write and
-/// react in it and count it, that nobody else reaches it and a refusal reads like a thread that is not there, and
-/// that each subject keeps its own discussion. A derived class names the kind and seeds two of its subjects.
+/// Integration tests for a kind of discussion open only to the reviewers, the members of the organization whose
+/// selection holds what it hangs off, as <see cref="ICommentService"/> keeps it against a real PostgreSQL database:
+/// that those accounts read it, write and react in it and count it, that nobody else reaches it, a member of another
+/// organization included, and a refusal reads like a thread that is not there, and that each subject keeps its own
+/// discussion. A derived class names the kind and seeds two of its subjects, both MathComps'.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public abstract class ReviewerCommentPostgresTests(PostgresContainerFixture fixture)
@@ -39,6 +40,11 @@ public abstract class ReviewerCommentPostgresTests(PostgresContainerFixture fixt
     /// A student, who is no reviewer and does not administer the site.
     /// </summary>
     protected CommentViewer Student { get; } = new(Guid.CreateVersion7(), IsAdmin: false);
+
+    /// <summary>
+    /// A member of the olympiad's commission, on its list alone.
+    /// </summary>
+    private readonly CommentViewer _commissioner = new(Guid.CreateVersion7(), IsAdmin: false);
 
     /// <summary>
     /// The subject discussed.
@@ -109,7 +115,7 @@ public abstract class ReviewerCommentPostgresTests(PostgresContainerFixture fixt
         // A reviewer's comment in the discussion
         var comment = await service.CreateCommentAsync(target, Reviewer, "Too easy for the slot.");
 
-        // Every caller short of a reviewer
+        // Every caller on no organization's list
         CommentViewer?[] outsiders = [_admin, Student, null];
 
         // No outsider reads the discussion or counts it
@@ -123,7 +129,7 @@ public abstract class ReviewerCommentPostgresTests(PostgresContainerFixture fixt
                 () => service.GetCommentCountsAsync(TargetType, [SubjectId.ToString()], outsider));
         }
 
-        // Every signed-in outsider
+        // Every signed-in caller on no organization's list
         CommentViewer[] signedIn = [_admin, Student];
 
         // No signed-in outsider reads the discussion in bulk, writes, edits, deletes or reacts in it
@@ -157,6 +163,34 @@ public abstract class ReviewerCommentPostgresTests(PostgresContainerFixture fixt
         Assert.Equal(comment.Id, root.Id);
         Assert.False(root.IsDeleted);
         Assert.Empty(root.Reactions);
+    });
+
+    /// <summary>
+    /// A member of another organization reaches none of MathComps' discussions: reading one is refused like a thread
+    /// that is not there, reacting to one of its comments like a comment that is not there, and a count asked for its
+    /// subject comes back with no entry for it.
+    /// </summary>
+    [Fact]
+    public Task A_member_of_another_organization_reaches_no_discussion() => RunTestAsync(async service =>
+    {
+        // The discussion of the subject
+        var target = Discussion(SubjectId);
+
+        // A reviewer's comment in the discussion
+        var comment = await service.CreateCommentAsync(target, Reviewer, "Too easy for the slot.");
+
+        // Reading the discussion as the commissioner, refused like a missing thread
+        await Assert.ThrowsAsync<CommentTargetNotFoundException>(() => service.GetCommentsAsync(target, _commissioner));
+
+        // Reacting to the comment as the commissioner, refused like a missing comment
+        await Assert.ThrowsAsync<CommentNotFoundException>(
+            () => service.PressReactionAsync(comment.Id, _commissioner, CommentReactionKind.ThumbsUp));
+
+        // The subject's count, as the commissioner asks for it
+        var counts = await service.GetCommentCountsAsync(TargetType, [SubjectId.ToString()], _commissioner);
+
+        // No entry for the subject
+        Assert.Empty(counts);
     });
 
     /// <summary>
@@ -285,16 +319,23 @@ public abstract class ReviewerCommentPostgresTests(PostgresContainerFixture fixt
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
-        // The reviewers, the admin and the student
+        // The reviewers, the admin, the student and the commissioner
         context.Users.AddRange(
             NewUser(Reviewer.UserId, "Reviewer"),
             NewUser(OtherReviewer.UserId, "OtherReviewer"),
             NewUser(_admin.UserId, "Admin"),
-            NewUser(Student.UserId, "Student"));
+            NewUser(Student.UserId, "Student"),
+            NewUser(_commissioner.UserId, "Commissioner"));
 
         // Each reviewer's address on the MathComps organization's list
         SelectionSeed.NewMember(context, "reviewer@example.com", DateTimeOffset.UtcNow);
         SelectionSeed.NewMember(context, "otherreviewer@example.com", DateTimeOffset.UtcNow);
+
+        // Another organization, the olympiad
+        var olympiadId = SelectionSeed.NewOrganization(context, "olympiad");
+
+        // The commissioner's address on the olympiad's list alone
+        SelectionSeed.NewMember(context, olympiadId, "commissioner@example.com", DateTimeOffset.UtcNow);
 
         // The two subjects
         SeedSubjects(context);

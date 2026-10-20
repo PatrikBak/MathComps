@@ -46,4 +46,12 @@ public interface IOrganizationMemberService
     /// <returns>When each address was put on the list, by account, for the ones among them who are members.</returns>
     Task<IReadOnlyDictionary<Guid, DateTimeOffset>> GetMemberSinceAsync(
         IReadOnlyCollection<Guid> userIds, string organizationSlug, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The ids of the organizations an account is a member of.
+    /// </summary>
+    /// <param name="userId">The account membership is read for.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The <see cref="Organization.Id"/> of each, none for an account on no list.</returns>
+    Task<IReadOnlyList<Guid>> GetOrganizationIdsAsync(Guid userId, CancellationToken cancellationToken = default);
 }

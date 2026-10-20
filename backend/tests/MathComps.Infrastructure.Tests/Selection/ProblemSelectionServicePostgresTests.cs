@@ -16,20 +16,28 @@ namespace MathComps.Infrastructure.Tests.Selection;
 
 /// <summary>
 /// Covers <see cref="ProblemSelectionService"/>: the field mapping of the selection read, which proposals, boards and
-/// cycles it holds once groups open, whose conversations it lists, and which discussions the discussions read holds.
+/// cycles it holds once groups open, whose conversations it lists, which discussions the discussions read holds, and
+/// that each organization's selection holds its own alone.
 /// </summary>
 /// <remarks>
 /// The seed is a pool of three proposals with a draft holding one. The October group has not opened and its
 /// rounds are empty. The November group has not opened either, and has a board finalized into it. The September
 /// group has opened, with a board finalized into it too. Each finalized board's problems sit in its group's rounds.
-/// One problem sits in a December round no group runs any more, the way a corrected manifest leaves one. One comment
-/// stands in the discussion of the first proposal, the first November problem, the September problem, the December
-/// problem, and the first paper of every board.
+/// One problem sits in a December round no group runs any more, the way a corrected manifest leaves one. The
+/// olympiad lists a category of its own and has a proposal of its own in the pool, under a number MathComps' pool
+/// uses too, on a board of its own, with its commissioner's conversation about it. One comment stands in the
+/// discussion of the first proposal, the first November problem, the September problem, the December problem, the
+/// olympiad's proposal, and the first paper of every board.
 /// </remarks>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixture)
     : PostgresTestBase<IProblemSelectionService>(fixture)
 {
+    /// <summary>
+    /// The slug of the olympiad, the organization beside MathComps.
+    /// </summary>
+    private const string OlympiadSlug = "olympiad";
+
     /// <summary>
     /// A reviewer whose account is live.
     /// </summary>
@@ -49,6 +57,11 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     /// A reviewer on the MathComps organization's list only since yesterday.
     /// </summary>
     private readonly Guid _latecomerId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// A member of the olympiad's commission, on its list alone.
+    /// </summary>
+    private readonly Guid _commissionerId = Guid.CreateVersion7();
 
     /// <summary>
     /// The pool's proposals by their number. The first is filed, set aside, written in two languages, talked about
@@ -96,6 +109,21 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     /// </summary>
     private Guid _septemberPaperId;
 
+    /// <summary>
+    /// The olympiad's proposal, discussed.
+    /// </summary>
+    private Guid _olympiadProposalId;
+
+    /// <summary>
+    /// The olympiad's board, holding its proposal.
+    /// </summary>
+    private Guid _olympiadBoardId;
+
+    /// <summary>
+    /// The first paper of the olympiad's board, discussed.
+    /// </summary>
+    private Guid _olympiadPaperId;
+
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services) =>
         // The service under test, with the rest of the selection.
@@ -110,7 +138,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     public Task A_proposal_reads_with_its_filing_and_its_texts() => RunTestAsync(async service =>
     {
         // The selection
-        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
+        var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
 
         // The first proposal
         var proposal = selection.Proposals.Single(candidate => candidate.Id == _pool[1]);
@@ -153,7 +181,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     public Task The_categories_are_the_organizations_own_in_order() => RunTestAsync(async service =>
     {
         // The selection
-        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
+        var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
 
         // MathComps' three, easiest first
         Assert.Equal(
@@ -179,7 +207,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     public Task A_draft_reads_its_slots_in_place() => RunTestAsync(async service =>
     {
         // The selection
-        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
+        var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
 
         // The draft
         var board = selection.Boards.Single(candidate => candidate.Finalization is null);
@@ -201,7 +229,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     public Task A_finalized_board_reads_its_slots_off_its_rounds() => RunTestAsync(async service =>
     {
         // The selection
-        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
+        var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
 
         // The November board
         var board = selection.Boards.Single(candidate => candidate.Id == _novemberBoardId);
@@ -228,7 +256,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     public Task An_opened_board_leaves_the_selection_with_its_problems() => RunTestAsync(async service =>
     {
         // The selection
-        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
+        var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
 
         // Two boards left: the November one and the draft
         Assert.Equal(2, selection.Boards.Count);
@@ -248,7 +276,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     public Task A_deleted_proposal_is_gone_from_the_read() => RunTestAsync(async service =>
     {
         // The selection
-        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
+        var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
 
         // Without the third proposal
         Assert.DoesNotContain(selection.Proposals, proposal => proposal.Id == _pool[3]);
@@ -258,14 +286,15 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     /// The discussions read holds what is said about the proposals still in the selection, a problem the November
     /// board took among them, and about the papers on its boards: the draft and the one finalized into a group still
     /// to open. What is said about the opened group's problem, the paper on the board filling that group and the
-    /// December problem, in a round no group runs, stays out, and the second proposal, which nobody discusses, gets
-    /// no entry.
+    /// December problem, in a round no group runs, stays out, and so does what is said about the olympiad's proposal
+    /// and paper. The second proposal, which nobody discusses, gets no entry.
     /// </summary>
     [Fact]
     public Task The_discussions_are_those_of_what_the_selection_holds() => RunTestAsync(async service =>
     {
         // The discussions, as the live reviewer reads them
-        var discussions = await service.GetDiscussionsAsync(new CommentViewer(_reviewerId, IsAdmin: false));
+        var discussions = await service.GetDiscussionsAsync(
+            Organization.MathCompsSlug, new CommentViewer(_reviewerId, IsAdmin: false));
 
         // The first proposal's and the November problem's discussions alone, each holding its one comment
         Assert.Equivalent(
@@ -296,7 +325,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     public Task The_cycles_are_the_groups_still_taking_a_board() => RunTestAsync(async service =>
     {
         // The selection, read in Slovak
-        var selection = await service.GetSelectionAsync(_reviewerId, Language.SK);
+        var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.SK);
 
         // October alone
         var cycle = Assert.Single(selection.Cycles);
@@ -343,7 +372,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         });
 
         // The selection
-        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
+        var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
 
         // So no group takes a board
         Assert.Empty(selection.Cycles);
@@ -361,7 +390,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         RunTestAsync(async service =>
         {
             // The selection
-            var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
+            var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
 
             // The first proposal's conversations
             var conversations = selection.Conversations
@@ -392,7 +421,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     public Task Ratings_read_with_their_raters() => RunTestAsync(async service =>
     {
         // The selection, as the live reviewer reads it
-        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
+        var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
 
         // The first proposal's ratings: the reader's own, then the deleted reviewer's, which has no name to go by
         Assert.Equal(
@@ -414,7 +443,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     public Task MathComps_needs_every_language() => RunTestAsync(async service =>
     {
         // The selection
-        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
+        var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
 
         // Needing a text in every language
         Assert.True(selection.NeedsEveryLanguage);
@@ -434,10 +463,52 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
                 setters.SetProperty(organization => organization.NeedsEveryLanguage, false)));
 
         // The selection
-        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
+        var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
 
         // Needing no more than one text
         Assert.False(selection.NeedsEveryLanguage);
+    });
+
+    /// <summary>
+    /// An organization's selection holds its own categories, proposals, boards, conversations and discussions alone,
+    /// and says whether its own problems need every language: the olympiad's reads its one of each and needs any one
+    /// language, and MathComps' reads none of the olympiad's. The hosted groups take MathComps' boards alone, so the
+    /// olympiad's has no cycle to finalize into.
+    /// </summary>
+    [Fact]
+    public Task An_organizations_selection_holds_its_own_alone() => RunTestAsync(async service =>
+    {
+        // The olympiad's selection, as the commissioner reads it
+        var olympiad = await service.GetSelectionAsync(OlympiadSlug, _commissionerId, Language.EN);
+
+        // Its one category, needing a text in any one language
+        Assert.Equal(["C"], olympiad.Categories.Select(category => category.Name));
+        Assert.False(olympiad.NeedsEveryLanguage);
+
+        // Its one proposal, its one board and the commissioner's conversation about it
+        Assert.Equal([_olympiadProposalId], olympiad.Proposals.Select(proposal => proposal.Id));
+        Assert.Equal([_olympiadBoardId], olympiad.Boards.Select(board => board.Id));
+        Assert.Equal([_olympiadProposalId], olympiad.Conversations.Select(conversation => conversation.ProposalId));
+
+        // And no cycle
+        Assert.Empty(olympiad.Cycles);
+
+        // MathComps' selection, as the live reviewer reads it
+        var mathComps = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
+
+        // None of the olympiad's in it
+        Assert.DoesNotContain(mathComps.Proposals, proposal => proposal.Id == _olympiadProposalId);
+        Assert.DoesNotContain(mathComps.Boards, board => board.Id == _olympiadBoardId);
+        Assert.DoesNotContain(
+            mathComps.Conversations, conversation => conversation.ProposalId == _olympiadProposalId);
+
+        // The olympiad's discussions, as the commissioner reads them
+        var discussions = await service.GetDiscussionsAsync(
+            OlympiadSlug, new CommentViewer(_commissionerId, IsAdmin: false));
+
+        // Its proposal's and its paper's alone
+        Assert.Equal([_olympiadProposalId.ToString()], discussions.Proposals.Keys);
+        Assert.Equal([_olympiadPaperId.ToString()], discussions.Papers.Keys);
     });
 
     /// <inheritdoc/>
@@ -465,9 +536,6 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
         // The latecomer on the MathComps organization's list since yesterday
         SelectionSeed.NewMember(context, "latecomer@example.com", DateTimeOffset.UtcNow.AddDays(-1));
-
-        // Another organization, listing a category of its own
-        SelectionSeed.NewOrganization(context, "olympiad", "C");
 
         // The season every round sits in
         var season = SelectionSeed.NewSeason(context);
@@ -534,8 +602,30 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // A draft holding the second proposal in its second slot, and its first paper
         _draftPaperId = FirstPaperOf(context, SelectionSeed.NewBoard(context, "Draft", null, _pool[2]).Id);
 
-        // A comment about the first proposal, a November problem, the September problem and the December one
-        foreach (var proposalId in new[] { _pool[1], _november[0], _openedId, _releasedId })
+        // The olympiad, listing a category of its own
+        var olympiadId = SelectionSeed.NewOrganization(context, OlympiadSlug, "C");
+
+        // The commissioner
+        context.Users.Add(HostedSeed.NewUser(_commissionerId, "Commissioner"));
+
+        // The commissioner on the olympiad's list since well before any conversation
+        SelectionSeed.NewMember(context, olympiadId, "commissioner@example.com", now.AddDays(-30));
+
+        // The olympiad's proposal in the pool, under the number MathComps' first proposal holds
+        _olympiadProposalId = SelectionSeed.NewProposal(context, olympiadId, pool, 1, 10);
+
+        // The olympiad's board, holding its proposal in its first slot
+        _olympiadBoardId = SelectionSeed.NewBoard(context, olympiadId, "Olympiad", _olympiadProposalId).Id;
+
+        // The olympiad board's first paper
+        _olympiadPaperId = FirstPaperOf(context, _olympiadBoardId);
+
+        // The commissioner's conversation about the olympiad's proposal
+        SeedConversation(context, _olympiadProposalId, _commissionerId, "Statement 1 in EN", now, "Ahoj");
+
+        // A comment about the first proposal, a November problem, the September problem, the December one and the
+        // olympiad's
+        foreach (var proposalId in new[] { _pool[1], _november[0], _openedId, _releasedId, _olympiadProposalId })
             context.ProposalComments.Add(new ProposalComment
             {
                 ProposalId = proposalId,
@@ -543,7 +633,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             });
 
         // A comment about the first paper of every board
-        foreach (var paperId in new[] { _draftPaperId, _novemberPaperId, _septemberPaperId })
+        foreach (var paperId in new[] { _draftPaperId, _novemberPaperId, _septemberPaperId, _olympiadPaperId })
             context.SelectionPaperComments.Add(new SelectionPaperComment
             {
                 PaperId = paperId,

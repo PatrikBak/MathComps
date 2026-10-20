@@ -46,20 +46,27 @@ internal static class SelectionRules
     }
 
     /// <summary>
-    /// Reads a proposal that has not been deleted, tracked, with its problem, the problem's round, and that round's
-    /// competition.
+    /// Reads a proposal of one organization's pool that has not been deleted, tracked, with its problem, the
+    /// problem's round, and that round's competition.
     /// </summary>
     /// <param name="dbContext">The write's context.</param>
+    /// <param name="organizationSlug">
+    /// The <see cref="Organization.Slug"/> of the organization whose pool the proposal has to be in.
+    /// </param>
     /// <param name="proposalId">The proposal, which is its problem's id.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The proposal.</returns>
-    /// <exception cref="SelectionTargetNotFoundException">Thrown when no live proposal has the id.</exception>
+    /// <exception cref="SelectionTargetNotFoundException">
+    /// Thrown when no live proposal of the organization's pool has the id.
+    /// </exception>
     public static async Task<Proposal> ReadProposalAsync(
-        MathCompsDbContext dbContext, Guid proposalId, CancellationToken cancellationToken) =>
-        // The proposal, refused like one that is not there once it has been deleted
+        MathCompsDbContext dbContext, string organizationSlug, Guid proposalId, CancellationToken cancellationToken) =>
+        // The proposal, refused like one that is not there once it has been deleted or where it is another pool's
         await dbContext.Proposals
             .Include(proposal => proposal.Problem.Round.Competition)
-            .Where(proposal => proposal.ProblemId == proposalId && proposal.DeletedAt == null)
+            .Where(proposal => proposal.ProblemId == proposalId
+                && proposal.DeletedAt == null
+                && proposal.Organization.Slug == organizationSlug)
             .FirstOrDefaultAsync(cancellationToken)
         ?? throw new SelectionTargetNotFoundException();
 
@@ -130,9 +137,9 @@ internal static class SelectionRules
 
     /// <summary>
     /// Whether a conversation about a proposal the selection holds is one of the reviewers': its author is a member
-    /// of the organization picking the problems, and was one when the conversation started. Only such an account
-    /// reaches a problem while the selection holds it, so anybody else's conversation about one was held while the
-    /// problem sat somewhere students reach, or by somebody whose address has since come off the list.
+    /// of the organization whose pool the proposal is in, and was one when the conversation started. Only such an
+    /// account reaches a problem while the selection holds it, so anybody else's conversation about one was held
+    /// while the problem sat somewhere students reach, or by somebody whose address has since come off the list.
     /// </summary>
     /// <param name="memberSince">
     /// When the author's address was put on the organization's list; null where it is not on it.

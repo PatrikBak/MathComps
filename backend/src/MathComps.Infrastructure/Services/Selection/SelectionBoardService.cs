@@ -18,18 +18,20 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
     : ISelectionBoardService
 {
     /// <inheritdoc/>
-    public Task PlaceAsync(SlotAddress slot, Guid proposalId, CancellationToken cancellationToken = default) =>
+    public Task PlaceAsync(
+        string organizationSlug, SlotAddress slot, Guid proposalId, CancellationToken cancellationToken = default) =>
         // The placement, as one selection write
         SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
             // The board, which has to be a draft
-            var board = await ReadDraftAsync(dbContext, slot.BoardId, cancellationToken);
+            var board = await ReadDraftAsync(dbContext, organizationSlug, slot.BoardId, cancellationToken);
 
             // The paper holding the slot
             var paper = PaperOf(board, slot);
 
-            // The proposal going in
-            var proposal = await SelectionRules.ReadProposalAsync(dbContext, proposalId, cancellationToken);
+            // The proposal going in, from the same organization's pool as the board
+            var proposal = await SelectionRules.ReadProposalAsync(
+                dbContext, organizationSlug, proposalId, cancellationToken);
 
             // A draft takes only what is still in the pool
             if (!SelectionRules.IsInPool(proposal.Problem.Round.Competition.Path))
@@ -52,12 +54,13 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
         }, cancellationToken);
 
     /// <inheritdoc/>
-    public Task ClearSlotAsync(SlotAddress slot, CancellationToken cancellationToken = default) =>
+    public Task ClearSlotAsync(
+        string organizationSlug, SlotAddress slot, CancellationToken cancellationToken = default) =>
         // The clearing, as one selection write
         SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
             // The board, which has to be a draft
-            var board = await ReadDraftAsync(dbContext, slot.BoardId, cancellationToken);
+            var board = await ReadDraftAsync(dbContext, organizationSlug, slot.BoardId, cancellationToken);
 
             // The paper holding the slot
             var paper = PaperOf(board, slot);
@@ -68,12 +71,13 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
 
     /// <inheritdoc/>
     public Task MoveSlotAsync(
-        SlotAddress slot, SlotDirection direction, CancellationToken cancellationToken = default) =>
+        string organizationSlug, SlotAddress slot, SlotDirection direction,
+        CancellationToken cancellationToken = default) =>
         // The trade, as one selection write
         SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
             // The board, which has to be a draft
-            var board = await ReadDraftAsync(dbContext, slot.BoardId, cancellationToken);
+            var board = await ReadDraftAsync(dbContext, organizationSlug, slot.BoardId, cancellationToken);
 
             // The paper holding the slot
             var paper = PaperOf(board, slot);
@@ -100,12 +104,17 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
         }, cancellationToken);
 
     /// <inheritdoc/>
-    public Task FinalizeAsync(Guid boardId, Guid cycleId, CancellationToken cancellationToken = default) =>
+    public Task FinalizeAsync(
+        string organizationSlug, Guid boardId, Guid cycleId, CancellationToken cancellationToken = default) =>
         // The finalize, as one selection write
         SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
             // The board, which has to be a draft
-            var board = await ReadDraftAsync(dbContext, boardId, cancellationToken);
+            var board = await ReadDraftAsync(dbContext, organizationSlug, boardId, cancellationToken);
+
+            // Only MathComps' boards fill the hosted groups, so to any other organization no group is there
+            if (organizationSlug != Organization.MathCompsSlug)
+                throw new SelectionTargetNotFoundException();
 
             // The group taking the papers
             var group = await dbContext.HostedGroups
@@ -169,24 +178,32 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
         }, cancellationToken);
 
     /// <summary>
-    /// Reads a draft board with its papers, their categories and their slot rows, tracked.
+    /// Reads a draft board of one organization with its papers, their categories and their slot rows, tracked.
     /// </summary>
     /// <param name="dbContext">The write's context.</param>
+    /// <param name="organizationSlug">
+    /// The <see cref="Organization.Slug"/> of the organization whose selection the board is in.
+    /// </param>
     /// <param name="boardId">The board.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The board.</returns>
-    /// <exception cref="SelectionTargetNotFoundException">Thrown when no board has the id.</exception>
+    /// <exception cref="SelectionTargetNotFoundException">
+    /// Thrown when no board of the organization has the id.
+    /// </exception>
     /// <exception cref="SelectionBoardOpenedException">Thrown when the board's group has opened.</exception>
     /// <exception cref="SelectionBoardFinalizedException">Thrown when the board is finalized.</exception>
     private static async Task<SelectionBoard> ReadDraftAsync(
-        MathCompsDbContext dbContext, Guid boardId, CancellationToken cancellationToken)
+        MathCompsDbContext dbContext, string organizationSlug, Guid boardId, CancellationToken cancellationToken)
     {
-        // The board with everything on it, and the group it was finalized into
+        // The board with everything on it, and the group it was finalized into, refused like one that is not there
+        // where it is another organization's
         var board = await dbContext.SelectionBoards
             .Include(candidate => candidate.HostedGroup)
             .Include(candidate => candidate.Papers).ThenInclude(paper => paper.Slots)
             .Include(candidate => candidate.Papers).ThenInclude(paper => paper.Category)
-            .FirstOrDefaultAsync(candidate => candidate.Id == boardId, cancellationToken)
+            .FirstOrDefaultAsync(
+                candidate => candidate.Id == boardId && candidate.Organization.Slug == organizationSlug,
+                cancellationToken)
             ?? throw new SelectionTargetNotFoundException();
 
         // Once its competitions run, students are sitting what the board holds
