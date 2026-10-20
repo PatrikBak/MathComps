@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.Data;
 using MathComps.Domain.Contracts.Comments;
-using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.Contracts.Selection;
 using MathComps.Domain.Contracts.Users;
 using MathComps.Domain.EfCoreEntities;
@@ -17,9 +16,9 @@ using Microsoft.EntityFrameworkCore;
 namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
-/// Implements <see cref="IProblemSelectionService"/> over the database, the discussions through the comment service.
-/// The selection read takes in every hosted group that has not opened, since a finalized board's slots read off its
-/// group's rounds.
+/// Implements <see cref="IProblemSelectionService"/> over the database, the discussions through the comment service
+/// and the cycles through the finalization service. The selection read takes in every hosted group that has not
+/// opened, since a finalized board's slots read off its group's rounds.
 /// </summary>
 /// <param name="dbContextFactory">Creates the context each read runs on.</param>
 /// <param name="localization">The names the taxonomy gives the groups' nodes.</param>
@@ -27,11 +26,13 @@ namespace MathComps.Infrastructure.Services.Selection;
 /// Reads when each conversation's author became a member of the organization whose selection is read.
 /// </param>
 /// <param name="comments">Reads the discussions of what the selection holds.</param>
+/// <param name="finalization">Reads the cycles a board can be finalized into.</param>
 public sealed class ProblemSelectionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IMetadataLocalizationService localization,
     IOrganizationMemberService members,
-    ICommentService comments)
+    ICommentService comments,
+    IBoardFinalizationService finalization)
     : IProblemSelectionService
 {
     /// <summary>
@@ -51,7 +52,8 @@ public sealed class ProblemSelectionService(
         // A fresh context for this read.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // One snapshot for every query below, so the selection reads as it stood at one instant.
+        // One snapshot for every query on this context, so they all read the database as it stood at one
+        // instant.
         await using var snapshot = await dbContext.Database.BeginTransactionAsync(
             IsolationLevel.RepeatableRead, cancellationToken);
 
@@ -67,8 +69,6 @@ public sealed class ProblemSelectionService(
             {
                 group.Id,
                 group.OpensAt,
-                group.ClosesAt,
-                group.ProblemCount,
                 Rounds = group.Rounds
                     .OrderBy(round => round.Competition.SortPath)
                     .Select(round => new
@@ -217,6 +217,11 @@ public sealed class ProblemSelectionService(
             .Select(organization => organization.NeedsEveryLanguage)
             .SingleAsync(cancellationToken);
 
+        // The cycles a board can be finalized into, which only MathComps' boards fill
+        var cycles = organizationSlug == Organization.MathCompsSlug
+            ? await finalization.GetCyclesAsync(language, cancellationToken)
+            : [];
+
         // The selection.
         return new SelectionDto(
             categories,
@@ -265,26 +270,7 @@ public sealed class ProblemSelectionService(
                             ? new BoardFinalizationDto(groupNames[finalizedInto], groupsById[finalizedInto].OpensAt)
                             : null)),
             ],
-            [
-                // The groups a board can still be finalized into, which only MathComps' boards fill
-                .. groups
-                    .Where(group => organizationSlug == Organization.MathCompsSlug
-                        && SelectionRules.TakesBoard(
-                            group.OpensAt,
-                            group.ClosesAt,
-                            [.. group.Rounds.Select(round => round.Problems.Count)],
-                            now))
-                    .Select(group => new SelectionCycleDto(
-                        group.Id,
-                        groupNames[group.Id],
-                        group.OpensAt,
-                        [
-                            .. group.Rounds
-                                .Select(round => HostedTaxonomy.CategoryOf(round.CompetitionPath))
-                                .OfType<HostedCompetitionCategory>(),
-                        ],
-                        group.ProblemCount)),
-            ],
+            cycles,
             reviewersConversations,
             needsEveryLanguage);
     }

@@ -144,7 +144,7 @@ public static class ProblemSelectionEndpoints
         app.MapPost($"{SelectionPath}/boards/{{boardId:guid}}/finalization", async (
             Guid boardId,
             FinalizeBoardRequest request,
-            ISelectionBoardService boardService,
+            IBoardFinalizationService finalization,
             CancellationToken cancellationToken) =>
         {
             // A finalization naming no cycle has nowhere to put the papers
@@ -152,7 +152,7 @@ public static class ProblemSelectionEndpoints
                 throw new BadHttpRequestException("A finalization must name the cycle.");
 
             // Finalize it
-            await boardService.FinalizeAsync(Organization.MathCompsSlug, boardId, cycleId, cancellationToken);
+            await finalization.FinalizeAsync(boardId, cycleId, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
