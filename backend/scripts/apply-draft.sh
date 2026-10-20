@@ -7,9 +7,9 @@
 # One tunnel serves the whole run: it is opened (or reused) once here, and the bulk-import tool
 # and psql both go through it.
 #
-# Usage: ./apply-draft.sh [-e prod|staging] [--clear-defenses] [--validate-only] <draft-folder>
+# Usage: ./apply-draft.sh [-e prod|staging] [--clear-defenses] [--dry-run] <draft-folder>
 # Examples:
-#   ./apply-draft.sh --validate-only ./data/problems/mathcomps-practice-2026
+#   ./apply-draft.sh --dry-run ./data/problems/mathcomps-practice-2026
 #   ./apply-draft.sh -e staging ./data/problems/mathcomps-practice-2026
 #   ./apply-draft.sh -e prod --clear-defenses ./data/problems/mathcomps-practice-2026
 
@@ -21,13 +21,12 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Print the invocation form and what each option does.
 usage() {
     cat >&2 <<'EOF'
-Usage: ./apply-draft.sh [-e <prod|staging>] [--clear-defenses] [--validate-only] <draft-folder>
+Usage: ./apply-draft.sh [-e <prod|staging>] [--clear-defenses] [--dry-run] <draft-folder>
 
 Options:
   -e, --env             Environment (prod or staging, default: prod)
-      --clear-defenses  Delete every defense session on the draft's competition, after the import.
-                        Also lets the import rewrite a defended problem, which apply otherwise refuses
-      --validate-only   Stop after validate; write nothing
+      --clear-defenses  Delete every defense session on the draft's competition, after the import
+      --dry-run         Stop after the import's dry run; keep nothing
 EOF
 }
 
@@ -37,15 +36,15 @@ environment="prod"
 # Whether to delete the competition's defense sessions once the import lands.
 clear_defenses="false"
 
-# Whether to stop after the read-only validate.
-validate_only="false"
+# Whether to stop after the import's dry run.
+dry_run="false"
 
 # Parse leading options up to the first non-option, which is the draft folder.
 while [ "$#" -gt 0 ]; do
     case "$1" in
         -e|--env) environment="$2"; shift 2 ;;
         --clear-defenses) clear_defenses="true"; shift ;;
-        --validate-only) validate_only="true"; shift ;;
+        --dry-run) dry_run="true"; shift ;;
         --) shift; break ;;
         -*) echo "Unknown option: $1" >&2; usage; exit 1 ;;
         *) break ;;
@@ -54,6 +53,13 @@ done
 
 # The draft folder is the one positional argument.
 draft_folder="${1:-}"
+
+# Nothing may follow the folder: every option goes before it.
+if [ "$#" -gt 1 ]; then
+    echo "Error: options go before the draft folder." >&2
+    usage
+    exit 1
+fi
 
 # An existing folder is required.
 if [ -z "$draft_folder" ] || [ ! -d "$draft_folder" ]; then
@@ -124,10 +130,10 @@ run_sql() {
     return "$status"
 }
 
-# The draft's own dry run: format, registry and a read-only preview of what the import would do.
+# The draft's own dry run: every check the import makes, and what it would do, with nothing kept.
 echo
-echo "=== Validating $draft_folder against $environment ==="
-"$script_dir/invoke-tool.sh" -e "$environment" bulk-import validate "$draft_folder"
+echo "=== Dry run of $draft_folder against $environment ==="
+"$script_dir/invoke-tool.sh" -e "$environment" bulk-import "$draft_folder" --dry-run
 
 # What the --clear-defenses step would remove, printed whether or not it is armed, so the cost of
 # the import is visible before it happens.
@@ -146,23 +152,17 @@ WHERE c.path = :'competition_path'
 ORDER BY p.slug, ds.created_at;
 EOF
 
-# Everything up to here only read, so this is where a dry run stops.
-if [ "$validate_only" = "true" ]; then
+# Everything up to here kept nothing, so this is where a dry run stops.
+if [ "$dry_run" = "true" ]; then
     echo
-    echo "Validate only. Nothing was written."
+    echo "Dry run only. Nothing was kept."
     exit 0
 fi
 
 # The real import: problems created or overwritten, figures uploaded.
 echo
-echo "=== Applying $draft_folder to $environment ==="
-
-# A run that clears the defenses wants the rewrite they would otherwise block.
-if [ "$clear_defenses" = "true" ]; then
-    "$script_dir/invoke-tool.sh" -e "$environment" bulk-import apply "$draft_folder" --allow-restating
-else
-    "$script_dir/invoke-tool.sh" -e "$environment" bulk-import apply "$draft_folder"
-fi
+echo "=== Importing $draft_folder to $environment ==="
+"$script_dir/invoke-tool.sh" -e "$environment" bulk-import "$draft_folder"
 
 # The delete runs after the import, so nothing that snapshotted the old text is left behind.
 if [ "$clear_defenses" = "true" ]; then

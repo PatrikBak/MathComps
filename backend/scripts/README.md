@@ -39,9 +39,9 @@ The tools these run live under [`backend/src/MathComps.Cli.*`](../README.md#cli-
 ./invoke-tool.sh embeddings -p "Regenerate"
 
 # Import problem drafts into the database (one or more folders; globs allowed)
-./invoke-tool.sh -e staging bulk-import validate ./my-draft              # dry-run, writes nothing
-./invoke-tool.sh -e staging bulk-import validate 'data/problems/skmo-*'  # a whole batch
-./invoke-tool.sh -e prod bulk-import apply ./my-draft                    # the real import
+./invoke-tool.sh -e staging bulk-import ./my-draft --dry-run              # every check, keeps nothing
+./invoke-tool.sh -e staging bulk-import 'data/problems/skmo-*' --dry-run  # a whole batch
+./invoke-tool.sh -e prod bulk-import ./my-draft                           # the real import
 ```
 
 Relative paths (like `./my-draft`) resolve against your current directory, not the tool's project directory.
@@ -50,17 +50,17 @@ Run `./invoke-tool.sh` with no arguments for the current list of commands.
 
 ### Importing a draft
 
-`apply-draft.sh` wraps the import in the one step that has to go with it. A defense session snapshots its problem's statement and reference solution when it starts and never re-reads them, so a session that predates a rewrite keeps arguing text the site no longer shows. `--clear-defenses` deletes every defense session on the draft's competition, after the import lands. It also lets the import rewrite a defended problem, which `apply` otherwise refuses:
+`apply-draft.sh` wraps the import in the one step that has to go with it. A defense session snapshots its problem's statement and reference solution when it starts and never re-reads them, so a session that predates a rewrite keeps arguing text the site no longer shows. `--clear-defenses` deletes every defense session on the draft's competition, after the import lands:
 
 ```bash
-# Read-only: validate, and list the defense sessions the import would strand
-./apply-draft.sh --validate-only ./data/problems/mathcomps-practice-2026
+# Dry-run the import and list the defense sessions it would strand
+./apply-draft.sh --dry-run ./data/problems/mathcomps-practice-2026
 
 # Import, and clear the defenses that would now hold the old text
 ./apply-draft.sh -e prod --clear-defenses ./data/problems/mathcomps-practice-2026
 ```
 
-The competition comes from the draft's own `_meta.yaml`, so the draft folder is the one positional argument. One tunnel serves the whole run: `invoke-tool.sh` finds the one this script opened and reuses it.
+The competition comes from the draft's own `_meta.yaml`, so the draft folder is the one positional argument, and every option goes before it. One tunnel serves the whole run: `invoke-tool.sh` finds the one this script opened and reuses it.
 
 `defense_spends` is left alone by `--clear-defenses`. It carries no session foreign key on purpose: it is the ledger the daily spend ceiling reads, and clearing it would make the ceiling evadable.
 

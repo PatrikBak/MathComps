@@ -4,9 +4,8 @@ using MathComps.Domain.Taxonomy;
 namespace MathComps.Domain.Tests;
 
 /// <summary>
-/// Tests the shape operations the stored competition tree is walked and stamped through. The dry run, the write
-/// and the test seeds all descend and stamp via these, so a drift here would let the preview report a
-/// renumbering the import doesn't perform.
+/// Tests the shape operations the stored competition tree is walked and stamped through. Every walk over the tree,
+/// the test seeds' included, descends via these.
 /// </summary>
 public class CompetitionTreeTests
 {

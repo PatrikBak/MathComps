@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace MathComps.Shared.Extensions;
 
 /// <summary>
@@ -53,5 +55,23 @@ public static class EnumerableExtensions
         // Yield the last partial batch if it has any items
         if (batch.Count > 0)
             yield return batch;
+    }
+
+    /// <summary>
+    /// The numbers from 1 up to the highest of the given ones that are missing among them.
+    /// </summary>
+    /// <param name="numbers">The numbers present.</param>
+    /// <returns>The missing numbers, ascending; empty when none is missing or none is given.</returns>
+    public static ImmutableArray<int> MissingFromOneToMax(this IEnumerable<int> numbers)
+    {
+        // The numbers present, each once.
+        var present = numbers.ToHashSet();
+
+        // The numbers missing below the highest, or none when no number is given
+        return present.Count == 0
+            // No numbers, so nothing missing
+            ? []
+            // Every number up to the highest that isn't present
+            : [.. Enumerable.Range(1, present.Max()).Where(number => !present.Contains(number))];
     }
 }

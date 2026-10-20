@@ -1,11 +1,11 @@
 ---
 name: add-problems
-description: Use this skill when adding a competition's problems to the site database through the bulk-import draft pipeline — registering a brand-new competition in the taxonomy if it isn't there yet, authoring the draft folder (statements + solutions + images, one original language plus translations), and running the bulk-import CLI validate until it passes. Trigger phrases — "add a new competition", "import a competition's problems into the DB", "register a competition in the taxonomy", "create a bulk-import draft", "add a round/year of a competition". Do NOT use for editing handouts (use the handout-* skills). The skill ends at `validate`; `apply` runs only on the user's explicit say-so.
+description: Use this skill when adding a competition's problems to the site database through the bulk-import draft pipeline — registering a brand-new competition in the taxonomy if it isn't there yet, authoring the draft folder (statements + solutions + images, one original language plus translations), and running the bulk-import CLI's dry run until it passes. Trigger phrases — "add a new competition", "import a competition's problems into the DB", "register a competition in the taxonomy", "create a bulk-import draft", "add a round/year of a competition". Do NOT use for editing handouts (use the handout-* skills). The skill ends at the dry run; the real import runs only on the user's explicit say-so.
 ---
 
 # Add problems (bulk-import draft)
 
-Turn a competition's problems into a validated **draft folder** under `data/problems/` that the bulk-import CLI can apply. **Done = `validate` passes (registry + DB preview running) with the wanted languages present.** Stop at `validate` by default — only run `apply` when the user explicitly tells you to in that instruction.
+Turn a competition's problems into a validated **draft folder** under `data/problems/` that the bulk-import CLI can import. **Done = the dry run (`--dry-run`) passes, registry and database checks included, with the wanted languages present.** Stop at the dry run by default — only run the real import when the user explicitly tells you to in that instruction.
 
 `data/problems/` is **gitignored** (`data/problems/.gitignore` = `*`) — drafts are local staging input, never committed. The committable artifact is any taxonomy/code change.
 
@@ -39,9 +39,9 @@ Each problem is matched to the DB by slug (`{edition}-{competitionPath}-{order}`
 | Add a solution to an existing problem | the body, now with `<!-- solution -->` | — | optional |
 | Add hints to an existing problem | the body, now with `<!-- hint -->` rungs | the same rungs, translated | optional |
 
-A full fresh import is `p1..pN` contiguous; a re-import carries any **subset** (e.g. just `p4`, or `p3` + `p7`) since the rest already exist. A draft is just per-problem ops — mix freely; the only cross-problem rule is round contiguity, enforced by `validate` below.
+A full fresh import is `p1..pN` contiguous; a re-import carries any **subset** (e.g. just `p4`, or `p3` + `p7`) since the rest already exist. A draft is just per-problem ops — mix freely; the only cross-problem rule is round contiguity, enforced by the dry run below.
 
-The preflight checks **format only**; the DB-aware `validate` is the gate (so it **needs a reachable DB**). It rejects: an import that would leave the round non-contiguous (`round-contiguity`, e.g. a `p5` whose `p4` doesn't exist yet); a problem it would create with no original (`no-original-new-problem`) or no `pN.yaml` (`missing-problem-meta`); and an original in a different language than the stored one (`original-conflict`). **A brand-new problem with only translations is _not_ valid** — translation-only drops require the problem to already exist.
+The preflight checks **format only**; the DB-aware dry run is the gate (so it **needs a reachable DB**). It rejects: an import that would leave the round non-contiguous (`round-contiguity`, e.g. a `p5` whose `p4` doesn't exist yet); a problem it would create with no original (`no-original-new-problem`) or no `pN.yaml` (`missing-problem-meta`); and an original in a different language than the stored one (`original-conflict`). **A brand-new problem with only translations is _not_ valid** — translation-only drops require the problem to already exist.
 
 ## Step 1 — Register the competition (only if its slug is new)
 
@@ -59,7 +59,7 @@ Decide the shape. The tree nests as deep as the competition really does — thre
 
 Every slug is lowercase alphanumeric with **no hyphen in it** — a hyphen is what joins a slug to its parent's path, so one inside a slug would make the path ambiguous. Path composition throws on it, and a check constraint refuses the row underneath.
 
-**A problem belonging to no competition goes under `mathcomps-proposals`** — a candidate in an organization's pool, which the problem selection picks from. It is registered already, so a draft just names it as its `competition`. Give that draft `visibleSince: 9999-01-01T00:00:00Z`, the embargo that hides the pool from students; `validate` refuses any other (`proposals-embargo`). It also names the organization whose pool it fills, `organization: mathcomps` for MathComps' own; `validate` refuses a pool draft naming no organization that exists, and any other draft naming one (`proposals-organization`).
+**A problem belonging to no competition goes under `mathcomps-proposals`** — a candidate in an organization's pool, which the problem selection picks from. It is registered already, so a draft just names it as its `competition`. Give that draft `visibleSince: 9999-01-01T00:00:00Z`, the embargo that hides the pool from students; the import refuses any other (`proposals-embargo`). It also names the organization whose pool it fills, `organization: mathcomps` for MathComps' own; the import refuses a pool draft naming no organization that exists, and any other draft naming one (`proposals-organization`).
 
 Add a test row for any new competition/round/name to `MetadataLocalizationServiceTests` (display order, leaf/child shape, name resolution, `Registered_competition_has_no_issues`). A new root also needs its slug in `Shared_roots_are_in_display_order`; the parity sweep walks the registry itself, so it needs no edit.
 
@@ -84,7 +84,7 @@ Season year is the academic start, not the event year: a March-2026 event ⇒ `y
 
 **Single-occasion competitions — give every round the same `date`.** When a competition runs all its rounds as one event (MEMO Individual + Team, CPSJ I + T, TST d1–d5), every round's `_meta.yaml` must carry the **same date**. The problem list sorts by event **date first** (newest first), then by round order (`OrderByDefaultProblemSort`: season → date → the competition's sort path → problem number). Because date outranks round order, distinct per-paper dates scatter one occasion's papers by date — the later paper sorts ahead of the earlier one (Team before Individual). A shared date collapses the date key so the round-order key takes over and the papers group in round order (Individual before Team). This is a deliberate data-side convention — don't "correct" the shared date to the real distinct per-paper days, it re-breaks the ordering.
 
-**Embargoing a round: `visibleSince`.** An ISO-8601 instant carrying an explicit offset (`Z` or `±HH:MM`) loads a round ahead of the day it opens. The problems land complete, and the archive begins serving them once the instant passes. Omit the field and the round is open the moment it is imported. The draft owns it, so a re-apply that drops the field lifts a stored embargo. It is a different axis from `date`, which is the day the round ran and only ever sorts, so an embargoed round can perfectly well have run in the past. It hides the problems and not their figures: those go to public storage at import time under a slug-derived key.
+**Embargoing a round: `visibleSince`.** An ISO-8601 instant carrying an explicit offset (`Z` or `±HH:MM`) loads a round ahead of the day it opens. The problems land complete, and the archive begins serving them once the instant passes. Omit the field and the round is open the moment it is imported. The draft owns it, so a re-import that drops the field lifts a stored embargo. It is a different axis from `date`, which is the day the round ran and only ever sorts, so an embargoed round can perfectly well have run in the past. It hides the problems and not their figures: those go to public storage at import time under a slug-derived key.
 
 ## Step 3 — Write the problems
 
@@ -98,7 +98,7 @@ Each `pN.<lang>.md`: statement (markdown + inline `$…$` / display `$$…$$` Te
 
 **Figures cut from a PDF** (clip id like `svgselect-region`, or an SVG that's huge for a plain line drawing) often carry the whole page's text as **hidden clipped glyphs** — bloated and embedding unrelated content. Slim to just the figure by dropping the `<defs>` glyph outlines and every `<use>`, keeping the stroked paths. Verify with a before/after render-diff (must be pixel-identical — guards against deleting real labels), and **ask the author before replacing a file they provided**.
 
-**Sizing figures — set the figure's INTRINSIC size, never the ref.** `apply` auto-stamps `?width=&height=` from the figure's own intrinsic dimensions (SVG root `width`/`height` or viewBox; raster = literal pixel size), and that IS the on-screen size (capped to the column). So the ref stays bare, and you resize by changing the figure itself: an **SVG** → set its root `width`/`height` to the target px keeping the `viewBox` (`width="240" height="240" viewBox="0 0 97.56 97.56"`); a **raster** → resize the pixels (and minify — Pillow `resize` + `quantize(colors=16)` + `save(optimize=True)`; a line drawing shrinks ~96%). The preflight rejects `width`/`height`/`scale`/any query param other than `?inline=true` on a ref (`image-ref-param`): hand-written dimensions are meaningless since `apply` derives and overrides them, and `scale` has no role on a problem image. So to change the displayed size, resize the figure itself — never the ref. A bloated giant figure → rebuild a small SVG from PDF vectors (the [extract-figures](../extract-figures/SKILL.md) skill) rather than shipping a huge raster.
+**Sizing figures — set the figure's INTRINSIC size, never the ref.** The import auto-stamps `?width=&height=` from the figure's own intrinsic dimensions (SVG root `width`/`height` or viewBox; raster = literal pixel size), and that IS the on-screen size (capped to the column). So the ref stays bare, and you resize by changing the figure itself: an **SVG** → set its root `width`/`height` to the target px keeping the `viewBox` (`width="240" height="240" viewBox="0 0 97.56 97.56"`); a **raster** → resize the pixels (and minify — Pillow `resize` + `quantize(colors=16)` + `save(optimize=True)`; a line drawing shrinks ~96%). The preflight rejects `width`/`height`/`scale`/any query param other than `?inline=true` on a ref (`image-ref-param`): hand-written dimensions are meaningless since the import derives and overrides them, and `scale` has no role on a problem image. So to change the displayed size, resize the figure itself — never the ref. A bloated giant figure → rebuild a small SVG from PDF vectors (the [extract-figures](../extract-figures/SKILL.md) skill) rather than shipping a huge raster.
 
 ## Step 4 — Translate to the other languages (fan out)
 
@@ -117,7 +117,7 @@ Mechanical parity only proves the math and structure survived; a prose-level mea
 
 ## Step 5 — Tag the draft
 
-Tag the problems before validating, so `validate` checks the slugs against the approved vocabulary:
+Tag the problems before the dry run, so it checks the slugs against the approved vocabulary:
 
 ```bash
 dotnet run --project backend/src/MathComps.Cli.Tagging -- ./data/problems/my-draft
@@ -125,17 +125,17 @@ dotnet run --project backend/src/MathComps.Cli.Tagging -- ./data/problems/my-dra
 
 This writes a `tags:` list into each `pN.yaml`. It skips any problem that already has a `tags:` key, so it's safe to re-run; to redo everything pass `--retag`, or to redo one problem delete its `tags:` key. Names it proposes outside the approved vocabulary land in `tag-suggestions.json` for review, never in a `pN.yaml`. See the [Tagging CLI README](../../../backend/src/MathComps.Cli.Tagging/README.md). Needs `Llm:ApiKey` in that project's user secrets.
 
-Hand-editing the list afterwards: keep **exactly one Area tag**, and judge each candidate against its description in [`approved-tags.json`](../../../backend/src/MathComps.Infrastructure/Resources/approved-tags.json) — those descriptions decide the edge cases, and that file is the vocabulary, not the DB `tags` table, which holds slugs `validate` rejects.
+Hand-editing the list afterwards: keep **exactly one Area tag**, and judge each candidate against its description in [`approved-tags.json`](../../../backend/src/MathComps.Infrastructure/Resources/approved-tags.json) — those descriptions decide the edge cases, and that file is the vocabulary, not the DB `tags` table, which holds slugs the import rejects.
 
-## Step 6 — Validate (the goal)
+## Step 6 — Dry run (the goal)
 
 ```bash
 # Fast inner loop on markdown/KaTeX/images (run from web/):
 cd web && npm run draft:preflight -- ../data/problems/my-draft
-# Full check (preflight + registry + read-only DB preview):
-dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate ./data/problems/my-draft
+# Full check (preflight + registry + the whole import, rolled back):
+dotnet run --project backend/src/MathComps.Cli.BulkImport -- ./data/problems/my-draft --dry-run
 ```
 
-A genuine pass shows the **DB preview** (create/reuse competition, season, round) then `No issues. PASS`. The preflight is the fast loop for body errors; the dotnet validate adds the registry + DB checks (including that every tag slug is in the approved vocabulary).
+A genuine pass shows the **Database** block (create/reuse competition, season, round) then `No issues.` and `PASS`. The preflight is the fast loop for body errors; the dry run adds the registry + DB checks (including that every tag slug is in the approved vocabulary). A draft with any error of its own never reaches the database, so its database issues show only once it is clean on its own terms.
 
-**`apply` is explicit-only.** Stop at `validate` unless the user tells you to apply in that same instruction — don't run it as a default last step, and don't offer to. `apply` writes to whatever `ConnectionStrings:DefaultConnection` points at, which is **localhost**; promoting to prod needs the connection repointed via the user's tunnel, so that stays user-run. When told to apply, run `dotnet run -c Release --project=backend/src/MathComps.Cli.BulkImport -- apply ./data/problems/my-draft` against localhost. For prod or staging, never hand-roll a `dotnet run` with a repointed connection string — `backend/scripts/invoke-tool.sh -e prod bulk-import apply 'data/problems/my-draft-*'` opens the tunnel, injects the connection and takes a glob, so several rounds go in one call. It runs the tool from your CWD, so relative draft paths only resolve from the repo root.
+**The real import is explicit-only.** Stop at the dry run unless the user tells you to import in that same instruction — don't run it as a default last step, and don't offer to. The import writes to whatever `ConnectionStrings:DefaultConnection` points at, which is **localhost**; promoting to prod needs the connection repointed via the user's tunnel, so that stays user-run. When told to import, run `dotnet run -c Release --project=backend/src/MathComps.Cli.BulkImport -- ./data/problems/my-draft` against localhost. For prod or staging, never hand-roll a `dotnet run` with a repointed connection string — `backend/scripts/invoke-tool.sh -e prod bulk-import 'data/problems/my-draft-*'` opens the tunnel, injects the connection and takes a glob, so several rounds go in one call; its dry run is the same call with `--dry-run` after the glob. It runs the tool from your CWD, so relative draft paths only resolve from the repo root.

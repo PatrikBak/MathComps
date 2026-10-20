@@ -4,7 +4,7 @@ Tags a bulk-import draft in place with a frontier model, writing the chosen tag 
 
 The model is reached through an OpenAI-compatible provider via `Microsoft.Extensions.AI`, so each pass's backend model is a one-line config change — it's set per pass under `TagDraftSettings` in `appsettings.json`.
 
-Tags live **in the draft**, not the database. `apply` runs twice — once against local/staging, once against prod — and the model is non-deterministic, so generating tags during the import would land different tags in each environment. Writing them into the draft means `apply` replays the exact same tags everywhere.
+Tags live **in the draft**, not the database. The import runs twice — once against local/staging, once against prod — and the model is non-deterministic, so generating tags during the import would land different tags in each environment. Writing them into the draft means the import replays the exact same tags everywhere.
 
 ## How It Works
 
@@ -12,7 +12,7 @@ For every problem whose `pN.yaml` has **no** `tags:` key, the tool runs these st
 
 1. **Generate — statement** → proposes Area / Type / Goal tags from the approved vocabulary.
 2. **Generate — solution** → proposes Technique tags. Skipped when the problem has no solution, so a Technique tag never lands on a statement-only problem.
-3. **Fit floor** → only proposals scoring at least the floor reach the veto pass, so marginal guesses never approach the draft. The score gates the veto here; it is also surfaced in each tag's yaml comment for review, but never parsed back (apply reads only the slugs).
+3. **Fit floor** → only proposals scoring at least the floor reach the veto pass, so marginal guesses never approach the draft. The score gates the veto here; it is also surfaced in each tag's yaml comment for review, but never parsed back (the import reads only the slugs).
 4. **Veto** → the model reviews its own survivors (statement tags against the statement, technique tags against the solution) and drops the ones that don't hold up.
 
 Each pass sends the instructions and its candidate tags as the system message and the problem itself as the user message.
@@ -28,7 +28,7 @@ tags:
   - am-gm-inequality # fit 0.88 — the key step bounds the sum below by the product
 ```
 
-`apply` later resolves each slug to a tag (deriving its category from the vocabulary) and writes it at the human-assigned convention (fit `1.0`), so the tag clears the visibility threshold and shows on the site immediately.
+The import later resolves each slug to a tag (deriving its category from the vocabulary) and writes it at the human-assigned convention (fit `1.0`), so the tag clears the visibility threshold and shows on the site immediately.
 
 ### Progress output
 
@@ -38,7 +38,7 @@ The run also prices itself: it sums what the provider billed each reply and prin
 
 ### Review and re-runs
 
-The `pN.yaml` slug list **is** the review surface: read it directly, or `apply` to local and view the problem on the local site (the tags render). Spot a bad one → delete the slug line → re-`apply` → re-check. Every slug left in the yaml is human-approved, which is exactly why `apply` trusts it.
+The `pN.yaml` slug list **is** the review surface: read it directly, or import to local and view the problem on the local site (the tags render). Spot a bad one → delete the slug line → re-import → re-check. Every slug left in the yaml is human-approved, which is exactly why the import trusts it.
 
 - **Skip rule** — the tool skips any problem whose `pN.yaml` already has a `tags:` key (a populated list *or* an empty one — empty means "decided: no tags"). A re-run only fills in problems that still have no key, so hand-edits are never overwritten and a partial run is resumable.
 - **Regenerate** — to redo a single problem from scratch, delete its `tags:` key and re-run (absent = generate). To redo a whole folder, pass `--retag`: it ignores the skip rule and re-tags every problem, overwriting existing tags (so any hand-edits go too — it's an explicit opt-in).
@@ -57,7 +57,7 @@ dotnet run --project backend/src/MathComps.Cli.Tagging -- ./my-draft
 The one argument is the draft folder. The only option is `--retag` (re-tag every problem, overwriting existing tags); the fit floor and each prompt pass's settings live in `appsettings.json`. Canonical sequence:
 
 ```
-author draft → tag → validate → apply (local) → eyeball on site → fix yaml → apply (prod)
+author draft → tag → dry run → import (local) → eyeball on site → fix yaml → import (prod)
 ```
 
 ## Setup

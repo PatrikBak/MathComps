@@ -6,9 +6,9 @@
 # Usage: ./invoke-tool.sh [-e prod|staging] [-p "Profile"] <command> [args...]
 # Examples:
 #   ./invoke-tool.sh sync-users
-#   ./invoke-tool.sh -e staging bulk-import validate ./my-draft
-#   ./invoke-tool.sh -e staging bulk-import validate 'data/problems/skmo-*'   # globs / many folders
-#   ./invoke-tool.sh -e prod bulk-import apply ./my-draft
+#   ./invoke-tool.sh -e staging bulk-import ./my-draft --dry-run
+#   ./invoke-tool.sh -e staging bulk-import 'data/problems/skmo-*' --dry-run   # globs / many folders
+#   ./invoke-tool.sh -e prod bulk-import ./my-draft
 #   ./invoke-tool.sh -e prod competitions ./data/problems/mc-2026-1.group.json --dry-run
 #   ./invoke-tool.sh embeddings -p "Regenerate"
 
@@ -30,7 +30,7 @@ Options:
 Commands:
   embeddings     - Generate embeddings
   sync-users     - Sync all users from Clerk
-  bulk-import    - Import problem drafts (e.g. bulk-import apply ./my-draft)
+  bulk-import    - Import problem drafts (e.g. bulk-import ./my-draft --dry-run)
   competitions   - Declare a hosted group from its manifest (e.g. competitions ./my-group.group.json)
 EOF
 }

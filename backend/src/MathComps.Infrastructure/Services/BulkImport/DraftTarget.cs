@@ -5,9 +5,9 @@ namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// The competition and season a draft resolves against — the path addressing the competition plus the season
-/// year, which is what it takes to look up (or preview creating) the competition, round and season, and to derive
-/// problem slugs. It also names the organization whose pool a draft for the proposals files its problems in.
-/// Per-text language and originality live on each problem's <see cref="DraftTextContent"/>.
+/// year, which is what it takes to look up (or create) the competition, round and season, and to derive problem
+/// slugs. It also names the organization whose pool a draft for the proposals files its problems in. Per-text
+/// language and originality live on each problem's <see cref="DraftTextContent"/>.
 /// </summary>
 /// <param name="CompetitionPath"><inheritdoc cref="Competition.Path" path="/summary"/></param>
 /// <param name="SeasonYear">Calendar year the season starts in (e.g. 2024 for the 2024/2025 season).</param>

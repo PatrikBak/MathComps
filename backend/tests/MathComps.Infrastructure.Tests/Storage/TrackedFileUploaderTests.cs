@@ -1,5 +1,5 @@
-using System.Collections.Immutable;
 using MathComps.Infrastructure.Storage;
+using MathComps.Infrastructure.Tests.TestInfrastructure;
 using static Microsoft.Extensions.Options.Options;
 using MathComps.Shared.Serialization;
 
@@ -218,24 +218,5 @@ public sealed class TrackedFileUploaderTests : IDisposable
         var path = Path.Combine(_workDir, name);
         File.WriteAllText(path, content);
         return path;
-    }
-
-    /// <summary>
-    /// A test double for <see cref="IFileUploader"/> that records uploads instead of hitting remote storage.
-    /// </summary>
-    private sealed class RecordingFileUploader : IFileUploader
-    {
-        /// <summary>
-        /// Every upload, in call order.
-        /// </summary>
-        public ImmutableList<(string LocalPath, string Key)> Uploads { get; private set; } = [];
-
-        /// <inheritdoc/>
-        public Task UploadAsync(string localFilePath, string key)
-        {
-            // Record the call; nothing leaves the process.
-            Uploads = Uploads.Add((localFilePath, key));
-            return Task.CompletedTask;
-        }
     }
 }

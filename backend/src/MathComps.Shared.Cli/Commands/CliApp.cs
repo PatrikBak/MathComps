@@ -83,24 +83,6 @@ public sealed class CliApp
     }
 
     /// <summary>
-    /// Bootstraps and runs a multi-command tool, registering its commands through
-    /// <paramref name="configure"/>.
-    /// </summary>
-    /// <param name="args">Command-line arguments forwarded from <c>Program.cs</c>.</param>
-    /// <param name="configure">Registers the tool's commands on the Spectre configurator.</param>
-    /// <returns>The process exit code: 0 on success, 1 on an unhandled exception.</returns>
-    public async Task<int> RunAsync(string[] args, Action<IConfigurator>? configure = null)
-    {
-        // Build the DI registrar through the shared bootstrap. Awaiting before the using disposes it keeps the
-        // service provider (and its singletons, e.g. the HttpClient meter factory) alive until the async command
-        // actually finishes.
-        using var registrar = BuildRegistrar();
-
-        // Run a command app with no compile-time default command.
-        return await CliRunner.RunAsync(new CommandApp(registrar), args, configure);
-    }
-
-    /// <summary>
     /// Bootstraps and runs a tool whose default command is <typeparamref name="TDefaultCommand"/>,
     /// optionally registering extra commands through <paramref name="configure"/>.
     /// </summary>

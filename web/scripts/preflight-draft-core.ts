@@ -142,7 +142,7 @@ function readMeta(folderPath: string): MetaResult {
  * Numbering need not be contiguous and `pN.yaml` files are optional here: whether a
  * draft's orders fill the round without gaps, and whether a newly-created problem
  * carries its metadata, both depend on what already lives in the DB — so they're
- * decided by the DB-aware `validate` step, not this DB-blind format read.
+ * decided by the DB-aware bulk import, not this DB-blind format read.
  *
  * @param folderPath - Path to the draft folder.
  * @param errors - Accumulator the structural issues are pushed onto.
@@ -517,8 +517,8 @@ async function parseBody(
         null,
         'image-ref-param',
         `image "${entry.ref}" sets ${entry.params.join('/')} on the ref; leave a problem image ref bare ` +
-          `(only ?inline=true is allowed) — apply auto-derives width/height from the figure's intrinsic size, so ` +
-          `resize the figure itself (SVG: root width/height keeping the viewBox; raster: resize the pixels). ` +
+          `(only ?inline=true is allowed) — the import auto-derives width/height from the figure's intrinsic size, ` +
+          `so resize the figure itself (SVG: root width/height keeping the viewBox; raster: resize the pixels). ` +
           `scale isn't used on problem images. See the add-problems skill's "Sizing figures" note.`
       )
     )

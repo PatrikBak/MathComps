@@ -8,18 +8,21 @@ using Spectre.Console;
 namespace MathComps.Cli.BulkImport.Tests;
 
 /// <summary>
-/// Tests what the dry run's report tells its reader about a draft's DB preview.
+/// Tests what the import's report tells its reader about what the import does to the database. It swaps the
+/// console every report writes to, so it shares a collection with every other test writing there.
 /// </summary>
-public class ValidateReportTests
+[Collection(nameof(AnsiConsole))]
+public class ImportReportTests
 {
     /// <summary>
     /// The report names each problem the import would create, with its languages, and each it would update. It names
-    /// each text it would rewrite, sums up the texts it would leave as they are, and prints the problem counts apply
-    /// would. A text of every kind the preview can classify goes in, so one the report has no line for can't take the
-    /// run down.
+    /// each text it would rewrite and sums up the texts it would leave as they are. A text of every kind the import can
+    /// classify goes in, so one the report has no line for can't take the run down. It closes on the verdict line a
+    /// script reading the run matches, counting the refused texts' errors, and once nothing is refused it also prints
+    /// the problem counts.
     /// </summary>
     [Fact]
-    public void The_report_lists_creates_updates_and_rewrites_and_counts_the_rest()
+    public async Task The_report_lists_creates_updates_and_rewrites_and_counts_the_rest()
     {
         // A text of every kind on problem 1.
         var texts = Enum.GetValues<DraftTextAction>()
@@ -27,7 +30,7 @@ public class ValidateReportTests
             .ToArray();
 
         // Problem 1 updated, 2 left as it is, and 3 created in Slovak and English.
-        var preview = new DraftDbPreview(
+        var findings = new DraftImportFindings(
             Entities: [],
             TextResolutions: [.. texts],
             Problems:
@@ -36,12 +39,12 @@ public class ValidateReportTests
                 new ProblemResolution("74-csmo-a-iii-2", ResolutionAction.Reuse, [Language.SK]),
                 new ProblemResolution("74-csmo-a-iii-3", ResolutionAction.Create, [Language.SK, Language.EN])
             ],
-            MissingProblemOrders: [], SortOrderChanges: [], Orphans: [], DefendedProblemRestatements: [],
-            HostedGroupCountDisagreement: null, MovesProposalsEmbargo: false, OrganizationProblem: null,
+            MissingProblemOrders: [], SortOrderChanges: [], HostedGroupCountDisagreement: null,
+            HostedEmbargoDisagreement: null, MovesProposalsEmbargo: false, OrganizationProblem: null,
             ProposalConflicts: []);
 
-        // The report on the preview.
-        var report = RenderReport(new ValidateResult([], preview));
+        // The report on a dry run of the draft.
+        var report = RenderReport(await CleanDraftAsync(findings));
 
         // The new problem with its languages, the updated one, and the rewritten text with its language.
         Assert.Contains("create problem 74-csmo-a-iii-3 (sk, en)", report);
@@ -51,16 +54,36 @@ public class ValidateReportTests
         // The two texts left as they are, summed up.
         Assert.Contains("unchanged 2 text(s)", report);
 
-        // The counts apply would print.
-        Assert.Contains("Problems: 1 inserted, 1 updated, 1 unchanged", report);
+        // The three texts the import refuses fail the run, last.
+        Assert.EndsWith("FAIL — 3 error(s), 0 warning(s)", report.TrimEnd());
+
+        // The report on the same draft once every text the import refuses is gone.
+        var passing = RenderReport(await CleanDraftAsync(
+            findings with { TextResolutions = [.. texts.Where(text => !text.IsRefused)] }));
+
+        // The problem counts.
+        Assert.Contains("Problems: 1 inserted, 1 updated, 1 unchanged", passing);
+
+        // The verdict, last.
+        Assert.EndsWith("PASS — 0 warning(s)", passing.TrimEnd());
     }
 
     /// <summary>
-    /// Renders a validation result's report into plain text, the way a redirected run would write it.
+    /// Builds the result of dry-running a draft clean on its own terms, which the database answered with the given
+    /// findings.
     /// </summary>
-    /// <param name="result">The validation result to report.</param>
+    /// <param name="findings"><inheritdoc cref="DraftImportFinished.Findings" path="/summary"/></param>
+    /// <returns>The folder's result.</returns>
+    private static Task<ImportResult> CleanDraftAsync(DraftImportFindings findings) =>
+        // No issue of the draft's own, so the import runs
+        ImportResult.CheckThenImportAsync([], async () => await FinishedImports.DryRunAsync(findings));
+
+    /// <summary>
+    /// Renders a dry run's report into plain text, the way a redirected run would write it.
+    /// </summary>
+    /// <param name="result">The import result to report.</param>
     /// <returns>The report's text, without colour.</returns>
-    private static string RenderReport(ValidateResult result)
+    private static string RenderReport(ImportResult result)
     {
         // The buffer the report goes to.
         var buffer = new StringWriter();
@@ -82,9 +105,9 @@ public class ValidateReportTests
         try
         {
             // Render the report for a Slovak draft of the csmo-a-iii 2024 round.
-            ValidateReport.Render(
+            ImportReport.Render(
                 new ManifestMeta("csmo-a-iii", new ManifestSeason(2024), "2024-03-15", null, null, Language.SK),
-                result);
+                result, dryRun: true);
         }
         finally
         {

@@ -4,7 +4,7 @@ namespace MathComps.Domain.Tests;
 
 /// <summary>
 /// Tests the canonical taxonomy slug formulas. Every layer keys rounds and problems through these, so a drift
-/// here would desync the registry, the persisted entities and the dry-run preview from each other.
+/// here would desync the registry and the persisted entities from each other.
 /// </summary>
 public class TaxonomySlugsTests
 {

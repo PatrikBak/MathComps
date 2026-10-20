@@ -3,8 +3,8 @@ using MathComps.Cli.BulkImport.Commands;
 namespace MathComps.Cli.BulkImport.Tests;
 
 /// <summary>
-/// Tests the path/glob expansion that lets <c>validate</c> and <c>apply</c> sweep multiple draft folders in one
-/// invocation. Runs against real throwaway directories so it exercises the same on-disk matching the commands do.
+/// Tests the path/glob expansion that lets the bulk import sweep multiple draft folders in one invocation. Runs
+/// against real throwaway directories so it exercises the same on-disk matching the command does.
 /// </summary>
 public class DraftFolderGlobTests : IDisposable
 {
