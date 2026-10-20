@@ -612,6 +612,8 @@ export const OPENED_COMMENT: CommentDto = {
 type SelectionMemory = {
   /** Whether the organization's problems need a text in every language; false where any one will do. */
   needsEveryLanguage: boolean
+  /** The names of the categories the reader leads, the only ones whose papers their slot writes change. */
+  leadCategories: string[]
   /** The conversations reviewers held with Mathilda before the test began, as many as are still held. */
   conversations: HeldConversation[]
   /** Each of the selection's discussions, by {@link threadKey}, oldest comment first. */
@@ -621,8 +623,9 @@ type SelectionMemory = {
 }
 
 /**
- * What the backend keeps as a test begins: an organization needing every language, as MathComps does,
- * {@link RECENT} and {@link EARLIER} about {@link OPENED}, and {@link OPENED_COMMENT} under it.
+ * What the backend keeps as a test begins: an organization needing every language, as MathComps does, a reader
+ * leading every one of its categories, {@link RECENT} and {@link EARLIER} about {@link OPENED}, and
+ * {@link OPENED_COMMENT} under it.
  *
  * @param chat - The backend the chat with Mathilda talks to; null where the test talks to her nowhere.
  *
@@ -632,6 +635,7 @@ export function rememberedSelection(chat: HostedBackend | null): SelectionMemory
   // The memory, fresh for each test so nothing one writes reaches the next
   return {
     needsEveryLanguage: true,
+    leadCategories: SELECTION_CATEGORIES.map((category) => category.name),
     conversations: [RECENT, EARLIER],
     discussions: new Map([[threadKey('Proposal', OPENED.id), [OPENED_COMMENT]]]),
     chat,
@@ -670,9 +674,9 @@ function heldConversations(memory: SelectionMemory, proposals: Proposal[]): Held
 }
 
 /**
- * The selection as the backend reads it: the organization's categories, the problems, the boards, the cycles a board
- * can go into, every conversation held about the problems in the shape the list of them takes, and the languages the
- * problems need.
+ * The selection as the backend reads it: the organization's categories, the ones the reader leads, the
+ * problems, the boards, the cycles a board can go into, every conversation held about the problems in the shape the
+ * list of them takes, and the languages the problems need.
  *
  * @param memory - What the backend keeps.
  * @param readable - The problems, the boards and the cycles the read shows.
@@ -702,10 +706,11 @@ function selectionOf(
     })
   )
 
-  // The categories, the problems, the boards, the cycles, the conversations newest first, and the languages the
-  // problems need
+  // The categories, the reader's lead categories, the problems, the boards, the cycles, the conversations newest
+  // first, and the languages the problems need
   return {
     categories: SELECTION_CATEGORIES,
+    leadCategories: memory.leadCategories,
     proposals,
     boards,
     cycles,
@@ -1096,9 +1101,16 @@ export async function stubSelection(
     // The slot, addressed as the backend reads it
     const slot = { boardId, paperId, index: Number(index) }
 
-    // Saved or refused
+    // Saved or refused, against the categories the reader leads at the time of the write
     return answerWrite(route, (held) =>
-      slotWrite(held, request.method(), move !== undefined, slot, request.postData())
+      slotWrite(
+        held,
+        memory.leadCategories,
+        request.method(),
+        move !== undefined,
+        slot,
+        request.postData()
+      )
     )
   })
 

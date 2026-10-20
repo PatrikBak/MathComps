@@ -28,6 +28,7 @@ import {
   type BoardSlot,
   categoryHue,
   finalizeBlockers,
+  isLeadOf,
   mapsToRounds,
 } from '../model/selection-state'
 import type { Board, Paper } from '../model/selection-types'
@@ -279,8 +280,9 @@ type SlotRowProps = BoardSlot & {
 }
 
 /**
- * One slot. A draft's stands empty and waits to be picked, or holds a problem that can be moved, replaced or sent
- * back. A finalized board's only shows what its round holds.
+ * One slot. On a draft, in a paper the reader leads, it stands empty and waits to be picked, or holds a problem that
+ * can be moved, replaced or sent back. Anywhere else it only shows what it holds. A slot whose own emptying was
+ * refused comes back holding its problem, the action pressed taking the focus again.
  */
 function SlotRow({ moves, ...slot }: SlotRowProps) {
   // Board copy
@@ -308,11 +310,14 @@ function SlotRow({ moves, ...slot }: SlotRowProps) {
   // The id of what comes next while an empty slot waits, which describes its button
   const hintId = useId()
 
-  // Whether the slot takes changes, which a finalized board's never does
-  const isDraft = board.finalization === null
+  // The reader's lead categories
+  const { leadCategories } = useLoadedSelection()
 
-  // An empty slot on a draft is one button: pick it, then pick a problem from the pool
-  if (proposal === undefined && isDraft) {
+  // Whether the slot takes changes: on a draft, and only in a paper the reader leads
+  const takesChanges = board.finalization === null && isLeadOf(leadCategories, paper)
+
+  // An empty slot taking changes is one button: pick it, then pick a problem from the pool
+  if (proposal === undefined && takesChanges) {
     return (
       <li>
         <button
@@ -347,7 +352,7 @@ function SlotRow({ moves, ...slot }: SlotRowProps) {
     )
   }
 
-  // An empty slot on a finalized board, which only says so
+  // An empty slot taking no changes, which only says so
   if (proposal === undefined) {
     return (
       <li className="flex items-center gap-3 px-2 py-1.5 text-sm text-muted">
@@ -368,7 +373,7 @@ function SlotRow({ moves, ...slot }: SlotRowProps) {
       className={cn(
         'group flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors',
         isWaiting && 'bg-brand/15',
-        !isWaiting && isDraft && 'hover:bg-foreground/[0.04] focus-within:bg-foreground/[0.04]'
+        !isWaiting && takesChanges && 'hover:bg-foreground/[0.04] focus-within:bg-foreground/[0.04]'
       )}
     >
       {/* The slot's short label */}
@@ -401,10 +406,9 @@ function SlotRow({ moves, ...slot }: SlotRowProps) {
         </>
       )}
 
-      {/* What can be done with a draft's slot: always in reach of the keyboard and a screen reader, shown on
-          hover and focus, and always shown on a device without hover. A slot whose own emptying was refused
-          comes back holding its problem, the action pressed taking the focus again */}
-      {isDraft && (
+      {/* What can be done with a slot taking changes: always in reach of the keyboard and a screen reader, shown
+          on hover and focus, and always shown on a device without hover */}
+      {takesChanges && (
         <div
           className={cn(
             'flex shrink-0 items-center sr-only',

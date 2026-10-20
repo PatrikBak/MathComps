@@ -34,7 +34,7 @@ public class ProblemSelectionEndpointsTests
         // The API's routes, mapped
         var mapped = MappedApi.Build();
 
-        // The caller resolving to an account, which the reads and the rating ask for
+        // The caller resolving to an account, for every route that asks who is calling
         Mock.Get(mapped.Services.GetRequiredService<IUserManager>())
             .Setup(manager => manager.GetUserIdAsync(CallerSubject, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Guid.CreateVersion7());

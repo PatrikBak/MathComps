@@ -76,9 +76,10 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
   const poolFilters = usePoolFilters(index?.categories ?? null)
 
   // The board being filled, the slot on it waiting for a problem, and the ways to change both
-  const { activeBoard, waitingSlot, selectBoard, toggleWaiting, stopWaiting } = useBoardPicking(
-    index?.boards ?? []
-  )
+  const { activeBoard, waitingSlot, selectBoard, toggleWaiting, stopWaiting } = useBoardPicking({
+    boards: index?.boards ?? [],
+    leadCategories: index?.leadCategories ?? [],
+  })
 
   // The selection with the board on screen, once the read has landed
   const selection = useMemo(

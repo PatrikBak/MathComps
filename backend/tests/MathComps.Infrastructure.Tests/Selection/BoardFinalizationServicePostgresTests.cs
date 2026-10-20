@@ -70,7 +70,7 @@ public class BoardFinalizationServicePostgresTests(PostgresContainerFixture fixt
 
         // The slot emptied
         await QueryAsync<ISelectionBoardService>((_, boards) =>
-            boards.ClearSlotAsync(Organization.MathCompsSlug, slot));
+            boards.ClearSlotAsync(Organization.MathCompsSlug, LeadId, slot));
 
         // Problem 4 back in the pool, the rest of the paper standing
         Assert.Equal(

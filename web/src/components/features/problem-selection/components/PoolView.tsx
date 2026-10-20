@@ -20,6 +20,7 @@ import { usePoolViewMode } from '../hooks/use-pool-view-mode'
 import { countActiveFilters, matchPool } from '../model/pool-filters'
 import { DEFAULT_RATINGS_SORT, type RatingsColumn } from '../model/ratings-order'
 import { POOL_VIEWS, type PoolViewMode } from '../model/selection-routes'
+import { canPlaceOn } from '../model/selection-state'
 import type { Proposal } from '../model/selection-types'
 import { SlotNumber } from './CategoryMarks'
 import { LanguageSwitch } from './LanguageSwitch'
@@ -392,6 +393,11 @@ function PoolCard({ proposal, language }: PoolCardProps) {
   // The slot waiting for a problem, if any, and the selection holding it
   const { waitingSlot, selection } = useSelectionWorkspace()
 
+  // Whether the reader can put the problem onto the board on screen
+  const isPlaceable =
+    selection?.activeBoard != null &&
+    canPlaceOn(selection.activeBoard, proposal, selection.leadCategories)
+
   // Whether the problem already fills the waiting slot
   const fillsWaitingSlot =
     waitingSlot !== null &&
@@ -414,8 +420,8 @@ function PoolCard({ proposal, language }: PoolCardProps) {
       details={<ProposalFiling proposal={proposal} />}
       className={cn(
         'transition-colors',
-        // A live card's border brightens while a slot waits for a problem, which it can go into
-        waitingSlot !== null && !proposal.isSetAside && !fillsWaitingSlot && 'border-foreground/15',
+        // A card's border brightens while a slot waits for a problem, which it can go into
+        waitingSlot !== null && isPlaceable && !fillsWaitingSlot && 'border-foreground/15',
         // A set-aside problem, dimmed
         proposal.isSetAside && 'opacity-70'
       )}

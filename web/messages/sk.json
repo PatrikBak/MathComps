@@ -181,6 +181,7 @@
     "SelectionBoardFinalized": "Tento výber už bol do súťaže uzavretý, takže jeho úlohy sa už nedajú meniť.",
     "SelectionBoardOpened": "Tieto súťaže sa už začali, takže ich úlohy sa už nedajú meniť.",
     "SelectionFinalizeBlocked": "Výber sa do tejto súťaže nedá uzavrieť. Všetky miesta musia byť obsadené a sedieť na jej kategórie a súťaž musí ešte čakať na úlohy.",
+    "SelectionNotLead": "Miesta tejto kategórie môžu meniť len jej garanti.",
     "SelectionProblemIncomplete": "Každá úloha v súťaži potrebuje zadanie aj riešenie vo všetkých jazykoch.",
     "SelectionProposalUsed": "Túto úlohu už má iná súťaž.",
     "SelectionTargetNotFound": "Toto už vo výbere nie je. Obnov stránku a skús to znova.",

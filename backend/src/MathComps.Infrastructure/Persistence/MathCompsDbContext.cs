@@ -153,6 +153,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>The categories the organizations pick problems for.</summary>
     public DbSet<OrganizationCategory> OrganizationCategories => Set<OrganizationCategory>();
 
+    /// <summary>The members made leads of their organizations' categories.</summary>
+    public DbSet<CategoryLead> CategoryLeads => Set<CategoryLead>();
+
     /// <summary>Problems proposed for the hosted competitions' papers.</summary>
     public DbSet<Proposal> Proposals => Set<Proposal>();
 
@@ -1151,6 +1154,30 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion OrganizationCategory
+
+        #region CategoryLead
+
+        modelBuilder.Entity<CategoryLead>(e =>
+        {
+            // A member leads a category once, so the three together are the row
+            e.HasKey(lead => new { lead.OrganizationId, lead.Email, lead.CategoryId });
+
+            // The member, who leads nothing once the address leaves the list, so a lead is always a member
+            e.HasOne(lead => lead.Member)
+             .WithMany()
+             .HasForeignKey(lead => new { lead.OrganizationId, lead.Email })
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // The category, matched together with the organization so it is always the member's organization's, its
+            // leads going with it
+            e.HasOne(lead => lead.Category)
+             .WithMany()
+             .HasForeignKey(lead => new { lead.OrganizationId, lead.CategoryId })
+             .HasPrincipalKey(category => new { category.OrganizationId, category.Id })
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        #endregion CategoryLead
 
         #region Proposal
 

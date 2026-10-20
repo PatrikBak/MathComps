@@ -62,6 +62,24 @@ public sealed class OrganizationMemberService(IDbContextFactory<MathCompsDbConte
             .ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc/>
+    public async Task<IReadOnlySet<Guid>> GetLeadCategoryIdsAsync(
+        Guid userId, string organizationSlug, CancellationToken cancellationToken = default)
+    {
+        // A fresh context for this read.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The account's address, lowercased.
+        var address = AddressOf(dbContext, userId);
+
+        // The organization's categories the address leads.
+        return await dbContext.CategoryLeads
+            .AsNoTracking()
+            .Where(lead => lead.Member.Organization.Slug == organizationSlug && address.Contains(lead.Email))
+            .Select(lead => lead.CategoryId)
+            .ToHashSetAsync(cancellationToken);
+    }
+
     /// <summary>
     /// The organizations whose list carries an account's address.
     /// </summary>
@@ -70,14 +88,24 @@ public sealed class OrganizationMemberService(IDbContextFactory<MathCompsDbConte
     /// <returns>The organizations, still unrun.</returns>
     private static IQueryable<Organization> OrganizationsOf(MathCompsDbContext dbContext, Guid userId)
     {
-        // The account's address lowercased, or none for an account without one.
-        var address = dbContext.Users
-            .Where(user => user.Id == userId && user.Email != null)
-            .Select(user => user.Email!.ToLower());
+        // The account's address, lowercased.
+        var address = AddressOf(dbContext, userId);
 
         // The organizations listing that address.
         return dbContext.Organizations
             .AsNoTracking()
             .Where(organization => organization.Members.Any(member => address.Contains(member.Email)));
     }
+
+    /// <summary>
+    /// An account's address lowercased, the way the lists hold every address.
+    /// </summary>
+    /// <param name="dbContext">The read's context.</param>
+    /// <param name="userId">The account.</param>
+    /// <returns>The address, still unrun; none for an account without one.</returns>
+    private static IQueryable<string> AddressOf(MathCompsDbContext dbContext, Guid userId) =>
+        // The one account's address, where it has one
+        dbContext.Users
+            .Where(user => user.Id == userId && user.Email != null)
+            .Select(user => user.Email!.ToLower());
 }

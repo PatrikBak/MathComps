@@ -4,8 +4,18 @@ import { useCallback, useState } from 'react'
 
 import { useKeyedState } from '@/hooks/use-keyed-state'
 
-import { pickActiveBoard, sameSlot } from '../model/selection-state'
+import { isLeadOf, pickActiveBoard, sameSlot } from '../model/selection-state'
 import type { Board, SlotAddress } from '../model/selection-types'
+
+/**
+ * Options for {@link useBoardPicking}.
+ */
+type UseBoardPickingOptions = {
+  /** Every board the selection holds, none until it arrives. */
+  boards: readonly Board[]
+  /** The names of the categories the reader leads, none until the selection arrives. */
+  leadCategories: readonly string[]
+}
 
 /**
  * Return type for {@link useBoardPicking}.
@@ -13,7 +23,10 @@ import type { Board, SlotAddress } from '../model/selection-types'
 export type UseBoardPickingResult = {
   /** The board on screen; null when there is none. */
   activeBoard: Board | null
-  /** The slot the next placement goes into, on the board on screen; null when none is waiting. */
+  /**
+   * The slot the next placement goes into, on the board on screen in a paper the reader leads; null when none
+   * is waiting.
+   */
   waitingSlot: SlotAddress | null
   /** Puts a board on screen, letting go of a slot waiting on any other. */
   selectBoard: (boardId: string) => void
@@ -27,13 +40,16 @@ export type UseBoardPickingResult = {
  * Which board the reader is filling, and which of its slots waits for a problem from the pool. The board on
  * screen stays there until the reader picks another or it leaves the selection, so finalizing it, by this
  * reader or another, never puts a different board in its place. A slot waiting on it when it is finalized is
- * let go, a finalized board taking no placement.
+ * let go, a finalized board taking no placement. A slot shows as waiting only while the reader leads its paper.
  *
- * @param boards - Every board the selection holds, none until it arrives.
+ * @param options - The boards and the reader's lead categories.
  *
  * @returns The board on screen, the slot waiting on it, and the ways to change both.
  */
-export function useBoardPicking(boards: readonly Board[]): UseBoardPickingResult {
+export function useBoardPicking({
+  boards,
+  leadCategories,
+}: UseBoardPickingOptions): UseBoardPickingResult {
   // The board kept on screen, by id: the one picked, else the one shown first; null before any is shown
   const [shownBoardId, setShownBoardId] = useState<string | null>(null)
 
@@ -76,9 +92,15 @@ export function useBoardPicking(boards: readonly Board[]): UseBoardPickingResult
   // A function which lets the waiting slot go
   const stopWaiting = useCallback(() => setWaitingSlot(null), [setWaitingSlot])
 
-  // The waiting slot, while it sits on the board on screen
+  // The paper of the waiting slot, while the slot sits on the board on screen
+  const waitingPaper =
+    waitingSlot !== null && waitingSlot.boardId === activeBoard?.id
+      ? activeBoard.papers.find((paper) => paper.id === waitingSlot.paperId)
+      : undefined
+
+  // The waiting slot, while its paper is one the reader leads
   const waitingOnScreen =
-    waitingSlot !== null && waitingSlot.boardId === activeBoard?.id ? waitingSlot : null
+    waitingPaper !== undefined && isLeadOf(leadCategories, waitingPaper) ? waitingSlot : null
 
   // The board on screen, the slot waiting on it, and the ways to change both
   return { activeBoard, waitingSlot: waitingOnScreen, selectBoard, toggleWaiting, stopWaiting }

@@ -246,6 +246,11 @@ public enum ApiErrorCode
     SelectionBoardFinalized,
 
     /// <summary>
+    /// A paper's slots were changed by someone who does not lead its category.
+    /// </summary>
+    SelectionNotLead,
+
+    /// <summary>
     /// A problem going into a round lacks a statement or a solution in some language.
     /// </summary>
     SelectionProblemIncomplete,

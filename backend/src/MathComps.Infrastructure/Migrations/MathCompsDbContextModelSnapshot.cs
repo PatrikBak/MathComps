@@ -151,6 +151,30 @@ namespace MathComps.Infrastructure.Migrations
                     b.ToTable("authors", (string)null);
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.CategoryLead", b =>
+                {
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("email");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("category_id");
+
+                    b.HasKey("OrganizationId", "Email", "CategoryId")
+                        .HasName("pk_category_leads");
+
+                    b.HasIndex("OrganizationId", "CategoryId")
+                        .HasDatabaseName("ix_category_leads_organization_id_category_id");
+
+                    b.ToTable("category_leads", (string)null);
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Comment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1079,6 +1103,9 @@ namespace MathComps.Infrastructure.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_organization_categories");
+
+                    b.HasAlternateKey("OrganizationId", "Id")
+                        .HasName("ak_organization_categories_organization_id_id");
 
                     b.HasIndex("OrganizationId", "HostedCategory")
                         .IsUnique()
@@ -2126,6 +2153,28 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("Reviewer");
 
                     b.Navigation("Session");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.CategoryLead", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.OrganizationCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId", "CategoryId")
+                        .HasPrincipalKey("OrganizationId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_category_leads_organization_categories_organization_id_cate");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.OrganizationMember", "Member")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId", "Email")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_category_leads_organization_members_organization_id_email");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Member");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Comment", b =>
