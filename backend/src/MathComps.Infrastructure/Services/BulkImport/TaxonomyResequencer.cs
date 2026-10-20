@@ -6,11 +6,9 @@ using MathComps.Infrastructure.Persistence;
 namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
-/// Brings one generation of the competition tree back in line with its registry positions. The preview side computes
-/// the renumbering read-only (<see cref="ComputeChanges"/>); apply performs it (<see cref="ResequenceAsync"/>)
-/// with a park-past-the-end, then number-1..N two-phase update so the per-parent unique sort-order index is never
-/// transiently violated. A node the registry doesn't know (a target of null) is left untouched — the orphan is
-/// reported elsewhere.
+/// Brings one generation of the competition tree back in line with its registry positions
+/// (<see cref="ResequenceAsync"/>) in two phases, so the per-parent unique sort-order index is never transiently
+/// violated. A node the registry doesn't know (a target of null) is left untouched — the orphan is reported elsewhere.
 /// </summary>
 public static class TaxonomyResequencer
 {
@@ -32,34 +30,6 @@ public static class TaxonomyResequencer
 
         // A known path yields its order; anything else yields null.
         return path => orderByPath.TryGetValue(path, out var order) ? order : null;
-    }
-
-    /// <summary>
-    /// The read-only renumbering: each node whose registry target differs from its stored order, as a change.
-    /// </summary>
-    /// <param name="rows">The stored nodes as <c>(path, current order)</c>.</param>
-    /// <param name="registryOrderOf">The registry order for a path, or null when the path is unregistered.</param>
-    /// <returns>One change per node that moves; empty when the generation already matches the registry.</returns>
-    public static ImmutableArray<SortOrderChange> ComputeChanges(
-        IReadOnlyList<(string Path, int CurrentOrder)> rows,
-        Func<string, int?> registryOrderOf)
-    {
-        // Accumulate one change per node that actually moves.
-        var changes = ImmutableArray.CreateBuilder<SortOrderChange>();
-
-        // Walk each stored node.
-        foreach (var (path, currentOrder) in rows)
-        {
-            // Its registry order — null when the path is unregistered (an orphan, left alone).
-            var target = registryOrderOf(path);
-
-            // A registered node whose stored order drifted from the registry is a move; record it.
-            if (target is { } targetOrder && targetOrder != currentOrder)
-                changes.Add(new SortOrderChange(path, currentOrder, targetOrder));
-        }
-
-        // The nodes that move.
-        return changes.ToImmutable();
     }
 
     /// <summary>

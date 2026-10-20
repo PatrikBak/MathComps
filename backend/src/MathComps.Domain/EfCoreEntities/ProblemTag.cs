@@ -20,6 +20,17 @@ public class ProblemTag
     public static readonly Expression<Func<ProblemTag, bool>> IsGoodEnoughTag = problemTag => problemTag.GoodnessOfFit >= MinimumGoodnessOfFitThreshold;
 
     /// <summary>
+    /// Builds a tag assignment a human made: a full fit, with no confidence or justification, which clears
+    /// <see cref="MinimumGoodnessOfFitThreshold"/> so the tag surfaces immediately.
+    /// </summary>
+    /// <param name="problemId">The problem tagged.</param>
+    /// <param name="tagId">The tag assigned.</param>
+    /// <returns>The assignment.</returns>
+    public static ProblemTag HumanAssigned(Guid problemId, Guid tagId) =>
+        // A human's fit is all or nothing, and this one is all
+        new() { ProblemId = problemId, TagId = tagId, GoodnessOfFit = 1.0f, Confidence = null, Justification = null };
+
+    /// <summary>
     /// Foreign key to the problem.
     /// </summary>
     public required Guid ProblemId { get; set; }

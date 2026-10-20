@@ -23,7 +23,7 @@ public record DraftManifest(
     /// <summary>
     /// Whether the taxonomy can be resolved from this manifest — true once the metadata carries a competition path.
     /// A blank path is the fallback the preflight emits when it can't read a well-formed one (and it has already
-    /// reported that), so the registry and DB-preview checks would have nothing to resolve against.
+    /// reported that), so the registry check would have nothing to resolve against.
     /// </summary>
     public bool IsMetadataUsable => !string.IsNullOrWhiteSpace(Meta.CompetitionPath);
 }
@@ -125,7 +125,7 @@ public record ManifestProblem(
     ImmutableArray<string> Images)
 {
     /// <summary>
-    /// The problem in the shape the import previews and writes, every field carried across as the preflight read it.
+    /// The problem in the shape the import writes, every field carried across as the preflight read it.
     /// </summary>
     public DraftProblemContent Content => new(
         Order,

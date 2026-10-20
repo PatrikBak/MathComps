@@ -26,8 +26,7 @@ public record ReimportedHalf(
 
 /// <summary>
 /// What re-importing a draft problem onto the problem already at its slug does: every half the draft writes and what
-/// writing it does, and which of the fields the draft declares differ from the stored ones. The read-only preview
-/// reports it and the import carries it out, so the two can't disagree about a problem. A field the draft omits is
+/// writing it does, and which of the fields the draft declares differ from the stored ones. A field the draft omits is
 /// left as it is, so it never differs.
 /// </summary>
 /// <param name="Halves">Every half the draft writes, in draft order.</param>

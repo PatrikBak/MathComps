@@ -6,7 +6,7 @@ namespace MathComps.Cli.BulkImport.Tests;
 
 /// <summary>
 /// Tests the authoritative tag-slug gate against the real approved vocabulary. The <c>tags:</c> list is hand-editable
-/// before apply, so a typo must surface as a blocking error here rather than become a junk row.
+/// before the import, so a typo must surface as a blocking error here rather than become a junk row.
 /// </summary>
 public class TagSlugValidatorTests
 {

@@ -30,14 +30,13 @@ public record LocalizedTagsByCategory(
 
 /// <summary>
 /// The single home for the approved tag vocabulary: loads <c>approved-tags.json</c> and resolves a slug to its
-/// <see cref="TagType"/>. Shared across the bulk-import preflight, apply, and the Tagging CLI so the
-/// "is this an approved slug, and what category is it?" rule lives in exactly one place.
+/// <see cref="TagType"/>, so the "is this an approved slug, and what category is it?" rule lives in exactly one
+/// place.
 /// </summary>
 public static class TagVocabulary
 {
     /// <summary>
-    /// The vocabulary loaded once from disk on first access. Slug lookups read the cached snapshot rather than
-    /// re-reading the JSON file per call (apply resolves a type for every slug it writes).
+    /// The vocabulary loaded once from disk on first access, the snapshot every slug lookup reads.
     /// </summary>
     private static readonly Lazy<ImmutableDictionary<string, TagType>> _slugToTagType =
         new(BuildSlugToTagType);
@@ -90,4 +89,13 @@ public static class TagVocabulary
     /// <param name="slug">The slug to canonicalize.</param>
     /// <returns>The canonical slug.</returns>
     public static string Canonicalize(string slug) => slug.Trim().ToLowerInvariant();
+
+    /// <summary>
+    /// Canonicalizes every slug and keeps each canonical one once, so two spellings of one slug count as one tag.
+    /// </summary>
+    /// <param name="slugs">The slugs as written.</param>
+    /// <returns>The distinct canonical slugs, in the order they first appear.</returns>
+    public static ImmutableArray<string> DistinctCanonical(IEnumerable<string> slugs) =>
+        // Each slug canonicalized, each canonical slug once
+        [.. slugs.Select(Canonicalize).Distinct()];
 }
