@@ -5,7 +5,13 @@ import {
 import { entriesOf } from '@/components/shared/utils/collection-utils'
 import { normalizeForSearch } from '@/components/shared/utils/string-utils'
 
-import { type Board, type Proposal, PROPOSAL_AREAS, type ProposalArea } from './selection-types'
+import {
+  type Board,
+  type Paper,
+  type Proposal,
+  PROPOSAL_AREAS,
+  type ProposalArea,
+} from './selection-types'
 
 /** Every answer to whether the board on screen holds a problem. */
 export const BOARD_MEMBERSHIPS = ['selected', 'notSelected'] as const
@@ -65,7 +71,7 @@ type OwnFacet = 'categories' | 'areas' | 'membership' | null
  * What a filter lets through of the pool, with the counts beside each facet's options.
  */
 export type PoolMatches = {
-  /** The problems every filter lets through, lowest number first. */
+  /** The problems every filter lets through, in the order of the board on screen. */
   shown: Proposal[]
   /** How many problems are recommended for each category, under every filter but the categories' own. */
   categoryCounts: Record<HostedCompetitionCategory, number>
@@ -137,10 +143,12 @@ export function matchPool(
     ) &&
     (searchTerm === '' || answersSearch(proposal))
 
-  // What every filter lets through, lowest number first
-  const shown = pool
-    .filter((proposal) => passes(proposal, null))
-    .sort((first, second) => first.number - second.number || first.id.localeCompare(second.id))
+  // What every filter lets through, in the order of the board on screen
+  const shown = inBoardOrder(
+    pool.filter((proposal) => passes(proposal, null)),
+    activeBoard,
+    filter.categories
+  )
 
   // A function which counts the problems holding each of a facet's options, under the other filters
   const countByOption = <TOption extends string>(
@@ -181,6 +189,106 @@ export function matchPool(
 
   // What the filter lets through, and the counts beside its options
   return { shown, categoryCounts, areaCounts, membershipCounts, setAsideCount }
+}
+
+/** The runs a paper brings into the pool's order, in turn: its own slots, what the other papers hold, the rest. */
+const PAPER_RUNS = ['ownSlots', 'otherPapers', 'rest'] as const
+
+/** One of {@link PAPER_RUNS}. */
+type PaperRun = (typeof PAPER_RUNS)[number]
+
+/**
+ * Where a problem runs in the pool's order.
+ */
+type PoolPlace = {
+  /** The paper it runs under, by its place on the board; one past the last paper where no paper takes it. */
+  paperIndex: number
+  /** The run it stands in under that paper. */
+  run: PaperRun
+  /** Its slot's place on the board, the papers read one after another; 0 where the board doesn't hold it. */
+  boardSpot: number
+}
+
+/**
+ * Orders problems the way the board runs. Each paper brings its placed problems in slot order, then the rest of the
+ * problems recommended for its category, by area and then by number. Under a Category filter only the papers of the
+ * categories picked run, and a problem another paper holds runs under the first of them it is recommended for, after
+ * its slots and before the rest, in the board's order. A problem recommended for several categories runs under the
+ * first paper among them, and a problem no paper takes runs after every paper.
+ *
+ * @param problems - The problems.
+ * @param board - The board on screen; null when there is none, which leaves every problem by area and then by number.
+ * @param categories - The categories whose papers run; empty for every paper.
+ *
+ * @returns The problems in that order.
+ */
+function inBoardOrder(
+  problems: readonly Proposal[],
+  board: Board | null,
+  categories: readonly HostedCompetitionCategory[]
+): Proposal[] {
+  // The board's papers in the order it sets them out, none without a board
+  const papers = board?.papers ?? []
+
+  // Where each problem on the board sits, by id: its paper, and its slot's place on the board
+  const placedAt = new Map(
+    papers
+      .flatMap((paper, paperIndex) => paper.slots.map((slot) => ({ slot, paperIndex })))
+      .flatMap(({ slot, paperIndex }, boardSpot): [string, Omit<PoolPlace, 'run'>][] =>
+        slot === null ? [] : [[slot, { paperIndex, boardSpot }]]
+      )
+  )
+
+  // A function which says whether a paper runs: every paper while no category is picked, else one of a category
+  // picked
+  const runs = (paper: Paper) =>
+    categories.length === 0 || (paper.category !== null && categories.includes(paper.category))
+
+  // A function which says whether a paper takes a problem it doesn't hold: one recommended for its category, where
+  // the paper runs
+  const takes = (paper: Paper, problem: Proposal) =>
+    runs(paper) && paper.category !== null && problem.recommended.includes(paper.category)
+
+  // A function which says where a problem runs: at its slot where a running paper holds it, else under the first
+  // paper taking it, else after every paper
+  const placeOf = (problem: Proposal): PoolPlace => {
+    // The slot holding it on the board, if any
+    const placed = placedAt.get(problem.id)
+
+    // A problem a running paper holds runs at its slot
+    if (placed !== undefined && runs(papers[placed.paperIndex])) {
+      return { ...placed, run: 'ownSlots' }
+    }
+
+    // The first paper taking it, -1 where none does
+    const takenBy = papers.findIndex((paper) => takes(paper, problem))
+
+    // Under that paper, or after every paper where none takes it: among what the other papers hold where the board
+    // holds it, else among the rest
+    return {
+      paperIndex: takenBy === -1 ? papers.length : takenBy,
+      run: placed === undefined ? 'rest' : 'otherPapers',
+      boardSpot: placed?.boardSpot ?? 0,
+    }
+  }
+
+  // The problems by paper, then run, then place on the board, then area, then number
+  return [...problems].sort((first, second) => {
+    // Where each of the two runs
+    const firstPlace = placeOf(first)
+    const secondPlace = placeOf(second)
+
+    // The earlier paper first, then the earlier run, then the earlier spot on the board, then the area listed first,
+    // then the lower number
+    return (
+      firstPlace.paperIndex - secondPlace.paperIndex ||
+      PAPER_RUNS.indexOf(firstPlace.run) - PAPER_RUNS.indexOf(secondPlace.run) ||
+      firstPlace.boardSpot - secondPlace.boardSpot ||
+      PROPOSAL_AREAS.indexOf(first.area) - PROPOSAL_AREAS.indexOf(second.area) ||
+      first.number - second.number ||
+      first.id.localeCompare(second.id)
+    )
+  })
 }
 
 /**

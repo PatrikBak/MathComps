@@ -6,15 +6,22 @@ import { BACKEND_ORIGIN, returnToTab } from './support/backend-routes'
 import { stubNamedReader } from './support/comments'
 import { actionsCopy, areaCopy, editorCopy, SELECTION_PATH } from './support/competitions'
 import {
+  actionsButton,
   addressedParam,
   BILINGUAL,
   cardOf,
+  DRAFT_BOARD,
+  GEOMETRY,
   headingOf,
   HINT,
   LANDING_WINDOW_MS,
+  LATER_DRAFT,
   ON_OFFER_COUNT,
   OPENED,
   OPENED_ADDRESS,
+  openPool,
+  pickBoard,
+  pickState,
   REVISION,
   selectedTab,
   SELECTION_ENDPOINT,
@@ -47,6 +54,13 @@ const UNHELD_ID = '00000000-0000-4000-8000-999999999999'
 
 /** A comment a reviewer is partway through writing. */
 const COMMENT_DRAFT = 'Fine for the intermediate paper'
+
+declare global {
+  interface Window {
+    /** Hands the test run what the pool's last card says, each time the page changes. */
+    reportLastCard: (text: string) => void
+  }
+}
 
 /**
  * How far down the window is scrolled.
@@ -123,6 +137,48 @@ async function twoFramesLater(page: Page): Promise<void> {
         requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
       })
   )
+}
+
+/**
+ * Starts writing down what the pool's last card says at every change to the page, so a card that moves and comes
+ * back shows in the record.
+ *
+ * @param page - The page, its pool drawn.
+ *
+ * @returns A function reading the record so far.
+ */
+async function recordLastCard(page: Page): Promise<() => string[]> {
+  // What the last card said after each change
+  const changes: string[] = []
+
+  // The channel the page hands each change back through
+  await page.exposeFunction('reportLastCard', (text: string) => {
+    changes.push(text)
+  })
+
+  // The page watched, the last card on show handed over at each change
+  await page.evaluate(() => {
+    // A function which hands over what the last card on show says
+    const report = () => {
+      // The cards on show
+      const cards = [...document.querySelectorAll('article')].filter((card) =>
+        card.checkVisibility()
+      )
+
+      // What the last of them says
+      window.reportLastCard(cards.at(-1)?.textContent ?? '')
+    }
+
+    // Run at every change, text changing as much as a node
+    new MutationObserver(report).observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    })
+  })
+
+  // A function reading the record so far
+  return () => changes
 }
 
 /**
@@ -833,6 +889,167 @@ test.describe('reading the selection', () => {
 
     // The pool, every card of it
     await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT)
+  })
+})
+
+test.describe("the pool's order", () => {
+  test('keeps every card where it stood while the reader works, and sets the order again once a filter changes', async ({
+    page,
+  }) => {
+    // A reviewer whose geometry problem, recommended for the advanced category alone, comes last in the pool
+    await stubSelection(page, 'selection')
+
+    // The pool
+    await openPool(page)
+
+    // The pool's cards, in the order they show
+    const cards = page.getByRole('article')
+
+    // The geometry problem's card last
+    await expect(cards.last()).toContainText(GEOMETRY.title)
+
+    // What the last card says, written down from here on
+    const lastCards = await recordLastCard(page)
+
+    // The menu on that card
+    await actionsButton(cardOf(page, GEOMETRY), GEOMETRY).click()
+
+    // The answer to the read after the write
+    const readAfterWrite = page.waitForResponse(SELECTION_ENDPOINT)
+
+    // The elementary category, switched on, which the board's elementary paper runs first
+    await page.getByRole('menuitemcheckbox', { name: areaCopy.categories.elementary }).click()
+
+    // Once the read has landed
+    await readAfterWrite
+
+    // The menu, closed from the keyboard
+    await page.keyboard.press('Escape')
+
+    // The card still last
+    await expect(cards.last()).toContainText(GEOMETRY.title)
+
+    // Changes on the way, written down
+    expect(lastCards()).not.toEqual([])
+
+    // The card last at every one of them
+    expect(lastCards().filter((text) => !text.includes(GEOMETRY.title))).toEqual([])
+
+    // The pool narrowed to what the board doesn't hold
+    await pickState(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
+
+    // The card among the elementary problems, after the algebra one, the elementary paper's own slot left out
+    await expect(cards.nth(1)).toContainText(GEOMETRY.title)
+  })
+
+  test('offers to set the order again once a switch leaves it out of date, and sets it when asked', async ({
+    page,
+  }) => {
+    // A reviewer whose geometry problem, recommended for the advanced category alone, comes last in the pool
+    await stubSelection(page, 'selection')
+
+    // The pool
+    await openPool(page)
+
+    // The pool's cards, in the order they show
+    const cards = page.getByRole('article')
+
+    // The button setting the order again
+    const resort = page.getByRole('button', { name: selectionText('pool.resort') })
+
+    // Not offered while the order is up to date
+    await expect(resort).toHaveCount(0)
+
+    // The menu on the geometry problem's card
+    await actionsButton(cardOf(page, GEOMETRY), GEOMETRY).click()
+
+    // The answer to the read after the write
+    const readAfterWrite = page.waitForResponse(SELECTION_ENDPOINT)
+
+    // The elementary category, switched on, which the board's elementary paper runs first
+    await page.getByRole('menuitemcheckbox', { name: areaCopy.categories.elementary }).click()
+
+    // Once the read has landed
+    await readAfterWrite
+
+    // The menu, closed from the keyboard
+    await page.keyboard.press('Escape')
+
+    // The card still last, the button offered
+    await expect(cards.last()).toContainText(GEOMETRY.title)
+    await expect(resort).toBeVisible()
+
+    // Pressed
+    await resort.click()
+
+    // The card among the elementary problems, after the paper's slot and the algebra one
+    await expect(cards.nth(2)).toContainText(GEOMETRY.title)
+
+    // The button gone, the order up to date again
+    await expect(resort).toHaveCount(0)
+  })
+
+  test("leaves the order as it was on coming back from a problem's page", async ({ page }) => {
+    // A reviewer whose geometry problem, recommended for the advanced category alone, comes last in the pool
+    await stubSelection(page, 'selection')
+
+    // The pool
+    await openPool(page)
+
+    // The pool's cards, in the order they show
+    const cards = page.getByRole('article')
+
+    // The geometry problem's card last
+    await expect(cards.last()).toContainText(GEOMETRY.title)
+
+    // Opened from its card
+    await cardOf(page, GEOMETRY).getByRole('link', { name: GEOMETRY.title }).click()
+
+    // Its page
+    await expect(headingOf(page, GEOMETRY)).toBeVisible()
+
+    // The menu on its page
+    await actionsButton(page, GEOMETRY).click()
+
+    // The answer to the read after the write
+    const readAfterWrite = page.waitForResponse(SELECTION_ENDPOINT)
+
+    // The elementary category, switched on, which the board's elementary paper runs first
+    await page.getByRole('menuitemcheckbox', { name: areaCopy.categories.elementary }).click()
+
+    // Once the read has landed
+    await readAfterWrite
+
+    // The menu, closed from the keyboard
+    await page.keyboard.press('Escape')
+
+    // Back to the pool
+    await page.goBack()
+
+    // The card still last, the button setting the order again offered
+    await expect(cards.last()).toContainText(GEOMETRY.title)
+    await expect(page.getByRole('button', { name: selectionText('pool.resort') })).toBeVisible()
+  })
+
+  test('sets the order again once another board goes on screen', async ({ page }) => {
+    // A reviewer whose geometry problem comes last in the pool against the first draft, and fills a slot of the
+    // later one
+    await stubSelection(page, 'selection')
+
+    // The pool
+    await openPool(page)
+
+    // The pool's cards, in the order they show
+    const cards = page.getByRole('article')
+
+    // The geometry problem's card last
+    await expect(cards.last()).toContainText(GEOMETRY.title)
+
+    // The later draft on screen
+    await pickBoard(page, DRAFT_BOARD, LATER_DRAFT)
+
+    // The card in that draft's order, after the elementary paper's slot and the problem that paper takes
+    await expect(cards.nth(2)).toContainText(GEOMETRY.title)
   })
 })
 

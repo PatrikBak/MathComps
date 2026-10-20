@@ -11,12 +11,15 @@ namespace MathComps.Infrastructure.Services.Defense.Content;
 public interface IDefenseContentResolver<in TTarget> where TTarget : DefenseTarget
 {
     /// <summary>
-    /// Resolves the current content behind a defense target, in one language.
+    /// Resolves the current content behind a defense target, for a student reading in one language.
     /// </summary>
     /// <param name="target">What the defense is held against.</param>
     /// <param name="language">The language the student is reading in.</param>
     /// <param name="cancellationToken">Cancels the lookup.</param>
-    /// <returns>The target's content, or null when the target names nothing defendable in that language.</returns>
+    /// <returns>
+    /// The target's content, which may be written in another language, or null when the target names nothing the
+    /// student can defend.
+    /// </returns>
     Task<DefenseProblemContent?> ResolveAsync(TTarget target, Language language, CancellationToken cancellationToken);
 
     /// <summary>

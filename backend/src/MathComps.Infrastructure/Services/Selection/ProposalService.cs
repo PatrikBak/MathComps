@@ -44,11 +44,11 @@ public sealed class ProposalService(IDbContextFactory<MathCompsDbContext> dbCont
 
     /// <inheritdoc/>
     public async Task RateAsync(
-        Guid proposalId, Guid raterId, int? beauty, int? difficulty, CancellationToken cancellationToken = default)
+        Guid proposalId, Guid raterId, decimal? beauty, decimal? difficulty,
+        CancellationToken cancellationToken = default)
     {
-        // A score off the scale is no score the rating can hold
-        if (beauty is < ProposalRating.MinScore or > ProposalRating.MaxScore
-            || difficulty is < ProposalRating.MinScore or > ProposalRating.MaxScore)
+        // A score off the scale or between its steps is no score the rating can hold
+        if (!IsOnScale(beauty) || !IsOnScale(difficulty))
             throw new ProposalRatingValueException();
 
         // The rating, as one selection write
@@ -105,4 +105,15 @@ public sealed class ProposalService(IDbContextFactory<MathCompsDbContext> dbCont
             // And the proposal off every board it stood on
             await SelectionRules.RemoveSlotsAsync(dbContext, [proposal.ProblemId], cancellationToken);
         }, cancellationToken);
+
+    /// <summary>
+    /// Says whether a score is one a rating can hold: none at all, or one of the scale's steps.
+    /// </summary>
+    /// <param name="score">The score; null for none.</param>
+    /// <returns>Whether the score is missing or on the scale.</returns>
+    private static bool IsOnScale(decimal? score) =>
+        // No score, or one within the scale that lands on a step
+        score is null
+        || (score is >= ProposalRating.MinScore and <= ProposalRating.MaxScore
+            && score.Value * ProposalRating.StepsPerPoint % 1 == 0);
 }

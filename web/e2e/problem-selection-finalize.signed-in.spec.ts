@@ -492,8 +492,8 @@ test.describe('setting a problem aside', () => {
     // Every category to recommend it for
     await expect(page.getByRole('menuitemcheckbox')).toHaveCount(3)
 
-    // Every score of every aspect to rate it with
-    await expect(page.getByRole('menuitemradio')).toHaveCount(10)
+    // A bar for each aspect to rate it on
+    await expect(page.getByRole('slider')).toHaveCount(2)
 
     // And no way to set it aside or delete it
     await expect(page.getByRole('menuitem')).toHaveCount(0)

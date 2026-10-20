@@ -21,6 +21,7 @@ import { categoryTextClass } from '@/components/features/hosted-competitions/com
 import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
+import { WaitingChangeButton } from '@/components/shared/components/WaitingChangeButton'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { focusForReader } from '@/components/shared/utils/focus-utils'
@@ -119,16 +120,17 @@ export function PoolComments({ countSlot }: PoolCommentsProps) {
       {/* How many comments show, in the line over the pool */}
       {count}
 
-      {/* That something waits, said to a screen reader as it arrives */}
-      <p role="status" className="sr-only">
-        {hasNews ? t('showWhatsNew') : ''}
-      </p>
-
       {/* What arrived since the threads were shown, waiting to be asked for */}
-      {hasNews && <WhatsNewButton onShow={showWhatsNew} countRef={countRef} />}
+      <WaitingChangeButton
+        label={t('showWhatsNew')}
+        icon={ArrowUp}
+        isWaiting={hasNews}
+        onShow={showWhatsNew}
+        fallbackRef={countRef}
+      />
 
       {/* Every thread under its heading, or why there are none */}
-      <div ref={listRef} className="scroll-mt-[var(--scroll-offset)]">
+      <div ref={listRef}>
         {threads.length === 0 ? (
           // Nothing said about anything the selection holds
           <div className={COMPACT_PANEL_CLASS}>
@@ -220,52 +222,6 @@ function ThreadsPlaceholder({ uiState, onRetry }: ThreadsPlaceholderProps) {
     default:
       return assertNever(uiState)
   }
-}
-
-/**
- * Props for the {@link WhatsNewButton} component.
- */
-type WhatsNewButtonProps = {
-  /** Shows what waited. */
-  onShow: () => void
-  /** The line over the pool, which takes the focus when the button leaves holding it with no thread to take it. */
-  countRef: RefObject<HTMLParagraphElement | null>
-}
-
-/**
- * The button showing what arrived since the threads were shown. It rests just below the header over the list as the
- * list scrolls, taking no room in it, so nothing moves as it appears. Leaving while it holds the focus, once what
- * waited is gone again, it hands the focus to the first thread's heading as {@link useFocusHandOff} does.
- */
-function WhatsNewButton({ onShow, countRef }: WhatsNewButtonProps) {
-  // Pool copy
-  const t = useTranslations('problemSelection.pool')
-
-  // The focus handed on as the button leaves holding it
-  const handOff = useFocusHandOff<HTMLDivElement>(countRef)
-
-  return (
-    // Centred on the list's top edge, clear of the first heading, and 8px below the header once held there: 26px is
-    // those 8px and half the small pill's 36px
-    <div
-      {...handOff}
-      className="sticky-below-header top-[calc(var(--header-height)+26px)] pointer-events-none h-0"
-    >
-      <div className="flex -translate-y-1/2 justify-center">
-        <Button
-          size="sm"
-          variant="outline"
-          shape="pill"
-          onClick={onShow}
-          // Solid over the threads passing under it
-          className="pointer-events-auto border-brand/40 bg-background/95 shadow-lg backdrop-blur"
-        >
-          <ArrowUp size={14} />
-          {t('showWhatsNew')}
-        </Button>
-      </div>
-    </div>
-  )
 }
 
 /**
