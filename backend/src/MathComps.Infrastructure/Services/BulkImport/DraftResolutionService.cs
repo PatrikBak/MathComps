@@ -14,7 +14,8 @@ namespace MathComps.Infrastructure.Services.BulkImport;
 /// probe. It loads the problems already at the draft's slugs with their stored content, and the proposals filing
 /// them, and reports for each the <see cref="ProblemReimport"/> plan the import would carry out. It also loads the
 /// round's full set of problem orders to check that the import would leave a round outside the proposals contiguous,
-/// and for a round of the proposals reads the proposals already holding the draft's numbers.
+/// and for a round of the proposals reads the proposals of the draft's organization already holding the draft's
+/// numbers.
 /// </summary>
 /// <param name="dbContextFactory">Factory for creating read-only database contexts.</param>
 /// <param name="metadata">The registry, source of the structural sort orders the preview reconciles against.</param>
@@ -60,10 +61,11 @@ public class DraftResolutionService(
             .Where(problem => candidateSlugs.Contains(problem.Slug))
             .ToDictionaryAsync(problem => problem.Slug);
 
-        // The proposals filing the problems already at the draft's places, with their recommendations, keyed by the
-        // place's slug.
+        // The proposals filing the problems already at the draft's places, with their recommendations and
+        // organizations, keyed by the place's slug.
         var storedProposalBySlug = await ProblemReimport.IncludeStoredRecommendations(context.Proposals.AsNoTracking())
             .Include(proposal => proposal.Problem)
+            .Include(proposal => proposal.Organization)
             .Where(proposal => candidateSlugs.Contains(proposal.Problem.Slug))
             .ToDictionaryAsync(proposal => proposal.Problem.Slug);
 
@@ -127,14 +129,38 @@ public class DraftResolutionService(
         // Whether a draft for the proposals names any embargo but the pool's instant, none included.
         var movesProposalsEmbargo = isProposalsRound && visibleSince != HostedTaxonomy.ProposalsVisibleSince;
 
+        // The organization whose pool the draft files its problems in, where it names one that exists.
+        var organizationId = await context.Organizations.AsNoTracking()
+            .Where(organization => organization.Slug == target.OrganizationSlug)
+            .Select(organization => (Guid?)organization.Id)
+            .FirstOrDefaultAsync();
+
+        // What is wrong with the organization the draft names, if anything.
+        DraftOrganizationProblem? organizationProblem =
+            (isProposalsRound, target.OrganizationSlug, organizationId) switch
+            {
+                // A draft for the proposals has to name the pool it fills
+                (true, null, _) => DraftOrganizationProblem.Missing,
+
+                // A draft for the proposals has to name an organization that exists
+                (true, not null, null) => DraftOrganizationProblem.Unknown,
+
+                // A draft anywhere else fills no pool
+                (false, not null, _) => DraftOrganizationProblem.OutsidePool,
+
+                // A draft for the proposals naming an existing organization, or any other draft naming none
+                _ => null,
+            };
+
         // Every reason a draft problem can't be filed in the pool the way the draft says.
         var proposalConflicts = await PreviewProposalConflictsAsync(
-            context, isProposalsRound, problems, slugByOrder, existingBySlug.Keys.ToHashSet(), storedProposalBySlug);
+            context, isProposalsRound, organizationId, problems, slugByOrder, existingBySlug.Keys.ToHashSet(),
+            storedProposalBySlug);
 
         // Hand back everything the preview found.
         return new DraftDbPreview(
             resolutions, textResolutions, problemResolutions, missingProblemOrders, sortOrderChanges, orphans,
-            defendedRestatements, countDisagreement, movesProposalsEmbargo, proposalConflicts);
+            defendedRestatements, countDisagreement, movesProposalsEmbargo, organizationProblem, proposalConflicts);
     }
 
     /// <summary>
@@ -143,6 +169,9 @@ public class DraftResolutionService(
     /// </summary>
     /// <param name="context">The read-only context.</param>
     /// <param name="isProposalsRound">Whether the draft lands in a round of the proposals.</param>
+    /// <param name="organizationId">
+    /// The organization whose pool the draft files its problems in, or null where it names none that exists.
+    /// </param>
     /// <param name="problems">The draft's problems.</param>
     /// <param name="slugByOrder">Each draft problem's would-be slug, keyed by its order.</param>
     /// <param name="takenSlugs">The would-be slugs a problem already holds.</param>
@@ -153,6 +182,7 @@ public class DraftResolutionService(
     private static async Task<ImmutableArray<ProposalConflict>> PreviewProposalConflictsAsync(
         MathCompsDbContext context,
         bool isProposalsRound,
+        Guid? organizationId,
         IReadOnlyList<DraftProblemContent> problems,
         IReadOnlyDictionary<int, string> slugByOrder,
         IReadOnlySet<string> takenSlugs,
@@ -167,16 +197,17 @@ public class DraftResolutionService(
                     .Select(problem => new ProposalOutsidePool(slugByOrder[problem.Order]))
             ];
 
-        // The proposals holding the numbers the draft's blocks name, wherever their problems sit, keyed by number.
+        // The proposals in the pool of the draft's organization holding the numbers the draft's blocks name, wherever
+        // their problems sit, keyed by number.
         var numbers = problems.Select(problem => problem.Proposal?.Number).OfType<int>().ToList();
         var holderByNumber = await context.Proposals.AsNoTracking()
             .Include(proposal => proposal.Problem)
-            .Where(proposal => numbers.Contains(proposal.Number))
+            .Where(proposal => proposal.OrganizationId == organizationId && numbers.Contains(proposal.Number))
             .ToDictionaryAsync(proposal => proposal.Number);
 
-        // The names of MathComps' categories, in the order they run. The import files every proposal into its pool.
+        // The names of the categories of the organization whose pool the draft fills, in the order they run.
         var categoryNames = await context.OrganizationCategories.AsNoTracking()
-            .Where(category => category.Organization.Slug == Organization.MathCompsSlug)
+            .Where(category => category.OrganizationId == organizationId)
             .OrderBy(category => category.Position)
             .Select(category => category.Name)
             .ToListAsync();
@@ -191,8 +222,8 @@ public class DraftResolutionService(
 
                 // Its conflicts, if any.
                 return ClassifyProposal(
-                    slug, problem.Proposal, takenSlugs.Contains(slug), storedBySlug.GetValueOrDefault(slug),
-                    holderByNumber, categoryNames);
+                    slug, problem.Proposal, organizationId, takenSlugs.Contains(slug),
+                    storedBySlug.GetValueOrDefault(slug), holderByNumber, categoryNames);
             })
         ];
     }
@@ -316,29 +347,46 @@ public class DraftResolutionService(
 
     /// <summary>
     /// Decides what keeps one problem of a draft for the proposals out of the pool. A problem new to the pool enters
-    /// it only through its block. A taken place keeps the problem already there, which has to be a live proposal under
-    /// the block's number. No other problem's proposal may hold the block's number. And the block recommends the
-    /// problem only for categories the pool's organization lists.
+    /// it only through its block. A taken place keeps the problem already there, which has to be a live proposal of
+    /// the draft's organization under the block's number. No other problem's proposal in that organization's pool
+    /// may hold the block's number. And the block recommends the problem only for categories that organization lists.
     /// </summary>
     /// <param name="slug">The would-be problem slug, naming its place.</param>
     /// <param name="proposal">The draft's block, or null when it carries none.</param>
+    /// <param name="organizationId">
+    /// The organization whose pool the draft files its problems in, or null where it names none that exists.
+    /// </param>
     /// <param name="isPlaceTaken">Whether a problem already holds the place.</param>
-    /// <param name="stored">The proposal filing the problem at the place, or null when none does.</param>
+    /// <param name="stored">
+    /// The proposal filing the problem at the place, with its organization, or null when none does.
+    /// </param>
     /// <param name="holderByNumber">
-    /// The proposals holding the numbers the draft names, with their problems, keyed by number.
+    /// The proposals in the pool of the draft's organization holding the numbers the draft names, with their problems,
+    /// keyed by number.
     /// </param>
     /// <param name="categoryNames">
-    /// The names of the categories the pool's organization lists, in the order they run.
+    /// The names of the categories the draft's organization lists, in the order they run.
     /// </param>
     /// <returns>The problem's conflicts, empty when it files cleanly.</returns>
     private static IEnumerable<ProposalConflict> ClassifyProposal(
         string slug,
         DraftProposal? proposal,
+        Guid? organizationId,
         bool isPlaceTaken,
         Proposal? stored,
         IReadOnlyDictionary<int, Proposal> holderByNumber,
         IReadOnlyList<string> categoryNames)
     {
+        // A taken place whose proposal is another organization's
+        if (stored is not null && organizationId is not null && stored.OrganizationId != organizationId)
+        {
+            // Refused for that alone
+            yield return new PlaceHoldsAnotherPoolsProposal(slug, stored.Number, stored.Organization.Slug);
+
+            // The checks below weigh the draft against its own organization's pool, which the place isn't in
+            yield break;
+        }
+
         // A new problem on a free place, with no block to file it in the pool.
         if (!isPlaceTaken && proposal is null)
             yield return new PoolProblemWithoutProposal(slug);
@@ -346,6 +394,10 @@ public class DraftResolutionService(
         // A taken place whose problem no proposal files.
         if (isPlaceTaken && stored is null)
             yield return new PlaceHoldsNoProposal(slug);
+
+        // The checks below weigh the draft against its organization's pool, so a draft naming none that exists stops
+        if (organizationId is null)
+            yield break;
 
         // A taken place whose proposal the reviewers deleted.
         if (stored is { DeletedAt: not null })
@@ -355,7 +407,7 @@ public class DraftResolutionService(
         if (stored is { DeletedAt: null } && proposal is not null && proposal.Number != stored.Number)
             yield return new PlaceHoldsAnotherProposal(slug, stored.Number, proposal.Number);
 
-        // Another problem's proposal holding the block's number.
+        // Another problem's proposal in the organization's pool holding the block's number.
         if (proposal is not null
             && holderByNumber.TryGetValue(proposal.Number, out var holder)
             && holder.Problem.Slug != slug)

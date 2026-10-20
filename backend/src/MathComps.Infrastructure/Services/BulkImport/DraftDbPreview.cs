@@ -173,8 +173,8 @@ public record ProposalOutsidePool(string Slug) : ProposalConflict(Slug);
 public record PoolProblemWithoutProposal(string Slug) : ProposalConflict(Slug);
 
 /// <summary>
-/// A block naming a number another problem's proposal already holds, wherever that problem sits now, a deleted
-/// proposal included.
+/// A block naming a number another problem's proposal in the same organization's pool already holds, wherever that
+/// problem sits now, a deleted proposal included.
 /// </summary>
 /// <param name="Slug"><inheritdoc cref="ProposalConflict.Slug" path="/summary"/></param>
 /// <param name="Number">The number the block names.</param>
@@ -196,6 +196,15 @@ public record ProposalDeleted(string Slug, int Number) : ProposalConflict(Slug);
 /// <param name="StoredNumber">The number of the proposal at the place.</param>
 /// <param name="DraftNumber">The number the block names.</param>
 public record PlaceHoldsAnotherProposal(string Slug, int StoredNumber, int DraftNumber) : ProposalConflict(Slug);
+
+/// <summary>
+/// A place holding a proposal of an organization other than the draft's, which the draft may not rewrite.
+/// </summary>
+/// <param name="Slug"><inheritdoc cref="ProposalConflict.Slug" path="/summary"/></param>
+/// <param name="Number">The number of the proposal at the place.</param>
+/// <param name="OrganizationSlug">The slug of the organization whose pool that proposal is in.</param>
+public record PlaceHoldsAnotherPoolsProposal(string Slug, int Number, string OrganizationSlug)
+    : ProposalConflict(Slug);
 
 /// <summary>
 /// A place in the pool's round holding a problem no proposal files, which the pool doesn't count as its own.
@@ -251,6 +260,9 @@ public record ProposalCategoryUnknown(string Slug, string Category, IReadOnlyLis
 /// Whether a draft for a round under <see cref="HostedTaxonomy.ProposalsPath"/> names an embargo other than
 /// <see cref="HostedTaxonomy.ProposalsVisibleSince"/>, or none. False for every other round.
 /// </param>
+/// <param name="OrganizationProblem">
+/// What is wrong with the organization the draft names, or null when nothing is.
+/// </param>
 /// <param name="ProposalConflicts">
 /// Every reason a draft problem can't be filed in the pool the way the draft says — empty in the normal case.
 /// </param>
@@ -264,4 +276,28 @@ public record DraftDbPreview(
     ImmutableArray<DefendedProblemRestatement> DefendedProblemRestatements,
     HostedGroupCountDisagreement? HostedGroupCountDisagreement,
     bool MovesProposalsEmbargo,
+    DraftOrganizationProblem? OrganizationProblem,
     ImmutableArray<ProposalConflict> ProposalConflicts);
+
+/// <summary>
+/// What is wrong with the organization a draft names. Every one refuses the import.
+/// </summary>
+public enum DraftOrganizationProblem
+{
+    /// <summary>
+    /// A draft for <see cref="HostedTaxonomy.ProposalsPath"/> naming no organization, so its problems would enter no
+    /// organization's pool.
+    /// </summary>
+    Missing,
+
+    /// <summary>
+    /// A draft naming a slug no organization goes by.
+    /// </summary>
+    Unknown,
+
+    /// <summary>
+    /// A draft outside <see cref="HostedTaxonomy.ProposalsPath"/> naming an organization, whose pool it files nothing
+    /// in.
+    /// </summary>
+    OutsidePool,
+}

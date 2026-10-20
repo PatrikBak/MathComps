@@ -16,8 +16,11 @@ export const META_FILENAME = '_meta.yaml'
 /** The key `_meta.yaml` names the competition by. */
 const COMPETITION_FIELD = 'competition'
 
-/** The only shape a competition is addressed in: lowercase alphanumeric segments joined by hyphens. */
-const COMPETITION_PATH_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/
+/**
+ * Lowercase alphanumeric segments joined by hyphens: the only shape a competition is addressed in, and the shape
+ * of an organization's slug.
+ */
+const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/
 
 /** Meta values substituted for any field that can't be read. */
 export const FALLBACK_META: ManifestMeta = {
@@ -25,6 +28,7 @@ export const FALLBACK_META: ManifestMeta = {
   season: { year: 0 },
   date: '',
   visibleSince: null,
+  organization: null,
   language: DEFAULT_LOCALE,
 }
 
@@ -79,10 +83,11 @@ export function narrowMeta(parsed: unknown): MetaResult {
   const season = narrowSeason(parsed.season, errors)
   const date = narrowDate(parsed.date, errors)
   const visibleSince = narrowVisibleSince(parsed.visibleSince, errors)
+  const organization = narrowOrganization(parsed.organization, errors)
   const language = narrowLanguage(parsed.language, errors)
 
   // Assemble the best-effort meta alongside the collected issues
-  return { meta: { competitionPath, season, date, visibleSince, language }, errors }
+  return { meta: { competitionPath, season, date, visibleSince, organization, language }, errors }
 }
 
 /**
@@ -97,7 +102,7 @@ export function narrowMeta(parsed: unknown): MetaResult {
  */
 function requireCompetitionPath(value: unknown, errors: VerdictError[]): string {
   // A string whose every segment is drawn from the slug alphabet addresses a competition
-  if (typeof value === 'string' && COMPETITION_PATH_PATTERN.test(value)) return value
+  if (typeof value === 'string' && SLUG_PATTERN.test(value)) return value
 
   // Anything else is missing or malformed
   errors.push(
@@ -105,6 +110,8 @@ function requireCompetitionPath(value: unknown, errors: VerdictError[]): string 
       `${COMPETITION_FIELD} is required and must be a path of lowercase alphanumeric segments joined by "-" (e.g. csmo-a-iii)`
     )
   )
+
+  // A blank path in its place
   return ''
 }
 
@@ -119,7 +126,10 @@ function requireCompetitionPath(value: unknown, errors: VerdictError[]): string 
 function narrowSeason(value: unknown, errors: VerdictError[]): Season {
   // The season must itself be a mapping carrying a year
   if (!isRecord(value)) {
+    // Anything else is missing or malformed
     errors.push(metaIssue('season is required and must have a numeric "year"'))
+
+    // A zero year in its place
     return { year: 0 }
   }
 
@@ -144,6 +154,8 @@ function narrowDate(value: unknown, errors: VerdictError[]): string {
 
   // Missing, wrong shape, or not a real date
   errors.push(metaIssue('date is required and must be a valid YYYY-MM-DD date'))
+
+  // A blank date in its place
   return ''
 }
 
@@ -171,6 +183,35 @@ function narrowVisibleSince(value: unknown, errors: VerdictError[]): string | nu
       'visibleSince must be a real ISO-8601 instant with an explicit offset (e.g. 2026-09-14T18:00:00Z), or be omitted'
     )
   )
+
+  // No embargo in its place
+  return null
+}
+
+/**
+ * Narrows the optional organization slug, recording an error when it is present but not shaped like a slug.
+ * Whether the draft has to name one, and whether it names an organization that exists, is the database's call.
+ *
+ * @param value - The raw `organization` value from the parsed document.
+ * @param errors - Accumulator the issue is pushed onto.
+ *
+ * @returns The slug, or `null` when absent or malformed.
+ */
+function narrowOrganization(value: unknown, errors: VerdictError[]): string | null {
+  // Absent is the ordinary case: a draft outside the pool files nothing
+  if (value === undefined || value === null) return null
+
+  // A slug names an organization
+  if (typeof value === 'string' && SLUG_PATTERN.test(value)) return value
+
+  // Present but unusable
+  errors.push(
+    metaIssue(
+      'organization must be the slug of the organization whose pool the draft fills (e.g. mathcomps)'
+    )
+  )
+
+  // No organization in its place
   return null
 }
 
@@ -189,6 +230,8 @@ function requireNumber(value: unknown, field: string, errors: VerdictError[]): n
 
   // Anything else is missing or malformed
   errors.push(metaIssue(`${field} is required and must be a number`))
+
+  // Zero in its place
   return 0
 }
 
@@ -206,11 +249,13 @@ function narrowLanguage(value: unknown, errors: VerdictError[]): Locale {
     return value as Locale
   }
 
-  // Unsupported or missing — record it and fall back to the default
+  // Unsupported or missing
   errors.push(
     metaIssue(
       `language must be one of ${SUPPORTED_LOCALES.join(', ')} (got ${JSON.stringify(value)})`
     )
   )
+
+  // The default language in its place
   return DEFAULT_LOCALE
 }

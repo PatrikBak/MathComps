@@ -772,9 +772,43 @@ describe('narrowMeta', () => {
       season: { year: 2024 },
       date: '2024-03-15',
       visibleSince: null,
+      organization: null,
       language: 'sk',
     })
   })
+
+  it('carries the organization a pool draft names through', () => {
+    // A pool draft naming the olympiad
+    const { meta, errors } = narrowMeta({
+      competition: 'mathcomps-proposals',
+      season: { year: 2026 },
+      date: '2026-09-14',
+      organization: 'olympiad',
+      language: 'sk',
+    })
+
+    // The slug survives verbatim
+    expect(errors).toEqual([])
+    expect(meta.organization).toBe('olympiad')
+  })
+
+  it.each(['Olympiad', 'two words', 7])(
+    'errors on the unusable organization %j',
+    (organization) => {
+      // A pool draft naming the organization
+      const { meta, errors } = narrowMeta({
+        competition: 'mathcomps-proposals',
+        season: { year: 2026 },
+        date: '2026-09-14',
+        organization,
+        language: 'sk',
+      })
+
+      // A rejected slug narrows to null, which the import then refuses for a pool draft
+      expect(meta.organization).toBeNull()
+      expect(errors).toHaveLength(1)
+    }
+  )
 
   it('carries an embargo instant through, and leaves it null when absent', () => {
     // An instant with an explicit offset survives verbatim, since the C# half re-parses this string
