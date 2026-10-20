@@ -4,6 +4,7 @@ import { useCallback } from 'react'
 import { type ApiState, useApi } from '@/hooks/use-api'
 import { apiQueryOptions } from '@/hooks/use-api-query'
 import { useQueryUiState } from '@/hooks/use-query-ui-state'
+import { cachePolicy } from '@/lib/query-config'
 import { isAwaitingAnswer, type QueryUiState } from '@/lib/query-ui-state'
 
 import { getCompetitionsBySeasonApiUrl } from '../services/problem-api-urls'
@@ -30,6 +31,8 @@ function competitionBrowserOptions(api: ApiState) {
       apiCall<SeasonCompetitionBrowserResult>(() => getCompetitionsBySeasonApiUrl(), {
         method: 'GET',
       }),
+    // Only an import adds a competition
+    cachePolicy: cachePolicy.content,
   })
 }
 

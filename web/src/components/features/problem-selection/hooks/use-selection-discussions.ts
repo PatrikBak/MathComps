@@ -13,7 +13,7 @@ import type { CommentDto } from '@/components/features/comments/services/comment
 import { getComments } from '@/components/features/comments/services/comment-service'
 import { useApi } from '@/hooks/use-api'
 import { apiQueryOptions, useApiQuery } from '@/hooks/use-api-query'
-import { cachePolicy, hasFailedForGood } from '@/lib/query-config'
+import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import {
@@ -29,7 +29,6 @@ import {
   readDiscussions,
   threadsAfterParking,
 } from './discussion-cache'
-import { SELECTION_REFRESH_MS } from './selection-cache'
 import { useSelectionOrganization } from './selection-organization'
 
 /**
@@ -132,16 +131,12 @@ export function useSelectionDiscussions({
     },
     // The discussions are never public, so the read waits for an account
     requireAuth: true,
-    // Other reviewers write too, so the discussions count as fresh only briefly
-    ...cachePolicy.userData,
+    // Other reviewers write too, so the discussions keep up with them while they are on screen
+    cachePolicy: cachePolicy.live,
     // Kept between stays, as the threads are, so a stay opens on them at once however long since the last
     gcTime: Infinity,
     // Read afresh as every stay starts, however recent an earlier stay's answer, so its first read sets off at once
     refetchOnMount: 'always',
-    // Read again on coming back to the tab, except over a refusal that stands
-    refetchOnWindowFocus: (query) => !hasFailedForGood(query.state),
-    // Read again every little while in view, except over a refusal that stands
-    refetchInterval: (query) => (hasFailedForGood(query.state) ? false : SELECTION_REFRESH_MS),
   })
 
   // Each subject's comment thread
@@ -158,6 +153,8 @@ export function useSelectionDiscussions({
         ...apiQueryOptions<CommentDto[]>(api, {
           queryKey: commentQueryKeys.target(target, readerId),
           fetch: (apiCall) => getComments(apiCall, target),
+          // The tier that reads only when asked
+          cachePolicy: cachePolicy.onDemand,
         }),
         // Never read from here, not even when told its copy is out of date, as after a failed write to it, so nothing
         // anybody else said comes in before the reader asks: the discussions read again once the reader's writes

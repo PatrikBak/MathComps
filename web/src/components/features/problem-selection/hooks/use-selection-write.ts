@@ -210,17 +210,6 @@ export function useSelectionWrite<TVariables>({
 }
 
 /**
- * Whether any write to the selection is still out, any read it waits for included. A read landing meanwhile could
- * cover a write's edit with the selection from before it.
- *
- * @returns True while any is out.
- */
-export function useIsSelectionWriting(): boolean {
-  // Whether any write to the selection has yet to settle
-  return useIsMutating({ mutationKey: SELECTION_WRITE_KEY }) > 0
-}
-
-/**
  * Whether a write changing what the slots hold is still out, any read it waits for included. A slot named while one
  * is out can name another problem by the time it lands.
  *

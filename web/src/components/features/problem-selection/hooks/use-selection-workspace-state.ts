@@ -3,18 +3,18 @@
 import { useMemo } from 'react'
 
 import { useApiQuery } from '@/hooks/use-api-query'
-import { cachePolicy, hasFailedForGood } from '@/lib/query-config'
+import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import { indexSelection, type SelectionIndex } from '../model/selection-state'
 import type { Board, SelectionData } from '../model/selection-types'
 import { getSelection } from '../services/selection-service'
-import { SELECTION_REFRESH_MS, useSelectionQueryKey } from './selection-cache'
+import { useSelectionQueryKey } from './selection-cache'
 import { useSelectionOrganization } from './selection-organization'
 import { useBoardPicking, type UseBoardPickingResult } from './use-board-picking'
 import { useOpenDetail, type UseOpenDetailResult } from './use-open-detail'
 import { usePoolFilters, type UsePoolFiltersResult } from './use-pool-filters'
-import { useIsChangingSlots, useIsSelectionWriting } from './use-selection-write'
+import { useIsChangingSlots } from './use-selection-write'
 
 /**
  * The selection once its read has landed, with the board on screen.
@@ -55,23 +55,14 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
   // Where the reader's selection is cached
   const queryKey = useSelectionQueryKey()
 
-  // Whether any write to the selection is still out
-  const isWriting = useIsSelectionWriting()
-
   // The whole selection, read as whoever is signed in
   const { data, uiState, retry } = useApiQuery<SelectionData>({
     queryKey,
     fetch: (apiCall) => getSelection(apiCall, organization),
     // The selection is never public, so the read waits for an account
     requireAuth: true,
-    // Other reviewers move things too, so the selection counts as fresh only briefly
-    ...cachePolicy.userData,
-    // Read again on coming back to the tab, except over a refusal that stands or while a write is out, since a
-    // read landing then could cover the write's edit with the selection from before it
-    refetchOnWindowFocus: (query) => !isWriting && !hasFailedForGood(query.state),
-    // Read again every little while in view, except at those same times
-    refetchInterval: (query) =>
-      isWriting || hasFailedForGood(query.state) ? false : SELECTION_REFRESH_MS,
+    // Other reviewers move things too, so the selection keeps up with them while it is open
+    cachePolicy: cachePolicy.live,
   })
 
   // The page open in full, and the ways in and out of it

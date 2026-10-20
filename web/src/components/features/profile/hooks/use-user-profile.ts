@@ -4,6 +4,7 @@ import { useAuth } from '@clerk/nextjs'
 import type { QueryKey } from '@tanstack/react-query'
 
 import { useApiQuery } from '@/hooks/use-api-query'
+import { cachePolicy } from '@/lib/query-config'
 
 import { getUserProfile } from '../services/profile-service'
 
@@ -79,6 +80,8 @@ export function useUserProfile(): UseUserProfileResult {
     fetch: getUserProfile,
     // Their own profile, so it is read as them
     requireAuth: true,
+    // The tier for the reader's own data
+    cachePolicy: cachePolicy.onDemand,
     // Never stale: nothing outside this browser writes any of these, and every call that does echoes its own
     // answer straight into this cache, so there is never a newer one to go and ask for
     staleTime: Infinity,

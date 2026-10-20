@@ -42,8 +42,8 @@ export function useCompetitionProblems(
     requireAuth: false,
     // Nothing is asked for until the reader is entitled to the set
     enabled: isEntitled,
-    // A conversation held on another tab should show up here promptly
-    ...cachePolicy.userData,
+    // Graders mark the set and reply in its threads, so their word keeps arriving while the set is open
+    cachePolicy: cachePolicy.live,
   })
 
   // The problems and the state of the read

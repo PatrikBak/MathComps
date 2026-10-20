@@ -3,6 +3,7 @@
 import { useLocale } from 'next-intl'
 
 import { useApiQuery } from '@/hooks/use-api-query'
+import { cachePolicy } from '@/lib/query-config'
 
 import { fetchDefenseCopy } from '../services/session-service'
 import { defenseCopyQueryKey } from './defense-cache'
@@ -32,6 +33,8 @@ export function useDefenseCopy(): UseDefenseCopyResult {
     fetch: (caller) => fetchDefenseCopy(caller),
     // The chat greets a visitor who has yet to sign in
     requireAuth: false,
+    // Near-static content
+    cachePolicy: cachePolicy.content,
     // Never stale: the lines are written down in the backend's own resource, so a deploy is the only
     // thing that can change them and nothing this side of one has a newer answer to go and ask for
     staleTime: Infinity,
