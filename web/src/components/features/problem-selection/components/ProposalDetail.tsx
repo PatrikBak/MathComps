@@ -33,7 +33,7 @@ type ProposalDetailProps = {
 }
 
 /**
- * One problem in full: what it is filed under, its statement in the language picked, and under it the hints, the
+ * One problem in full: what it is filed under, its statement in the language being read, and under it the hints, the
  * solution, every conversation reviewers held with Mathilda, and the discussion.
  */
 export function ProposalDetail({ proposalId, poolLanguage }: ProposalDetailProps) {
@@ -124,12 +124,15 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
     },
   }
 
+  // Whether the problems need every language
+  const { needsEveryLanguage } = useLoadedSelection()
+
   return (
     <article>
       {/* The way out */}
       <BackLink />
 
-      {/* Identity and the language it is read in */}
+      {/* Identity and, where the problems need every language, the language it is read in */}
       <header className="mt-3 flex flex-col items-start gap-3 sm:flex-row">
         {/* The problem's name */}
         <DetailHeading subjectId={proposal.id} className="text-foreground sm:min-w-0 sm:flex-1">
@@ -138,11 +141,13 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
         </DetailHeading>
 
         {/* The language */}
-        <LanguageSwitch
-          language={language}
-          onChange={setLanguage}
-          unwritten={unwrittenAcross([proposal])}
-        />
+        {needsEveryLanguage && (
+          <LanguageSwitch
+            language={language}
+            onChange={setLanguage}
+            unwritten={unwrittenAcross([proposal])}
+          />
+        )}
       </header>
 
       {/* The problem, with what it is filed under and what can be done to it */}

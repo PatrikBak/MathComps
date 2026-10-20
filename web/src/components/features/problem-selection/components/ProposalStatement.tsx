@@ -7,6 +7,7 @@ import type { Locale } from '@/i18n/i18n'
 
 import { resolveText } from '../model/selection-state'
 import type { Proposal } from '../model/selection-types'
+import { useLoadedSelection } from './SelectionWorkspaceProvider'
 
 /**
  * Props for the {@link ProposalStatement} component.
@@ -20,11 +21,14 @@ type ProposalStatementProps = {
 
 /**
  * A problem's statement in the language being read, typeset compactly with its math and figures, under a note
- * when another language has to stand in.
+ * when another language has to stand in. Where any one text will do, the one standing in goes without a note.
  */
 export function ProposalStatement({ proposal, language }: ProposalStatementProps) {
   // Copy for the statement's fallbacks
   const t = useTranslations('problemSelection.text')
+
+  // Whether the problems need every language
+  const { needsEveryLanguage } = useLoadedSelection()
 
   // The problem's text in the language being read, or in the first one it has
   const resolved = resolveText(proposal, language)
@@ -34,8 +38,8 @@ export function ProposalStatement({ proposal, language }: ProposalStatementProps
 
   return (
     <>
-      {/* Which language stood in, when the one being read has nothing */}
-      {resolved.language !== language && (
+      {/* Which language stood in, when the one being read has nothing and every language is needed */}
+      {needsEveryLanguage && resolved.language !== language && (
         <p className="mb-2 text-xs text-muted">
           {t('fallback', {
             missing: language.toUpperCase(),

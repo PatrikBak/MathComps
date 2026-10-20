@@ -109,7 +109,7 @@ public class OrganizationMemberServicePostgresTests(PostgresContainerFixture fix
         SelectionSeed.NewMember(context, "member@example.com", _addedAt);
 
         // Another organization.
-        var other = new Organization { Slug = "other" };
+        var other = new Organization { Slug = "other", NeedsEveryLanguage = false };
         context.Organizations.Add(other);
 
         // The outsider's address on the other organization's list.

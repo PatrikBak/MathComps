@@ -9,6 +9,7 @@ import {
   actionsButton,
   addressedParam,
   BILINGUAL,
+  boardPanel,
   cardOf,
   DRAFT_BOARD,
   GEOMETRY,
@@ -22,6 +23,7 @@ import {
   openPool,
   pickBoard,
   pickState,
+  rememberedSelection,
   REVISION,
   selectedTab,
   SELECTION_ENDPOINT,
@@ -30,6 +32,9 @@ import {
   SET_ASIDE,
   SETTLE_TIMEOUT_MS,
   showsFocusRing,
+  slotOf,
+  SLOVAK_ALONE,
+  SLOVAK_ALONE_STATEMENT,
   SLOVAK_STATEMENT,
   stubSelection,
   UNWRITTEN,
@@ -1160,5 +1165,78 @@ test.describe('the languages a problem is read in', () => {
 
     // With a word where its statement would be
     await expect(cardOf(page, UNWRITTEN).getByText(selectionCopy.text.none)).toBeVisible()
+  })
+
+  test('reads each problem in the text it has where any one will do, naming no language', async ({
+    page,
+  }) => {
+    // A reviewer whose organization's problems need any one text, a problem written in Slovak alone in its pool
+    await stubSelection(page, 'slovakAlone', {
+      ...rememberedSelection(null),
+      needsEveryLanguage: false,
+    })
+
+    // The pool
+    await page.goto(SELECTION_PATH)
+
+    // Once every card is drawn
+    await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT + 1, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The switch between languages, wherever one shows
+    const languageSwitch = page.getByRole('radiogroup', { name: selectionCopy.language.label })
+
+    // None over the pool
+    await expect(languageSwitch).toHaveCount(0)
+
+    // The problem written in Slovak alone, read in Slovak
+    await expect(cardOf(page, SLOVAK_ALONE)).toContainText(SLOVAK_ALONE_STATEMENT)
+
+    // With no note that English is missing
+    await expect(cardOf(page, SLOVAK_ALONE)).not.toContainText(
+      selectionText('text.fallback', { missing: 'EN', shown: 'SK' })
+    )
+
+    // Nor a note that it lacks Czech and English
+    await expect(cardOf(page, SLOVAK_ALONE)).not.toContainText(
+      selectionText('filing.unwritten', { languages: 'CS, EN' })
+    )
+
+    // A problem in English alone with no solution, with no note of the languages it is not written in
+    await expect(cardOf(page, OPENED)).not.toContainText(
+      selectionText('filing.unwritten', { languages: 'SK, CS' })
+    )
+
+    // Nor a note of any language it lacks a solution in
+    await expect(cardOf(page, OPENED)).not.toContainText(
+      new RegExp(selectionCopy.filing.noSolution.replace('{languages}', '.+'))
+    )
+
+    // E1, holding a problem in English alone with no solution, naming no language
+    await expect(slotOf(page, 'E1')).not.toContainText(
+      selectionText('board.missingLanguages', { languages: 'SK, CS, EN' })
+    )
+
+    // The problem written in Slovak alone, opened
+    await cardOf(page, SLOVAK_ALONE).getByRole('link', { name: SLOVAK_ALONE.title }).click()
+
+    // Its page
+    await expect(headingOf(page, SLOVAK_ALONE)).toBeVisible()
+
+    // With no switch either
+    await expect(languageSwitch).toHaveCount(0)
+
+    // The elementary paper
+    const elementary = DRAFT_BOARD.papers[0]
+
+    // Opened from the board
+    await boardPanel(page).getByRole('link', { name: elementary.name, exact: true }).click()
+
+    // Its page
+    await expect(page.getByRole('heading', { level: 2, name: elementary.name })).toBeVisible()
+
+    // With no switch either
+    await expect(languageSwitch).toHaveCount(0)
   })
 })
