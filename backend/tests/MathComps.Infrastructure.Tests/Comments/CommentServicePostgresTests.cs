@@ -162,7 +162,7 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     /// <summary>
     /// A comment is signed with the author's username. Each projection that names an author is written on its
     /// own, LINQ for the comment just created and raw SQL for the thread read back, so each is asserted here: a
-    /// fix that misses one renames a student's comment the moment the page reloads.
+    /// change that misses one renames a student's comment the moment the page reloads.
     /// </summary>
     [Fact]
     public Task CreateCommentAsync_SignsTheCommentWithTheUsername() => RunTestAsync(async commentService =>

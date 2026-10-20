@@ -8,14 +8,14 @@ Tags live **in the draft**, not the database. `apply` runs twice — once agains
 
 ## How It Works
 
-For every problem whose `pN.yaml` has **no** `tags:` key, the tool runs four model passes over the draft's English body (the translations come from stronger models than the source-language originals, so tagging runs on English):
+For every problem whose `pN.yaml` has **no** `tags:` key, the tool runs these steps over the draft's English body (the translations come from stronger models than the source-language originals, so tagging runs on English):
 
 1. **Generate — statement** → proposes Area / Type / Goal tags from the approved vocabulary.
 2. **Generate — solution** → proposes Technique tags. Skipped when the problem has no solution, so a Technique tag never lands on a statement-only problem.
-3. **Fit floor** → only proposals scoring at least the floor (default `0.5`) reach the veto pass, so marginal guesses never approach the draft. The score gates the veto here; it is also surfaced in each tag's yaml comment for review, but never parsed back (apply reads only the slugs).
+3. **Fit floor** → only proposals scoring at least the floor reach the veto pass, so marginal guesses never approach the draft. The score gates the veto here; it is also surfaced in each tag's yaml comment for review, but never parsed back (apply reads only the slugs).
 4. **Veto** → the model reviews its own survivors (statement tags against the statement, technique tags against the solution) and drops the ones that don't hold up.
 
-Each pass sends the instructions and the candidate vocabulary as the system message (constant across problems, so the model caches that prefix) and the problem itself as the user message.
+Each pass sends the instructions and its candidate tags as the system message and the problem itself as the user message.
 
 The survivors are written as a bare slug list into `pN.yaml`, each line trailed by a comment carrying the model's fitness score and, when it gave one, its justification:
 
@@ -34,7 +34,7 @@ tags:
 
 The run streams a timestamped line as each problem enters a pass (`p3 → veto statement…`), so a pass sitting with no follow-up shows exactly where a problem is waiting. When a problem finishes it logs a one-line summary with the per-pass timing and tag count, and the run ends with the total.
 
-The run also prices itself: it samples the key's spend from the provider's `/key` endpoint before and after, and the difference is what the round cost (`This round cost ≈$0.0123`). The figure is approximate — the provider settles a request's cost shortly after the response — and a failed reading just drops the line, never the run.
+The run also prices itself: it sums what the provider billed each reply and prints the total (`This round cost $0.0123.`).
 
 ### Review and re-runs
 
@@ -54,7 +54,7 @@ The model is told to use only approved tags, but if it ever proposes a name outs
 dotnet run --project backend/src/MathComps.Cli.Tagging -- ./my-draft
 ```
 
-The one argument is the draft folder. The only option is `--retag` (re-tag every problem, overwriting existing tags); the fit floor and the four prompt passes live in `appsettings.json`. Canonical sequence:
+The one argument is the draft folder. The only option is `--retag` (re-tag every problem, overwriting existing tags); the fit floor and each prompt pass's settings live in `appsettings.json`. Canonical sequence:
 
 ```
 author draft → tag → validate → apply (local) → eyeball on site → fix yaml → apply (prod)
@@ -69,7 +69,7 @@ author draft → tag → validate → apply (local) → eyeball on site → fix 
   dotnet user-secrets set "Llm:ApiKey" "..."
   ```
 
-  The base URL lives in `appsettings.json` under `Llm`; each pass's `Model` lives under `TagDraftSettings` — swap any to a model the provider exposes (e.g. an Anthropic or OpenAI id) to change backends.
+  The base URL lives under `Llm` in the shared [`appsettings.llm.json`](../MathComps.Infrastructure/appsettings.llm.json); each pass's `Model` lives under `TagDraftSettings` — swap any to a model the provider exposes (e.g. an Anthropic or OpenAI id) to change backends.
 
 - **Vocabulary** — the approved tags come from [`approved-tags.json`](../MathComps.Infrastructure/Resources/approved-tags.json), bundled into the build. No database connection is needed.
 
@@ -77,4 +77,4 @@ Every backend project shares one user-secrets store (see the [main backend READM
 
 ## AI prompts
 
-The four prompt templates live in [`Prompts/`](./Prompts). Each holds the instructions, rules, and the `{candidate_tags}` slot that becomes the system message; the problem statement (and solution) is sent separately as the user message.
+The prompt templates live in [`Prompts/`](./Prompts). Each holds the instructions, rules, and the `{candidate_tags}` slot that becomes the system message; the problem statement (and solution) is sent separately as the user message.

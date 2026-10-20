@@ -33,7 +33,7 @@ public interface IUserListService
     Task<UserListDto> UpdateListAsync(Guid userId, string contentId, string newName);
 
     /// <summary>
-    /// Deletes a user list. System default lists cannot be deleted.
+    /// Deletes a user list along with its items.
     /// </summary>
     /// <param name="userId">The internal ID of the user.</param>
     /// <param name="contentId">The content ID of the list to delete.</param>

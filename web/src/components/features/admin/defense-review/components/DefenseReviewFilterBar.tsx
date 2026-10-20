@@ -74,9 +74,9 @@ export function DefenseReviewFilterBar({
   // Which of the signal options the filter currently stands for
   const selectedSignals = toSignalSelection(filter)
 
-  // Applies a signal selection to the three fields it stands for
+  // Applies a signal selection to the fields it stands for
   const applySignals = (selected: string[]) => {
-    // What those options leave the three fields at
+    // What the picked options leave each signal field at
     const signals = readSignalSelection(selected, filter)
 
     // Each set on its own, since the facet holds them together but the filter doesn't
@@ -96,7 +96,7 @@ export function DefenseReviewFilterBar({
         {t('filters.unread')}
       </FacetTogglePill>
 
-      {/* What the conversation carries, three of the filter's fields offered as one set of options */}
+      {/* What the conversation carries, several of the filter's fields offered as one set of options */}
       <MultiSelectFacet
         variant="pill"
         title={t('filters.signals')}

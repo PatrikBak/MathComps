@@ -25,7 +25,7 @@ You edit Asymptote figures in `data/handouts/Images/`. Source is `.asy`; the `.s
 
 A figure's physical size *is* the magnitude of its coordinates (`unitsize(1pt)`, no `size()` clamp), while pens and fonts are absolute. Nothing downstream rescales it up: **a figure shrinks on a narrow screen but never grows**, and there is no tap-to-zoom. The phone is the binding constraint, never print.
 
-- **Cap natural width at 185pt** (≈246px) — the widest figure that never downscales, even on a 320px phone. A ceiling, not a target.
+- **Cap natural width at 185pt** (≈246px) — the widest figure that never downscales in a theorem card, even on a 320px phone. A ceiling, not a target. **A figure inside a hint or solution caps at 159pt** (≈212px), that panel's width on the same phone.
 - **Target 90–120pt tall.** Height is the constraint you actually get told about: it decides how big a bite the figure takes out of the page next to a one- or two-line statement. Past ~140pt needs a reason.
 - **A circle-dominated figure is roughly as tall as it is wide, so sizing it by width is the trap.** Hitting the height target puts such figures at ~110–150pt wide — deliberately under the width band, and correct. Wide-and-short figures (a triangle, a point-and-secant layout) can use the full width.
 - **Keep a handout's figures within a narrow band**, banded on whichever dimension dominates them. Below roughly 100pt across, 13pt labels start to dominate whatever the shape.
@@ -52,7 +52,7 @@ Measured viewport widths and the arithmetic behind these numbers: [figure-sizing
 
 ## Palette and styling
 
-- **6 hue families × 3 shades** in `_common.asy`: `LightBlue/Blue/DarkBlue`, `LightRed/Red/DarkRed`, `LightGreen/Green/DarkGreen`, `LightPurple/Purple/DarkPurple`, `LightPink/Pink/DarkPink`, `LightYellow/Yellow/DarkYellow`. Always pick a named pen — never inline `rgb(...)`.
+- **Hue families × 3 shades** in `_common.asy`: `LightBlue/Blue/DarkBlue`, `LightRed/Red/DarkRed`, `LightGreen/Green/DarkGreen`, `LightPurple/Purple/DarkPurple`, `LightPink/Pink/DarkPink`, `LightYellow/Yellow/DarkYellow`, `LightOrange/Orange/DarkOrange`. Always pick a named pen — never inline `rgb(...)`.
 - **`AngleMark` / `RightAngleMark` take a `Light*` pen** — they fill a sector with no edge stroke, so a saturated pen reads heavy. For `labelPen` use a Normal/Dark pen or a `Font*` tier (e.g. `AngleMark(C, B, A, LightRed, "\alpha", labelPen = Red)`, `labelPen = Font2`).
 - **`AngleMark(X, Y, Z, color, ...)` — vertex is the MIDDLE arg, sweep is CCW from ray YX to ray YZ.** It does NOT auto-pick the smaller side (`while (d2 < d1) d2 += 360`). If the wedge fills the long way around, swap to `AngleMark(Z, Y, X, ...)` to reverse direction.
 - **`RightAngleMark(A, O, B, ...)` is the opposite: orientation-independent.** It always marks the corner between rays OA and OB, so swapping `A`/`B` renders the identical L. Don't try to flip it. Its signature is also `(A, O, B, radius, color, filled)` — `color` is the FIFTH argument, after `radius`, not the fourth as in `AngleMark`.

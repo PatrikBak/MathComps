@@ -37,7 +37,7 @@ public static class ReviewNoteSeed
     private static readonly Guid _otherSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a2");
 
     /// <summary>
-    /// A conversation with no environment behind it, which nothing can open.
+    /// A conversation held against nothing at all, which nothing can open.
     /// </summary>
     public static readonly Guid UntargetedSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a3");
 

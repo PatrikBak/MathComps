@@ -98,7 +98,7 @@ run_in() {
     fi
 }
 
-# Dispatch a command to its project, prepending any fixed subcommand and appending passthrough args.
+# Dispatch a command to its project, appending the passthrough args.
 run_tool() {
     # Project directory name under src/.
     local project_name="$1"
@@ -106,7 +106,7 @@ run_tool() {
     run_in "$src_dir/$project_name" "$@" ${rest[@]+"${rest[@]}"}
 }
 
-# Map each command to its project (and fixed subcommand where the tool needs one).
+# Map each command to its project.
 # set +e so we can capture the tool's exit code and propagate it after the tunnel is closed.
 set +e
 case "$tool_command" in

@@ -142,7 +142,7 @@ public static class NamedDefenseTargets
     }
 
     /// <summary>
-    /// Reduces a problem to whatever addresses it, so options over both kinds can be put in one order.
+    /// Reduces a problem to whatever addresses it, so options over every kind can be put in one order.
     /// </summary>
     /// <param name="target"><inheritdoc cref="NamedDefenseTarget" path="/summary"/></param>
     /// <returns>The problem as one string.</returns>

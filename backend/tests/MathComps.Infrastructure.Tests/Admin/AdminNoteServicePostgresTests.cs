@@ -137,16 +137,16 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A conversation that has lost its environment stays out of the feed whole, count included: opening one takes
-    /// an environment, so a line about it would lead nowhere.
+    /// A conversation held against nothing at all stays out of the feed whole, count included: opening one takes the
+    /// thing it was held against, so a line about it would lead nowhere.
     /// </summary>
     [Fact]
-    public Task The_feed_leaves_out_a_conversation_with_no_environment_behind_it() => RunTestAsync(async service =>
+    public Task The_feed_leaves_out_a_conversation_held_against_nothing() => RunTestAsync(async service =>
     {
-        // A note about the conversation that still has its environment
+        // A note about a conversation held against a handout environment
         await WriteNoteAsync(ReviewerId, SessionId, null, "went in circles", null);
 
-        // And one about the conversation that has none
+        // And one about the conversation held against nothing
         await WriteNoteAsync(ReviewerId, UntargetedSessionId, null, "nowhere to open", null);
 
         // Read the feed

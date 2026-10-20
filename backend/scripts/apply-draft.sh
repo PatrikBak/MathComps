@@ -169,7 +169,7 @@ if [ "$clear_defenses" = "true" ]; then
     echo
     echo "=== Deleting defense sessions on $competition_path ==="
 
-    # Turns, attempts, calls, reports, feedback, admin notes and reviews all cascade off the
+    # Turns, attempts, calls, reports, feedback, review notes and reviews all cascade off the
     # session. `defense_spends` deliberately carries no session foreign key: it is the ledger the
     # daily spend ceiling reads, and wiping it would make the ceiling evadable.
     run_sql <<'EOF'

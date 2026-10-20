@@ -17,7 +17,7 @@ public static class EndpointExtensions
         // Problem catalog: filtering, competition browser, lookup, like/mark
         app.MapProblemEndpoints();
 
-        // Threaded comments on problems, handouts and news
+        // Comment threads on every kind of target
         app.MapCommentEndpoints();
 
         // The authenticated user's problem lists
@@ -32,7 +32,7 @@ public static class EndpointExtensions
         // The competitions the site hosts itself: the groups, entries, and the problems an entry opens
         app.MapCompetitionEndpoints();
 
-        // Admin-only endpoints, gated by the admin policy
+        // The admin's whoami endpoint, gated by the admin policy
         app.MapAdminEndpoints();
 
         // Reading one defense conversation back and recording how far it has been read

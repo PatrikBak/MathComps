@@ -156,7 +156,7 @@ public class DefenseSessionService(
         var allEntries = dbContext.HostedEntries;
 
         // The session with its turns (tracked, for the append below), the student's answer for it and what they
-        // hold against its replies, the columns of both target arms, of which the session's kind says which are
+        // hold against its replies, the columns of every target arm, of which the session's kind says which are
         // filled, and whether they hold an entry into the round its problem sits in. Split, because turns and
         // reports are two collections off one row: joined in a single query the database would return every
         // pairing of them, each repeating the session's statement, reference, and settings snapshot. Another
@@ -280,7 +280,7 @@ public class DefenseSessionService(
         // tree runs.
         var deletedProposals = dbContext.Proposals.Where(proposal => proposal.DeletedAt != null);
 
-        // The user's sessions, most recently active first, each with the columns of both target arms, the round
+        // The user's sessions, most recently active first, each with the columns of every target arm, the round
         // it was argued under and when it started, its statement, last activity, and the student's most recent
         // message.
         var rows = await dbContext.DefenseSessions

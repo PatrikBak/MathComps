@@ -45,7 +45,7 @@ internal static class DefenseTargets
     };
 
     /// <summary>
-    /// Rebuilds the target of a stored session from the two arms' columns, of which the session's kind says
+    /// Rebuilds the target of a stored session from the columns of every arm, of which the session's kind says
     /// which one is filled.
     /// </summary>
     /// <remarks>

@@ -329,7 +329,7 @@ export function areProblemsReadable(
   competition: HostedCompetition,
   preparesCompetitions: boolean
 ): boolean {
-  // Any one of the three opens the set
+  // Any one of them opens the set
   return preparesCompetitions || competition.entry !== null || competition.problemsPublished
 }
 
