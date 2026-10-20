@@ -1611,12 +1611,9 @@ namespace MathComps.Infrastructure.Migrations
                     b.HasKey("ProblemId")
                         .HasName("pk_proposals");
 
-                    b.HasIndex("Number")
+                    b.HasIndex("OrganizationId", "Number")
                         .IsUnique()
-                        .HasDatabaseName("ux_proposal_number");
-
-                    b.HasIndex("OrganizationId")
-                        .HasDatabaseName("ix_proposals_organization_id");
+                        .HasDatabaseName("ux_proposal_organization_number");
 
                     b.ToTable("proposals", null, t =>
                         {

@@ -1,3 +1,4 @@
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Problems;
@@ -45,7 +46,7 @@ public class SelectionRulesPostgresTests(PostgresContainerFixture fixture)
         await ProblemPositions.LockAsync(running, CancellationToken.None);
 
         // A second write, started meanwhile
-        var write = service.SetAsideAsync(_proposalId, isSetAside: true);
+        var write = service.SetAsideAsync(Organization.MathCompsSlug, _proposalId, isSetAside: true);
 
         // A while later
         await Task.Delay(TimeSpan.FromMilliseconds(500));

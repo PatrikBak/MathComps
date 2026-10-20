@@ -1,3 +1,4 @@
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -5,7 +6,7 @@ namespace MathComps.Infrastructure.Services.Organizations;
 
 /// <summary>
 /// Implements <see cref="IOrganizationMemberService"/> over the database, matching an account's address lowercased
-/// against the list, which holds every address lowercased.
+/// against the organizations' lists, which hold every address lowercased.
 /// </summary>
 /// <param name="dbContextFactory">The factory minting each read's database context.</param>
 public sealed class OrganizationMemberService(IDbContextFactory<MathCompsDbContext> dbContextFactory)
@@ -46,5 +47,37 @@ public sealed class OrganizationMemberService(IDbContextFactory<MathCompsDbConte
                 member => member.Email,
                 (user, member) => new { user.Id, member.AddedAt })
             .ToDictionaryAsync(entry => entry.Id, entry => entry.AddedAt, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<Guid>> GetOrganizationIdsAsync(
+        Guid userId, CancellationToken cancellationToken = default)
+    {
+        // A fresh context for this read.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The id of each organization whose list carries the account's address.
+        return await OrganizationsOf(dbContext, userId)
+            .Select(organization => organization.Id)
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// The organizations whose list carries an account's address.
+    /// </summary>
+    /// <param name="dbContext">The read's context.</param>
+    /// <param name="userId">The account.</param>
+    /// <returns>The organizations, still unrun.</returns>
+    private static IQueryable<Organization> OrganizationsOf(MathCompsDbContext dbContext, Guid userId)
+    {
+        // The account's address lowercased, or none for an account without one.
+        var address = dbContext.Users
+            .Where(user => user.Id == userId && user.Email != null)
+            .Select(user => user.Email!.ToLower());
+
+        // The organizations listing that address.
+        return dbContext.Organizations
+            .AsNoTracking()
+            .Where(organization => organization.Members.Any(member => address.Contains(member.Email)));
     }
 }

@@ -3,12 +3,14 @@ using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Organizations;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MathComps.Infrastructure.Tests.Organizations;
 
 /// <summary>
-/// Covers <see cref="OrganizationMemberService"/>: who is a member of an organization, and since when.
+/// Covers <see cref="OrganizationMemberService"/>: who is a member of an organization, since when, and which
+/// organizations an account is a member of.
 /// </summary>
 /// <remarks>
 /// Membership is an account's address matched against a list, so the cases that matter are the near misses: the same
@@ -34,7 +36,7 @@ public class OrganizationMemberServicePostgresTests(PostgresContainerFixture fix
     private readonly Guid _twinId = Guid.CreateVersion7();
 
     /// <summary>
-    /// An account whose address is on another organization's list alone.
+    /// An account whose address is on the other organization's list alone.
     /// </summary>
     private readonly Guid _outsiderId = Guid.CreateVersion7();
 
@@ -88,6 +90,36 @@ public class OrganizationMemberServicePostgresTests(PostgresContainerFixture fix
             new Dictionary<Guid, DateTimeOffset> { [_memberId] = _addedAt, [_twinId] = _addedAt },
             await members.GetMemberSinceAsync(
                 [_memberId, _twinId, _outsiderId, _addresslessId], Organization.MathCompsSlug)));
+
+    /// <summary>
+    /// An account's organizations come back, whatever capitals its address carries: the member's two, the
+    /// outsider's one, and none for an account with no address.
+    /// </summary>
+    [Fact]
+    public Task An_accounts_organizations_come_back() => RunTestAsync(async members =>
+    {
+        // The member's address on the other organization's list as well
+        await QueryAsync(async context =>
+        {
+            // The other organization
+            var other = await context.Organizations.SingleAsync(organization => organization.Slug == "other");
+
+            // The member's address on the other organization's list too
+            SelectionSeed.NewMember(context, other.Id, "member@example.com", _addedAt);
+
+            // Written
+            await context.SaveChangesAsync();
+        });
+
+        // The member's two
+        Assert.Equal(2, (await members.GetOrganizationIdsAsync(_memberId)).Count);
+
+        // The outsider's one
+        Assert.Single(await members.GetOrganizationIdsAsync(_outsiderId));
+
+        // And none for the account with no address
+        Assert.Empty(await members.GetOrganizationIdsAsync(_addresslessId));
+    });
 
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)

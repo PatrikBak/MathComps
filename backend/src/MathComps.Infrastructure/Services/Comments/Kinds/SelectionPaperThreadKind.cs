@@ -14,7 +14,7 @@ namespace MathComps.Infrastructure.Services.Comments.Kinds;
 public sealed record SelectionPaperAnchor(Guid PaperId) : CommentAnchor;
 
 /// <summary>
-/// The reviewers' discussions of the papers on the selection's boards, named by the paper's id, one per paper.
+/// The reviewers' discussions of the papers on the selections' boards, named by the paper's id, one per paper.
 /// </summary>
 /// <param name="members"><inheritdoc cref="IOrganizationMemberService" path="/summary"/></param>
 public class SelectionPaperThreadKind(IOrganizationMemberService members)
@@ -36,21 +36,35 @@ public class SelectionPaperThreadKind(IOrganizationMemberService members)
 
     /// <inheritdoc />
     protected override IQueryable<KeyValuePair<string, int>> CountById(
-        MathCompsDbContext dbContext, ImmutableList<Guid> ids) =>
+        MathCompsDbContext dbContext, ImmutableList<Guid> threadIds) =>
         // Each paper's active comments, keyed by its id
         dbContext.SelectionPaperComments
-            .Where(link => ids.Contains(link.PaperId))
+            .Where(link => threadIds.Contains(link.PaperId))
             .Where(link => link.Comment.Status == CommentStatus.Active)
             .GroupBy(link => link.PaperId)
             .Select(group => new KeyValuePair<string, int>(group.Key.ToString(), group.Count()));
 
     /// <inheritdoc />
     protected override IQueryable<KeyValuePair<string, Guid>> LinksById(
-        MathCompsDbContext dbContext, ImmutableList<Guid> ids) =>
+        MathCompsDbContext dbContext, ImmutableList<Guid> threadIds) =>
         // Each paper's comments, keyed by its id
         dbContext.SelectionPaperComments
-            .Where(link => ids.Contains(link.PaperId))
+            .Where(link => threadIds.Contains(link.PaperId))
             .Select(link => new KeyValuePair<string, Guid>(link.PaperId.ToString(), link.CommentId));
+
+    /// <inheritdoc />
+    protected override IQueryable<Guid> InOrganizations(
+        MathCompsDbContext dbContext, ImmutableList<Guid> threadIds, IReadOnlyList<Guid> organizationIds) =>
+        // The papers the ids name that sit on one of the organizations' boards
+        dbContext.SelectionPapers
+            .Where(paper => threadIds.Contains(paper.Id) && organizationIds.Contains(paper.Board.OrganizationId))
+            .Select(paper => paper.Id);
+
+    /// <inheritdoc />
+    protected override Task<bool> IsOpenToAsync(
+        MathCompsDbContext dbContext, SelectionPaperAnchor anchor, CommentViewer? viewer) =>
+        // Open to the reviewers of the organization whose board the paper is on
+        IsReachableAsync(dbContext, anchor.PaperId, viewer);
 
     /// <inheritdoc />
     protected override async Task<SelectionPaperAnchor> ResolveAsync(

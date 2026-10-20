@@ -1,12 +1,13 @@
 using MathComps.Domain.Contracts.Selection;
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services.Problems;
 
 namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
-/// Fills a draft board's slots from the pool, and finalizes it into the rounds of a hosted group. A finalized board
-/// is its group's rounds, which every change here refuses to touch. Every change runs after every one before it has
-/// finished.
+/// Fills a draft board's slots from its organization's pool, and finalizes it into the rounds of a hosted group. A
+/// finalized board is its group's rounds, which every change here refuses to touch. Every change runs after every
+/// one before it has finished.
 /// </summary>
 public interface ISelectionBoardService
 {
@@ -14,32 +15,42 @@ public interface ISelectionBoardService
     /// Puts a proposal into a draft's slot. A proposal already elsewhere on the board trades places with whatever
     /// held the slot, and one from the pool sends that problem back to it.
     /// </summary>
+    /// <param name="organizationSlug">
+    /// The <see cref="Organization.Slug"/> of the organization whose selection the board is in.
+    /// </param>
     /// <param name="slot">The slot the proposal goes into.</param>
-    /// <param name="proposalId">The proposal.</param>
+    /// <param name="proposalId">The proposal, which has to be in the organization's pool.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the change is saved.</returns>
     /// <exception cref="SelectionTargetNotFoundException">
-    /// Thrown when the slot or a live proposal is not there.
+    /// Thrown when the slot or a live proposal of the organization's pool is not there.
     /// </exception>
     /// <exception cref="SelectionBoardOpenedException">Thrown when the board's group has opened.</exception>
     /// <exception cref="SelectionBoardFinalizedException">Thrown when the board is finalized.</exception>
     /// <exception cref="SelectionProposalUsedException">Thrown when a paper has taken the proposal.</exception>
-    Task PlaceAsync(SlotAddress slot, Guid proposalId, CancellationToken cancellationToken = default);
+    Task PlaceAsync(
+        string organizationSlug, SlotAddress slot, Guid proposalId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Empties a draft's slot, sending its problem back to the pool.
     /// </summary>
+    /// <param name="organizationSlug">
+    /// The <see cref="Organization.Slug"/> of the organization whose selection the board is in.
+    /// </param>
     /// <param name="slot">The slot.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the change is saved.</returns>
     /// <exception cref="SelectionTargetNotFoundException">Thrown when the slot is not there.</exception>
     /// <exception cref="SelectionBoardOpenedException">Thrown when the board's group has opened.</exception>
     /// <exception cref="SelectionBoardFinalizedException">Thrown when the board is finalized.</exception>
-    Task ClearSlotAsync(SlotAddress slot, CancellationToken cancellationToken = default);
+    Task ClearSlotAsync(string organizationSlug, SlotAddress slot, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Trades a draft's slot with its neighbour in the same paper.
     /// </summary>
+    /// <param name="organizationSlug">
+    /// The <see cref="Organization.Slug"/> of the organization whose selection the board is in.
+    /// </param>
     /// <param name="slot">The slot.</param>
     /// <param name="direction"><inheritdoc cref="SlotDirection" path="/summary"/></param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
@@ -47,18 +58,26 @@ public interface ISelectionBoardService
     /// <exception cref="SelectionTargetNotFoundException">Thrown when either slot is not there.</exception>
     /// <exception cref="SelectionBoardOpenedException">Thrown when the board's group has opened.</exception>
     /// <exception cref="SelectionBoardFinalizedException">Thrown when the board is finalized.</exception>
-    Task MoveSlotAsync(SlotAddress slot, SlotDirection direction, CancellationToken cancellationToken = default);
+    Task MoveSlotAsync(
+        string organizationSlug, SlotAddress slot, SlotDirection direction,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Finalizes a draft board into a hosted group: each paper's problems move into the round of the hosted level the
     /// paper's category is, in slot order, and leave every other draft they stood on. The board then reads its slots
     /// off the rounds.
     /// </summary>
+    /// <param name="organizationSlug">
+    /// The <see cref="Organization.Slug"/> of the organization whose selection the board is in.
+    /// </param>
     /// <param name="boardId">The board.</param>
     /// <param name="cycleId">The hosted group whose rounds take the papers.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the problems have moved.</returns>
-    /// <exception cref="SelectionTargetNotFoundException">Thrown when the board or the group is not there.</exception>
+    /// <exception cref="SelectionTargetNotFoundException">
+    /// Thrown when the board or the group is not there. To any organization but the one
+    /// <see cref="Organization.MathCompsSlug"/> names, no group is there at all.
+    /// </exception>
     /// <exception cref="SelectionBoardOpenedException">Thrown when the board's group has opened.</exception>
     /// <exception cref="SelectionBoardFinalizedException">Thrown when the board is already finalized.</exception>
     /// <exception cref="SelectionFinalizeBlockedException">
@@ -73,7 +92,8 @@ public interface ISelectionBoardService
     /// <exception cref="ProblemSlugTakenException">
     /// Thrown when a problem outside the board carries a slug a slotted problem would take.
     /// </exception>
-    Task FinalizeAsync(Guid boardId, Guid cycleId, CancellationToken cancellationToken = default);
+    Task FinalizeAsync(
+        string organizationSlug, Guid boardId, Guid cycleId, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

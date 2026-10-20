@@ -1173,10 +1173,10 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
                   .HasForeignKey(proposal => proposal.ProblemId)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            // The number a reviewer quotes names one problem.
-            entity.HasIndex(proposal => proposal.Number)
+            // The number a reviewer quotes names one of the organization's proposals.
+            entity.HasIndex(proposal => new { proposal.OrganizationId, proposal.Number })
                   .IsUnique()
-                  .HasDatabaseName("ux_proposal_number");
+                  .HasDatabaseName("ux_proposal_organization_number");
 
             // DB-side guard mirroring [Range]
             entity.ToTable(table => table.HasCheckConstraint("ck_proposal_number_positive", "\"number\" > 0"));

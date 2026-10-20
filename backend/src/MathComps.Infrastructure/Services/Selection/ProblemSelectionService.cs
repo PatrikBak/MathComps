@@ -23,7 +23,9 @@ namespace MathComps.Infrastructure.Services.Selection;
 /// </summary>
 /// <param name="dbContextFactory">Creates the context each read runs on.</param>
 /// <param name="localization">The names the taxonomy gives the groups' nodes.</param>
-/// <param name="members">Reads when each conversation's author became a member of the MathComps organization.</param>
+/// <param name="members">
+/// Reads when each conversation's author became a member of the organization whose selection is read.
+/// </param>
 /// <param name="comments">Reads the discussions of what the selection holds.</param>
 public sealed class ProblemSelectionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
@@ -44,7 +46,7 @@ public sealed class ProblemSelectionService(
 
     /// <inheritdoc/>
     public async Task<SelectionDto> GetSelectionAsync(
-        Guid reviewerId, Language language, CancellationToken cancellationToken = default)
+        string organizationSlug, Guid reviewerId, Language language, CancellationToken cancellationToken = default)
     {
         // A fresh context for this read.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -81,14 +83,16 @@ public sealed class ProblemSelectionService(
             })
             .ToListAsync(cancellationToken);
 
-        // Every proposal not deleted and outside the groups that have opened, lowest number first, with where its
-        // problem sits, the categories it is recommended for in the order they run, every text it carries, the
-        // language it was first written in, and every rating it was given, by the raters' usernames with a rater
-        // showing none last. Split, because its recommendations, texts and ratings are each a collection off one row:
-        // joined in a single query the database would return every pairing of them, each repeating the text.
+        // Every proposal of the organization's pool not deleted and outside the groups that have opened, lowest
+        // number first, with where its problem sits, the categories it is recommended for in the order they run,
+        // every text it carries, the language it was first written in, and every rating it was given, by the raters'
+        // usernames with a rater showing none last. Split, because its recommendations, texts and ratings are each a
+        // collection off one row: joined in a single query the database would return every pairing of them, each
+        // repeating the text.
         var proposals = await dbContext.Proposals
             .AsNoTracking()
             .AsSplitQuery()
+            .Where(proposal => proposal.Organization.Slug == organizationSlug)
             .WhereSelectionMayHold(now)
             .OrderBy(proposal => proposal.Number)
             .Select(proposal => new
@@ -157,9 +161,10 @@ public sealed class ProblemSelectionService(
                     && (text.MarkdownText ?? text.RawText) == defense.DefenseSession.ProblemStatement)))
             .ToListAsync(cancellationToken);
 
-        // Every board with its papers, each paper's category and slot rows, oldest first.
+        // Every board of the organization with its papers, each paper's category and slot rows, oldest first.
         var boards = await dbContext.SelectionBoards
             .AsNoTracking()
+            .Where(board => board.Organization.Slug == organizationSlug)
             .OrderBy(board => board.CreatedAt)
             .Select(board => new
             {
@@ -185,10 +190,10 @@ public sealed class ProblemSelectionService(
         // The groups that have not opened, by id.
         var groupsById = groups.ToDictionary(group => group.Id);
 
-        // When each conversation's author became a member of the MathComps organization, for those who still are.
+        // When each conversation's author became a member of the organization, for those who still are.
         var memberSince = await members.GetMemberSinceAsync(
             [.. conversations.Select(conversation => conversation.Author.Id).Distinct()],
-            Organization.MathCompsSlug,
+            organizationSlug,
             cancellationToken);
 
         // Only the conversations the reviewers held.
@@ -198,17 +203,17 @@ public sealed class ProblemSelectionService(
                 conversation.StartedAt))
             .ToList();
 
-        // The MathComps organization's categories, in the order they run.
+        // The organization's categories, in the order they run.
         var categories = await dbContext.OrganizationCategories
             .AsNoTracking()
-            .Where(category => category.Organization.Slug == Organization.MathCompsSlug)
+            .Where(category => category.Organization.Slug == organizationSlug)
             .OrderBy(category => category.Position)
             .Select(category => new SelectionCategoryDto(category.Name, category.HostedCategory))
             .ToListAsync(cancellationToken);
 
-        // Whether the MathComps organization's problems need every language.
+        // Whether the organization's problems need every language.
         var needsEveryLanguage = await dbContext.Organizations
-            .Where(organization => organization.Slug == Organization.MathCompsSlug)
+            .Where(organization => organization.Slug == organizationSlug)
             .Select(organization => organization.NeedsEveryLanguage)
             .SingleAsync(cancellationToken);
 
@@ -261,13 +266,14 @@ public sealed class ProblemSelectionService(
                             : null)),
             ],
             [
-                // The groups a board can still be finalized into
+                // The groups a board can still be finalized into, which only MathComps' boards fill
                 .. groups
-                    .Where(group => SelectionRules.TakesBoard(
-                        group.OpensAt,
-                        group.ClosesAt,
-                        [.. group.Rounds.Select(round => round.Problems.Count)],
-                        now))
+                    .Where(group => organizationSlug == Organization.MathCompsSlug
+                        && SelectionRules.TakesBoard(
+                            group.OpensAt,
+                            group.ClosesAt,
+                            [.. group.Rounds.Select(round => round.Problems.Count)],
+                            now))
                     .Select(group => new SelectionCycleDto(
                         group.Id,
                         groupNames[group.Id],
@@ -285,7 +291,7 @@ public sealed class ProblemSelectionService(
 
     /// <inheritdoc/>
     public async Task<SelectionDiscussionsDto> GetDiscussionsAsync(
-        CommentViewer viewer, CancellationToken cancellationToken = default)
+        string organizationSlug, CommentViewer viewer, CancellationToken cancellationToken = default)
     {
         // A fresh context for this read.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -293,9 +299,11 @@ public sealed class ProblemSelectionService(
         // One instant for everything the read weighs against a group opening.
         var now = DateTimeOffset.UtcNow;
 
-        // Every proposal not deleted and outside the groups that have opened, with where its problem sits.
+        // Every proposal of the organization's pool not deleted and outside the groups that have opened, with where
+        // its problem sits.
         var proposals = await dbContext.Proposals
             .AsNoTracking()
+            .Where(proposal => proposal.Organization.Slug == organizationSlug)
             .WhereSelectionMayHold(now)
             .Select(proposal => new
             {
@@ -311,9 +319,10 @@ public sealed class ProblemSelectionService(
             .Select(proposal => proposal.ProblemId.ToString())
             .ToImmutableList();
 
-        // Every paper, with when the group its board was finalized into opens.
+        // Every paper on one of the organization's boards, with when the group its board was finalized into opens.
         var papers = await dbContext.SelectionPapers
             .AsNoTracking()
+            .Where(paper => paper.Board.Organization.Slug == organizationSlug)
             .Select(paper => new { paper.Id, GroupOpensAt = (DateTimeOffset?)paper.Board.HostedGroup!.OpensAt })
             .ToListAsync(cancellationToken);
 

@@ -12,12 +12,14 @@ namespace MathComps.Infrastructure.Services.Selection;
 public sealed class ProposalService(IDbContextFactory<MathCompsDbContext> dbContextFactory) : IProposalService
 {
     /// <inheritdoc/>
-    public Task SetAsideAsync(Guid proposalId, bool isSetAside, CancellationToken cancellationToken = default) =>
+    public Task SetAsideAsync(
+        string organizationSlug, Guid proposalId, bool isSetAside, CancellationToken cancellationToken = default) =>
         // The change, as one selection write
         SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
             // The proposal
-            var proposal = await SelectionRules.ReadProposalAsync(dbContext, proposalId, cancellationToken);
+            var proposal = await SelectionRules.ReadProposalAsync(
+                dbContext, organizationSlug, proposalId, cancellationToken);
 
             // Set aside or back, as asked
             proposal.IsSetAside = isSetAside;
@@ -25,12 +27,14 @@ public sealed class ProposalService(IDbContextFactory<MathCompsDbContext> dbCont
 
     /// <inheritdoc/>
     public Task SetRecommendedAsync(
-        Guid proposalId, string category, bool isRecommended, CancellationToken cancellationToken = default) =>
+        string organizationSlug, Guid proposalId, string category, bool isRecommended,
+        CancellationToken cancellationToken = default) =>
         // The change, as one selection write
         SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
             // The proposal
-            var proposal = await SelectionRules.ReadProposalAsync(dbContext, proposalId, cancellationToken);
+            var proposal = await SelectionRules.ReadProposalAsync(
+                dbContext, organizationSlug, proposalId, cancellationToken);
 
             // The category, one of the proposal's organization's
             var categoryId = await dbContext.OrganizationCategories
@@ -55,7 +59,7 @@ public sealed class ProposalService(IDbContextFactory<MathCompsDbContext> dbCont
 
     /// <inheritdoc/>
     public async Task RateAsync(
-        Guid proposalId, Guid raterId, decimal? beauty, decimal? difficulty,
+        string organizationSlug, Guid proposalId, Guid raterId, decimal? beauty, decimal? difficulty,
         CancellationToken cancellationToken = default)
     {
         // A score off the scale or between its steps is no score the rating can hold
@@ -65,8 +69,8 @@ public sealed class ProposalService(IDbContextFactory<MathCompsDbContext> dbCont
         // The rating, as one selection write
         await SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
-            // A proposal gone from the selection takes no rating
-            await SelectionRules.ReadProposalAsync(dbContext, proposalId, cancellationToken);
+            // A proposal gone from the selection, or another organization's, takes no rating
+            await SelectionRules.ReadProposalAsync(dbContext, organizationSlug, proposalId, cancellationToken);
 
             // The rating the reviewer gave the proposal before, if any
             var rating = await dbContext.ProposalRatings.FindAsync([proposalId, raterId], cancellationToken);
@@ -99,12 +103,13 @@ public sealed class ProposalService(IDbContextFactory<MathCompsDbContext> dbCont
     }
 
     /// <inheritdoc/>
-    public Task DeleteAsync(Guid proposalId, CancellationToken cancellationToken = default) =>
+    public Task DeleteAsync(string organizationSlug, Guid proposalId, CancellationToken cancellationToken = default) =>
         // The delete, as one selection write
         SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
             // The proposal
-            var proposal = await SelectionRules.ReadProposalAsync(dbContext, proposalId, cancellationToken);
+            var proposal = await SelectionRules.ReadProposalAsync(
+                dbContext, organizationSlug, proposalId, cancellationToken);
 
             // A problem a paper has taken stays in its round, so its proposal stays with it
             if (!SelectionRules.IsInPool(proposal.Problem.Round.Competition.Path))
