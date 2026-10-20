@@ -1,9 +1,10 @@
 namespace MathComps.Domain.Contracts.Selection;
 
 /// <summary>
-/// The whole problem selection: its proposals, the boards still in play, the cycles a board can be finalized into,
-/// and the conversations reviewers held with the examiner about the proposals.
+/// The whole problem selection: the categories it picks problems for, its proposals, the boards still in play, the
+/// cycles a board can be finalized into, and the conversations reviewers held with the examiner about the proposals.
 /// </summary>
+/// <param name="Categories">The categories the selection picks problems for, in the order they run.</param>
 /// <param name="Proposals">
 /// Every proposal still in the selection, the set-aside ones included, lowest number first.
 /// </param>
@@ -13,6 +14,7 @@ namespace MathComps.Domain.Contracts.Selection;
 /// Every conversation a reviewer held about a proposal in the selection, newest first.
 /// </param>
 public record SelectionDto(
+    IReadOnlyList<SelectionCategoryDto> Categories,
     IReadOnlyList<ProposalDto> Proposals,
     IReadOnlyList<SelectionBoardDto> Boards,
     IReadOnlyList<SelectionCycleDto> Cycles,

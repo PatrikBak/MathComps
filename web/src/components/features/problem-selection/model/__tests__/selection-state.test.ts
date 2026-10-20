@@ -6,14 +6,30 @@ import {
   arguedText,
   averageScore,
   cycleMisfit,
+  mapsToRounds,
   pickActiveBoard,
   resolveText,
   unreadyLanguages,
   unwrittenAcross,
 } from '../selection-state'
-import type { Board, Cycle, Paper, Proposal } from '../selection-types'
+import type { Board, Cycle, Paper, Proposal, SelectionCategory } from '../selection-types'
 
-/** The October cycle: one round per category, four problems each. */
+/** MathComps' categories, each a hosted level, and the olympiad's C, which no hosted round runs. */
+const CATEGORIES: SelectionCategory[] = [
+  { name: 'elementary', hostedCategory: 'elementary' },
+  { name: 'intermediate', hostedCategory: 'intermediate' },
+  { name: 'advanced', hostedCategory: 'advanced' },
+  { name: 'C', hostedCategory: null },
+]
+
+/** The categories of an organization calling the elementary level Junior. */
+const JUNIOR_CATEGORIES: SelectionCategory[] = [
+  { name: 'Junior', hostedCategory: 'elementary' },
+  { name: 'intermediate', hostedCategory: 'intermediate' },
+  { name: 'advanced', hostedCategory: 'advanced' },
+]
+
+/** The October cycle: one round per hosted level, four problems each. */
 const OCTOBER: Cycle = {
   id: 'october',
   name: 'October',
@@ -100,18 +116,20 @@ describe('averageScore', () => {
 
 describe('cycleMisfit', () => {
   it('names a paper no round is left for, and the round no paper fills', () => {
-    // A second elementary paper, and a paper outside the categories
+    // A second elementary paper, a paper outside the categories, and one of a category no round runs
     const second = paper('E2', 'elementary')
     const school = paper('School', null)
+    const olympiad = paper('C', 'C')
 
-    // What keeps a board of E, E2 and School from pairing up with October's rounds
+    // What keeps a board of E, E2, School and C from pairing up with October's rounds
     const misfit = cycleMisfit(
-      { ...board('board'), papers: [paper('E', 'elementary'), second, school] },
-      OCTOBER
+      { ...board('board'), papers: [paper('E', 'elementary'), second, school, olympiad] },
+      OCTOBER,
+      CATEGORIES
     )
 
-    // The second elementary paper and the school paper have no round
-    expect(misfit.unmatched).toEqual([second, school])
+    // The second elementary paper, the school paper and the C paper have no round
+    expect(misfit.unmatched).toEqual([second, school, olympiad])
 
     // And no paper stands for the intermediate round or the advanced one
     expect(misfit.uncovered).toEqual(['intermediate', 'advanced'])
@@ -128,7 +146,8 @@ describe('cycleMisfit', () => {
         ...board('board'),
         papers: [paper('E', 'elementary'), intermediate, paper('A', 'advanced')],
       },
-      twoRounds
+      twoRounds,
+      CATEGORIES
     )
 
     // The intermediate paper has no round
@@ -138,6 +157,21 @@ describe('cycleMisfit', () => {
     expect(misfit.uncovered).toEqual([])
   })
 
+  it("pairs a paper with the round of its category's level, whatever the category is called", () => {
+    // A board of a Junior paper, then the intermediate and advanced ones
+    const misfit = cycleMisfit(
+      {
+        ...board('board'),
+        papers: [paper('J', 'Junior'), paper('I', 'intermediate'), paper('A', 'advanced')],
+      },
+      OCTOBER,
+      JUNIOR_CATEGORIES
+    )
+
+    // Junior fills the elementary round, so everything pairs up
+    expect(misfit).toEqual({ unmatched: [], wrongSize: [], uncovered: [] })
+  })
+
   it('names a paper whose length differs from what the rounds take', () => {
     // Advanced has five slots where every round takes four
     const long = paper('A', 'advanced', 5)
@@ -145,7 +179,8 @@ describe('cycleMisfit', () => {
     // What keeps a board of E, I and the long A from pairing up with October's rounds
     const misfit = cycleMisfit(
       { ...board('board'), papers: [paper('E', 'elementary'), paper('I', 'intermediate'), long] },
-      OCTOBER
+      OCTOBER,
+      CATEGORIES
     )
 
     // The advanced paper is named for its length
@@ -154,6 +189,27 @@ describe('cycleMisfit', () => {
     // And nothing else stands in the way
     expect(misfit.unmatched).toEqual([])
     expect(misfit.uncovered).toEqual([])
+  })
+})
+
+describe('mapsToRounds', () => {
+  it('holds once every paper fills a category that is a hosted level', () => {
+    // MathComps' three papers
+    const mathcomps = {
+      ...board('mathcomps'),
+      papers: [paper('E', 'elementary'), paper('I', 'intermediate'), paper('A', 'advanced')],
+    }
+
+    // The same with the olympiad's C paper beside them
+    const mixed = { ...mathcomps, papers: [...mathcomps.papers, paper('C', 'C')] }
+
+    // A board of one Junior paper, a hosted level under another name
+    const junior = { ...board('junior'), papers: [paper('J', 'Junior')] }
+
+    // Every paper but the C one goes into a round
+    expect(mapsToRounds(mathcomps, CATEGORIES)).toBe(true)
+    expect(mapsToRounds(junior, JUNIOR_CATEGORIES)).toBe(true)
+    expect(mapsToRounds(mixed, CATEGORIES)).toBe(false)
   })
 })
 

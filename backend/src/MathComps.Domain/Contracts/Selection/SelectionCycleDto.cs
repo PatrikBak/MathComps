@@ -10,7 +10,7 @@ namespace MathComps.Domain.Contracts.Selection;
 /// <param name="Name">The group's name, in the language the selection is read in.</param>
 /// <param name="OpensAt"><inheritdoc cref="HostedGroup.OpensAt" path="/summary"/></param>
 /// <param name="Categories">
-/// The categories of its rounds, in the order the taxonomy sets them out.
+/// The hosted levels of its rounds, in the order the taxonomy sets them out.
 /// </param>
 /// <param name="ProblemCount"><inheritdoc cref="HostedGroup.ProblemCount" path="/summary"/></param>
 public record SelectionCycleDto(

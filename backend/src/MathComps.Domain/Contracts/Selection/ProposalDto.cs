@@ -1,4 +1,3 @@
-using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 
@@ -11,7 +10,10 @@ namespace MathComps.Domain.Contracts.Selection;
 /// <param name="Number"><inheritdoc cref="Proposal.Number" path="/summary"/></param>
 /// <param name="Title"><inheritdoc cref="Proposal.Title" path="/summary"/></param>
 /// <param name="Area"><inheritdoc cref="Proposal.Area" path="/summary"/></param>
-/// <param name="Recommended"><inheritdoc cref="Proposal.Recommended" path="/summary"/></param>
+/// <param name="Recommended">
+/// The categories the reviewers recommend it for, by their <see cref="OrganizationCategory.Name"/>, in the order the
+/// categories run.
+/// </param>
 /// <param name="Texts">
 /// Its text in every language it has a statement in, keyed by that language.
 /// </param>
@@ -29,7 +31,7 @@ public record ProposalDto(
     int Number,
     string Title,
     ProposalArea Area,
-    IReadOnlyList<HostedCompetitionCategory> Recommended,
+    IReadOnlyList<string> Recommended,
     IReadOnlyDictionary<Language, ProposalTextDto> Texts,
     Language? OriginalLanguage,
     bool IsSetAside,

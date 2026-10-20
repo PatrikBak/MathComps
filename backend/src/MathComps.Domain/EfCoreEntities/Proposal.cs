@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using MathComps.Domain.Contracts.Competitions;
 
 namespace MathComps.Domain.EfCoreEntities;
 
@@ -52,11 +51,6 @@ public class Proposal
     public required ProposalArea Area { get; set; }
 
     /// <summary>
-    /// The categories the reviewers recommend it for, in the order the categories run.
-    /// </summary>
-    public required List<HostedCompetitionCategory> Recommended { get; set; }
-
-    /// <summary>
     /// Whether the reviewers have set it aside, which leaves it in the selection.
     /// </summary>
     public bool IsSetAside { get; set; }
@@ -76,4 +70,9 @@ public class Proposal
     /// The reviewers' ratings of it, one per reviewer who rated it.
     /// </summary>
     public ICollection<ProposalRating> Ratings { get; } = [];
+
+    /// <summary>
+    /// The categories the reviewers recommend it for, each one of its organization's.
+    /// </summary>
+    public ICollection<ProposalRecommendation> Recommendations { get; } = [];
 }

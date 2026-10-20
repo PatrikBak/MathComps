@@ -1,4 +1,5 @@
 using MathComps.Domain.Contracts.Competitions;
+using MathComps.Domain.Contracts.Selection;
 using MathComps.Domain.Contracts.Users;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
@@ -56,7 +57,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     private readonly Dictionary<int, Guid> _pool = [];
 
     /// <summary>
-    /// The November group's problems, round by round in the order the categories run.
+    /// The November group's problems, round by round in the order the hosted levels run.
     /// </summary>
     private readonly List<Guid> _november = [];
 
@@ -118,9 +119,9 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         Assert.Equal(
             (1, "Proposal 1", ProposalArea.Geometry, true, false),
             (proposal.Number, proposal.Title, proposal.Area, proposal.IsSetAside, proposal.IsUsed));
-        Assert.Equal(
-            [HostedCompetitionCategory.Elementary, HostedCompetitionCategory.Advanced],
-            proposal.Recommended);
+
+        // Its categories in the order they run, whatever order they were recommended in
+        Assert.Equal(["elementary", "advanced"], proposal.Recommended);
 
         // A text in English and Slovak, the two it has statements in
         Assert.Equal([Language.SK, Language.EN], proposal.Texts.Keys.Order());
@@ -142,6 +143,31 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         Assert.Equal("Statement 1 in SK", slovak.Statement);
         Assert.Null(slovak.Solution);
         Assert.Empty(slovak.Hints);
+    });
+
+    /// <summary>
+    /// The selection reads MathComps' categories in the order they run, each with the hosted level it is, and every
+    /// paper names the category it fills. Another organization's category stays out.
+    /// </summary>
+    [Fact]
+    public Task The_categories_are_the_organizations_own_in_order() => RunTestAsync(async service =>
+    {
+        // The selection
+        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
+
+        // MathComps' three, easiest first
+        Assert.Equal(
+            [
+                new SelectionCategoryDto("elementary", HostedCompetitionCategory.Elementary),
+                new SelectionCategoryDto("intermediate", HostedCompetitionCategory.Intermediate),
+                new SelectionCategoryDto("advanced", HostedCompetitionCategory.Advanced),
+            ],
+            selection.Categories);
+
+        // The draft's papers, each naming its category
+        Assert.Equal(
+            ["elementary", "intermediate", "advanced"],
+            selection.Boards.Single(board => board.Finalization is null).Papers.Select(paper => paper.Category));
     });
 
     /// <summary>
@@ -406,6 +432,9 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // The latecomer on the MathComps organization's list since yesterday
         SelectionSeed.NewMember(context, "latecomer@example.com", DateTimeOffset.UtcNow.AddDays(-1));
 
+        // Another organization, listing a category of its own
+        SelectionSeed.NewOrganization(context, "olympiad", "C");
+
         // The season every round sits in
         var season = SelectionSeed.NewSeason(context);
 
@@ -549,8 +578,10 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // Its filing
         var proposal = context.Proposals.Local.Single(candidate => candidate.ProblemId == problemId);
         proposal.Area = ProposalArea.Geometry;
-        proposal.Recommended = [HostedCompetitionCategory.Elementary, HostedCompetitionCategory.Advanced];
         proposal.IsSetAside = true;
+
+        // Recommended for two categories, the harder one first
+        SelectionSeed.Recommend(context, problemId, "advanced", "elementary");
 
         // The id
         return problemId;

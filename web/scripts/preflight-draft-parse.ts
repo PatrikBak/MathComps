@@ -10,7 +10,6 @@ import { unified } from 'unified'
 import { visit } from 'unist-util-visit'
 import { parse as parseYaml } from 'yaml'
 
-import { HOSTED_COMPETITION_CATEGORIES } from '../src/components/features/hosted-competitions/model/hosted-competition-types'
 import {
   PROPOSAL_AREAS,
   PROPOSAL_TITLE_MAX_LENGTH,
@@ -274,7 +273,8 @@ export function parseProblemMeta(yamlText: string): ProblemMetaParse {
 
 /**
  * Narrows a `proposal:` block, which files a problem in the pool. Every field is required, the area is one of
- * {@link PROPOSAL_AREAS} and each category one of {@link HOSTED_COMPETITION_CATEGORIES}.
+ * {@link PROPOSAL_AREAS} and each category a name, which the bulk import checks against the organization's
+ * categories.
  *
  * @param raw - The block's parsed YAML value.
  *
@@ -320,27 +320,20 @@ function narrowProposal(raw: unknown): ProposalParse {
     }
   }
 
-  // Each category the list names, read as one a hosted competition runs at, or null when there is no list
-  const categories = Array.isArray(recommended)
-    ? recommended.map((category) => parseMember(category, HOSTED_COMPETITION_CATEGORIES))
-    : null
-
-  // Every entry of the list a hosted category, none named twice
+  // Every entry of the list a category's name, none named twice
   if (
-    categories === null ||
-    !categories.every((category) => category !== null) ||
-    new Set(categories).size !== categories.length
+    !Array.isArray(recommended) ||
+    !recommended.every((category) => typeof category === 'string' && category.trim() !== '') ||
+    new Set(recommended).size !== recommended.length
   ) {
     return {
       kind: 'rejected',
-      error:
-        'metadata "proposal.recommended" must be a list of distinct categories from ' +
-        HOSTED_COMPETITION_CATEGORIES.join(', '),
+      error: 'metadata "proposal.recommended" must be a list of distinct category names',
     }
   }
 
   // A well-formed block
-  return { kind: 'parsed', proposal: { number, title, area: filedArea, recommended: categories } }
+  return { kind: 'parsed', proposal: { number, title, area: filedArea, recommended } }
 }
 
 /**

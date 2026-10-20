@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
-using MathComps.Infrastructure.Services.Selection;
 using MathComps.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using MathComps.Shared.Extensions;
@@ -324,7 +323,7 @@ public class DraftApplyService(
                 .Select(organization => organization.Id)
                 .SingleAsync();
 
-            // The proposal, the categories in the order they run.
+            // The proposal.
             await context.Proposals.AddAsync(new Proposal
             {
                 ProblemId = newProblem.Id,
@@ -332,8 +331,12 @@ public class DraftApplyService(
                 Number = proposal.Number,
                 Title = proposal.Title,
                 Area = proposal.Area,
-                Recommended = SelectionRules.InCategoryOrder(proposal.Recommended),
             });
+
+            // Recommended for the draft's categories.
+            foreach (var categoryId in await ResolveCategoriesAsync(context, organizationId, proposal))
+                await context.ProposalRecommendations.AddAsync(
+                    new ProposalRecommendation { ProposalId = newProblem.Id, CategoryId = categoryId });
         }
     }
 
@@ -359,10 +362,11 @@ public class DraftApplyService(
         IDictionary<string, Tag> tagsCache,
         ImmutableArray<AppliedText>.Builder appliedTexts)
     {
-        // The proposal filing the problem, read only when the draft files it.
+        // The proposal filing the problem with its recommendations, read only when the draft files it.
         var storedProposal = problem.Proposal is null
             ? null
-            : await context.Proposals.SingleOrDefaultAsync(candidate => candidate.ProblemId == existing.Id);
+            : await ProblemReimport.IncludeStoredRecommendations(context.Proposals)
+                .SingleOrDefaultAsync(candidate => candidate.ProblemId == existing.Id);
 
         // What re-importing the draft onto the problem does.
         var plan = ProblemReimport.Plan(problem, existing, storedProposal, replacements);
@@ -397,8 +401,15 @@ public class DraftApplyService(
             storedProposal.Title = proposal.Title;
             storedProposal.Area = proposal.Area;
 
-            // Take the draft's categories, in the order they run.
-            storedProposal.Recommended = SelectionRules.InCategoryOrder(proposal.Recommended);
+            // The draft's categories, among those of the proposal's organization.
+            var categoryIds = await ResolveCategoriesAsync(context, storedProposal.OrganizationId, proposal);
+
+            // Take the draft's categories in place of the stored recommendations.
+            await ReplaceJoinRowsAsync(
+                context,
+                storedProposal.Recommendations,
+                categoryIds.Select(categoryId =>
+                    new ProposalRecommendation { ProposalId = storedProposal.ProblemId, CategoryId = categoryId }));
         }
 
         // Updated only when the plan changes something.
@@ -596,6 +607,39 @@ public class DraftApplyService(
     }
 
     /// <summary>
+    /// Resolves the categories a draft's block recommends its problem for to the organization's categories of those
+    /// names.
+    /// </summary>
+    /// <param name="context">The write context.</param>
+    /// <param name="organizationId">The organization whose pool the problem is filed in.</param>
+    /// <param name="proposal">The draft's block.</param>
+    /// <returns>The categories' ids.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// The organization lists no category of one of the names.
+    /// </exception>
+    private static async Task<List<Guid>> ResolveCategoriesAsync(
+        MathCompsDbContext context, Guid organizationId, DraftProposal proposal)
+    {
+        // The names the block gives, each once.
+        var names = proposal.Recommended.Distinct().ToList();
+
+        // The organization's categories of those names.
+        var categoryIds = await context.OrganizationCategories
+            .Where(category => category.OrganizationId == organizationId && names.Contains(category.Name))
+            .Select(category => category.Id)
+            .ToListAsync();
+
+        // A name the organization doesn't list never passes validation, so one here means validation was skipped.
+        if (categoryIds.Count != names.Count)
+            throw new InvalidOperationException(
+                $"Refusing to recommend proposal #{proposal.Number} for a category its organization doesn't list "
+                + "— validation should have rejected this draft.");
+
+        // The categories.
+        return categoryIds;
+    }
+
+    /// <summary>
     /// Resolves tag slugs to entities, get-or-creating each by slug and deriving its <see cref="TagType"/> from the
     /// approved vocabulary. A run-scoped cache means a slug shared across problems is looked up once.
     /// </summary>
@@ -660,9 +704,9 @@ public class DraftApplyService(
         [.. slugs.Select(TagVocabulary.Canonicalize).Distinct()];
 
     /// <summary>
-    /// Replaces a problem's join rows wholesale: deletes the existing rows and flushes before adding the new ones, so
-    /// a re-used key (an ordinal, or a <c>(problem, tag)</c> pair) can't transiently violate its unique index within
-    /// one statement batch.
+    /// Replaces a set of join rows wholesale: deletes the existing rows and flushes before adding the new ones, so a
+    /// re-used key (an ordinal, or a <c>(problem, tag)</c> or <c>(proposal, category)</c> pair) can't transiently
+    /// violate its unique index within one statement batch.
     /// </summary>
     /// <typeparam name="TRow">The join-row entity type.</typeparam>
     /// <param name="context">The write context.</param>

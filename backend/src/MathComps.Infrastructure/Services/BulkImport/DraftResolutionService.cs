@@ -60,8 +60,9 @@ public class DraftResolutionService(
             .Where(problem => candidateSlugs.Contains(problem.Slug))
             .ToDictionaryAsync(problem => problem.Slug);
 
-        // The proposals filing the problems already at the draft's places, keyed by the place's slug.
-        var storedProposalBySlug = await context.Proposals.AsNoTracking()
+        // The proposals filing the problems already at the draft's places, with their recommendations, keyed by the
+        // place's slug.
+        var storedProposalBySlug = await ProblemReimport.IncludeStoredRecommendations(context.Proposals.AsNoTracking())
             .Include(proposal => proposal.Problem)
             .Where(proposal => candidateSlugs.Contains(proposal.Problem.Slug))
             .ToDictionaryAsync(proposal => proposal.Problem.Slug);
@@ -173,6 +174,13 @@ public class DraftResolutionService(
             .Where(proposal => numbers.Contains(proposal.Number))
             .ToDictionaryAsync(proposal => proposal.Number);
 
+        // The names of MathComps' categories, in the order they run. The import files every proposal into its pool.
+        var categoryNames = await context.OrganizationCategories.AsNoTracking()
+            .Where(category => category.Organization.Slug == Organization.MathCompsSlug)
+            .OrderBy(category => category.Position)
+            .Select(category => category.Name)
+            .ToListAsync();
+
         // Classify each draft problem against what its place and its number already hold.
         return
         [
@@ -184,7 +192,7 @@ public class DraftResolutionService(
                 // Its conflicts, if any.
                 return ClassifyProposal(
                     slug, problem.Proposal, takenSlugs.Contains(slug), storedBySlug.GetValueOrDefault(slug),
-                    holderByNumber);
+                    holderByNumber, categoryNames);
             })
         ];
     }
@@ -309,7 +317,8 @@ public class DraftResolutionService(
     /// <summary>
     /// Decides what keeps one problem of a draft for the proposals out of the pool. A problem new to the pool enters
     /// it only through its block. A taken place keeps the problem already there, which has to be a live proposal under
-    /// the block's number. And no other problem's proposal may hold the block's number.
+    /// the block's number. No other problem's proposal may hold the block's number. And the block recommends the
+    /// problem only for categories the pool's organization lists.
     /// </summary>
     /// <param name="slug">The would-be problem slug, naming its place.</param>
     /// <param name="proposal">The draft's block, or null when it carries none.</param>
@@ -318,13 +327,17 @@ public class DraftResolutionService(
     /// <param name="holderByNumber">
     /// The proposals holding the numbers the draft names, with their problems, keyed by number.
     /// </param>
+    /// <param name="categoryNames">
+    /// The names of the categories the pool's organization lists, in the order they run.
+    /// </param>
     /// <returns>The problem's conflicts, empty when it files cleanly.</returns>
     private static IEnumerable<ProposalConflict> ClassifyProposal(
         string slug,
         DraftProposal? proposal,
         bool isPlaceTaken,
         Proposal? stored,
-        IReadOnlyDictionary<int, Proposal> holderByNumber)
+        IReadOnlyDictionary<int, Proposal> holderByNumber,
+        IReadOnlyList<string> categoryNames)
     {
         // A new problem on a free place, with no block to file it in the pool.
         if (!isPlaceTaken && proposal is null)
@@ -347,6 +360,10 @@ public class DraftResolutionService(
             && holderByNumber.TryGetValue(proposal.Number, out var holder)
             && holder.Problem.Slug != slug)
             yield return new ProposalNumberTaken(slug, proposal.Number, holder.Problem.Slug);
+
+        // Each category the block names that the organization doesn't list.
+        foreach (var category in proposal?.Recommended.Where(name => !categoryNames.Contains(name)) ?? [])
+            yield return new ProposalCategoryUnknown(slug, category, categoryNames);
     }
 
     /// <summary>

@@ -1,7 +1,3 @@
-import {
-  HOSTED_COMPETITION_CATEGORIES,
-  type HostedCompetitionCategory,
-} from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import { entriesOf } from '@/components/shared/utils/collection-utils'
 import { normalizeForSearch } from '@/components/shared/utils/string-utils'
 
@@ -11,6 +7,7 @@ import {
   type Proposal,
   PROPOSAL_AREAS,
   type ProposalArea,
+  type SelectionCategory,
 } from './selection-types'
 
 /** Every answer to whether the board on screen holds a problem. */
@@ -25,8 +22,8 @@ export type BoardMembership = (typeof BOARD_MEMBERSHIPS)[number]
 export type PoolFilter = {
   /** Text a problem's number, name or statement must contain, or a number like #7 naming one problem. */
   query: string
-  /** The categories a problem must be recommended for at least one of; empty for any. */
-  categories: HostedCompetitionCategory[]
+  /** The categories, by name, a problem must be recommended for at least one of; empty for any. */
+  categories: string[]
   /** The areas a problem must belong to one of; empty for any. */
   areas: ProposalArea[]
   /** Whether the board on screen must hold a problem or must not; null for any. */
@@ -42,6 +39,27 @@ export const OPEN_POOL_FILTER: PoolFilter = {
   areas: [],
   membership: null,
   isShowingSetAside: false,
+}
+
+/**
+ * A filter narrowed to the categories the selection lists, in the order they run.
+ *
+ * @param filter - What the pool is narrowed to.
+ * @param categories - The selection's categories, in the order they run.
+ *
+ * @returns The filter without the categories the selection doesn't list.
+ */
+export function withListedCategories(
+  filter: PoolFilter,
+  categories: readonly SelectionCategory[]
+): PoolFilter {
+  // The filter, holding each of the selection's categories it picked
+  return {
+    ...filter,
+    categories: categories
+      .map((category) => category.name)
+      .filter((name) => filter.categories.includes(name)),
+  }
 }
 
 /**
@@ -73,8 +91,8 @@ type OwnFacet = 'categories' | 'areas' | 'membership' | null
 export type PoolMatches = {
   /** The problems every filter lets through, in the order of the board on screen. */
   shown: Proposal[]
-  /** How many problems are recommended for each category, under every filter but the categories' own. */
-  categoryCounts: Record<HostedCompetitionCategory, number>
+  /** How many problems are recommended for each category, by name, under every filter but the categories' own. */
+  categoryCounts: Record<string, number>
   /** How many problems belong to each area, under every filter but the areas' own. */
   areaCounts: Record<ProposalArea, number>
   /** How many problems the board on screen holds and how many it doesn't, under every other filter. */
@@ -89,13 +107,15 @@ export type PoolMatches = {
  * @param proposals - Every proposal.
  * @param filter - What the pool is narrowed to.
  * @param activeBoard - The board on screen; null when there is none.
+ * @param categories - The selection's categories, in the order they run.
  *
  * @returns What the filter lets through, with the facet counts.
  */
 export function matchPool(
   proposals: readonly Proposal[],
   filter: PoolFilter,
-  activeBoard: Board | null
+  activeBoard: Board | null,
+  categories: readonly SelectionCategory[]
 ): PoolMatches {
   // The pool: everything no round has taken
   const pool = proposals.filter((proposal) => !proposal.isUsed)
@@ -166,7 +186,7 @@ export function matchPool(
   // The problems recommended for each category, counted under every filter but the categories' own
   const categoryCounts = countByOption(
     'categories',
-    HOSTED_COMPETITION_CATEGORIES,
+    categories.map((category) => category.name),
     (proposal, category) => proposal.recommended.includes(category)
   )
 
@@ -218,14 +238,14 @@ type PoolPlace = {
  *
  * @param problems - The problems.
  * @param board - The board on screen; null when there is none, which leaves every problem by area and then by number.
- * @param categories - The categories whose papers run; empty for every paper.
+ * @param categories - The categories whose papers run, by name; empty for every paper.
  *
  * @returns The problems in that order.
  */
 function inBoardOrder(
   problems: readonly Proposal[],
   board: Board | null,
-  categories: readonly HostedCompetitionCategory[]
+  categories: readonly string[]
 ): Proposal[] {
   // The board's papers in the order it sets them out, none without a board
   const papers = board?.papers ?? []

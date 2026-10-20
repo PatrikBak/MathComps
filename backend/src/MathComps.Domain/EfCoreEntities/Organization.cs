@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations;
 namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
-/// A group of people picking problems together: its own proposals, its own boards, and the email addresses of its
-/// members.
+/// A group of people picking problems together: its own categories, proposals and boards, and the email addresses
+/// of its members.
 /// </summary>
 public class Organization
 {
@@ -29,4 +29,9 @@ public class Organization
     /// The addresses on its list.
     /// </summary>
     public ICollection<OrganizationMember> Members { get; } = [];
+
+    /// <summary>
+    /// The categories it picks problems for.
+    /// </summary>
+    public ICollection<OrganizationCategory> Categories { get; } = [];
 }

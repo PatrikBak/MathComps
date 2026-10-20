@@ -144,11 +144,14 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>What students say about their own solutions, one claim per student per problem.</summary>
     public DbSet<ProblemSelfAssessment> ProblemSelfAssessments => Set<ProblemSelfAssessment>();
 
-    /// <summary>The groups picking problems, each with its own pool and boards.</summary>
+    /// <summary>The groups picking problems, each with its own categories, pool and boards.</summary>
     public DbSet<Organization> Organizations => Set<Organization>();
 
     /// <summary>The email addresses on the organizations' lists.</summary>
     public DbSet<OrganizationMember> OrganizationMembers => Set<OrganizationMember>();
+
+    /// <summary>The categories the organizations pick problems for.</summary>
+    public DbSet<OrganizationCategory> OrganizationCategories => Set<OrganizationCategory>();
 
     /// <summary>Problems proposed for the hosted competitions' papers.</summary>
     public DbSet<Proposal> Proposals => Set<Proposal>();
@@ -158,6 +161,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
     /// <summary>The reviewers' ratings of the proposals.</summary>
     public DbSet<ProposalRating> ProposalRatings => Set<ProposalRating>();
+
+    /// <summary>Join table: the categories the reviewers recommend the proposals for.</summary>
+    public DbSet<ProposalRecommendation> ProposalRecommendations => Set<ProposalRecommendation>();
 
     /// <summary>The boards papers are selected on.</summary>
     public DbSet<SelectionBoard> SelectionBoards => Set<SelectionBoard>();
@@ -1112,6 +1118,40 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         #endregion OrganizationMember
 
+        #region OrganizationCategory
+
+        modelBuilder.Entity<OrganizationCategory>(e =>
+        {
+            // The organization listing it, its categories going with it
+            e.HasOne(category => category.Organization)
+             .WithMany(organization => organization.Categories)
+             .HasForeignKey(category => category.OrganizationId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Each category stands in its own place among its organization's
+            e.HasIndex(category => new { category.OrganizationId, category.Position })
+             .IsUnique()
+             .HasDatabaseName("ux_organization_category_organization_id_position");
+
+            // The name names one of the organization's categories
+            e.HasIndex(category => new { category.OrganizationId, category.Name })
+             .IsUnique()
+             .HasDatabaseName("ux_organization_category_organization_id_name");
+
+            // Each hosted level is at most one of the organization's categories, so a round matches one category at
+            // most
+            e.HasIndex(category => new { category.OrganizationId, category.HostedCategory })
+             .IsUnique()
+             .HasFilter("\"hosted_category\" IS NOT NULL")
+             .HasDatabaseName("ux_organization_category_organization_id_hosted_category");
+
+            // Positions count from zero
+            e.ToTable(t => t.HasCheckConstraint(
+                "ck_organization_category_position_non_negative", "\"position\" >= 0"));
+        });
+
+        #endregion OrganizationCategory
+
         #region Proposal
 
         modelBuilder.Entity<Proposal>(entity =>
@@ -1214,6 +1254,28 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         #endregion ProposalRating
 
+        #region ProposalRecommendation
+
+        modelBuilder.Entity<ProposalRecommendation>(e =>
+        {
+            // A proposal is recommended for a category once, so the pair is the row
+            e.HasKey(recommendation => new { recommendation.ProposalId, recommendation.CategoryId });
+
+            // The proposal recommended, its recommendations going with it
+            e.HasOne(recommendation => recommendation.Proposal)
+             .WithMany(proposal => proposal.Recommendations)
+             .HasForeignKey(recommendation => recommendation.ProposalId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // The category, the recommendations for it going with it
+            e.HasOne(recommendation => recommendation.Category)
+             .WithMany()
+             .HasForeignKey(recommendation => recommendation.CategoryId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        #endregion ProposalRecommendation
+
         #region SelectionBoard
 
         modelBuilder.Entity<SelectionBoard>(entity =>
@@ -1249,6 +1311,13 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
                   .WithMany(board => board.Papers)
                   .HasForeignKey(paper => paper.BoardId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            // The category it fills. Restricted, since a category papers fill is not something a delete should
+            // quietly take off them.
+            entity.HasOne(paper => paper.Category)
+                  .WithMany()
+                  .HasForeignKey(paper => paper.CategoryId)
+                  .OnDelete(DeleteBehavior.Restrict);
 
             // Each paper stands in its own place on the board.
             entity.HasIndex(paper => new { paper.BoardId, paper.Position })

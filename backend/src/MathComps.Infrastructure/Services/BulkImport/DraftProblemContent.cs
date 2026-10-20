@@ -1,8 +1,6 @@
 using System.Collections.Immutable;
-using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
-using MathComps.Infrastructure.Services.Selection;
 
 namespace MathComps.Infrastructure.Services.BulkImport;
 
@@ -97,27 +95,34 @@ public record DraftProblemContent(
 }
 
 /// <summary>
-/// What a draft files a pool problem under: the fields its <see cref="Proposal"/> row is written from.
+/// What a draft files a pool problem under: the fields its <see cref="Proposal"/> row is written from, and the
+/// categories it is recommended for.
 /// </summary>
 /// <param name="Number"><inheritdoc cref="Proposal.Number" path="/summary"/></param>
 /// <param name="Title"><inheritdoc cref="Proposal.Title" path="/summary"/></param>
 /// <param name="Area"><inheritdoc cref="Proposal.Area" path="/summary"/></param>
-/// <param name="Recommended">The categories the problem is recommended for, in any order.</param>
+/// <param name="Recommended">
+/// The categories the problem is recommended for, by their <see cref="OrganizationCategory.Name"/>, in any order.
+/// </param>
 public record DraftProposal(
     int Number,
     string Title,
     ProposalArea Area,
-    ImmutableArray<HostedCompetitionCategory> Recommended)
+    ImmutableArray<string> Recommended)
 {
     /// <summary>
     /// Whether a stored proposal already holds everything a re-import writes from this block: its title, its area
     /// and its categories.
     /// </summary>
-    /// <param name="stored">The proposal filing the problem the block re-imports.</param>
+    /// <param name="stored">
+    /// The proposal filing the problem the block re-imports, loaded through
+    /// <see cref="ProblemReimport.IncludeStoredRecommendations"/>.
+    /// </param>
     /// <returns>True when a re-import would leave the proposal as it is.</returns>
     public bool Matches(Proposal stored) =>
-        // The same title and area, recommended for the same categories, which a proposal keeps in category order
+        // The same title and area, recommended for the same categories
         stored.Title == Title
         && stored.Area == Area
-        && stored.Recommended.SequenceEqual(SelectionRules.InCategoryOrder(Recommended));
+        && stored.Recommendations.Select(recommendation => recommendation.Category.Name).ToHashSet()
+            .SetEquals(Recommended);
 }

@@ -1,4 +1,3 @@
-using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Domain.Taxonomy;
@@ -19,12 +18,12 @@ public static class SelectionSeed
     private const int SeasonYear = 2026;
 
     /// <summary>
-    /// The paths of the competitions one group's rounds hang off, one per category in the order the categories run.
+    /// The paths of the competitions one group's rounds hang off, one per hosted level in the order the levels run.
     /// </summary>
-    /// <param name="month">The group's node under each category (e.g. <c>october</c>).</param>
+    /// <param name="month">The group's node under each hosted level (e.g. <c>october</c>).</param>
     /// <returns>The paths.</returns>
     public static string[] RoundPaths(string month) =>
-        // Every category's node for that month
+        // Every hosted level's node for that month
         [
             $"{HostedTaxonomy.RootSlug}-elementary-{month}",
             $"{HostedTaxonomy.RootSlug}-intermediate-{month}",
@@ -135,11 +134,46 @@ public static class SelectionSeed
             Number = number,
             Title = $"Proposal {number}",
             Area = ProposalArea.Algebra,
-            Recommended = [],
         });
 
         // The id
         return problemId;
+    }
+
+    /// <summary>
+    /// Tracks the recommendations of a proposal for some of the MathComps organization's categories.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="proposalId">The proposal, which is its problem's id.</param>
+    /// <param name="categories">The categories, by name.</param>
+    public static void Recommend(MathCompsDbContext context, Guid proposalId, params string[] categories)
+    {
+        // One recommendation per category named
+        foreach (var category in categories)
+            context.ProposalRecommendations.Add(
+                new ProposalRecommendation { ProposalId = proposalId, CategoryId = CategoryId(context, category) });
+    }
+
+    /// <summary>
+    /// Tracks an organization other than MathComps, listing categories of its own that no hosted round runs.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="slug"><inheritdoc cref="Organization.Slug" path="/summary"/></param>
+    /// <param name="categories">Its categories by name, in the order they run.</param>
+    public static void NewOrganization(MathCompsDbContext context, string slug, params string[] categories)
+    {
+        // The organization
+        var organization = new Organization { Slug = slug };
+        context.Organizations.Add(organization);
+
+        // Its categories, each at its place in the order given
+        foreach (var position in Enumerable.Range(0, categories.Length))
+            context.OrganizationCategories.Add(new OrganizationCategory
+            {
+                OrganizationId = organization.Id,
+                Position = position,
+                Name = categories[position],
+            });
     }
 
     /// <summary>
@@ -164,11 +198,11 @@ public static class SelectionSeed
         };
 
     /// <summary>
-    /// Tracks a hosted group of four problems a paper, with one empty round per category.
+    /// Tracks a hosted group of four problems a paper, with one empty round per hosted level.
     /// </summary>
     /// <param name="context">The seeding context.</param>
     /// <param name="season">The season its rounds sit in.</param>
-    /// <param name="month">The group's node under each category (e.g. <c>october</c>).</param>
+    /// <param name="month">The group's node under each hosted level (e.g. <c>october</c>).</param>
     /// <param name="opensAt"><inheritdoc cref="HostedGroup.OpensAt" path="/summary"/></param>
     /// <returns>The group, its rounds tracked beside it.</returns>
     public static HostedGroup NewGroup(
@@ -180,7 +214,7 @@ public static class SelectionSeed
         // Four problems a round, as many as a seeded board's papers have slots
         group.ProblemCount = 4;
 
-        // One empty round per category
+        // One empty round per hosted level
         foreach (var path in RoundPaths(month))
             HostedSeed.NewRound(context, season, group, Guid.CreateVersion7(), path);
 
@@ -189,7 +223,8 @@ public static class SelectionSeed
     }
 
     /// <summary>
-    /// Tracks a draft board with one paper per category, each of four slots, filled from the ids given.
+    /// Tracks a draft board with one paper per category of the MathComps organization, each of four slots, filled
+    /// from the ids given.
     /// </summary>
     /// <param name="context">The seeding context.</param>
     /// <param name="name"><inheritdoc cref="SelectionBoard.Name" path="/summary"/></param>
@@ -210,20 +245,23 @@ public static class SelectionSeed
         };
         context.SelectionBoards.Add(board);
 
-        // The categories, in the order they run
-        var categories = Enum.GetValues<HostedCompetitionCategory>();
+        // MathComps' categories, in the order they run
+        var categories = context.OrganizationCategories
+            .Where(category => category.OrganizationId == board.OrganizationId)
+            .OrderBy(category => category.Position)
+            .ToList();
 
         // One paper per category
-        foreach (var position in Enumerable.Range(0, categories.Length))
+        foreach (var position in Enumerable.Range(0, categories.Count))
         {
-            // The paper
+            // The paper, named after its category
             var paper = new SelectionPaper
             {
                 Id = Guid.CreateVersion7(),
                 BoardId = board.Id,
                 Position = position,
-                Name = categories[position].ToString(),
-                Category = categories[position],
+                Name = categories[position].Name,
+                CategoryId = categories[position].Id,
                 SlotCount = 4,
             };
             context.SelectionPapers.Add(paper);
@@ -238,4 +276,16 @@ public static class SelectionSeed
         // The tracked board
         return board;
     }
+
+    /// <summary>
+    /// Reads the id of one of the MathComps organization's categories, which the migrations create.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="name"><inheritdoc cref="OrganizationCategory.Name" path="/summary"/></param>
+    /// <returns>The category's id.</returns>
+    private static Guid CategoryId(MathCompsDbContext context, string name) =>
+        // The one MathComps category the name names
+        context.OrganizationCategories
+            .Single(category => category.OrganizationId == MathCompsId(context) && category.Name == name)
+            .Id;
 }

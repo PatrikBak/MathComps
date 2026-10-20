@@ -74,7 +74,8 @@ The import finds a pool problem by its place, the `N` of `pN`, so a pool problem
 
 - a new problem with no block (`missing-proposal`), or a block outside the pool (`proposal-outside-pool`);
 - a number another problem's proposal holds, even one finalized into a round or deleted (`proposal-number-taken`);
-- a place holding a deleted proposal (`proposal-deleted`), another proposal (`proposal-place-taken`), or a problem no proposal files (`proposal-place-unfiled`).
+- a place holding a deleted proposal (`proposal-deleted`), another proposal (`proposal-place-taken`), or a problem no proposal files (`proposal-place-unfiled`);
+- a category name the pool's organization doesn't list (`proposal-unknown-category`).
 
 `apply` writes the proposal with its problem. A re-import refreshes its title, area and categories. Setting it aside and deleting it are the reviewers' after that.
 

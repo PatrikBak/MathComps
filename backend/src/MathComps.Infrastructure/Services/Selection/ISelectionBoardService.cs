@@ -50,9 +50,9 @@ public interface ISelectionBoardService
     Task MoveSlotAsync(SlotAddress slot, SlotDirection direction, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Finalizes a draft board into a hosted group: each paper's problems move into the round of the paper's
-    /// category, in slot order, and leave every other draft they stood on. The board then reads its slots off the
-    /// rounds.
+    /// Finalizes a draft board into a hosted group: each paper's problems move into the round of the hosted level the
+    /// paper's category is, in slot order, and leave every other draft they stood on. The board then reads its slots
+    /// off the rounds.
     /// </summary>
     /// <param name="boardId">The board.</param>
     /// <param name="cycleId">The hosted group whose rounds take the papers.</param>
@@ -94,6 +94,6 @@ public sealed class SelectionProblemIncompleteException()
 
 /// <summary>
 /// Thrown when a board cannot be finalized into a group: the group no longer takes one, the papers don't pair up
-/// with its rounds by category and size, or a slot stands empty.
+/// with its rounds by their categories' hosted levels and by size, or a slot stands empty.
 /// </summary>
 public sealed class SelectionFinalizeBlockedException() : Exception("This board cannot be finalized into that cycle");

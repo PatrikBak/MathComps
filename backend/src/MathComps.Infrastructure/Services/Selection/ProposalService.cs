@@ -1,4 +1,3 @@
-using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -26,20 +25,32 @@ public sealed class ProposalService(IDbContextFactory<MathCompsDbContext> dbCont
 
     /// <inheritdoc/>
     public Task SetRecommendedAsync(
-        Guid proposalId, HostedCompetitionCategory category, bool isRecommended,
-        CancellationToken cancellationToken = default) =>
+        Guid proposalId, string category, bool isRecommended, CancellationToken cancellationToken = default) =>
         // The change, as one selection write
         SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
             // The proposal
             var proposal = await SelectionRules.ReadProposalAsync(dbContext, proposalId, cancellationToken);
 
-            // Every category recommended after the switch, in the order the categories run
-            proposal.Recommended = SelectionRules.InCategoryOrder(isRecommended
-                // The stored categories with this one added
-                ? proposal.Recommended.Append(category)
-                // The stored categories without this one
-                : proposal.Recommended.Where(candidate => candidate != category));
+            // The category, one of the proposal's organization's
+            var categoryId = await dbContext.OrganizationCategories
+                .Where(candidate => candidate.OrganizationId == proposal.OrganizationId && candidate.Name == category)
+                .Select(candidate => (Guid?)candidate.Id)
+                .FirstOrDefaultAsync(cancellationToken)
+                ?? throw new SelectionTargetNotFoundException();
+
+            // The recommendation as it stands, if the proposal has it
+            var recommendation = await dbContext.ProposalRecommendations
+                .FindAsync([proposalId, categoryId], cancellationToken);
+
+            // A recommendation the proposal lacks, added
+            if (isRecommended && recommendation is null)
+                dbContext.ProposalRecommendations.Add(
+                    new ProposalRecommendation { ProposalId = proposalId, CategoryId = categoryId });
+
+            // A recommendation taken back, where the proposal has it
+            if (!isRecommended && recommendation is not null)
+                dbContext.ProposalRecommendations.Remove(recommendation);
         }, cancellationToken);
 
     /// <inheritdoc/>

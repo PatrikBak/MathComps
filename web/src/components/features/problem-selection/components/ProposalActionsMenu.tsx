@@ -4,8 +4,6 @@ import { MoreVertical } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 import { useId } from 'react'
 
-import { useCategoryName } from '@/components/features/hosted-competitions/hooks/use-category-name'
-import { HOSTED_COMPETITION_CATEGORIES } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import { Button } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
 import {
@@ -18,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/shared/components/DropdownMenu'
 
+import { useCategoryLabel } from '../hooks/use-category-label'
 import { useProposalDeleteConfirmation } from '../hooks/use-proposal-delete-confirmation'
 import { useRate, useRecommend, useSetAside } from '../hooks/use-proposal-writes'
 import {
@@ -27,7 +26,7 @@ import {
   type RatingScores,
 } from '../model/selection-types'
 import { ScoreBar } from './ScoreBar'
-import { useSelectionWorkspace } from './SelectionWorkspaceProvider'
+import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /**
  * Props for the {@link ProposalActionsMenu} component.
@@ -66,8 +65,11 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
   // Lists in the reader's language
   const format = useFormatter()
 
-  // What each level is called
-  const categoryName = useCategoryName()
+  // The selection's categories, in the order they run
+  const { categories } = useLoadedSelection()
+
+  // What each category is called
+  const categoryLabel = useCategoryLabel()
 
   // The id of the label naming the categories' rows
   const recommendedId = useId()
@@ -87,31 +89,36 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-48">
-          {/* The categories the problem is recommended for, each switched on its own and the menu kept open */}
-          <DropdownMenuGroup aria-labelledby={recommendedId}>
-            <p id={recommendedId} className="px-2 pt-1.5 pb-1 text-xs font-semibold text-muted">
-              {t('recommendedFor')}
-            </p>
-            {HOSTED_COMPETITION_CATEGORIES.map((category) => (
-              <DropdownMenuCheckboxItem
-                key={category}
-                checked={proposal.recommended.includes(category)}
-                onSelect={(event) => event.preventDefault()}
-                onCheckedChange={(isChecked) =>
-                  recommend.mutate({
-                    proposalId: proposal.id,
-                    category,
-                    isRecommended: isChecked,
-                  })
-                }
-              >
-                {categoryName(category)}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuGroup>
+          {/* The categories the problem is recommended for, each switched on its own and the menu kept open, where
+              the organization lists any */}
+          {categories.length > 0 && (
+            <>
+              <DropdownMenuGroup aria-labelledby={recommendedId}>
+                <p id={recommendedId} className="px-2 pt-1.5 pb-1 text-xs font-semibold text-muted">
+                  {t('recommendedFor')}
+                </p>
+                {categories.map(({ name }) => (
+                  <DropdownMenuCheckboxItem
+                    key={name}
+                    checked={proposal.recommended.includes(name)}
+                    onSelect={(event) => event.preventDefault()}
+                    onCheckedChange={(isChecked) =>
+                      recommend.mutate({
+                        proposalId: proposal.id,
+                        category: name,
+                        isRecommended: isChecked,
+                      })
+                    }
+                  >
+                    {categoryLabel(name)}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+            </>
+          )}
 
           {/* The reader's own rating */}
-          <DropdownMenuSeparator />
           <RatingRows proposal={proposal} />
 
           {/* Setting the problem aside or bringing it back, and deleting it, while no round has taken it */}

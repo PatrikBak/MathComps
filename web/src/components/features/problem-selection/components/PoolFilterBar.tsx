@@ -2,8 +2,6 @@
 
 import { useTranslations } from 'next-intl'
 
-import { useCategoryName } from '@/components/features/hosted-competitions/hooks/use-category-name'
-import { HOSTED_COMPETITION_CATEGORIES } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import {
   FacetClearButton,
   FacetTogglePill,
@@ -12,9 +10,11 @@ import { MultiSelectFacet } from '@/components/shared/components/facets/componen
 import type { FacetSelectionMode } from '@/components/shared/components/facets/model/facet-types'
 
 import { useAreaName } from '../hooks/use-area-name'
+import { useCategoryLabel } from '../hooks/use-category-label'
 import type { UsePoolFiltersResult } from '../hooks/use-pool-filters'
 import { BOARD_MEMBERSHIPS, type BoardMembership, type PoolMatches } from '../model/pool-filters'
 import { PROPOSAL_AREAS } from '../model/selection-types'
+import { useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /**
  * Props for the {@link PoolFilterBar} component.
@@ -34,8 +34,12 @@ export function PoolFilterBar({ filters, matches }: PoolFilterBarProps) {
   // Filter copy
   const t = useTranslations('problemSelection.filters')
 
+  // The selection's categories by name, in the order they run; none until its read lands
+  const categoryNames =
+    useSelectionWorkspace().selection?.categories.map((category) => category.name) ?? []
+
   // What each category is called
-  const categoryName = useCategoryName()
+  const categoryLabel = useCategoryLabel()
 
   // What each area is called
   const areaName = useAreaName()
@@ -65,8 +69,8 @@ export function PoolFilterBar({ filters, matches }: PoolFilterBarProps) {
       {/* Which categories a problem is recommended for */}
       <PoolFacet
         title={t('category')}
-        values={HOSTED_COMPETITION_CATEGORIES}
-        nameOf={categoryName}
+        values={categoryNames}
+        nameOf={categoryLabel}
         counts={matches?.categoryCounts}
         selected={filter.categories}
         onChange={(categories) => setField('categories', categories)}

@@ -51,7 +51,7 @@ export function ProposalFiling({ proposal }: ProposalFilingProps) {
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {/* The categories the problem is recommended for */}
-      <RecommendedMarks categories={proposal.recommended} />
+      <RecommendedMarks recommended={proposal.recommended} />
 
       {/* The problem's area */}
       <Chip className="border-transparent py-px leading-4 sm:py-px">{areaName(proposal.area)}</Chip>

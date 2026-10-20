@@ -4,10 +4,10 @@ import { useTranslations } from 'next-intl'
 import { useRef } from 'react'
 
 import { CommentSection } from '@/components/features/comments/components/CommentSection'
-import { categoryTextClass } from '@/components/features/hosted-competitions/components/CategoryBadge'
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
 import { Tabs } from '@/components/shared/components/Tabs'
 import { cn } from '@/components/shared/utils/css-utils'
+import { hueTextStyle } from '@/components/shared/utils/hue-colors'
 import type { TableSort } from '@/components/shared/utils/table-sort'
 import { type Locale, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
@@ -15,7 +15,7 @@ import { useDetailTab } from '../hooks/use-detail-tab'
 import { usePaperCommentCount } from '../hooks/use-paper-comment-count'
 import { DEFAULT_RATINGS_SORT, type RatingsColumn } from '../model/ratings-order'
 import { PAPER_TABS, type PaperTab } from '../model/selection-routes'
-import { type SlotPosition, unwrittenAcross } from '../model/selection-state'
+import { categoryHue, type SlotPosition, unwrittenAcross } from '../model/selection-state'
 import type { Board, Paper, Proposal } from '../model/selection-types'
 import { SlotNumber } from './CategoryMarks'
 import { DetailHeading, DetailMissing, type DetailTabContent } from './DetailFrame'
@@ -106,8 +106,8 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
   // Paper page copy
   const t = useTranslations('problemSelection.paper')
 
-  // Every problem, by id
-  const { proposalsById } = useLoadedSelection()
+  // Every problem by id, and the selection's categories
+  const { proposalsById, categories } = useLoadedSelection()
 
   // The problem in each slot, undefined where the slot stands empty
   const slotProposals = paper.slots.map((proposalId) =>
@@ -211,8 +211,9 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
 
       {/* The paper's name and its board, and over its problems' statements the language they are read in */}
       <header className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <DetailHeading subjectId={paper.id} className={categoryTextClass(paper.category)}>
-          {paper.name} <span className="ml-1 font-normal text-muted">{board.name}</span>
+        <DetailHeading subjectId={paper.id}>
+          <span style={hueTextStyle(categoryHue(categories, paper.category))}>{paper.name}</span>{' '}
+          <span className="ml-1 font-normal text-muted">{board.name}</span>
         </DetailHeading>
         <div
           // Hidden but holding its room on a tab without statements, so the tabs stay put as they switch

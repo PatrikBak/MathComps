@@ -251,6 +251,10 @@ public class DraftValidationPipeline(
                 $"problem '{slug}' sits in the pool's round with no proposal filing it, so the draft can't be "
                 + "matched to it — file it in the database first, or give the problem another place"),
 
+            ProposalCategoryUnknown unknown => ("proposal-unknown-category",
+                $"problem '{slug}' is recommended for '{unknown.Category}', which the pool's organization doesn't "
+                + $"list as a category — name one of {string.Join(", ", unknown.Listed)}"),
+
             // Unhandled cases.
             _ => throw new ArgumentOutOfRangeException(nameof(conflict), conflict, "Unknown proposal conflict.")
         };

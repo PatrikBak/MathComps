@@ -4,7 +4,6 @@ import { ArrowDown, ArrowLeftRight, ArrowUp, ChevronDown, X } from 'lucide-react
 import { useFormatter, useTranslations } from 'next-intl'
 import { type ReactNode, type Ref, useId, useState } from 'react'
 
-import { categoryTextClass } from '@/components/features/hosted-competitions/components/CategoryBadge'
 import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import {
   DropdownMenu,
@@ -16,6 +15,7 @@ import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyS
 import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
 import { cn } from '@/components/shared/utils/css-utils'
 import { focusForReader } from '@/components/shared/utils/focus-utils'
+import { hueTextStyle } from '@/components/shared/utils/hue-colors'
 import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
 import { useKeyedState } from '@/hooks/use-keyed-state'
 import { localeCodeList } from '@/i18n/i18n'
@@ -24,7 +24,12 @@ import { useBoardFocusKeeper } from '../hooks/use-board-focus-keeper'
 import { useBoardSlot } from '../hooks/use-board-slot'
 import { usePaperMoves, type UsePaperMovesResult } from '../hooks/use-paper-moves'
 import { useSlotWrites } from '../hooks/use-slot-writes'
-import { type BoardSlot, finalizeBlockers } from '../model/selection-state'
+import {
+  type BoardSlot,
+  categoryHue,
+  finalizeBlockers,
+  mapsToRounds,
+} from '../model/selection-state'
 import type { Board, Paper } from '../model/selection-types'
 import { SlotNumber, WARNING_MARK_CLASS } from './CategoryMarks'
 import { FinalizeDialog } from './FinalizeDialog'
@@ -228,6 +233,9 @@ function PaperSlots({ board, paper }: PaperSlotsProps) {
   // The moves along the paper
   const moves = usePaperMoves({ board, paper })
 
+  // The selection's categories, in the order they run
+  const { categories } = useLoadedSelection()
+
   // How many of the paper's slots hold a problem
   const filled = paper.slots.filter((slot) => slot !== null).length
 
@@ -235,7 +243,10 @@ function PaperSlots({ board, paper }: PaperSlotsProps) {
     <div className="px-2 pt-3">
       {/* The paper's name in its category's colour, and how full it is */}
       <div className="flex items-baseline justify-between gap-2 px-2 pb-1">
-        <h3 className={cn('text-sm font-semibold', categoryTextClass(paper.category))}>
+        <h3
+          className="text-sm font-semibold"
+          style={hueTextStyle(categoryHue(categories, paper.category))}
+        >
           <PaperLink
             paperId={paper.id}
             // Named so the board can come back to it, focus and all, once the paper closes
@@ -482,14 +493,15 @@ type BoardFooterProps = {
 }
 
 /**
- * What stands between a draft board and the rounds, and the way to send it there.
+ * What stands between a draft board and the rounds, and the way to send it there. A board with a paper no round takes
+ * never goes, so it shows neither.
  */
 function BoardFooter({ board, onFinalize }: BoardFooterProps) {
   // Board copy
   const t = useTranslations('problemSelection.board')
 
-  // Every proposal, by id
-  const { proposalsById } = useLoadedSelection()
+  // Every proposal by id, and the selection's categories
+  const { proposalsById, categories } = useLoadedSelection()
 
   // Whether a write changing the slots is still out
   const { isChangingSlots } = useSelectionWorkspace()
@@ -497,8 +509,10 @@ function BoardFooter({ board, onFinalize }: BoardFooterProps) {
   // The id of the list of what still has to happen, which describes the press
   const blockersId = useId()
 
-  // A finalized board has nothing left to finalize, leaving the footer a bare gap
-  if (board.finalization !== null) return <div className="h-3" />
+  // A finalized board has nothing left to finalize, and a board with a paper no round takes never finalizes, each
+  // leaving the footer a bare gap
+  if (board.finalization !== null || !mapsToRounds(board, categories))
+    return <div className="h-3" />
 
   // What stops the board going
   const blockers = finalizeBlockers(board, proposalsById)

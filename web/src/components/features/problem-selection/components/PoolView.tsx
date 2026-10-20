@@ -103,7 +103,12 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
   // selection arrives, and over the discussions, which no filter narrows
   const matches =
     selection !== null && LISTS_PROBLEMS[mode]
-      ? matchPool([...selection.proposalsById.values()], filters.filter, selection.activeBoard)
+      ? matchPool(
+          [...selection.proposalsById.values()],
+          filters.filter,
+          selection.activeBoard,
+          selection.categories
+        )
       : null
 
   // Whether a search, a facet or leaving out what the board holds narrows the view on screen, set aside or live

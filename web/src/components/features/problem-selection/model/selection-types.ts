@@ -56,8 +56,8 @@ export type Proposal = {
   title: string
   /** The area it belongs to. */
   area: ProposalArea
-  /** The categories it is recommended for, in the order the categories run. */
-  recommended: HostedCompetitionCategory[]
+  /** The categories it is recommended for, by name, in the order the categories run. */
+  recommended: string[]
   /** Its text in each language it has a statement in. */
   texts: Partial<Record<Locale, ProposalText>>
   /** The language it was first written in, which its other texts translate; null where none is the original. */
@@ -81,8 +81,8 @@ export type Paper = {
   id: string
   /** What the paper is called. */
   name: string
-  /** The MathComps category the paper fills, null for a paper outside the categories, which no round takes. */
-  category: HostedCompetitionCategory | null
+  /** The category the paper fills, by name; null for a paper outside the categories. */
+  category: string | null
   /** The problem in each slot, by id, null where the slot stands empty. */
   slots: (string | null)[]
 }
@@ -113,7 +113,7 @@ export type Board = {
 }
 
 /**
- * A batch of rounds that open together, one for each of its categories, all still empty, so a board can be
+ * A batch of rounds that open together, one for each of its hosted levels, all still empty, so a board can be
  * finalized into them.
  */
 export type Cycle = {
@@ -123,7 +123,7 @@ export type Cycle = {
   name: string
   /** When its rounds open, as an ISO-8601 string. */
   opensAt: string
-  /** The categories of its rounds, one paper's worth each. */
+  /** The hosted levels of its rounds, one paper's worth each. */
   categories: HostedCompetitionCategory[]
   /** How many problems each of its rounds takes. */
   problemCount: number
@@ -180,8 +180,8 @@ export type SetAsideWrite = {
 export type RecommendationWrite = {
   /** The proposal. */
   proposalId: string
-  /** The category. */
-  category: HostedCompetitionCategory
+  /** The category, by name. */
+  category: string
   /** Whether the proposal is recommended for the category afterwards. */
   isRecommended: boolean
 }
@@ -225,9 +225,21 @@ export type ReviewConversation = {
 }
 
 /**
+ * One category the selection's organization picks problems for.
+ */
+export type SelectionCategory = {
+  /** What the organization calls it, unique among its categories. */
+  name: string
+  /** The hosted level it is, whose round takes a paper of this category; null for one no hosted round runs. */
+  hostedCategory: HostedCompetitionCategory | null
+}
+
+/**
  * Everything the selection reads, which arrives in one go.
  */
 export type SelectionData = {
+  /** The categories the selection picks problems for, in the order they run. */
+  categories: SelectionCategory[]
   /** Every proposal still in the selection, the set-aside and used ones included, lowest number first. */
   proposals: Proposal[]
   /** Every board still in the selection, oldest first. */

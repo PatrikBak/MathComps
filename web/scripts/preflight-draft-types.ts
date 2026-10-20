@@ -3,7 +3,6 @@
  * run's issues.
  */
 
-import type { HostedCompetitionCategory } from '../src/components/features/hosted-competitions/model/hosted-competition-types'
 import type { ProposalArea } from '../src/components/features/problem-selection/model/selection-types'
 import type { Locale } from '../src/i18n/i18n'
 
@@ -62,8 +61,8 @@ export type ManifestProposal = {
   title: string
   /** The area it is filed under. */
   area: ProposalArea
-  /** The categories it is recommended for, in any order. */
-  recommended: HostedCompetitionCategory[]
+  /** The categories it is recommended for, by name, in any order. */
+  recommended: string[]
 }
 
 /** One problem's normalized content. */
