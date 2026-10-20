@@ -65,7 +65,7 @@ function finalize(held: HeldSelection, boardId: string, cycleId: string): HeldSe
   if (!takesBoard(cycle)) refuseWith('SelectionFinalizeBlocked')
 
   // The categories the papers fill, in one order
-  const paperCategories = board.papers.map((paper) => paper.category ?? '').sort()
+  const paperCategories = board.papers.map((paper) => paper.category).sort()
 
   // The categories the rounds run at, in the same order
   const roundCategories = [...cycle.categories].sort()

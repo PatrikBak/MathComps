@@ -176,8 +176,8 @@ public sealed class ProblemSelectionService(
                     {
                         paper.Id,
                         paper.Name,
-                        Category = (string?)paper.Category!.Name,
-                        paper.Category!.HostedCategory,
+                        Category = paper.Category.Name,
+                        paper.Category.HostedCategory,
                         paper.SlotCount,
                         Slots = paper.Slots.Select(slot => new { slot.Position, slot.ProblemId }).ToList(),
                     })

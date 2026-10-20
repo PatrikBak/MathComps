@@ -211,7 +211,7 @@ public sealed class BoardFinalizationService(
         var roundLevels = rounds.Select(round => HostedTaxonomy.CategoryOf(round.Competition.Path)).ToList();
 
         // The hosted level each paper's category is
-        var paperLevels = board.Papers.Select(paper => paper.Category?.HostedCategory).ToList();
+        var paperLevels = board.Papers.Select(paper => paper.Category.HostedCategory).ToList();
 
         // Every round at a hosted level of its own, and the papers' categories at exactly those levels, one each
         if (roundLevels.Contains(null)
@@ -229,7 +229,7 @@ public sealed class BoardFinalizationService(
             .. board.Papers.Select(paper => (
                 paper,
                 rounds.Single(round =>
-                    HostedTaxonomy.CategoryOf(round.Competition.Path) == paper.Category?.HostedCategory))),
+                    HostedTaxonomy.CategoryOf(round.Competition.Path) == paper.Category.HostedCategory))),
         ];
     }
 

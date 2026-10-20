@@ -201,12 +201,12 @@ public sealed class SelectionBoardService(
     /// <param name="paper">The paper, with its category's id.</param>
     /// <param name="leadCategoryIds">The ids of the categories the account leads.</param>
     /// <exception cref="SelectionNotLeadException">
-    /// Thrown when the account does not lead the paper's category, or the paper has none and so no leads.
+    /// Thrown when the account does not lead the paper's category.
     /// </exception>
     private static void RequireLead(SelectionPaper paper, IReadOnlySet<Guid> leadCategoryIds)
     {
-        // A paper outside the categories has no leads, and any other paper only its own category's
-        if (paper.CategoryId is not { } categoryId || !leadCategoryIds.Contains(categoryId))
+        // Only a lead of the paper's category changes it
+        if (!leadCategoryIds.Contains(paper.CategoryId))
             throw new SelectionNotLeadException();
     }
 

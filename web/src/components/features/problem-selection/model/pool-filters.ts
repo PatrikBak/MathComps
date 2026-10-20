@@ -261,13 +261,12 @@ function inBoardOrder(
 
   // A function which says whether a paper runs: every paper while no category is picked, else one of a category
   // picked
-  const runs = (paper: Paper) =>
-    categories.length === 0 || (paper.category !== null && categories.includes(paper.category))
+  const runs = (paper: Paper) => categories.length === 0 || categories.includes(paper.category)
 
   // A function which says whether a paper takes a problem it doesn't hold: one recommended for its category, where
   // the paper runs
   const takes = (paper: Paper, problem: Proposal) =>
-    runs(paper) && paper.category !== null && problem.recommended.includes(paper.category)
+    runs(paper) && problem.recommended.includes(paper.category)
 
   // A function which says where a problem runs: at its slot where a running paper holds it, else under the first
   // paper taking it, else after every paper
