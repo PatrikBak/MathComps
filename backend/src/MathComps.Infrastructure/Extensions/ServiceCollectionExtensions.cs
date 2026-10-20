@@ -572,6 +572,9 @@ public static class ServiceCollectionExtensions
         // The changes to the boards.
         services.TryAddScoped<ISelectionBoardService, SelectionBoardService>();
 
+        // Finalizing the boards, and the cycles they can go into.
+        services.TryAddScoped<IBoardFinalizationService, BoardFinalizationService>();
+
         // Builder pattern
         return services;
     }

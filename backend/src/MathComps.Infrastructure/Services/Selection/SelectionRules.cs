@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
-/// The rules every part of the problem selection shares: writes run one at a time, and the reads and the writes
-/// agree on which problems are still in the pool and which groups still take a board.
+/// The rules every part of the problem selection shares: writes run one at a time, a board changes only while it is
+/// a draft, and the reads and the writes agree on which problems are still in the pool.
 /// </summary>
 internal static class SelectionRules
 {
@@ -69,6 +69,47 @@ internal static class SelectionRules
                 && proposal.Organization.Slug == organizationSlug)
             .FirstOrDefaultAsync(cancellationToken)
         ?? throw new SelectionTargetNotFoundException();
+
+    /// <summary>
+    /// Reads a draft board of one organization with its papers, their categories and their slot rows, tracked.
+    /// </summary>
+    /// <param name="dbContext">The write's context.</param>
+    /// <param name="organizationSlug">
+    /// The <see cref="Organization.Slug"/> of the organization whose selection the board is in.
+    /// </param>
+    /// <param name="boardId">The board.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The board.</returns>
+    /// <exception cref="SelectionTargetNotFoundException">
+    /// Thrown when no board of the organization has the id.
+    /// </exception>
+    /// <exception cref="SelectionBoardOpenedException">Thrown when the board's group has opened.</exception>
+    /// <exception cref="SelectionBoardFinalizedException">Thrown when the board is finalized.</exception>
+    public static async Task<SelectionBoard> ReadDraftAsync(
+        MathCompsDbContext dbContext, string organizationSlug, Guid boardId, CancellationToken cancellationToken)
+    {
+        // The board with everything on it, and the group it was finalized into, refused like one that is not there
+        // where it is another organization's
+        var board = await dbContext.SelectionBoards
+            .Include(candidate => candidate.HostedGroup)
+            .Include(candidate => candidate.Papers).ThenInclude(paper => paper.Slots)
+            .Include(candidate => candidate.Papers).ThenInclude(paper => paper.Category)
+            .FirstOrDefaultAsync(
+                candidate => candidate.Id == boardId && candidate.Organization.Slug == organizationSlug,
+                cancellationToken)
+            ?? throw new SelectionTargetNotFoundException();
+
+        // Once its competitions run, students are sitting what the board holds
+        if (board.HostedGroup is { } group && group.OpensAt <= DateTimeOffset.UtcNow)
+            throw new SelectionBoardOpenedException();
+
+        // A finalized board's slots are its group's rounds, which take no change
+        if (board.HostedGroupId is not null)
+            throw new SelectionBoardFinalizedException();
+
+        // A draft
+        return board;
+    }
 
     /// <summary>
     /// Empties every slot the problems stand in, which only a draft paper keeps.
@@ -149,18 +190,4 @@ internal static class SelectionRules
     public static bool IsReviewersConversation(DateTimeOffset? memberSince, DateTimeOffset startedAt) =>
         // A member by the time it started
         memberSince <= startedAt;
-
-    /// <summary>
-    /// Whether a hosted group still takes a board: it has not opened, it closes at some point, and it runs rounds
-    /// nothing has filled yet. A group that never closes is the practice one, which nobody picks papers for.
-    /// </summary>
-    /// <param name="opensAt"><inheritdoc cref="HostedGroup.OpensAt" path="/summary"/></param>
-    /// <param name="closesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
-    /// <param name="problemsHeld">How many problems each of the group's rounds holds.</param>
-    /// <param name="now">The instant the group's opening is read against.</param>
-    /// <returns>Whether a board can be finalized into it.</returns>
-    public static bool TakesBoard(
-        DateTimeOffset opensAt, DateTimeOffset? closesAt, IReadOnlyCollection<int> problemsHeld, DateTimeOffset now) =>
-        // Not yet open, closing at some point, with rounds that are all still empty
-        opensAt > now && closesAt is not null && problemsHeld.Count > 0 && problemsHeld.All(held => held == 0);
 }
