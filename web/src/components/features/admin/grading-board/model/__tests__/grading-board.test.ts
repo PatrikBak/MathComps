@@ -65,9 +65,24 @@ const COMPETITION: GradingCompetition = {
     { id: 'p2', slug: 'p-2', number: 2 },
   ],
   entrants: [
-    { user: { id: 'zora', username: 'Zora', email: null }, finishedAfterSeconds: 2400 },
-    { user: { id: 'adam', username: 'Adam', email: null }, finishedAfterSeconds: 600 },
-    { user: { id: 'emil', username: 'Emil', email: null }, finishedAfterSeconds: 1200 },
+    {
+      user: { id: 'zora', username: 'Zora', email: null },
+      startedAt: '2026-09-10T08:00:00Z',
+      finishedAt: null,
+      finishedAfterSeconds: 2400,
+    },
+    {
+      user: { id: 'adam', username: 'Adam', email: null },
+      startedAt: '2026-09-10T08:00:00Z',
+      finishedAt: null,
+      finishedAfterSeconds: 600,
+    },
+    {
+      user: { id: 'emil', username: 'Emil', email: null },
+      startedAt: '2026-09-10T08:00:00Z',
+      finishedAt: null,
+      finishedAfterSeconds: 1200,
+    },
   ],
   grades: [
     summaryOf('zora', 'p1', 1, gradeOf(6, 0, true)),

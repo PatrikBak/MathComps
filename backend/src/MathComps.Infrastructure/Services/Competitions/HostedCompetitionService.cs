@@ -36,8 +36,8 @@ public sealed class HostedCompetitionService(
     /// <inheritdoc cref="HostedCompetitionOptions.MaxNoteChars" path="/summary"/>
     private readonly int _maxNoteChars = options.Value.MaxNoteChars;
 
-    /// <inheritdoc cref="HostedCompetitionOptions.NoteGraceMinutes" path="/summary"/>
-    private readonly int _noteGraceMinutes = options.Value.NoteGraceMinutes;
+    /// <inheritdoc/>
+    public int NoteGraceMinutes { get; } = options.Value.NoteGraceMinutes;
 
     /// <inheritdoc/>
     public async Task<HostedCompetitionsViewDto> GetViewAsync(
@@ -130,7 +130,7 @@ public sealed class HostedCompetitionService(
                         ProblemsReady: AreProblemsReady(round.ProblemIds.Count, group.ProblemCount))),
                 ])),
             ],
-            _noteGraceMinutes,
+            NoteGraceMinutes,
             preparesCompetitions);
     }
 
@@ -930,7 +930,7 @@ public sealed class HostedCompetitionService(
         var endedAt = HostedEntryRules.EndedAt(startedAt, entry.FinishedAt, entry.ClockMinutes);
 
         // Past the grace that follows it, so the note and the transcript have both settled.
-        if (endedAt.AddMinutes(_noteGraceMinutes) <= DateTimeOffset.UtcNow)
+        if (endedAt.AddMinutes(NoteGraceMinutes) <= DateTimeOffset.UtcNow)
             throw new HostedEntryNotRunningException();
     }
 

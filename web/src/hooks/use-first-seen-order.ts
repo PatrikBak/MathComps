@@ -30,8 +30,8 @@ type UseFirstSeenOrderOptions<TItem> = {
 
 /**
  * A list that keeps every item where it first appeared, however the order the items come in changes, so nothing on
- * screen moves under the reader. An item seen for the first time goes on top or in place, as asked; everything else
- * stays put.
+ * screen moves under the reader. An item seen for the first time goes on top, in place, or, once the list has shown
+ * anything, nowhere until the order is set afresh, as asked; everything else stays put.
  *
  * Say the items come in as A, B, C. Later C moves up and they come in as C, A, B: the list still reads A, B, C. Then
  * D comes in too, as C, A, D, B. On top, the list reads D, A, B, C; in place, it reads A, D, B, C, since D comes in
@@ -43,7 +43,7 @@ type UseFirstSeenOrderOptions<TItem> = {
  *
  * @param options - {@link UseFirstSeenOrderOptions}.
  *
- * @returns The items present, in the held order.
+ * @returns The items present that the held order shows, in that order.
  */
 export function useFirstSeenOrder<TItem>({
   items,
@@ -73,7 +73,7 @@ export function useFirstSeenOrder<TItem>({
   // Each item present, by its key
   const byKey = new Map(items.map((item) => [keyOf(item), item]))
 
-  // The items present, in the held order
+  // The items present that the held order shows, in that order
   return order.flatMap((key) => {
     // The item under the key, if it is still in the list
     const item = byKey.get(key)

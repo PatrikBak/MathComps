@@ -50,6 +50,8 @@ export type ConversationDialogProps = {
   selection: UseSteppedSelectionResult
   /** Who held the open item's conversations; null while that is unknown. */
   author: UserIdentity | null
+  /** What stands right after the author's name, saying something more about them. */
+  authorMarker?: ReactNode
   /** Every conversation the author held about the open item's problem, as far as reading them has got. */
   conversationList: AuthorConversationsResult
   /**
@@ -99,6 +101,7 @@ export type ConversationDialogProps = {
 export function ConversationDialog({
   selection,
   author,
+  authorMarker,
   conversationList,
   grading = null,
   listSync,
@@ -169,7 +172,10 @@ export function ConversationDialog({
       >
         {/* Who and what, opted out of the hyphenation the page turns on globally */}
         <div className="w-full min-w-0 hyphens-none sm:w-auto sm:flex-1" aria-live="polite">
-          <p className="truncate font-bold text-foreground">{authorName ?? '\u00a0'}</p>
+          <p className="flex min-w-0 items-center gap-1.5 font-bold text-foreground">
+            <span className="truncate">{authorName ?? '\u00a0'}</span>
+            {authorMarker}
+          </p>
           <p className="flex items-baseline gap-2 text-xs text-muted">
             {detail === null ? (
               <span>&nbsp;</span>

@@ -17,10 +17,14 @@ namespace MathComps.Infrastructure.Services.Admin;
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
 /// <param name="localization">The names the taxonomy gives the nodes a group's rounds run under.</param>
 /// <param name="members"><inheritdoc cref="HostedGrading.FindGradedEntryAsync" path="/param[@name='members']"/></param>
+/// <param name="competitionService">
+/// The service running the hosted competitions, which says how long a student may still comment after an entry ends.
+/// </param>
 public class AdminGradingService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IMetadataLocalizationService localization,
-    IOrganizationMemberService members) : IAdminGradingService
+    IOrganizationMemberService members,
+    IHostedCompetitionService competitionService) : IAdminGradingService
 {
     /// <summary>
     /// A grade nobody has touched: no mark, no help, nothing written, nothing settled.
@@ -61,17 +65,19 @@ public class AdminGradingService(
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new HostedGroupNotFoundException();
 
-        // Every entry into the group's rounds, by username, and by account among those with none.
+        // Every entry the students sat in the group's rounds, the only kind anybody grades, by username, and by
+        // account among those with none.
         var entries = await dbContext.HostedEntries
             .AsNoTracking()
-            .Where(entry => entry.Round.HostedGroupId == group.Id)
+            .Where(entry => entry.Round.HostedGroupId == group.Id && entry.StartedAt != null)
             .OrderBy(entry => entry.User.IsDeleted ? null : entry.User.Username)
             .ThenBy(entry => entry.UserId)
             .Select(entry => new
             {
                 entry.Id,
                 entry.RoundId,
-                entry.StartedAt,
+                // Set on every sat entry, which is the only kind the filter lets through.
+                StartedAt = entry.StartedAt!.Value,
                 entry.FinishedAt,
                 User = new UserIdentityDto(
                     entry.User.Id, entry.User.IsDeleted ? null : entry.User.Username, entry.User.Email),
@@ -102,11 +108,13 @@ public class AdminGradingService(
         var grades = await HostedGrading.ReadCurrentGradesAsync(
             dbContext, [.. spoken.Select(entry => entry.Id)], cancellationToken);
 
-        // The board: which group it is, then one competition per round.
+        // The board: which group it is and the terms its entries run on, then one competition per round.
         return new GradingBoardDto(
             HostedGroupName.Of(localization, group.Rounds.FirstOrDefault()?.CompetitionPath),
             group.OpensAt,
             group.ClosesAt,
+            group.ClockMinutes,
+            competitionService.NoteGraceMinutes,
             [
                 .. group.Rounds.Select(round =>
                 {
@@ -122,11 +130,15 @@ public class AdminGradingService(
                             ?? throw new InvalidOperationException(
                                 $"Round {round.Id} of a graded group has no level."),
                         round.Problems,
-                        // The round's entrants who spoke while their entry counted, each with how far into their
-                        // clock they last wrote about each problem, summed.
+                        // The round's entrants who spoke while their entry counted, each with when their clock
+                        // started, when they handed in, and how far into the clock they last wrote about each
+                        // problem, summed.
                         [
-                            .. roundEntries.Select(entry =>
-                                new GradingEntrantDto(entry.User, gradings.FinishedAfter(entry.Id).TotalSeconds)),
+                            .. roundEntries.Select(entry => new GradingEntrantDto(
+                                entry.User,
+                                entry.StartedAt,
+                                entry.FinishedAt,
+                                gradings.FinishedAfter(entry.Id).TotalSeconds)),
                         ],
                         // Every entrant who spoke, on every problem: their conversations about it and the grade.
                         [
