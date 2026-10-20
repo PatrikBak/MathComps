@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Page, Request } from '@playwright/test'
 import { createTranslator } from 'next-intl'
 
 import type { CommentReactionPress } from '@/components/features/comments/hooks/use-press-comment-reaction'
@@ -10,7 +10,7 @@ import { PENDING_COMMENT_REACTION_STORAGE_KEY } from '@/constants/local-storage-
 
 import messages from '../messages/en.json'
 import { gateReads } from './support/answer-gate'
-import { BACKEND_ORIGIN } from './support/backend-routes'
+import { BACKEND_ORIGIN, returnToTab } from './support/backend-routes'
 import {
   commentBy,
   commentFrom,
@@ -20,6 +20,7 @@ import {
   stubNamedReader,
   stubPageThread,
   threadPage,
+  THREADS_PATH,
 } from './support/comments'
 import { editorCopy } from './support/competitions'
 import { expect, test } from './support/test'
@@ -154,6 +155,18 @@ function countOn(page: Page, label: string, count: number) {
   })
 }
 
+/**
+ * Whether a call the page makes reads a thread.
+ *
+ * @param request - The call.
+ *
+ * @returns True for a read of a thread.
+ */
+function isThreadRead(request: Request): boolean {
+  // A read of the threads' own address, which the counts' and the presses' addresses only start with
+  return request.method() === 'GET' && new URL(request.url()).pathname === THREADS_PATH
+}
+
 test.describe('a comment thread, read by a signed-in reader', () => {
   test.beforeEach(async ({ page }) => {
     // A reader with a username, which a thread asks for before it takes a comment
@@ -167,7 +180,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // The thread, and what reaches the backend
     const writes = await stubPageThread(page, [answered])
 
-    // Read
+    // The thread's page, opened
     await openThread(page, THEIR_TEXT)
 
     // A comment, sent
@@ -225,7 +238,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // A thread whose backend fails every comment sent into it
     await stubPageThread(page, [theirComment()], (write) => write.kind === 'sent')
 
-    // Read
+    // The thread's page, opened
     await openThread(page, THEIR_TEXT)
 
     // The box a new comment is written in
@@ -248,7 +261,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // A thread whose backend fails every comment sent into it
     await stubPageThread(page, [theirComment()], (write) => write.kind === 'sent')
 
-    // Read
+    // The thread's page, opened
     await openThread(page, THEIR_TEXT)
 
     // A reply, opened under the comment
@@ -287,7 +300,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // Every comment sent passing a gate, open to begin with
     const gate = await gateReads(page, `${BACKEND_ORIGIN}/comments`)
 
-    // Read
+    // The thread's page, opened
     await openThread(page, THEIR_TEXT)
 
     // The box a reply is written in
@@ -362,7 +375,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // The thread
     await stubPageThread(page, [answered])
 
-    // Read
+    // The thread's page, opened
     await openThread(page, THEIR_TEXT)
 
     // A reply, opened under Martin's
@@ -405,7 +418,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // The thread, and what reaches the backend
     const writes = await stubPageThread(page, [own])
 
-    // Read
+    // The thread's page, opened
     await openThread(page, OWN_TEXT)
 
     // The comment
@@ -458,7 +471,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // The reader's comment, alone in the thread
     await stubPageThread(page, [ownComment()])
 
-    // Read
+    // The thread's page, opened
     await openThread(page, OWN_TEXT)
 
     // A reply, opened under the reader's comment
@@ -507,7 +520,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // The reader's comment, which Zuzana answered
     await stubPageThread(page, [{ ...ownComment(), replies: [theirComment()] }])
 
-    // Read
+    // The thread's page, opened
     await openThread(page, OWN_TEXT)
 
     // The comment's replies folded away
@@ -538,7 +551,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // A thread whose backend fails every edit
     await stubPageThread(page, [ownComment()], (write) => write.kind === 'edited')
 
-    // Read
+    // The thread's page, opened
     await openThread(page, OWN_TEXT)
 
     // The reader's comment, opened for editing
@@ -571,7 +584,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // The thread, and what reaches the backend
     const writes = await stubPageThread(page, [own])
 
-    // Read
+    // The thread's page, opened
     await openThread(page, OWN_TEXT)
 
     // A reply, opened under the reader's comment
@@ -616,7 +629,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // The thread, and what reaches the backend
     const writes = await stubPageThread(page, [own])
 
-    // Read
+    // The thread's page, opened
     await openThread(page, OWN_TEXT)
 
     // The reader's comment, opened for editing
@@ -655,7 +668,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // A thread whose backend fails every delete
     await stubPageThread(page, [ownComment()], (write) => write.kind === 'deleted')
 
-    // Read
+    // The thread's page, opened
     await openThread(page, OWN_TEXT)
 
     // The reader's comment, deleted
@@ -680,7 +693,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // The thread, and what reaches the backend
     const writes = await stubPageThread(page, [comment])
 
-    // Read
+    // The thread's page, opened
     await openThread(page, THEIR_TEXT)
 
     // A thumbs up, pressed
@@ -759,7 +772,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
       if (request.url().endsWith('/reaction')) sent.push(request.url())
     })
 
-    // Read
+    // The thread's page, opened
     await openThread(page, THEIR_TEXT)
 
     // The gate, shut, and a function which opens it again
@@ -801,6 +814,64 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     await expect(countOn(page, commentsCopy.thumbsDown, 1)).toBeVisible()
   })
 
+  test('reads the open thread again every little while, but never while a press is still out', async ({
+    page,
+  }) => {
+    // The clock under the test's hand, so the next read comes when the test says
+    await page.clock.install()
+
+    // A comment nobody has reacted to, and its thread
+    await stubPageThread(page, [theirComment()])
+
+    // A gate every press waits at, open until the test holds it
+    const presses = await gateReads(page, `${BACKEND_ORIGIN}/comments/*/reaction`)
+
+    // The thread's page, opened
+    await openThread(page, THEIR_TEXT)
+
+    // How many reads of the thread have gone out since
+    let reads = 0
+
+    // Each call the page makes, watched as it leaves
+    page.on('request', (request) => {
+      // Counted when it reads the thread
+      if (isThreadRead(request)) reads++
+    })
+
+    // Long enough for the open thread to be read again
+    await page.clock.fastForward('00:31')
+
+    // One read of the thread goes out
+    await expect.poll(() => reads).toBe(1)
+
+    // The gate, shut, and a function which opens it again
+    const release = presses.hold()
+
+    // A thumbs up, pressed, and stopped at the gate
+    await reactionOn(page, commentsCopy.thumbsUp).click()
+
+    // Shown as held meanwhile
+    await expect(reactionOn(page, commentsCopy.thumbsUp, true)).toBeVisible()
+
+    // Long enough for another read
+    await page.clock.fastForward('00:31')
+
+    // And a return from another tab, which reads an open thread again too
+    await returnToTab(page)
+
+    // Time for a read the clock or the return to the tab set off to go out
+    await page.waitForTimeout(LANDING_WINDOW_MS)
+
+    // None did, which could have landed the thread from before the press over it
+    expect(reads).toBe(1)
+
+    // The press let through
+    release()
+
+    // Counted once it lands
+    await expect(countOn(page, commentsCopy.thumbsUp, 1)).toBeVisible()
+  })
+
   // Presses left from before the sign-in that the page drops
   const unreplayed: UnreplayedPress[] = [
     {
@@ -826,7 +897,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
       // The thumbs down pressed while signed out, left for after the sign-in
       await leavePendingPress(page, { commentId: comment.id, kind: 'thumbsDown' })
 
-      // Read
+      // The thread's page, opened
       await openThread(page, comment.content)
 
       // The waiting reaction, cleared from the browser
@@ -862,7 +933,7 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // A thumbs down pressed on the reply while signed out, left for after the sign-in
     await leavePendingPress(page, { commentId: reply.id, kind: 'thumbsDown' })
 
-    // Read
+    // The thread's page, opened
     await openThread(page, MARTIN_TEXT)
 
     // The thumbs down, pressed
@@ -899,7 +970,7 @@ test.describe('a comment thread, read on a phone', () => {
     // The thread, and what reaches the backend
     const writes = await stubPageThread(page, [answered])
 
-    // Read
+    // The thread's page, opened
     await openThread(page, THEIR_TEXT)
 
     // A reply, opened under the comment
@@ -940,7 +1011,7 @@ test.describe('a comment thread, read by a signed-in reader with no username', (
     // The thread
     await stubPageThread(page, [theirComment()])
 
-    // Read
+    // The thread's page, opened
     await openThread(page, THEIR_TEXT)
 
     // The reader, asked to choose a username

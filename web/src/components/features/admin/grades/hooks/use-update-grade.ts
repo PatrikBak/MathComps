@@ -1,4 +1,4 @@
-import { useIsMutating, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 
@@ -15,7 +15,7 @@ import {
   type StudentGrade,
 } from '../model/grade-types'
 import { finalizeGrades as sendFinalizeGrades, updateGrade } from '../services/grade-service'
-import { cancelBoardReads, readCachedGrade, refreshBoards, writeCachedGrade } from './grade-cache'
+import { readCachedGrade, refreshBoards, writeCachedGrade } from './grade-cache'
 
 /**
  * One change to one entrant's grade on one problem.
@@ -83,9 +83,6 @@ export function useUpdateGrade(): UseUpdateGradeResult {
 
   // A function which shows a change to one grade before the server has it
   const showChange = (address: PairIds, change: GradeChange) => {
-    // Every board read still out, dropped
-    cancelBoardReads(queryClient)
-
     // Which grade the changes settling on it are counted under
     const key = pairKey(address.userId, address.problemId)
 
@@ -216,14 +213,4 @@ export function useUpdateGrade(): UseUpdateGradeResult {
 
   // The ways to change grades
   return { changeGrade, finalizeGrades }
-}
-
-/**
- * Whether any change to a grade has yet to settle.
- *
- * @returns True while one is out.
- */
-export function useIsGradeWriting(): boolean {
-  // Whether any grade write has yet to settle
-  return useIsMutating({ mutationKey: GRADE_WRITE_KEY }) > 0
 }

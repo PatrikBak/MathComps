@@ -49,8 +49,8 @@ export function useCommentCounts(
     // A visitor reads the counts of the threads open to everybody, so the call goes out without
     // an account
     requireAuth: false,
-    // A count can lag a little behind the thread it counts
-    ...cachePolicy.counts,
+    // Anybody can comment, so the counts keep up while they are on screen
+    cachePolicy: cachePolicy.live,
   })
 
   // The counts and whether more may yet arrive

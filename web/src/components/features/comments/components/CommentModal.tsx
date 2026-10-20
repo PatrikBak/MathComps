@@ -26,12 +26,17 @@ type CommentModalProps = {
 }
 
 /**
- * A modal for displaying comments on content.
- *
- * Wraps {@link CommentSection} in a modal with a title header
- * to provide context about what is being commented on.
+ * Props for the {@link ThreadCountBadge} component.
  */
-export function CommentModal({ isOpen, onClose, title, target }: CommentModalProps) {
+type ThreadCountBadgeProps = {
+  /** The thread counted. */
+  target: CommentTarget
+}
+
+/**
+ * A badge counting the comments in a thread, off the thread itself so the badge and the thread under it agree.
+ */
+function ThreadCountBadge({ target }: ThreadCountBadgeProps) {
   // The target's thread
   const { comments, uiState } = useFetchComments(target)
 
@@ -42,6 +47,26 @@ export function CommentModal({ isOpen, onClose, title, target }: CommentModalPro
   const isCountLoading = isAwaitingAnswer(uiState)
 
   return (
+    <CountBadge
+      count={commentCount}
+      color="indigo"
+      isHighlighted={commentCount > 0}
+      isLoading={isCountLoading}
+      className="mr-5"
+    >
+      <MessageSquare size={22} />
+    </CountBadge>
+  )
+}
+
+/**
+ * A modal for displaying comments on content.
+ *
+ * Wraps {@link CommentSection} in a modal with a title header to provide context about what is being commented
+ * on. The thread is read only while the modal is open, since a page may hold one for every item it lists.
+ */
+export function CommentModal({ isOpen, onClose, title, target }: CommentModalProps) {
+  return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
@@ -51,15 +76,7 @@ export function CommentModal({ isOpen, onClose, title, target }: CommentModalPro
       title={
         <>
           {/* Title icon */}
-          <CountBadge
-            count={commentCount}
-            color="indigo"
-            isHighlighted={commentCount > 0}
-            isLoading={isCountLoading}
-            className="mr-5"
-          >
-            <MessageSquare size={22} />
-          </CountBadge>
+          <ThreadCountBadge target={target} />
           {/* Title text */}
           <span>{title}</span>
         </>

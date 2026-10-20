@@ -65,8 +65,8 @@ export function useMathildaConsent(): UseMathildaConsentResult {
     fetch: getMathildaConsent,
     // The student's own acknowledgement, so it is read as them
     requireAuth: true,
-    // An acknowledgement given on another device should show up here promptly
-    ...cachePolicy.userData,
+    // Only the student's own writes change the acknowledgement, and they keep it current
+    cachePolicy: cachePolicy.onDemand,
   })
 
   // Recording the acknowledgement

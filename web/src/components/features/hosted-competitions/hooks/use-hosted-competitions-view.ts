@@ -43,8 +43,8 @@ export function useHostedCompetitionsView(
     requireAuth: false,
     // Nothing is read until a caller asks for it
     enabled: shouldRead,
-    // An entry taken on another tab should show up here promptly
-    ...cachePolicy.userData,
+    // Groups open and close and grading lands while the board is open, so the read keeps up
+    cachePolicy: cachePolicy.live,
   })
 
   // The view and the state of the read

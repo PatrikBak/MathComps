@@ -54,8 +54,8 @@ export function useMyDefenses(): UseMyDefensesResult {
     requireAuth: true,
     // Only fetch once the key's user is settled, or the list lands under the wrong one
     enabled: isUserLoaded,
-    // The user's own recent activity
-    ...cachePolicy.userData,
+    // The user's own recent activity, which their writes keep current
+    cachePolicy: cachePolicy.onDemand,
   })
 
   // Removes a defense from the store

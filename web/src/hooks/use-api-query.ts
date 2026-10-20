@@ -1,13 +1,14 @@
 'use client'
 
 import type { QueryKey, SkipToken, UseQueryOptions } from '@tanstack/react-query'
-import { skipToken, useQuery } from '@tanstack/react-query'
+import { skipToken, useIsMutating, useQuery } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 
 import type { ApiCaller, ApiState } from '@/hooks/use-api'
 import { abortableCall, apiCallOf, readyApiCall, useApi } from '@/hooks/use-api'
 import { useQueryUiState } from '@/hooks/use-query-ui-state'
 import { unwrap } from '@/lib/api/api-error'
+import type { CachePolicyTier } from '@/lib/query-config'
 import { isAwaitingAnswer as awaitsAnswer, type QueryUiState } from '@/lib/query-ui-state'
 import type { ApiResult } from '@/types/api'
 
@@ -37,6 +38,50 @@ type ApiQueryOptions<TData> = Omit<
    * it with.
    */
   enabled?: boolean
+  /**
+   * Cache-freshness tier to run it under. Required, because a read of data other people change left on a tier
+   * that never reads it again shows the first answer for as long as the page stays open, and nothing errors.
+   */
+  cachePolicy: CachePolicyTier
+}
+
+/**
+ * What {@link useRefreshHold} hands back: the reads a query makes on its own, each switched off while held.
+ */
+type UseRefreshHoldResult = {
+  /** The read on a timer. */
+  refetchInterval?: false
+  /** The read on coming back to the tab. */
+  refetchOnWindowFocus?: false
+  /** The read on regaining the connection. */
+  refetchOnReconnect?: false
+}
+
+/** Every read a query makes on its own, held back. */
+const HELD_REFRESHES: Required<UseRefreshHoldResult> = {
+  refetchInterval: false,
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: false,
+}
+
+/**
+ * Holds back a read's own refreshes while any write has yet to settle, so no read starts while the cache
+ * holds an edit the server may not have yet. Spread over the read's options.
+ *
+ * @param tier - The tier the read runs under. Only one that reads again on its own has anything to hold.
+ *
+ * @returns The options holding the refreshes back while a write is out, and none otherwise.
+ */
+export function useRefreshHold(tier: CachePolicyTier): UseRefreshHoldResult {
+  // Whether the tier reads again on its own
+  const refreshesOnItsOwn = tier.refetchInterval !== undefined
+
+  // Whether any write has yet to settle. Only a tier with something to hold counts them, since every change
+  // in the count renders the read's component again
+  const isWriting = useIsMutating({ predicate: () => refreshesOnItsOwn }) > 0
+
+  // The refreshes held back while a write is out, and none otherwise
+  return isWriting ? HELD_REFRESHES : {}
 }
 
 /**
@@ -96,14 +141,15 @@ type UseApiQueryResult<TData> = {
  */
 export function apiQueryOptions<TData>(
   api: ApiState,
-  { fetch: fetchData, enabled = true, ...queryOptions }: ApiQueryOptions<TData>
+  { fetch: fetchData, enabled = true, cachePolicy: tier, ...queryOptions }: ApiQueryOptions<TData>
 ) {
   // The ready caller, or null while it is still loading or nobody is signed in
   const apiCall = apiCallOf(api)
 
-  // The read, held shut until there is a caller and something to read, and until whatever else the call
-  // site asked for is true
+  // The read under its tier, with whatever the call site sets itself on top, held shut until there is a
+  // caller and something to read, and until whatever else the call site asked for is true
   return {
+    ...tier,
     ...queryOptions,
     // Nothing to run for a skipped read, otherwise the data or throwing the backend failure. The gate
     // below keeps the read from running without a caller, and readyApiCall is the one assertion that says
@@ -142,8 +188,11 @@ export function useApiQuery<TData>({
   // The read as React Query wants it
   const queryOptions = apiQueryOptions(api, options)
 
+  // The read's own refreshes, held back while a write is out
+  const refreshHold = useRefreshHold(options.cachePolicy)
+
   // The read itself
-  const query = useQuery(queryOptions)
+  const query = useQuery({ ...queryOptions, ...refreshHold })
 
   // Reduce the raw flags to the one state that describes this fetch
   const uiState = useQueryUiState(query)

@@ -61,7 +61,8 @@ export function useStudentConversations(
         : (apiCall) => fetchStudentConversations(apiCall, user.id, target),
     // The list is an admin's own read, so it is made as them
     requireAuth: true,
-    ...cachePolicy.userData,
+    // Other graders grade the same student, so their grades keep arriving while the list is open
+    cachePolicy: cachePolicy.live,
   })
 
   // The conversations once they have arrived, and how the fetch is going meanwhile

@@ -72,8 +72,8 @@ export function useUserLists(): UseUserListsResult {
     fetch: (apiCall) => apiCall<UserListsResponse>(() => getUserListsApiUrl(), { method: 'GET' }),
     // Their own lists, so they are read as them
     requireAuth: true,
-    // The user's own lists should reflect their edits quickly
-    ...cachePolicy.userData,
+    // Only the user's own edits change the lists, and they keep them current
+    cachePolicy: cachePolicy.onDemand,
   })
 
   // Return the data

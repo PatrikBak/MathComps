@@ -50,7 +50,9 @@ export function useConversationDetail(sessionId: string | null): UseConversation
       sessionId === null ? skipToken : (apiCall) => fetchConversationDetail(apiCall, sessionId),
     // The transcript is the reader's own read, so it is made as them
     requireAuth: true,
-    ...cachePolicy.userData,
+    // Read again on opening and on every note write. A read of its own would bring in turns the read mark
+    // taken on opening does not cover
+    cachePolicy: cachePolicy.onDemand,
   })
 
   // The conversation once it has arrived, and how the fetch is going meanwhile

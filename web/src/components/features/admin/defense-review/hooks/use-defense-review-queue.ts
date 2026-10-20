@@ -58,7 +58,9 @@ export function useDefenseReviewQueue(filter: DefenseReviewFilter): UseDefenseRe
     fetchPage,
     // The queue is an admin's own read, so it is made as them
     requireAuth: true,
-    cachePolicy: cachePolicy.userData,
+    // Other admins change the queue too, yet it is read again only when asked: a read landing on its own would
+    // reorder the rows under an open conversation
+    cachePolicy: cachePolicy.onDemand,
   })
 
   // The pages loaded so far, which stay put across renders where the result object doesn't
