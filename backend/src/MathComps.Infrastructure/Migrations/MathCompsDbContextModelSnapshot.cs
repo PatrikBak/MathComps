@@ -1033,6 +1033,10 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<bool>("NeedsEveryLanguage")
+                        .HasColumnType("boolean")
+                        .HasColumnName("needs_every_language");
+
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(100)

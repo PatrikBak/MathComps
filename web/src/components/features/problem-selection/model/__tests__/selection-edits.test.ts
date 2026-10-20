@@ -61,8 +61,8 @@ function board(id: string, slots: (string | null)[]): Board {
  * @returns The selection.
  */
 function selection(boards: Board[], proposals: Proposal[]): SelectionData {
-  // The boards and the proposals, every other part of the selection empty
-  return { proposals, boards, cycles: [], conversations: [] }
+  // The boards and the proposals, every other part of the selection empty, and every language needed
+  return { proposals, boards, cycles: [], conversations: [], needsEveryLanguage: true }
 }
 
 /**

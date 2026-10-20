@@ -194,6 +194,12 @@ public sealed class ProblemSelectionService(
                 conversation.StartedAt))
             .ToList();
 
+        // Whether the MathComps organization's problems need every language.
+        var needsEveryLanguage = await dbContext.Organizations
+            .Where(organization => organization.Slug == Organization.MathCompsSlug)
+            .Select(organization => organization.NeedsEveryLanguage)
+            .SingleAsync(cancellationToken);
+
         // The selection.
         return new SelectionDto(
             [
@@ -260,7 +266,8 @@ public sealed class ProblemSelectionService(
                         ],
                         group.ProblemCount)),
             ],
-            reviewersConversations);
+            reviewersConversations,
+            needsEveryLanguage);
     }
 
     /// <inheritdoc/>

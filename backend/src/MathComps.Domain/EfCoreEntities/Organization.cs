@@ -26,6 +26,12 @@ public class Organization
     public required string Slug { get; set; }
 
     /// <summary>
+    /// Whether its problems need a statement and a solution in every language the site is read in, as a hosted round
+    /// does; where false, any one text will do.
+    /// </summary>
+    public required bool NeedsEveryLanguage { get; set; }
+
+    /// <summary>
     /// The addresses on its list.
     /// </summary>
     public ICollection<OrganizationMember> Members { get; } = [];
