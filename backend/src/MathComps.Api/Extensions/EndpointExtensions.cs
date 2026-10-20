@@ -41,10 +41,10 @@ public static class EndpointExtensions
         // What gets written down while reviewing a conversation
         app.MapReviewNoteEndpoints();
 
-        // The admin's queue of every student's defense conversations
+        // The admin's queue of the students' defense conversations
         app.MapAdminDefenseReviewEndpoints();
 
-        // The notes written across every conversation, read as one feed
+        // The notes written across the conversations, read as one feed
         app.MapAdminNoteEndpoints();
 
         // Grading the hosted groups from the students' defense conversations

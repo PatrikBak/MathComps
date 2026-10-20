@@ -5,7 +5,7 @@ using MathComps.Infrastructure.Services.Users;
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Maps the endpoint for reading the notes written across every defense conversation, gated by the
+/// Maps the endpoint for reading the notes written across the defense conversations, gated by the
 /// <see cref="AuthorizationPolicies.Admin"/> policy.
 /// </summary>
 public static class AdminNoteEndpoints
@@ -21,7 +21,7 @@ public static class AdminNoteEndpoints
     /// <param name="app">The route builder to register the endpoints on.</param>
     public static void MapAdminNoteEndpoints(this IEndpointRouteBuilder app)
     {
-        // Read notes across every conversation
+        // Read notes across the conversations
         app.MapGet(NotesPath, async (
             HttpContext context,
             IUserManager userManager,
@@ -30,7 +30,8 @@ public static class AdminNoteEndpoints
             int pageNumber,
             bool openOnly = false) =>
         {
-            // The reviewer asking, which is what each note's authorship is reported against
+            // The reviewer asking, whose organizations decide which conversations' notes show and against whom
+            // each note's authorship is reported
             var reviewerId = await userManager.RequireUserIdAsync(context);
 
             // The page of notes, each carrying where it was written

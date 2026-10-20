@@ -10,9 +10,8 @@ import {
 } from './note-api-urls'
 
 /**
- * The backend for review notes on defense conversations: authenticated calls to the .NET API, open
- * to admins on every conversation and to the problem selection's reviewers on the conversations
- * reviewers held about the proposals the selection still holds.
+ * The backend for review notes on defense conversations: authenticated calls to the .NET API, which
+ * decides who reaches each conversation.
  */
 
 /**

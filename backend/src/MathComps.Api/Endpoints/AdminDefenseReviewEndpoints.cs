@@ -7,7 +7,7 @@ using MathComps.Infrastructure.Services.Users;
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Maps the admin's endpoints over every student's defense conversations: the review queue, what its filters can be
+/// Maps the admin's endpoints over the students' defense conversations: the review queue, what its filters can be
 /// set to, each student's conversations on a problem, and marking a whole set read. Gated by the
 /// <see cref="AuthorizationPolicies.Admin"/> policy, since they read across all users, which is exactly what the
 /// student-facing <c>/defense</c> endpoints refuse to do.
@@ -26,7 +26,7 @@ public static class AdminDefenseReviewEndpoints
     private const int MaxBulkMarkSessions = 1000;
 
     /// <summary>
-    /// Maps the admin's endpoints over every student's conversations onto the route builder.
+    /// Maps the admin's endpoints over the students' conversations onto the route builder.
     /// </summary>
     /// <param name="app">The route builder to register the endpoints on.</param>
     public static void MapAdminDefenseReviewEndpoints(this IEndpointRouteBuilder app)
@@ -45,7 +45,8 @@ public static class AdminDefenseReviewEndpoints
             if (request.Filter is not { } filter)
                 throw new BadHttpRequestException("A queue request must carry its filters.");
 
-            // The reviewer asking, whose own read marks decide what the queue counts as unread
+            // The reviewer asking, whose organizations decide which proposals' conversations show and whose own
+            // read marks decide what the queue counts as unread
             var reviewerId = await userManager.RequireUserIdAsync(context);
 
             // The page of conversations, each problem named in the language the request asks for
@@ -64,12 +65,17 @@ public static class AdminDefenseReviewEndpoints
 
         // Read what the filters can be set to
         app.MapGet($"{ReviewPath}/filters", async (
+            HttpContext context,
+            IUserManager userManager,
             IAdminDefenseReviewService reviewService,
             CancellationToken cancellationToken) =>
         {
-            // Every student, problem and set of examiner settings a conversation exists under
+            // The reviewer asking, whose organizations decide which proposals' conversations count
+            var reviewerId = await userManager.RequireUserIdAsync(context);
+
+            // Every student, problem and set of examiner settings a conversation the reviewer reaches exists under
             var options = await reviewService.GetFilterOptionsAsync(
-                EndpointHelpers.GetRequestLanguage(), cancellationToken);
+                reviewerId, EndpointHelpers.GetRequestLanguage(), cancellationToken);
 
             // Return them
             return Results.Ok(options);
@@ -82,14 +88,20 @@ public static class AdminDefenseReviewEndpoints
             Guid userId,
             string handoutContentId,
             string environmentId,
+            HttpContext context,
+            IUserManager userManager,
             IAdminDefenseReviewService reviewService,
             CancellationToken cancellationToken) =>
         {
+            // The reviewer asking, whose organizations decide which proposals' conversations show
+            var reviewerId = await userManager.RequireUserIdAsync(context);
+
             // The environment the conversations are held against
             var target = new HandoutEnvironmentTarget(handoutContentId, environmentId);
 
             // The student's conversations against it
-            var conversations = await reviewService.GetStudentConversationsAsync(userId, target, cancellationToken);
+            var conversations = await reviewService.GetStudentConversationsAsync(
+                reviewerId, userId, target, cancellationToken);
 
             // Return them
             return Results.Ok(conversations);
@@ -101,14 +113,20 @@ public static class AdminDefenseReviewEndpoints
         app.MapGet($"{ReviewPath}/students/{{userId:guid}}/sessions/problems/{{problemId:guid}}", async (
             Guid userId,
             Guid problemId,
+            HttpContext context,
+            IUserManager userManager,
             IAdminDefenseReviewService reviewService,
             CancellationToken cancellationToken) =>
         {
+            // The reviewer asking, whose organizations decide which proposals' conversations show
+            var reviewerId = await userManager.RequireUserIdAsync(context);
+
             // The problem the conversations are held against
             var target = new ProblemTarget(problemId);
 
             // The student's conversations against it, with their grading
-            var conversations = await reviewService.GetStudentConversationsAsync(userId, target, cancellationToken);
+            var conversations = await reviewService.GetStudentConversationsAsync(
+                reviewerId, userId, target, cancellationToken);
 
             // Return them
             return Results.Ok(conversations);

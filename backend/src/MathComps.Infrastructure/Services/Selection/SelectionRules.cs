@@ -8,7 +8,8 @@ namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
 /// The rules every part of the problem selection shares: writes run one at a time, a board changes only while it is
-/// a draft, and the reads and the writes agree on which problems are still in the pool.
+/// a draft, the reads and the writes agree on which problems are still in the pool, and the reads agree on which
+/// conversations belong to an organization.
 /// </summary>
 internal static class SelectionRules
 {
@@ -155,16 +156,53 @@ internal static class SelectionRules
         IsInPool(competitionPath) || groupOpensAt > now;
 
     /// <summary>
+    /// Narrows proposals to the ones outside the hosted groups that have opened: in a round of no hosted group, or
+    /// of one still to open. A deleted proposal is among them, since it stays in the pool.
+    /// </summary>
+    /// <param name="source">The proposals.</param>
+    /// <param name="now">The instant a group's opening is read against.</param>
+    /// <returns>The proposals narrowed.</returns>
+    public static IQueryable<Proposal> WhereOutsideOpenedGroups(this IQueryable<Proposal> source, DateTimeOffset now) =>
+        // In a round of no hosted group or of one still to open
+        source.Where(proposal =>
+            proposal.Problem.Round.HostedGroupId == null || proposal.Problem.Round.HostedGroup!.OpensAt > now);
+
+    /// <summary>
     /// Narrows proposals to the ones the selection may still hold: not deleted, and outside the hosted groups that
-    /// have opened. <see cref="IsInSelection"/> decides the rest on what the query reads.
+    /// have opened (<see cref="WhereOutsideOpenedGroups"/>). <see cref="IsInSelection"/> decides the rest on what the
+    /// query reads.
     /// </summary>
     /// <param name="source">The proposals.</param>
     /// <param name="now">The instant a group's opening is read against.</param>
     /// <returns>The proposals narrowed.</returns>
     public static IQueryable<Proposal> WhereSelectionMayHold(this IQueryable<Proposal> source, DateTimeOffset now) =>
-        // Not deleted, in a round of no hosted group or of one still to open
-        source.Where(proposal => proposal.DeletedAt == null
-            && (proposal.Problem.Round.HostedGroupId == null || proposal.Problem.Round.HostedGroup!.OpensAt > now));
+        // Not deleted, outside the groups that have opened
+        source.Where(proposal => proposal.DeletedAt == null).WhereOutsideOpenedGroups(now);
+
+    /// <summary>
+    /// Narrows conversations to the ones an admin on some organizations' lists may reach: every one but those
+    /// belonging to another organization, by the rule <see cref="IConversationAccess"/> states.
+    /// </summary>
+    /// <param name="sessions">The conversations.</param>
+    /// <param name="proposals">Every proposal.</param>
+    /// <param name="organizationIds">The organizations the admin is a member of.</param>
+    /// <param name="now">The instant a group's opening is read against.</param>
+    /// <returns>The conversations narrowed.</returns>
+    public static IQueryable<DefenseSession> WhereReachableByAdmin(
+        this IQueryable<DefenseSession> sessions,
+        IQueryable<Proposal> proposals,
+        IReadOnlyList<Guid> organizationIds,
+        DateTimeOffset now)
+    {
+        // The other organizations' proposals outside the groups that have opened, deleted or not
+        var foreignProposals = proposals
+            .WhereOutsideOpenedGroups(now)
+            .Where(proposal => !organizationIds.Contains(proposal.OrganizationId));
+
+        // Every conversation about none of them
+        return sessions.Where(session => session.ProblemTarget == null
+            || !foreignProposals.Any(proposal => proposal.ProblemId == session.ProblemTarget.ProblemId));
+    }
 
     /// <summary>
     /// Whether a board is still in the selection: a draft, or finalized into a hosted group that has not opened.
@@ -175,19 +213,4 @@ internal static class SelectionRules
     public static bool IsBoardInSelection(DateTimeOffset? groupOpensAt, DateTimeOffset now) =>
         // A draft, or filling a group still to open
         groupOpensAt is null || groupOpensAt > now;
-
-    /// <summary>
-    /// Whether a conversation about a proposal the selection holds is one of the reviewers': its author is a member
-    /// of the organization whose pool the proposal is in, and was one when the conversation started. Only such an
-    /// account reaches a problem while the selection holds it, so anybody else's conversation about one was held
-    /// while the problem sat somewhere students reach, or by somebody whose address has since come off the list.
-    /// </summary>
-    /// <param name="memberSince">
-    /// When the author's address was put on the organization's list; null where it is not on it.
-    /// </param>
-    /// <param name="startedAt">When the conversation started.</param>
-    /// <returns>Whether it is a reviewer's.</returns>
-    public static bool IsReviewersConversation(DateTimeOffset? memberSince, DateTimeOffset startedAt) =>
-        // A member by the time it started
-        memberSince <= startedAt;
 }

@@ -9,9 +9,8 @@ import {
 } from './conversation-api-urls'
 
 /**
- * The backend for reviewing one defense conversation: authenticated calls to the .NET API, open to
- * admins for every conversation and to the problem selection's reviewers for the conversations
- * reviewers held about the proposals the selection still holds.
+ * The backend for reviewing one defense conversation: authenticated calls to the .NET API, which
+ * decides who reaches each conversation.
  */
 
 /**

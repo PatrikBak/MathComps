@@ -14,7 +14,7 @@ namespace MathComps.Api.Tests;
 /// <summary>
 /// Covers the policies the API registers, each weighed for every kind of caller. A route only names its policy, so
 /// a policy loosened where it is registered opens every route naming it, and nothing else fails. Among those routes
-/// are the problems competitions are picked from and the reviewers' conversations about them.
+/// are the problems competitions are picked from.
 /// </summary>
 public class AuthorizationPolicyTests
 {
@@ -34,9 +34,8 @@ public class AuthorizationPolicyTests
     };
 
     /// <summary>
-    /// Each policy lets in exactly the callers it is for: the admins' one only the admins, the members' one only the
-    /// accounts on the MathComps organization's list, and the one the reviewers reach their conversations through both
-    /// of those, never a student or anybody signed out.
+    /// Each policy lets in exactly the callers it is for: the admins' one only the admins, and the members' one only
+    /// the accounts on the MathComps organization's list, never a student or anybody signed out.
     /// </summary>
     /// <param name="policy">The policy weighed.</param>
     /// <param name="caller">Who is asking: <c>anonymous</c>, or the subject of a <c>student</c>, a
@@ -51,10 +50,6 @@ public class AuthorizationPolicyTests
     [InlineData(AuthorizationPolicies.OrganizationMember, "student", false)]
     [InlineData(AuthorizationPolicies.OrganizationMember, "reviewer", true)]
     [InlineData(AuthorizationPolicies.OrganizationMember, "admin", false)]
-    [InlineData(AuthorizationPolicies.AdminOrOrganizationMember, "anonymous", false)]
-    [InlineData(AuthorizationPolicies.AdminOrOrganizationMember, "student", false)]
-    [InlineData(AuthorizationPolicies.AdminOrOrganizationMember, "reviewer", true)]
-    [InlineData(AuthorizationPolicies.AdminOrOrganizationMember, "admin", true)]
     public async Task A_policy_lets_in_its_callers_alone(string policy, string caller, bool letsIn)
     {
         // Each subject resolving to its account

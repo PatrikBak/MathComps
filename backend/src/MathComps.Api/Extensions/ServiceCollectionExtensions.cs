@@ -123,10 +123,7 @@ public static class ServiceCollectionExtensions
             .AddPolicy(AuthorizationPolicies.Admin, policy => policy.RequireRole(ClerkClaims.AdminRole))
             .AddPolicy(AuthorizationPolicies.OrganizationMember, policy => policy
                 .RequireAuthenticatedUser()
-                .AddRequirements(new OrganizationMemberRequirement(Organization.MathCompsSlug)))
-            .AddPolicy(AuthorizationPolicies.AdminOrOrganizationMember, policy => policy
-                .RequireAuthenticatedUser()
-                .AddRequirements(new OrganizationMemberRequirement(Organization.MathCompsSlug, AdmitsAdmins: true)));
+                .AddRequirements(new OrganizationMemberRequirement(Organization.MathCompsSlug)));
 
         // What looks the caller's account up on an organization's list
         services.AddScoped<IAuthorizationHandler, OrganizationMemberHandler>();

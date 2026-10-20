@@ -7,6 +7,7 @@ using MathComps.Infrastructure.Services.Admin;
 using MathComps.Infrastructure.Services.ConversationReview;
 using MathComps.Infrastructure.Tests.ConversationReview;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MsOptions = Microsoft.Extensions.Options.Options;
 using static MathComps.Infrastructure.Tests.ConversationReview.ReviewNoteSeed;
@@ -37,8 +38,11 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
         // Settle one
         await QueryAsync<IReviewNoteService>((_, notes) => notes.SetResolvedAsync(settled.Id, resolved: true));
 
-        // The feed still carries both
-        Assert.Equal(2, (await service.GetFeedAsync(ReviewerId, openOnly: false, 1, Language.EN)).TotalCount);
+        // The whole feed
+        var all = await service.GetFeedAsync(ReviewerId, openOnly: false, 1, Language.EN);
+
+        // Still carrying both
+        Assert.Equal(2, all.TotalCount);
 
         // Ask for the open set
         var open = await service.GetFeedAsync(ReviewerId, openOnly: true, 1, Language.EN);
@@ -50,8 +54,11 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
         // Put it back to standing
         await QueryAsync<IReviewNoteService>((_, notes) => notes.SetResolvedAsync(settled.Id, resolved: false));
 
-        // Which brings it into the open set again
-        Assert.Equal(2, (await service.GetFeedAsync(ReviewerId, openOnly: true, 1, Language.EN)).TotalCount);
+        // The open set once more
+        var reopened = await service.GetFeedAsync(ReviewerId, openOnly: true, 1, Language.EN);
+
+        // Holding both again
+        Assert.Equal(2, reopened.TotalCount);
     });
 
     /// <summary>
@@ -160,24 +167,45 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A note on a conversation held against a proposal names the proposal, by the number and the working name the
-    /// reviewers quote it by, since no competition has set it.
+    /// A note on a conversation held against a proposal reaches only the members of the organization whose pool the
+    /// proposal is in, and names the proposal, by the number and the working name the reviewers quote it by, since
+    /// no competition has set it.
     /// </summary>
     [Fact]
-    public Task The_feed_names_a_proposals_conversation_by_the_proposal() => RunTestAsync(async service =>
-    {
-        // A note about the proposal conversation
-        await WriteNoteAsync(ReviewerId, ProposalSessionId, null, "about a proposal", null);
+    public Task The_feed_names_a_proposals_conversation_by_the_proposal_to_its_members() =>
+        RunTestAsync(async service =>
+        {
+            // A note about the proposal conversation
+            await WriteNoteAsync(ReviewerId, ProposalSessionId, null, "about a proposal", null);
 
-        // Read the feed
-        var feed = await service.GetFeedAsync(ReviewerId, openOnly: false, 1, Language.EN);
+            // The feed while the reviewer is on no list
+            var before = await service.GetFeedAsync(ReviewerId, openOnly: false, 1, Language.EN);
 
-        // The note's problem, which is a proposal rather than a competition problem
-        var proposal = Assert.IsType<NamedProposalTarget>(Assert.Single(feed.Items).Target);
+            // Leaving the note out, the proposal being in MathComps' pool
+            Assert.Equal(0, before.TotalCount);
 
-        // Named by the proposal filing it
-        Assert.Equal((21, "Proposal 21"), (proposal.Number, proposal.Title));
-    });
+            // The reviewer on MathComps' list
+            await QueryAsync(async context =>
+            {
+                // The reviewer's account, given an address
+                (await context.Users.SingleAsync(user => user.Id == ReviewerId)).Email = "reviewer@example.com";
+
+                // The address on the list
+                SelectionSeed.NewMember(context, "reviewer@example.com", DateTimeOffset.UtcNow.AddDays(-30));
+
+                // Written down
+                await context.SaveChangesAsync();
+            });
+
+            // Read the feed
+            var feed = await service.GetFeedAsync(ReviewerId, openOnly: false, 1, Language.EN);
+
+            // The note's problem, which is a proposal rather than a competition problem
+            var proposal = Assert.IsType<NamedProposalTarget>(Assert.Single(feed.Items).Target);
+
+            // Named by the proposal filing it
+            Assert.Equal((21, "Proposal 21"), (proposal.Number, proposal.Title));
+        });
 
     /// <summary>
     /// Paging cuts the one run of notes, so a page carries as many as the server serves and the next one carries on

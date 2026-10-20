@@ -150,7 +150,8 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
     {
-        // The reader of when a student started preparing the competitions.
+        // The reader of the organizations' lists: when a student started preparing the competitions, and which
+        // organizations a grader is on.
         services.AddOrganizationMembers();
 
         // The service under test.
@@ -1230,8 +1231,8 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // The review service, which lists a student's conversations
         var review = scope.ServiceProvider.GetRequiredService<IAdminDefenseReviewService>();
 
-        // The student's conversations on the problem
-        return await review.GetStudentConversationsAsync(userId, new ProblemTarget(problemId));
+        // The student's conversations on the problem, as the grader reads them
+        return await review.GetStudentConversationsAsync(_graderId, userId, new ProblemTarget(problemId));
     }
 
     /// <summary>
