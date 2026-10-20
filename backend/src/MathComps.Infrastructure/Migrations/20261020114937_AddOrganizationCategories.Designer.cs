@@ -18,7 +18,7 @@ using Pgvector;
 namespace MathComps.Infrastructure.Migrations
 {
     [DbContext(typeof(MathCompsDbContext))]
-    [Migration("20261020081348_AddOrganizationCategories")]
+    [Migration("20261020114937_AddOrganizationCategories")]
     partial class AddOrganizationCategories
     {
         /// <inheritdoc />
@@ -1035,6 +1035,10 @@ namespace MathComps.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<bool>("NeedsEveryLanguage")
+                        .HasColumnType("boolean")
+                        .HasColumnName("needs_every_language");
 
                     b.Property<string>("Slug")
                         .IsRequired()
