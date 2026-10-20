@@ -30,7 +30,7 @@ public static class CompetitionEndpoints
     /// <param name="app">The route builder to register the endpoints on.</param>
     public static void MapCompetitionEndpoints(this IEndpointRouteBuilder app)
     {
-        // Every group the caller can see, with whatever entry they hold in each competition
+        // Every group, with whatever entry the caller holds in each competition
         app.MapGet(CompetitionsPath, async (
             HttpContext context,
             IUserManager userManager,

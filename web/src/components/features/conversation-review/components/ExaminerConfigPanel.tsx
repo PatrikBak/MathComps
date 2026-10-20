@@ -40,7 +40,7 @@ type ExaminerConfigPanelProps = {
  *
  * The settings read down the steps rather than across them. Across is the shape that invites comparison, but
  * the panel this sits in is narrower than a row of model names, so that shape could only ever be reached
- * through a sideways scrollbar, and the labels beside it were losing their own column to hyphenation. Each
+ * through a sideways scrollbar, and the labels beside it would lose their own column to hyphenation. Each
  * step's label and value columns hold a fixed width so the steps read as one column of values rather than
  * several ragged ones.
  *

@@ -75,7 +75,7 @@ export function countActiveFilters(filter: DefenseReviewFilter): number {
 }
 
 /**
- * What the signals facet holds, which is three of the filter's fields offered as one set of options.
+ * What the signals facet holds, which is several of the filter's fields offered as one set of options.
  */
 export type DefenseReviewSignals = Pick<
   DefenseReviewFilter,
@@ -124,7 +124,7 @@ export function readSignalSelection(
   const notesSignal =
     addedNotesSignal ?? selected.find((signal) => signal === 'hasNotes' || signal === 'noNotes')
 
-  // The three fields as the selection now has them, an unpicked one narrowing nothing
+  // The fields as the selection now has them, an unpicked one narrowing nothing
   return {
     hasNotes: notesSignal === 'hasNotes' ? true : notesSignal === 'noNotes' ? false : undefined,
     studentReported: selected.includes('reported') ? true : undefined,

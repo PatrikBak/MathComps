@@ -38,7 +38,7 @@ import { defenseSessionsQueryKey, invalidateDefenseLists } from './defense-cache
 /**
  * The failed outcome every action reports when the client isn't ready to run it (still loading or signed
  * out). Structurally a member of each of {@link SendOutcome}, {@link DeleteOutcome}, and
- * {@link RewindOutcome}, so one value serves all three.
+ * {@link RewindOutcome}, so one value serves them all.
  */
 const NOT_READY_OUTCOME = { kind: 'failed' as const, errorCode: undefined }
 

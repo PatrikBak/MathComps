@@ -20,7 +20,7 @@ export function useCategoryName(): (category: HostedCompetitionCategory) => stri
   return useCallback(
     (category: HostedCompetitionCategory) => {
       switch (category) {
-        // The easiest of the three
+        // The easiest
         case 'elementary':
           return t('elementary')
 

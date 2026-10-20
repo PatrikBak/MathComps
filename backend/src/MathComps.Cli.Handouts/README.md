@@ -30,7 +30,7 @@ Patterns are matched against the handout sources in `data/handouts`, not your wo
 
 ```bash
 # Every locale
-dotnet run --project backend/src/MathComps.Cli.Handouts -- *.sk.tex *.en.tex *.cs.tex
+dotnet run --project backend/src/MathComps.Cli.Handouts -- '*.sk.tex' '*.en.tex' '*.cs.tex'
 
 # One file, skipping the R2 upload
 dotnet run --project backend/src/MathComps.Cli.Handouts -- --skip-upload factorization.sk.tex
@@ -85,7 +85,7 @@ Note the ordering that follows from those two tracks: the examiner reads its pro
 
 ```bash
 # 1. Build handouts (generates JSONs locally + uploads PDFs/images to R2)
-dotnet run -- *.sk.tex *.en.tex *.cs.tex
+dotnet run --project backend/src/MathComps.Cli.Handouts -- '*.sk.tex' '*.en.tex' '*.cs.tex'
 
 # 2. Commit and push the JSONs (frontend auto-redeploys)
 git add web/src/content/handouts/

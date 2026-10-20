@@ -506,7 +506,7 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         #endregion ProblemAuthor (ordered join)
 
-        #region ProblemTag (ordered join)
+        #region ProblemTag
 
         modelBuilder.Entity<ProblemTag>(e =>
         {
@@ -531,7 +531,7 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
             e.HasIndex(x => x.ProblemId).HasDatabaseName("ix_problem_tag_problem_id");
         });
 
-        #endregion ProblemTag (ordered join)
+        #endregion ProblemTag
 
         #region ProblemSimilarity
 

@@ -24,8 +24,8 @@ public record HostedGroupManifest(
     IReadOnlyList<HostedGroupRoundRef> Rounds);
 
 /// <summary>
-/// Names one of the rounds a group runs, one already imported. Its problems may still be on their way: a round
-/// stands empty from the moment its draft raises it until the ones it will ask are picked.
+/// Names one of the rounds a group runs, which declaring the group raises when no draft has raised it yet. Its
+/// problems may still be on their way: a round stands empty until the ones it will ask are picked.
 /// </summary>
 /// <param name="CompetitionPath">
 /// The path of the node the round hangs off (e.g. <c>mathcomps-advanced-november</c>).

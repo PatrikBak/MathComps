@@ -546,7 +546,7 @@ export type SchoolYearRun = {
  * rounds one school year at a time.
  */
 export type BoardLayout = {
-  /** The groups open to anybody at any time, which sit outside the calendar. */
+  /** The groups open at any time to anybody with an account, which sit outside the calendar. */
   practice: HostedCompetitionGroup[]
   /** Every graded group, one run per school year, the newest year first. */
   years: SchoolYearRun[]

@@ -28,7 +28,7 @@ export async function generateMetadata({
 }
 
 /**
- * Every competition open right now, and the press that puts a student inside one.
+ * Every competition the program has run or will run, and the press that puts a student inside one.
  */
 export default withLocale(async function CompetitionsPage({ searchParams }: PageProps) {
   // The address the reader came back to

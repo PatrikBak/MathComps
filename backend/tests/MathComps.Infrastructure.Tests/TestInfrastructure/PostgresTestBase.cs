@@ -5,8 +5,9 @@ namespace MathComps.Infrastructure.Tests.TestInfrastructure;
 
 /// <summary>
 /// Base class for integration tests using a shared PostgreSQL container.
-/// Each test class gets its own isolated database within the shared container,
-/// ensuring test isolation while avoiding the overhead of container startup per test.
+/// Each test gets its own isolated database within the shared container, copied from the
+/// migrated template and seeded afresh, ensuring test isolation while avoiding the overhead
+/// of container startup per test.
 /// </summary>
 /// <typeparam name="TService">The service type to resolve for test execution.</typeparam>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
@@ -14,12 +15,12 @@ namespace MathComps.Infrastructure.Tests.TestInfrastructure;
 public abstract class PostgresTestBase<TService>(PostgresContainerFixture fixture) : IAsyncLifetime where TService : class
 {
     /// <summary>
-    /// Unique database name for this test class to ensure isolation.
+    /// Unique database name for this test.
     /// </summary>
     private readonly string _dbName = $"mathcomps_test_{Guid.NewGuid():N}";
 
     /// <summary>
-    /// The connection string for this test class's database.
+    /// The connection string for this test's database.
     /// </summary>
     private string? _connectionString;
 

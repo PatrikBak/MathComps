@@ -8,6 +8,6 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// The language is all a <see cref="StartDefenseRequest"/> is missing, so nothing else is restated here.
 /// </summary>
 /// <param name="Request"><inheritdoc cref="StartDefenseRequest" path="/summary"/></param>
-/// <param name="Language">The language the student is working in, which decides which variant of the handout the
+/// <param name="Language">The language the student is working in, which decides which language's text the
 /// examiner is given and which words she opens with.</param>
 public record DefenseSessionStart(StartDefenseRequest Request, Language Language);

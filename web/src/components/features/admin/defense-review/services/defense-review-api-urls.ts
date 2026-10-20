@@ -18,7 +18,7 @@ export function getDefenseReviewQueueUrl(): string {
  * @returns The filter-options URL.
  */
 export function getDefenseReviewFilterOptionsUrl(): string {
-  // The options endpoint, which hands back all three lists at once
+  // The options endpoint, which hands back every list at once
   return buildApiUrl(`${ADMIN_DEFENSE_PATH}/filters`)
 }
 

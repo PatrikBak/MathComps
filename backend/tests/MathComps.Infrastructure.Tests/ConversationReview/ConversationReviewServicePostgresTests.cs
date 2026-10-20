@@ -107,9 +107,8 @@ public class ConversationReviewServicePostgresTests(PostgresContainerFixture fix
     });
 
     /// <summary>
-    /// A conversation held before the drafts were kept reads back holding none, rather than failing on their absence.
-    /// Every conversation already in the database is one of those, so the empty case is the ordinary one for a while
-    /// yet, and it has to reach the review surface as "nothing to show" rather than as an error.
+    /// A conversation held before the drafts were kept reads back holding none, so it reaches the review surface as
+    /// "nothing to show" rather than as an error.
     /// </summary>
     [Fact]
     public Task The_detail_holds_no_drafts_for_a_conversation_from_before_they_were_kept() =>

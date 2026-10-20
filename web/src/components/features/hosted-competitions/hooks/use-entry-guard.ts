@@ -48,7 +48,7 @@ type UseEntryGuardParams = {
 /**
  * What pressing Enter turns into, given what the reader still owes on the group they pressed.
  *
- * One press and three endings: the entry's own question, a prompt for an account, or a prompt for the
+ * One press and several endings: the entry's own question, a prompt for an account, or a prompt for the
  * profile fields. Neither prompt navigates; each is a toast carrying the action.
  *
  * What is owed is read at the press rather than for the page, since the practice group asks less of a

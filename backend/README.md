@@ -19,7 +19,7 @@ Source projects live flat under `src/`, named `MathComps.*`:
 
 ### Shared Resources
 
-Metadata files in `src/MathComps.Infrastructure/Resources/` are embedded and copied to output directories, making them available to both the API and CLI tools at runtime via `ResourcePaths` constants.
+Metadata files in `src/MathComps.Infrastructure/Resources/` are copied to output directories, making them available to both the API and CLI tools at runtime via `ResourcePaths` constants.
 
 ### Localization
 
@@ -48,8 +48,9 @@ Problem statements and solutions are stored in the `problem_texts` table with pe
 1. Create `metadata.{locale}.json` with translated competition/round names
 2. Create `copy.{locale}.json` holding every line the other copy files hold
 3. Add the locale to the `Language` enum (`src/MathComps.Domain/Localization/Language.cs`)
-4. Author the problem translations for the new locale and apply them via bulk-import
-5. The API will automatically serve content based on `Accept-Language`
+4. Add a migration for the new value of the `language` Postgres enum
+5. Author the problem translations for the new locale and apply them via bulk-import
+6. The API will automatically serve content based on `Accept-Language`
 
 ## Getting Started
 

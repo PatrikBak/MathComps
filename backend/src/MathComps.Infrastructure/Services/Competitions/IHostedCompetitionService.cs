@@ -14,8 +14,8 @@ namespace MathComps.Infrastructure.Services.Competitions;
 public interface IHostedCompetitionService
 {
     /// <summary>
-    /// Reads every group a student can see, with the entry they currently hold in each competition and their own
-    /// cells in its results once those are out.
+    /// Reads every group, with the entry the student currently holds in each competition and their own cells in its
+    /// results once those are out.
     /// </summary>
     /// <param name="userId">The student reading, or null for a signed-out visitor, who holds no entries.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>

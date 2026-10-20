@@ -55,9 +55,8 @@ type ReviewNoteComposerProps = {
  *
  * A note is typically one line about one reply, so the editor stands short and carries only the entries that
  * note needs: maths to quote the step, emphasis to mark it. Uploading a file or an image belongs to a
- * conversation, not to a remark written about one. Filing it is the editor's own footer rather than a button
- * underneath, which put the one action at the bottom of a stack of chips and read as another chip; the footer
- * also buys the same ⌘/Ctrl+Enter a comment is sent with, and the X the revision is abandoned from.
+ * conversation, not to a remark written about one. Filing it is the editor's own footer, which buys the same
+ * ⌘/Ctrl+Enter a comment is sent with, and the X the revision is abandoned from.
  */
 export function ReviewNoteComposer({
   initialContent = '',

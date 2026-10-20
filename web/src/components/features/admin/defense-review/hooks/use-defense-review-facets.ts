@@ -28,7 +28,7 @@ export function useDefenseReviewFacets(): UseDefenseReviewFacetsResult {
   // The language the options are named in
   const locale = useLocale()
 
-  // The three option lists, which the queue needs the moment it opens
+  // The option lists, which the queue needs the moment it opens
   const { data: options } = useApiQuery({
     // One list per language
     queryKey: [...ADMIN_DEFENSE_QUERY_KEY, 'filters', locale],

@@ -52,7 +52,7 @@ Do not compile. Typo fixes in prose cannot break TeX. If the user wants a compil
 ## Ignore zones (never inspect or edit)
 
 - **Comments:** from an **unescaped** `%` to end of line; lines starting with `%`; `\iffalse … \fi`; `\begin{comment} … \end{comment}`.
-- **Math:** `$…$`, `$$…$$`, and this stack's display environments — `\align`/`\endalign`, `\gather`/`\endgather`, `\eqalign{…}`. (LaTeX-isms like `equation`, `cases`, `matrix`, `verbatim`, `lstlisting` do not exist in this PlainTeX+AMS-TeX+OPmac stack; the general rule below covers anything unlisted.)
+- **Math:** `$…$`, `$$…$$`, and this stack's display environments — `\align`/`\endalign`, `\gather`/`\endgather`, `\eqalign{…}`. (LaTeX environments like `\begin{equation}`, `\begin{cases}`, `\begin{matrix}`, `\begin{verbatim}`, `\begin{lstlisting}` do not exist in this PlainTeX+AMS-TeX+OPmac stack; the general rule below covers anything unlisted.)
 - **Control / IDs:** any token starting with `\`; contents of `\url{}`, `\MathcompsLink{}`, `\setlanguage{}`, `\EnvId{}`, `\input`, filename-like arguments.
 
 ### Allowed prose wrappers (check **inside** the braces only)

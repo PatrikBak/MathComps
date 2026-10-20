@@ -23,7 +23,7 @@ type PromptTextModalProps = {
  * mangle rather than show, but at a size and a measure meant for reading rather than for glancing at.
  *
  * The text is focusable and named, since a region that only scrolls is otherwise out of reach from the
- * keyboard. Hyphenation is off: the page turns it on for prose, and on a template it was breaking words that
+ * keyboard. Hyphenation is off: the page turns it on for prose, and on a template it would break words that
  * have to be read exactly as they were written.
  */
 export function PromptTextModal({ title, text, onClose }: PromptTextModalProps) {

@@ -182,7 +182,7 @@ public class UserManagerProfilePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// Re-syncing a user from Clerk leaves every field standing. The sync upserts the whole row from an entity
-    /// Clerk carries neither of them for, so a column not excluded from that write is silently blanked every
+    /// Clerk carries none of them for, so a column not excluded from that write is silently blanked every
     /// time the student edits their avatar upstream.
     /// </summary>
     [Fact]

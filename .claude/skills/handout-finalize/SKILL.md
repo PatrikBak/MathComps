@@ -76,7 +76,7 @@ Scope the glob to this handout. If `_common.asy` changed in a way that alters ex
 
 ### 5. Handle CLI failures
 
-The CLI exits 1 on compile failures, unknown commands, or a failed environment-index regeneration (that last one usually means `web/` dependencies aren't installed — run `npm install` there).
+The CLI exits 1 on compile failures, unknown commands, or a failed regeneration of the environment index or the defense content (that last one usually means `web/` dependencies aren't installed — run `npm install` there).
 
 **Compile failures:** stop and surface the failing file(s) to the user. Do not try to fix `.tex` content here and do not quote the TeX log — it's noise.
 

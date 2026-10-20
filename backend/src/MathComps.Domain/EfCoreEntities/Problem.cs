@@ -60,7 +60,7 @@ public class Problem
     public ICollection<ProblemAuthor> ProblemAuthors { get; } = [];
 
     /// <summary>
-    /// Associated tags via the ordered join entity. This includes all tags processed
+    /// Associated tags via the join entity. This includes all tags processed
     /// by the LLM, even the rejected ones (i.e. ones with goodness of fit &lt; 0.5).
     /// </summary>
     public ICollection<ProblemTag> ProblemTagsAll { get; } = [];
