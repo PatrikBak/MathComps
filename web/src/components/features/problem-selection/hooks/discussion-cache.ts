@@ -15,7 +15,8 @@ import type { ApiResult } from '@/types/api'
 import type { SelectionDiscussions } from '../model/selection-types'
 
 /**
- * The prefix every cached copy of the selection's discussions sits under, whoever it was read as.
+ * The prefix every cached copy of a selection's discussions sits under, whichever organization's it is and whoever
+ * it was read as.
  */
 const DISCUSSIONS_QUERY_KEY = ['problem-selection-discussions'] as const
 
@@ -43,17 +44,18 @@ type ParkableThread = {
 }
 
 /**
- * The key a reader's copy of the selection's discussions is cached under. It names the reader, so another account
+ * The key a reader's copy of an organization's discussions is cached under. It names the reader, so another account
  * signing in on the same page is never handed the first one's answer. It sits outside the prefix a write to the
  * selection refreshes, since no such write says anything in a discussion.
  *
+ * @param organization - The slug of the organization whose selection holds the discussions.
  * @param readerId - Who is reading; null until sign-in has settled, and while nobody is signed in.
  *
  * @returns The key.
  */
-export function discussionsQueryKey(readerId: string | null): QueryKey {
-  // The discussions, per reader
-  return [...DISCUSSIONS_QUERY_KEY, readerId] as const
+export function discussionsQueryKey(organization: string, readerId: string | null): QueryKey {
+  // The discussions, per organization and reader
+  return [...DISCUSSIONS_QUERY_KEY, organization, readerId] as const
 }
 
 /**

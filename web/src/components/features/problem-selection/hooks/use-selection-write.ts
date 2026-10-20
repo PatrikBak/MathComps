@@ -4,13 +4,16 @@ import { useIsMutating, useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
+import type { ApiCaller } from '@/hooks/use-api'
 import {
   type OptimisticMutationConfig,
   useOptimisticMutation,
 } from '@/hooks/use-optimistic-mutation'
+import type { ApiResult } from '@/types/api'
 
 import type { SelectionData } from '../model/selection-types'
 import { invalidateSelection, useSelectionQueryKey } from './selection-cache'
+import { useSelectionOrganization } from './selection-organization'
 
 /**
  * The queue every write to the selection runs in, one after another in the order they were fired.
@@ -67,8 +70,14 @@ type EditSnapshot = {
  */
 type SelectionWriteConfig<TVariables> = Pick<
   OptimisticMutationConfig<void, TVariables, EditSnapshot | undefined>,
-  'apiFn' | 'errorMessage'
+  'errorMessage'
 > & {
+  /** The call making the write, handed the slug of the organization whose selection it changes. */
+  apiFn: (
+    apiCall: ApiCaller,
+    organization: string,
+    variables: TVariables
+  ) => Promise<ApiResult<void>>
   /** The selection as the write leaves it, shown before the server answers; null for a write that waits for it. */
   edit: ((data: SelectionData, variables: TVariables) => SelectionData) | null
   /** Whether the write can change what a slot holds. */
@@ -101,12 +110,15 @@ export function useSelectionWrite<TVariables>({
   // The React Query cache
   const queryClient = useQueryClient()
 
+  // The organization whose selection the write changes
+  const organization = useSelectionOrganization()
+
   // Where the reader's selection is cached
   const queryKey = useSelectionQueryKey()
 
   // The write, which hands the selection around its edit along for a refusal to put back
   const mutation = useOptimisticMutation<void, TVariables, EditSnapshot | undefined>({
-    apiFn,
+    apiFn: (apiCall, variables) => apiFn(apiCall, organization, variables),
     scope: SELECTION_WRITE_SCOPE,
     mutationKey: changesSlots ? SLOT_WRITE_KEY : SELECTION_WRITE_KEY,
     // What the write does, shown at the press where it can be

@@ -1,8 +1,9 @@
-import type {
-  Board,
-  Cycle,
-  Proposal,
-  SelectionCategory,
+import {
+  type Board,
+  type Cycle,
+  MATHCOMPS_ORGANIZATION_SLUG,
+  type Proposal,
+  type SelectionCategory,
 } from '@/components/features/problem-selection/model/selection-types'
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
 
@@ -110,6 +111,9 @@ export function liveProposal(held: HeldSelection, proposalId: string): Proposal 
     refuseWith('SelectionTargetNotFound')
   )
 }
+
+/** The path MathComps' selection hangs off on the backend, which every read and write of it goes under. */
+export const SELECTION_API_PATH = `/problem-selection/${MATHCOMPS_ORGANIZATION_SLUG}`
 
 /** The shape of an id the backend's routes take, any other answering as a path it does not serve. */
 export const GUID = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'

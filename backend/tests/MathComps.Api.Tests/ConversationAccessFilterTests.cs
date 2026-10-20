@@ -1,4 +1,3 @@
-using System.Text.Json;
 using MathComps.Api.Authorization;
 using MathComps.Api.Constants;
 using MathComps.Infrastructure.Services.Defense;
@@ -6,7 +5,6 @@ using MathComps.Infrastructure.Services.Selection;
 using MathComps.Infrastructure.Services.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Routing;
 using Moq;
 
@@ -182,27 +180,15 @@ public class ConversationAccessFilterTests
         // And one for the conversation the body names
         var bodySessionId = Guid.NewGuid();
 
-        // The body, written as a client would
-        var body = JsonSerializer.SerializeToUtf8Bytes(new { sessionId = bodySessionId, content = "A note" });
-
-        // The request from the caller
-        var request = new DefaultHttpContext
-        {
-            User = TestCallers.SignedIn(CallerSubject, isAdmin),
-            RequestServices = services,
-        };
+        // The request from the caller, its body naming that conversation and saying something
+        var request = TestRequests.WithJsonBody(
+            TestCallers.SignedIn(CallerSubject, isAdmin),
+            services,
+            new { sessionId = bodySessionId, content = "A note" });
 
         // Carrying each id in its route value
         foreach (var (name, id) in routeIds)
             request.Request.RouteValues[name] = id.ToString();
-
-        // And the body
-        request.Request.ContentType = "application/json";
-        request.Request.Body = new MemoryStream(body);
-        request.Request.ContentLength = body.Length;
-
-        // A bare request reads no body until it says it can carry one
-        request.Features.Set<IHttpRequestBodyDetectionFeature>(new CarriesBody());
 
         // The request, with what it names
         return (request, routeIds, bodySessionId);
@@ -225,14 +211,5 @@ public class ConversationAccessFilterTests
             serviceType == typeof(IConversationAccess) ? conversationAccess
             : serviceType == typeof(IUserManager) ? userManager
             : services.GetService(serviceType);
-    }
-
-    /// <summary>
-    /// Says a request can carry a body, as a server says of every request with content.
-    /// </summary>
-    private sealed class CarriesBody : IHttpRequestBodyDetectionFeature
-    {
-        /// <inheritdoc/>
-        public bool CanHaveBody => true;
     }
 }

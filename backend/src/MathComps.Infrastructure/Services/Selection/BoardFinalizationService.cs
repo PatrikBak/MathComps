@@ -13,8 +13,7 @@ namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
 /// Implements <see cref="IBoardFinalizationService"/> over the database, each finalize one write through
-/// <see cref="SelectionRules.RunWriteAsync"/>. The board is read from the selection of the organization
-/// <see cref="Organization.MathCompsSlug"/> names, so another organization's board is never found.
+/// <see cref="SelectionRules.RunWriteAsync"/>.
 /// </summary>
 /// <param name="dbContextFactory">Creates the context each read and finalize runs on.</param>
 /// <param name="localization">The names the taxonomy gives the groups' nodes.</param>
@@ -76,13 +75,17 @@ public sealed class BoardFinalizationService(
     }
 
     /// <inheritdoc/>
-    public Task FinalizeAsync(Guid boardId, Guid cycleId, CancellationToken cancellationToken = default) =>
+    public Task FinalizeAsync(
+        string organizationSlug, Guid boardId, Guid cycleId, CancellationToken cancellationToken = default) =>
         // The finalize, as one selection write
         SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
-            // The board, which has to be a draft of MathComps' own, since only its boards fill the hosted groups
-            var board = await SelectionRules.ReadDraftAsync(
-                dbContext, Organization.MathCompsSlug, boardId, cancellationToken);
+            // Only MathComps' boards fill the hosted groups, so no other organization's selection holds one to finalize
+            if (organizationSlug != Organization.MathCompsSlug)
+                throw new SelectionTargetNotFoundException();
+
+            // The board, a draft of the organization's own
+            var board = await SelectionRules.ReadDraftAsync(dbContext, organizationSlug, boardId, cancellationToken);
 
             // The group taking the papers
             var group = await dbContext.HostedGroups

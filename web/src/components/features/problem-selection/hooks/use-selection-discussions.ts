@@ -30,6 +30,7 @@ import {
   threadsAfterParking,
 } from './discussion-cache'
 import { SELECTION_REFRESH_MS } from './selection-cache'
+import { useSelectionOrganization } from './selection-organization'
 
 /**
  * Options for {@link useSelectionDiscussions}.
@@ -95,6 +96,9 @@ export function useSelectionDiscussions({
   // The cache the comment threads are held in
   const queryClient = useQueryClient()
 
+  // The organization whose selection holds the discussions
+  const organization = useSelectionOrganization()
+
   // Who is reading, once sign-in has settled
   const { userId, isLoaded } = useAuth()
 
@@ -106,10 +110,10 @@ export function useSelectionDiscussions({
 
   // Every discussion the selection holds, as the latest read found it
   const { data, uiState, retry } = useApiQuery({
-    queryKey: discussionsQueryKey(readerId),
+    queryKey: discussionsQueryKey(organization, readerId),
     fetch: async (apiCall) => {
       // The discussions, with what stood as the read set off
-      const result = await readDiscussions(queryClient, () => getDiscussions(apiCall))
+      const result = await readDiscussions(queryClient, () => getDiscussions(apiCall, organization))
 
       // The stay's first read shown as it lands
       if (result.success && showings === 0) {

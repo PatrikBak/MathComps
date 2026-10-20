@@ -4,11 +4,12 @@ import { ArrowRight, MessageSquarePlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { ProseContactLink } from '@/components/features/contact/ProseContactLink'
+import { selectionHref } from '@/components/features/problem-selection/model/selection-routes'
+import { MATHCOMPS_ORGANIZATION_SLUG } from '@/components/features/problem-selection/model/selection-types'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { PageHeader } from '@/components/shared/components/PageHeader'
 import { useAddressedDisclosure } from '@/hooks/use-addressed-disclosure'
-import { ROUTES } from '@/i18n/i18n'
 
 import { useHostedCompetitionsBoard } from '../hooks/use-hosted-competitions-board'
 import { RESULTS_PARAM } from '../services/hosted-competition-routes'
@@ -94,7 +95,11 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
 
           {/* The way to where the problems are picked, for the accounts that prepare competitions */}
           {preparesCompetitions && (
-            <AppLink href={ROUTES.PROBLEM_SELECTION} plain className={HEADER_ROW_CLASS}>
+            <AppLink
+              href={selectionHref(MATHCOMPS_ORGANIZATION_SLUG)}
+              plain
+              className={HEADER_ROW_CLASS}
+            >
               <ArrowRight size={15} />
               {tSelection('title')}
             </AppLink>

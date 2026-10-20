@@ -14,6 +14,7 @@ import {
   liveProposal,
   readFields,
   refuseWith,
+  SELECTION_API_PATH,
   SELECTION_CATEGORIES,
 } from './selection-writes'
 
@@ -21,7 +22,7 @@ import {
  * The path of a proposal write: the proposal, and a trailing set-aside, recommended or rating naming the change.
  */
 export const PROPOSAL_WRITE_PATH = new RegExp(
-  `^/problem-selection/proposals/(${GUID})(/set-aside|/recommended|/rating)?$`
+  `^${SELECTION_API_PATH}/proposals/(${GUID})(/set-aside|/recommended|/rating)?$`
 )
 
 /** The reader, as the backend names the reviewer reading the selection. */

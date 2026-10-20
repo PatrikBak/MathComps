@@ -4,6 +4,7 @@ import { createContext, type ReactNode, use, useMemo } from 'react'
 
 import { CommentCountProvider } from '@/components/features/comments/components/CommentCountContext'
 
+import { SelectionOrganizationContext } from '../hooks/selection-organization'
 import {
   type LoadedSelection,
   type SelectionWorkspace,
@@ -17,15 +18,41 @@ const SelectionWorkspaceContext = createContext<SelectionWorkspace | null>(null)
  * Props for the {@link SelectionWorkspaceProvider} component.
  */
 type SelectionWorkspaceProviderProps = {
+  /** The slug of the organization whose selection the provider holds. */
+  organization: string
   /** Everything the selection's shared state is handed to. */
   children: ReactNode
 }
 
 /**
- * A provider holding the selection's shared state for everything inside it, with how many comments each problem's
- * discussion holds, read for every problem at once.
+ * A provider handing everything inside it the organization whose selection it holds, the selection's shared state,
+ * and how many comments each problem's discussion holds, read for every problem at once.
  */
-export function SelectionWorkspaceProvider({ children }: SelectionWorkspaceProviderProps) {
+export function SelectionWorkspaceProvider({
+  organization,
+  children,
+}: SelectionWorkspaceProviderProps) {
+  // The organization, handed to everything reading or writing its selection, the shared state included
+  return (
+    <SelectionOrganizationContext value={organization}>
+      <SelectionWorkspaceState>{children}</SelectionWorkspaceState>
+    </SelectionOrganizationContext>
+  )
+}
+
+/**
+ * Props for the {@link SelectionWorkspaceState} component.
+ */
+type SelectionWorkspaceStateProps = {
+  /** Everything the selection's shared state is handed to. */
+  children: ReactNode
+}
+
+/**
+ * A provider holding the selection's shared state for everything inside it. It sits inside the organization's
+ * context, which that state reads.
+ */
+function SelectionWorkspaceState({ children }: SelectionWorkspaceStateProps) {
   // The selection's shared state
   const workspace = useSelectionWorkspaceState()
 

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
 import { SelectionShell } from '@/components/features/problem-selection/components/SelectionShell'
+import { MATHCOMPS_ORGANIZATION_SLUG } from '@/components/features/problem-selection/model/selection-types'
 import Layout from '@/components/layout/Layout'
 import type { Locale } from '@/i18n/i18n'
 import { ROUTES } from '@/i18n/i18n'
@@ -29,14 +30,15 @@ export async function generateMetadata({
 }
 
 /**
- * The pool of proposed problems, with any one of them open in full over it.
+ * The problem selection's address naming no organization, which opens MathComps' selection, with any one of its
+ * problems open in full over it.
  */
 export default withLocale(function ProblemSelectionPage() {
   return (
     <Layout displayFooter={false} wider>
       {/* The selection, which reads its open problem off the address and so renders per request */}
       <Suspense fallback={null}>
-        <SelectionShell />
+        <SelectionShell organization={MATHCOMPS_ORGANIZATION_SLUG} />
       </Suspense>
     </Layout>
   )

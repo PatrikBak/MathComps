@@ -64,10 +64,14 @@ describe('tabOf', () => {
 describe('detailHref', () => {
   it('opens a problem over the paper the address names, and a paper alone', () => {
     // A problem's link, on a page whose address names the paper e1
-    const problemHref = detailHref({ kind: 'proposal', id: 'p4', tab: 'comments' }, 'e1')
+    const problemHref = detailHref(
+      'mathcomps',
+      { kind: 'proposal', id: 'p4', tab: 'comments' },
+      'e1'
+    )
 
     // Another paper's link, on the same page
-    const paperHref = detailHref({ kind: 'paper', id: 'i1', tab: undefined }, 'e1')
+    const paperHref = detailHref('mathcomps', { kind: 'paper', id: 'i1', tab: undefined }, 'e1')
 
     // The problem over e1, and the other paper with nothing beneath it
     expect(problemHref.query).toEqual({ problem: 'p4', tab: 'comments', paper: 'e1' })

@@ -41,7 +41,11 @@ public sealed record NamedProblemTarget(
 /// quote it by.
 /// </summary>
 /// <param name="ProblemId"><inheritdoc cref="ProblemTarget.ProblemId" path="/summary"/></param>
+/// <param name="OrganizationSlug">
+/// The <see cref="EfCoreEntities.Organization.Slug"/> of the organization whose pool the proposal is in.
+/// </param>
 /// <param name="Slug"><inheritdoc cref="EfCoreEntities.Problem.Slug" path="/summary"/></param>
 /// <param name="Number"><inheritdoc cref="EfCoreEntities.Proposal.Number" path="/summary"/></param>
 /// <param name="Title"><inheritdoc cref="EfCoreEntities.Proposal.Title" path="/summary"/></param>
-public sealed record NamedProposalTarget(Guid ProblemId, string Slug, int Number, string Title) : NamedDefenseTarget;
+public sealed record NamedProposalTarget(Guid ProblemId, string OrganizationSlug, string Slug, int Number, string Title)
+    : NamedDefenseTarget;

@@ -35,6 +35,7 @@ import {
   READY,
   rememberedSelection,
   selectedTab,
+  SELECTION_ENDPOINT,
   selectionCopy,
   SET_ASIDE,
   SETTLE_TIMEOUT_MS,
@@ -85,7 +86,7 @@ const LONG_REMARK = Array.from(
 ).join('\n\n')
 
 /** Where the pool's discussions are read, all of them at once. */
-const DISCUSSIONS_ADDRESS = `${BACKEND_ORIGIN}/problem-selection/comments`
+const DISCUSSIONS_ADDRESS = `${SELECTION_ENDPOINT}/comments`
 
 declare global {
   interface Window {

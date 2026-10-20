@@ -6,14 +6,15 @@ import type { ConversationDetail } from '@/components/features/conversation-revi
 import type { StoredTurn } from '@/components/features/defense/model/defense-types'
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import type { ProposalTab } from '@/components/features/problem-selection/model/selection-routes'
-import type {
-  Board,
-  Cycle,
-  Paper,
-  Proposal,
-  ProposalRating,
-  ReviewConversation,
-  SelectionData,
+import {
+  type Board,
+  type Cycle,
+  MATHCOMPS_ORGANIZATION_SLUG,
+  type Paper,
+  type Proposal,
+  type ProposalRating,
+  type ReviewConversation,
+  type SelectionData,
 } from '@/components/features/problem-selection/model/selection-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { DAY_MS } from '@/components/shared/utils/time-units'
@@ -33,6 +34,7 @@ import {
   hasOpened,
   type HeldCycle,
   type HeldSelection,
+  SELECTION_API_PATH,
   SELECTION_CATEGORIES,
   SELECTION_WRITE_REFUSALS,
   SelectionWriteRefused,
@@ -46,8 +48,8 @@ export const SETTLE_TIMEOUT_MS = 15_000
 /** How long a read gets to go out before a test is willing to say none did. */
 export const LANDING_WINDOW_MS = 1_000
 
-/** Where the backend answers the selection's read. */
-export const SELECTION_ENDPOINT = `${BACKEND_ORIGIN}/problem-selection`
+/** Where the backend answers the read of MathComps' selection. */
+export const SELECTION_ENDPOINT = `${BACKEND_ORIGIN}${SELECTION_API_PATH}`
 
 /** Where the backend answers a read of one conversation in full, short of the conversation's id. */
 export const CONVERSATION_ENDPOINT = `${BACKEND_ORIGIN}/admin/defense/sessions/`
@@ -730,6 +732,7 @@ function conversationInFullOf(held: HeldConversation, proposal: Proposal): Conve
     target: {
       kind: 'proposal',
       problemId: proposal.id,
+      organizationSlug: MATHCOMPS_ORGANIZATION_SLUG,
       slug: `proposal-${proposal.number}`,
       number: proposal.number,
       title: proposal.title,

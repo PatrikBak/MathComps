@@ -152,7 +152,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     {
         // The October board finalized
         await QueryAsync<IBoardFinalizationService>((_, finalization) =>
-            finalization.FinalizeAsync(OctoberBoardId, OctoberId));
+            finalization.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId, OctoberId));
 
         // Its first elementary slot
         var slot = await SlotAsync(OctoberBoardId, HostedCompetitionCategory.Elementary, 0);

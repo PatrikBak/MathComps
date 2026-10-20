@@ -13,6 +13,7 @@ import {
   liveProposal,
   readFields,
   refuseWith,
+  SELECTION_API_PATH,
 } from './selection-writes'
 
 /** How far a move takes a slot: up is the slot before it, down the slot after. */
@@ -23,7 +24,7 @@ const MOVE_OFFSET: Record<SlotDirection, number> = { up: -1, down: 1 }
  * neighbour.
  */
 export const SLOT_WRITE_PATH = new RegExp(
-  `^/problem-selection/boards/(${GUID})/papers/(${GUID})/slots/(-?\\d+)(/move)?$`
+  `^${SELECTION_API_PATH}/boards/(${GUID})/papers/(${GUID})/slots/(-?\\d+)(/move)?$`
 )
 
 /**

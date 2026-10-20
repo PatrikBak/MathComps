@@ -26,13 +26,16 @@ public interface IBoardFinalizationService
     /// paper's category is, in slot order, and leave every other draft they stood on. The board then reads its slots
     /// off the rounds.
     /// </summary>
+    /// <param name="organizationSlug">
+    /// The <see cref="Organization.Slug"/> of the organization whose selection the board is in.
+    /// </param>
     /// <param name="boardId">The board.</param>
     /// <param name="cycleId">The hosted group whose rounds take the papers.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the problems have moved.</returns>
     /// <exception cref="SelectionTargetNotFoundException">
-    /// Thrown when the board is not one of the boards of the organization <see cref="Organization.MathCompsSlug"/>
-    /// names, or the group is not there.
+    /// Thrown when the organization is not the one <see cref="Organization.MathCompsSlug"/> names, the board is not
+    /// one of its boards, or the group is not there.
     /// </exception>
     /// <exception cref="SelectionBoardOpenedException">Thrown when the board's group has opened.</exception>
     /// <exception cref="SelectionBoardFinalizedException">Thrown when the board is already finalized.</exception>
@@ -48,7 +51,8 @@ public interface IBoardFinalizationService
     /// <exception cref="ProblemSlugTakenException">
     /// Thrown when a problem outside the board carries a slug a slotted problem would take.
     /// </exception>
-    Task FinalizeAsync(Guid boardId, Guid cycleId, CancellationToken cancellationToken = default);
+    Task FinalizeAsync(
+        string organizationSlug, Guid boardId, Guid cycleId, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
