@@ -5,12 +5,12 @@ using MathComps.Infrastructure.Tests.TestInfrastructure;
 namespace MathComps.Infrastructure.Tests.Comments;
 
 /// <summary>
-/// The <see cref="PreparerCommentPostgresTests"/> for a paper's discussion, the reviewers' thread about one paper on a
+/// The <see cref="ReviewerCommentPostgresTests"/> for a paper's discussion, the reviewers' thread about one paper on a
 /// board of the problem selection.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class SelectionPaperCommentPostgresTests(PostgresContainerFixture fixture)
-    : PreparerCommentPostgresTests(fixture)
+    : ReviewerCommentPostgresTests(fixture)
 {
     /// <inheritdoc/>
     protected override CommentTargetType TargetType => CommentTargetType.SelectionPaper;

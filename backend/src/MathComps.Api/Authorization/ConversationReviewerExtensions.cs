@@ -17,6 +17,6 @@ public static class ConversationReviewerExtensions
     public static RouteHandlerBuilder RequireConversationReviewer(this RouteHandlerBuilder builder) =>
         // Admins and reviewers past the door, and the reviewers on to the reviewers' conversations alone
         builder
-            .RequireAuthorization(AuthorizationPolicies.AdminOrPreparesCompetitions)
+            .RequireAuthorization(AuthorizationPolicies.AdminOrOrganizationMember)
             .AddEndpointFilter<ProposalConversationFilter>();
 }

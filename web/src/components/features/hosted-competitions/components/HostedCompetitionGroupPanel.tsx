@@ -547,8 +547,8 @@ export function EntryAction({
     // Untaken, so the group decides: one that has not opened yet has nothing to press, and an open one
     // offers the way in. A reader who prepares competitions is offered it either way
     case 'none': {
-      // No paper picked yet, or a group not yet open to this reader: the entry would be spent on a set the
-      // site cannot serve
+      // No paper picked yet, which an entry would be spent on with nothing to serve, or a group
+      // that takes no entry from this reader yet
       const hasNothingToPress =
         !competition.problemsReady || (phase === 'upcoming' && !preparesCompetitions)
 

@@ -9,7 +9,7 @@ import { requireAdmin } from '@/lib/auth/admin-auth'
 import { createPageMetadata } from '@/lib/metadata'
 
 /**
- * Page-specific metadata. It is kept out of search entirely: nobody but its one reader has any business
+ * Page-specific metadata. It is kept out of search entirely: nobody but an admin has any business
  * finding it, and the guard below would turn anyone else away regardless.
  */
 export async function generateMetadata({
@@ -33,8 +33,8 @@ export async function generateMetadata({
  * Reads every student's defense conversations back, for finding what keeps going wrong with the examiner.
  */
 export default withLocale(async function AdminDefensesPage() {
-  // Only the reviewer gets in. The claim behind this is also what every endpoint the page calls
-  // checks for itself, so the guard here is what saves the trip rather than what does the gating.
+  // Only admins get in. Every endpoint the page calls does its own gating, so the guard here saves
+  // the trip rather than doing the gating.
   await requireAdmin()
 
   // Render the queue

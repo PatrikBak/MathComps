@@ -8,7 +8,7 @@ namespace MathComps.Api.Endpoints;
 /// <summary>
 /// Maps the endpoints of the problem selection: one read returning the whole of it, one returning its discussions,
 /// and one write per change a reviewer makes. Every route is gated by the
-/// <see cref="AuthorizationPolicies.PreparesCompetitions"/> policy, since the proposals are problems no student
+/// <see cref="AuthorizationPolicies.OrganizationMember"/> policy, since the proposals are problems no student
 /// may see.
 /// </summary>
 public static class ProblemSelectionEndpoints
@@ -52,7 +52,7 @@ public static class ProblemSelectionEndpoints
             // Return it
             return Results.Ok(selection);
         })
-        .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
+        .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Read every discussion the selection holds
@@ -71,7 +71,7 @@ public static class ProblemSelectionEndpoints
             // Return the discussions
             return Results.Ok(discussions);
         })
-        .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
+        .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Put a proposal into a slot
@@ -93,7 +93,7 @@ public static class ProblemSelectionEndpoints
             // Nothing to return
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
+        .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Empty a slot
@@ -110,7 +110,7 @@ public static class ProblemSelectionEndpoints
             // Nothing to return
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
+        .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Trade a slot with its neighbour
@@ -132,7 +132,7 @@ public static class ProblemSelectionEndpoints
             // Nothing to return
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
+        .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Finalize a board into a cycle's rounds
@@ -152,7 +152,7 @@ public static class ProblemSelectionEndpoints
             // Nothing to return
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
+        .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Set a proposal aside, or bring it back
@@ -172,7 +172,7 @@ public static class ProblemSelectionEndpoints
             // Nothing to return
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
+        .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Recommend a proposal for one category, or take it back
@@ -192,7 +192,7 @@ public static class ProblemSelectionEndpoints
             // Nothing to return
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
+        .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Rate a proposal, or take the rating back
@@ -214,7 +214,7 @@ public static class ProblemSelectionEndpoints
             // Nothing to return
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
+        .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Delete a proposal from the selection
@@ -229,7 +229,7 @@ public static class ProblemSelectionEndpoints
             // Nothing to return
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
+        .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
     }
 }

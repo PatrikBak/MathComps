@@ -54,9 +54,6 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Users synced from Clerk.</summary>
     public DbSet<User> Users => Set<User>();
 
-    /// <summary>Capabilities handed to individual users.</summary>
-    public DbSet<UserGrant> UserGrants => Set<UserGrant>();
-
     /// <summary>Likes on problems by users.</summary>
     public DbSet<ProblemLike> ProblemLikes => Set<ProblemLike>();
 
@@ -146,6 +143,12 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
     /// <summary>What students say about their own solutions, one claim per student per problem.</summary>
     public DbSet<ProblemSelfAssessment> ProblemSelfAssessments => Set<ProblemSelfAssessment>();
+
+    /// <summary>The groups picking problems, each with its own pool and boards.</summary>
+    public DbSet<Organization> Organizations => Set<Organization>();
+
+    /// <summary>The email addresses on the organizations' lists.</summary>
+    public DbSet<OrganizationMember> OrganizationMembers => Set<OrganizationMember>();
 
     /// <summary>Problems proposed for the hosted competitions' papers.</summary>
     public DbSet<Proposal> Proposals => Set<Proposal>();
@@ -1016,25 +1019,6 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         #endregion OutgoingMail
 
-        #region UserGrant
-
-        modelBuilder.Entity<UserGrant>(e =>
-        {
-            // Owner of the grant, cascading so deleting a user drops what they were allowed.
-            e.HasOne(grant => grant.User)
-             .WithMany()
-             .HasForeignKey(grant => grant.UserId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            // Every read asks whether one account holds one capability, and a second row would leave two
-            // places to revoke it from.
-            e.HasIndex(grant => new { grant.UserId, grant.Capability })
-             .IsUnique()
-             .HasDatabaseName("ux_user_grant_user_id_capability");
-        });
-
-        #endregion UserGrant
-
         #region ProblemDefense
 
         modelBuilder.Entity<ProblemDefense>(e =>
@@ -1095,12 +1079,52 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         #endregion ProblemSelfAssessment
 
+        #region Organization
+
+        modelBuilder.Entity<Organization>(e =>
+        {
+            // The slug names one organization.
+            e.HasIndex(organization => organization.Slug)
+             .IsUnique()
+             .HasDatabaseName("ux_organization_slug");
+        });
+
+        #endregion Organization
+
+        #region OrganizationMember
+
+        modelBuilder.Entity<OrganizationMember>(e =>
+        {
+            // An address is on one organization's list once, so the pair is the row
+            e.HasKey(member => new { member.OrganizationId, member.Email });
+
+            // The organization whose list it is, its list going with it
+            e.HasOne(member => member.Organization)
+             .WithMany(organization => organization.Members)
+             .HasForeignKey(member => member.OrganizationId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // DB-side guard: an address in any other case would match no account, since accounts are matched on
+            // their address lowercased
+            e.ToTable(t => t.HasCheckConstraint(
+                "ck_organization_member_email_lowercase", "\"email\" = lower(\"email\")"));
+        });
+
+        #endregion OrganizationMember
+
         #region Proposal
 
         modelBuilder.Entity<Proposal>(entity =>
         {
             // A problem is proposed once, so its own id doubles as this row's key.
             entity.HasKey(proposal => proposal.ProblemId);
+
+            // The organization whose pool it is in. Restricted, since an organization's pool is not something a
+            // delete should quietly take with it.
+            entity.HasOne(proposal => proposal.Organization)
+                  .WithMany()
+                  .HasForeignKey(proposal => proposal.OrganizationId)
+                  .OnDelete(DeleteBehavior.Restrict);
 
             // The problem proposed. Restricted, since what the reviewers said about it must outlive any tidying
             // of the row it was said about.
@@ -1190,6 +1214,13 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         modelBuilder.Entity<SelectionBoard>(entity =>
         {
+            // The organization picking its papers. Restricted, since an organization's boards are not something a
+            // delete should quietly take with it.
+            entity.HasOne(board => board.Organization)
+                  .WithMany()
+                  .HasForeignKey(board => board.OrganizationId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
             // The group it was finalized into. Restricted: a group whose problems a board picked is not something
             // a delete should quietly take the board with.
             entity.HasOne(board => board.HostedGroup)

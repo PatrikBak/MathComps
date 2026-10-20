@@ -26,9 +26,9 @@ export type TurnMark = {
 }
 
 /**
- * The way into the drafts a reply went through before it was sent. Only an admin gets this: a rejected draft is
- * one a guard sent back, so a turn only offers it where the reader is allowed to see what the student was kept
- * from.
+ * The way into the drafts a reply went through before it was sent. Only a reader reviewing the
+ * conversation gets this: a rejected draft is one a guard sent back, so a turn only offers it
+ * where the reader is allowed to see what the student was kept from.
  */
 export type TurnDraftsMark = {
   /**

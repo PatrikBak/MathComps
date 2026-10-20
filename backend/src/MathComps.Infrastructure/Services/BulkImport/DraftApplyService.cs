@@ -315,16 +315,26 @@ public class DraftApplyService(
             foreach (var tag in await ResolveTagsAsync(context, DistinctCanonicalSlugs(tagSlugs), tagsCache))
                 await context.ProblemTags.AddAsync(NewProblemTag(newProblem.Id, tag.Id));
 
-        // File the problem in the pool when the draft says how, the categories in the order they run.
+        // File the problem in the pool when the draft says how.
         if (problem.Proposal is { } proposal)
+        {
+            // The MathComps organization, whose pool the import files every proposal into.
+            var organizationId = await context.Organizations
+                .Where(organization => organization.Slug == Organization.MathCompsSlug)
+                .Select(organization => organization.Id)
+                .SingleAsync();
+
+            // The proposal, the categories in the order they run.
             await context.Proposals.AddAsync(new Proposal
             {
                 ProblemId = newProblem.Id,
+                OrganizationId = organizationId,
                 Number = proposal.Number,
                 Title = proposal.Title,
                 Area = proposal.Area,
                 Recommended = SelectionRules.InCategoryOrder(proposal.Recommended),
             });
+        }
     }
 
     /// <summary>

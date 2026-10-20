@@ -792,7 +792,7 @@ type SelectionReply =
   | 'winterOnOffer'
   /** With every problem in the selection but {@link OPENED}, which another reviewer deleted meanwhile. */
   | 'openedDeleted'
-  /** Refused with the code an account that does not prepare competitions earns. */
+  /** Refused with the code an account off the MathComps organization's list earns. */
   | 'forbidden'
   /** Refused for good with no code at all, as an address the backend does not serve is. */
   | 'failure'

@@ -238,7 +238,7 @@ export type SelectionData = {
   boards: Board[]
   /** The cycles a board can be finalized into, soonest first. */
   cycles: Cycle[]
-  /** Every conversation about a proposal still in the selection, newest first. */
+  /** Every conversation a reviewer held about a proposal still in the selection, newest first. */
   conversations: ReviewConversation[]
 }
 

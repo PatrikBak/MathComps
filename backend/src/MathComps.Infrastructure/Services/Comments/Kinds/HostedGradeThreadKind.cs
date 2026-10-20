@@ -3,7 +3,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.GradeMessages;
-using MathComps.Infrastructure.Services.Users;
+using MathComps.Infrastructure.Services.Organizations;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 
@@ -22,8 +22,8 @@ public sealed record GradeAnchor(Guid EntryId, Guid ProblemId, Guid StudentId) :
 /// One is open to admins, and to its student while the grade is final and their group has closed. A new message
 /// is owed to the other side of the conversation by mail.
 /// </summary>
-/// <param name="grants"><inheritdoc cref="IUserGrantService" path="/summary"/></param>
-public class HostedGradeThreadKind(IUserGrantService grants) : CommentThreadKind<GradeAnchor>
+/// <param name="members"><inheritdoc cref="HostedGrading.FindGradedEntryAsync" path="/param[@name='members']"/></param>
+public class HostedGradeThreadKind(IOrganizationMemberService members) : CommentThreadKind<GradeAnchor>
 {
     /// <inheritdoc />
     public override CommentTargetType TargetType => CommentTargetType.HostedGrade;
@@ -88,7 +88,7 @@ public class HostedGradeThreadKind(IUserGrantService grants) : CommentThreadKind
 
         // The entry the student is graded under, refused like a missing thread where there is nothing to grade
         var entry = await HostedGrading.FindGradableEntryAsync(
-                dbContext, grants, problemId, userId, CancellationToken.None)
+                dbContext, members, problemId, userId, CancellationToken.None)
             ?? throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
 
         // The conversation with the student about the problem

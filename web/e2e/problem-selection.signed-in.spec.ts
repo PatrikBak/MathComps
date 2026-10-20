@@ -727,7 +727,7 @@ test.describe("the selection's address and history", () => {
 })
 
 test.describe('reading the selection', () => {
-  test('turns away an account that does not prepare competitions, and asks no more', async ({
+  test("turns away an account off the MathComps organization's list, and asks no more", async ({
     page,
   }) => {
     // The clock under the test's hand, so a later read would come when the test says

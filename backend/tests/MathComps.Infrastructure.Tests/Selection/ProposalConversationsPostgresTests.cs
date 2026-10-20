@@ -56,23 +56,23 @@ public class ProposalConversationsPostgresTests(PostgresContainerFixture fixture
     private const string Student = "student";
 
     /// <summary>
-    /// The case of the latecomer's conversation about a proposal in the pool, held before they prepared the
-    /// competitions.
+    /// The case of the latecomer's conversation about a proposal in the pool, held before their address was on the
+    /// MathComps organization's list.
     /// </summary>
-    private const string BeforeGrant = "before grant";
+    private const string BeforeMembership = "before membership";
 
     /// <summary>
-    /// A reviewer, preparing the competitions since well before any conversation.
+    /// A reviewer, on the MathComps organization's list since well before any conversation.
     /// </summary>
     private readonly Guid _reviewerId = Guid.CreateVersion7();
 
     /// <summary>
-    /// A reviewer preparing the competitions only since after their conversation.
+    /// A reviewer on the MathComps organization's list only since after their conversation.
     /// </summary>
     private readonly Guid _latecomerId = Guid.CreateVersion7();
 
     /// <summary>
-    /// A student, who never prepared the competitions.
+    /// A student, whose address was never on the MathComps organization's list.
     /// </summary>
     private readonly Guid _studentId = Guid.CreateVersion7();
 
@@ -118,7 +118,8 @@ public class ProposalConversationsPostgresTests(PostgresContainerFixture fixture
     /// <summary>
     /// Every other conversation, and any note on it, is refused like a missing conversation: one about an archive
     /// problem or a handout problem, one about a proposal taken by a group that has opened or about a deleted one, a
-    /// student's about a proposal in the pool, and a reviewer's held before they prepared the competitions.
+    /// student's about a proposal in the pool, and a reviewer's held before their address was on the MathComps
+    /// organization's list.
     /// </summary>
     /// <param name="conversation">The case.</param>
     [Theory]
@@ -127,7 +128,7 @@ public class ProposalConversationsPostgresTests(PostgresContainerFixture fixture
     [InlineData(OpenedGroup)]
     [InlineData(DeletedProposal)]
     [InlineData(Student)]
-    [InlineData(BeforeGrant)]
+    [InlineData(BeforeMembership)]
     public Task Any_other_conversation_is_refused(string conversation) => RunTestAsync(async service =>
     {
         // The conversation, refused
@@ -158,7 +159,7 @@ public class ProposalConversationsPostgresTests(PostgresContainerFixture fixture
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
-        // The instant every conversation and grant is dated from
+        // The instant every conversation and membership is dated from
         var now = DateTimeOffset.UtcNow;
 
         // The reviewer, the latecomer and the student
@@ -167,20 +168,11 @@ public class ProposalConversationsPostgresTests(PostgresContainerFixture fixture
             HostedSeed.NewUser(_latecomerId, "Latecomer"),
             HostedSeed.NewUser(_studentId, "Student"));
 
-        // The reviewer preparing the competitions for a month, the latecomer since yesterday
-        context.UserGrants.AddRange(
-            new UserGrant
-            {
-                UserId = _reviewerId,
-                Capability = UserCapability.PrepareCompetitions,
-                GrantedAt = now.AddDays(-30),
-            },
-            new UserGrant
-            {
-                UserId = _latecomerId,
-                Capability = UserCapability.PrepareCompetitions,
-                GrantedAt = now.AddDays(-1),
-            });
+        // The reviewer on the MathComps organization's list for a month
+        SelectionSeed.NewMember(context, "reviewer@example.com", now.AddDays(-30));
+
+        // The latecomer on the MathComps organization's list only since yesterday
+        SelectionSeed.NewMember(context, "latecomer@example.com", now.AddDays(-1));
 
         // The season every round sits in
         var season = SelectionSeed.NewSeason(context);
@@ -229,7 +221,7 @@ public class ProposalConversationsPostgresTests(PostgresContainerFixture fixture
         SeedConversation(context, OpenedGroup, _reviewerId, opened, now.AddDays(-2));
         SeedConversation(context, DeletedProposal, _reviewerId, deleted, now.AddDays(-2));
         SeedConversation(context, Student, _studentId, pooled, now.AddDays(-2));
-        SeedConversation(context, BeforeGrant, _latecomerId, pooled, now.AddDays(-2));
+        SeedConversation(context, BeforeMembership, _latecomerId, pooled, now.AddDays(-2));
 
         // A handout problem
         var handout = new Handout { Id = Guid.CreateVersion7(), ContentId = "handout-one" };

@@ -298,8 +298,9 @@ export function readAreaRun(
   preparesCompetitions: boolean
 ): AreaRun {
   switch (entry.kind) {
-    // A clock ran on it, so where it stands follows from it, and so does whether notes are still taken:
-    // no note is taken from a reader who prepares competitions, nobody grading their run
+    // A clock ran on it, so where it stands follows from it, and so does whether notes are still
+    // taken: no note is taken from a reader who prepares competitions, whose runs are test runs
+    // nobody grades
     case 'sat':
       return {
         ...entry,

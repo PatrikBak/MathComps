@@ -38,7 +38,6 @@ namespace MathComps.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "proposal_area", new[] { "algebra", "combinatorics", "geometry", "number_theory" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "tag_type", new[] { "area", "goal", "technique", "type" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "transcript_role", new[] { "candidate", "examiner" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "user_capability", new[] { "prepare_competitions" });
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "unaccent");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
@@ -1028,6 +1027,52 @@ namespace MathComps.Infrastructure.Migrations
                     b.ToTable("news_article_comments", (string)null);
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Organization", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("slug");
+
+                    b.HasKey("Id")
+                        .HasName("pk_organizations");
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasDatabaseName("ux_organization_slug");
+
+                    b.ToTable("organizations", (string)null);
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.OrganizationMember", b =>
+                {
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("email");
+
+                    b.Property<DateTimeOffset>("AddedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("added_at");
+
+                    b.HasKey("OrganizationId", "Email")
+                        .HasName("pk_organization_members");
+
+                    b.ToTable("organization_members", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_organization_member_email_lowercase", "\"email\" = lower(\"email\")");
+                        });
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.OutgoingMail", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1503,6 +1548,10 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("number");
 
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
                     b.PrimitiveCollection<List<HostedCompetitionCategory>>("Recommended")
                         .IsRequired()
                         .HasColumnType("hosted_competition_category[]")
@@ -1520,6 +1569,9 @@ namespace MathComps.Infrastructure.Migrations
                     b.HasIndex("Number")
                         .IsUnique()
                         .HasDatabaseName("ux_proposal_number");
+
+                    b.HasIndex("OrganizationId")
+                        .HasDatabaseName("ix_proposals_organization_id");
 
                     b.ToTable("proposals", null, t =>
                         {
@@ -1676,12 +1728,19 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("name");
 
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
                     b.HasKey("Id")
                         .HasName("pk_selection_boards");
 
                     b.HasIndex("HostedGroupId")
                         .IsUnique()
                         .HasDatabaseName("ux_selection_board_hosted_group_id");
+
+                    b.HasIndex("OrganizationId")
+                        .HasDatabaseName("ix_selection_boards_organization_id");
 
                     b.ToTable("selection_boards", (string)null);
                 });
@@ -1873,34 +1932,6 @@ namespace MathComps.Infrastructure.Migrations
                         .HasDatabaseName("ux_user_external_id");
 
                     b.ToTable("users", (string)null);
-                });
-
-            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.UserGrant", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<UserCapability>("Capability")
-                        .HasColumnType("user_capability")
-                        .HasColumnName("capability");
-
-                    b.Property<DateTimeOffset>("GrantedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("granted_at");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_user_grants");
-
-                    b.HasIndex("UserId", "Capability")
-                        .IsUnique()
-                        .HasDatabaseName("ux_user_grant_user_id_capability");
-
-                    b.ToTable("user_grants", (string)null);
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.UserProblemList", b =>
@@ -2369,6 +2400,18 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("NewsArticle");
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.OrganizationMember", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Organization", "Organization")
+                        .WithMany("Members")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_organization_members_organizations_organization_id");
+
+                    b.Navigation("Organization");
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Problem", b =>
                 {
                     b.HasOne("MathComps.Domain.EfCoreEntities.Round", "Round")
@@ -2605,12 +2648,21 @@ namespace MathComps.Infrastructure.Migrations
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Proposal", b =>
                 {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_proposals_organizations_organization_id");
+
                     b.HasOne("MathComps.Domain.EfCoreEntities.Problem", "Problem")
                         .WithMany()
                         .HasForeignKey("ProblemId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_proposals_problems_problem_id");
+
+                    b.Navigation("Organization");
 
                     b.Navigation("Problem");
                 });
@@ -2694,7 +2746,16 @@ namespace MathComps.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_selection_boards_hosted_groups_hosted_group_id");
 
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_selection_boards_organizations_organization_id");
+
                     b.Navigation("HostedGroup");
+
+                    b.Navigation("Organization");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.SelectionPaper", b =>
@@ -2749,18 +2810,6 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("Paper");
 
                     b.Navigation("Proposal");
-                });
-
-            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.UserGrant", b =>
-                {
-                    b.HasOne("MathComps.Domain.EfCoreEntities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_grants_users_user_id");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.UserProblemList", b =>
@@ -2856,6 +2905,11 @@ namespace MathComps.Infrastructure.Migrations
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.NewsArticle", b =>
                 {
                     b.Navigation("Comments");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Organization", b =>
+                {
+                    b.Navigation("Members");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Problem", b =>

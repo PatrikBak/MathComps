@@ -29,8 +29,8 @@ public sealed record DefenseGrading(DefenseProblemRound? Round, DateTimeOffset S
         // The practice group, which never closes and grades nobody.
         { IsHosted: true, GroupClosesAt: null } => false,
 
-        // Started before its group opened. Only a competition preparer can argue a problem or enter a round that
-        // early, and nobody grades a preparer's run.
+        // Started before its group opened, which only somebody preparing the competitions can do, and that makes
+        // it a test run nobody grades.
         { GroupOpensAt: { } opensAt } when StartedAt < opensAt => false,
 
         // A round somebody was grading, whether or not it still belongs to the group that ran it.

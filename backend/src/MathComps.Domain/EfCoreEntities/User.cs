@@ -91,8 +91,8 @@ public class User
     /// When the student first accepted the competition rules, or null while they have not.
     /// </summary>
     /// <remarks>
-    /// Written the first time they spend an entry, which is where the rules are put in front of them. It records
-    /// the acceptance and not which version of the rules it was.
+    /// Written the first time they spend an entry while not preparing the competitions, which is where the rules
+    /// are put in front of them. It records the acceptance and not which version of the rules it was.
     /// </remarks>
     public DateTimeOffset? RulesAcceptedAt { get; set; }
 

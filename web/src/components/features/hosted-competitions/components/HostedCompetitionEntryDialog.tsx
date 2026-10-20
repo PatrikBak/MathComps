@@ -29,7 +29,10 @@ type HostedCompetitionEntryDialogProps = {
   group: HostedCompetitionGroup
   /** The competition being entered. */
   competition: HostedCompetition
-  /** Whether the student has yet to accept the rules, which is true of a first entry ever and no other. */
+  /**
+   * Whether the student has yet to accept the rules, which is true of a first entry ever, unless
+   * they prepare the competitions, and of no other.
+   */
   needsRulesAccept: boolean
   /** Drops the question without entering. */
   onClose: () => void
@@ -45,7 +48,8 @@ type HostedCompetitionEntryDialogProps = {
  * The last thing between a student and a running clock, the press behind it being one that cannot be taken
  * back or repeated.
  *
- * It says what the press does, and on a first entry ever holds the rules and the box that accepts them.
+ * It says what the press does, and on a first entry ever by somebody not preparing the
+ * competitions holds the rules and the box that accepts them.
  *
  * The other thing an entry can be spent on lives here too: reading the problems and not competing, asked
  * as its own question in the same shell.

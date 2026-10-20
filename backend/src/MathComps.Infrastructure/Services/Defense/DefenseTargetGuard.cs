@@ -3,7 +3,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Competitions;
-using MathComps.Infrastructure.Services.Users;
+using MathComps.Infrastructure.Services.Organizations;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.Services.Defense;
@@ -15,9 +15,9 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// that entry into the permission as well.
 /// </summary>
 /// <param name="dbContextFactory">Creates the contexts the checks run on.</param>
-/// <param name="grants">Reads whether the student prepares the competitions.</param>
+/// <param name="members">Reads whether the student prepares the competitions.</param>
 public sealed class DefenseTargetGuard(
-    IDbContextFactory<MathCompsDbContext> dbContextFactory, IUserGrantService grants)
+    IDbContextFactory<MathCompsDbContext> dbContextFactory, IOrganizationMemberService members)
     : IDefenseTargetGuard
 {
     /// <inheritdoc/>
@@ -84,8 +84,7 @@ public sealed class DefenseTargetGuard(
             throw new HostedProblemNotFoundException();
 
         // Whether the student prepares the competitions, which opens the proposals and the gates to them.
-        var preparesCompetitions = await grants.HasAsync(
-            userId, UserCapability.PrepareCompetitions, cancellationToken);
+        var preparesCompetitions = await members.IsMemberAsync(userId, Organization.MathCompsSlug, cancellationToken);
 
         // A problem among the proposals is a reviewer's to argue, and only while a live proposal files it. Anybody
         // else, and any problem parked there with none, gets the answer an unarguable problem gets.

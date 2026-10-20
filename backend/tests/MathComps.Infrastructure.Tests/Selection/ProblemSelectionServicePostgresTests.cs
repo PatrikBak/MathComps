@@ -40,12 +40,12 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     private readonly Guid _goneReviewerId = Guid.CreateVersion7();
 
     /// <summary>
-    /// A student, who never prepared the competitions.
+    /// A student, whose address was never on the MathComps organization's list.
     /// </summary>
     private readonly Guid _studentId = Guid.CreateVersion7();
 
     /// <summary>
-    /// A reviewer preparing the competitions only since yesterday.
+    /// A reviewer on the MathComps organization's list only since yesterday.
     /// </summary>
     private readonly Guid _latecomerId = Guid.CreateVersion7();
 
@@ -322,9 +322,9 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     /// <summary>
     /// Conversations read newest first, each with who held it, how many messages it holds and whether the problem
     /// still has the statement it was argued against, in any of its languages. The author carries their username and
-    /// address, and no username once their account is deleted. A deleted account keeps its username, so a read that
-    /// skipped the check would still sign the deleted reviewer's words. Only the reviewers' conversations read: the
-    /// student's, the first proposal's newest, is left out, and so is the latecomer's from before they were preparing.
+    /// address. Only the reviewers' conversations read: the student's, the first proposal's newest, is left out, and so
+    /// is the latecomer's from before they were on the list. So is the deleted reviewer's, since deleting an account
+    /// clears the address that kept it on the list.
     /// </summary>
     [Fact]
     public Task Conversations_read_with_their_authors_and_whether_their_statement_stands() =>
@@ -338,12 +338,13 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
                 .Where(conversation => conversation.ProposalId == _pool[1])
                 .ToList();
 
-            // Newest first: the English statement and the Slovak one still stand, the deleted reviewer's is gone
+            // Newest first: the English statement and the Slovak one still stand, the older statement is gone, and
+            // the deleted reviewer's conversation is left out
             Assert.Equal(
                 [
                     (new UserIdentityDto(_reviewerId, "Reviewer", "reviewer@example.com"), 2, false),
                     (new UserIdentityDto(_reviewerId, "Reviewer", "reviewer@example.com"), 1, false),
-                    (new UserIdentityDto(_goneReviewerId, null, null), 1, true),
+                    (new UserIdentityDto(_reviewerId, "Reviewer", "reviewer@example.com"), 1, true),
                 ],
                 conversations.Select(conversation => (
                     conversation.Author,
@@ -385,17 +386,12 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         var gone = HostedSeed.NewUser(_goneReviewerId, "Gone");
         gone.Email = null;
         gone.IsDeleted = true;
-        gone.Email = null;
         context.Users.Add(gone);
 
-        // The live reviewer and the deleted one, preparing the competitions since well before any conversation
-        context.UserGrants.AddRange(
-            new[] { _reviewerId, _goneReviewerId }.Select(reviewerId => new UserGrant
-            {
-                UserId = reviewerId,
-                Capability = UserCapability.PrepareCompetitions,
-                GrantedAt = DateTimeOffset.UtcNow.AddDays(-30),
-            }));
+        // The live reviewer's address and the deleted one's, both on the MathComps organization's list since well
+        // before any conversation
+        SelectionSeed.NewMember(context, "reviewer@example.com", DateTimeOffset.UtcNow.AddDays(-30));
+        SelectionSeed.NewMember(context, "gone@example.com", DateTimeOffset.UtcNow.AddDays(-30));
 
         // The student
         context.Users.Add(HostedSeed.NewUser(_studentId, "Student"));
@@ -403,13 +399,8 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // The latecomer
         context.Users.Add(HostedSeed.NewUser(_latecomerId, "Latecomer"));
 
-        // The latecomer preparing the competitions since yesterday
-        context.UserGrants.Add(new UserGrant
-        {
-            UserId = _latecomerId,
-            Capability = UserCapability.PrepareCompetitions,
-            GrantedAt = DateTimeOffset.UtcNow.AddDays(-1),
-        });
+        // The latecomer on the MathComps organization's list since yesterday
+        SelectionSeed.NewMember(context, "latecomer@example.com", DateTimeOffset.UtcNow.AddDays(-1));
 
         // The season every round sits in
         var season = SelectionSeed.NewSeason(context);
@@ -492,8 +483,11 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
                 CommentId = SeedComment(context, $"On {paperId}"),
             });
 
-        // The first proposal's oldest conversation, by the deleted reviewer about a statement since changed
-        SeedConversation(context, _pool[1], _goneReviewerId, "Older statement", now.AddDays(-2), "Old");
+        // The first proposal's oldest conversation, by the deleted reviewer
+        SeedConversation(context, _pool[1], _goneReviewerId, "Statement 1 in EN", now.AddDays(-3), "Gone");
+
+        // The first proposal's next conversation, about a statement since changed
+        SeedConversation(context, _pool[1], _reviewerId, "Older statement", now.AddDays(-2), "Old");
 
         // The first proposal's conversation about its Slovak statement
         SeedConversation(context, _pool[1], _reviewerId, "Statement 1 in SK", now.AddDays(-1).AddHours(-1), "Hi");
@@ -504,7 +498,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // And the student's about it, newer still, held while the problem sat somewhere students reach
         SeedConversation(context, _pool[1], _studentId, "Statement 1 in EN", now.AddHours(-1), "Mine");
 
-        // And the latecomer's, held before they were preparing
+        // And the latecomer's, held before they were on the list
         SeedConversation(context, _pool[1], _latecomerId, "Statement 1 in EN", now.AddDays(-2).AddHours(1), "Early");
 
         // The live reviewer's rating of the first proposal, both scores given

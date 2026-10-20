@@ -35,9 +35,10 @@ type UseEnterHostedCompetitionResult = {
 }
 
 /**
- * The two things a press can do to one competition: sit it, or give it up for the problems. Both spend the
- * entry and both carry the rules acceptance on a first entry ever, which is why they are one hook rather
- * than two copies of the same cache writes.
+ * The two things a press can do to one competition: sit it, or give it up for the problems. Both
+ * spend the entry and both carry the rules acceptance on a first entry ever by somebody not
+ * preparing the competitions, which is why they are one hook rather than two copies of the same
+ * cache writes.
  *
  * The call is not optimistic. Showing a clock that a failure then takes back would be showing a student
  * time they never had, and this is the one press on the site with nothing behind it to undo.
@@ -78,7 +79,8 @@ export function useEnterHostedCompetition(
         forgetDefenseDraft({ kind: 'competition', problemId: problem.id, readerKey })
       }
 
-      // The acceptance that rode along with it, a first entry ever carrying one
+      // The acceptance that rode along with it, a first entry ever carrying one, unless they
+      // prepare the competitions
       writeRulesAccepted(queryClient, readerKey)
 
       // And the student, sent where the entry they just spent is read

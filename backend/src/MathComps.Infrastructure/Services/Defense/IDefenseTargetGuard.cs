@@ -20,6 +20,7 @@ public interface IDefenseTargetGuard
 }
 
 /// <summary>
-/// Thrown when a problem is not one a hosted competition sets, which is the only kind that may be argued.
+/// Thrown when a problem is not one the caller may reach: no hosted round sets it, or it sits among the proposals
+/// out of their reach.
 /// </summary>
 public sealed class HostedProblemNotFoundException() : Exception("Competition problem not found");

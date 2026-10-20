@@ -3,7 +3,7 @@ using MathComps.Domain.Contracts.Admin;
 using MathComps.Domain.Contracts.Users;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
-using MathComps.Infrastructure.Services.Users;
+using MathComps.Infrastructure.Services.Organizations;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.Services.Competitions;
@@ -19,14 +19,14 @@ internal static class HostedGrading
     /// Finds the entry one student's grade on one problem belongs to, if anybody grades them on it.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
-    /// <param name="grants">Reads when a student started preparing the competitions.</param>
+    /// <param name="members">Reads when a student started preparing the competitions.</param>
     /// <param name="problemId">The problem.</param>
     /// <param name="userId">The student.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The entry and the window its conversations count in, or null when nobody grades them on it.</returns>
     public static async Task<GradedEntry?> FindGradedEntryAsync(
         MathCompsDbContext dbContext,
-        IUserGrantService grants,
+        IOrganizationMemberService members,
         Guid problemId,
         Guid userId,
         CancellationToken cancellationToken)
@@ -56,8 +56,7 @@ internal static class HostedGrading
             return null;
 
         // When the student started preparing the competitions, if they still do.
-        var preparerSince = await grants.GetGrantedAtAsync(
-            userId, UserCapability.PrepareCompetitions, cancellationToken);
+        var preparerSince = await members.GetMemberSinceAsync(userId, Organization.MathCompsSlug, cancellationToken);
 
         // The entry and when its conversations count, where anybody grades it.
         return GradedEntry.Of(
@@ -77,7 +76,7 @@ internal static class HostedGrading
     /// grades them on it, and they started a conversation about it while the entry counted.
     /// </summary>
     /// <param name="dbContext"><inheritdoc cref="FindGradedEntryAsync" path="/param[@name='dbContext']"/></param>
-    /// <param name="grants"><inheritdoc cref="FindGradedEntryAsync" path="/param[@name='grants']"/></param>
+    /// <param name="members"><inheritdoc cref="FindGradedEntryAsync" path="/param[@name='members']"/></param>
     /// <param name="problemId"><inheritdoc cref="FindGradedEntryAsync" path="/param[@name='problemId']"/></param>
     /// <param name="userId"><inheritdoc cref="FindGradedEntryAsync" path="/param[@name='userId']"/></param>
     /// <param name="cancellationToken">
@@ -88,13 +87,13 @@ internal static class HostedGrading
     /// </returns>
     public static async Task<GradedEntry?> FindGradableEntryAsync(
         MathCompsDbContext dbContext,
-        IUserGrantService grants,
+        IOrganizationMemberService members,
         Guid problemId,
         Guid userId,
         CancellationToken cancellationToken)
     {
         // The entry the grade belongs to, if anybody grades the student on the problem.
-        var entry = await FindGradedEntryAsync(dbContext, grants, problemId, userId, cancellationToken);
+        var entry = await FindGradedEntryAsync(dbContext, members, problemId, userId, cancellationToken);
 
         // Nobody grades the student on the problem.
         if (entry is null)
@@ -121,13 +120,13 @@ internal static class HostedGrading
     /// <see cref="ProblemGradings.FinishedAfter"/> when it was written inside the window.
     /// </remarks>
     /// <param name="dbContext">The operation's database context.</param>
-    /// <param name="grants"><inheritdoc cref="FindGradedEntryAsync" path="/param[@name='grants']"/></param>
+    /// <param name="members"><inheritdoc cref="FindGradedEntryAsync" path="/param[@name='members']"/></param>
     /// <param name="entries">The entries, into any rounds.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>Where each graded entry stands on each problem of its round.</returns>
     public static async Task<ProblemGradings> ReadProblemGradingsAsync(
         MathCompsDbContext dbContext,
-        IUserGrantService grants,
+        IOrganizationMemberService members,
         IReadOnlyCollection<SpentEntry> entries,
         CancellationToken cancellationToken)
     {
@@ -136,9 +135,9 @@ internal static class HostedGrading
             return ProblemGradings.None;
 
         // When each entrant who prepares the competitions started doing so.
-        var preparerSince = await grants.GetGrantedAtAsync(
+        var preparerSince = await members.GetMemberSinceAsync(
             [.. entries.Select(entry => entry.UserId).Distinct()],
-            UserCapability.PrepareCompetitions,
+            Organization.MathCompsSlug,
             cancellationToken);
 
         // The entries anybody grades, each with the window its conversations count in.

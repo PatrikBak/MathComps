@@ -38,7 +38,7 @@ export function useFetchComments(target: CommentTarget): UseFetchCommentsResult 
   const { data: comments, uiState } = useApiQuery({
     queryKey: commentQueryKeys.target(target, readerId),
     fetch: (apiCall) => getComments(apiCall, target),
-    // A thread reads the same to a visitor with no account
+    // A visitor reads the threads open to everybody, so the read goes out without an account
     requireAuth: false,
     // Only read once the key's reader is settled, or the thread lands under the wrong one
     enabled: isUserLoaded,

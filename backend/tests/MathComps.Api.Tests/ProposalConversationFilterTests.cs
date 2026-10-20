@@ -167,7 +167,7 @@ public class ProposalConversationFilterTests
         // Every route carrying the reviewers' policy
         [
             .. mapped.Routes.Where(route => route.Metadata.GetOrderedMetadata<IAuthorizeData>()
-                .Any(authorize => authorize.Policy == AuthorizationPolicies.AdminOrPreparesCompetitions)),
+                .Any(authorize => authorize.Policy == AuthorizationPolicies.AdminOrOrganizationMember)),
         ];
 
     /// <summary>

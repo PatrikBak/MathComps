@@ -26,14 +26,15 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
     : PostgresTestBase<IDefenseTargetGuard>(fixture)
 {
     /// <summary>
-    /// The student holding neither an entry nor a grant.
+    /// The student holding no entry, whose account carries no address.
     /// </summary>
     private readonly Guid _studentId = Guid.CreateVersion7();
 
     /// <summary>
-    /// A student who prepares competitions.
+    /// A student who prepares competitions, whose address is on the MathComps organization's list capitalized
+    /// differently from how the account carries it.
     /// </summary>
-    private readonly Guid _grantedStudentId = Guid.CreateVersion7();
+    private readonly Guid _preparerId = Guid.CreateVersion7();
 
     /// <summary>
     /// A problem of the ordinary archive, sitting in a round no hosted group runs.
@@ -81,7 +82,7 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
     protected override void ConfigureServices(IServiceCollection services)
     {
         // What the guard asks about the student asking.
-        services.AddUserGrants();
+        services.AddOrganizationMembers();
 
         // The guard under test.
         services.AddScoped<IDefenseTargetGuard, DefenseTargetGuard>();
@@ -109,53 +110,53 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             () => guard.EnsureCanDefendAsync(_studentId, new ProblemTarget(Guid.CreateVersion7()))));
 
     /// <summary>
-    /// A parked problem is the reviewers' alone, so a student without the grant is told it is not there, the
-    /// answer an archive problem gets, rather than the embargo refusal a hosted problem gets.
+    /// A parked problem is the reviewers' alone, so a student off the MathComps organization's list is told it is
+    /// not there, the answer an archive problem gets, rather than the embargo refusal a hosted problem gets.
     /// </summary>
     [Fact]
-    public Task A_problem_among_the_proposals_is_not_there_for_a_student_without_the_grant() => RunTestAsync(
+    public Task A_problem_among_the_proposals_is_not_there_for_a_student_off_the_list() => RunTestAsync(
         async guard =>
-            // Signed in, holding no grant
+            // Signed in, on no list
             await Assert.ThrowsAsync<HostedProblemNotFoundException>(
                 () => guard.EnsureCanDefendAsync(_studentId, new ProblemTarget(_proposedProblemId))));
 
     /// <summary>
-    /// A holder of the grant argues a parked problem a live proposal files, and the spend ceiling still reaches
-    /// them, there being no entry to lift it. Every refusal of a proposal varies one thing from this case, so a
-    /// guard turning the reviewers away too fails here.
+    /// A preparer argues a parked problem a live proposal files, and the spend ceiling still reaches them, there
+    /// being no entry to lift it. Every refusal of a proposal varies one thing from this case, so a guard turning
+    /// the reviewers away too fails here.
     /// </summary>
     [Fact]
-    public Task A_problem_among_the_proposals_can_be_argued_by_a_grant_holder() => RunTestAsync(async guard =>
+    public Task A_problem_among_the_proposals_can_be_argued_by_a_preparer() => RunTestAsync(async guard =>
     {
         // Cleared, on a round nobody has entered or could
         var holdsEntry = await guard.EnsureCanDefendAsync(
-            _grantedStudentId, new ProblemTarget(_proposedProblemId));
+            _preparerId, new ProblemTarget(_proposedProblemId));
 
         // And the ceiling reaches them, there being no entry to lift it
         Assert.False(holdsEntry);
     });
 
     /// <summary>
-    /// A deleted proposal is gone from the selection, so even a holder of the grant is told its problem is not
-    /// there. The problem still sits in the proposals round, so a guard reading only where a problem sits would
-    /// clear it as it clears the holder case above.
+    /// A deleted proposal is gone from the selection, so even a preparer is told its problem is not there. The
+    /// problem still sits in the proposals round, so a guard reading only where a problem sits would clear it as
+    /// it clears the preparer case above.
     /// </summary>
     [Fact]
-    public Task A_problem_whose_proposal_was_deleted_cannot_be_argued_by_a_grant_holder() => RunTestAsync(
+    public Task A_problem_whose_proposal_was_deleted_cannot_be_argued_by_a_preparer() => RunTestAsync(
         async guard =>
             // Preparing the competitions, on a problem the pool dropped
             await Assert.ThrowsAsync<HostedProblemNotFoundException>(
-                () => guard.EnsureCanDefendAsync(_grantedStudentId, new ProblemTarget(_deletedProposalProblemId))));
+                () => guard.EnsureCanDefendAsync(_preparerId, new ProblemTarget(_deletedProposalProblemId))));
 
     /// <summary>
     /// A problem parked in the proposals round with no proposal filing it was never taken into the pool, so a
-    /// holder of the grant is told it is not there either.
+    /// preparer is told it is not there either.
     /// </summary>
     [Fact]
-    public Task A_problem_no_proposal_files_cannot_be_argued_by_a_grant_holder() => RunTestAsync(async guard =>
+    public Task A_problem_no_proposal_files_cannot_be_argued_by_a_preparer() => RunTestAsync(async guard =>
         // Preparing the competitions, on a problem nobody proposed
         await Assert.ThrowsAsync<HostedProblemNotFoundException>(
-            () => guard.EnsureCanDefendAsync(_grantedStudentId, new ProblemTarget(_unfiledProblemId))));
+            () => guard.EnsureCanDefendAsync(_preparerId, new ProblemTarget(_unfiledProblemId))));
 
     /// <summary>
     /// An embargoed hosted problem cannot be argued by a student holding no entry into its round, which is the
@@ -213,30 +214,30 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// A student who prepares competitions argues an embargoed problem holding no entry, and still counts against
-    /// the daily spend ceiling. The grant says when a competition may be reached; what a conversation costs is the entry's to
-    /// answer, and they hold none.
+    /// the daily spend ceiling. Preparing competitions says when a competition may be reached; what a conversation
+    /// costs is the entry's to answer, and they hold none.
     /// </summary>
     [Fact]
-    public Task A_granted_student_argues_an_embargoed_problem_and_still_pays_for_it() => RunTestAsync(
+    public Task A_preparer_argues_an_embargoed_problem_and_still_pays_for_it() => RunTestAsync(
         async guard =>
         {
             // Cleared on a round nobody has entered
             var holdsEntry = await guard.EnsureCanDefendAsync(
-                _grantedStudentId, new ProblemTarget(_embargoedProblemId));
+                _preparerId, new ProblemTarget(_embargoedProblemId));
 
             // And the ceiling still reaches them, an entry being what lifts it
             Assert.False(holdsEntry);
         });
 
     /// <summary>
-    /// The grant does not make an archive problem arguable. Whether the site hosts a problem at all is settled
-    /// before any question of timing, so a grant that reached it would open every problem on the site.
+    /// Preparing competitions does not make an archive problem arguable. Whether the site hosts a problem at all is
+    /// settled before any question of timing, so a waiver that reached it would open every problem on the site.
     /// </summary>
     [Fact]
-    public Task A_granted_student_still_cannot_argue_an_archive_problem() => RunTestAsync(async guard =>
+    public Task A_preparer_still_cannot_argue_an_archive_problem() => RunTestAsync(async guard =>
         // A student who prepares competitions, on a problem that was never one of the site's own
         await Assert.ThrowsAsync<HostedProblemNotFoundException>(
-            () => guard.EnsureCanDefendAsync(_grantedStudentId, new ProblemTarget(_archiveProblemId))));
+            () => guard.EnsureCanDefendAsync(_preparerId, new ProblemTarget(_archiveProblemId))));
 
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
@@ -244,16 +245,19 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
         // The students the checks are made as.
         context.Users.AddRange(
             new User { Id = _studentId, ExternalId = "ext-student", Username = "Student" },
-            new User { Id = _grantedStudentId, ExternalId = "ext-granted", Username = "Granted" },
+            new User
+            {
+                Id = _preparerId,
+                ExternalId = "ext-preparer",
+                Username = "Preparer",
+                Email = "Preparer@example.com",
+            },
             new User { Id = _neighbourId, ExternalId = "ext-neighbour", Username = "Neighbour" },
             new User { Id = _forfeiterId, ExternalId = "ext-forfeiter", Username = "Forfeiter" });
 
-        // The grant letting the granted student past a competition's gates.
-        context.UserGrants.Add(new UserGrant
-        {
-            UserId = _grantedStudentId,
-            Capability = UserCapability.PrepareCompetitions,
-        });
+        // The preparer's address on the MathComps organization's list, lowercased as the list keeps it, which lets
+        // them past a competition's gates and into the proposals.
+        SelectionSeed.NewMember(context, "preparer@example.com", DateTimeOffset.UtcNow);
 
         // The season the round below sits in.
         var season = new Season { Id = Guid.NewGuid(), StartYear = 2026, EditionNumber = 76 };
@@ -331,7 +335,8 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             VisibleSince = closesAt,
         });
 
-        // Its first problem, the one a student without the grant is refused and a holder is cleared on.
+        // Its first problem, the one a student off the MathComps organization's list is refused and a preparer is
+        // cleared on.
         context.Problems.Add(new Problem
         {
             Id = _proposedProblemId,
@@ -344,6 +349,7 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
         context.Proposals.Add(new Proposal
         {
             ProblemId = _proposedProblemId,
+            OrganizationId = SelectionSeed.MathCompsId(context),
             Number = 1,
             Title = "Live proposal",
             Area = ProposalArea.Algebra,
@@ -363,6 +369,7 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
         context.Proposals.Add(new Proposal
         {
             ProblemId = _deletedProposalProblemId,
+            OrganizationId = SelectionSeed.MathCompsId(context),
             Number = 2,
             Title = "Deleted proposal",
             Area = ProposalArea.Algebra,
@@ -406,6 +413,7 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
         context.Proposals.Add(new Proposal
         {
             ProblemId = _enteredProblemId,
+            OrganizationId = SelectionSeed.MathCompsId(context),
             Number = 4,
             Title = "Picked proposal",
             Area = ProposalArea.Algebra,
