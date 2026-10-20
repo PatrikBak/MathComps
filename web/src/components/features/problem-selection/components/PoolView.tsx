@@ -14,7 +14,6 @@ import { focusForReader } from '@/components/shared/utils/focus-utils'
 import type { TableSort } from '@/components/shared/utils/table-sort'
 import { useFocusHandOff } from '@/hooks/use-focus-hand-off'
 import { useResortableOrder } from '@/hooks/use-resortable-order'
-import { useShowFromTop } from '@/hooks/use-show-from-top'
 import type { Locale } from '@/i18n/i18n'
 
 import { usePoolViewMode } from '../hooks/use-pool-view-mode'
@@ -145,9 +144,9 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
     if (slot !== null) setCommentCountSlot(slot)
   }, [])
 
-  // The problems the filters let through, each kept where it stood when their order was last set, whether that
-  // order is out of date, and the way to set it again
-  const { shown, isOutOfOrder, resort } = useResortableOrder({
+  // The problems the filters let through, each kept where it stood when their order was last set, whether a change
+  // waits, the spot over the list the page comes back to, and the way to set the order again from there
+  const { shown, isChangeWaiting, listRef, resortFromTop } = useResortableOrder({
     items: matches?.shown ?? [],
     keyOf: (proposal) => proposal.id,
     // The order set again as the filter changes, its search as the pool reads it, and as another board goes on screen
@@ -157,12 +156,7 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
     ]),
     // A problem the filters let through after the order was set goes where the order it comes in puts it
     newcomerPlace: 'inPlace',
-  })
-
-  // The spot over the list the page comes back to, and the way to set the order again from there, the focus on the
-  // line over the pool
-  const { listRef, showFromTop: resortFromTop } = useShowFromTop({
-    show: resort,
+    // The focus on the line over the pool as the order is set again
     focusTarget: countRef,
   })
 
@@ -248,7 +242,7 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
           <WaitingChangeButton
             label={t('resort')}
             icon={ArrowDownUp}
-            isWaiting={HOLDS_ORDER[mode] && isOutOfOrder && waitingSlot === null}
+            isWaiting={HOLDS_ORDER[mode] && isChangeWaiting && waitingSlot === null}
             onShow={resortFromTop}
             fallbackRef={countRef}
           />
