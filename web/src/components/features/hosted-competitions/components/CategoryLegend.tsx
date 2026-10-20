@@ -14,7 +14,7 @@ import { DisclosureNote } from './DisclosureNote'
 import { HeaderDisclosure } from './HeaderDisclosure'
 
 /**
- * What the three levels are, said once in the header for every group on the page.
+ * What each level is, said once in the header for every group on the page.
  */
 export function CategoryLegend() {
   // Competitions copy
@@ -29,7 +29,7 @@ export function CategoryLegend() {
    */
   function hintFor(category: HostedCompetitionCategory): string {
     switch (category) {
-      // The easiest of the three
+      // The easiest
       case 'elementary':
         return t('categoryHints.elementary')
 
@@ -61,7 +61,7 @@ export function CategoryLegend() {
         ))}
       </dl>
 
-      {/* What the three names on their own would imply the opposite of */}
+      {/* What the names on their own would imply the opposite of */}
       <p className="mt-3.5 text-sm text-muted">{t('categoryNote')}</p>
 
       {/* What else the program might run, and the way to ask for it */}

@@ -4,8 +4,10 @@ using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Extensions;
+using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Admin;
+using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using static MathComps.Infrastructure.Tests.TestInfrastructure.HostedSeed;
@@ -33,6 +35,12 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     /// What addresses the practice group.
     /// </summary>
     private const string PracticeSlug = "mc-practice";
+
+    /// <summary>
+    /// How long a note stays open after an entry ends, in minutes, set apart from the default and from every clock
+    /// length.
+    /// </summary>
+    private const int NoteGraceMinutes = 25;
 
     /// <summary>
     /// When every seeded clock started, days before the graded group closed.
@@ -70,7 +78,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     private readonly Guid _carolId = Guid.CreateVersion7();
 
     /// <summary>
-    /// A student already preparing the competitions when they sat the advanced round, which made it a test run.
+    /// Somebody already preparing the competitions when they sat the advanced round, which made it a preparer's run.
     /// </summary>
     private readonly Guid _preparerId = Guid.CreateVersion7();
 
@@ -148,6 +156,12 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // The service under test.
         services.AddScoped<IAdminGradingService, AdminGradingService>();
 
+        // The competitions service, which says how long a note about a solution stays open.
+        services.AddScoped<IHostedCompetitionService, HostedCompetitionService>();
+
+        // The window a note about a solution stays open in.
+        services.Configure<HostedCompetitionOptions>(options => options.NoteGraceMinutes = NoteGraceMinutes);
+
         // The bounds the review service is built with.
         services.AddPaginationOptions();
 
@@ -162,8 +176,9 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     /// The board sets out each competition of the group, its problems in order, and every graded entrant who spoke
     /// about one of those problems, each on every problem, counting only the conversations each entrant started while
     /// their entry counted: Alice's third conversation came after she handed in, her practice on the second problem
-    /// after the close, and Bob's second after his clock ran out. Each entrant carries how far into their own clock
-    /// they last wrote about each problem while the entry counted, summed.
+    /// after the close, and Bob's second after his clock ran out. Each entrant carries when their clock started,
+    /// when they handed in, and how far into their own clock they last wrote about each problem while the entry
+    /// counted, summed.
     /// Nobody holds a grade yet.
     /// </summary>
     [Fact]
@@ -191,6 +206,12 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
         // Graded are Alice and Bob, by username
         Assert.Equal(["Alice", "Bob"], advanced.Entrants.Select(entrant => entrant.User.Username));
+
+        // Both clocks started when they were seeded to
+        Assert.Equal([_startedAt, _startedAt], advanced.Entrants.Select(entrant => entrant.StartedAt));
+
+        // Alice handed in an hour in, and Bob never did
+        Assert.Equal([_startedAt.AddMinutes(60), null], advanced.Entrants.Select(entrant => entrant.FinishedAt));
 
         // Alice finished half an hour in, what she wrote after handing in left out, and Bob just inside his clock,
         // what he wrote past it left out
@@ -227,11 +248,11 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// The board names its group by the node its first round runs under, in every language, and says when the group
-    /// took entries.
+    /// The board names its group by the node its first round runs under, in every language, says when the group
+    /// took entries, how long its clocks run, and how long a note stays open after one ends.
     /// </summary>
     [Fact]
-    public Task The_board_names_its_group_and_when_it_took_entries() => RunTestAsync(async service =>
+    public Task The_board_names_its_group_and_the_terms_it_runs_on() => RunTestAsync(async service =>
     {
         // Read the graded group's board
         var board = await service.GetBoardAsync(GradedSlug);
@@ -255,11 +276,17 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
         // Closed when the group was seeded to close
         Assert.Equal(_closesAt, board.ClosesAt);
+
+        // Its clocks run as long as the group was seeded with
+        Assert.Equal(180, board.ClockMinutes);
+
+        // And a note stays open as long as the hosted competition options say
+        Assert.Equal(NoteGraceMinutes, board.NoteGraceMinutes);
     });
 
     /// <summary>
     /// Only a run held to the gates is graded: an entry given up for the problems is no run whatever was argued
-    /// under it, a test run is nobody's to grade, and a student who never entered is no entrant however much they
+    /// under it, a preparer's run is nobody's to grade, and a student who never entered is no entrant however much they
     /// practised afterwards.
     /// </summary>
     [Fact]
@@ -277,7 +304,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Not Carol, who gave her entry up
         Assert.DoesNotContain(_carolId, graded);
 
-        // Not the preparer, whose run was a test run
+        // Not the preparer, whose run nobody grades
         Assert.DoesNotContain(_preparerId, graded);
 
         // Not the stranger, who never entered
@@ -350,7 +377,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// A student nobody grades on a problem still has their conversations on it listed, with no grading: an entry
-    /// given up, a test run, a student who never entered, and the practice group.
+    /// given up, a preparer's run, a student who never entered, and the practice group.
     /// </summary>
     [Fact]
     public Task A_student_nobody_grades_has_their_conversations_listed_ungraded() => RunTestAsync(async _ =>
@@ -371,7 +398,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Carol gave her entry up
         await AssertListedUngradedAsync(_carolId, _advancedFirstId);
 
-        // The preparer's run was a test run
+        // The preparer's run, which nobody grades
         await AssertListedUngradedAsync(_preparerId, _advancedFirstId);
 
         // The stranger never entered
@@ -1151,7 +1178,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Carol argued one of them anyway
         NewConversation(context, Guid.CreateVersion7(), _carolId, _advancedFirstId, _startedAt.AddMinutes(5));
 
-        // The preparer sat the advanced round as a test run
+        // The preparer sat the advanced round, which makes it a preparer's run
         context.HostedEntries.Add(NewEntry(_preparerId, _advancedRoundId, _startedAt));
 
         // Arguing a problem inside the clock

@@ -119,7 +119,7 @@ public enum ApiErrorCode
     DefenseFeedbackCommentTooLong,
 
     /// <summary>
-    /// A rewind or delete was asked of a conversation argued under a graded round, which cannot be changed.
+    /// A rewind or delete was asked of a conversation the student is graded on, which cannot be changed.
     /// </summary>
     DefenseGradedSessionImmutable,
 
@@ -159,7 +159,7 @@ public enum ApiErrorCode
     HostedEntryNotRunning,
 
     /// <summary>
-    /// A note for the graders was left or taken back under a test run, which nobody grades.
+    /// A note for the graders was left or taken back under a preparer's run, which nobody grades.
     /// </summary>
     HostedEntryNotGraded,
 

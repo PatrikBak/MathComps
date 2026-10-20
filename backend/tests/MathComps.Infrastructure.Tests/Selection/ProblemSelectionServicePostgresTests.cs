@@ -406,6 +406,40 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
                 .Select(rating => (rating.Rater, rating.IsOwn, rating.Beauty, rating.Difficulty)));
     });
 
+    /// <summary>
+    /// The selection reads as needing every language, since the migrations set MathComps' row that way: its problems
+    /// go into the hosted rounds.
+    /// </summary>
+    [Fact]
+    public Task MathComps_needs_every_language() => RunTestAsync(async service =>
+    {
+        // The selection
+        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
+
+        // Needing a text in every language
+        Assert.True(selection.NeedsEveryLanguage);
+    });
+
+    /// <summary>
+    /// The selection carries whatever its organization's row says, so an organization set to any one text reads as
+    /// needing no more than one.
+    /// </summary>
+    [Fact]
+    public Task The_organization_says_which_languages_it_needs() => RunTestAsync(async service =>
+    {
+        // MathComps set to any one text
+        await QueryAsync(context => context.Organizations
+            .Where(organization => organization.Slug == Organization.MathCompsSlug)
+            .ExecuteUpdateAsync(setters =>
+                setters.SetProperty(organization => organization.NeedsEveryLanguage, false)));
+
+        // The selection
+        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
+
+        // Needing no more than one text
+        Assert.False(selection.NeedsEveryLanguage);
+    });
+
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {

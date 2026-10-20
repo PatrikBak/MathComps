@@ -9,12 +9,14 @@ import { useAddressSync } from '@/hooks/use-address-sync'
 import { useApiQuery } from '@/hooks/use-api-query'
 import { useInitialUrlState } from '@/hooks/use-initial-url-state'
 import { useSteppedSelection, type UseSteppedSelectionResult } from '@/hooks/use-stepped-selection'
-import { cachePolicy } from '@/lib/query-config'
+import { cachePolicy, hasFailedForGood } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import type { StudentProblem } from '../../conversation/hooks/use-student-conversations'
-import { gradingBoardQueryKey } from '../../grades/hooks/grade-cache'
+import { BOARD_REFRESH_MS, gradingBoardQueryKey } from '../../grades/hooks/grade-cache'
+import { useIsGradeWriting } from '../../grades/hooks/use-update-grade'
 import { pairKey, splitPairKey } from '../../grades/model/grade-types'
+import { type EntrantRun, isBoardLive } from '../model/entrant-run'
 import {
   type BoardRow,
   buildRows,
@@ -32,6 +34,7 @@ import {
 } from '../model/grading-types'
 import { fromGradingQuery, toGradingQuery } from '../model/grading-url'
 import { fetchGradingBoard } from '../services/grading-service'
+import { useEntrantRuns } from './use-entrant-runs'
 
 /** Stands in for any map while there is no competition to fill it. */
 const EMPTY_MAP = new Map<string, never>()
@@ -60,6 +63,8 @@ type UseGradingBoardResult = {
   setSort: (sort: TableSort<SortBy>) => void
   /** The grades of the competition on screen, by pair. */
   grades: ReadonlyMap<string, GradeSummary>
+  /** Where each entrant of the competition on screen stands on their own run, by user. */
+  runs: ReadonlyMap<string, EntrantRun>
   /** How far grading the competition on screen has got. */
   progress: GradingProgress
   /** Which pair is open, and the walk through every pair with a conversation. */
@@ -78,6 +83,9 @@ type UseGradingBoardResult = {
  * a link can be sent to another. Whatever an address names that the board doesn't hold falls away once the board
  * arrives: a category the group doesn't run, and a pair the competition on screen doesn't walk.
  *
+ * While anything on the board can still change on its own, it is read again every little while, so students who
+ * write or hand in show up without a reload.
+ *
  * @param groupSlug - What addresses the group.
  *
  * @returns The board as described by {@link UseGradingBoardResult}.
@@ -86,6 +94,9 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
   // Profile copy
   const tProfile = useTranslations('profile')
 
+  // Whether any change to a grade is still out
+  const isWriting = useIsGradeWriting()
+
   // The group, its competitions, entrants and grades
   const { data, uiState } = useApiQuery({
     queryKey: gradingBoardQueryKey(groupSlug),
@@ -93,6 +104,16 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
     // The board is an admin's own read, so it is made as them
     requireAuth: true,
     ...cachePolicy.userData,
+    // Read the board again every little while as long as anything on it can still change, except over a refusal
+    // that stands or while a grade write is out, since a read landing then could cover the write with the grade from
+    // before it
+    refetchInterval: (query) =>
+      isWriting ||
+      hasFailedForGood(query.state) ||
+      query.state.data === undefined ||
+      !isBoardLive(query.state.data, Date.now())
+        ? false
+        : BOARD_REFRESH_MS,
   })
 
   // The group, once it has arrived
@@ -140,6 +161,9 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
     () => (competition === null ? EMPTY_MAP : indexGrades(competition)),
     [competition]
   )
+
+  // Where each entrant of the competition on screen stands on their own run
+  const runs = useEntrantRuns({ board: data ?? null, competition })
 
   // The competition's rows, by name
   const rowsByName = useMemo(
@@ -210,6 +234,7 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
     sort,
     setSort,
     grades,
+    runs,
     progress,
     selection,
     landingTabId,

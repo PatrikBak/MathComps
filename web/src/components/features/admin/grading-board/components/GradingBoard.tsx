@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, CheckCheck } from 'lucide-react'
+import { ArrowDownUp, Check, CheckCheck } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { useCategoryName } from '@/components/features/hosted-competitions/hooks/use-category-name'
@@ -11,6 +11,7 @@ import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { SortHeader } from '@/components/shared/components/SortHeader'
 import { TruncatedText } from '@/components/shared/components/TruncatedText'
+import { WaitingChangeButton } from '@/components/shared/components/WaitingChangeButton'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import type { TableSort } from '@/components/shared/utils/table-sort'
@@ -22,6 +23,8 @@ import { AdminConversationDialog } from '../../conversation/components/AdminConv
 import { type Grade, pairKey, scoreOf } from '../../grades/model/grade-types'
 import { type ColumnToFinalize, useColumnFinalizing } from '../hooks/use-column-finalizing'
 import { useGradingBoard } from '../hooks/use-grading-board'
+import { useHeldRows } from '../hooks/use-held-rows'
+import { type EntrantRun, IS_STILL_SOLVING } from '../model/entrant-run'
 import {
   type BoardRow,
   type ColumnFinality,
@@ -36,6 +39,7 @@ import {
   type GradingGroup,
   type GradingProblem,
 } from '../model/grading-types'
+import { RunMarker } from './RunMarker'
 
 /**
  * Props for the {@link GradingBoard} component.
@@ -64,8 +68,27 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
   // Walking the pairs from the keyboard
   useStepHotkeys(board.selection)
 
+  // The rows held where they stood, and the way to show them as the latest read has them
+  const heldRows = useHeldRows({
+    rows: board.rows,
+    roundId: board.competition?.roundId ?? null,
+    sort: board.sort,
+  })
+
   // Making a whole column final, once confirmed
   const finalizing = useColumnFinalizing()
+
+  // The open student's run, while a student is open
+  const openRun =
+    board.studentProblem === null ? undefined : board.runs.get(board.studentProblem.user.id)
+
+  // How many of the students whose marks the grader is asked to make final are still solving
+  const stillSolving =
+    finalizing.asking === null
+      ? 0
+      : finalizing.asking.column.userIds
+          .map((userId) => board.runs.get(userId))
+          .filter((run) => run !== undefined && IS_STILL_SOLVING[run.kind]).length
 
   return (
     <div className="mx-auto w-full max-w-4xl">
@@ -110,7 +133,13 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
           </div>
 
           {/* How far it has got */}
-          <p className="mt-3 text-xs text-muted sm:mt-4 sm:text-sm">
+          <p
+            // Takes the focus as the way to show the latest rows leaves
+            ref={heldRows.progressRef}
+            tabIndex={-1}
+            // On a narrow screen, far enough above the grid for the button between them to cover neither
+            className="mt-3 mb-5 text-xs text-muted focus:outline-none sm:mt-4 sm:text-sm md:mb-0"
+          >
             {t.rich('progress', {
               graded: board.progress.graded,
               total: board.progress.total,
@@ -119,21 +148,35 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
             })}
           </p>
 
-          {/* Every student on every problem */}
-          <GradingGrid
-            competition={board.competition}
-            rows={board.rows}
-            grades={board.grades}
-            sort={board.sort}
-            onSort={board.setSort}
-            onOpen={board.selection.open}
-            onFinalize={finalizing.ask}
+          {/* The offer to show the rows as the latest read has them, once it moves them or brings a student */}
+          <WaitingChangeButton
+            label={t('showWhatsNew')}
+            icon={ArrowDownUp}
+            isWaiting={heldRows.isOutOfOrder}
+            onShow={heldRows.showLatest}
+            fallbackRef={heldRows.progressRef}
           />
+
+          {/* Every student on every problem */}
+          <div ref={heldRows.gridRef}>
+            <GradingGrid
+              competition={board.competition}
+              rows={heldRows.rows}
+              standings={board.rows}
+              grades={board.grades}
+              runs={board.runs}
+              sort={board.sort}
+              onSort={board.setSort}
+              onOpen={board.selection.open}
+              onFinalize={finalizing.ask}
+            />
+          </div>
 
           {/* The pair being graded */}
           <AdminConversationDialog
             selection={board.selection}
             studentProblem={board.studentProblem}
+            authorMarker={openRun && <RunMarker run={openRun} />}
             initialTabId={board.landingTabId}
           />
 
@@ -144,11 +187,20 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
               onClose={finalizing.dismiss}
               onConfirm={finalizing.confirm}
               title={t('finalize.title', { number: finalizing.asking.problem.number })}
-              message={t('finalize.message', {
-                number: finalizing.asking.problem.number,
-                count: finalizing.asking.column.userIds.length,
-                unmarked: finalizing.asking.column.unmarked,
-              })}
+              message={
+                <>
+                  {t('finalize.message', {
+                    number: finalizing.asking.problem.number,
+                    count: finalizing.asking.column.userIds.length,
+                    unmarked: finalizing.asking.column.unmarked,
+                  })}
+                  {stillSolving > 0 && (
+                    <span className="mt-1 block">
+                      {t('finalize.stillSolving', { count: stillSolving })}
+                    </span>
+                  )}
+                </>
+              }
               confirmText={t('finalize.confirm')}
               variant="default"
             />
@@ -203,10 +255,14 @@ function GroupSubtitle({ group }: GroupSubtitleProps) {
 type GradingGridProps = {
   /** The competition. */
   competition: GradingCompetition
-  /** The competition's rows, in the order asked for. */
+  /** The rows as they show, each where it stood when their order was last set. */
   rows: BoardRow[]
+  /** Every row of the competition, shown yet or not, which the places are counted among. */
+  standings: BoardRow[]
   /** The competition's grades, by pair. */
   grades: ReadonlyMap<string, GradeSummary>
+  /** Where each of the competition's entrants stands on their own run, by user. */
+  runs: ReadonlyMap<string, EntrantRun>
   /** Opens a pair, by its key. */
   onOpen: (key: string) => void
   /** Asks to make a problem's column final. */
@@ -224,7 +280,9 @@ type GradingGridProps = {
 function GradingGrid({
   competition,
   rows,
+  standings,
   grades,
+  runs,
   sort,
   onSort,
   onOpen,
@@ -278,68 +336,80 @@ function GradingGrid({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr key={row.user.id} className="border-t border-foreground/5">
-              {/* Where they stand */}
-              <td className="w-px whitespace-nowrap py-0.5 pl-5 pr-1 text-right tabular-nums text-muted sm:pl-6 sm:py-1.5">
-                {rankOf(rows, row) ?? <span className="text-muted/50">–</span>}
-              </td>
+          {rows.map((row) => {
+            // Where the student stands on their own run
+            const run = runs.get(row.user.id)
 
-              {/* Who */}
-              <th
-                scope="row"
-                className="w-full max-w-0 py-0.5 pl-2 pr-2 text-left font-medium text-foreground sm:px-3 sm:py-1.5"
-              >
-                <TruncatedText>{row.name}</TruncatedText>
-              </th>
+            // The student's row
+            return (
+              <tr key={row.user.id} className="border-t border-foreground/5">
+                {/* Where they stand */}
+                <td className="w-px whitespace-nowrap py-0.5 pl-5 pr-1 text-right tabular-nums text-muted sm:pl-6 sm:py-1.5">
+                  {rankOf(standings, row) ?? <span className="text-muted/50">–</span>}
+                </td>
 
-              {/* Each problem */}
-              {competition.problems.map((problem) => {
-                // The student's pair on this problem
-                const key = pairKey(row.user.id, problem.id)
+                {/* Who, and whether they may still write */}
+                <th
+                  scope="row"
+                  className="w-full max-w-0 py-0.5 pl-2 pr-2 text-left font-medium text-foreground sm:px-3 sm:py-1.5"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="min-w-0">
+                      <TruncatedText>{row.name}</TruncatedText>
+                    </div>
+                    {run !== undefined && <RunMarker run={run} />}
+                  </div>
+                </th>
 
-                // The student's summary on this problem, where the board holds one
-                const summary = grades.get(key)
+                {/* Each problem */}
+                {competition.problems.map((problem) => {
+                  // The student's pair on this problem
+                  const key = pairKey(row.user.id, problem.id)
 
-                return (
-                  <td key={problem.id} className="w-px px-0.5 py-0.5 text-center sm:px-1 sm:py-1">
-                    <GradeCell
-                      pairId={key}
-                      conversationCount={summary?.conversationCount ?? 0}
-                      grade={summary?.grade ?? null}
-                      onOpen={onOpen}
-                    />
-                  </td>
-                )
-              })}
+                  // The student's summary on this problem, where the board holds one
+                  const summary = grades.get(key)
 
-              {/* The sum */}
-              <td className="w-px whitespace-nowrap py-0.5 pl-2 pr-5 text-center tabular-nums sm:py-1.5 sm:pl-3 sm:pr-6">
-                {/* The number sits centred under Σ, and the final check hangs off it without moving it */}
-                <span className="relative inline-block">
-                  {row.total === null ? (
-                    <span className="text-muted/50">–</span>
-                  ) : (
-                    <span
-                      className={
-                        row.isFinal ? 'font-semibold text-foreground' : 'text-muted-foreground'
-                      }
-                    >
-                      {formatScore(row.total)}
-                    </span>
-                  )}
-                  {row.isFinal && (
-                    <Check
-                      size={12}
-                      strokeWidth={3}
-                      className="absolute left-full top-1/2 ml-0.5 -translate-y-1/2 text-success"
-                      aria-label={t('final')}
-                    />
-                  )}
-                </span>
-              </td>
-            </tr>
-          ))}
+                  // The student's cell on this problem
+                  return (
+                    <td key={problem.id} className="w-px px-0.5 py-0.5 text-center sm:px-1 sm:py-1">
+                      <GradeCell
+                        pairId={key}
+                        conversationCount={summary?.conversationCount ?? 0}
+                        grade={summary?.grade ?? null}
+                        onOpen={onOpen}
+                      />
+                    </td>
+                  )
+                })}
+
+                {/* The sum */}
+                <td className="w-px whitespace-nowrap py-0.5 pl-2 pr-5 text-center tabular-nums sm:py-1.5 sm:pl-3 sm:pr-6">
+                  {/* The number sits centred under Σ, and the final check hangs off it without moving it */}
+                  <span className="relative inline-block">
+                    {row.total === null ? (
+                      <span className="text-muted/50">–</span>
+                    ) : (
+                      <span
+                        className={
+                          row.isFinal ? 'font-semibold text-foreground' : 'text-muted-foreground'
+                        }
+                      >
+                        {formatScore(row.total)}
+                      </span>
+                    )}
+                    {row.isFinal && (
+                      <Check
+                        size={12}
+                        strokeWidth={3}
+                        className="absolute left-full top-1/2 ml-0.5 -translate-y-1/2 text-success"
+                        aria-label={t('final')}
+                      />
+                    )}
+                  </span>
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
         <tfoot>
           <tr className="border-t border-foreground/10">

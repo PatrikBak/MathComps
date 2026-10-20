@@ -489,6 +489,32 @@ test.describe('the conversation inside a competition', () => {
     // But nothing that could rewrite the record the conversation leaves behind. Starting another one is
     // still offered: it adds to that record rather than taking anything out of it
     await expect(page.getByRole('button', { name: chatCopy.rewind })).toHaveCount(0)
+
+    // Nor among this problem's conversations, once their list is open
+    await page.getByRole('button', { name: chatCopy.history }).click()
+
+    // Which holds the graded one alone
+    await expect(page.getByRole('menuitem')).toHaveCount(1)
+
+    // And offers no way to drop it
+    await expect(page.getByRole('button', { name: chatCopy.deleteSession })).toHaveCount(0)
+
+    // Put the list away again
+    await page.getByRole('button', { name: chatCopy.history }).click()
+
+    // Which takes its rows off the screen
+    await expect(page.getByRole('menuitem')).toHaveCount(0)
+
+    // Start a fresh conversation beside the graded one, which nobody grades yet
+    await page.getByRole('button', { name: chatCopy.newDefense }).click()
+
+    // Open the list once more
+    await page.getByRole('button', { name: chatCopy.history }).click()
+
+    // Which still holds the graded one alone, the fresh one being unsaved
+    await expect(page.getByRole('menuitem')).toHaveCount(1)
+
+    // And still offers no way to drop it
     await expect(page.getByRole('button', { name: chatCopy.deleteSession })).toHaveCount(0)
   })
 

@@ -8,8 +8,8 @@ using MathComps.Infrastructure.Services.Localization;
 namespace MathComps.Infrastructure.Services.Problems;
 
 /// <summary>
-/// Says where a problem comes from, in the reader's language. Shared, because the archive and the admin
-/// review surface name a problem the same way and a second copy of this is a second set of labels.
+/// Says where a problem comes from, in the reader's language. Shared, because the archive and every surface
+/// reading conversations back name a problem the same way, and a second copy of this is a second set of labels.
 /// </summary>
 public static class ProblemSources
 {

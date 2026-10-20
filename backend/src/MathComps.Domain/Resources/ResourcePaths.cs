@@ -22,8 +22,8 @@ public static class ResourcePaths
     public static string Copy(Language language) => $"Resources/copy.{language.ToString().ToLowerInvariant()}.json";
 
     /// <summary>
-    /// The metadata.shared.json file name — the language-neutral taxonomy structure (competitions, their
-    /// categories and rounds, and the sort order of all three).
+    /// The metadata.shared.json file name — the language-neutral taxonomy structure: the tree of competition nodes
+    /// at any depth, each in its sort order among its siblings.
     /// </summary>
     public const string SharedMetadataFileName = "metadata.shared.json";
 

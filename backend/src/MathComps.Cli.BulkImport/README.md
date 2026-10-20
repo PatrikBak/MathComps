@@ -11,7 +11,7 @@ The draft format lives in [the draft format reference](../../../web/scripts/PREF
 - **Preflight** — the `web/` TypeScript preflight (`npm run draft:preflight`) reads the folder and reports any format, markdown or image problem.
 - **Figures** — every referenced image must size cleanly, the same read `apply` performs on import.
 - **Tag slugs** — every slug in a `pN.yaml` must be in the approved vocabulary, which the preflight cannot see.
-- **Registry** — every competition on the path must be registered in the shared taxonomy and carry both names in all three locales, and the last one must be a leaf.
+- **Registry** — every competition on the path must be registered in the shared taxonomy and carry both names in every locale, and the last one must be a leaf.
 - **DB preview** — what each problem would create, overwrite, or leave unchanged, compared by content so a no-op re-import isn't flagged. It also carries the checks needing a database: round contiguity, the `pN.yaml` a new problem must have, a second original, a stored taxonomy node the registry can't place, the problem count a hosted round's group announced, and [the pool's own checks](#filling-the-pool).
 
 `apply` upserts what the draft describes: the taxonomy and its sort order, the round, the problems, their texts, authors and tags, and a pool problem's proposal. Figures upload to R2 as each problem is written, and their refs are rewritten to the `media:` keys the site resolves. Only texts that actually changed are rewritten.

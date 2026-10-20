@@ -2,8 +2,8 @@
 # Opens an SSH tunnel to the staging or production database and holds it open.
 # Usage: ./open-db-tunnel.sh [prod|staging]   (default: prod)
 #
-# Leave this running in a terminal; other tools (psql, mathcomps-ro) then reach
-# the remote DB at localhost:$DB_TUNNEL_PORT. Ctrl-C to close the tunnel.
+# Leave this running in a terminal; the remote DB is then reachable at
+# localhost:$DB_TUNNEL_PORT. Ctrl-C to close the tunnel.
 
 set -euo pipefail
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from '@clerk/nextjs'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Activity, type ReactNode, useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
@@ -173,14 +173,23 @@ function SelectionNotice({ children }: SelectionNoticeProps) {
 /**
  * The pool, or the page open over it. The pool stays mounted while hidden, so its cards come back without being
  * built again. A page opens in the pool's language where what it shows is written in that language. A paper's page
- * opens in the language last picked for it, if any, with its ratings ordered as they were last left.
+ * opens in the language last picked for it, if any, with its ratings ordered as they were last left. Where any one
+ * text will do, everything reads in the site's language, or in the one a problem has where it lacks that.
  */
 function SelectionContent() {
-  // The page open in full, if any
-  const { detail } = useSelectionWorkspace()
+  // The page open in full, if any, and the selection, if its read has landed
+  const { detail, selection } = useSelectionWorkspace()
 
-  // The language the pool is read in
+  // The site's language
+  const siteLanguage = useLocale() as Locale
+
+  // The language picked over the pool
   const [poolLanguage, setPoolLanguage] = useState<Locale>(PROPOSAL_AUTHORING_LANGUAGE)
+
+  // The language the problems are read in: the one picked while every language is needed, the site's where any one
+  // text will do
+  const readingLanguage =
+    selection === null || selection.needsEveryLanguage ? poolLanguage : siteLanguage
 
   // What was last chosen on each paper's page, by the paper's id
   const [paperChoices, setPaperChoices] = useState<ReadonlyMap<string, PaperChoices>>(new Map())
@@ -194,12 +203,12 @@ function SelectionContent() {
   return (
     <>
       <Activity mode={detail === null ? 'visible' : 'hidden'}>
-        <PoolView language={poolLanguage} onLanguageChange={setPoolLanguage} />
+        <PoolView language={readingLanguage} onLanguageChange={setPoolLanguage} />
       </Activity>
       {detail !== null && (
         <DetailView
           detail={detail}
-          poolLanguage={poolLanguage}
+          poolLanguage={readingLanguage}
           paperChoices={paperChoices}
           onPaperChoice={keepPaperChoice}
         />

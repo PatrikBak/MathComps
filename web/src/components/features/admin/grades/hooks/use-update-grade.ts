@@ -1,4 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query'
+import { useIsMutating, useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 
@@ -15,7 +15,7 @@ import {
   type StudentGrade,
 } from '../model/grade-types'
 import { finalizeGrades as sendFinalizeGrades, updateGrade } from '../services/grade-service'
-import { readCachedGrade, writeCachedGrade } from './grade-cache'
+import { cancelBoardReads, readCachedGrade, refreshBoards, writeCachedGrade } from './grade-cache'
 
 /**
  * One change to one entrant's grade on one problem.
@@ -41,6 +41,9 @@ const MAKE_FINAL: GradeChange = { isFinal: true }
 /** The scope every grade write shares, so they reach the server in the order they were made. */
 const GRADE_WRITES_SCOPE = { id: 'admin-grading-grade' }
 
+/** The key every grade write is filed under, which tells them apart from every other mutation. */
+const GRADE_WRITE_KEY = ['admin-grading-grade'] as const
+
 /**
  * What {@link useUpdateGrade} hands back.
  */
@@ -61,7 +64,7 @@ export type UseUpdateGradeResult = {
  *
  * Every change lands wherever the grade is cached at once. A refused change puts back what the server still
  * holds, unless a later change is still settling and decides instead. Making several grades final counts as one
- * change on each of them.
+ * change on each of them. Once the last change still out settles, every board is read again.
  *
  * @returns The change as described by {@link UseUpdateGradeResult}.
  */
@@ -80,6 +83,9 @@ export function useUpdateGrade(): UseUpdateGradeResult {
 
   // A function which shows a change to one grade before the server has it
   const showChange = (address: PairIds, change: GradeChange) => {
+    // Every board read still out, dropped
+    cancelBoardReads(queryClient)
+
     // Which grade the changes settling on it are counted under
     const key = pairKey(address.userId, address.problemId)
 
@@ -121,12 +127,24 @@ export function useUpdateGrade(): UseUpdateGradeResult {
     if (confirmed !== null) writeCachedGrade(queryClient, address, confirmed.state)
   }
 
+  // A function which reads every board again once the last change still out settles. Each change drops any board
+  // read still out and pauses the boards' own reads, whose wait starts over once it settles, so a grader marking
+  // steadily would otherwise see none
+  const readBoardsOnceSettled = () => {
+    // Another change still out reads the boards once it settles; the count still takes in the one settling now
+    if (queryClient.isMutating({ mutationKey: GRADE_WRITE_KEY }) > 1) return
+
+    // Every board, as the server now holds it
+    refreshBoards(queryClient)
+  }
+
   // The write itself, which lands in the cache before the server answers
   const { mutateAsync } = useOptimisticMutation<Grade | null, GradeWrite, void>({
     apiFn: (apiCall, { userId: studentId, problemId, change }) =>
       updateGrade(apiCall, problemId, studentId, change),
     // Changes reach the server in the order they were made, so the last to land is the one that decides
     scope: GRADE_WRITES_SCOPE,
+    mutationKey: GRADE_WRITE_KEY,
     onMutate: ({ userId: studentId, problemId, change }) =>
       // The grade as the change leaves it, straight away
       showChange({ userId: studentId, problemId }, change),
@@ -136,9 +154,13 @@ export function useUpdateGrade(): UseUpdateGradeResult {
     onError: (_error, address) =>
       // What the server still holds
       refuseChange(address),
-    onSettled: (_grade, _error, { userId: studentId, problemId }) =>
+    onSettled: (_grade, _error, { userId: studentId, problemId }) => {
       // One change fewer settling, whichever way it went
-      settling.settle(pairKey(studentId, problemId)),
+      settling.settle(pairKey(studentId, problemId))
+
+      // The boards caught up, once nothing else is out
+      readBoardsOnceSettled()
+    },
     authReason: t('saveFailed'),
     errorMessage: t('saveFailed'),
   })
@@ -148,6 +170,7 @@ export function useUpdateGrade(): UseUpdateGradeResult {
     apiFn: (apiCall, { problemId, userIds }) => sendFinalizeGrades(apiCall, problemId, userIds),
     // Behind every change made before it, and ahead of every change made after
     scope: GRADE_WRITES_SCOPE,
+    mutationKey: GRADE_WRITE_KEY,
     onMutate: ({ problemId, userIds }) =>
       // Each grade final, straight away
       userIds.forEach((studentId) => showChange({ userId: studentId, problemId }, MAKE_FINAL)),
@@ -162,9 +185,13 @@ export function useUpdateGrade(): UseUpdateGradeResult {
     onError: (_error, { problemId, userIds }) =>
       // What the server still holds for each
       userIds.forEach((studentId) => refuseChange({ userId: studentId, problemId })),
-    onSettled: (_grades, _error, { problemId, userIds }) =>
+    onSettled: (_grades, _error, { problemId, userIds }) => {
       // One change fewer settling on each, whichever way it went
-      userIds.forEach((studentId) => settling.settle(pairKey(studentId, problemId))),
+      userIds.forEach((studentId) => settling.settle(pairKey(studentId, problemId)))
+
+      // The boards caught up, once nothing else is out
+      readBoardsOnceSettled()
+    },
     authReason: t('saveFailed'),
     errorMessage: t('finalizeFailed'),
   })
@@ -189,4 +216,14 @@ export function useUpdateGrade(): UseUpdateGradeResult {
 
   // The ways to change grades
   return { changeGrade, finalizeGrades }
+}
+
+/**
+ * Whether any change to a grade has yet to settle.
+ *
+ * @returns True while one is out.
+ */
+export function useIsGradeWriting(): boolean {
+  // Whether any grade write has yet to settle
+  return useIsMutating({ mutationKey: GRADE_WRITE_KEY }) > 0
 }

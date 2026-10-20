@@ -19,7 +19,7 @@ type CommentCountContextValue = {
  * Props for the {@link CommentCountProvider} component.
  */
 type CommentCountProviderProps = {
-  /** The type of targets (Handout, Problem, or News) */
+  /** The kind of target every count is for */
   targetType: CommentTargetType
   /** Array of permanent target IDs to fetch counts for */
   targetIds: string[]

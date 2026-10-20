@@ -4,8 +4,7 @@ using MathComps.Domain.Tagging;
 namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
-/// Categorized tag for mathematical problems supporting precise filtering by Area, Type, or Technique.
-/// Each tag belongs to exactly one category.
+/// Categorized tag for mathematical problems, filed under one <see cref="Tagging.TagType"/>.
 /// </summary>
 public class Tag
 {
@@ -23,7 +22,7 @@ public class Tag
     public required string Slug { get; set; }
 
     /// <summary>
-    /// Classification of tag by conceptual role: Area (mathematical field), Type (problem structure), or Technique (solution method).
+    /// Classification of tag by conceptual role.
     /// This categorization enables structured AI prompting and organized user filtering experience.
     /// </summary>
     public required TagType TagType { get; set; }

@@ -263,6 +263,6 @@ export function afterDeletion(data: SelectionData, proposalId: string): Selectio
     (conversation) => conversation.proposalId !== proposalId
   )
 
-  // The selection without the deleted proposal, the categories and the cycles as they were
-  return { categories: data.categories, proposals, boards, cycles: data.cycles, conversations }
+  // The selection without the deleted proposal, everything else as it was
+  return { ...data, proposals, boards, conversations }
 }

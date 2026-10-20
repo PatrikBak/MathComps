@@ -19,9 +19,13 @@ export type GradingProblem = {
 /**
  * One entrant of a competition being graded.
  */
-type GradingEntrant = {
+export type GradingEntrant = {
   /** Who they are. */
   user: UserIdentity
+  /** When their clock started, as an ISO-8601 string. */
+  startedAt: string
+  /** When they closed the entry themselves, as an ISO-8601 string; null while they have not. */
+  finishedAt: string | null
   /**
    * The sum, over the competition's problems, of how far into their own clock they last wrote about each one while
    * their entry counted, in seconds.
@@ -60,7 +64,7 @@ export type GradingCompetition = {
 }
 
 /**
- * The group being graded: what it is called, and when it took entries.
+ * The group being graded: what it is called, when it took entries, and how long each entrant's clock runs.
  */
 export type GradingGroup = {
   /** What a heading calls the group, in every language the site is read in. */
@@ -69,12 +73,17 @@ export type GradingGroup = {
   opensAt: string
   /** When it stopped, as an ISO-8601 string. */
   closesAt: string
+  /** How long an entrant's own clock runs once they enter, in minutes. */
+  clockMinutes: number
 }
 
 /**
- * Everything grading one group starts from: which group it is, and each of its competitions.
+ * Everything grading one group starts from: which group it is, how long a note stays open after an entry ends, and
+ * each of its competitions.
  */
 export type GradingBoard = GradingGroup & {
+  /** How long after an entry ends its student may still comment on their own solutions, in minutes. */
+  noteGraceMinutes: number
   /** Its competitions, in the order it sets the categories out. */
   competitions: GradingCompetition[]
 }

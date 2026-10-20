@@ -107,6 +107,8 @@ export type DefenseConversationState = {
   readonly isThinking: boolean
   /** The id of the open session, or null while a fresh one is unsaved. */
   readonly currentSessionId: string | null
+  /** Whether the student is graded on the open session, which nobody is on one still unsaved. */
+  readonly isGraded: boolean
   /** What the student said the open conversation came to, or null until they say. */
   readonly currentFeedback: DefenseFeedback | null
   /** What the student holds against the open conversation's replies, by reply. */
@@ -349,6 +351,7 @@ export class DefenseConversationModel {
       turns: [],
       isThinking: false,
       currentSessionId: null,
+      isGraded: false,
       currentFeedback: null,
       reports: new Map(),
       conversationEpoch: 0,
@@ -434,6 +437,7 @@ export class DefenseConversationModel {
       this.setState({
         turns: session.turns,
         currentSessionId: session.id,
+        isGraded: session.isGraded,
         isThinking: false,
       })
 
@@ -498,6 +502,7 @@ export class DefenseConversationModel {
     // Reseed a blank conversation
     this.setState({
       currentSessionId: null,
+      isGraded: false,
       currentFeedback: null,
       reports: new Map(),
       turns: [],
@@ -523,6 +528,7 @@ export class DefenseConversationModel {
     // hold against its replies, so a reopened conversation reads exactly as they left it
     this.setState({
       currentSessionId: session.id,
+      isGraded: session.isGraded,
       currentFeedback: session.feedback,
       reports: indexReports(session.reports),
       turns: session.turns,

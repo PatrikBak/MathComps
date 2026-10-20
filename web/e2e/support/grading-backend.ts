@@ -9,6 +9,7 @@ import {
 import type {
   GradeSummary,
   GradingBoard,
+  GradingEntrant,
 } from '@/components/features/admin/grading-board/model/grading-types'
 import type { ConversationDetail } from '@/components/features/conversation-review/model/conversation-detail'
 
@@ -44,6 +45,8 @@ const BOARD: GradingBoard = {
   name: { sk: 'Septembrové kolo', cs: 'Zářijové kolo', en: GROUP_NAME },
   opensAt: '2026-09-01T00:00:00Z',
   closesAt: '2026-09-14T22:00:00Z',
+  clockMinutes: 120,
+  noteGraceMinutes: 30,
   competitions: [
     {
       roundId: 'elementary-round',
@@ -53,9 +56,24 @@ const BOARD: GradingBoard = {
         { id: 'p2', slug: 'elementary-2', number: 2 },
       ],
       entrants: [
-        { user: { id: 'ada', username: 'Ada', email: null }, finishedAfterSeconds: 2400 },
-        { user: { id: 'bruno', username: 'Bruno', email: null }, finishedAfterSeconds: 1800 },
-        { user: { id: 'cyril', username: 'Cyril', email: null }, finishedAfterSeconds: 3000 },
+        {
+          user: { id: 'ada', username: 'Ada', email: null },
+          startedAt: '2026-09-10T08:00:00Z',
+          finishedAt: '2026-09-10T09:00:00Z',
+          finishedAfterSeconds: 2400,
+        },
+        {
+          user: { id: 'bruno', username: 'Bruno', email: null },
+          startedAt: '2026-09-11T08:00:00Z',
+          finishedAt: null,
+          finishedAfterSeconds: 1800,
+        },
+        {
+          user: { id: 'cyril', username: 'Cyril', email: null },
+          startedAt: '2026-09-12T08:00:00Z',
+          finishedAt: null,
+          finishedAfterSeconds: 3000,
+        },
       ],
       grades: [
         { userId: 'ada', problemId: 'p1', conversationCount: 2, grade: null },
@@ -76,8 +94,18 @@ const BOARD: GradingBoard = {
       category: 'intermediate',
       problems: [{ id: 'q1', slug: 'intermediate-1', number: 1 }],
       entrants: [
-        { user: { id: 'ada', username: 'Ada', email: null }, finishedAfterSeconds: 900 },
-        { user: { id: 'dora', username: 'Dora', email: null }, finishedAfterSeconds: 1200 },
+        {
+          user: { id: 'ada', username: 'Ada', email: null },
+          startedAt: '2026-09-10T12:00:00Z',
+          finishedAt: null,
+          finishedAfterSeconds: 900,
+        },
+        {
+          user: { id: 'dora', username: 'Dora', email: null },
+          startedAt: '2026-09-13T08:00:00Z',
+          finishedAt: null,
+          finishedAfterSeconds: 1200,
+        },
       ],
       grades: [
         { userId: 'ada', problemId: 'q1', conversationCount: 1, grade: null },
@@ -120,6 +148,11 @@ type GradingBackend = ConversationBackend & {
   finals: () => SentFinal[]
   /** Keeps every change from here on waiting, until the function handed back lets them through. */
   hold: () => () => void
+  /**
+   * Puts a student on the board, as writing about one problem for the first time does, marked on it where a mark is
+   * given.
+   */
+  enter: (username: string, problemId: string, mark?: number) => void
 }
 
 /**
@@ -130,6 +163,11 @@ type GradingBackendOptions = {
   refuses?: (change: GradeChange) => boolean
   /** Whether the backend fails every request to make grades final. Absent while it takes them. */
   failsFinals?: boolean
+  /**
+   * When students started their clocks and handed in, by user, in place of the board's own. Absent while those
+   * stand.
+   */
+  clocks?: Readonly<Record<string, Pick<GradingEntrant, 'startedAt' | 'finishedAt'>>>
 }
 
 /**
@@ -291,6 +329,13 @@ export async function installGradingBackend(
   // The board as the backend holds it, written to by every change it takes
   const board = structuredClone(BOARD)
 
+  // Each student's clock where the test sets one, in every competition they entered
+  board.competitions.forEach((competition) =>
+    competition.entrants.forEach((entrant) =>
+      Object.assign(entrant, options.clocks?.[entrant.user.id])
+    )
+  )
+
   // Every grade on it, the same objects the board holds so a change lands on both
   const grades = board.competitions.flatMap((competition) => competition.grades)
 
@@ -413,6 +458,42 @@ export async function installGradingBackend(
   // A function which snapshots the requests to make grades final so far
   const finals = () => [...sentFinals]
 
-  // The backend, to watch and to hold
-  return { changes, finals, hold: answers.hold, readMarks }
+  // A function which puts a student on the board with one conversation about the problem, and its mark if given
+  const enter = (username: string, problemId: string, mark?: number) => {
+    // The competition the problem belongs to
+    const competition = board.competitions.find((candidate) =>
+      candidate.problems.some((problem) => problem.id === problemId)
+    )
+
+    // Only a problem on the board can be written about
+    if (competition === undefined) throw new Error(`No competition holds ${problemId}`)
+
+    // Their id, which the fake spells as the name in lower case
+    const userId = username.toLowerCase()
+
+    // The student, on the clock since before the group closed
+    competition.entrants.push({
+      user: { id: userId, username, email: null },
+      startedAt: '2026-09-14T21:00:00Z',
+      finishedAt: null,
+      finishedAfterSeconds: 600,
+    })
+
+    // Their grade on every problem, one conversation and the mark given on the one they wrote about
+    const summaries = competition.problems.map((problem) => ({
+      userId,
+      problemId: problem.id,
+      conversationCount: problem.id === problemId ? 1 : 0,
+      grade: problem.id === problemId && mark !== undefined ? { ...PRE_GRADED, mark } : null,
+    }))
+
+    // On the board
+    competition.grades.push(...summaries)
+
+    // Among the grades a change lands on
+    grades.push(...summaries)
+  }
+
+  // The backend, to watch, to hold and to add to
+  return { changes, finals, hold: answers.hold, readMarks, enter }
 }

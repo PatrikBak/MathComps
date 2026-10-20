@@ -45,12 +45,12 @@ The preflight checks **format only**; the DB-aware `validate` is the gate (so it
 
 ## Step 1 — Register the competition (only if its slug is new)
 
-Check `backend/src/MathComps.Infrastructure/Resources/metadata.shared.json`. If the competition slug isn't there, add it to **all four** metadata files, or the registry check fails with "no structural entry":
+Check `backend/src/MathComps.Infrastructure/Resources/metadata.shared.json`. If the competition slug isn't there, add it to `metadata.shared.json` and every locale's file, or the registry check fails with "no structural entry":
 
 - `metadata.shared.json` — a tree of nodes, `{ "nodes": [ { "slug": "csmo", "children": [ … ] } ] }`. Array position = sort order **at every level**, and `children` is omitted at a leaf.
 - `metadata.{cs,sk,en}.json` — one `nodes["<path>"] = { shortName, fullName }` entry per node, a path being the slugs from the competition down, hyphen-joined: the competition (`csmo`), each of its categories (`csmo-a`), and each round (`csmo-a-iii`, `memo-i`). A node the site addresses by URL carries a third key, `urlSlug`, unique across the whole tree and every locale.
 
-**The two files must list exactly the same paths** — a test asserts it in both directions, so a node added to one and forgotten in the other fails the suite.
+**The shared file and each locale file must list exactly the same paths** — a test asserts it in both directions, so a node added to one and forgotten in the other fails the suite.
 
 Decide the shape. The tree nests as deep as the competition really does — three levels is the deepest anything runs today, not a ceiling:
 - **Categories** (age/level bands like `a`,`b`,`z9`) → the competition's `children`, when it has them at all. Each carries its own `nodes["{competition}-{category}"]` name.
@@ -61,7 +61,7 @@ Every slug is lowercase alphanumeric with **no hyphen in it** — a hyphen is wh
 
 **A problem belonging to no competition goes under `mathcomps-proposals`** — a candidate in the pool the problem selection fills a MathComps cycle from. It is registered already, so a draft just names it as its `competition`. Give that draft `visibleSince: 9999-01-01T00:00:00Z`, the embargo that hides the pool from students; `validate` refuses any other (`proposals-embargo`).
 
-Add a test row for any new competition/round/name to `MetadataLocalizationServiceTests` (display order, leaf/child shape, name resolution, `Registered_taxonomy_has_no_issues`). A new root also needs its slug in `Shared_roots_are_in_display_order`; the parity sweep walks the registry itself, so it needs no edit.
+Add a test row for any new competition/round/name to `MetadataLocalizationServiceTests` (display order, leaf/child shape, name resolution, `Registered_competition_has_no_issues`). A new root also needs its slug in `Shared_roots_are_in_display_order`; the parity sweep walks the registry itself, so it needs no edit.
 
 ## Step 2 — Author `_meta.yaml`
 
@@ -77,7 +77,7 @@ Optionally `visibleSince: 2026-09-14T18:00:00Z` (see "Embargoing a round" below)
 
 `competition` is the path from Step 1: the slugs from the root of the taxonomy down to the competition the problems were set in, hyphen-joined, however many that is. `csmo-b-ii` is round II of category B; `memo-i` is a round of a competition with no categories; `imo` is a competition that runs as one flat sitting. Two rules the registry check enforces:
 
-- **Every competition on the path must be registered** — `csmo-b-ii` needs `csmo`, `csmo-b` and `csmo-b-ii` all present in the shared tree and named in all three locales, or you get one error per missing one.
+- **Every competition on the path must be registered** — `csmo-b-ii` needs `csmo`, `csmo-b` and `csmo-b-ii` all present in the shared tree and named in every locale, or you get one error per missing one.
 - **The competition must be a leaf.** Naming `csmo-b` when it carries rounds fails with "has competitions nested below it" — those rounds are what a draft picks from, since problems hang off a sitting, not off a container.
 
 Season year is the academic start, not the event year: a March-2026 event ⇒ `year: 2025` (ročník = year − 1950, shared across competitions by design — it is not each competition's own edition count).
@@ -125,7 +125,7 @@ dotnet run --project backend/src/MathComps.Cli.Tagging -- ./data/problems/my-dra
 
 This writes a `tags:` list into each `pN.yaml`. It skips any problem that already has a `tags:` key, so it's safe to re-run; to redo everything pass `--retag`, or to redo one problem delete its `tags:` key. Names it proposes outside the approved vocabulary land in `tag-suggestions.json` for review, never in a `pN.yaml`. See the [Tagging CLI README](../../../backend/src/MathComps.Cli.Tagging/README.md). Needs `Llm:ApiKey` in that project's user secrets.
 
-Hand-editing the list afterwards: keep **exactly one Area tag** (3322 of 3345 tagged problems carry one), and judge each candidate against its description in [`approved-tags.json`](../../../backend/src/MathComps.Infrastructure/Resources/approved-tags.json) — those descriptions decide the edge cases, and that file is the vocabulary, not the DB `tags` table, which holds slugs `validate` rejects.
+Hand-editing the list afterwards: keep **exactly one Area tag**, and judge each candidate against its description in [`approved-tags.json`](../../../backend/src/MathComps.Infrastructure/Resources/approved-tags.json) — those descriptions decide the edge cases, and that file is the vocabulary, not the DB `tags` table, which holds slugs `validate` rejects.
 
 ## Step 6 — Validate (the goal)
 
@@ -138,4 +138,4 @@ dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate ./data/pro
 
 A genuine pass shows the **DB preview** (create/reuse competition, season, round) then `No issues. PASS`. The preflight is the fast loop for body errors; the dotnet validate adds the registry + DB checks (including that every tag slug is in the approved vocabulary).
 
-**`apply` is explicit-only.** Stop at `validate` unless the user tells you to apply in that same instruction — don't run it as a default last step, and don't offer to. `apply` writes to whatever `ConnectionStrings:DefaultConnection` points at, which is **localhost** (the staging DB); promoting to prod needs the connection repointed via the user's tunnel, so that stays user-run. When told to apply, run `dotnet run -c Release --project=backend/src/MathComps.Cli.BulkImport -- apply ./data/problems/my-draft` against localhost. For prod or staging, never hand-roll a `dotnet run` with a repointed connection string — `backend/scripts/invoke-tool.sh -e prod bulk-import apply 'data/problems/my-draft-*'` opens the tunnel, injects the connection and takes a glob, so several rounds go in one call. It runs the tool from your CWD, so relative draft paths only resolve from the repo root.
+**`apply` is explicit-only.** Stop at `validate` unless the user tells you to apply in that same instruction — don't run it as a default last step, and don't offer to. `apply` writes to whatever `ConnectionStrings:DefaultConnection` points at, which is **localhost**; promoting to prod needs the connection repointed via the user's tunnel, so that stays user-run. When told to apply, run `dotnet run -c Release --project=backend/src/MathComps.Cli.BulkImport -- apply ./data/problems/my-draft` against localhost. For prod or staging, never hand-roll a `dotnet run` with a repointed connection string — `backend/scripts/invoke-tool.sh -e prod bulk-import apply 'data/problems/my-draft-*'` opens the tunnel, injects the connection and takes a glob, so several rounds go in one call. It runs the tool from your CWD, so relative draft paths only resolve from the repo root.

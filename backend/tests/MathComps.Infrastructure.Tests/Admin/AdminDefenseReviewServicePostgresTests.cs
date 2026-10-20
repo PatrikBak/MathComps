@@ -40,9 +40,9 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     };
 
     /// <summary>
-    /// The queue reads as one run of conversations, the ones spoken to most recently first, each naming the
-    /// environment it was held against. Recency is the last thing said in a conversation rather than the first, so
-    /// the one opened twenty days ago and carried on yesterday leads the two opened after it.
+    /// The queue reads as one run of conversations, the ones spoken to most recently first, each handout one naming
+    /// the environment it was held against. Recency is the last thing said in a conversation rather than the first,
+    /// so the one opened twenty days ago and carried on yesterday leads every one opened after it.
     /// </summary>
     [Fact]
     public Task Queue_orders_every_conversation_by_recency() => RunTestAsync(async service =>
@@ -715,16 +715,16 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     });
 
     /// <summary>
-    /// A conversation held against no environment is out of the reviewer's reach altogether: it never reaches the
+    /// A conversation held against nothing at all is out of the reviewer's reach altogether: it never reaches the
     /// queue, which has nothing to name it by, and asking for it outright reads as absent rather than opening it.
     /// </summary>
     [Fact]
-    public Task A_conversation_held_against_no_environment_stays_out_of_reach() => RunTestAsync(async service =>
+    public Task A_conversation_held_against_nothing_stays_out_of_reach() => RunTestAsync(async service =>
     {
         // Read the whole queue, narrowed by nothing
         var queue = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
 
-        // The four that name a problem are all of it, though the targetless one moved more recently than two
+        // The four that name a problem are all of it, though the targetless one moved more recently than most of them
         Assert.Equal(4, queue.TotalCount);
         Assert.DoesNotContain(TargetlessSessionId, queue.Items.Select(conversation => conversation.Id));
 

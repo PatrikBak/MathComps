@@ -29,7 +29,7 @@ public static class CompetitionEndpoints
     /// <param name="app">The route builder to register the endpoints on.</param>
     public static void MapCompetitionEndpoints(this IEndpointRouteBuilder app)
     {
-        // Every group the caller can see, with whatever entry they hold in each competition
+        // Every group, with whatever entry the caller holds in each competition
         app.MapGet(CompetitionsPath, async (
             HttpContext context,
             IUserManager userManager,
@@ -157,7 +157,8 @@ public static class CompetitionEndpoints
         })
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
-        // A competition's results, once its group has closed, with the caller's own row marked
+        // A competition's results, once its group has closed and unless the caller is still sitting it, with the
+        // caller's own row marked
         app.MapGet($"{CompetitionsPath}/{{competitionSlug}}/results", async (
             string competitionSlug,
             HttpContext context,

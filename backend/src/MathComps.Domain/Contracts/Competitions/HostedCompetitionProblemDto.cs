@@ -22,8 +22,8 @@ namespace MathComps.Domain.Contracts.Competitions;
 /// <param name="SelfAssessment">What the student says about their own solution, or null while they have said nothing.</param>
 /// <param name="MaxCommentChars">The longest what they say about it may be, in characters.</param>
 /// <param name="Result">
-/// The reader's own result on it; null until the competition's group has closed, and for a reader nobody grades in
-/// it.
+/// The reader's own result on it; null until the competition's group has closed and the reader's own entry into it
+/// has ended, and for a reader nobody grades in it.
 /// </param>
 public record HostedCompetitionProblemDto(
     Guid Id,

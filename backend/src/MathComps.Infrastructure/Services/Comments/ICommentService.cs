@@ -12,9 +12,10 @@ namespace MathComps.Infrastructure.Services.Comments;
 /// and every comment in it, is refused as though it did not exist: <see cref="CommentTargetNotFoundException"/>
 /// for a target, <see cref="CommentNotFoundException"/> for a comment. Handouts, news and the problems the archive
 /// serves are open to anybody, and no other problem has a thread. A grade conversation is open to admins, and to
-/// the student it is with while the grade is final and their group has closed. A proposal's discussion and a
-/// paper's are open only to the members of the organization picking the problems, and a proposal's to nobody once
-/// the proposal is deleted. A version an edit has replaced is refused with <see cref="CommentNotFoundException"/> too.
+/// the student it is with while the grade is final, their group has closed and their own entry has ended. A
+/// proposal's discussion and a paper's are open only to the members of the organization picking the problems, and
+/// a proposal's to nobody once the proposal is deleted. A version an edit has replaced is refused with
+/// <see cref="CommentNotFoundException"/> too.
 /// </remarks>
 public interface ICommentService
 {

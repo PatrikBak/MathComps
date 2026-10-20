@@ -45,8 +45,8 @@ const LISTS_PROBLEMS: Record<PoolViewMode, boolean> = {
 }
 
 /**
- * Whether each layout of the pool shows the problems' statements, and so carries the language they are read in. The
- * ratings table names each problem by its title alone, which has no languages.
+ * Whether each layout of the pool shows the problems' statements, and so, where they need every language, carries the
+ * language they are read in. The ratings table names each problem by its title alone, which has no languages.
  */
 const SHOWS_STATEMENTS: Record<PoolViewMode, boolean> = {
   problems: true,
@@ -76,9 +76,9 @@ type PoolViewProps = {
 
 /**
  * The pool: every problem no round has taken, live or set aside, filtered and read statement by statement, or laid
- * out as a table of their ratings. Its language switch keeps every language in reach, since a {@link PoolCard}
- * lacking the one picked shows another the problem has. The pool also lists every discussion of what the selection
- * holds.
+ * out as a table of their ratings. Where the problems need every language, its language switch keeps each of them in
+ * reach, since a {@link PoolCard} lacking the one picked shows another the problem has; where any one text will do,
+ * the pool has no switch. The pool also lists every discussion of what the selection holds.
  */
 export function PoolView({ language, onLanguageChange }: PoolViewProps) {
   // Pool copy
@@ -160,6 +160,8 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
       { ...filters.filter, query: filters.filter.query.trim() },
       selection?.activeBoard?.id ?? null,
     ]),
+    // A problem the filters let through after the order was set goes where the order it comes in puts it
+    newcomerPlace: 'inPlace',
   })
 
   // The spot over the list the page comes back to, and the way to set the order again from there, the focus on the
@@ -171,7 +173,8 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
 
   return (
     <div>
-      {/* The way between the pool's lists, and over the problems' statements the language they are read in */}
+      {/* The way between the pool's lists, and over the problems' statements the language they are read in, where
+          they need every language */}
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <SegmentedSwitch
           value={mode}
@@ -182,7 +185,7 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
             label: modeLabels[candidate],
           }))}
         />
-        {SHOWS_STATEMENTS[mode] && (
+        {SHOWS_STATEMENTS[mode] && selection !== null && selection.needsEveryLanguage && (
           <LanguageSwitch language={language} onChange={onLanguageChange} unwritten={[]} />
         )}
       </div>

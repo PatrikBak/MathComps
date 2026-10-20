@@ -1,4 +1,5 @@
 using Clerk.BackendAPI;
+using MathComps.Domain.Contracts.Users;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Clerk;
@@ -12,9 +13,9 @@ namespace MathComps.Infrastructure.Tests.Users;
 /// <summary>
 /// Integration tests for the EF-backed <see cref="IUserManager"/> against a real PostgreSQL database, with a Clerk
 /// client nothing calls (no live upstream): the sync that brings a user in and brings them back, what it writes and
-/// what it must leave alone across a resync (the row's id, the moment they joined, their AI acknowledgement), the
-/// lookup that answers from the database rather than upstream, the acknowledgement's read and write, and the deletion
-/// that strips a user while leaving the row everything they authored points at.
+/// what it must leave alone across a resync (every column Clerk does not own), the lookup that answers from the
+/// database rather than upstream, the acknowledgement's read and write, and the deletion that strips a user while
+/// leaving the row everything they authored points at, which no later sync undoes.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class UserManagerPostgresTests(PostgresContainerFixture fixture)
@@ -40,11 +41,6 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
     /// The Clerk id of the user the first-sync test syncs.
     /// </summary>
     private const string CreateExternalId = "user_create";
-
-    /// <summary>
-    /// The Clerk id of the user the row-identity test syncs.
-    /// </summary>
-    private const string IdentityExternalId = "user_identity";
 
     /// <summary>
     /// The Clerk id of the user the lookup test syncs.
@@ -77,9 +73,19 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
     private const string DeleteExternalId = "user_delete";
 
     /// <summary>
+    /// The Clerk id of the user the late-update test syncs.
+    /// </summary>
+    private const string LateExternalId = "user_late";
+
+    /// <summary>
     /// A moment far enough from now that a second write over it could not be mistaken for the first.
     /// </summary>
     private static readonly DateTimeOffset _firstToldAt = new(2026, 1, 2, 3, 4, 5, TimeSpan.Zero);
+
+    /// <summary>
+    /// A moment the site recorded something about a user at, far enough from now that no sync could have written it.
+    /// </summary>
+    private static readonly DateTimeOffset _stampedAt = new(2026, 2, 3, 4, 5, 6, TimeSpan.Zero);
 
     /// <summary>
     /// A first sync writes the user as Clerk described them: the address to reach them at and their picture.
@@ -104,35 +110,69 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Re-syncing a user keeps the row's identity: everything they authored points at that id, and the creation
-    /// moment says when they joined rather than when Clerk last sent them along.
+    /// Re-syncing a user brings in what Clerk owns, the address and the picture, and leaves every column the student
+    /// said or the site recorded as it stood. The row keeps its id, which everything the user authored points at, and
+    /// its join moment. It runs for a student at school and one past it, since being past school clears the year.
     /// </summary>
-    [Fact]
-    public Task SyncUserAsync_KeepsTheIdAndJoinMomentAcrossAResync() => RunTestAsync(async service =>
-    {
-        // A synced user
-        var userId = await service.SyncUserAsync(
-            new UserSyncDto(IdentityExternalId, "identity@example.com", null));
+    /// <param name="graduationYear">The year the student gives, held only while they are still at school.</param>
+    /// <param name="hasLeftHighSchool">Whether the student says they are past school, which clears the year.</param>
+    [Theory]
+    [InlineData(2027, false)]
+    [InlineData(null, true)]
+    public Task SyncUserAsync_WritesOnlyWhatClerkOwnsAcrossAResync(int? graduationYear, bool hasLeftHighSchool) =>
+        RunTestAsync(async service =>
+        {
+            // A synced user
+            var userId = await service.SyncUserAsync(new UserSyncDto(ResyncExternalId, "before@example.com", null));
 
-        // The moment the row records them joining
-        var createdAt = await QueryValueAsync(context => context.Users
-            .Where(user => user.Id == userId)
-            .Select(user => user.CreatedAt)
-            .SingleAsync());
+            // Who has taken a name
+            await service.SetUsernameAsync(userId, "keeper");
 
-        // Clerk sends the same user along again, with a changed avatar
-        var resyncedId = await service.SyncUserAsync(
-            new UserSyncDto(IdentityExternalId, "identity@example.com", "https://example.com/after.png"));
+            // And said where and when they compete
+            await service.UpdateProfileAsync(
+                userId, new UpdateUserProfileRequest(graduationYear, hasLeftHighSchool, "SK"));
 
-        // The same row answered
-        Assert.Equal(userId, resyncedId);
+            // Whom the site has recorded as told about Mathilda, as having accepted the rules and as having hidden
+            // the profile prompt
+            await QueryAsync(context => context.Users
+                .Where(user => user.Id == userId)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(user => user.ConsentedToAiAt, _stampedAt)
+                    .SetProperty(user => user.RulesAcceptedAt, _stampedAt)
+                    .SetProperty(user => user.ProfilePromptDismissedAt, _stampedAt)));
 
-        // The row as the resync left it
-        var user = await QueryValueAsync(context => context.Users.SingleAsync(user => user.Id == userId));
+            // The row as the student and the site left it
+            var before = await QueryValueAsync(context => context.Users.SingleAsync(user => user.Id == userId));
 
-        // Still dated from when they joined
-        Assert.Equal(createdAt, user.CreatedAt);
-    });
+            // Clerk sends the same user along again, with a new address and picture
+            var resyncedId = await service.SyncUserAsync(
+                new UserSyncDto(ResyncExternalId, "after@example.com", "https://example.com/after.png"));
+
+            // The same row answered
+            Assert.Equal(userId, resyncedId);
+
+            // The row as the resync left it
+            var after = await QueryValueAsync(context => context.Users.SingleAsync(user => user.Id == userId));
+
+            // It took what Clerk sent, and its last-updated moment moved on
+            Assert.Equal("after@example.com", after.Email);
+            Assert.Equal("https://example.com/after.png", after.AvatarUrl);
+            Assert.True(after.UpdatedAt > before.UpdatedAt);
+
+            // Still dated from when they joined
+            Assert.Equal(before.CreatedAt, after.CreatedAt);
+
+            // What the student said still stands
+            Assert.Equal("keeper", after.Username);
+            Assert.Equal(graduationYear, after.GraduationYear);
+            Assert.Equal(hasLeftHighSchool, after.HasLeftHighSchool);
+            Assert.Equal("SK", after.CountryCode);
+
+            // And so does what the site recorded of them
+            Assert.Equal(_stampedAt, after.ConsentedToAiAt);
+            Assert.Equal(_stampedAt, after.RulesAcceptedAt);
+            Assert.Equal(_stampedAt, after.ProfilePromptDismissedAt);
+        });
 
     /// <summary>
     /// Looking up a user we already hold is answered from the database. The lookup falls back to fetching them from
@@ -150,35 +190,6 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
 
         // The same user, without a trip upstream
         Assert.Equal(userId, foundId);
-    });
-
-    /// <summary>
-    /// Re-syncing a user from Clerk leaves their AI acknowledgement standing. The sync upserts the whole row from an
-    /// entity Clerk carries no acknowledgement for, so a column not excluded from that write is silently blanked
-    /// every time the user edits their avatar upstream.
-    /// </summary>
-    [Fact]
-    public Task SyncUserAsync_KeepsAiConsentAcrossAResync() => RunTestAsync(async service =>
-    {
-        // A synced user
-        var userId = await service.SyncUserAsync(
-            new UserSyncDto(ResyncExternalId, "resync@example.com", null));
-
-        // Who has since acknowledged what talking to Mathilda entails
-        await service.RecordAiConsentAsync(userId);
-
-        // The same user comes back from Clerk with a changed avatar
-        await service.SyncUserAsync(
-            new UserSyncDto(ResyncExternalId, "resync@example.com", "https://example.com/after.png"));
-
-        // The row as the resync left it
-        var user = await QueryValueAsync(context => context.Users.SingleAsync(user => user.Id == userId));
-
-        // The upsert landed
-        Assert.Equal("https://example.com/after.png", user.AvatarUrl);
-
-        // And it left the acknowledgement alone
-        Assert.NotNull(user.ConsentedToAiAt);
     });
 
     /// <summary>
@@ -271,6 +282,35 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
         var user = await QueryValueAsync(context => context.Users.SingleAsync(user => user.Id == userId));
 
         // Flagged as deleted, and stripped of what Clerk supplied
+        Assert.True(user.IsDeleted);
+        Assert.Null(user.Email);
+        Assert.Null(user.AvatarUrl);
+    });
+
+    /// <summary>
+    /// Re-syncing a deleted user leaves the deletion standing. Clerk can deliver an update after the deletion, and
+    /// writing it would bring back the address and the picture the deletion stripped.
+    /// </summary>
+    [Fact]
+    public Task SyncUserAsync_LeavesADeletedUserAsTheDeletionLeftThem() => RunTestAsync(async service =>
+    {
+        // A synced user
+        var userId = await service.SyncUserAsync(new UserSyncDto(LateExternalId, "late@example.com", null));
+
+        // Whom Clerk reports gone
+        await service.DeleteUserAsync(LateExternalId);
+
+        // And then sends them along once more, in an update that arrived after the deletion
+        var resyncedId = await service.SyncUserAsync(
+            new UserSyncDto(LateExternalId, "late@example.com", "https://example.com/late.png"));
+
+        // The same row answered
+        Assert.Equal(userId, resyncedId);
+
+        // The row as the late update left it
+        var user = await QueryValueAsync(context => context.Users.SingleAsync(user => user.Id == userId));
+
+        // Still deleted, and still stripped
         Assert.True(user.IsDeleted);
         Assert.Null(user.Email);
         Assert.Null(user.AvatarUrl);

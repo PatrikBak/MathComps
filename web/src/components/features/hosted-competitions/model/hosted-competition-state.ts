@@ -52,7 +52,10 @@ type StandingForfeited = {
 type StandingDone = {
   /** The discriminant. */
   kind: 'done'
-  /** The student's own row of the results; null until the group has closed, and where nobody grades them. */
+  /**
+   * The student's own row of the results; null until the group has closed and this entry has ended, and where
+   * nobody grades them.
+   */
   cells: ResultCell[] | null
 }
 
@@ -163,7 +166,10 @@ export function derivePhase(group: HostedCompetitionGroup, now: number): GroupPh
  *
  * @returns The instant, in epoch milliseconds.
  */
-function clockRunsOutAtMs(group: HostedCompetitionGroup, entry: SatEntry): number {
+function clockRunsOutAtMs(
+  group: Pick<HostedCompetitionGroup, 'clockMinutes'>,
+  entry: Pick<SatEntry, 'startedAt'>
+): number {
   // The clock starts when the student does, not when the group opens
   return Date.parse(entry.startedAt) + group.clockMinutes * MINUTE_MS
 }
@@ -196,7 +202,10 @@ export function wasHandedInEarly(group: HostedCompetitionGroup, entry: SatEntry)
  *
  * @returns The instant it ends, as an ISO-8601 string.
  */
-export function entryEndsAt(group: HostedCompetitionGroup, entry: SatEntry): string {
+export function entryEndsAt(
+  group: Pick<HostedCompetitionGroup, 'clockMinutes'>,
+  entry: Pick<SatEntry, 'startedAt' | 'finishedAt'>
+): string {
   // Where its own clock would have put it
   const clockRunsOutAt = clockRunsOutAtMs(group, entry)
 
@@ -235,6 +244,19 @@ export function hasEntryEnded(entry: AreaEntry, now: number): boolean {
 }
 
 /**
+ * When a sat entry stops taking notes about the student's own solutions: the grace after its end.
+ *
+ * @param endsAt - When the entry stopped counting, as an ISO-8601 string.
+ * @param graceMinutes - How long past the end of the entry notes are still taken.
+ *
+ * @returns The instant, in epoch milliseconds.
+ */
+export function noteWindowClosesAt(endsAt: string, graceMinutes: number): number {
+  // The grace, counted from the end
+  return Date.parse(endsAt) + graceMinutes * MINUTE_MS
+}
+
+/**
  * Whether a student may still leave a note about their own solutions to a competition's problems.
  *
  * An entry given up for the problems was never a run, so nothing was argued in it to speak about; one that
@@ -249,7 +271,7 @@ export function hasEntryEnded(entry: AreaEntry, now: number): boolean {
 export function areNotesOpen(entry: AreaEntry, graceMinutes: number, now: number): boolean {
   // Nothing was sat, so there is nothing of theirs to say anything about; and what was sat runs out once
   // the grace behind its end does
-  return entry.kind !== 'forfeited' && Date.parse(entry.endsAt) + graceMinutes * MINUTE_MS > now
+  return entry.kind !== 'forfeited' && noteWindowClosesAt(entry.endsAt, graceMinutes) > now
 }
 
 /**
@@ -299,7 +321,7 @@ export function readAreaRun(
 ): AreaRun {
   switch (entry.kind) {
     // A clock ran on it, so where it stands follows from it, and so does whether notes are still
-    // taken: no note is taken from a reader who prepares competitions, whose runs are test runs
+    // taken: no note is taken from a reader who prepares competitions, whose runs are preparer's runs
     // nobody grades
     case 'sat':
       return {
@@ -547,7 +569,7 @@ export type SchoolYearRun = {
  * rounds one school year at a time.
  */
 export type BoardLayout = {
-  /** The groups open to anybody at any time, which sit outside the calendar. */
+  /** The groups open at any time to anybody with an account, which sit outside the calendar. */
   practice: HostedCompetitionGroup[]
   /** Every graded group, one run per school year, the newest year first. */
   years: SchoolYearRun[]

@@ -248,6 +248,11 @@ export type SelectionData = {
   cycles: Cycle[]
   /** Every conversation a reviewer held about a proposal still in the selection, newest first. */
   conversations: ReviewConversation[]
+  /**
+   * Whether its problems need a statement and a solution in every language the site is read in, as a hosted round
+   * does; where false, any one text will do.
+   */
+  needsEveryLanguage: boolean
 }
 
 /**

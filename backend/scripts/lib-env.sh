@@ -5,7 +5,7 @@
 # Loading order (later files override earlier ones):
 #   1. .env.example                — base defaults
 #   2. .env.{environment}.example  — env-specific defaults (ports)
-#   3. .env                        — your secrets (SSH key, passwords)
+#   3. .env                        — your secrets (SSH host alias, passwords)
 #   4. .env.{environment}          — your env-specific overrides (optional)
 
 # Read KEY=VALUE lines from a single .env file and export them; missing files are skipped.

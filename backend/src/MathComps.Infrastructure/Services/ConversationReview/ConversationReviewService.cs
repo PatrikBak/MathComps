@@ -28,7 +28,8 @@ public class ConversationReviewService(
         // This read's own context, since reading one conversation is a unit of work in itself.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The sets the projection below reads, held apart from the context for the same reason as above.
+        // The sets the projection below reads. Held as their own values so the expression tree captures a set
+        // rather than the context around it, which the analyzer reads as disposed by the time the tree runs.
         var notes = dbContext.AdminNotes;
         var reviews = dbContext.AdminSessionReviews;
 

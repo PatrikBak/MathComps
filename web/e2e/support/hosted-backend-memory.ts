@@ -17,6 +17,7 @@ import type {
   HostedCompetitionProblem,
   HostedCompetitionsView,
 } from '@/components/features/hosted-competitions/model/hosted-competition-types'
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { MINUTE_MS } from '@/components/shared/utils/time-units'
 import type { PartialLocalizedString } from '@/i18n/i18n'
 
@@ -36,9 +37,9 @@ import { CLOCK_MINUTES, PROBLEMS_PER_COMPETITION } from './hosted-backend-world'
 
 /**
  * A conversation as the fake keeps it: everything the backend stores of it, short of whether its statement is
- * still one the problem has, which every read weighs again.
+ * still one the problem has and whether the student is graded on it, which every read weighs again.
  */
-export type HeldSession = Omit<DefenseSession, 'hasOlderStatement' | 'target'> & {
+export type HeldSession = Omit<DefenseSession, 'hasOlderStatement' | 'isGraded' | 'target'> & {
   /** The problem it is about. */
   target: Extract<DefenseSessionTarget, { kind: 'problem' }>
 }
@@ -166,7 +167,7 @@ export function statementsOf(state: FakeState, problemId: string): PartialLocali
 
 /**
  * A held conversation as the backend serves it, saying whether the problem it is about still has the statement
- * it was argued against in any language.
+ * it was argued against in any language, and whether the student is graded on it.
  *
  * @param state - The fake's memory.
  * @param session - The conversation.
@@ -178,7 +179,11 @@ export function servedSession(state: FakeState, session: HeldSession): DefenseSe
   const statements = Object.values(statementsOf(state, session.target.problemId))
 
   // The conversation, said to be argued against an older one once its own is among none of them
-  return { ...session, hasOlderStatement: !statements.includes(session.statement) }
+  return {
+    ...session,
+    hasOlderStatement: !statements.includes(session.statement),
+    isGraded: isSessionGraded(state, session),
+  }
 }
 
 /**
@@ -329,7 +334,7 @@ export function areProblemsReadable(
   competition: HostedCompetition,
   preparesCompetitions: boolean
 ): boolean {
-  // Any one of the three opens the set
+  // Any one of them opens the set
   return preparesCompetitions || competition.entry !== null || competition.problemsPublished
 }
 
@@ -424,11 +429,73 @@ function libraryItemsOf(
     lastActivityAt: session.turns.at(-1)?.createdAt ?? new Date(0).toISOString(),
     lastStudentMessage:
       session.turns.findLast((turn) => turn.role === 'candidate')?.content ?? null,
-    // Graded unless its group grades nobody or it began before the group opened
-    isGraded:
-      !isPracticeGroup(group) &&
-      Date.parse(session.turns[0]?.createdAt ?? group.opensAt) >= Date.parse(group.opensAt),
+    isGraded: isSessionGraded(state, session),
   }))
+}
+
+/**
+ * Whether the student is graded on a conversation: it started while a run of theirs that somebody grades
+ * was counting.
+ *
+ * @param state - The fake's memory.
+ * @param session - The conversation.
+ *
+ * @returns Whether it is graded.
+ */
+function isSessionGraded(state: FakeState, session: HeldSession): boolean {
+  // The group and the competition whose set holds the problem, absent for one no competition sets
+  const place = state.view.groups
+    .flatMap((group) => group.competitions.map((competition) => [group, competition] as const))
+    .find(([, competition]) =>
+      Array.from({ length: PROBLEMS_PER_COMPETITION }, (_unused, index) =>
+        problemIdOf(competition.slug.en, index + 1)
+      ).includes(session.target.problemId)
+    )
+
+  // Nowhere a competition sets it, so there is no entry to be graded under
+  if (place === undefined) {
+    return false
+  }
+
+  // The group setting the terms, and the entry the student spent into the competition
+  const [group, { entry }] = place
+
+  // When the conversation started, which its opening turn was stamped with
+  const startedAt = session.turns[0]?.createdAt ?? null
+
+  // Nothing spent here, nothing said yet, a group that grades nobody, or a reader preparing the
+  // competitions, which the fake's reader does from before any clock started, so their run grades nobody
+  if (
+    entry === null ||
+    startedAt === null ||
+    isPracticeGroup(group) ||
+    state.view.preparesCompetitions
+  ) {
+    return false
+  }
+
+  // What the entry settles, by how it was spent
+  switch (entry.kind) {
+    // No clock ever ran, so there is nothing to grade
+    case 'forfeited':
+      return false
+
+    // Counted when it started inside the run: from the clock starting up to the run ending
+    case 'sat': {
+      // When the conversation started, in epoch milliseconds
+      const startedAtMs = Date.parse(startedAt)
+
+      // Inside the window or not
+      return (
+        Date.parse(entry.startedAt) <= startedAtMs &&
+        startedAtMs < Date.parse(entryEndsAt(group, entry))
+      )
+    }
+
+    // Every entry is handled above
+    default:
+      return assertNever(entry)
+  }
 }
 
 /**

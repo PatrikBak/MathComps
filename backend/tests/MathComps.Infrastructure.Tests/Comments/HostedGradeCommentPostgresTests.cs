@@ -4,6 +4,7 @@ using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Comments;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using static MathComps.Infrastructure.Tests.TestInfrastructure.HostedSeed;
 
@@ -12,9 +13,10 @@ namespace MathComps.Infrastructure.Tests.Comments;
 /// <summary>
 /// Integration tests for the grade conversation, the private thread between the graders and one student about one
 /// problem they were graded on, as <see cref="ICommentService"/> keeps it against a real PostgreSQL database: that
-/// admins read and write it, that its student joins once their group has closed, while the grade is final, that
-/// nobody else reaches it and a refusal reads like a thread that is not there, that each conversation keeps to
-/// itself and no reply crosses into another thread, and that it takes no reactions and is never counted in bulk.
+/// admins read and write it, that its student joins once their group has closed and their own entry has ended,
+/// while the grade is final, that nobody else reaches it and a refusal reads like a thread that is not there, that
+/// each conversation keeps to itself and no reply crosses into another thread, and that it takes no reactions and
+/// is never counted in bulk.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
@@ -74,6 +76,16 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
     /// The problem of a round whose group is still taking entries, which the student has a final grade on already.
     /// </summary>
     private readonly Guid _openProblemId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// A round whose group has closed with the student still sitting it.
+    /// </summary>
+    private readonly Guid _lateRoundId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// The late round's problem, which the student has a final grade on already.
+    /// </summary>
+    private readonly Guid _lateProblemId = Guid.CreateVersion7();
 
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services) =>
@@ -251,6 +263,35 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
         // Nor write in it
         await Assert.ThrowsAsync<CommentTargetNotFoundException>(
             () => service.CreateCommentAsync(target, _student, "Why?"));
+    });
+
+    /// <summary>
+    /// A clock started just before the group closed runs on past the close, and a final grade keeps its
+    /// conversation from the student until their entry ends, which their handing it in does.
+    /// </summary>
+    [Fact]
+    public Task A_clock_running_past_the_close_keeps_the_conversation_until_it_ends() => RunTestAsync(async service =>
+    {
+        // The conversation about the final grade in the group that has just closed
+        var target = GradeConversation(_lateProblemId, _student);
+
+        // A grader's word in it
+        await service.CreateCommentAsync(target, _grader, "Seven.");
+
+        // The student, still sitting it, does not read it
+        await Assert.ThrowsAsync<CommentTargetNotFoundException>(() => service.GetCommentsAsync(target, _student));
+
+        // Nor write in it
+        await Assert.ThrowsAsync<CommentTargetNotFoundException>(
+            () => service.CreateCommentAsync(target, _student, "Why?"));
+
+        // The student hands the entry in
+        await QueryAsync(context => context.HostedEntries
+            .Where(entry => entry.UserId == _student.UserId && entry.RoundId == _lateRoundId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(entry => entry.FinishedAt, DateTimeOffset.UtcNow)));
+
+        // And now reads the grader's word
+        Assert.Single(await service.GetCommentsAsync(target, _student));
     });
 
     /// <summary>
@@ -448,6 +489,26 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
         context.HostedGrades.Add(NewGrade(
             openEntry.Id, _openProblemId, _grader.UserId, mark: 7, help: 0, isFinal: true,
             DateTimeOffset.UtcNow.AddMinutes(-5)));
+
+        // A group that closed ten minutes ago
+        var lateGroup = NewGroup(
+            context, "mc-late", DateTimeOffset.UtcNow.AddDays(-7), DateTimeOffset.UtcNow.AddMinutes(-10));
+
+        // Its round, with one problem
+        NewRound(context, season, lateGroup, _lateRoundId, "mathcomps-advanced-november", _lateProblemId);
+
+        // The student sat it twenty minutes ago, just before it closed, so their clock still runs
+        var lateStartedAt = DateTimeOffset.UtcNow.AddMinutes(-20);
+        var lateEntry = NewEntry(_student.UserId, _lateRoundId, lateStartedAt);
+        context.HostedEntries.Add(lateEntry);
+
+        // And argued its problem five minutes in
+        NewConversation(context, Guid.CreateVersion7(), _student.UserId, _lateProblemId, lateStartedAt.AddMinutes(5));
+
+        // And a grader has already marked them final there
+        context.HostedGrades.Add(NewGrade(
+            lateEntry.Id, _lateProblemId, _grader.UserId, mark: 7, help: 0, isFinal: true,
+            DateTimeOffset.UtcNow.AddMinutes(-1)));
 
         // The student argued both problems inside the clock
         NewConversation(context, Guid.CreateVersion7(), _student.UserId, _problemId, _startedAt.AddMinutes(10));

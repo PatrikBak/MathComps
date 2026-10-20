@@ -155,7 +155,8 @@ public static class SelectionSeed
     }
 
     /// <summary>
-    /// Tracks an organization other than MathComps, listing categories of its own that no hosted round runs.
+    /// Tracks an organization other than MathComps, listing categories of its own that no hosted round runs, its
+    /// problems needing any one language.
     /// </summary>
     /// <param name="context">The seeding context.</param>
     /// <param name="slug"><inheritdoc cref="Organization.Slug" path="/summary"/></param>
@@ -163,7 +164,7 @@ public static class SelectionSeed
     public static void NewOrganization(MathCompsDbContext context, string slug, params string[] categories)
     {
         // The organization
-        var organization = new Organization { Slug = slug };
+        var organization = new Organization { Slug = slug, NeedsEveryLanguage = false };
         context.Organizations.Add(organization);
 
         // Its categories, each at its place in the order given

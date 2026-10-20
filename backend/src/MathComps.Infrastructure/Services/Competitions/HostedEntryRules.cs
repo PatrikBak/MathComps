@@ -117,38 +117,57 @@ public static class HostedEntryRules
     }
 
     /// <summary>
-    /// Whether a student's run is a test run: they were already preparing the competitions when its clock started.
+    /// Whether a run is a preparer's run: its owner was already preparing the competitions when its clock started.
     /// Starting to prepare them later leaves a run they sat for real as it was.
     /// </summary>
     /// <param name="preparerSince">
     /// When the student started preparing the competitions, null where they do not.
     /// </param>
     /// <param name="startedAt">When the run's clock started.</param>
-    /// <returns>Whether the run is a test run.</returns>
-    public static bool IsTestRun(DateTimeOffset? preparerSince, DateTimeOffset startedAt) =>
+    /// <returns>Whether the run is a preparer's run.</returns>
+    public static bool IsPreparersRun(DateTimeOffset? preparerSince, DateTimeOffset startedAt) =>
         // Preparing by the time the clock started, which an account that does not prepare them never is
         preparerSince <= startedAt;
 
     /// <summary>
     /// Whether a student's run in a hosted group is one somebody grades: a group with no closing instant grades
-    /// nobody, and nobody grades a test run.
+    /// nobody, and nobody grades a preparer's run.
     /// </summary>
     /// <param name="groupClosesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
-    /// <param name="isTestRun"><inheritdoc cref="IsTestRun" path="/summary"/></param>
+    /// <param name="isPreparersRun"><inheritdoc cref="IsPreparersRun" path="/summary"/></param>
     /// <returns>Whether the run is graded.</returns>
-    public static bool IsGraded(DateTimeOffset? groupClosesAt, bool isTestRun) =>
-        groupClosesAt is not null && !isTestRun;
+    public static bool IsGraded(DateTimeOffset? groupClosesAt, bool isPreparersRun) =>
+        groupClosesAt is not null && !isPreparersRun;
 
     /// <summary>
-    /// Whether a group's results are out, which they are for anybody once it has closed. A group with no closing
-    /// instant grades nobody, so it has none.
+    /// Whether a group's results are out to a reader: once the group has closed and the reader's own entry into it
+    /// has ended, by the clock running out or by the student handing in. A group with no closing instant grades
+    /// nobody, so it has none.
     /// </summary>
+    /// <remarks>
+    /// A clock started just before the close runs on past it, and its student's results wait for it. A reader no
+    /// clock ever ran for, one who never sat the round or gave the entry up, waits on the close alone.
+    /// </remarks>
     /// <param name="groupClosesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
-    /// <param name="now">The instant to read the close against.</param>
-    /// <returns>Whether the results are out.</returns>
-    public static bool AreResultsOut(DateTimeOffset? groupClosesAt, DateTimeOffset now) =>
-        // Out from the closing instant on
-        groupClosesAt is { } closesAt && closesAt <= now;
+    /// <param name="startedAt">When the reader's clock in the round started; null where none ever ran.</param>
+    /// <param name="finishedAt"><inheritdoc cref="HostedEntry.FinishedAt" path="/summary"/></param>
+    /// <param name="clockMinutes"><inheritdoc cref="HostedGroup.ClockMinutes" path="/summary"/></param>
+    /// <param name="now">The instant to read the close and the clock against.</param>
+    /// <returns>Whether the results are out to the reader.</returns>
+    public static bool AreResultsOut(
+        DateTimeOffset? groupClosesAt,
+        DateTimeOffset? startedAt,
+        DateTimeOffset? finishedAt,
+        int clockMinutes,
+        DateTimeOffset now)
+    {
+        // Nothing is out before the group closes, nor ever where it never does.
+        if (groupClosesAt is not { } closesAt || closesAt > now)
+            return false;
+
+        // From then on, out once the reader's own entry has ended. A reader no clock ever ran for has none to wait on.
+        return startedAt is not { } clockStartedAt || EndedAt(clockStartedAt, finishedAt, clockMinutes) <= now;
+    }
 }
 
 /// <summary>

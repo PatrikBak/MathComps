@@ -34,8 +34,8 @@ type HostedCompetitionsBoardProps = {
 /**
  * Every competition the program has run or will run, and the way into whichever one is open.
  *
- * The practice competition leads, being open to anybody at any time. Under it the graded rounds sit in
- * tabs, one school year at a time.
+ * The practice competition leads, being open at any time to anybody with an account. Under it the graded
+ * rounds sit in tabs, one school year at a time.
  */
 export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsBoardProps) {
   // Competitions copy

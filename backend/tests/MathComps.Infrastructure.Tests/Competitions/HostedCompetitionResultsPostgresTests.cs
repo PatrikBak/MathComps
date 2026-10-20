@@ -15,8 +15,9 @@ namespace MathComps.Infrastructure.Tests.Competitions;
 /// Integration tests for a hosted competition's results as <see cref="IHostedCompetitionService"/> reads them
 /// against a real PostgreSQL database: who is listed, what each cell shows, how a tie on the total is broken and
 /// when a place is shared, the school grade at the time of the round, that nothing is out before the group
-/// closes, and the reader's own cells and results on the competitions view, the problems and an entry handed in
-/// after the close.
+/// closes, nor to a student whose clock started before the close and still runs, and the reader's own cells and
+/// results on the competitions view, the problems and an entry handed in after the close, or whose clock ran out
+/// after it.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixture)
@@ -43,7 +44,7 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
     private const string OpenSlug = "elementary-october-2026";
 
     /// <summary>
-    /// What addresses the round of the group that closed while Bob was still sitting it.
+    /// What addresses the round of the group that closed while Bob and Cyril were still sitting it.
     /// </summary>
     private const string LateSlug = "elementary-november-2026";
 
@@ -53,7 +54,7 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
     private static readonly DateTimeOffset _startedAt = new(2026, 9, 10, 10, 0, 0, TimeSpan.Zero);
 
     /// <summary>
-    /// When every message about a grade was written, after the grades were given.
+    /// When every message about a grade in the round was written, after the grades were given.
     /// </summary>
     private static readonly DateTimeOffset _messagedAt = _startedAt.AddDays(21);
 
@@ -82,6 +83,22 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
     /// second.
     /// </summary>
     private readonly Guid _filipId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// A student who entered the late round before its group closed, his clock running out a minute ago, after
+    /// the close.
+    /// </summary>
+    private readonly Guid _cyrilId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// The late round's first problem.
+    /// </summary>
+    private readonly Guid _lateFirstId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// The late round's second problem.
+    /// </summary>
+    private readonly Guid _lateSecondId = Guid.CreateVersion7();
 
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
@@ -308,17 +325,84 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
     });
 
     /// <summary>
-    /// A clock started just before the group closed runs on past the close, and handing such an entry in gives it
-    /// back with its cells, the results being out by then.
+    /// A clock started just before the group closed runs on past the close, and its student's own results wait for
+    /// it. Bob, still sitting the round, finds no cells on the competitions view and no result on any problem, a
+    /// final grade with the graders' word on it included, and is refused the results, which a reader with no clock
+    /// in the round reads.
     /// </summary>
     [Fact]
-    public Task An_entry_handed_in_after_the_close_comes_back_with_its_cells() => RunTestAsync(async service =>
+    public Task A_clock_running_past_the_close_holds_back_its_students_results() => RunTestAsync(async service =>
+    {
+        // Bob's entry on the competitions view, with no cells
+        Assert.Null(CellsIn(await service.GetViewAsync(_bobId), LateSlug));
+
+        // No result on any of his problems
+        Assert.All(await service.GetProblemsAsync(_bobId, LateSlug), problem => Assert.Null(problem.Result));
+
+        // The results, refused to him
+        await Assert.ThrowsAsync<HostedResultsNotOutException>(() => service.GetResultsAsync(_bobId, LateSlug));
+
+        // The same results as a reader with no account reads them
+        var results = await service.GetResultsAsync(null, LateSlug);
+
+        // Cyril's row among them, at his four points
+        Assert.Equal(4m, TotalOf(RowOf(results, "Cyril")));
+    });
+
+    /// <summary>
+    /// Handing in a clock that runs past the close ends the wait: the entry comes back with its cells, the problem
+    /// carries its final grade and the graders' word on it, and the results open to the student.
+    /// </summary>
+    [Fact]
+    public Task An_entry_handed_in_after_the_close_comes_back_with_its_results() => RunTestAsync(async service =>
     {
         // Bob hands in the entry he started just before the close
         var entry = Assert.IsType<SatEntryDto>(await service.FinishAsync(_bobId, LateSlug));
 
-        // Nothing written about on either problem, so nothing to mark
-        Assert.Equal([new NoConversationCellDto(), new NoConversationCellDto()], entry.Cells);
+        // Seven on the first problem, nothing written about on the second
+        Assert.Equal([new ScoredCellDto(7m), new NoConversationCellDto()], entry.Cells);
+
+        // His problems once handed in
+        var problems = await service.GetProblemsAsync(_bobId, LateSlug);
+
+        // The first final, with the graders' one message standing in its conversation
+        Assert.Equal(
+            new FinalResultDto(7, 0, new GradeConversationDto($"{_lateFirstId}:{_bobId}", 1)),
+            problems[0].Result);
+
+        // The results as he reads them now
+        var results = await service.GetResultsAsync(_bobId, LateSlug);
+
+        // His own row marked as his
+        Assert.Equal(["Bob"], results.Rows.Where(row => row.IsReader).Select(row => row.Student.Username));
+    });
+
+    /// <summary>
+    /// A clock that started before the close and ran out after it puts its student's own results out with nothing
+    /// handed in. Cyril, whose clock ran out a minute ago, finds his cells, his final grade with the graders' word
+    /// on it, and the results.
+    /// </summary>
+    [Fact]
+    public Task A_clock_run_out_after_the_close_puts_its_students_results_out() => RunTestAsync(async service =>
+    {
+        // His row on the competitions view
+        Assert.Equal(
+            [new ScoredCellDto(4m), new NoConversationCellDto()],
+            CellsIn(await service.GetViewAsync(_cyrilId), LateSlug));
+
+        // His problems
+        var problems = await service.GetProblemsAsync(_cyrilId, LateSlug);
+
+        // The first final, with the graders' one message standing in its conversation
+        Assert.Equal(
+            new FinalResultDto(4, 0, new GradeConversationDto($"{_lateFirstId}:{_cyrilId}", 1)),
+            problems[0].Result);
+
+        // The results as he reads them
+        var results = await service.GetResultsAsync(_cyrilId, LateSlug);
+
+        // His own row marked as his
+        Assert.Equal(["Cyril"], results.Rows.Where(row => row.IsReader).Select(row => row.Student.Username));
     });
 
     /// <summary>
@@ -487,14 +571,43 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
         Conversation(context, bobsOpenEntry, openProblemId, 10);
         Grade(context, bobsOpenEntry, openProblemId, mark: 7, help: 0);
 
-        // A group that closed ten minutes ago, which Bob entered just before it did and is still sitting
+        // A group that closed ten minutes ago, its problems written out to be read
         var lateRoundId = Guid.CreateVersion7();
         var late = NewGroup(
             context, "mc-late", DateTimeOffset.UtcNow.AddDays(-7), DateTimeOffset.UtcNow.AddMinutes(-10));
-        NewRound(
-            context, season, late, lateRoundId, "mathcomps-elementary-november", Guid.CreateVersion7(),
-            Guid.CreateVersion7());
-        context.HostedEntries.Add(NewEntry(_bobId, lateRoundId, DateTimeOffset.UtcNow.AddMinutes(-20)));
+        NewRound(context, season, late, lateRoundId, "mathcomps-elementary-november", _lateFirstId, _lateSecondId);
+        Texts(context, _lateFirstId);
+        Texts(context, _lateSecondId);
+
+        // Bob entered it just before it closed and is still sitting it
+        var bobsLateEntry = NewEntry(_bobId, lateRoundId, DateTimeOffset.UtcNow.AddMinutes(-20));
+        context.HostedEntries.Add(bobsLateEntry);
+
+        // He wrote about its first problem five minutes in
+        Conversation(context, bobsLateEntry, _lateFirstId, 5);
+
+        // A grader has already marked him final there
+        Grade(context, bobsLateEntry, _lateFirstId, mark: 7, help: 0);
+
+        // With a word on it
+        NewMessage(context, bobsLateEntry.Id, _lateFirstId, _graderId, DateTimeOffset.UtcNow.AddMinutes(-5));
+
+        // Cyril's account
+        context.Users.Add(NewUser(_cyrilId, "Cyril"));
+
+        // He entered it before it closed too, three hours and a minute ago, so his three-hour clock ran out a minute
+        // ago, after the close
+        var cyrilsEntry = NewEntry(_cyrilId, lateRoundId, DateTimeOffset.UtcNow.AddMinutes(-181));
+        context.HostedEntries.Add(cyrilsEntry);
+
+        // He wrote about its first problem ten minutes in
+        Conversation(context, cyrilsEntry, _lateFirstId, 10);
+
+        // And was marked final there
+        Grade(context, cyrilsEntry, _lateFirstId, mark: 4, help: 0);
+
+        // With a word on it
+        NewMessage(context, cyrilsEntry.Id, _lateFirstId, _graderId, DateTimeOffset.UtcNow.AddMinutes(-5));
 
         // Save seeded data
         await context.SaveChangesAsync();

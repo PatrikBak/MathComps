@@ -142,9 +142,9 @@ public class AiTaggingService(ILlmChatCaller chatCaller)
     }
 
     /// <summary>
-    /// Runs one pass: the prompt template (instructions, rules, and the candidate vocabulary) becomes the system
-    /// message, and the problem itself becomes the user message. Keeping the per-pass instructions constant lets the
-    /// model cache that prefix across problems. The caller returns the reply bound to <typeparamref name="TResponse"/>.
+    /// Runs one pass: the prompt template (instructions, rules, and the candidate tags) becomes the system message,
+    /// and the problem itself becomes the user message. The caller returns the reply bound to
+    /// <typeparamref name="TResponse"/>.
     /// </summary>
     /// <typeparam name="TResponse">The structured shape to bind the model's reply into.</typeparam>
     /// <param name="step">The prompt, model, and reasoning level this pass runs on.</param>
@@ -160,7 +160,7 @@ public class AiTaggingService(ILlmChatCaller chatCaller)
         string candidateTagsJson,
         CancellationToken cancellationToken)
     {
-        // The system message is the instructions plus the candidate vocabulary — constant per pass, hence cacheable.
+        // The system message is the instructions plus the candidate tags
         var systemPrompt = (await FileUtilities.ReadAppFileAsync(step.Prompt, cancellationToken))
             .Replace("{candidate_tags}", candidateTagsJson);
 

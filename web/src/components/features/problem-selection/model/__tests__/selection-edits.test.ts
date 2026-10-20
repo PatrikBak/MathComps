@@ -61,7 +61,8 @@ function board(id: string, slots: (string | null)[]): Board {
  * @returns The selection.
  */
 function selection(boards: Board[], proposals: Proposal[]): SelectionData {
-  // MathComps' categories, the boards and the proposals, every other part of the selection empty
+  // MathComps' categories, the boards and the proposals, every other part of the selection empty, and every
+  // language needed
   return {
     categories: [
       { name: 'elementary', hostedCategory: 'elementary' },
@@ -72,6 +73,7 @@ function selection(boards: Board[], proposals: Proposal[]): SelectionData {
     boards,
     cycles: [],
     conversations: [],
+    needsEveryLanguage: true,
   }
 }
 

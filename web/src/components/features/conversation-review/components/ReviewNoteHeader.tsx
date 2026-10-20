@@ -45,10 +45,9 @@ type ReviewNoteHeaderProps = {
  * Shared between the conversation's own notes and the cross-conversation feed so the two can't drift into
  * describing one state two ways. What differs between them rides in through the slots rather than as flags.
  *
- * It reads down rather than across. One line carrying all five parts plus whatever can be done with the note ran
- * to two wrapped rows of 11px text in a panel this narrow, and a longer name pushed the controls onto a line of
- * their own. The anchor leads on its own line because it is the part the reader is scanning for; everything else
- * is what they check once they have found the note.
+ * It reads down rather than across, since one line carrying every part and the note's controls wraps in a panel
+ * this narrow. The anchor leads, sharing its line only with the controls, because it is the part the reader is
+ * scanning for; everything else is what they check once they have found the note.
  *
  * A settled note is marked in words as well as in the check, so the state never rests on colour alone, and the
  * day it was settled rides in the title: beside the day it was written, two dates would read as a range.

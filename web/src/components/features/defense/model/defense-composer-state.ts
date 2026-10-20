@@ -125,7 +125,7 @@ export type DefenseComposerState =
  * The competition run a conversation is being argued inside, as far as the composer has to know it.
  */
 type ComposerCompetitionRun = {
-  /** Whether the student is graded on the run. */
+  /** Whether the student is graded on the conversation. */
   isGraded: boolean
 }
 

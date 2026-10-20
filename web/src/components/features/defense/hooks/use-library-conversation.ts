@@ -3,15 +3,12 @@
 import { useAuth } from '@clerk/nextjs'
 
 import { useAreaEntry } from '@/components/features/hosted-competitions/hooks/use-area-entry'
+import type { AreaEntry } from '@/components/features/hosted-competitions/model/hosted-competition-state'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import { competitionSlugOf } from '../model/defense-target'
-import type {
-  DefenseCompetitionRun,
-  DefenseProblem,
-  DefenseSessionListItem,
-} from '../model/defense-types'
+import type { DefenseProblem, DefenseSessionListItem } from '../model/defense-types'
 
 /**
  * What a defense waiting on nothing reports. Module-level so every render hands out the same object.
@@ -27,8 +24,8 @@ type UseLibraryConversationResult = {
    * still waiting on the entry it was argued under, and for a graded one with no entry to read it against.
    */
   problem: DefenseProblem | null
-  /** The run the conversation is being argued inside, or null outside a competition. */
-  competition: DefenseCompetitionRun | null
+  /** The entry the conversation is being argued inside, or null outside a competition. */
+  entry: AreaEntry | null
   /**
    * How far the read behind the problem got, so a chosen defense that cannot be opened says so rather than
    * waiting for good. Ready for a handout defense, which waits on nothing.
@@ -40,14 +37,13 @@ type UseLibraryConversationResult = {
  * Works out what a chosen defense opens as. A competition one opens on the terms its own area opens it on,
  * the entry and its clock included, so the same conversation reads the same wherever it was reached from.
  *
- * That entry is read before the conversation is handed over rather than alongside it: without one the chat
- * offers to rewind and delete a graded conversation the backend refuses to change. A conversation nobody
- * grades, held by a reader who never entered, opens without one once the read says there is none, which is
- * how the area opens it too.
+ * That entry is read before the conversation is handed over rather than alongside it, since the chat takes
+ * its clock and Mathilda's role in it from the entry. A conversation nobody grades, held by a reader who never
+ * entered, opens without one once the read says there is none, which is how the area opens it too.
  *
  * @param defense - The defense the student chose, or null while they are still on the list.
  *
- * @returns The problem to open on, and the run it is argued inside.
+ * @returns The problem to open on, and the entry it is argued inside.
  */
 export function useLibraryConversation(
   defense: DefenseSessionListItem | null
@@ -63,7 +59,7 @@ export function useLibraryConversation(
 
   // Nothing chosen, so there is nothing to open
   if (defense === null) {
-    return { problem: null, competition: null, uiState: READY }
+    return { problem: null, entry: null, uiState: READY }
   }
 
   // What it opens as, which each kind of target answers differently
@@ -75,7 +71,7 @@ export function useLibraryConversation(
           target: { kind: 'handout', environment: defense.target },
           statement: defense.statement,
         },
-        competition: null,
+        entry: null,
         uiState: READY,
       }
 
@@ -93,21 +89,21 @@ export function useLibraryConversation(
 
       // An entry spent, so the conversation is argued inside the run it bought
       if (entry !== null) {
-        return { problem, competition: { entry, isGraded: defense.isGraded }, uiState }
+        return { problem, entry, uiState }
       }
 
       // The read behind the entry still going or given up on, so it waits rather than opening without one
       if (uiState.kind !== 'ready') {
-        return { problem: null, competition: null, uiState }
+        return { problem: null, entry: null, uiState }
       }
 
       // No entry, and nobody grades it, so nothing of the reader's own is spent on it
       if (!defense.isGraded) {
-        return { problem, competition: null, uiState }
+        return { problem, entry: null, uiState }
       }
 
       // Graded, with no entry to hold the conversation to
-      return { problem: null, competition: null, uiState }
+      return { problem: null, entry: null, uiState }
     }
 
     // A proposal, argued under nothing and open whenever
@@ -117,7 +113,7 @@ export function useLibraryConversation(
           target: { kind: 'proposal', problemId: defense.target.problemId },
           statement: defense.statement,
         },
-        competition: null,
+        entry: null,
         uiState: READY,
       }
 

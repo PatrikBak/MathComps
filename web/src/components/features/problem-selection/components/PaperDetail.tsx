@@ -27,7 +27,8 @@ import { BackLink } from './SelectionLinks'
 import { useLoadedSelection } from './SelectionWorkspaceProvider'
 
 /**
- * Whether each tab of a paper's page shows its problems' statements, and so carries the language they are read in.
+ * Whether each tab of a paper's page shows its problems' statements, and so, where they need every language, carries
+ * the language they are read in.
  */
 const SHOWS_STATEMENTS: Record<PaperTab, boolean> = {
   problems: true,
@@ -106,8 +107,8 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
   // Paper page copy
   const t = useTranslations('problemSelection.paper')
 
-  // Every problem by id, and the selection's categories
-  const { proposalsById, categories } = useLoadedSelection()
+  // Every problem by id, the selection's categories, and whether the problems need every language
+  const { proposalsById, categories, needsEveryLanguage } = useLoadedSelection()
 
   // The problem in each slot, undefined where the slot stands empty
   const slotProposals = paper.slots.map((proposalId) =>
@@ -209,22 +210,25 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
       {/* The way out */}
       <BackLink />
 
-      {/* The paper's name and its board, and over its problems' statements the language they are read in */}
+      {/* The paper's name and its board, and over its problems' statements the language they are read in, where they
+          need every language */}
       <header className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <DetailHeading subjectId={paper.id}>
           <span style={hueTextStyle(categoryHue(categories, paper.category))}>{paper.name}</span>{' '}
           <span className="ml-1 font-normal text-muted">{board.name}</span>
         </DetailHeading>
-        <div
-          // Hidden but holding its room on a tab without statements, so the tabs stay put as they switch
-          className={cn(!SHOWS_STATEMENTS[tab] && 'invisible')}
-        >
-          <LanguageSwitch
-            language={language}
-            onChange={(picked) => onChoice({ language: picked })}
-            unwritten={unwritten}
-          />
-        </div>
+        {needsEveryLanguage && (
+          <div
+            // Hidden but holding its room on a tab without statements, so the tabs stay put as they switch
+            className={cn(!SHOWS_STATEMENTS[tab] && 'invisible')}
+          >
+            <LanguageSwitch
+              language={language}
+              onChange={(picked) => onChoice({ language: picked })}
+              unwritten={unwritten}
+            />
+          </div>
+        )}
       </header>
 
       {/* The paper's tabs */}

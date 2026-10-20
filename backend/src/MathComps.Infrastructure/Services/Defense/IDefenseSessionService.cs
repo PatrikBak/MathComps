@@ -69,8 +69,8 @@ public interface IDefenseSessionService
         Guid userId, Language language, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Deletes a session and its turns outright. The session must belong to the user, and must not be part of
-    /// a graded round.
+    /// Deletes a session and its turns outright. The session must belong to the user, and must not be one they are
+    /// graded on.
     /// </summary>
     /// <param name="userId">The user the session must belong to.</param>
     /// <param name="sessionId">The session to delete.</param>
@@ -80,7 +80,7 @@ public interface IDefenseSessionService
     /// <summary>
     /// Rewinds a session to a chosen point, deleting every turn after it so the conversation can be taken
     /// from there again. The kept point must be an examiner turn, so the result awaits the student's next
-    /// message. The session must belong to the user, and must not be part of a graded round.
+    /// message. The session must belong to the user, and must not be one they are graded on.
     /// </summary>
     /// <param name="userId">The user the session must belong to.</param>
     /// <param name="sessionId">The session to rewind.</param>
@@ -122,8 +122,8 @@ public sealed class DefenseMessageLimitException() : Exception("This defense has
 public sealed class DefenseSpendLimitException() : Exception("You have reached your usage limit — try again later");
 
 /// <summary>
-/// Thrown when a conversation argued under a graded round is rewound or deleted. What a student argued where
-/// they are graded outlives their opinion of it.
+/// Thrown when a conversation the student is graded on is rewound or deleted. What a student argued where they are
+/// graded outlives their opinion of it.
 /// </summary>
 public sealed class DefenseGradedSessionImmutableException()
     : Exception("A graded conversation cannot be changed");

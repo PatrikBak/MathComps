@@ -80,7 +80,7 @@ public static class ConversationReviewSeed
 
     /// <summary>
     /// The only conversation against the second environment, and the most recently active of them all. Opened long
-    /// before the other two and carried on yesterday, so where it lands says which end of its turns the queue reads.
+    /// before every other one and carried on yesterday, so where it lands says which end of its turns the queue reads.
     /// </summary>
     public static readonly Guid NewestSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a3");
 
@@ -110,8 +110,7 @@ public static class ConversationReviewSeed
     public const string HandoutContentId = "handout-one";
 
     /// <summary>
-    /// The settings all but one conversation ran on, holding a model so a conversation's snapshot has something
-    /// to read back off it.
+    /// Examiner settings holding a model, so a conversation's snapshot has something to read back off it.
     /// </summary>
     public const string ExaminerConfig =
         /*lang=json,strict*/ """{"generate":{"model":"gemini-3.6-flash","promptText":"be fair"}}""";
