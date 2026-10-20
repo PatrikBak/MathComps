@@ -6,7 +6,7 @@ namespace MathComps.Domain.EfCoreEntities;
 /// </summary>
 /// <remarks>
 /// Whether a conversation is unread is derived by comparing this against its newest turn rather than stored as a
-/// flag, so a student carrying the conversation on brings it back to be read again. That comparison is against a
+/// flag, so its author carrying the conversation on brings it back to be read again. That comparison is against a
 /// time and not a turn's sequence on purpose: a rewind drops the turns above a sequence and later ones reuse those
 /// numbers, which would let turns nobody has read sit under an already-read high-water mark.
 /// </remarks>
@@ -23,7 +23,7 @@ public class AdminSessionReview
     public DefenseSession Session { get; set; } = null!;
 
     /// <summary>
-    /// The reviewer who read it, as against the student who held the conversation.
+    /// The reviewer who read it, as against the author who held the conversation.
     /// </summary>
     public required Guid ReviewerId { get; set; }
 

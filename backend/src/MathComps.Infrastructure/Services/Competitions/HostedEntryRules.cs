@@ -7,7 +7,7 @@ namespace MathComps.Infrastructure.Services.Competitions;
 /// </summary>
 /// <param name="UserId">The student reading, null where the reader has no account.</param>
 /// <param name="PreparesCompetitions">
-/// Whether they hold <see cref="UserCapability.PrepareCompetitions"/>, which only an account can do.
+/// Whether they prepare the competitions (see <see cref="Organization.MathCompsSlug"/>), which only an account can do.
 /// </param>
 public readonly record struct HostedReader(Guid? UserId, bool PreparesCompetitions);
 
@@ -74,8 +74,7 @@ public static class HostedEntryRules
     /// Everything else opens it: an entry they handed in, a clock that ran out, an entry they gave up for the
     /// problems, and a competition that has closed, which anybody may then read.
     ///
-    /// A reader who prepares competitions (<see cref="UserCapability.PrepareCompetitions"/>) is held to their
-    /// clock like everybody else.
+    /// A reader who prepares competitions is held to their clock like everybody else.
     ///
     /// The round's embargo is a separate gate, deciding whether the problems may be reached at all, and
     /// <see cref="EnsureEntitled"/> has settled it by the time anything asks this.
@@ -118,16 +117,16 @@ public static class HostedEntryRules
     }
 
     /// <summary>
-    /// Whether a student's run is a test run: they already held <see cref="UserCapability.PrepareCompetitions"/>
-    /// when its clock started. A grant handed over later leaves a run they sat for real as it was.
+    /// Whether a student's run is a test run: they were already preparing the competitions when its clock started.
+    /// Starting to prepare them later leaves a run they sat for real as it was.
     /// </summary>
     /// <param name="preparerSince">
-    /// When the student was handed <see cref="UserCapability.PrepareCompetitions"/>, null where they do not hold it.
+    /// When the student started preparing the competitions, null where they do not.
     /// </param>
     /// <param name="startedAt">When the run's clock started.</param>
     /// <returns>Whether the run is a test run.</returns>
     public static bool IsTestRun(DateTimeOffset? preparerSince, DateTimeOffset startedAt) =>
-        // Granted by the time the clock started, which an account without a grant never was
+        // Preparing by the time the clock started, which an account that does not prepare them never is
         preparerSince <= startedAt;
 
     /// <summary>

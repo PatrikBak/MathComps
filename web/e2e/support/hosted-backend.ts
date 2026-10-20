@@ -462,7 +462,7 @@ export async function installHostedBackend(
 
       // The one place an embargoed statement is served
       case 'problems': {
-        // An embargoed set takes an entry, a grant, or the embargo having lifted
+        // An embargoed set takes an entry, a reader who prepares competitions, or the embargo having lifted
         if (!areProblemsReadable(competition, state.view.preparesCompetitions)) {
           // Answered as the backend answers it
           await route.fulfill({

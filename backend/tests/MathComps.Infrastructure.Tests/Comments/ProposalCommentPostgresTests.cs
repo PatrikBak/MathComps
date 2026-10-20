@@ -7,12 +7,12 @@ using Microsoft.EntityFrameworkCore;
 namespace MathComps.Infrastructure.Tests.Comments;
 
 /// <summary>
-/// The <see cref="PreparerCommentPostgresTests"/> for a proposal's discussion, the reviewers' thread about one problem
+/// The <see cref="ReviewerCommentPostgresTests"/> for a proposal's discussion, the reviewers' thread about one problem
 /// of the problem selection, and beyond them: that it closes once the proposal is deleted, and that the problem has
 /// no public thread beside it.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
-public class ProposalCommentPostgresTests(PostgresContainerFixture fixture) : PreparerCommentPostgresTests(fixture)
+public class ProposalCommentPostgresTests(PostgresContainerFixture fixture) : ReviewerCommentPostgresTests(fixture)
 {
     /// <inheritdoc/>
     protected override CommentTargetType TargetType => CommentTargetType.Proposal;

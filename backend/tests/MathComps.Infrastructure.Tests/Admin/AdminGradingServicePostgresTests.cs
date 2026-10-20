@@ -72,7 +72,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     /// <summary>
     /// A student already preparing the competitions when they sat the advanced round, which made it a test run.
     /// </summary>
-    private readonly Guid _grantedId = Guid.CreateVersion7();
+    private readonly Guid _preparerId = Guid.CreateVersion7();
 
     /// <summary>
     /// A student who sat the elementary round, and the practice one besides.
@@ -143,7 +143,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     protected override void ConfigureServices(IServiceCollection services)
     {
         // The reader of when a student started preparing the competitions.
-        services.AddUserGrants();
+        services.AddOrganizationMembers();
 
         // The service under test.
         services.AddScoped<IAdminGradingService, AdminGradingService>();
@@ -277,8 +277,8 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Not Carol, who gave her entry up
         Assert.DoesNotContain(_carolId, graded);
 
-        // Not the granted student, whose run was a test run
-        Assert.DoesNotContain(_grantedId, graded);
+        // Not the preparer, whose run was a test run
+        Assert.DoesNotContain(_preparerId, graded);
 
         // Not the stranger, who never entered
         Assert.DoesNotContain(_strangerId, graded);
@@ -371,8 +371,8 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Carol gave her entry up
         await AssertListedUngradedAsync(_carolId, _advancedFirstId);
 
-        // The granted student's run was a test run
-        await AssertListedUngradedAsync(_grantedId, _advancedFirstId);
+        // The preparer's run was a test run
+        await AssertListedUngradedAsync(_preparerId, _advancedFirstId);
 
         // The stranger never entered
         await AssertListedUngradedAsync(_strangerId, _advancedFirstId);
@@ -382,23 +382,18 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A grant handed over once the group has closed leaves a student's grading where it was.
+    /// A student who starts preparing the competitions once the group has closed keeps their grading where it was.
     /// </summary>
     [Fact]
-    public Task A_grant_handed_over_after_the_close_leaves_the_grading_as_it_was() => RunTestAsync(async _ =>
+    public Task Starting_to_prepare_after_the_close_leaves_the_grading_as_it_was() => RunTestAsync(async _ =>
     {
-        // Alice granted the capability three days after the group closed
+        // Alice put on the MathComps organization's list three days after the group closed
         await QueryAsync(async context =>
         {
-            // The grant
-            context.UserGrants.Add(new UserGrant
-            {
-                UserId = _aliceId,
-                Capability = UserCapability.PrepareCompetitions,
-                GrantedAt = _closesAt.AddDays(3),
-            });
+            // Alice's address
+            SelectionSeed.NewMember(context, "alice@example.com", _closesAt.AddDays(3));
 
-            // Commit the grant
+            // Commit it
             await context.SaveChangesAsync();
         });
 
@@ -1070,17 +1065,12 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
             NewUser(_aliceId, "Alice"),
             NewUser(_bobId, "Bob"),
             NewUser(_carolId, "Carol"),
-            NewUser(_grantedId, "Granted"),
+            NewUser(_preparerId, "Preparer"),
             NewUser(_danId, "Dan"),
             NewUser(_strangerId, "Stranger"));
 
-        // The grant one of them held from the day before every clock started
-        context.UserGrants.Add(new UserGrant
-        {
-            UserId = _grantedId,
-            Capability = UserCapability.PrepareCompetitions,
-            GrantedAt = _startedAt.AddDays(-1),
-        });
+        // The preparer on the MathComps organization's list from the day before every clock started
+        SelectionSeed.NewMember(context, "preparer@example.com", _startedAt.AddDays(-1));
 
         // The one season every round sits in
         var season = new Season { Id = Guid.NewGuid(), StartYear = 2026, EditionNumber = 76 };
@@ -1161,11 +1151,11 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Carol argued one of them anyway
         NewConversation(context, Guid.CreateVersion7(), _carolId, _advancedFirstId, _startedAt.AddMinutes(5));
 
-        // The granted student sat the advanced round as a test run
-        context.HostedEntries.Add(NewEntry(_grantedId, _advancedRoundId, _startedAt));
+        // The preparer sat the advanced round as a test run
+        context.HostedEntries.Add(NewEntry(_preparerId, _advancedRoundId, _startedAt));
 
         // Arguing a problem inside the clock
-        NewConversation(context, Guid.CreateVersion7(), _grantedId, _advancedFirstId, _startedAt.AddMinutes(5));
+        NewConversation(context, Guid.CreateVersion7(), _preparerId, _advancedFirstId, _startedAt.AddMinutes(5));
 
         // Dan sat the elementary round
         context.HostedEntries.Add(NewEntry(_danId, _elementaryRoundId, _startedAt));

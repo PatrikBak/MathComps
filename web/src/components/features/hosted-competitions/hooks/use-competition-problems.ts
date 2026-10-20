@@ -24,8 +24,8 @@ type UseCompetitionProblemsResult = {
  *
  * @param readerKey - Who the answer belongs to, which is what it gets cached under.
  * @param competitionSlug - Which competition's problems to read.
- * @param isEntitled - Whether the problems are the reader's to see, through an entry or through the
- *   competition having closed with them made public.
+ * @param isEntitled - Whether the problems are the reader's to see: through an entry, through the
+ *   competition having closed with them made public, or through preparing competitions.
  *
  * @returns The problems and the state of the read.
  */
@@ -40,7 +40,7 @@ export function useCompetitionProblems(
     fetch: (apiCall) => fetchCompetitionProblems(apiCall, competitionSlug),
     // A closed competition's set is public, so this read does not wait on an account
     requireAuth: false,
-    // Embargoed until an entry is spent on them, so nothing is asked for before there is one
+    // Nothing is asked for until the reader is entitled to the set
     enabled: isEntitled,
     // A conversation held on another tab should show up here promptly
     ...cachePolicy.userData,

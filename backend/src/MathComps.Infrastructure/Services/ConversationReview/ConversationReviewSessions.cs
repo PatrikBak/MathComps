@@ -5,10 +5,9 @@ using Microsoft.EntityFrameworkCore;
 namespace MathComps.Infrastructure.Services.ConversationReview;
 
 /// <summary>
-/// What every review operation against a defense conversation has to settle before reaching into it. A
-/// reviewer's reach isn't scoped to whoever held the conversation, so existence is the whole check, and it lives
-/// on this side rather than beside the defense surface's own writes, where an unscoped check would be a way past the
-/// ownership one.
+/// What every review operation against a defense conversation has to settle before reaching into it. A reviewer
+/// reads conversations other people held, so existence is all this settles, and it lives on this side rather than
+/// beside the defense surface's own writes, where an unscoped check would be a way past the ownership one.
 /// </summary>
 internal static class ConversationReviewSessions
 {

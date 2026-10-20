@@ -378,8 +378,8 @@ test.describe('the entry and the area it opens', () => {
     // Which is there, with nothing said about the profile they never filled in
     await expect(enter).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
-    // On a card still counting down to the day the group opens: the grant decides what is offered, and the
-    // board goes on saying what the schedule is
+    // On a card still counting down to the day the group opens: preparing competitions decides what is
+    // offered, and the board goes on saying what the schedule is
     await expect(page.getByRole('tabpanel').getByText(/opens in/i)).toBeVisible()
 
     // Press it, which raises the question rather than the profile the fields would otherwise be wanted for

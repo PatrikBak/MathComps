@@ -13,8 +13,8 @@ namespace MathComps.Infrastructure.Services.Comments;
 /// for a target, <see cref="CommentNotFoundException"/> for a comment. Handouts, news and the problems the archive
 /// serves are open to anybody, and no other problem has a thread. A grade conversation is open to admins, and to
 /// the student it is with while the grade is final and their group has closed. A proposal's discussion and a
-/// paper's are open only to the accounts preparing the competitions, and a proposal's to nobody once the proposal
-/// is deleted. A version an edit has replaced is refused with <see cref="CommentNotFoundException"/> too.
+/// paper's are open only to the members of the organization picking the problems, and a proposal's to nobody once
+/// the proposal is deleted. A version an edit has replaced is refused with <see cref="CommentNotFoundException"/> too.
 /// </remarks>
 public interface ICommentService
 {
@@ -38,8 +38,8 @@ public interface ICommentService
 
     /// <summary>
     /// Reads the threads of several targets of one type at once, each as <see cref="GetCommentsAsync"/> reads it.
-    /// Only proposals and papers are read in bulk, and only by the accounts preparing the competitions: anybody else
-    /// is refused like targets that are not there, and every other type throws <see cref="NotSupportedException"/>.
+    /// Only proposals and papers are read in bulk, and only by a viewer their threads are open to: anybody else is
+    /// refused like targets that are not there, and every other type throws <see cref="NotSupportedException"/>.
     /// </summary>
     /// <param name="targetType">The type of the targets.</param>
     /// <param name="targetIds">The ids of the targets.</param>
@@ -104,7 +104,7 @@ public interface ICommentService
     /// <summary>
     /// Counts the active comments on each of several targets of one type. Only handouts, news articles, proposals
     /// and papers are counted in bulk: problems and grade conversations are refused like targets that are not
-    /// there, and so are proposals and papers to anybody but the accounts preparing the competitions.
+    /// there, and so are proposals and papers to anybody their threads are closed to.
     /// </summary>
     /// <param name="targetType">The type of the targets.</param>
     /// <param name="targetIds">The ids of the targets.</param>

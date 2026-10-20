@@ -46,7 +46,8 @@ export function useCommentCounts(
       // How many comments each of the targets carries
       return getCommentCounts(apiCall, targetType, targetIds)
     },
-    // A count reads the same to a visitor with no account
+    // A visitor reads the counts of the threads open to everybody, so the call goes out without
+    // an account
     requireAuth: false,
     // A count can lag a little behind the thread it counts
     ...cachePolicy.counts,

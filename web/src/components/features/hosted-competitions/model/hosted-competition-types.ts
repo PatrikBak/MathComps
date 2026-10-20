@@ -17,9 +17,9 @@ export type HostedCompetition = {
   /**
    * Whether the problems are open to this reader without an entry.
    *
-   * They open to everybody once the round's embargo has lifted, and to a reader who prepares competitions
-   * whenever they like. Before that, the only way to them is to spend the entry, by sitting it or by giving
-   * it up to read them.
+   * They open to anybody signed in once the round's embargo has lifted, to everybody once the
+   * competition is over, and to a reader who prepares competitions at any time. Before that, the
+   * only way to them is to spend the entry, by sitting it or by giving it up to read them.
    */
   problemsPublished: boolean
   /**
@@ -128,7 +128,10 @@ export type ResultRow = {
  * One competition's results, readable by anybody once its group has closed.
  */
 export type CompetitionResults = {
-  /** Every student who sat it, in the order they stand. */
+  /**
+   * Every graded student who argued any of its problems inside their entry, in the order they
+   * stand.
+   */
   rows: ResultRow[]
 }
 

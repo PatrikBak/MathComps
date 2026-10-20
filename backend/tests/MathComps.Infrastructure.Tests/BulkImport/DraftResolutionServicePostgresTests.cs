@@ -1130,6 +1130,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
                 context.Proposals.Add(new Proposal
                 {
                     ProblemId = problem.Id,
+                    OrganizationId = SelectionSeed.MathCompsId(context),
                     Number = filed,
                     Title = $"Proposal {filed}",
                     Area = ProposalArea.Algebra,

@@ -115,7 +115,7 @@ describe('entryBlockerFor', () => {
   })
 
   it('asks a reader who prepares competitions for an account all the same', () => {
-    // An entry has to belong to somebody, which no grant can supply
+    // An entry has to belong to somebody, which preparing competitions cannot supply
     expect(entryBlockerFor({ kind: 'signedOut' }, GRADED, true)).toBe('signIn')
   })
 

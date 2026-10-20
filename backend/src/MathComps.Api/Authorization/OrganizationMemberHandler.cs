@@ -1,25 +1,26 @@
 using MathComps.Api.Constants;
 using MathComps.Api.Endpoints;
+using MathComps.Infrastructure.Services.Organizations;
 using MathComps.Infrastructure.Services.Users;
 using Microsoft.AspNetCore.Authorization;
 
 namespace MathComps.Api.Authorization;
 
 /// <summary>
-/// Meets a <see cref="UserCapabilityRequirement"/> when the caller resolves to an account holding the capability, or
-/// is an admin where the requirement admits admins. A grant is read afresh on every request, so revoking one closes
-/// the door on the next.
+/// Meets an <see cref="OrganizationMemberRequirement"/> when the caller resolves to an account that is a member of
+/// the requirement's organization, or is an admin where the requirement admits admins. The list is read afresh on
+/// every request, so taking an address off it closes the door on the next.
 /// </summary>
 /// <param name="userManager">Resolves the caller to their account.</param>
-/// <param name="grants">Reads what the account holds.</param>
-public sealed class UserCapabilityHandler(IUserManager userManager, IUserGrantService grants)
-    : AuthorizationHandler<UserCapabilityRequirement>
+/// <param name="members">Reads who is on the organization's list.</param>
+public sealed class OrganizationMemberHandler(IUserManager userManager, IOrganizationMemberService members)
+    : AuthorizationHandler<OrganizationMemberRequirement>
 {
     /// <inheritdoc/>
     protected override async Task HandleRequirementAsync(
-        AuthorizationHandlerContext context, UserCapabilityRequirement requirement)
+        AuthorizationHandlerContext context, OrganizationMemberRequirement requirement)
     {
-        // An admin, where the requirement lets admins in, needs no grant
+        // An admin, where the requirement lets admins in, needs no membership
         if (requirement.AdmitsAdmins && context.User.IsInRole(ClerkClaims.AdminRole))
         {
             // Met
@@ -37,8 +38,8 @@ public sealed class UserCapabilityHandler(IUserManager userManager, IUserGrantSe
         if (await userManager.GetUserIdAsync(httpContext) is not { } userId)
             return;
 
-        // Met only where a grant of the capability stands against the account
-        if (await grants.HasAsync(userId, requirement.Capability, httpContext.RequestAborted))
+        // Met only where the account's address is on the organization's list
+        if (await members.IsMemberAsync(userId, requirement.OrganizationSlug, httpContext.RequestAborted))
             context.Succeed(requirement);
     }
 }

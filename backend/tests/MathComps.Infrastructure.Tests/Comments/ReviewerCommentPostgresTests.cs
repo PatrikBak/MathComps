@@ -11,32 +11,32 @@ using static MathComps.Infrastructure.Tests.TestInfrastructure.HostedSeed;
 namespace MathComps.Infrastructure.Tests.Comments;
 
 /// <summary>
-/// Integration tests for a kind of discussion open only to the accounts preparing the competitions, as
+/// Integration tests for a kind of discussion open only to the reviewers, the MathComps organization's members, as
 /// <see cref="ICommentService"/> keeps it against a real PostgreSQL database: that those accounts read it, write and
 /// react in it and count it, that nobody else reaches it and a refusal reads like a thread that is not there, and
 /// that each subject keeps its own discussion. A derived class names the kind and seeds two of its subjects.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
-public abstract class PreparerCommentPostgresTests(PostgresContainerFixture fixture)
+public abstract class ReviewerCommentPostgresTests(PostgresContainerFixture fixture)
     : PostgresTestBase<ICommentService>(fixture)
 {
     /// <summary>
-    /// A reviewer preparing the competitions.
+    /// A reviewer, whose address is on the MathComps organization's list.
     /// </summary>
     protected CommentViewer Reviewer { get; } = new(Guid.CreateVersion7(), IsAdmin: false);
 
     /// <summary>
-    /// A second reviewer, since anybody preparing the competitions writes in the discussion.
+    /// A second reviewer, since every reviewer writes in the discussion.
     /// </summary>
     protected CommentViewer OtherReviewer { get; } = new(Guid.CreateVersion7(), IsAdmin: false);
 
     /// <summary>
-    /// An admin who does not prepare the competitions.
+    /// An admin who is no reviewer.
     /// </summary>
     private readonly CommentViewer _admin = new(Guid.CreateVersion7(), IsAdmin: true);
 
     /// <summary>
-    /// A student, who neither prepares the competitions nor administers the site.
+    /// A student, who is no reviewer and does not administer the site.
     /// </summary>
     protected CommentViewer Student { get; } = new(Guid.CreateVersion7(), IsAdmin: false);
 
@@ -96,12 +96,12 @@ public abstract class PreparerCommentPostgresTests(PostgresContainerFixture fixt
     });
 
     /// <summary>
-    /// Nobody but the accounts preparing the competitions reaches a discussion: not an admin without the grant, not a
-    /// student, not anybody signed out. Each refusal is the one a thread or comment that is not there gets, so it
-    /// confirms nothing, and the counts and the bulk read, which takes a signed-in viewer, are refused the same way.
+    /// Nobody but the reviewers reaches a discussion: not an admin, not a student, not anybody signed out. Each
+    /// refusal is the one a thread or comment that is not there gets, so it confirms nothing, and the counts and the
+    /// bulk read, which takes a signed-in viewer, are refused the same way.
     /// </summary>
     [Fact]
-    public Task Nobody_without_the_grant_reaches_a_discussion() => RunTestAsync(async service =>
+    public Task Nobody_off_the_list_reaches_a_discussion() => RunTestAsync(async service =>
     {
         // The discussion of the subject
         var target = Discussion(SubjectId);
@@ -292,10 +292,9 @@ public abstract class PreparerCommentPostgresTests(PostgresContainerFixture fixt
             NewUser(_admin.UserId, "Admin"),
             NewUser(Student.UserId, "Student"));
 
-        // The grant each reviewer prepares the competitions under
-        context.UserGrants.AddRange(
-            new UserGrant { UserId = Reviewer.UserId, Capability = UserCapability.PrepareCompetitions },
-            new UserGrant { UserId = OtherReviewer.UserId, Capability = UserCapability.PrepareCompetitions });
+        // Each reviewer's address on the MathComps organization's list
+        SelectionSeed.NewMember(context, "reviewer@example.com", DateTimeOffset.UtcNow);
+        SelectionSeed.NewMember(context, "otherreviewer@example.com", DateTimeOffset.UtcNow);
 
         // The two subjects
         SeedSubjects(context);

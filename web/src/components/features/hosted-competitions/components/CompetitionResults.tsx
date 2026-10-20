@@ -88,8 +88,8 @@ type CompetitionResultsDialogProps = {
 }
 
 /**
- * One group's results, a competition at a time: everybody who sat it, where they stand and what they scored
- * on each problem.
+ * One group's results, a competition at a time: every graded student who argued in it, where they
+ * stand and what they scored on each problem.
  */
 function CompetitionResultsDialog({
   group,

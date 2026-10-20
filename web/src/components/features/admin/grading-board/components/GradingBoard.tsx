@@ -85,7 +85,7 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
         <>
           {/* The competitions of the group */}
           <div className="mt-4 flex flex-wrap items-center gap-1 sm:mt-6 sm:gap-2">
-            {/* Each competition, with how many entered it */}
+            {/* Each competition, with how many students its board holds */}
             {board.competitions.map((candidate) => (
               <Button
                 key={candidate.roundId}

@@ -125,8 +125,8 @@ export function useCompetitionArea(competitionSlug: string): UseCompetitionAreaR
 
   // Whether the set may be read at all: an entry of their own buys it, a competition that is over with its
   // problems open to this reader hands it to anybody, account or none, and a reader who prepares
-  // competitions reads it whenever they like. A grant can arrive before the paper does, so it is the one
-  // way in that has to check the set exists
+  // competitions reads it whenever they like. That reader can arrive before the paper does, so theirs is the
+  // one way in that has to check the set exists
   const isReadable =
     entry !== null ||
     (competitionInGroup !== undefined &&

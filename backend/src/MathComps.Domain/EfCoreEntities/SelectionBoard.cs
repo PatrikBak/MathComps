@@ -15,6 +15,16 @@ public class SelectionBoard
     public Guid Id { get; set; } = Guid.CreateVersion7();
 
     /// <summary>
+    /// FK to the organization picking its papers.
+    /// </summary>
+    public required Guid OrganizationId { get; set; }
+
+    /// <summary>
+    /// Navigation to the organization.
+    /// </summary>
+    public Organization Organization { get; set; } = null!;
+
+    /// <summary>
     /// What the board is called.
     /// </summary>
     [MaxLength(200)]

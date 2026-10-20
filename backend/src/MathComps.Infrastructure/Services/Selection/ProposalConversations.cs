@@ -1,7 +1,7 @@
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.ConversationReview;
-using MathComps.Infrastructure.Services.Users;
+using MathComps.Infrastructure.Services.Organizations;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.Services.Selection;
@@ -10,10 +10,10 @@ namespace MathComps.Infrastructure.Services.Selection;
 /// Implements <see cref="IProposalConversations"/> over the database.
 /// </summary>
 /// <param name="dbContextFactory">Creates the context each check runs on.</param>
-/// <param name="grants">Reads when a conversation's author started preparing the competitions.</param>
+/// <param name="members">Reads when a conversation's author became a member of the MathComps organization.</param>
 public sealed class ProposalConversations(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
-    IUserGrantService grants)
+    IOrganizationMemberService members)
     : IProposalConversations
 {
     /// <inheritdoc/>
@@ -78,12 +78,12 @@ public sealed class ProposalConversations(
                 conversation.CompetitionPath, conversation.GroupOpensAt, DateTimeOffset.UtcNow))
             throw new SelectionTargetNotFoundException();
 
-        // When the conversation's author started preparing the competitions, if they still do.
-        var preparerSince = await grants.GetGrantedAtAsync(
-            conversation.UserId, UserCapability.PrepareCompetitions, cancellationToken);
+        // When the conversation's author became a member of the MathComps organization, if they still are one.
+        var memberSince = await members.GetMemberSinceAsync(
+            conversation.UserId, Organization.MathCompsSlug, cancellationToken);
 
-        // Nor is a conversation whose author wasn't preparing the competitions when it started, or has since stopped.
-        if (!SelectionRules.IsReviewersConversation(preparerSince, conversation.CreatedAt))
+        // Nor is a conversation whose author wasn't a member when it started, or has since stopped being one.
+        if (!SelectionRules.IsReviewersConversation(memberSince, conversation.CreatedAt))
             throw new SelectionTargetNotFoundException();
     }
 }

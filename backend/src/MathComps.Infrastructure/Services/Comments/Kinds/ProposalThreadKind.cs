@@ -1,7 +1,7 @@
 using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
-using MathComps.Infrastructure.Services.Users;
+using MathComps.Infrastructure.Services.Organizations;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 
@@ -17,8 +17,9 @@ public sealed record ProposalAnchor(Guid ProposalId) : CommentAnchor;
 /// The reviewers' discussions of the proposals, named by the proposal's id. One goes with its proposal once that is
 /// deleted.
 /// </summary>
-/// <param name="grants"><inheritdoc cref="IUserGrantService" path="/summary"/></param>
-public class ProposalThreadKind(IUserGrantService grants) : PreparerCommentThreadKind<ProposalAnchor>(grants)
+/// <param name="members"><inheritdoc cref="IOrganizationMemberService" path="/summary"/></param>
+public class ProposalThreadKind(IOrganizationMemberService members)
+    : ReviewerCommentThreadKind<ProposalAnchor>(members)
 {
     /// <inheritdoc />
     public override CommentTargetType TargetType => CommentTargetType.Proposal;

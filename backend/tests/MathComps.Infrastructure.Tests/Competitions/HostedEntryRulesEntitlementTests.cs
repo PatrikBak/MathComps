@@ -47,7 +47,7 @@ public class HostedEntryRulesEntitlementTests
     /// <summary>
     /// A student who prepares competitions.
     /// </summary>
-    private static readonly HostedReader _timingGranted = new(Guid.CreateVersion7(), PreparesCompetitions: true);
+    private static readonly HostedReader _preparer = new(Guid.CreateVersion7(), PreparesCompetitions: true);
 
     /// <summary>
     /// An embargoed set stays out of reach of a student who spent nothing on it, which is the whole point
@@ -124,18 +124,18 @@ public class HostedEntryRulesEntitlementTests
         AssertRefused(_visitor, new RoundAccess(_embargoed, _closesLater, HoldsEntry: false));
 
     /// <summary>
-    /// The grant is what the whole feature turns on: a granted student reaches an embargoed round holding no
+    /// Preparing competitions is what the whole feature turns on: a preparer reaches an embargoed round holding no
     /// entry.
     /// </summary>
     [Fact]
-    public void A_granted_student_reads_an_embargoed_round_without_an_entry() =>
-        // The case the grant exists for
+    public void A_preparer_reads_an_embargoed_round_without_an_entry() =>
+        // The case preparing competitions exists for
         HostedEntryRules.EnsureEntitled(
-            _timingGranted, new RoundAccess(_embargoed, _closesLater, HoldsEntry: false), _now);
+            _preparer, new RoundAccess(_embargoed, _closesLater, HoldsEntry: false), _now);
 
     /// <summary>
-    /// The grant is read before anything about the round is, so it holds whatever the embargo, the window and
-    /// the entry say.
+    /// Whether the reader prepares competitions is read before anything about the round is, so a preparer is let in
+    /// whatever the embargo, the window and the entry say.
     /// </summary>
     /// <param name="isEmbargoed">Whether the round's embargo still stands.</param>
     /// <param name="hasClosed">Whether the competition it runs in is over.</param>
@@ -150,10 +150,10 @@ public class HostedEntryRulesEntitlementTests
     [InlineData(false, true, false)]
     [InlineData(false, false, true)]
     [InlineData(false, false, false)]
-    public void A_granted_student_is_refused_nothing(bool isEmbargoed, bool hasClosed, bool holdsEntry) =>
-        // Whatever the round says, the grant was read first
+    public void A_preparer_is_refused_nothing(bool isEmbargoed, bool hasClosed, bool holdsEntry) =>
+        // Whatever the round says, preparing competitions was read first
         HostedEntryRules.EnsureEntitled(
-            _timingGranted,
+            _preparer,
             new RoundAccess(
                 isEmbargoed ? _embargoed : _lifted,
                 hasClosed ? _now.AddDays(-1) : _closesLater,

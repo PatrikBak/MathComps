@@ -132,7 +132,8 @@ function SelectionAccess({ children }: SelectionAccessProps) {
         />
       )
 
-    // The read gave up: an account that doesn't prepare competitions is turned away, anything else can try again
+    // The read gave up: an account off the MathComps organization's list is turned away,
+    // anything else can try again
     case 'failed':
       return errorCodeOf(uiState.error) === 'Forbidden' ? (
         <SelectionNotice>

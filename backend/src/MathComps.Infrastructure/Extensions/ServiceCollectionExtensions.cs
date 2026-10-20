@@ -21,6 +21,7 @@ using MathComps.Infrastructure.Services.Defense.Engine;
 using MathComps.Infrastructure.Services.GradeMessages;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Mail;
+using MathComps.Infrastructure.Services.Organizations;
 using MathComps.Infrastructure.Services.Problems;
 using MathComps.Infrastructure.Services.Selection;
 using MathComps.Infrastructure.Services.Users;
@@ -76,7 +77,6 @@ public static class ServiceCollectionExtensions
                     .MapEnum<DefenseReportCategory>("defense_report_category")
                     .MapEnum<DefenseOutcome>("defense_outcome")
                     .MapEnum<ExaminerStep>("examiner_step")
-                    .MapEnum<UserCapability>("user_capability")
                     .MapEnum<ProposalArea>("proposal_area")
                     .MapEnum<HostedCompetitionCategory>("hosted_competition_category")
                     .MapEnum<OutgoingMailStatus>("outgoing_mail_status")
@@ -180,15 +180,15 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers what reads the capabilities handed to individual accounts. Expects the DbContext from
+    /// Registers what reads the organizations' lists of members. Expects the DbContext from
     /// <see cref="AddMathCompsDbContext"/>.
     /// </summary>
-    /// <param name="services">The service collection to add the grant reader to.</param>
+    /// <param name="services">The service collection to add the membership reader to.</param>
     /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddUserGrants(this IServiceCollection services)
+    public static IServiceCollection AddOrganizationMembers(this IServiceCollection services)
     {
-        // The grant reader.
-        services.TryAddScoped<IUserGrantService, UserGrantService>();
+        // The membership reader.
+        services.TryAddScoped<IOrganizationMemberService, OrganizationMemberService>();
 
         // Builder pattern
         return services;
@@ -206,8 +206,9 @@ public static class ServiceCollectionExtensions
         // The user manager reads upstream users through the Clerk client, so bring it along
         services.AddClerkApi();
 
-        // Capabilities hang off an account, so they come with the account services.
-        services.AddUserGrants();
+        // The organizations an account's address puts it in, which open the selection's threads to it and decide
+        // whether anybody grades its runs.
+        services.AddOrganizationMembers();
 
         // User account DB services
         services.TryAddScoped<IUserManager, UserManager>();
@@ -494,9 +495,9 @@ public static class ServiceCollectionExtensions
         // The service that records what students thought of those conversations.
         services.TryAddScoped<IDefenseFeedbackService, DefenseFeedbackService>();
 
-        // What the defense target guard asks about a reader before it weighs a competition's gates against
-        // them.
-        services.AddUserGrants();
+        // What the defense target guard asks about a reader before it weighs a competition's gates against them,
+        // and before it opens the proposals to them.
+        services.AddOrganizationMembers();
 
         // Says whether a student may argue what a defense target names.
         services.TryAddScoped<IDefenseTargetGuard, DefenseTargetGuard>();
@@ -531,7 +532,7 @@ public static class ServiceCollectionExtensions
 
         // What the hosted competition service asks about a student before it holds them to a competition's
         // gates.
-        services.AddUserGrants();
+        services.AddOrganizationMembers();
 
         // Runs the competitions the site hosts itself.
         services.TryAddScoped<IHostedCompetitionService, HostedCompetitionService>();
@@ -553,8 +554,8 @@ public static class ServiceCollectionExtensions
         // A cycle is named after the node its rounds run under, so bring the metadata registry along.
         services.AddLocalization();
 
-        // The read and the check on a conversation pick out the reviewers' ones by when each author started preparing.
-        services.AddUserGrants();
+        // The read and the check on a conversation pick out the reviewers' ones by when each author became a member.
+        services.AddOrganizationMembers();
 
         // The discussions are comment threads, read through the comment service.
         services.AddUserServices();
@@ -606,7 +607,7 @@ public static class ServiceCollectionExtensions
 
         // The reader of when a student started preparing the competitions, which decides whether anybody grades
         // their runs.
-        services.AddUserGrants();
+        services.AddOrganizationMembers();
 
         // The service that reads every student's conversations as a queue.
         services.TryAddScoped<IAdminDefenseReviewService, AdminDefenseReviewService>();
