@@ -129,15 +129,45 @@ export function paperBeneathOf(searchParams: URLSearchParams): string | null {
 }
 
 /**
+ * The localized-route href of an organization's selection.
+ */
+type SelectionHref = {
+  /** The route, dynamic segment and all. */
+  pathname: typeof ROUTES.ORGANIZATION_SELECTION
+  /** What fills the route's dynamic segment. */
+  params: {
+    /** The organization's slug. */
+    slug: string
+  }
+}
+
+/**
+ * Where an organization's selection lives, named by its route so each language gets its own path.
+ *
+ * @param organization - The organization's slug.
+ *
+ * @returns The route of the organization's pool.
+ */
+export function selectionHref(organization: string): SelectionHref {
+  // The pool's route, naming the organization
+  return { pathname: ROUTES.ORGANIZATION_SELECTION, params: { slug: organization } }
+}
+
+/**
  * Where one page lives, named by its route so each language gets its own path. The paper an address names stays
  * beside a page that leaves it standing, as {@link PAGE_PARAMS} has it, so the page opens over it.
  *
+ * @param organization - The slug of the organization whose selection holds the page's subject.
  * @param page - The page and the tab it opens on.
  * @param paperId - The paper the current address names; null for none.
  *
  * @returns The pool's route with the page open over it.
  */
-export function detailHref(page: DetailPage, paperId: string | null): RouteHref {
+export function detailHref(
+  organization: string,
+  page: DetailPage,
+  paperId: string | null
+): RouteHref {
   // The paper, wherever the page leaves it standing
   const paper =
     paperId === null || PAGE_PARAMS[page.kind].includes(OPEN_PAPER_PARAM)
@@ -145,7 +175,7 @@ export function detailHref(page: DetailPage, paperId: string | null): RouteHref 
       : { [OPEN_PAPER_PARAM]: paperId }
 
   // The pool's route, carrying the page's subject, the tab where one is asked for, and the paper beneath
-  return { pathname: ROUTES.PROBLEM_SELECTION, query: { ...detailSearch(page), ...paper } }
+  return { ...selectionHref(organization), query: { ...detailSearch(page), ...paper } }
 }
 
 /**

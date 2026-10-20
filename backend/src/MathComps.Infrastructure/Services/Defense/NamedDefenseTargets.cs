@@ -66,13 +66,14 @@ public static class NamedDefenseTargets
         // The instant every group's opening is read against
         var now = DateTimeOffset.UtcNow;
 
-        // The proposals filing them, each with where its problem sits
+        // The proposals filing them, each with its organization and where its problem sits
         var proposals = await dbContext.Proposals
             .AsNoTracking()
             .Where(proposal => problemIds.Contains(proposal.ProblemId))
             .Select(proposal => new
             {
                 proposal.ProblemId,
+                OrganizationSlug = proposal.Organization.Slug,
                 proposal.Problem.Slug,
                 proposal.Number,
                 proposal.Title,
@@ -87,7 +88,7 @@ public static class NamedDefenseTargets
             .ToDictionary(
                 proposal => proposal.ProblemId,
                 proposal => new NamedProposalTarget(
-                    proposal.ProblemId, proposal.Slug, proposal.Number, proposal.Title));
+                    proposal.ProblemId, proposal.OrganizationSlug, proposal.Slug, proposal.Number, proposal.Title));
     }
 
     /// <summary>

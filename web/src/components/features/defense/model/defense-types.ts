@@ -192,9 +192,11 @@ export type NamedProposalTarget = {
   kind: 'proposal'
   /** The problem being defended, which is also the proposal's id. */
   problemId: string
+  /** The slug of the organization whose pool the proposal is in. */
+  organizationSlug: string
   /** URL-safe identifier, unique across the archive. */
   slug: string
-  /** The number the reviewers quote it by, unique across every proposal. */
+  /** The number the reviewers quote it by, unique within its organization's pool. */
   number: number
   /** The working name, never shown to a student. */
   title: string

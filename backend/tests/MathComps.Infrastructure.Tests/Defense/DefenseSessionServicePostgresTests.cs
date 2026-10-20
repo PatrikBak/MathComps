@@ -799,7 +799,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // And the proposal one by the proposal filing its problem
         Assert.Equal(
-            new NamedProposalTarget(_proposedProblemId, "mathcomps-proposals-1", 21, "Proposal 21"),
+            new NamedProposalTarget(
+                _proposedProblemId, Organization.MathCompsSlug, "mathcomps-proposals-1", 21, "Proposal 21"),
             sessions[1].Target);
     });
 
@@ -1214,7 +1215,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // Which still names it by the proposal filing its problem
         Assert.Equal(
-            new NamedProposalTarget(_proposedProblemId, "mathcomps-proposals-1", 21, "Proposal 21"),
+            new NamedProposalTarget(
+                _proposedProblemId, Organization.MathCompsSlug, "mathcomps-proposals-1", 21, "Proposal 21"),
             listed.Target);
 
         // And reports it as nobody's to grade

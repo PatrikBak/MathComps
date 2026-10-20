@@ -10,6 +10,7 @@ import { indexSelection, type SelectionIndex } from '../model/selection-state'
 import type { Board, SelectionData } from '../model/selection-types'
 import { getSelection } from '../services/selection-service'
 import { SELECTION_REFRESH_MS, useSelectionQueryKey } from './selection-cache'
+import { useSelectionOrganization } from './selection-organization'
 import { useBoardPicking, type UseBoardPickingResult } from './use-board-picking'
 import { useOpenDetail, type UseOpenDetailResult } from './use-open-detail'
 import { usePoolFilters, type UsePoolFiltersResult } from './use-pool-filters'
@@ -48,6 +49,9 @@ export type SelectionWorkspace = UseOpenDetailResult &
  * @returns The workspace.
  */
 export function useSelectionWorkspaceState(): SelectionWorkspace {
+  // The organization whose selection it is
+  const organization = useSelectionOrganization()
+
   // Where the reader's selection is cached
   const queryKey = useSelectionQueryKey()
 
@@ -57,7 +61,7 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
   // The whole selection, read as whoever is signed in
   const { data, uiState, retry } = useApiQuery<SelectionData>({
     queryKey,
-    fetch: getSelection,
+    fetch: (apiCall) => getSelection(apiCall, organization),
     // The selection is never public, so the read waits for an account
     requireAuth: true,
     // Other reviewers move things too, so the selection counts as fresh only briefly

@@ -1,4 +1,4 @@
-using MathComps.Domain.EfCoreEntities;
+using MathComps.Api.Authorization;
 
 namespace MathComps.Api.Constants;
 
@@ -13,8 +13,8 @@ public static class AuthorizationPolicies
     public const string Admin = "Admin";
 
     /// <summary>
-    /// Restricts an endpoint to the members of the organization picking the problems, the one named by
-    /// <see cref="Organization.MathCompsSlug"/>.
+    /// Restricts an endpoint to the members of the organization its route names, by the route value
+    /// <see cref="OrganizationMemberRequirement.OrganizationRouteValue"/>.
     /// </summary>
     public const string OrganizationMember = "OrganizationMember";
 }

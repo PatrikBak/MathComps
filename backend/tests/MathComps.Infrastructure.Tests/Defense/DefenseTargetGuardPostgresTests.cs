@@ -63,6 +63,16 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
     private readonly Guid _unfiledProblemId = Guid.CreateVersion7();
 
     /// <summary>
+    /// A problem parked among the proposals and filed by a live proposal of the olympiad's pool.
+    /// </summary>
+    private readonly Guid _olympiadProblemId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// A member of the olympiad's commission, on its list alone.
+    /// </summary>
+    private readonly Guid _commissionerId = Guid.CreateVersion7();
+
+    /// <summary>
     /// A problem of a second hosted round, embargoed until the same instant, which the student does hold an
     /// entry into. What the scoping cases vary against the embargoed problem.
     /// </summary>
@@ -159,6 +169,26 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             () => guard.EnsureCanDefendAsync(_preparerId, new ProblemTarget(_unfiledProblemId))));
 
     /// <summary>
+    /// A proposal is argued by the members of the organization whose pool it is in alone: the commissioner argues
+    /// the olympiad's, and a preparer, on MathComps' list, is told it is not there, as the commissioner is of
+    /// MathComps' own.
+    /// </summary>
+    [Fact]
+    public Task A_proposal_is_argued_by_its_organizations_members_alone() => RunTestAsync(async guard =>
+    {
+        // The commissioner cleared on the olympiad's proposal, the ceiling reaching them
+        Assert.False(await guard.EnsureCanDefendAsync(_commissionerId, new ProblemTarget(_olympiadProblemId)));
+
+        // The preparer refused it, like a problem that is not there
+        await Assert.ThrowsAsync<HostedProblemNotFoundException>(
+            () => guard.EnsureCanDefendAsync(_preparerId, new ProblemTarget(_olympiadProblemId)));
+
+        // And the commissioner refused MathComps' proposal the same way
+        await Assert.ThrowsAsync<HostedProblemNotFoundException>(
+            () => guard.EnsureCanDefendAsync(_commissionerId, new ProblemTarget(_proposedProblemId)));
+    });
+
+    /// <summary>
     /// An embargoed hosted problem cannot be argued by a student holding no entry into its round, which is the
     /// embargo rule reached through this guard.
     /// </summary>
@@ -230,6 +260,18 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
         });
 
     /// <summary>
+    /// Only MathComps' members prepare the competitions, so a member of another organization holding no entry is held
+    /// to the embargo like any student. A guard asking about any list, or about the list of the organization whose pool
+    /// a problem came from, would open the competitions to every organization's members.
+    /// </summary>
+    [Fact]
+    public Task A_member_of_another_organization_does_not_prepare_the_competitions() => RunTestAsync(
+        async guard =>
+            // The commissioner, on the olympiad's list alone, on a round nobody has entered
+            await Assert.ThrowsAsync<HostedEntryRequiredException>(
+                () => guard.EnsureCanDefendAsync(_commissionerId, new ProblemTarget(_embargoedProblemId))));
+
+    /// <summary>
     /// Preparing competitions does not make an archive problem arguable. Whether the site hosts a problem at all is
     /// settled before any question of timing, so a waiver that reached it would open every problem on the site.
     /// </summary>
@@ -253,7 +295,14 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
                 Email = "Preparer@example.com",
             },
             new User { Id = _neighbourId, ExternalId = "ext-neighbour", Username = "Neighbour" },
-            new User { Id = _forfeiterId, ExternalId = "ext-forfeiter", Username = "Forfeiter" });
+            new User { Id = _forfeiterId, ExternalId = "ext-forfeiter", Username = "Forfeiter" },
+            new User
+            {
+                Id = _commissionerId,
+                ExternalId = "ext-commissioner",
+                Username = "Commissioner",
+                Email = "commissioner@example.com",
+            });
 
         // The preparer's address on the MathComps organization's list, lowercased as the list keeps it, which lets
         // them past a competition's gates and into the proposals.
@@ -382,6 +431,31 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             RoundId = proposalsRoundId,
             Number = 3,
             Slug = "mathcomps-proposals-2026-3",
+        });
+
+        // The olympiad.
+        var olympiadId = SelectionSeed.NewOrganization(context, "olympiad");
+
+        // The commissioner's address on the olympiad's list.
+        SelectionSeed.NewMember(context, olympiadId, "commissioner@example.com", DateTimeOffset.UtcNow);
+
+        // A fourth problem of the round.
+        context.Problems.Add(new Problem
+        {
+            Id = _olympiadProblemId,
+            RoundId = proposalsRoundId,
+            Number = 4,
+            Slug = "mathcomps-proposals-2026-4",
+        });
+
+        // The proposal filing it in the olympiad's pool, under the number MathComps' first proposal holds too.
+        context.Proposals.Add(new Proposal
+        {
+            ProblemId = _olympiadProblemId,
+            OrganizationId = olympiadId,
+            Number = 1,
+            Title = "Olympiad proposal",
+            Area = ProposalArea.Algebra,
         });
 
         // A second round of the same group, embargoed until the same instant: the other side of every

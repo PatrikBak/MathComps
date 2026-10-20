@@ -138,6 +138,7 @@ describe('toProblemFacet, over the proposals', () => {
         target: {
           kind: 'proposal',
           problemId: 'p-21',
+          organizationSlug: 'mathcomps',
           slug: 'p-21',
           number: 21,
           title: 'Two circles',
@@ -145,7 +146,14 @@ describe('toProblemFacet, over the proposals', () => {
         conversationCount: 2,
       },
       {
-        target: { kind: 'proposal', problemId: 'p-4', slug: 'p-4', number: 4, title: 'A sum' },
+        target: {
+          kind: 'proposal',
+          problemId: 'p-4',
+          organizationSlug: 'mathcomps',
+          slug: 'p-4',
+          number: 4,
+          title: 'A sum',
+        },
         conversationCount: 1,
       },
     ]

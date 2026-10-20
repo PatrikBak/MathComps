@@ -4,7 +4,6 @@ using System.Threading.RateLimiting;
 using MathComps.Api.Authorization;
 using MathComps.Api.Constants;
 using MathComps.Api.Errors;
-using MathComps.Domain.EfCoreEntities;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.RegularExpressions;
 
@@ -123,7 +122,7 @@ public static class ServiceCollectionExtensions
             .AddPolicy(AuthorizationPolicies.Admin, policy => policy.RequireRole(ClerkClaims.AdminRole))
             .AddPolicy(AuthorizationPolicies.OrganizationMember, policy => policy
                 .RequireAuthenticatedUser()
-                .AddRequirements(new OrganizationMemberRequirement(Organization.MathCompsSlug)));
+                .AddRequirements(new OrganizationMemberRequirement()));
 
         // What looks the caller's account up on an organization's list
         services.AddScoped<IAuthorizationHandler, OrganizationMemberHandler>();

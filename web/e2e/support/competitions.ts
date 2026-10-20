@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { MATHCOMPS_ORGANIZATION_SLUG } from '@/components/features/problem-selection/model/selection-types'
 import { ROUTES } from '@/i18n/i18n'
 
 import messages from '../../messages/en.json'
@@ -47,9 +48,9 @@ export const userMenuCopy = ui.userMenu
 export const LIST_PATH = `/en${ROUTES.COMPETITIONS}`
 
 /**
- * The problem selection in English, which is the canonical locale and so carries no route translation.
+ * MathComps' problem selection in English, which is the canonical locale and so carries no route translation.
  */
-export const SELECTION_PATH = `/en${ROUTES.PROBLEM_SELECTION}`
+export const SELECTION_PATH = `/en${ROUTES.PROBLEM_SELECTION}/${MATHCOMPS_ORGANIZATION_SLUG}`
 
 /**
  * One competition's own area.

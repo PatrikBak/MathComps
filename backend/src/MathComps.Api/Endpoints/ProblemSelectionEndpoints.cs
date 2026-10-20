@@ -1,23 +1,29 @@
+using MathComps.Api.Authorization;
 using MathComps.Api.Constants;
 using MathComps.Domain.Contracts.Selection;
-using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services.Selection;
 using MathComps.Infrastructure.Services.Users;
 
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Maps the endpoints of the MathComps organization's problem selection: one read returning the whole of it, one
-/// returning its discussions, and one write per change a reviewer makes. Every route is gated by the
-/// <see cref="AuthorizationPolicies.OrganizationMember"/> policy, since the proposals are problems no student
-/// may see.
+/// Maps the endpoints of the problem selection, each organization's selection at its own address: one read
+/// returning the whole of it, one returning its discussions, and one write per change a reviewer makes. Every
+/// route is gated by the <see cref="AuthorizationPolicies.OrganizationMember"/> policy, since the proposals are
+/// problems no student may see.
 /// </summary>
 public static class ProblemSelectionEndpoints
 {
     /// <summary>
-    /// The base path the selection's endpoints hang off.
+    /// The path each organization's selection hangs off.
     /// </summary>
-    private const string SelectionPath = "/problem-selection";
+    private const string OrganizationsPath = "/problem-selection";
+
+    /// <summary>
+    /// The base path of one organization's selection, the organization named by its slug.
+    /// </summary>
+    private const string SelectionPath =
+        $"{OrganizationsPath}/{{{OrganizationMemberRequirement.OrganizationRouteValue}}}";
 
     /// <summary>
     /// The path of one slot, below the base path.
@@ -38,6 +44,7 @@ public static class ProblemSelectionEndpoints
     {
         // Read the whole selection
         app.MapGet(SelectionPath, async (
+            string organization,
             HttpContext context,
             IUserManager userManager,
             IProblemSelectionService selectionService,
@@ -46,9 +53,9 @@ public static class ProblemSelectionEndpoints
             // The reviewer reading the selection
             var reviewerId = await userManager.RequireUserIdAsync(context);
 
-            // The selection, its cycles named in the caller's language
+            // The organization's selection, its cycles named in the caller's language
             var selection = await selectionService.GetSelectionAsync(
-                Organization.MathCompsSlug, reviewerId, EndpointHelpers.GetRequestLanguage(), cancellationToken);
+                organization, reviewerId, EndpointHelpers.GetRequestLanguage(), cancellationToken);
 
             // Return it
             return Results.Ok(selection);
@@ -58,6 +65,7 @@ public static class ProblemSelectionEndpoints
 
         // Read every discussion the selection holds
         app.MapGet($"{SelectionPath}/comments", async (
+            string organization,
             HttpContext context,
             IUserManager userManager,
             IProblemSelectionService selectionService,
@@ -66,9 +74,8 @@ public static class ProblemSelectionEndpoints
             // The reviewer reading the discussions
             var viewer = await CommentEndpoints.RequireViewerAsync(userManager, context);
 
-            // The discussions of every proposal and paper the selection holds
-            var discussions = await selectionService.GetDiscussionsAsync(
-                Organization.MathCompsSlug, viewer, cancellationToken);
+            // The discussions of every proposal and paper the organization's selection holds
+            var discussions = await selectionService.GetDiscussionsAsync(organization, viewer, cancellationToken);
 
             // Return the discussions
             return Results.Ok(discussions);
@@ -78,6 +85,7 @@ public static class ProblemSelectionEndpoints
 
         // Put a proposal into a slot
         app.MapPut(SlotPath, async (
+            string organization,
             Guid boardId,
             Guid paperId,
             int index,
@@ -91,7 +99,7 @@ public static class ProblemSelectionEndpoints
 
             // Place it
             await boardService.PlaceAsync(
-                Organization.MathCompsSlug, new SlotAddress(boardId, paperId, index), proposalId, cancellationToken);
+                organization, new SlotAddress(boardId, paperId, index), proposalId, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -101,6 +109,7 @@ public static class ProblemSelectionEndpoints
 
         // Empty a slot
         app.MapDelete(SlotPath, async (
+            string organization,
             Guid boardId,
             Guid paperId,
             int index,
@@ -108,8 +117,7 @@ public static class ProblemSelectionEndpoints
             CancellationToken cancellationToken) =>
         {
             // Empty it
-            await boardService.ClearSlotAsync(
-                Organization.MathCompsSlug, new SlotAddress(boardId, paperId, index), cancellationToken);
+            await boardService.ClearSlotAsync(organization, new SlotAddress(boardId, paperId, index), cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -119,6 +127,7 @@ public static class ProblemSelectionEndpoints
 
         // Trade a slot with its neighbour
         app.MapPost($"{SlotPath}/move", async (
+            string organization,
             Guid boardId,
             Guid paperId,
             int index,
@@ -132,7 +141,7 @@ public static class ProblemSelectionEndpoints
 
             // Trade them
             await boardService.MoveSlotAsync(
-                Organization.MathCompsSlug, new SlotAddress(boardId, paperId, index), direction, cancellationToken);
+                organization, new SlotAddress(boardId, paperId, index), direction, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -142,6 +151,7 @@ public static class ProblemSelectionEndpoints
 
         // Finalize a board into a cycle's rounds
         app.MapPost($"{SelectionPath}/boards/{{boardId:guid}}/finalization", async (
+            string organization,
             Guid boardId,
             FinalizeBoardRequest request,
             IBoardFinalizationService finalization,
@@ -152,7 +162,7 @@ public static class ProblemSelectionEndpoints
                 throw new BadHttpRequestException("A finalization must name the cycle.");
 
             // Finalize it
-            await finalization.FinalizeAsync(boardId, cycleId, cancellationToken);
+            await finalization.FinalizeAsync(organization, boardId, cycleId, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -162,6 +172,7 @@ public static class ProblemSelectionEndpoints
 
         // Set a proposal aside, or bring it back
         app.MapPut($"{ProposalPath}/set-aside", async (
+            string organization,
             Guid proposalId,
             SetAsideRequest request,
             IProposalService proposalService,
@@ -172,8 +183,7 @@ public static class ProblemSelectionEndpoints
                 throw new BadHttpRequestException("The change must say whether the proposal is set aside.");
 
             // Change it
-            await proposalService.SetAsideAsync(
-                Organization.MathCompsSlug, proposalId, isSetAside, cancellationToken);
+            await proposalService.SetAsideAsync(organization, proposalId, isSetAside, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -183,6 +193,7 @@ public static class ProblemSelectionEndpoints
 
         // Recommend a proposal for one category, or take it back
         app.MapPut($"{ProposalPath}/recommended", async (
+            string organization,
             Guid proposalId,
             SetRecommendedRequest request,
             IProposalService proposalService,
@@ -194,7 +205,7 @@ public static class ProblemSelectionEndpoints
 
             // Change it
             await proposalService.SetRecommendedAsync(
-                Organization.MathCompsSlug, proposalId, category, isRecommended, cancellationToken);
+                organization, proposalId, category, isRecommended, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -204,6 +215,7 @@ public static class ProblemSelectionEndpoints
 
         // Rate a proposal, or take the rating back
         app.MapPut($"{ProposalPath}/rating", async (
+            string organization,
             Guid proposalId,
             SetRatingRequest request,
             HttpContext context,
@@ -216,12 +228,7 @@ public static class ProblemSelectionEndpoints
 
             // Change it
             await proposalService.RateAsync(
-                Organization.MathCompsSlug,
-                proposalId,
-                raterId,
-                request.Beauty,
-                request.Difficulty,
-                cancellationToken);
+                organization, proposalId, raterId, request.Beauty, request.Difficulty, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -231,12 +238,13 @@ public static class ProblemSelectionEndpoints
 
         // Delete a proposal from the selection
         app.MapDelete(ProposalPath, async (
+            string organization,
             Guid proposalId,
             IProposalService proposalService,
             CancellationToken cancellationToken) =>
         {
             // Delete it
-            await proposalService.DeleteAsync(Organization.MathCompsSlug, proposalId, cancellationToken);
+            await proposalService.DeleteAsync(organization, proposalId, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();

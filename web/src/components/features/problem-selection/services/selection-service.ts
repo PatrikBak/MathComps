@@ -29,41 +29,51 @@ import {
  */
 
 /**
- * Reads the whole selection in one go.
+ * Reads an organization's whole selection in one go.
  *
  * @param apiCall - The authenticated API caller.
+ * @param organization - The slug of the organization whose selection is read.
  *
  * @returns The selection, or an error.
  */
-export function getSelection(apiCall: ApiCaller): Promise<ApiResult<SelectionData>> {
-  return apiCall<SelectionData>(() => getSelectionUrl())
+export function getSelection(
+  apiCall: ApiCaller,
+  organization: string
+): Promise<ApiResult<SelectionData>> {
+  return apiCall<SelectionData>(() => getSelectionUrl(organization))
 }
 
 /**
- * Reads the reviewers' discussion of every proposal and paper the selection holds, leaving out the ones nothing has
- * been said in.
+ * Reads the reviewers' discussion of every proposal and paper an organization's selection holds, leaving out the
+ * ones nothing has been said in.
  *
  * @param apiCall - The authenticated API caller.
+ * @param organization - The slug of the organization whose selection holds the discussions.
  *
  * @returns The discussions, or an error.
  */
-export function getDiscussions(apiCall: ApiCaller): Promise<ApiResult<SelectionDiscussions>> {
-  return apiCall<SelectionDiscussions>(() => getDiscussionsUrl())
+export function getDiscussions(
+  apiCall: ApiCaller,
+  organization: string
+): Promise<ApiResult<SelectionDiscussions>> {
+  return apiCall<SelectionDiscussions>(() => getDiscussionsUrl(organization))
 }
 
 /**
  * Puts a proposal into a slot. One already on the same board trades places with whatever held the slot.
  *
  * @param apiCall - The authenticated API caller.
+ * @param organization - The slug of the organization whose selection holds the slot's board.
  * @param placement - The proposal and the slot it goes into.
  *
  * @returns Success, or an error.
  */
 export function placeProposal(
   apiCall: ApiCaller,
+  organization: string,
   { slot, proposalId }: PlacementWrite
 ): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getSlotUrl(slot), {
+  return apiCall<void>(() => getSlotUrl(organization, slot), {
     method: 'PUT',
     body: JSON.stringify({ proposalId }),
   })
@@ -73,27 +83,34 @@ export function placeProposal(
  * Empties a slot on a draft board, sending its problem back to the pool.
  *
  * @param apiCall - The authenticated API caller.
+ * @param organization - The slug of the organization whose selection holds the slot's board.
  * @param slot - The slot.
  *
  * @returns Success, or an error.
  */
-export function clearSlot(apiCall: ApiCaller, slot: SlotAddress): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getSlotUrl(slot), { method: 'DELETE' })
+export function clearSlot(
+  apiCall: ApiCaller,
+  organization: string,
+  slot: SlotAddress
+): Promise<ApiResult<void>> {
+  return apiCall<void>(() => getSlotUrl(organization, slot), { method: 'DELETE' })
 }
 
 /**
  * Trades a slot with its neighbour in the same paper.
  *
  * @param apiCall - The authenticated API caller.
+ * @param organization - The slug of the organization whose selection holds the slot's board.
  * @param move - The slot and the neighbour it trades with.
  *
  * @returns Success, or an error.
  */
 export function moveSlot(
   apiCall: ApiCaller,
+  organization: string,
   { slot, direction }: MoveWrite
 ): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getSlotMoveUrl(slot), {
+  return apiCall<void>(() => getSlotMoveUrl(organization, slot), {
     method: 'POST',
     body: JSON.stringify({ direction }),
   })
@@ -103,15 +120,17 @@ export function moveSlot(
  * Finalizes a board into a cycle's rounds.
  *
  * @param apiCall - The authenticated API caller.
+ * @param organization - The slug of the organization whose selection holds the board.
  * @param finalization - The board and the cycle it goes into.
  *
  * @returns Success, or an error.
  */
 export function finalizeBoard(
   apiCall: ApiCaller,
+  organization: string,
   { boardId, cycleId }: FinalizationWrite
 ): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getFinalizationUrl(boardId), {
+  return apiCall<void>(() => getFinalizationUrl(organization, boardId), {
     method: 'POST',
     body: JSON.stringify({ cycleId }),
   })
@@ -121,15 +140,17 @@ export function finalizeBoard(
  * Sets a proposal aside, or brings it back.
  *
  * @param apiCall - The authenticated API caller.
+ * @param organization - The slug of the organization whose pool holds the proposal.
  * @param change - The proposal and where it stands afterwards.
  *
  * @returns Success, or an error.
  */
 export function setAside(
   apiCall: ApiCaller,
+  organization: string,
   { proposalId, isSetAside }: SetAsideWrite
 ): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getSetAsideUrl(proposalId), {
+  return apiCall<void>(() => getSetAsideUrl(organization, proposalId), {
     method: 'PUT',
     body: JSON.stringify({ isSetAside }),
   })
@@ -139,15 +160,17 @@ export function setAside(
  * Recommends a proposal for one category, or takes the recommendation back.
  *
  * @param apiCall - The authenticated API caller.
+ * @param organization - The slug of the organization whose pool holds the proposal.
  * @param change - The proposal, the category and whether it is recommended for it afterwards.
  *
  * @returns Success, or an error.
  */
 export function setRecommended(
   apiCall: ApiCaller,
+  organization: string,
   { proposalId, category, isRecommended }: RecommendationWrite
 ): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getRecommendedUrl(proposalId), {
+  return apiCall<void>(() => getRecommendedUrl(organization, proposalId), {
     method: 'PUT',
     body: JSON.stringify({ category, isRecommended }),
   })
@@ -157,15 +180,17 @@ export function setRecommended(
  * Sets the reader's rating of a proposal, or takes it back.
  *
  * @param apiCall - The authenticated API caller.
+ * @param organization - The slug of the organization whose pool holds the proposal.
  * @param change - The proposal and the reader's scores afterwards.
  *
  * @returns Success, or an error.
  */
 export function setRating(
   apiCall: ApiCaller,
+  organization: string,
   { proposalId, scores }: RatingWrite
 ): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getRatingUrl(proposalId), {
+  return apiCall<void>(() => getRatingUrl(organization, proposalId), {
     method: 'PUT',
     body: JSON.stringify(scores),
   })
@@ -175,10 +200,15 @@ export function setRating(
  * Deletes a proposal from the selection, emptying every draft slot it held.
  *
  * @param apiCall - The authenticated API caller.
+ * @param organization - The slug of the organization whose pool holds the proposal.
  * @param proposalId - The proposal.
  *
  * @returns Success, or an error.
  */
-export function deleteProposal(apiCall: ApiCaller, proposalId: string): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getProposalUrl(proposalId), { method: 'DELETE' })
+export function deleteProposal(
+  apiCall: ApiCaller,
+  organization: string,
+  proposalId: string
+): Promise<ApiResult<void>> {
+  return apiCall<void>(() => getProposalUrl(organization, proposalId), { method: 'DELETE' })
 }

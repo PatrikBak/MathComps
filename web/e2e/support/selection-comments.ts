@@ -14,7 +14,7 @@ import { parseMember } from '@/components/shared/utils/collection-utils'
 
 import { answerJson, BACKEND_ORIGIN } from './backend-routes'
 import { asSentTo, senderOf, stubComments, threadKey } from './comments'
-import type { HeldSelection } from './selection-writes'
+import { type HeldSelection, SELECTION_API_PATH } from './selection-writes'
 
 /** The kinds of thread the selection's backend keeps. */
 const SELECTION_THREAD_TYPES = [
@@ -103,7 +103,7 @@ export async function stubSelectionComments(
   })
 
   // Every discussion of what the selection's read shows, the ones nothing has been said in left out
-  await page.route(`${BACKEND_ORIGIN}/problem-selection/comments`, (route) =>
+  await page.route(`${BACKEND_ORIGIN}${SELECTION_API_PATH}/comments`, (route) =>
     // Answered as the selection's read is, refused alike
     answer(route, () => {
       // What the read shows

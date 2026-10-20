@@ -15,7 +15,9 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// that entry into the permission as well.
 /// </summary>
 /// <param name="dbContextFactory">Creates the contexts the checks run on.</param>
-/// <param name="members">Reads whether the student prepares the competitions.</param>
+/// <param name="members">
+/// Reads whether the student reviews a proposal's pool, and whether they prepare the competitions.
+/// </param>
 public sealed class DefenseTargetGuard(
     IDbContextFactory<MathCompsDbContext> dbContextFactory, IOrganizationMemberService members)
     : IDefenseTargetGuard
@@ -55,10 +57,10 @@ public sealed class DefenseTargetGuard(
         var allProposals = dbContext.Proposals;
 
         // The round the problem sits in: where in the taxonomy it hangs, the window its group runs in, whether
-        // the site hosts it at all, whether this student has spent an entry into it, and whether a live proposal
-        // files the problem. The entry is read whatever the embargo says, since it decides the daily spend ceiling
-        // as well as the permission, and a group's problems go public the moment it closes. An id naming nothing
-        // gets the answer an unarguable problem gets.
+        // the site hosts it at all, whether this student has spent an entry into it, and the organization whose pool
+        // a live proposal files the problem in. The entry is read whatever the embargo says, since it decides the
+        // daily spend ceiling as well as the permission, and a group's problems go public the moment it closes. An
+        // id naming nothing gets the answer an unarguable problem gets.
         var round = await dbContext.Problems
             .AsNoTracking()
             .Where(problem => problem.Id == problemId)
@@ -70,8 +72,10 @@ public sealed class DefenseTargetGuard(
                 problem.Round.HostedGroup!.ClosesAt,
                 HoldsEntry = allEntries.Any(entry =>
                     entry.UserId == userId && entry.RoundId == problem.RoundId),
-                IsLiveProposal = allProposals.Any(proposal =>
-                    proposal.ProblemId == problem.Id && proposal.DeletedAt == null),
+                ProposalOrganizationSlug = allProposals
+                    .Where(proposal => proposal.ProblemId == problem.Id && proposal.DeletedAt == null)
+                    .Select(proposal => proposal.Organization.Slug)
+                    .FirstOrDefault(),
             })
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new HostedProblemNotFoundException();
@@ -83,17 +87,21 @@ public sealed class DefenseTargetGuard(
         if (!isProposal && !round.IsHosted)
             throw new HostedProblemNotFoundException();
 
-        // Whether the student prepares the competitions, which opens the proposals and the gates to them.
-        var preparesCompetitions = await members.IsMemberAsync(userId, Organization.MathCompsSlug, cancellationToken);
-
-        // A problem among the proposals is a reviewer's to argue, and only while a live proposal files it. Anybody
-        // else, and any problem parked there with none, gets the answer an unarguable problem gets.
-        if (isProposal && (!preparesCompetitions || !round.IsLiveProposal))
-            throw new HostedProblemNotFoundException();
-
-        // A proposal belongs to no competition anybody enters, so no entry stands to lift what it costs them.
+        // A problem among the proposals is for the reviewers of the pool a live proposal files it in
         if (isProposal)
+        {
+            // A caller off the list of the proposal's organization, and any problem parked among the proposals with no
+            // live proposal, gets the answer an unarguable problem gets
+            if (round.ProposalOrganizationSlug is not { } organizationSlug
+                || !await members.IsMemberAsync(userId, organizationSlug, cancellationToken))
+                throw new HostedProblemNotFoundException();
+
+            // A proposal belongs to no competition anybody enters, so no entry stands to lift what it costs them
             return false;
+        }
+
+        // Whether the student prepares the competitions, which opens the gates to them.
+        var preparesCompetitions = await members.IsMemberAsync(userId, Organization.MathCompsSlug, cancellationToken);
 
         // And past that it is the same rule the area serves its problems under.
         HostedEntryRules.EnsureEntitled(

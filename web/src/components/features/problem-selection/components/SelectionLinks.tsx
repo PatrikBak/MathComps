@@ -13,8 +13,8 @@ import {
 import { AppLink } from '@/components/shared/components/AppLink'
 import { countOpenDialogs, isInArrowKeyWidget } from '@/components/shared/utils/dom-utils'
 import { isPlainClick } from '@/components/shared/utils/event-utils'
-import { ROUTES } from '@/i18n/i18n'
 
+import { useSelectionOrganization } from '../hooks/selection-organization'
 import { useProposalTabCounts } from '../hooks/use-proposal-tab-counts'
 import {
   detailHref,
@@ -22,6 +22,7 @@ import {
   OPEN_PAPER_PARAM,
   PROPOSAL_TABS,
   type ProposalTab,
+  selectionHref,
 } from '../model/selection-routes'
 import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
@@ -94,9 +95,12 @@ export function DetailLink({ page, ...rest }: DetailLinkProps) {
   // The paper the address names, if any
   const paperId = useSearchParams().get(OPEN_PAPER_PARAM)
 
+  // The organization whose selection holds the page's subject
+  const organization = useSelectionOrganization()
+
   return (
     <SelectionLink
-      href={detailHref(page, paperId)}
+      href={detailHref(organization, page, paperId)}
       onPlainClick={(link) => openDetail(page, link)}
       {...rest}
     />
@@ -163,15 +167,22 @@ export function BackLink() {
   // The paper the open problem was opened over, and the ways to a paper and to the pool
   const { paperBeneathId, openDetail, closeDetail } = useSelectionWorkspace()
 
+  // The organization whose pool the way back leads to
+  const organization = useSelectionOrganization()
+
   // The paper the open problem was opened over, where the selection still holds it
   const paperBeneath = paperBeneathId === null ? undefined : papersById.get(paperBeneathId)?.paper
 
   // Back to the paper's page, or to the pool where no paper is there to go back to
   const back: WayBack =
     paperBeneath === undefined
-      ? { href: ROUTES.PROBLEM_SELECTION, go: closeDetail, name: t('backToPool') }
+      ? { href: selectionHref(organization), go: closeDetail, name: t('backToPool') }
       : {
-          href: detailHref({ kind: 'paper', id: paperBeneath.id, tab: undefined }, null),
+          href: detailHref(
+            organization,
+            { kind: 'paper', id: paperBeneath.id, tab: undefined },
+            null
+          ),
           go: () => openDetail({ kind: 'paper', id: paperBeneath.id, tab: undefined }, null),
           name: paperBeneath.name,
         }

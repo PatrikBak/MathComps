@@ -8,11 +8,12 @@ import {
   isGuid,
   readFields,
   refuseWith,
+  SELECTION_API_PATH,
   takesBoard,
 } from './selection-writes'
 
 /** The path of a finalization: the board going into a cycle's rounds. */
-export const FINALIZATION_PATH = new RegExp(`^/problem-selection/boards/(${GUID})/finalization$`)
+export const FINALIZATION_PATH = new RegExp(`^${SELECTION_API_PATH}/boards/(${GUID})/finalization$`)
 
 /**
  * Every language a hosted round carries each problem in, written out rather than imported, so the fake keeps the

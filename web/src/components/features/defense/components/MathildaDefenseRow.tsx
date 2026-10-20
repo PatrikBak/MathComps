@@ -317,7 +317,11 @@ function ProposalDefenseRow({
       label={<DefenseTargetLabel target={target} emphasis="strong" />}
       jump={
         <RowJump
-          href={detailHref({ kind: 'proposal', id: target.problemId, tab: undefined }, null)}
+          href={detailHref(
+            target.organizationSlug,
+            { kind: 'proposal', id: target.problemId, tab: undefined },
+            null
+          )}
           label={tSelection('goToSelection')}
           onClick={onClose}
         />

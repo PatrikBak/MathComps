@@ -87,6 +87,7 @@ export const ROUTES = {
   ADMIN_DEFENSES: '/admin/defenses',
   ADMIN_GRADING: '/admin/grading/[slug]',
   PROBLEM_SELECTION: '/problem-selection',
+  ORGANIZATION_SELECTION: '/problem-selection/[slug]',
 } as const
 
 /** Union type of all possible route paths. */
@@ -116,6 +117,7 @@ const ROUTE_TRANSLATIONS: Record<RouteKey, NonCanonicalLocaleTranslations> = {
   '/admin/defenses': { sk: '/admin/obhajoby', cs: '/admin/obhajoby' },
   '/admin/grading/[slug]': { sk: '/admin/hodnotenie/[slug]', cs: '/admin/hodnoceni/[slug]' },
   '/problem-selection': { sk: '/vyber-uloh', cs: '/vyber-uloh' },
+  '/problem-selection/[slug]': { sk: '/vyber-uloh/[slug]', cs: '/vyber-uloh/[slug]' },
 }
 
 /** Common anchor fragments used for in-page navigation. English is canonical. */

@@ -1,12 +1,14 @@
-using MathComps.Domain.EfCoreEntities;
 using Microsoft.AspNetCore.Authorization;
 
 namespace MathComps.Api.Authorization;
 
 /// <summary>
-/// Requires the caller's account to be a member of an organization.
+/// Requires the caller's account to be a member of the organization the route names by its slug.
 /// </summary>
-/// <param name="OrganizationSlug">
-/// The <see cref="Organization.Slug"/> of the organization the account has to be a member of.
-/// </param>
-public sealed record OrganizationMemberRequirement(string OrganizationSlug) : IAuthorizationRequirement;
+public sealed class OrganizationMemberRequirement : IAuthorizationRequirement
+{
+    /// <summary>
+    /// The route value naming the organization by its slug.
+    /// </summary>
+    public const string OrganizationRouteValue = "organization";
+}

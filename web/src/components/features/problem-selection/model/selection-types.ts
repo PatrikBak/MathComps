@@ -235,6 +235,11 @@ export type SelectionCategory = {
 }
 
 /**
+ * The slug of the organization preparing the competitions the site hosts, as the API names it.
+ */
+export const MATHCOMPS_ORGANIZATION_SLUG = 'mathcomps'
+
+/**
  * Everything the selection reads, which arrives in one go.
  */
 export type SelectionData = {

@@ -24,15 +24,23 @@ import { ProposalDetail } from './ProposalDetail'
 import { SelectionWorkspaceProvider, useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /**
- * The selection's frame: the pool, a single problem or a single paper on the left, the board being filled on the
- * right. On a narrow screen the board folds into a bar above the content.
+ * Props for the {@link SelectionShell} component.
  */
-export function SelectionShell() {
+type SelectionShellProps = {
+  /** The slug of the organization whose selection the shell shows. */
+  organization: string
+}
+
+/**
+ * An organization's selection: the pool, a single problem or a single paper on the left, the board being filled on
+ * the right. On a narrow screen the board folds into a bar above the content.
+ */
+export function SelectionShell({ organization }: SelectionShellProps) {
   // The page's own name and description
   const tPage = useTranslations('pages.problemSelection')
 
   return (
-    <SelectionWorkspaceProvider>
+    <SelectionWorkspaceProvider organization={organization}>
       {/* Page title, for assistive tech */}
       <h1 className="sr-only">{tPage('title')}</h1>
 
@@ -132,7 +140,7 @@ function SelectionAccess({ children }: SelectionAccessProps) {
         />
       )
 
-    // The read gave up: an account off the MathComps organization's list is turned away,
+    // The read gave up: an account off the organization's list is turned away,
     // anything else can try again
     case 'failed':
       return errorCodeOf(uiState.error) === 'Forbidden' ? (
