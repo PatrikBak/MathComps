@@ -52,7 +52,10 @@ type StandingForfeited = {
 type StandingDone = {
   /** The discriminant. */
   kind: 'done'
-  /** The student's own row of the results; null until the group has closed, and where nobody grades them. */
+  /**
+   * The student's own row of the results; null until the group has closed and this entry has ended, and where
+   * nobody grades them.
+   */
   cells: ResultCell[] | null
 }
 

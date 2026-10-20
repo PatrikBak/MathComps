@@ -125,7 +125,7 @@ export type ResultRow = {
 }
 
 /**
- * One competition's results, readable by anybody once its group has closed.
+ * One competition's results, readable once its group has closed by anybody not still sitting it.
  */
 export type CompetitionResults = {
   /**
@@ -136,7 +136,7 @@ export type CompetitionResults = {
 }
 
 /**
- * The reader's own result on one problem, once their group has closed.
+ * The reader's own result on one problem, once their group has closed and their own entry has ended.
  */
 export type ProblemResult = NoConversationResult | PendingResult | FinalResult
 
@@ -218,8 +218,8 @@ export type HostedCompetitionProblem = {
   /** The longest what they say about it may be, in characters. */
   maxCommentChars: number
   /**
-   * The reader's result on it; null until the group has closed, and for an entry nobody grades or nobody
-   * sat.
+   * The reader's result on it; null until the group has closed and their own entry has ended, and for an
+   * entry nobody grades or nobody sat.
    */
   result: ProblemResult | null
 }
@@ -267,8 +267,8 @@ export type SatEntry = {
   /** When the student closed the entry themselves, as an ISO-8601 string; null while they have not. */
   finishedAt: string | null
   /**
-   * The student's own row of the results, one cell per problem; null until the group has closed, and where
-   * nobody grades them.
+   * The student's own row of the results, one cell per problem; null until the group has closed and this
+   * entry has ended, and where nobody grades them.
    */
   cells: ResultCell[] | null
 }

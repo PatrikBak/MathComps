@@ -288,12 +288,12 @@ internal static class HostedGrading
 
     /// <summary>
     /// Whether the conversation about one entry's grade on one problem is open to the student it is with: once
-    /// their group has closed, and while the grade is final.
+    /// their results are out (see <see cref="HostedEntryRules.AreResultsOut"/>), and while the grade is final.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
     /// <param name="entryId">The entry.</param>
     /// <param name="problemId">The problem.</param>
-    /// <param name="now">The instant to read the group's close against.</param>
+    /// <param name="now">The instant to read the group's close and the entry's clock against.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>Whether the student may read and write in it.</returns>
     public static async Task<bool> IsOutToStudentAsync(
@@ -303,15 +303,23 @@ internal static class HostedGrading
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        // When the student's group closes
-        var closesAt = await dbContext.HostedEntries
+        // When the entry started and was handed in, with when the student's group closes and how long its clock runs
+        var entry = await dbContext.HostedEntries
             .AsNoTracking()
-            .Where(entry => entry.Id == entryId)
-            .Select(entry => entry.Round.HostedGroup!.ClosesAt)
+            .Where(candidate => candidate.Id == entryId)
+            .Select(candidate => new
+            {
+                candidate.StartedAt,
+                candidate.FinishedAt,
+                candidate.Round.HostedGroup!.ClosesAt,
+                candidate.Round.HostedGroup.ClockMinutes,
+            })
             .FirstAsync(cancellationToken);
 
-        // Nothing of the student's results is out before their group closes, a final grade included
-        if (!HostedEntryRules.AreResultsOut(closesAt, now))
+        // Nothing of the student's results is out before their group closes and their own entry ends, a final grade
+        // included
+        if (!HostedEntryRules.AreResultsOut(
+                entry.ClosesAt, entry.StartedAt, entry.FinishedAt, entry.ClockMinutes, now))
             return false;
 
         // Open while the grade is final

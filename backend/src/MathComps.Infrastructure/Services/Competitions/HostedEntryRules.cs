@@ -140,15 +140,34 @@ public static class HostedEntryRules
         groupClosesAt is not null && !isTestRun;
 
     /// <summary>
-    /// Whether a group's results are out, which they are for anybody once it has closed. A group with no closing
-    /// instant grades nobody, so it has none.
+    /// Whether a group's results are out to a reader: once the group has closed and the reader's own entry into it
+    /// has ended, by the clock running out or by the student handing in. A group with no closing instant grades
+    /// nobody, so it has none.
     /// </summary>
+    /// <remarks>
+    /// A clock started just before the close runs on past it, and its student's results wait for it. A reader no
+    /// clock ever ran for, one who never sat the round or gave the entry up, waits on the close alone.
+    /// </remarks>
     /// <param name="groupClosesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
-    /// <param name="now">The instant to read the close against.</param>
-    /// <returns>Whether the results are out.</returns>
-    public static bool AreResultsOut(DateTimeOffset? groupClosesAt, DateTimeOffset now) =>
-        // Out from the closing instant on
-        groupClosesAt is { } closesAt && closesAt <= now;
+    /// <param name="startedAt">When the reader's clock in the round started; null where none ever ran.</param>
+    /// <param name="finishedAt"><inheritdoc cref="HostedEntry.FinishedAt" path="/summary"/></param>
+    /// <param name="clockMinutes"><inheritdoc cref="HostedGroup.ClockMinutes" path="/summary"/></param>
+    /// <param name="now">The instant to read the close and the clock against.</param>
+    /// <returns>Whether the results are out to the reader.</returns>
+    public static bool AreResultsOut(
+        DateTimeOffset? groupClosesAt,
+        DateTimeOffset? startedAt,
+        DateTimeOffset? finishedAt,
+        int clockMinutes,
+        DateTimeOffset now)
+    {
+        // Nothing is out before the group closes, nor ever where it never does.
+        if (groupClosesAt is not { } closesAt || closesAt > now)
+            return false;
+
+        // From then on, out once the reader's own entry has ended. A reader no clock ever ran for has none to wait on.
+        return startedAt is not { } clockStartedAt || EndedAt(clockStartedAt, finishedAt, clockMinutes) <= now;
+    }
 }
 
 /// <summary>
