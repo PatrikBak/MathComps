@@ -150,8 +150,7 @@ export function useDefenseFeedback(conversation: DefenseFeedbackInput): UseDefen
   // Cache handle for the defense lists
   const queryClient = useQueryClient()
 
-  // What the student is told when a write can't be made or doesn't land, which is the same whichever of the
-  // four it was
+  // What the student is told when a write can't be made or doesn't land, which is the same whichever write it was
   const failureCopy = {
     authReason: t('feedbackAuthReason'),
     errorMessage: t('feedbackError'),

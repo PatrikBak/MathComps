@@ -10,12 +10,12 @@ namespace MathComps.Api.Endpoints;
 public record AdminWhoamiResponse(string ExternalId, string? Role);
 
 /// <summary>
-/// Maps the admin-only endpoints, gated by the <see cref="AuthorizationPolicies.Admin"/> policy.
+/// Maps the admin's whoami endpoint, gated by the <see cref="AuthorizationPolicies.Admin"/> policy.
 /// </summary>
 public static class AdminEndpoints
 {
     /// <summary>
-    /// Maps the <c>/admin</c> endpoints onto the route builder.
+    /// Maps the admin's whoami endpoint onto the route builder.
     /// </summary>
     /// <param name="app">The route builder to register the endpoints on.</param>
     public static void MapAdminEndpoints(this IEndpointRouteBuilder app)

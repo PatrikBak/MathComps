@@ -10,8 +10,8 @@ import { withLocale } from '@/i18n/with-locale'
 import { createPageMetadata } from '@/lib/metadata'
 
 /**
- * Page-specific metadata. The problems here are embargoed until their group closes, so the page stays out of
- * search whatever else happens to it.
+ * Page-specific metadata. A graded competition's problems are embargoed until its group closes, so the page stays
+ * out of search whatever else happens to it.
  */
 export async function generateMetadata({
   params,

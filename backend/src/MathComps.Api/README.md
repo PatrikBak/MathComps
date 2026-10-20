@@ -1,6 +1,6 @@
 # MathComps API
 
-The main .NET Web API for the MathComps application. Provides endpoints for browsing problems, filtering, similarity search, and serving problem metadata, plus the signed-in surfaces: comments, user lists, and the AI defense conversations described in the [Examiner CLI README](../MathComps.Cli.Examiner/README.md). Behind the admin policy it also serves the review of those conversations, under `/admin/defense`: reading every student's back, recording which have been read, and keeping what gets noted down about them. The routes on one conversation also let in the problem selection's reviewers, for the conversations the reviewers held about the proposals.
+The main .NET Web API for the MathComps application. Provides endpoints for browsing problems, filtering, similarity search, and serving problem metadata, plus the signed-in surfaces, among them the AI defense conversations described in the [Examiner CLI README](../MathComps.Cli.Examiner/README.md). Behind the admin policy it also serves the review of those conversations, under `/admin/defense`: reading every student's back, recording which have been read, and keeping what gets noted down about them. The routes on one conversation also let in the problem selection's reviewers, for the conversations the reviewers held about the proposals.
 
 ## Setup
 
@@ -18,7 +18,7 @@ The API will be available at `http://localhost:5000`.
 
 ## Configuration
 
-The `appsettings.json` file contains settings for:
+Sections in `appsettings.json` include:
 
 - **CORS Origins** – Allowed frontend URLs (already configured for `localhost:3000`)
 - **Pagination** – Default and maximum page sizes for list endpoints

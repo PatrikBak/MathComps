@@ -174,8 +174,8 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// Verifies that a manifest naming a node the registry gives competitions below it is refused. Such a node is
-    /// where a group's categories hang, not a sitting anything runs, and the tool now raises whatever a manifest
-    /// names — so without this it would put a round on the container itself.
+    /// where a group's categories hang, not a sitting anything runs, and the tool raises whatever a manifest names,
+    /// so without this it would put a round on the container itself.
     /// </summary>
     [Fact]
     public Task A_node_carrying_competitions_below_it_is_refused() => RunTestAsync(async service =>
@@ -756,8 +756,8 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// Verifies that a round somebody has entered cannot be dropped. Releasing it closes its problems to
-    /// everybody, both the area and the defense engine requiring a hosted round, so the student loses what they
-    /// paid for.
+    /// everybody, both the area and the defense target guard requiring a hosted round, so the student loses what
+    /// they paid for.
     /// </summary>
     [Fact]
     public Task A_round_students_have_entered_cannot_be_dropped() => RunTestAsync(async service =>
@@ -807,7 +807,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// Verifies that a manifest the group cannot run on is refused as a manifest fault, whether a field it needs
-    /// is absent or the window it names cannot be met. A field the YAML never named reads back as a blank rather
+    /// is absent or the window it names cannot be met. A field the JSON never named reads back as a blank rather
     /// than as a complaint, so nothing but these checks tells an author which line to fix.
     /// </summary>
     /// <param name="field">The fault the manifest carries, which is also what the refusal has to name.</param>
@@ -831,7 +831,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// The manifest with one field blanked the way a reader blanks one the YAML never named.
+    /// The manifest with one field blanked the way a reader blanks one the JSON never named.
     /// </summary>
     /// <param name="field">Which field to leave out.</param>
     /// <returns>The manifest, short of it.</returns>

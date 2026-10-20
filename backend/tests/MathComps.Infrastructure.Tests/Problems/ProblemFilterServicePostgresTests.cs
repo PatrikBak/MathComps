@@ -357,7 +357,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 IsOriginal = true
             });
 
-            // Solution stored only as legacy TeX raw text, as the old import pipeline produced
+            // Solution stored only as legacy TeX raw text
             problem.Texts.Add(new ProblemText
             {
                 Id = Guid.NewGuid(),

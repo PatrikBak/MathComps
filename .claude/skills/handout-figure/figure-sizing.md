@@ -16,7 +16,7 @@ Nothing downstream scales it up. `\Image` places at natural size in the PDF, and
 | 360px | 286px | 252px |
 | 320px | 246px | 212px |
 
-The 185pt width cap is the 320px disclosure column (246px ÷ 4/3 = 184.5pt). Anything at or under it never downscales anywhere.
+The 185pt width cap is the 320px theorem-card column (246px ÷ 4/3 = 184.5pt). The 159pt cap for a figure inside a hint or solution is that phone's disclosure column (212px ÷ 4/3 = 159pt).
 
 ## Why height is the binding constraint in practice
 

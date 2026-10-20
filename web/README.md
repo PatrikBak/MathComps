@@ -6,7 +6,7 @@ A Next.js application for browsing and searching mathematical competition proble
 
 - **`src/app/`** – Next.js App Router pages
   - `[locale]/` – Localized routes (English canonical: `problems`, `handouts`, `news`, etc.)
-  - `api/` – API routes (contact form, webhooks)
+  - `api/` – API routes (contact form, file uploads, webhooks)
 - **`src/components/`** – React components organized by purpose
   - `features/` – Page-specific feature components (problems, handouts, defense, contact, etc.)
   - `shared/` – Reusable components and utilities
@@ -148,10 +148,10 @@ The same session is what the `signed-in` specs start from, minted fresh each run
 
 ### Mathilda (AI defense)
 
-Mathilda is the AI examiner a student defends a handout solution to. The feature lives in [`src/components/features/defense/`](src/components/features/defense/) and talks to the backend's `/defense/sessions` routes.
+Mathilda is the AI examiner a student defends a solution to. The feature lives in [`src/components/features/defense/`](src/components/features/defense/) and talks to the backend's `/defense/sessions` routes.
 
-- **There is no defense route.** The whole feature is modals, opened from a handout environment card or from the user menu.
-- **The client names the problem rather than sending it.** A start carries the environment id; the backend resolves the statement, reference and hints and snapshots them onto the session.
+- **There is no defense route.** The whole feature is modals, opened from wherever a problem offers a conversation, and from the user menu.
+- **The client names the problem rather than sending it.** A start carries its target (the handout's and environment's ids, or the problem's id); the backend resolves the statement, reference and hints and snapshots them onto the session.
 - **Reading the conversations back is a route:** [`/admin/defenses`](src/app/[locale]/admin/defenses/page.tsx), gated by the Clerk admin role.
 
 A turn is several LLM calls and takes about 40 seconds, so develop against `"Examiner:UseFake": true` in the backend config.

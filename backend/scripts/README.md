@@ -60,13 +60,13 @@ Run `./invoke-tool.sh` with no arguments for the current list of commands.
 ./apply-draft.sh -e prod --clear-defenses ./data/problems/mathcomps-practice-2026
 ```
 
-The competition comes from the draft's own `_meta.yaml`, so there is no second argument to keep in step. One tunnel serves the whole run: `invoke-tool.sh` finds the one this script opened and reuses it.
+The competition comes from the draft's own `_meta.yaml`, so the draft folder is the one positional argument. One tunnel serves the whole run: `invoke-tool.sh` finds the one this script opened and reuses it.
 
 `defense_spends` is left alone by `--clear-defenses`. It carries no session foreign key on purpose: it is the ledger the daily spend ceiling reads, and clearing it would make the ceiling evadable.
 
 ### Opening a standalone tunnel
 
-When you want a long-lived tunnel — e.g. to poke at the database with `psql` or `mathcomps-ro` — open one directly and leave it running:
+When you want a long-lived tunnel — e.g. to poke at the database with `psql` — open one directly and leave it running:
 
 ```bash
 # Production (default)
@@ -92,4 +92,4 @@ The scripts load environment variables in this order (later files override earli
 - **`open-db-tunnel.sh`** – Opens an SSH tunnel to the database and holds it open.
 - **`invoke-tool.sh`** – Runs a CLI tool against the tunneled database (auto-manages its own tunnel).
 - **`apply-draft.sh`** – Runs a bulk-import draft against the tunneled database.
-- **`lib-env.sh`**, **`lib-tunnel.sh`** – Sourced by the three above; they load the environment and open the tunnel.
+- **`lib-env.sh`**, **`lib-tunnel.sh`** – Shared helpers the scripts source: `lib-env.sh` loads the environment, `lib-tunnel.sh` opens the tunnel or reuses an open one.

@@ -91,7 +91,7 @@ echo "==> Deploying $ENV environment" >&2
 
 # Run docker compose with:
 # -f docker-compose.yml        = base configuration
-# -f $COMPOSE_OVERRIDE         = environment-specific overrides (prods or staging)
+# -f $COMPOSE_OVERRIDE         = environment-specific overrides (prod or staging)
 # --env-file .env              = load shared environment variables
 # --env-file $ENV_FILE         = load environment-specific overrides (later file wins)
 # "$@"                         = pass all remaining arguments to docker compose

@@ -56,7 +56,7 @@ The verdict scheme:
 
 Both are hint-quality findings as much as solution findings, so report them as such: the author may prefer to cut a hint rather than rewrite a solution around it.
 
-**Don't key difficulty off the stars.** The corpus is `\Problem{0}`×591, `{1}`×63, `{2}`×18 and zero `{3}` — most handouts convey difficulty by problem ordering and carry `{0}` throughout, so stars are not a usable signal. Judge hardness from the statement, the source (an IMO/ISL problem is hard whatever its stars say), and the length of the hint ladder.
+**Don't key difficulty off the stars.** Most problems carry `{0}`, and many handouts convey difficulty by problem ordering alone with `{0}` throughout, so stars are not a usable signal. Judge hardness from the statement, the source (an IMO/ISL problem is hard whatever its stars say), and the length of the hint ladder.
 
 For a hard problem, the prompt should include explicit checklists — induction steps especially are where reviewers without prompting tend to rubber-stamp. The hints in the handout often telegraph the intended proof structure; cite them in the prompt so the reviewer knows what the solution was supposed to do.
 
