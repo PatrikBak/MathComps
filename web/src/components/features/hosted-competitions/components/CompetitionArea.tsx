@@ -111,8 +111,11 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
   // What there is to draw, once both reads have landed
   const { readerKey, group, competition, run, problems, now, isGraded } = area
 
-  // Whether the group is over, which is when its results open
-  const isClosed = derivePhase(group, now) === 'closed'
+  // Whether the reader's own clock is still running here
+  const isRunning = run?.kind === 'sat' && !run.hasEnded
+
+  // Whether the group is over and the reader's own clock with it, which is when its results open to them
+  const areResultsOpen = derivePhase(group, now) === 'closed' && !isRunning
 
   return (
     // Hyphenation off: the global setting is for article prose, and the words here are names and labels
@@ -134,9 +137,9 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
           endsAt={clockEndsAt(run)}
           now={now}
           wasHandedIn={run?.kind === 'sat' && run.wasHandedIn}
-          onFinish={run?.kind === 'sat' && !run.hasEnded ? openFinish : null}
+          onFinish={isRunning ? openFinish : null}
           onOpenRules={openRules}
-          onOpenResults={isClosed ? () => openedResults.open(competitionSlug) : null}
+          onOpenResults={areResultsOpen ? () => openedResults.open(competitionSlug) : null}
           listHref={COMPETITIONS_LIST_HREF}
         />
       </div>

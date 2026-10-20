@@ -19,8 +19,9 @@ public sealed record GradeAnchor(Guid EntryId, Guid ProblemId, Guid StudentId) :
 
 /// <summary>
 /// The grade conversations, named like the grade itself by its problem and student as <c>{problemId}:{userId}</c>.
-/// One is open to admins, and to its student while the grade is final and their group has closed. A new message
-/// is owed to the other side of the conversation by mail.
+/// One is open to admins, and to its student while the grade is final and their results are out (see
+/// <see cref="HostedEntryRules.AreResultsOut"/>). A new message is owed to the other side of the conversation by
+/// mail.
 /// </summary>
 /// <param name="members"><inheritdoc cref="HostedGrading.FindGradedEntryAsync" path="/param[@name='members']"/></param>
 public class HostedGradeThreadKind(IOrganizationMemberService members) : CommentThreadKind<GradeAnchor>
@@ -111,7 +112,7 @@ public class HostedGradeThreadKind(IOrganizationMemberService members) : Comment
     /// <inheritdoc />
     protected override async Task<bool> IsOpenToAsync(
         MathCompsDbContext dbContext, GradeAnchor anchor, CommentViewer? viewer) =>
-        // Open to admins, and to its student while the grade is final and their group has closed
+        // Open to admins, and to its student while the grade is final and their results are out
         IsBetween(viewer, anchor.StudentId)
         && (viewer is { IsAdmin: true }
             || await HostedGrading.IsOutToStudentAsync(

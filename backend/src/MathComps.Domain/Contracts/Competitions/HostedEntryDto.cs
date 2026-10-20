@@ -17,7 +17,7 @@ public abstract record HostedEntryDto;
 /// <param name="FinishedAt"><inheritdoc cref="EfCoreEntities.HostedEntry.FinishedAt" path="/summary"/></param>
 /// <param name="Cells">
 /// The student's own cells, one per problem in the order the competition sets them; null until the group has
-/// closed, and where nobody grades them.</param>
+/// closed and this entry has ended, and where nobody grades them.</param>
 public sealed record SatEntryDto(
     DateTimeOffset StartedAt, DateTimeOffset? FinishedAt, IReadOnlyList<ResultCellDto>? Cells) : HostedEntryDto;
 

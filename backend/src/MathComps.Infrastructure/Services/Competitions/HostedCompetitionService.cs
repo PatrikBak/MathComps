@@ -210,7 +210,7 @@ public sealed class HostedCompetitionService(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // The round the student's own cells are read against. A clock started just before the close runs past it,
-        // so a hand-in can come after the results are out.
+        // so a hand-in after the close is what puts their results out.
         var round = await ReadRoundTermsAsync(dbContext, roundId, cancellationToken);
 
         // Their own cells, where the results are out.
@@ -271,8 +271,10 @@ public sealed class HostedCompetitionService(
             ? HostedEntryRules.IsSolutionOpen(entry.StartedAt, entry.FinishedAt, entry.ClockMinutes, now)
             : access.VisibleSince is null || access.VisibleSince <= now;
 
-        // Their entry once the results are out, which is what their own result on each problem waits on.
-        var resultEntry = entry is not null && HostedEntryRules.AreResultsOut(access.ClosesAt, now)
+        // Their entry once their results are out, which is what their own result on each problem waits on.
+        var resultEntry = entry is not null
+            && HostedEntryRules.AreResultsOut(
+                access.ClosesAt, entry.StartedAt, entry.FinishedAt, entry.ClockMinutes, now)
             ? new HostedGrading.SpentEntry(
                 entry.Id,
                 entry.UserId,
@@ -300,10 +302,6 @@ public sealed class HostedCompetitionService(
         // The round's problems in order, and its group's opening, close and clock.
         var round = await ReadRoundTermsAsync(dbContext, roundId, cancellationToken);
 
-        // Nothing is out before the group closes.
-        if (!HostedEntryRules.AreResultsOut(round.ClosesAt, DateTimeOffset.UtcNow))
-            throw new HostedResultsNotOutException();
-
         // Every entry sat into the round, with what the results say about whoever sat it.
         var entries = await dbContext.HostedEntries
             .AsNoTracking()
@@ -324,6 +322,18 @@ public sealed class HostedCompetitionService(
                 entry.User.HasLeftHighSchool,
             })
             .ToListAsync(cancellationToken);
+
+        // The reader's own entry among them, absent where they sat none or read with no account.
+        var readerEntry = entries.FirstOrDefault(entry => entry.UserId == userId);
+
+        // Nothing is out before the group closes, nor to a reader whose own clock still runs past it.
+        if (!HostedEntryRules.AreResultsOut(
+                round.ClosesAt,
+                readerEntry?.StartedAt,
+                readerEntry?.FinishedAt,
+                round.ClockMinutes,
+                DateTimeOffset.UtcNow))
+            throw new HostedResultsNotOutException();
 
         // Where each entry anybody grades stands on each problem, and how far into its clock its student last wrote
         // about each.
@@ -1033,7 +1043,7 @@ public sealed class HostedCompetitionService(
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
     /// <param name="entries">The reader's entries, each with what reading its cells takes.</param>
-    /// <param name="now">The instant the closes are read against.</param>
+    /// <param name="now">The instant the closes and the clocks are read against.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The cells, keyed by the round.</returns>
     private async Task<Dictionary<Guid, IReadOnlyList<ResultCellDto>>> ReadCellsAsync(
@@ -1044,7 +1054,12 @@ public sealed class HostedCompetitionService(
     {
         // The entries whose results are out.
         var entriesWithResults = entries
-            .Where(entryInRound => HostedEntryRules.AreResultsOut(entryInRound.Round.ClosesAt, now))
+            .Where(entryInRound => HostedEntryRules.AreResultsOut(
+                entryInRound.Round.ClosesAt,
+                entryInRound.Entry.StartedAt,
+                entryInRound.Entry.FinishedAt,
+                entryInRound.Round.ClockMinutes,
+                now))
             .ToList();
 
         // Where the ones anybody grades stand on each problem of their rounds.

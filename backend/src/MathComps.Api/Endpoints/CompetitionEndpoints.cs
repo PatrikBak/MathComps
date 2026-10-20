@@ -157,7 +157,8 @@ public static class CompetitionEndpoints
         })
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
-        // A competition's results, once its group has closed, with the caller's own row marked
+        // A competition's results, once its group has closed and unless the caller is still sitting it, with the
+        // caller's own row marked
         app.MapGet($"{CompetitionsPath}/{{competitionSlug}}/results", async (
             string competitionSlug,
             HttpContext context,

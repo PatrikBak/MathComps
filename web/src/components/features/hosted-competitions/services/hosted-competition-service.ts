@@ -38,7 +38,7 @@ export function fetchHostedCompetitionsView(
 }
 
 /**
- * Reads one competition's results, as anybody may once its group has closed.
+ * Reads one competition's results, as anybody not still sitting it may once its group has closed.
  *
  * @param apiCall - The authenticated API caller.
  * @param competitionSlug - Which competition's results to read.

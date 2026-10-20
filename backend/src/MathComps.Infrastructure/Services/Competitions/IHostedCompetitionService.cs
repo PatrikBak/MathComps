@@ -75,9 +75,9 @@ public interface IHostedCompetitionService
 
     /// <summary>
     /// Reads one competition's problem set, with whatever the student has said about each and their own result on
-    /// it once the results are out. An embargoed set is served only to a student who has spent an entry into it or
-    /// who prepares the competitions, and a competition still running only to an account; once it is over the set
-    /// reads for anybody, carrying nothing of anyone's own.
+    /// it once their results are out. An embargoed set is served only to a student who has spent an entry into it
+    /// or who prepares the competitions, and a competition still running only to an account; once it is over the
+    /// set reads for anybody, carrying nothing of anyone's own.
     /// </summary>
     /// <param name="userId">The student reading, null where the reader has no account.</param>
     /// <param name="competitionSlug">What addresses the competition whose problems these are.</param>
@@ -87,10 +87,10 @@ public interface IHostedCompetitionService
         Guid? userId, string competitionSlug, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Reads one competition's results, open to anybody once its group has closed. They list every student the
-    /// graders grade who held a conversation about its problems inside their entry, placed by the sum of their
-    /// final scores, a tie going to the smaller sum, over the problems, of how far into their own clock they last
-    /// wrote about each.
+    /// Reads one competition's results, open once its group has closed to anybody not still sitting it. They list
+    /// every student the graders grade who held a conversation about its problems inside their entry, placed by the
+    /// sum of their final scores, a tie going to the smaller sum, over the problems, of how far into their own clock
+    /// they last wrote about each.
     /// </summary>
     /// <param name="userId">
     /// The reader, whose own row is marked as theirs; null where the reader has no account.
@@ -174,7 +174,8 @@ public sealed class HostedNoteEmptyException() : Exception("A note has to say so
 public sealed class HostedNoteTooLongException() : Exception("The note is too long");
 
 /// <summary>
-/// Thrown when a competition's results are read before its group has closed, or for one that never closes.
+/// Thrown when a competition's results are read before its group has closed, for one that never closes, or by a
+/// student whose own clock in it still runs past the close.
 /// </summary>
 public sealed class HostedResultsNotOutException() : Exception("This competition's results are not out yet");
 
