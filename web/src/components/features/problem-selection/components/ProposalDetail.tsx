@@ -12,7 +12,7 @@ import { useProposalTabCounts } from '../hooks/use-proposal-tab-counts'
 import { PROPOSAL_TABS, type ProposalTab } from '../model/selection-routes'
 import { resolveText, unwrittenAcross } from '../model/selection-state'
 import type { Proposal } from '../model/selection-types'
-import { DetailHeading, DetailMissing, type DetailTabContent } from './DetailFrame'
+import { DetailMissing, type DetailTabContent } from './DetailFrame'
 import { LanguageSwitch } from './LanguageSwitch'
 import { PlaceControl } from './PlaceControl'
 import { ProposalActionsMenu } from './ProposalActionsMenu'
@@ -129,16 +129,10 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
 
   return (
     <article>
-      {/* The way out */}
-      <BackLink />
-
-      {/* Identity and, where the problems need every language, the language it is read in */}
-      <header className="mt-3 flex flex-col items-start gap-3 sm:flex-row">
-        {/* The problem's name */}
-        <DetailHeading subjectId={proposal.id} className="text-foreground sm:min-w-0 sm:flex-1">
-          <span className="mr-1 font-normal tabular-nums text-muted">{`#${proposal.number}`}</span>{' '}
-          {proposal.title}
-        </DetailHeading>
+      {/* The way out and, where the problems need every language, the language the problem is read in */}
+      <div className="flex items-center justify-between gap-3">
+        {/* The way out */}
+        <BackLink />
 
         {/* The language */}
         {needsEveryLanguage && (
@@ -148,9 +142,9 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
             unwritten={unwrittenAcross([proposal])}
           />
         )}
-      </header>
+      </div>
 
-      {/* The problem, with what it is filed under and what can be done to it */}
+      {/* The problem under its name, with what it is filed under and what can be done to it */}
       <ProposalCard
         proposal={proposal}
         language={language}
