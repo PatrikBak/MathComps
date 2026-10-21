@@ -17,14 +17,10 @@ import {
 } from '@/components/shared/components/DropdownMenu'
 
 import { useCategoryLabel } from '../hooks/use-category-label'
+import { useOwnRating } from '../hooks/use-own-rating'
 import { useProposalDeleteConfirmation } from '../hooks/use-proposal-delete-confirmation'
-import { useRate, useRecommend, useSetAside } from '../hooks/use-proposal-writes'
-import {
-  type Proposal,
-  RATING_ASPECTS,
-  type RatingAspect,
-  type RatingScores,
-} from '../model/selection-types'
+import { useRecommend, useSetAside } from '../hooks/use-proposal-writes'
+import { type Proposal, RATING_ASPECTS } from '../model/selection-types'
 import { ScoreBar } from './ScoreBar'
 import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
@@ -176,29 +172,17 @@ type RatingRowsProps = {
  * The reader's own rating of a problem, a bar of scores per aspect.
  */
 function RatingRows({ proposal }: RatingRowsProps) {
-  // The reader's rating of the problem, if they have rated it
-  const ownRating = proposal.ratings.find((rating) => rating.isOwn)
-
-  // The reader's score for each aspect, none where they have given none
-  const ownScores: RatingScores = {
-    beauty: ownRating?.beauty ?? null,
-    difficulty: ownRating?.difficulty ?? null,
-  }
-
-  // Rating the problem, or taking the rating back
-  const rate = useRate()
-
-  // A function which sets the reader's score for one aspect, keeping the other's, or takes it back
-  const setScore = (aspect: RatingAspect, score: number | null) =>
-    rate.mutate({ proposalId: proposal.id, scores: { ...ownScores, [aspect]: score } })
+  // The reader's scores and the ways to set them
+  const rating = useOwnRating(proposal)
 
   // A bar per aspect
   return RATING_ASPECTS.map((aspect) => (
     <ScoreBar
       key={aspect}
       aspect={aspect}
-      score={ownScores[aspect]}
-      onScore={(score) => setScore(aspect, score)}
+      score={rating.scores[aspect]}
+      onScore={(score) => rating.setScore(aspect, score)}
+      onKeyScore={(score) => rating.setKeyScore(aspect, score)}
     />
   ))
 }

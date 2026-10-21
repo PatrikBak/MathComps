@@ -1,3 +1,4 @@
+using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
@@ -8,15 +9,16 @@ namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
 /// The rules every part of the problem selection shares: writes run one at a time, a board changes only while it is
-/// a draft, the reads and the writes agree on which problems are still in the pool, and the reads agree on which
-/// conversations belong to an organization.
+/// a draft, the reads and the writes agree on which problems are still in the pool, the read and the finalize agree
+/// on which groups still take a board and which round each paper fills, and the reads agree on which conversations
+/// belong to an organization.
 /// </summary>
 internal static class SelectionRules
 {
     /// <summary>
-    /// Runs one write in its own transaction, after every write before it has committed, a selection write or any
-    /// other move of a problem. The write reads what it checks only once it holds the lock, so it never acts on a
-    /// state another write has since changed.
+    /// Runs one selection write in its own transaction, after every selection write before it has committed. The
+    /// write reads what it checks only once it holds the lock, so it never acts on a state another selection write
+    /// has since changed.
     /// </summary>
     /// <param name="dbContextFactory">Creates the context the write runs on.</param>
     /// <param name="write">The write, handed the context; whatever it leaves tracked is saved.</param>
@@ -33,7 +35,7 @@ internal static class SelectionRules
         // One transaction for the reads and the writes, so the lock below spans both.
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
-        // Wait for every other write to finish.
+        // Wait for every other selection write to finish.
         await ProblemPositions.LockAsync(dbContext, cancellationToken);
 
         // The write itself.
@@ -203,6 +205,33 @@ internal static class SelectionRules
         return sessions.Where(session => session.ProblemTarget == null
             || !foreignProposals.Any(proposal => proposal.ProblemId == session.ProblemTarget.ProblemId));
     }
+
+    /// <summary>
+    /// Whether a round is the one a paper fills once its board is finalized into the round's group: the round runs at
+    /// the hosted level the paper's category is.
+    /// </summary>
+    /// <param name="competitionPath">The path of the competition the round hangs off.</param>
+    /// <param name="hostedCategory">
+    /// The hosted level the paper's category is; null for one no hosted round runs, which fills no round.
+    /// </param>
+    /// <returns>Whether the paper fills the round.</returns>
+    public static bool IsRoundFor(string competitionPath, HostedCompetitionCategory? hostedCategory) =>
+        // The paper's category at a hosted level, and the round's level that one
+        hostedCategory is { } level && HostedTaxonomy.CategoryOf(competitionPath) == level;
+
+    /// <summary>
+    /// Whether a hosted group still takes a board: it has not opened, it closes at some point, and it runs rounds
+    /// nothing has filled yet. A group that never closes is the practice one, which nobody picks papers for.
+    /// </summary>
+    /// <param name="opensAt"><inheritdoc cref="HostedGroup.OpensAt" path="/summary"/></param>
+    /// <param name="closesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
+    /// <param name="problemsHeld">How many problems each of the group's rounds holds.</param>
+    /// <param name="now">The instant the group's opening is read against.</param>
+    /// <returns>Whether a board can be finalized into it.</returns>
+    public static bool TakesBoard(
+        DateTimeOffset opensAt, DateTimeOffset? closesAt, IReadOnlyCollection<int> problemsHeld, DateTimeOffset now) =>
+        // Not yet open, closing at some point, with rounds that are all still empty
+        opensAt > now && closesAt is not null && problemsHeld.Count > 0 && problemsHeld.All(held => held == 0);
 
     /// <summary>
     /// Whether a board is still in the selection: a draft, or finalized into a hosted group that has not opened.
