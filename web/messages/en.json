@@ -172,6 +172,7 @@
     "ProblemNotFound": "Problem not found.",
     "ProblemSlugTaken": "Another problem already uses the address a problem gets in this spot.",
     "ProfileValueInvalid": "That value cannot be used.",
+    "ProposalNotLead": "Only the people in charge of a category can set problems aside, delete them or change what they're recommended for.",
     "ProposalRatingValue": "That score isn't on the scale.",
     "RateLimited": "You're doing that too fast. Please wait a moment and try again.",
     "ReviewNoteNotFound": "This note no longer exists.",

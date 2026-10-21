@@ -251,6 +251,12 @@ public enum ApiErrorCode
     SelectionNotLead,
 
     /// <summary>
+    /// A proposal was set aside, had its recommended categories changed or was deleted by someone who leads none of
+    /// its organization's categories.
+    /// </summary>
+    ProposalNotLead,
+
+    /// <summary>
     /// A problem going into a round lacks a statement or a solution in some language.
     /// </summary>
     SelectionProblemIncomplete,

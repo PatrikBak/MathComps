@@ -172,6 +172,7 @@
     "ProblemNotFound": "Úloha nebyla nalezena.",
     "ProblemSlugTaken": "Adresu, kterou úloha na tomto místě dostane, už používá jiná úloha.",
     "ProfileValueInvalid": "Tuto hodnotu nelze použít.",
+    "ProposalNotLead": "Odkládat, mazat a doporučovat úlohy mohou jen garanti kategorií.",
     "ProposalRatingValue": "Toto číslo není na stupnici.",
     "RateLimited": "Příliš mnoho požadavků. Chvíli počkej a zkus to znovu.",
     "ReviewNoteNotFound": "Tato poznámka už neexistuje.",

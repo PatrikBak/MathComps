@@ -153,6 +153,7 @@ public sealed class GlobalExceptionHandler(
         NotReviewNoteAuthorException => (StatusCodes.Status403Forbidden, ApiErrorCode.NotReviewNoteAuthor),
         ListAccessDeniedException => (StatusCodes.Status403Forbidden, ApiErrorCode.ListAccessDenied),
         SelectionNotLeadException => (StatusCodes.Status403Forbidden, ApiErrorCode.SelectionNotLead),
+        ProposalNotLeadException => (StatusCodes.Status403Forbidden, ApiErrorCode.ProposalNotLead),
         // The student owns the conversation and is refused the rewind or delete all the same
         DefenseGradedSessionImmutableException
             => (StatusCodes.Status403Forbidden, ApiErrorCode.DefenseGradedSessionImmutable),

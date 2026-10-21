@@ -36,6 +36,7 @@ import {
   problemCount,
   READY,
   recordWrites,
+  rememberedSelection,
   SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
@@ -494,6 +495,33 @@ test.describe('setting a problem aside', () => {
 
     // A bar for each aspect to rate it on
     await expect(page.getByRole('slider')).toHaveCount(2)
+
+    // And no way to set it aside or delete it
+    await expect(page.getByRole('menuitem')).toHaveCount(0)
+  })
+
+  test("offers a reader leading no category only the rating, the card still naming the problem's categories", async ({
+    page,
+  }) => {
+    // A reviewer leading none of the categories
+    await stubSelection(page, 'selection', { ...rememberedSelection(null), leadCategories: [] })
+
+    // The pool
+    await openPool(page)
+
+    // A problem's card, naming the category it is recommended for
+    await expect(
+      cardOf(page, OPENED).getByText(categoryCopy.intermediate, { exact: true })
+    ).toBeVisible()
+
+    // The problem's menu
+    await actionsButton(page, OPENED).click()
+
+    // A bar for each aspect to rate it on
+    await expect(page.getByRole('slider')).toHaveCount(2)
+
+    // No category to switch
+    await expect(page.getByRole('menuitemcheckbox')).toHaveCount(0)
 
     // And no way to set it aside or delete it
     await expect(page.getByRole('menuitem')).toHaveCount(0)
@@ -1061,6 +1089,52 @@ test.describe('a finalize the backend refuses', () => {
 })
 
 test.describe("a problem's action the backend refuses", () => {
+  test('keeps a problem in the pool when the reader stopped leading before setting it aside, and says why', async ({
+    page,
+  }) => {
+    // What the backend keeps, a reviewer leading every category for now
+    const memory = rememberedSelection(null)
+
+    // The selection, read out of it
+    await stubSelection(page, 'selection', memory)
+
+    // Every notice the page raises
+    const notices = await recordNotices(page)
+
+    // The pool
+    await openPool(page)
+
+    // The reviewer leading nothing any more, which the page has not read yet
+    memory.leadCategories = []
+
+    // Every read held from here, so the page has only the refusal to go on
+    const releaseReads = await holdReads(page)
+
+    // A problem set aside from its card all the same
+    await pickAction(page, OPENED, selectionCopy.actions.setAside)
+
+    // Refused, the reader told why
+    await expect.poll(notices).toEqual([refusalCopy.ProposalNotLead])
+
+    // The problem back in the pool
+    await expect(cardOf(page, OPENED)).toBeVisible()
+
+    // The read after the write, let through
+    releaseReads()
+
+    // The problem's menu
+    await actionsButton(page, OPENED).click()
+
+    // Offering the rating still
+    await expect(page.getByRole('slider')).toHaveCount(2)
+
+    // With no way to set the problem aside any more, once that read has landed
+    await expect(page.getByRole('menuitem')).toHaveCount(0)
+
+    // And no other notice raised
+    expect(notices()).toEqual([refusalCopy.ProposalNotLead])
+  })
+
   test('refuses setting aside a problem another reviewer deleted meanwhile, then shows it gone', async ({
     page,
   }) => {
