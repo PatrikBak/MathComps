@@ -6,7 +6,7 @@ namespace MathComps.Cli.BulkImport.Validation;
 /// <summary>
 /// Validates each problem's draft tag slugs against the approved vocabulary. The <c>tags:</c> list is hand-editable on
 /// the localhost-render review step, so the by-construction guarantee from the Tagging CLI can be voided by a typo;
-/// this is the authoritative gate that a slug exists before apply turns it into a row. Runs in C# (not the Node
+/// this is the authoritative gate that a slug exists before the import turns it into a row. Runs in C# (not the Node
 /// preflight) because the vocabulary resolver lives in <c>MathComps.Domain</c>.
 /// </summary>
 public static class TagSlugValidator
@@ -41,7 +41,7 @@ public static class TagSlugValidator
             .Select(slug => Issue(file, $"unknown tag slug '{slug}' — not in the approved vocabulary", VerdictSeverity.Error));
 
         // A slug listed more than once is harmless but worth flagging. Group on the canonical form so two casings of
-        // one slug are caught here — apply collapses them to a single row, so the reviewer should know.
+        // one slug are caught here — the import collapses them to a single row, so the reviewer should know.
         var duplicates = tags
             .GroupBy(TagVocabulary.Canonicalize)
             .Where(group => group.Count() > 1)

@@ -16,7 +16,7 @@ my-draft/
     incircle.svg
 ```
 
-Problems are numbered from 1. A full fresh import numbers them `p1`, `p2`, … with no gaps, but a draft may also carry an arbitrary **subset** of orders (e.g. just `p4`, to correct one problem). The preflight here doesn't police that — whether the orders fill the round without gaps is decided by the DB-aware `validate` step, which can see what already exists (see [Format vs. validate](#format-vs-validate)).
+Problems are numbered from 1. A full fresh import numbers them `p1`, `p2`, … with no gaps, but a draft may also carry an arbitrary **subset** of orders (e.g. just `p4`, to correct one problem). The preflight here doesn't police that — whether the orders fill the round without gaps is decided by the bulk import, which can see what already exists (see [Format vs. the database](#format-vs-the-database)).
 
 ## `_meta.yaml`
 
@@ -33,13 +33,13 @@ language: sk # the draft's original language: sk | cs | en
 
 A draft for `mathcomps-proposals` also names the organization whose pool it fills, `organization: <slug>` (see [A problem of the pool](#a-problem-of-the-pool)).
 
-The path is the competition's slugs from the root of the taxonomy down to it, hyphen-joined, and it runs as deep as the taxonomy does: `csmo-a-iii` is round III of category A of the Czech-Slovak MO, `imo` is a competition that runs as one flat sitting, and however deep a competition sits, the path names every level. Every segment is lowercase alphanumeric — a path outside that alphabet is refused here. Each node on the path has to be registered in the taxonomy, which the [bulk-import CLI](../../backend/src/MathComps.Cli.BulkImport/README.md)'s `validate` step checks; the one the path ends at must be a leaf, since a competition carrying others below it is a container rather than a sitting problems belong to.
+The path is the competition's slugs from the root of the taxonomy down to it, hyphen-joined, and it runs as deep as the taxonomy does: `csmo-a-iii` is round III of category A of the Czech-Slovak MO, `imo` is a competition that runs as one flat sitting, and however deep a competition sits, the path names every level. Every segment is lowercase alphanumeric — a path outside that alphabet is refused here. Each node on the path has to be registered in the taxonomy, which the [bulk-import CLI](../../backend/src/MathComps.Cli.BulkImport/README.md) checks; the one the path ends at must be a leaf, since a competition carrying others below it is a container rather than a sitting problems belong to.
 
 `visibleSince` embargoes the round. The problems land in the database complete, and the archive begins serving them once that instant passes, with nobody having to flip anything. Omit it and the round is open the moment it is imported.
 
 It must carry an explicit offset (`Z` or `±HH:MM`). A bare wall-clock time would open the round at whatever the importing machine thinks the zone is, and that is the one thing an embargo must not depend on. It is a different axis from `date`, which is the day the round ran and only ever sorts.
 
-It hides the problems, not their images. Figures go to public storage under a key derived from the problem slug as soon as the import runs (see the [bulk-import CLI](../../backend/src/MathComps.Cli.BulkImport/README.md)).
+It hides the problems, not their images. Figures go to public storage under a key derived from the problem slug as soon as a real import runs (see the [bulk-import CLI](../../backend/src/MathComps.Cli.BulkImport/README.md)).
 
 ## Problem body — `pN.<lang>.md`
 
@@ -71,15 +71,15 @@ The problem number and language come from the filename. The file whose `<lang>` 
 
 A draft may **omit the original-language file entirely** and carry only translations — a way to drop, say, `cs`/`en` translations onto a problem that already lives in the DB without re-importing its untouched original. Keep `_meta.yaml`'s `language` set to the problem's **true original language** even when that file is absent; otherwise a translation gets marked as the original and collides with the stored one (a second original is forbidden). With no in-draft original, the "solution only if the original has one" check can't run, so a dropped translated solution is accepted on faith — make sure the stored original already has its own solution, or you'll orphan the translated one.
 
-## Format vs. validate
+## Format vs. the database
 
-The preflight here is **DB-blind** — it checks the draft's _format_ (file shape, markdown, math, images) and only that. Whether a subset's numbering fills the round without gaps, or whether a created problem carries its `pN.yaml`, depends on what already exists in the DB — so those calls belong to the C# `validate` step, which queries the DB and can tell a correction or append from a mistake:
+The preflight here is **DB-blind** — it checks the draft's _format_ (file shape, markdown, math, images) and only that. Whether a subset's numbering fills the round without gaps, or whether a created problem carries its `pN.yaml`, depends on what already exists in the DB — so those calls belong to the C# bulk import, which queries the DB and can tell a correction or append from a mistake:
 
 - **Round contiguity** — once the import lands, the round's problem orders (those already in the DB plus the draft's) must run `1..N` with no gap. A fresh import that skipped a problem, or a subset drop onto an order that doesn't exist yet, is rejected (`round-contiguity`). A single-problem correction or a clean append passes.
 - **New-problem metadata** — a problem the import would **create** must carry a `pN.yaml` sidecar (`missing-problem-meta`). A re-import onto an existing problem may omit it: with no `pN.yaml`, `authors`/`tags`/`solutionLink` default to "leave the stored values untouched", so a draft can hold exactly the problems being corrected and nothing else.
 - **Original existence** — a no-original (translation-only) drop is rejected unless its problem already exists (`no-original-new-problem`), and an original in a language other than the stored one is rejected as a second original (`original-conflict`).
 
-Because all of this is DB-aware, `validate` **requires a reachable database** — it fails (rather than warning) when it can't reach one, since a dry run that can't see the DB can't vouch for the import. `apply` likewise needs a live DB.
+Because all of this is DB-aware, the import **requires a reachable database**, its `--dry-run` included.
 
 ## Problem metadata — `pN.yaml`
 
@@ -94,7 +94,7 @@ tags: # approved tag slugs; usually written by the Tagging CLI, hand-editable
   - am-gm-inequality
 ```
 
-`authors` and `tags` share the same omit-vs-clear semantics on apply: an **absent** key leaves a problem's existing values untouched, an **empty** list (`authors: []` / `tags: []`) clears them, and a populated list replaces them. So a partial re-import — say, attaching only a solution — can leave both authors and tags alone by omitting their keys. Each tag slug must be in the approved vocabulary (`approved-tags.json`) — the C# validate step rejects unknown ones.
+`authors` and `tags` share the same omit-vs-clear semantics on import: an **absent** key leaves a problem's existing values untouched, an **empty** list (`authors: []` / `tags: []`) clears them, and a populated list replaces them. So a partial re-import — say, attaching only a solution — can leave both authors and tags alone by omitting their keys. Each tag slug must be in the approved vocabulary (`approved-tags.json`) — the C# bulk import rejects unknown ones.
 
 `solutionLink` follows the same omit-leaves-untouched rule: an **absent** key keeps the stored link, a value sets it. Being a scalar it has no empty-list analogue, so a re-import never clears a link — that's done directly in the DB.
 
@@ -121,7 +121,7 @@ Put assets in `images/` and reference them with a **bare** ref:
 ![equals](images/eq.svg?inline=true) # the one legal query param — flows inline with the text
 ```
 
-A ref is bare except for an optional `?inline=true` (inline display). `apply` auto-derives `width`/`height` from the figure's own intrinsic dimensions and stamps them on import — so to resize a figure, change the figure itself (an SVG's root `width`/`height` keeping its `viewBox`, or a raster's pixels), never the ref. Writing `width`/`height`/`scale`/any other query param on a ref is a preflight **error** (`image-ref-param`): hand-written dimensions are meaningless (`apply` overrides them) and `scale` has no role on a problem image. Supported formats are **SVG, PNG, JPEG, and WebP**, each under **2 MB** (figures serve unoptimized, so they ship at full weight). Every referenced image must exist on disk; files in `images/` that nothing references produce a warning (not an error). Two images in one problem can't share a name (e.g. `fig.svg` and `fig.png`) — they'd collide on one stored key.
+A ref is bare except for an optional `?inline=true` (inline display). The import auto-derives `width`/`height` from the figure's own intrinsic dimensions and stamps them on import — so to resize a figure, change the figure itself (an SVG's root `width`/`height` keeping its `viewBox`, or a raster's pixels), never the ref. Writing `width`/`height`/`scale`/any other query param on a ref is a preflight **error** (`image-ref-param`): hand-written dimensions are meaningless (the import overrides them) and `scale` has no role on a problem image. Supported formats are **SVG, PNG, JPEG, and WebP**, each under **2 MB** (figures serve unoptimized, so they ship at full weight). Every referenced image must exist on disk; files in `images/` that nothing references produce a warning (not an error). Two images in one problem can't share a name (e.g. `fig.svg` and `fig.png`) — they'd collide on one stored key.
 
 ## Markdown & math checks
 
@@ -141,7 +141,7 @@ npm run draft:preflight -- ./my-draft          # human-readable report
 npm run draft:preflight -- ./my-draft --json   # machine-readable manifest
 ```
 
-Exit `0` when clean, `1` on any error. Warnings (e.g. orphan images) don't fail the run. A clean preflight is what the [`apply` command](../../backend/src/MathComps.Cli.BulkImport/README.md) needs to import the draft.
+Exit `0` when clean, `1` on any error. Warnings (e.g. orphan images) don't fail the run. A clean preflight is what the [bulk import](../../backend/src/MathComps.Cli.BulkImport/README.md) needs to import the draft.
 
 ## Examples
 

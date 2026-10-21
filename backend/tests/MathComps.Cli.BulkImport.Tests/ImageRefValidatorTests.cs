@@ -4,9 +4,8 @@ using MathComps.Cli.BulkImport.Validation;
 namespace MathComps.Cli.BulkImport.Tests;
 
 /// <summary>
-/// Tests the image-ref hard gate that unites validate and apply: every referenced figure must size cleanly, as a
-/// blocking error, before any import. Runs against a temp draft folder seeded from the real fixtures, so it
-/// exercises the same read apply performs.
+/// Tests the image-ref hard gate: every referenced figure must size cleanly, as a blocking error, before any import.
+/// Runs against a temp draft folder seeded from the real fixtures, so it exercises the same read the import performs.
 /// </summary>
 public class ImageRefValidatorTests : IDisposable
 {
@@ -46,7 +45,7 @@ public class ImageRefValidatorTests : IDisposable
     }
 
     /// <summary>
-    /// An unsupported format is one blocking error — the same rejection apply would hit, surfaced at validate.
+    /// An unsupported format is one blocking error — the same rejection the import would hit, surfaced before it runs.
     /// </summary>
     [Fact]
     public void An_unsupported_format_is_a_blocking_error()

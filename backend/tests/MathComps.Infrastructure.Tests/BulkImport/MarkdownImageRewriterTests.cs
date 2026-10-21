@@ -3,7 +3,7 @@ using MathComps.Infrastructure.Services.BulkImport;
 namespace MathComps.Infrastructure.Tests.BulkImport;
 
 /// <summary>
-/// Unit tests for <see cref="MarkdownImageRewriter.Rewrite"/>. These pin the substitution apply relies on: every
+/// Unit tests for <see cref="MarkdownImageRewriter.Rewrite"/>. These pin the substitution the import relies on: every
 /// known ref is swapped for its dimensioned <c>media:</c> ref, the derived dimensions are stamped onto a single
 /// clean query, an author-written <c>?inline=</c> survives while other params are dropped, a prefix-sharing
 /// filename isn't clobbered, and a body referencing none of the images is left untouched.

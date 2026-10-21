@@ -86,13 +86,13 @@ export function indexSelection(data: SelectionData): SelectionIndex {
  * The hue a category wears, which is its index among the selection's categories.
  *
  * @param categories - The selection's categories, in the order they run.
- * @param category - The category, by name; null for none.
+ * @param category - The category, by name.
  *
- * @returns The hue's index, from zero; null for no category, or one the selection doesn't list.
+ * @returns The hue's index, from zero; null for a category the selection doesn't list.
  */
 export function categoryHue(
   categories: readonly SelectionCategory[],
-  category: string | null
+  category: string
 ): number | null {
   // Where the category stands, -1 where nowhere
   const place = categories.findIndex((candidate) => candidate.name === category)
@@ -104,13 +104,13 @@ export function categoryHue(
 /**
  * The hosted level a category is, which picks the round a paper of that category goes into.
  *
- * @param category - The category, by name; null for none.
+ * @param category - The category, by name.
  * @param categories - The selection's categories.
  *
- * @returns The level; null for no category, one the selection doesn't list, or one no hosted round runs.
+ * @returns The level; null for a category the selection doesn't list, or one no hosted round runs.
  */
 export function hostedLevelOf(
-  category: string | null,
+  category: string,
   categories: readonly SelectionCategory[]
 ): HostedCompetitionCategory | null {
   // The level of the category of that name, where the selection lists one
@@ -132,8 +132,7 @@ export function mapsToRounds(board: Board, categories: readonly SelectionCategor
 }
 
 /**
- * Whether the reader leads a paper's category, which is what lets them change its slots. A paper outside the
- * categories has no leads.
+ * Whether the reader leads a paper's category, which is what lets them change its slots.
  *
  * @param leadCategories - The names of the categories the reader leads.
  * @param paper - The paper.
@@ -141,8 +140,8 @@ export function mapsToRounds(board: Board, categories: readonly SelectionCategor
  * @returns True when the reader leads the paper's category.
  */
 export function isLeadOf(leadCategories: readonly string[], paper: Paper): boolean {
-  // The paper's category, where it has one, among the reader's
-  return paper.category !== null && leadCategories.includes(paper.category)
+  // The paper's category among the reader's
+  return leadCategories.includes(paper.category)
 }
 
 /**

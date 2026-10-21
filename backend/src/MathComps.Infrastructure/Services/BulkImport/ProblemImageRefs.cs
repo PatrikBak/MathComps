@@ -11,8 +11,8 @@ public readonly record struct ResolvedImageRef(string MediaKey, int Width, int H
 
 /// <summary>
 /// Builds the relative-ref → <see cref="ResolvedImageRef"/> map a problem's markdown is rewritten against. The map
-/// is fully determined by the problem slug and the images' intrinsic dimensions, so it can be reproduced without
-/// uploading — the apply path builds it and then uploads, the read-only preview builds it only to compare content.
+/// is fully determined by the problem slug and the images' intrinsic dimensions, so it is known before anything
+/// uploads, and a dry run rewrites every body exactly as the real import does.
 /// </summary>
 public static class ProblemImageRefs
 {

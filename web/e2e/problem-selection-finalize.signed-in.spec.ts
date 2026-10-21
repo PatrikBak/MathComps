@@ -491,7 +491,7 @@ test.describe('setting a problem aside', () => {
     await actionsButton(page, USED).click()
 
     // Every category to recommend it for
-    await expect(page.getByRole('menuitemcheckbox')).toHaveCount(3)
+    await expect(page.getByRole('menuitemcheckbox')).toHaveCount(4)
 
     // A bar for each aspect to rate it on
     await expect(page.getByRole('slider')).toHaveCount(2)
@@ -813,8 +813,8 @@ test.describe('finalizing a board', () => {
   })
 
   test('offers no Finalize on a board with a paper no round takes', async ({ page }) => {
-    // A reviewer whose first draft's papers all go into rounds, and whose later one carries a spare paper outside
-    // the categories
+    // A reviewer whose first draft's papers all go into rounds, and whose later one carries a spare C paper, which
+    // no hosted round takes
     await stubSelection(page, 'selection')
 
     // The pool, the first draft on screen

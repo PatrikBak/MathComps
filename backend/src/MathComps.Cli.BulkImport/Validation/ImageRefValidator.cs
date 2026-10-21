@@ -4,10 +4,9 @@ using MathComps.Infrastructure.Services.BulkImport;
 namespace MathComps.Cli.BulkImport.Validation;
 
 /// <summary>
-/// Checks that every image a draft references resolves to readable intrinsic dimensions — the same read
-/// <c>apply</c> performs when it sizes and uploads each figure. It runs in the shared validation as a hard error so
-/// that a green <c>validate</c> guarantees a green <c>apply</c>: a draft carrying an unreadable or wrong-format
-/// figure is rejected up front, before any upload or write, rather than only surfacing mid-import.
+/// Checks that every image a draft references resolves to readable intrinsic dimensions — the same read the import
+/// performs when it sizes each figure. A hard error, so a draft carrying an unreadable or wrong-format figure is
+/// rejected before the database is consulted.
 /// </summary>
 public static class ImageRefValidator
 {
@@ -46,8 +45,8 @@ public static class ImageRefValidator
 
         try
         {
-            // The same read apply will perform — an unsupported format or a sizeless file throws here, well before
-            // any upload or write.
+            // The same read the import performs — an unsupported format or a sizeless file throws here, before any
+            // upload or write.
             _ = ImageDimensions.Read(path);
             return null;
         }

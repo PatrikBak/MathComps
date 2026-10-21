@@ -81,8 +81,8 @@ export type Paper = {
   id: string
   /** What the paper is called. */
   name: string
-  /** The category the paper fills, by name; null for a paper outside the categories. */
-  category: string | null
+  /** The category the paper fills, by name. */
+  category: string
   /** The problem in each slot, by id, null where the slot stands empty. */
   slots: (string | null)[]
 }

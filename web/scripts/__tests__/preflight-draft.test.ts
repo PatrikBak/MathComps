@@ -219,7 +219,7 @@ describe('valid drafts — parsed manifest content', () => {
     expect(problem!.texts.map((text) => text.language)).toEqual(['cs', 'en'])
     expect(problem!.texts.some((text) => text.original)).toBe(false)
 
-    // Omitting the original passes the format gate; whether the target exists is the DB-aware validate step's call
+    // Omitting the original passes the format gate; whether the target exists is the DB-aware import's call
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
 
@@ -234,12 +234,12 @@ describe('valid drafts — parsed manifest content', () => {
       true
     )
 
-    // pN.yaml is omitted, so authors/tags default to null (left untouched on apply)
+    // pN.yaml is omitted, so authors/tags default to null (left untouched on import)
     expect(
       manifest.problems.every((problem) => problem.authors === null && problem.tags === null)
     ).toBe(true)
 
-    // The preflight checks format only; contiguity and pN.yaml presence are the DB-aware validate step's call, so a
+    // The preflight checks format only; contiguity and pN.yaml presence are the DB-aware import's call, so a
     // bare subset of orders passes the format gate cleanly
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
@@ -247,7 +247,7 @@ describe('valid drafts — parsed manifest content', () => {
   it('accepts a non-contiguous subset that carries originals', async () => {
     const manifest = await loadFixture('valid-subset-with-originals')
 
-    // Problems sit at orders 1 and 3 (no order 2); the preflight leaves the gap for the DB-aware validate step to
+    // Problems sit at orders 1 and 3 (no order 2); the preflight leaves the gap for the DB-aware import to
     // judge against what already exists
     expect(manifest.problems.map((problem) => problem.order)).toEqual([1, 3])
 
@@ -263,7 +263,7 @@ describe('valid drafts — parsed manifest content', () => {
     const [problem] = manifest.problems
 
     // No pN.yaml, so hasSidecar is false and authors/tags stay null; whether a fresh problem may omit it is the
-    // DB-aware validate step's call, not the preflight's
+    // DB-aware import's call, not the preflight's
     expect(problem!.hasSidecar).toBe(false)
     expect(problem!.authors).toBeNull()
     expect(isOk(manifest.verdict.errors)).toBe(true)

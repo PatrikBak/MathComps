@@ -277,17 +277,12 @@ export const ON_OFFER_COUNT = ON_OFFER.length
  *
  * @param index - Which of the fake's papers it is, which its id is built from.
  * @param name - What the paper is called.
- * @param category - The category it fills, by name; null for a paper outside the categories.
+ * @param category - The category it fills, by name.
  * @param slots - The problem in each slot, null where the slot stands empty.
  *
  * @returns The paper.
  */
-function paperOf(
-  index: number,
-  name: string,
-  category: string | null,
-  slots: (Proposal | null)[]
-): Paper {
+function paperOf(index: number, name: string, category: string, slots: (Proposal | null)[]): Paper {
   // The paper, its id built from its index so every paper gets its own
   return {
     id: `00000000-0000-4000-8000-a${String(index).padStart(11, '0')}`,
@@ -386,7 +381,7 @@ export const DRAFT_BOARD: Board = {
 
 /**
  * A draft after {@link DRAFT_BOARD}: {@link READY}, which that board holds too, {@link GEOMETRY}, and
- * {@link SET_ASIDE} in a paper outside the categories.
+ * {@link SET_ASIDE} in a C paper, which no hosted round takes.
  */
 export const LATER_DRAFT: Board = {
   id: '00000000-0000-4000-8000-b00000000003',
@@ -394,7 +389,7 @@ export const LATER_DRAFT: Board = {
   papers: [
     paperOf(5, 'Elementary', 'elementary', [READY, null]),
     paperOf(6, 'Advanced', 'advanced', [GEOMETRY, null]),
-    paperOf(7, 'Spare', null, [null, SET_ASIDE]),
+    paperOf(7, 'Spare', 'C', [null, SET_ASIDE]),
   ],
   finalization: null,
 }
@@ -624,8 +619,8 @@ type SelectionMemory = {
 
 /**
  * What the backend keeps as a test begins: an organization needing every language, as MathComps does, a reader
- * leading every one of its categories, {@link RECENT} and {@link EARLIER} about {@link OPENED}, and
- * {@link OPENED_COMMENT} under it.
+ * leading every one of its categories that is a hosted level, {@link RECENT} and {@link EARLIER} about
+ * {@link OPENED}, and {@link OPENED_COMMENT} under it.
  *
  * @param chat - The backend the chat with Mathilda talks to; null where the test talks to her nowhere.
  *
@@ -635,7 +630,9 @@ export function rememberedSelection(chat: HostedBackend | null): SelectionMemory
   // The memory, fresh for each test so nothing one writes reaches the next
   return {
     needsEveryLanguage: true,
-    leadCategories: SELECTION_CATEGORIES.map((category) => category.name),
+    leadCategories: SELECTION_CATEGORIES.filter((category) => category.hostedCategory !== null).map(
+      (category) => category.name
+    ),
     conversations: [RECENT, EARLIER],
     discussions: new Map([[threadKey('Proposal', OPENED.id), [OPENED_COMMENT]]]),
     chat,

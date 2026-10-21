@@ -1,39 +1,30 @@
 using MathComps.Cli.BulkImport.Commands;
-using MathComps.Cli.BulkImport.Validation;
 using MathComps.Infrastructure.Extensions;
-using MathComps.Infrastructure.Services.BulkImport;
 using MathComps.Shared.Cli;
 using MathComps.Shared.Cli.Commands;
+using MathComps.Shared.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
-// Bootstrap the tool and run the requested command.
+// Bootstrap the tool and run its sole command — import draft folders, or dry-run them.
 return await CliApp.Create<Program>()
     .RequireConfigFile("appsettings.json")
     .ConfigureServices((services, configuration) =>
     {
-        // Make sure DI can resolve DbContext — validate connects read-only for the create-vs-reuse preview.
+        // The import reads and writes the archive's own tables.
         services.AddMathCompsDbContext(configuration);
 
-        // The metadata localization service the registry-link check uses
+        // The registry the registry-link check and the taxonomy writes read.
         services.AddLocalization();
 
-        // The read-only DB-resolution service backing the preview
-        services.AddBulkImport();
-
-        // The R2 uploader, wrapped in the tracker that skips images already on R2 across re-applies;
+        // The R2 uploader, wrapped in the tracker that skips images already on R2 across re-imports;
         // the ledger lives beside the draft sources.
         var uploadLedgerPath = RepoPaths.Resolve("data/problems", ".r2-uploads.json");
         services.AddStorage().AddTrackedFileUploader(uploadLedgerPath);
 
-        // The apply service that writes a resolved draft to the database.
-        services.AddScoped<IDraftApplyService, DraftApplyService>();
+        // Lazy<T> injection, so a dry run never builds the uploader.
+        services.AddTransient(typeof(Lazy<>), typeof(LazyService<>));
 
-        // The validation pipeline validate and apply share.
-        services.AddScoped<DraftValidationPipeline>();
+        // The import itself.
+        services.AddBulkImport();
     })
-    .RunAsync(args, config =>
-    {
-        // The dry-run command and its mutating sibling, the import.
-        config.AddCommand<ValidateCommand>("validate");
-        config.AddCommand<ApplyCommand>("apply");
-    });
+    .RunAsync<ImportCommand>(args);

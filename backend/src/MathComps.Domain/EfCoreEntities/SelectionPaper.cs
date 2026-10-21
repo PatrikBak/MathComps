@@ -34,15 +34,14 @@ public class SelectionPaper
     public required string Name { get; set; }
 
     /// <summary>
-    /// FK to the category the paper fills, one of its board's organization's; null for a paper outside the
-    /// categories.
+    /// FK to the category the paper fills, one of its board's organization's.
     /// </summary>
-    public Guid? CategoryId { get; set; }
+    public required Guid CategoryId { get; set; }
 
     /// <summary>
-    /// Navigation to the category, null for a paper outside the categories.
+    /// Navigation to the category.
     /// </summary>
-    public OrganizationCategory? Category { get; set; }
+    public OrganizationCategory Category { get; set; } = null!;
 
     /// <summary>
     /// How many problems the paper asks.

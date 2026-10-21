@@ -334,15 +334,16 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the read-only draft resolution service that backs the bulk-import create-vs-reuse preview. Expects the
-    /// DbContext from <see cref="AddMathCompsDbContext"/>.
+    /// Registers the service that imports a bulk-import draft. Expects the DbContext from
+    /// <see cref="AddMathCompsDbContext"/>, and an <see cref="ITrackedFileUploader"/> for the figures, whose upload
+    /// ledger is the host's to place, injectable as a <see cref="Lazy{T}"/>.
     /// </summary>
     /// <param name="services">The service collection to add the bulk-import service to.</param>
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddBulkImport(this IServiceCollection services)
     {
-        // Read-only DB-resolution service backing the import preview
-        services.TryAddScoped<IDraftResolutionService, DraftResolutionService>();
+        // The import itself, dry runs included
+        services.TryAddScoped<IDraftImportService, DraftImportService>();
 
         // The writer that raises the competition node and season a draft names.
         services.AddCompetitionTreeWriter();

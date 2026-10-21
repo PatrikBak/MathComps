@@ -18,7 +18,7 @@ namespace MathComps.Cli.Tagging.Commands;
 /// Tags a bulk-import draft in place: for each untagged problem it runs the model over the configured-language
 /// statement (Area/Goal/Type) and solution (Technique), prunes the proposals with a second AI veto pass, and writes
 /// the surviving slugs into the problem's <c>pN.yaml</c> sidecar. The draft — not the database — is the source of
-/// truth, so <c>apply</c> later replays the same tags identically to every environment.
+/// truth, so the bulk import later replays the same tags identically to every environment.
 /// </summary>
 /// <param name="taggingService">The database-free generate/veto core.</param>
 /// <param name="settings">The four tagging passes and the fit floor.</param>

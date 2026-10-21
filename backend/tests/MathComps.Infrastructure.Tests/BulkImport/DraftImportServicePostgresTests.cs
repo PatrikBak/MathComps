@@ -6,6 +6,7 @@ using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.BulkImport;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Storage;
+using MathComps.Shared.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using static Microsoft.Extensions.Options.Options;
@@ -16,16 +17,17 @@ using MathComps.Domain.Taxonomy;
 namespace MathComps.Infrastructure.Tests.BulkImport;
 
 /// <summary>
-/// Integration tests for <see cref="DraftApplyService"/> against a real Postgres database, starting from an empty
+/// Integration tests for <see cref="DraftImportService"/> against a real Postgres database, starting from an empty
 /// schema so every run exercises the create path. These pin the behaviours a pure test can't reach: the taxonomy
 /// chain is created with structural fields (path, sort order, sort path) sourced from the registry, a re-import is
-/// idempotent (overwrite in place, no duplicate rows), a translation attaches without disturbing the original, and
-/// images are uploaded under the slug-based key with their refs rewritten into the stored markdown.
+/// idempotent (overwrite in place, no duplicate rows), a translation attaches without disturbing the original,
+/// images are uploaded under the slug-based key with their refs rewritten into the stored markdown, a dry run
+/// reports what the real import then does and keeps none of it, and a refused or failed import keeps nothing.
 /// The R2 uploader is faked — no network — so the test asserts the keys and rewritten refs instead.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
-public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
-    : PostgresTestBase<IDraftApplyService>(fixture)
+public class DraftImportServicePostgresTests(PostgresContainerFixture fixture)
+    : PostgresTestBase<IDraftImportService>(fixture)
 {
     /// <summary>
     /// The slug the csmo-a-iii · 2024 problem 1 upserts on — keyed by the season's edition (2024 − 1950 = 74).
@@ -48,25 +50,21 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     protected override void ConfigureServices(IServiceCollection services)
     {
         // The recording fake stands in for R2. The tracker wraps it (real change-detection against a throwaway
-        // ledger), and the apply service depends on the tracker — registered here because the bulk-import host
-        // owns it, not shared infrastructure.
-        services.AddSingleton<IFileUploader>(_uploader);
+        // ledger), and the import depends on the tracker — registered here because the bulk-import host owns it,
+        // not shared infrastructure.
         services.AddSingleton<ITrackedFileUploader>(_ => new TrackedFileUploader(
             _uploader, Create(new UploadLedgerOptions { LedgerPath = _ledgerPath })));
 
-        // The apply service also reads the metadata registry for taxonomy structure
-        services.AddLocalization();
-
-        // The read-only preview, so a test can check the dry run against what applying then does.
+        // The tested service
         services.AddBulkImport();
 
-        // The tested service
-        services.AddScoped<IDraftApplyService, DraftApplyService>();
+        // The import takes its uploader lazily.
+        services.AddTransient(typeof(Lazy<>), typeof(LazyService<>));
     }
 
     /// <inheritdoc/>
     protected override Task SeedDataAsync(MathCompsDbContext context) =>
-        // Start empty — apply creates the whole taxonomy chain from the draft + registry.
+        // Start empty — the import creates the whole taxonomy chain from the draft + registry.
         Task.CompletedTask;
 
     /// <summary>
@@ -77,12 +75,12 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_net_new_draft_creates_the_whole_chain() => RunTestAsync(async service =>
     {
         // Import one Slovak-original problem with a statement and a solution.
-        var result = await ApplyOpenAsync(service,
+        var result = await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement", "solution"))], Path.GetTempPath());
 
         // Every taxonomy entity is newly created.
-        Assert.All(result.Entities, entity => Assert.Equal(ResolutionAction.Create, entity.Action));
-        Assert.Equal(1, result.ProblemsInserted);
+        Assert.All(result.Findings.Entities, entity => Assert.Equal(ResolutionAction.Create, entity.Action));
+        Assert.Equal(1, CountOf(result, ResolutionAction.Create));
 
         // Every created row carries the fields the registry and draft dictate.
         await QueryAsync<IMetadataLocalizationService>(async (context, metadata) =>
@@ -138,17 +136,17 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task Re_importing_overwrites_in_place_without_duplicates() => RunTestAsync(async service =>
     {
         // Import the problem.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "first"))], Path.GetTempPath());
 
         // Re-import it with changed statement text.
-        var second = await ApplyOpenAsync(service,
+        var second = await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "second"))], Path.GetTempPath());
 
         // The second run reuses the whole taxonomy and updates rather than inserts the problem.
-        Assert.All(second.Entities, entity => Assert.Equal(ResolutionAction.Reuse, entity.Action));
-        Assert.Equal(0, second.ProblemsInserted);
-        Assert.Equal(1, second.ProblemsUpdated);
+        Assert.All(second.Findings.Entities, entity => Assert.Equal(ResolutionAction.Reuse, entity.Action));
+        Assert.Equal(0, CountOf(second, ResolutionAction.Create));
+        Assert.Equal(1, CountOf(second, ResolutionAction.Update));
 
         // No rows were duplicated, and the statement now holds the second import's text.
         await QueryAsync(async context =>
@@ -172,7 +170,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task Hints_land_as_one_document_and_read_back_in_order() => RunTestAsync(async service =>
     {
         // Import one problem whose Slovak original carries a two-rung ladder, with an English translation that has none.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [Problem(1,
                 Original(Language.SK, "statement", "solution", "first nudge", "the key idea"),
                 Translation(Language.EN, "statement"))],
@@ -200,7 +198,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task Re_importing_identical_content_changes_nothing() => RunTestAsync(async service =>
     {
         // Import a problem.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
 
         // Read back its statement's modified timestamp.
@@ -210,13 +208,14 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             .SingleAsync());
 
         // Re-import the exact same content.
-        var second = await ApplyOpenAsync(service,
+        var second = await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
 
         // Nothing moved — the problem counts unchanged, not updated, and every text reports unchanged.
-        Assert.Equal(0, second.ProblemsUpdated);
-        Assert.Equal(1, second.ProblemsUnchanged);
-        Assert.All(second.Texts, text => Assert.Equal(AppliedTextAction.Unchanged, text.Action));
+        Assert.Equal(0, CountOf(second, ResolutionAction.Update));
+        Assert.Equal(1, CountOf(second, ResolutionAction.Reuse));
+        Assert.All(second.Findings.TextResolutions, text =>
+            Assert.True(text.Action is DraftTextAction.UnchangedOriginal or DraftTextAction.UnchangedTranslation));
 
         // The stored row was left alone — its DateModified didn't advance.
         var secondModified = await QueryValueAsync(context => context.ProblemTexts
@@ -234,42 +233,44 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task Changing_one_language_overwrites_only_that_text() => RunTestAsync(async service =>
     {
         // Import a Slovak original plus an English translation.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [Problem(1, Original(Language.SK, "sk"), Translation(Language.EN, "en"))], Path.GetTempPath());
 
         // Re-import with only the Slovak body changed.
-        var second = await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        var second = await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [Problem(1, Original(Language.SK, "sk-new"), Translation(Language.EN, "en"))], Path.GetTempPath());
 
         // Something moved, so the problem counts as updated.
-        Assert.Equal(1, second.ProblemsUpdated);
-        Assert.Equal(0, second.ProblemsUnchanged);
+        Assert.Equal(1, CountOf(second, ResolutionAction.Update));
+        Assert.Equal(0, CountOf(second, ResolutionAction.Reuse));
 
         // The Slovak statement was overwritten; the English one was recognised as unchanged.
         Assert.Equal(
-            AppliedTextAction.Overwritten, second.Texts.Single(text => text.Language == Language.SK).Action);
+            DraftTextAction.OverwriteOriginal,
+            second.Findings.TextResolutions.Single(text => text.Language == Language.SK).Action);
         Assert.Equal(
-            AppliedTextAction.Unchanged, second.Texts.Single(text => text.Language == Language.EN).Action);
+            DraftTextAction.UnchangedTranslation,
+            second.Findings.TextResolutions.Single(text => text.Language == Language.EN).Action);
     });
 
     /// <summary>
-    /// Re-applying a draft whose <c>_meta</c> date was corrected updates the round's stored date in place: the
+    /// Re-importing a draft whose <c>_meta</c> date was corrected updates the round's stored date in place: the
     /// round reports the update action and the row's date moves to the draft's new value.
     /// </summary>
     [Fact]
-    public Task Re_applying_with_a_changed_date_updates_the_round() => RunTestAsync(async service =>
+    public Task Re_importing_with_a_changed_date_updates_the_round() => RunTestAsync(async service =>
     {
         // Import the problem under the original round date.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
 
         // Re-import the identical draft under a corrected, later date.
         var correctedDate = new DateOnly(2024, 4, 1);
-        var second = await ApplyOpenAsync(service,
+        var second = await ImportOpenAsync(service,
             CsmoTarget(), correctedDate, [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
 
         // The round reports the date update distinctly from the quiet reuse path.
-        var round = second.Entities.Single(entity => entity.EntityKind == "round");
+        var round = second.Findings.Entities.Single(entity => entity.EntityKind == "round");
         Assert.Equal(ResolutionAction.Update, round.Action);
 
         // The stored date actually moved to the corrected value.
@@ -282,15 +283,15 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// ahead of the day it opens.
     /// </summary>
     [Fact]
-    public Task Applying_a_draft_with_an_embargo_stamps_the_round() => RunTestAsync(async service =>
+    public Task Importing_a_draft_with_an_embargo_stamps_the_round() => RunTestAsync(async service =>
     {
         // The instant the round is meant to open.
         var opensAt = new DateTimeOffset(2026, 9, 14, 18, 0, 0, TimeSpan.Zero);
 
         // Import the problem under that embargo.
-        await service.ApplyAsync(
+        await service.ImportAsync(
             CsmoTarget(), RoundDate, opensAt,
-            [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
+            [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath(), dryRun: false);
 
         // The round carries it, so the archive will start serving it on its own once the instant passes.
         await QueryAsync(async context =>
@@ -298,23 +299,23 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Re-applying a draft that no longer names an embargo lifts the stored one. The draft owns the round's
+    /// Re-importing a draft that no longer names an embargo lifts the stored one. The draft owns the round's
     /// visibility outright, so dropping the field is how a round is opened early, not a request to leave it be.
     /// </summary>
     [Fact]
-    public Task Re_applying_without_an_embargo_lifts_the_stored_one() => RunTestAsync(async service =>
+    public Task Re_importing_without_an_embargo_lifts_the_stored_one() => RunTestAsync(async service =>
     {
         // Import the problem under an embargo.
-        await service.ApplyAsync(
+        await service.ImportAsync(
             CsmoTarget(), RoundDate, new DateTimeOffset(2026, 9, 14, 18, 0, 0, TimeSpan.Zero),
-            [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
+            [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath(), dryRun: false);
 
         // Re-import the identical draft with the field dropped from _meta.
-        var second = await ApplyOpenAsync(service,
+        var second = await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
 
         // The round reports the change rather than quietly reusing the row.
-        var round = second.Entities.Single(entity => entity.EntityKind == "round");
+        var round = second.Findings.Entities.Single(entity => entity.EntityKind == "round");
         Assert.Equal(ResolutionAction.Update, round.Action);
 
         // The embargo is gone, so the round is open.
@@ -328,28 +329,27 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// everybody who can sign in, and the entry it charges would buy them nothing.
     /// </summary>
     [Fact]
-    public Task Applying_over_a_hosted_rounds_embargo_is_refused() => RunTestAsync(async service =>
+    public Task Importing_over_a_hosted_rounds_embargo_is_refused() => RunTestAsync(async service =>
     {
         // When the group closes, which is also the embargo its round carries.
         var closesAt = new DateTimeOffset(2026, 9, 14, 18, 0, 0, TimeSpan.Zero);
 
         // Import the problem under that embargo.
-        await service.ApplyAsync(
+        await service.ImportAsync(
             CsmoTarget(), RoundDate, closesAt,
-            [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
+            [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath(), dryRun: false);
 
         // The group taking the round over on a one-problem paper, the way a declaration does.
         await HostTheRoundAsync(closesAt, problemCount: 1);
 
         // Re-import the identical draft with the embargo moved an hour on.
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => service.ApplyAsync(
-                CsmoTarget(), RoundDate, closesAt.AddHours(1),
-                [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath()));
+        var outcome = Assert.IsType<DraftImportFinished>(await service.ImportAsync(
+            CsmoTarget(), RoundDate, closesAt.AddHours(1),
+            [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath(), dryRun: false));
 
-        // Said in terms of the round and the field whoever authored it has to bring back into line.
-        Assert.Contains("csmo-a-iii", exception.Message, StringComparison.Ordinal);
-        Assert.Contains("visibleSince", exception.Message, StringComparison.Ordinal);
+        // Refused, naming the instant the round keeps beside the one the draft asked for.
+        Assert.Equal(
+            new HostedEmbargoDisagreement(closesAt, closesAt.AddHours(1)), outcome.Findings.HostedEmbargoDisagreement);
 
         // And the round still carries the instant the group declared.
         await QueryAsync(async context =>
@@ -361,24 +361,26 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// announces is refused, and nothing is written.
     /// </summary>
     [Fact]
-    public Task Applying_a_draft_short_of_the_groups_problem_count_is_refused() => RunTestAsync(async service =>
+    public Task Importing_a_draft_short_of_the_groups_problem_count_is_refused() => RunTestAsync(async service =>
     {
         // When the group closes, which is also the embargo its round carries.
         var closesAt = new DateTimeOffset(2026, 9, 14, 18, 0, 0, TimeSpan.Zero);
 
         // Import the round's first problem under that embargo.
-        await service.ApplyAsync(
+        await service.ImportAsync(
             CsmoTarget(), RoundDate, closesAt,
-            [Problem(1, Original(Language.SK, "first"))], Path.GetTempPath());
+            [Problem(1, Original(Language.SK, "first"))], Path.GetTempPath(), dryRun: false);
 
         // The group taking the round over on a two-problem paper, the way a declaration does.
         await HostTheRoundAsync(closesAt, problemCount: 2);
 
         // Re-import the first problem alone, which would leave the round one short of the announced paper.
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => service.ApplyAsync(
-                CsmoTarget(), RoundDate, closesAt,
-                [Problem(1, Original(Language.SK, "corrected"))], Path.GetTempPath()));
+        var outcome = Assert.IsType<DraftImportFinished>(await service.ImportAsync(
+            CsmoTarget(), RoundDate, closesAt,
+            [Problem(1, Original(Language.SK, "corrected"))], Path.GetTempPath(), dryRun: false));
+
+        // Refused, with both numbers.
+        Assert.Equal(new HostedGroupCountDisagreement(1, 2), outcome.Findings.HostedGroupCountDisagreement);
 
         // And the round still holds exactly what it did, body included.
         var stored = await QueryValueAsync(async context =>
@@ -391,23 +393,23 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// import lands.
     /// </summary>
     [Fact]
-    public Task Applying_the_draft_that_completes_a_hosted_rounds_paper_is_allowed() => RunTestAsync(async service =>
+    public Task Importing_the_draft_that_completes_a_hosted_rounds_paper_is_allowed() => RunTestAsync(async service =>
     {
         // When the group closes, which is also the embargo its round carries.
         var closesAt = new DateTimeOffset(2026, 9, 14, 18, 0, 0, TimeSpan.Zero);
 
         // Import the round's first problem under that embargo.
-        await service.ApplyAsync(
+        await service.ImportAsync(
             CsmoTarget(), RoundDate, closesAt,
-            [Problem(1, Original(Language.SK, "first"))], Path.GetTempPath());
+            [Problem(1, Original(Language.SK, "first"))], Path.GetTempPath(), dryRun: false);
 
         // The group taking the round over on a two-problem paper, the way a declaration does.
         await HostTheRoundAsync(closesAt, problemCount: 2);
 
         // Import the second problem, the one the announced paper is still waiting on.
-        await service.ApplyAsync(
+        await service.ImportAsync(
             CsmoTarget(), RoundDate, closesAt,
-            [Problem(2, Original(Language.SK, "second"))], Path.GetTempPath());
+            [Problem(2, Original(Language.SK, "second"))], Path.GetTempPath(), dryRun: false);
 
         // The round now holds the paper its group announced.
         var held = await QueryValueAsync(context => context.Problems.CountAsync());
@@ -420,7 +422,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// group goes on the site with its rounds empty, and the problems arrive afterwards.
     /// </summary>
     [Fact]
-    public Task The_first_draft_filling_an_empty_hosted_round_is_applied() => RunTestAsync(async service =>
+    public Task The_first_draft_filling_an_empty_hosted_round_lands() => RunTestAsync(async service =>
     {
         // When the group closes, which is also the embargo the declaration stamps on its empty round.
         var closesAt = new DateTimeOffset(2026, 9, 14, 18, 0, 0, TimeSpan.Zero);
@@ -460,10 +462,10 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         });
 
         // Import the whole announced paper in one go.
-        await service.ApplyAsync(
+        await service.ImportAsync(
             CsmoTarget(), RoundDate, closesAt,
             [Problem(1, Original(Language.SK, "first")), Problem(2, Original(Language.SK, "second"))],
-            Path.GetTempPath());
+            Path.GetTempPath(), dryRun: false);
 
         // The round now holds the paper its group announced.
         var held = await QueryValueAsync(context => context.Problems.CountAsync());
@@ -478,7 +480,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task Re_importing_an_image_problem_with_no_changes_is_unchanged() => RunTestAsync(async service =>
     {
         // A dedicated draft folder holding one SVG referenced by the statement.
-        var folder = Path.Combine(Path.GetTempPath(), $"bulkimport-apply-{Guid.NewGuid():N}");
+        var folder = Path.Combine(Path.GetTempPath(), $"bulkimport-import-{Guid.NewGuid():N}");
         Directory.CreateDirectory(Path.Combine(folder, "images"));
         await File.WriteAllTextAsync(
             Path.Combine(folder, "images", "fig.svg"), "<svg width=\"100px\" height=\"80px\"></svg>");
@@ -487,15 +489,16 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         var problem = new DraftProblemContent(
             1, true, ["Author"], null, null, Proposal: null,
             [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
 
         // Re-import the very same draft.
-        var second = await ApplyOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
+        var second = await ImportOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
 
         // The reproduced media body matches the stored one, so nothing counts as updated.
-        Assert.Equal(0, second.ProblemsUpdated);
-        Assert.Equal(1, second.ProblemsUnchanged);
-        Assert.All(second.Texts, text => Assert.Equal(AppliedTextAction.Unchanged, text.Action));
+        Assert.Equal(0, CountOf(second, ResolutionAction.Update));
+        Assert.Equal(1, CountOf(second, ResolutionAction.Reuse));
+        Assert.All(second.Findings.TextResolutions, text =>
+            Assert.True(text.Action is DraftTextAction.UnchangedOriginal or DraftTextAction.UnchangedTranslation));
     });
 
     /// <summary>
@@ -506,24 +509,30 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task Changing_only_the_solution_link_counts_as_updated() => RunTestAsync(async service =>
     {
         // Import without a solution link.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
 
         // Re-import the identical text, now carrying a solution link.
         var withLink = new DraftProblemContent(
             1, true, ["Jaromír Šimša"], "https://example.com/sol", null, Proposal: null,
             [Original(Language.SK, "same")], Images: []);
-        var second = await ApplyOpenAsync(service, CsmoTarget(), RoundDate, [withLink], Path.GetTempPath());
+        var second = await ImportOpenAsync(service, CsmoTarget(), RoundDate, [withLink], Path.GetTempPath());
 
         // The link moved, so the problem counts as updated while its text reports unchanged.
-        Assert.Equal(1, second.ProblemsUpdated);
-        Assert.Equal(0, second.ProblemsUnchanged);
-        Assert.All(second.Texts, text => Assert.Equal(AppliedTextAction.Unchanged, text.Action));
+        Assert.Equal(1, CountOf(second, ResolutionAction.Update));
+        Assert.Equal(0, CountOf(second, ResolutionAction.Reuse));
+        Assert.All(second.Findings.TextResolutions, text =>
+            Assert.True(text.Action is DraftTextAction.UnchangedOriginal or DraftTextAction.UnchangedTranslation));
+
+        // The problem stores the draft's link.
+        var link = await QueryValueAsync(context =>
+            context.Problems.Select(problem => problem.SolutionLink).SingleAsync());
+        Assert.Equal("https://example.com/sol", link);
     });
 
     /// <summary>
     /// A re-import that omits the <c>solutionLink:</c> key (null) leaves the stored link untouched — protecting a link
-    /// set by an earlier draft (or directly in the DB) from a link-less re-apply.
+    /// set by an earlier draft (or directly in the DB) from a link-less re-import.
     /// </summary>
     [Fact]
     public Task Absent_solution_link_leaves_existing_link_untouched() => RunTestAsync(async service =>
@@ -532,15 +541,15 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         var withLink = new DraftProblemContent(
             1, true, ["Jaromír Šimša"], "https://example.com/sol", null, Proposal: null,
             [Original(Language.SK, "same")], Images: []);
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate, [withLink], Path.GetTempPath());
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate, [withLink], Path.GetTempPath());
 
         // Re-import the identical text with no solutionLink key at all.
-        var second = await ApplyOpenAsync(service,
+        var second = await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
 
         // Nothing moved — the absent key is not a clear — and the link survives.
-        Assert.Equal(0, second.ProblemsUpdated);
-        Assert.Equal(1, second.ProblemsUnchanged);
+        Assert.Equal(0, CountOf(second, ResolutionAction.Update));
+        Assert.Equal(1, CountOf(second, ResolutionAction.Reuse));
         await QueryAsync(async context =>
             Assert.Equal("https://example.com/sol", (await context.Problems.SingleAsync()).SolutionLink));
     });
@@ -553,19 +562,19 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task Changing_only_the_authors_counts_as_updated() => RunTestAsync(async service =>
     {
         // Import with two authors.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [ProblemBy(1, ["Alice", "Bob"], Original(Language.SK, "same"))], Path.GetTempPath());
 
         // Re-import the identical text with their order flipped.
-        var second = await ApplyOpenAsync(service,
+        var second = await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [ProblemBy(1, ["Bob", "Alice"], Original(Language.SK, "same"))], Path.GetTempPath());
 
         // The author set moved, so the problem counts as updated while its text reports unchanged.
-        Assert.Equal(1, second.ProblemsUpdated);
-        Assert.Equal(0, second.ProblemsUnchanged);
+        Assert.Equal(1, CountOf(second, ResolutionAction.Update));
+        Assert.Equal(0, CountOf(second, ResolutionAction.Reuse));
         Assert.Equal(
-            AppliedTextAction.Unchanged,
-            second.Texts.Single(text => text.DocumentType == DocumentType.Statement).Action);
+            DraftTextAction.UnchangedOriginal,
+            second.Findings.TextResolutions.Single(text => text.DocumentType == DocumentType.Statement).Action);
     });
 
     /// <summary>
@@ -576,11 +585,11 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_translation_attaches_without_touching_the_original() => RunTestAsync(async service =>
     {
         // Import the Slovak original.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "original"))], Path.GetTempPath());
 
         // Re-import it alongside a fresh Czech translation.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate,
             [Problem(1, Original(Language.SK, "original"), Translation(Language.CS, "preklad"))], Path.GetTempPath());
 
@@ -613,7 +622,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task An_image_is_uploaded_and_its_ref_rewritten() => RunTestAsync(async service =>
     {
         // A dedicated draft folder holding one SVG referenced by the statement.
-        var folder = Path.Combine(Path.GetTempPath(), $"bulkimport-apply-{Guid.NewGuid():N}");
+        var folder = Path.Combine(Path.GetTempPath(), $"bulkimport-import-{Guid.NewGuid():N}");
         Directory.CreateDirectory(Path.Combine(folder, "images"));
         await File.WriteAllTextAsync(
             Path.Combine(folder, "images", "incircle.svg"), "<svg width=\"100px\" height=\"80px\"></svg>");
@@ -622,11 +631,11 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         var statement = "see ![fig](images/incircle.svg)";
         var problem = new DraftProblemContent(
             1, true, ["Author"], null, null, Proposal: null, [Original(Language.SK, statement)], ["incircle.svg"]);
-        var result = await ApplyOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
+        var result = await ImportOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
 
         // One image was uploaded, under the slug-based problems/ key.
-        Assert.Equal(1, result.ImagesUploaded);
-        Assert.Equal(0, result.ImagesSkipped);
+        Assert.Equal(1, result.Uploads?.Uploaded);
+        Assert.Equal(0, result.Uploads?.Skipped);
         var (_, key) = Assert.Single(_uploader.Uploads);
         Assert.Equal($"problems/{ProblemSlug}-incircle", key);
 
@@ -640,50 +649,14 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A raster (PNG) image is uploaded under the slug-based key and its ref rewritten with the PNG's real pixel
-    /// dimensions — the raster counterpart to the SVG path, proving the pipeline sizes, keys and rewrites raster
-    /// figures too.
-    /// </summary>
-    [Fact]
-    public Task A_raster_image_is_uploaded_and_its_ref_rewritten() => RunTestAsync(async service =>
-    {
-        // A dedicated draft folder holding one real 4×2 PNG referenced by the statement.
-        var folder = Path.Combine(Path.GetTempPath(), $"bulkimport-apply-{Guid.NewGuid():N}");
-        Directory.CreateDirectory(Path.Combine(folder, "images"));
-        File.Copy(
-            Path.Combine(AppContext.BaseDirectory, "Fixtures", "Images", "fig.png"),
-            Path.Combine(folder, "images", "incircle.png"));
-
-        // Import a problem whose statement references that image.
-        var statement = "see ![fig](images/incircle.png)";
-        var problem = new DraftProblemContent(
-            1, true, ["Author"], null, null, Proposal: null, [Original(Language.SK, statement)], ["incircle.png"]);
-        var result = await ApplyOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
-
-        // One image uploaded, under the slug-based key.
-        Assert.Equal(1, result.ImagesUploaded);
-        Assert.Equal(0, result.ImagesSkipped);
-        var (_, key) = Assert.Single(_uploader.Uploads);
-        Assert.Equal($"problems/{ProblemSlug}-incircle", key);
-
-        // The stored markdown points at the resolved media ref, carrying the PNG's real 4×2 dimensions.
-        await QueryAsync(async context =>
-        {
-            var stored = await context.ProblemTexts.SingleAsync(text => text.DocumentType == DocumentType.Statement);
-            Assert.Equal(
-                $"see ![fig](media:{ProblemSlug}-incircle?width=4&height=2)", stored.MarkdownText);
-        });
-    });
-
-    /// <summary>
-    /// Re-applying a draft whose image hasn't changed skips the re-upload: the apply reports it uploaded the first
+    /// Re-importing a draft whose image hasn't changed skips the re-upload: the import reports it uploaded the first
     /// time and skipped the second, and the inner uploader is only ever called once.
     /// </summary>
     [Fact]
-    public Task Re_applying_an_unchanged_image_skips_the_upload() => RunTestAsync(async service =>
+    public Task Re_importing_an_unchanged_image_skips_the_upload() => RunTestAsync(async service =>
     {
         // A dedicated draft folder holding one SVG referenced by the statement.
-        var folder = Path.Combine(Path.GetTempPath(), $"bulkimport-apply-{Guid.NewGuid():N}");
+        var folder = Path.Combine(Path.GetTempPath(), $"bulkimport-import-{Guid.NewGuid():N}");
         Directory.CreateDirectory(Path.Combine(folder, "images"));
         await File.WriteAllTextAsync(
             Path.Combine(folder, "images", "fig.svg"), "<svg width=\"100px\" height=\"80px\"></svg>");
@@ -694,18 +667,18 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
 
         // Import it.
-        var first = await ApplyOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
+        var first = await ImportOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
 
         // Re-import the very same draft.
-        var second = await ApplyOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
+        var second = await ImportOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
 
-        // The first apply uploads the image; the second recognises it as unchanged and skips it.
-        Assert.Equal(1, first.ImagesUploaded);
-        Assert.Equal(0, first.ImagesSkipped);
-        Assert.Equal(0, second.ImagesUploaded);
-        Assert.Equal(1, second.ImagesSkipped);
+        // The first import uploads the image; the second recognises it as unchanged and skips it.
+        Assert.Equal(1, first.Uploads?.Uploaded);
+        Assert.Equal(0, first.Uploads?.Skipped);
+        Assert.Equal(0, second.Uploads?.Uploaded);
+        Assert.Equal(1, second.Uploads?.Skipped);
 
-        // Only the first apply's single upload ever left the process.
+        // Only the first import's single upload ever left the process.
         Assert.Single(_uploader.Uploads);
     });
 
@@ -717,11 +690,11 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task Re_importing_with_reordered_authors_swaps_ordinals() => RunTestAsync(async service =>
     {
         // Import with two authors.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [ProblemBy(1, ["Alice", "Bob"], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // Re-import with their order flipped.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [ProblemBy(1, ["Bob", "Alice"], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // No duplicate authors, and they now sit in the flipped order.
@@ -737,22 +710,22 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// A re-import that omits the <c>authors:</c> key (null) leaves the stored authors untouched — protecting authors
-    /// credited by an earlier draft from an author-less re-apply (e.g. one attaching only a solution).
+    /// credited by an earlier draft from an author-less re-import (e.g. one attaching only a solution).
     /// </summary>
     [Fact]
     public Task Absent_authors_leave_existing_authors_untouched() => RunTestAsync(async service =>
     {
         // Import the problem credited to one author.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemBy(1, ["Alice"], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // Re-import with no authors key at all.
-        var second = await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        var second = await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemBy(1, null, Original(Language.SK, "s"))], Path.GetTempPath());
 
         // Nothing moved — the absent key is not a clear — and the author survives.
-        Assert.Equal(0, second.ProblemsUpdated);
-        Assert.Equal(1, second.ProblemsUnchanged);
+        Assert.Equal(0, CountOf(second, ResolutionAction.Update));
+        Assert.Equal(1, CountOf(second, ResolutionAction.Reuse));
         await QueryAsync(async context => Assert.Equal(["Alice"], await AuthorNamesAsync(context)));
     });
 
@@ -763,15 +736,15 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task An_empty_authors_list_clears_the_authors() => RunTestAsync(async service =>
     {
         // Import the problem credited to one author.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemBy(1, ["Alice"], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // Re-import with an empty authors list.
-        var second = await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        var second = await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemBy(1, [], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // The clear counts as an update and removes the join row.
-        Assert.Equal(1, second.ProblemsUpdated);
+        Assert.Equal(1, CountOf(second, ResolutionAction.Update));
         await QueryAsync(async context => Assert.Equal(0, await context.ProblemAuthors.CountAsync()));
     });
 
@@ -783,36 +756,16 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_changed_authors_list_replaces_the_set() => RunTestAsync(async service =>
     {
         // Import with one author.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemBy(1, ["Alice"], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // Re-import with a different one.
-        var second = await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        var second = await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemBy(1, ["Bob"], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // The set moved, leaving exactly the new author.
-        Assert.Equal(1, second.ProblemsUpdated);
+        Assert.Equal(1, CountOf(second, ResolutionAction.Update));
         await QueryAsync(async context => Assert.Equal(["Bob"], await AuthorNamesAsync(context)));
-    });
-
-    /// <summary>
-    /// Re-importing the identical author set changes nothing — the problem counts as unchanged, not updated.
-    /// </summary>
-    [Fact]
-    public Task Re_importing_the_same_authors_changes_nothing() => RunTestAsync(async service =>
-    {
-        // Import credited to one author.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
-            [ProblemBy(1, ["Alice"], Original(Language.SK, "s"))], Path.GetTempPath());
-
-        // Re-import the very same authors.
-        var second = await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
-            [ProblemBy(1, ["Alice"], Original(Language.SK, "s"))], Path.GetTempPath());
-
-        // The author set matched, so the problem is unchanged and no rows were duplicated.
-        Assert.Equal(0, second.ProblemsUpdated);
-        Assert.Equal(1, second.ProblemsUnchanged);
-        await QueryAsync(async context => Assert.Equal(1, await context.ProblemAuthors.CountAsync()));
     });
 
     /// <summary>
@@ -823,7 +776,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task An_author_shared_across_problems_is_created_once() => RunTestAsync(async service =>
     {
         // Two problems in the same round, both crediting the same author.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
         [
             ProblemBy(1, ["Shared Author"], Original(Language.SK, "one")),
             ProblemBy(2, ["Shared Author"], Original(Language.SK, "two"))
@@ -838,19 +791,31 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A draft whose original is in a different language than the stored original is refused with a clear error
-    /// rather than an opaque unique-index violation — the guard a clean validate makes unreachable, proven to fire.
+    /// A draft whose original is in a different language than the stored original is refused rather than left to an
+    /// opaque unique-index violation, and the stored original stays as it was.
     /// </summary>
     [Fact]
     public Task A_second_original_in_another_language_is_rejected() => RunTestAsync(async service =>
     {
         // Establish a Slovak original.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "sk"))], Path.GetTempPath());
 
-        // The second original is rejected.
-        await Assert.ThrowsAsync<InvalidOperationException>(() => ApplyOpenAsync(service,
-            CsmoTarget(), RoundDate, [Problem(1, Original(Language.CS, "cs"))], Path.GetTempPath()));
+        // Offer a Czech original of the same statement.
+        var outcome = await ImportOpenAsync(service,
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.CS, "cs"))], Path.GetTempPath());
+
+        // The second original is refused.
+        Assert.Equal(
+            DraftTextAction.SecondOriginal,
+            outcome.Findings.TextResolutions.Single(text => text.DocumentType == DocumentType.Statement).Action);
+
+        // And the problem keeps its one Slovak original.
+        await QueryAsync(async context =>
+        {
+            var stored = await context.ProblemTexts.SingleAsync();
+            Assert.Equal((Language.SK, "sk"), (stored.Language, stored.MarkdownText));
+        });
     });
 
     /// <summary>
@@ -861,11 +826,11 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_solution_can_be_added_to_a_statement_only_problem() => RunTestAsync(async service =>
     {
         // Import the statement alone.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // Re-import the same statement now carrying a solution.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement", "solution"))], Path.GetTempPath());
 
         // The solution is now present as the Slovak original.
@@ -886,7 +851,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_populated_tags_list_assigns_the_tags() => RunTestAsync(async service =>
     {
         // Import a problem tagged with one Area slug and one Technique slug.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemWithTags(1, ["algebra", "am-gm-inequality"], Original(Language.SK, "s", "sol"))],
             Path.GetTempPath());
 
@@ -911,22 +876,22 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// A re-import that omits the <c>tags:</c> key (null) leaves the stored tags untouched — protecting tags assigned
-    /// by an earlier draft from a tag-less re-apply.
+    /// by an earlier draft from a tag-less re-import.
     /// </summary>
     [Fact]
     public Task Absent_tags_leave_existing_tags_untouched() => RunTestAsync(async service =>
     {
         // Import the problem tagged.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemWithTags(1, ["algebra"], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // Re-import with no tags key at all.
-        var second = await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        var second = await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemWithTags(1, null, Original(Language.SK, "s"))], Path.GetTempPath());
 
         // Nothing moved — the absent key is not a clear — and the tag survives.
-        Assert.Equal(0, second.ProblemsUpdated);
-        Assert.Equal(1, second.ProblemsUnchanged);
+        Assert.Equal(0, CountOf(second, ResolutionAction.Update));
+        Assert.Equal(1, CountOf(second, ResolutionAction.Reuse));
         await QueryAsync(async context => Assert.Equal(["algebra"], await TagSlugsAsync(context)));
     });
 
@@ -937,15 +902,15 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task An_empty_tags_list_clears_the_tags() => RunTestAsync(async service =>
     {
         // Import the problem tagged.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemWithTags(1, ["algebra"], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // Re-import with an empty tags list.
-        var second = await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        var second = await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemWithTags(1, [], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // The clear counts as an update and removes the join row.
-        Assert.Equal(1, second.ProblemsUpdated);
+        Assert.Equal(1, CountOf(second, ResolutionAction.Update));
         await QueryAsync(async context => Assert.Equal(0, await context.ProblemTags.CountAsync()));
     });
 
@@ -957,15 +922,15 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_changed_tags_list_replaces_the_set() => RunTestAsync(async service =>
     {
         // Import with one tag.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemWithTags(1, ["algebra"], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // Re-import with a different one.
-        var second = await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        var second = await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemWithTags(1, ["number-theory"], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // The set moved, leaving exactly the new tag.
-        Assert.Equal(1, second.ProblemsUpdated);
+        Assert.Equal(1, CountOf(second, ResolutionAction.Update));
         await QueryAsync(async context => Assert.Equal(["number-theory"], await TagSlugsAsync(context)));
     });
 
@@ -976,16 +941,16 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task Re_importing_the_same_tags_changes_nothing() => RunTestAsync(async service =>
     {
         // Import tagged.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemWithTags(1, ["algebra"], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // Re-import the very same tags.
-        var second = await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        var second = await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemWithTags(1, ["algebra"], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // The tag set matched, so the problem is unchanged and no rows were duplicated.
-        Assert.Equal(0, second.ProblemsUpdated);
-        Assert.Equal(1, second.ProblemsUnchanged);
+        Assert.Equal(0, CountOf(second, ResolutionAction.Update));
+        Assert.Equal(1, CountOf(second, ResolutionAction.Reuse));
         await QueryAsync(async context => Assert.Equal(1, await context.ProblemTags.CountAsync()));
     });
 
@@ -998,15 +963,15 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task Reducing_the_tag_set_keeps_only_the_retained_tag() => RunTestAsync(async service =>
     {
         // Import with two tags.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemWithTags(1, ["algebra", "number-theory"], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // Re-import dropping one but keeping the other.
-        var second = await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        var second = await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemWithTags(1, ["algebra"], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // The set moved, leaving exactly the retained tag.
-        Assert.Equal(1, second.ProblemsUpdated);
+        Assert.Equal(1, CountOf(second, ResolutionAction.Update));
         await QueryAsync(async context => Assert.Equal(["algebra"], await TagSlugsAsync(context)));
     });
 
@@ -1018,7 +983,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_duplicate_or_case_variant_slug_collapses_to_one_canonical_row() => RunTestAsync(async service =>
     {
         // Import a problem whose tags list repeats one slug under two casings.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
             [ProblemWithTags(1, ["algebra", "Algebra"], Original(Language.SK, "s"))], Path.GetTempPath());
 
         // Exactly one row, stored under the canonical lowercase slug.
@@ -1037,7 +1002,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_tag_shared_across_problems_is_created_once() => RunTestAsync(async service =>
     {
         // Two problems in one run, both carrying the same tag.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
         [
             ProblemWithTags(1, ["algebra"], Original(Language.SK, "one")),
             ProblemWithTags(2, ["algebra"], Original(Language.SK, "two"))
@@ -1052,9 +1017,9 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Registering a competition in the middle of the registry array shifts the later competitions' positions; apply
-    /// re-sequences the existing rows out of the way first, so the new competition lands without colliding with a
-    /// stored sort order.
+    /// Registering a competition in the middle of the registry array shifts the later competitions' positions; the
+    /// import re-sequences the existing rows out of the way first, so the new competition lands without colliding with
+    /// a stored sort order.
     /// </summary>
     [Fact]
     public Task Inserting_a_competition_mid_array_resequences_the_later_competitions() => RunTestAsync(async service =>
@@ -1072,7 +1037,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         });
 
         // Import a tst problem — tst sits at registry order 2, the slot memo currently holds.
-        var result = await ApplyOpenAsync(service,
+        var result = await ImportOpenAsync(service,
             new DraftTarget("tst-d1", 2024, null), RoundDate,
             [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
@@ -1091,8 +1056,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         });
 
         // The renumbering is reported, memo and imo each shifted up by one.
-        Assert.Contains(new SortOrderChange("memo", 2, 3), result.SortOrderChanges);
-        Assert.Contains(new SortOrderChange("imo", 3, 4), result.SortOrderChanges);
+        Assert.Contains(new SortOrderChange("memo", 2, 3), result.Findings.SortOrderChanges);
+        Assert.Contains(new SortOrderChange("imo", 3, 4), result.Findings.SortOrderChanges);
     });
 
     /// <summary>
@@ -1113,8 +1078,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             await context.SaveChangesAsync();
         });
 
-        // Import a csmo problem — apply reconciles the whole competition space before touching the draft's taxonomy.
-        await ApplyOpenAsync(service,
+        // Import a csmo problem, which renumbers the roots to the registry on its way down the draft's path.
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // Both rows now sit at their registry orders, the swap untangled.
@@ -1131,14 +1096,14 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Applying a draft into an empty database raises the whole chain of competitions its target names, each
+    /// Importing a draft into an empty database raises the whole chain of competitions its target names, each
     /// addressed by the path its slugs spell and positioned among its siblings.
     /// </summary>
     [Fact]
-    public Task Applying_a_draft_raises_the_competition_chain() => RunTestAsync(async service =>
+    public Task Importing_a_draft_raises_the_competition_chain() => RunTestAsync(async service =>
     {
         // Import a csmo-a-iii problem into a database carrying no taxonomy at all.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // Every level the path names now stands as a competition.
@@ -1177,7 +1142,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_root_path_stands_for_the_whole_competition() => RunTestAsync(async service =>
     {
         // Import an imo problem, imo being a competition the registry gives no rounds at all.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             new DraftTarget("imo", 2024, null), RoundDate,
             [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
@@ -1207,11 +1172,11 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_competition_holds_its_absolute_registry_position() => RunTestAsync(async service =>
     {
         // Import csmo-a-iii first, which leaves it the only round under its category.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // Then import csmo-a-i, which the registry orders ahead of iii.
-        await ApplyOpenAsync(service,
+        await ImportOpenAsync(service,
             new DraftTarget("csmo-a-i", 2024, null), RoundDate,
             [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
@@ -1235,7 +1200,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// Re-sequencing reaches every generation the chain descends through, not just the roots: a round shifted up
-    /// in the registry is renumbered on apply.
+    /// in the registry is renumbered on import.
     /// </summary>
     [Fact]
     public Task Inserting_a_round_mid_array_resequences_the_sibling_rounds() => RunTestAsync(async service =>
@@ -1251,8 +1216,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             await context.SaveChangesAsync();
         });
 
-        // Import a csmo-a-iii problem — apply reconciles the generation before reusing the node.
-        var result = await ApplyOpenAsync(service,
+        // Import a csmo-a-iii problem — the import reconciles the generation before reusing the node.
+        var result = await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // Round iii now carries its registry order, shifted up from the stored 2.
@@ -1266,12 +1231,12 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         });
 
         // The renumbering is reported.
-        Assert.Contains(new SortOrderChange("csmo-a-iii", 2, 4), result.SortOrderChanges);
+        Assert.Contains(new SortOrderChange("csmo-a-iii", 2, 4), result.Findings.SortOrderChanges);
     });
 
     /// <summary>
     /// Re-sequencing reaches the middle generation too: a category shifted up in the registry is renumbered on
-    /// apply, and the sort paths below it are rewritten to match.
+    /// the import, and the sort paths below it are rewritten to match.
     /// </summary>
     [Fact]
     public Task Inserting_a_category_mid_array_resequences_the_later_categories() => RunTestAsync(async service =>
@@ -1287,8 +1252,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             await context.SaveChangesAsync();
         });
 
-        // Import a csmo-a-iii problem — apply reconciles csmo's children before reusing category a.
-        var result = await ApplyOpenAsync(service,
+        // Import a csmo-a-iii problem — the import reconciles csmo's children before reusing category a.
+        var result = await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // Category c now carries its registry order, shifted up from the stored 2.
@@ -1302,11 +1267,11 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         });
 
         // The renumbering is reported.
-        Assert.Contains(new SortOrderChange("csmo-c", 2, 3), result.SortOrderChanges);
+        Assert.Contains(new SortOrderChange("csmo-c", 2, 3), result.Findings.SortOrderChanges);
     });
 
     /// <summary>
-    /// Applying onto a DB that already agrees with the registry renumbers nothing.
+    /// Importing onto a DB that already agrees with the registry renumbers nothing.
     /// </summary>
     [Fact]
     public Task A_registry_consistent_db_is_not_resequenced() => RunTestAsync(async service =>
@@ -1322,11 +1287,11 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         });
 
         // Import a csmo problem onto the consistent DB.
-        var result = await ApplyOpenAsync(service,
+        var result = await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // Nothing drifted, so nothing was re-sequenced.
-        Assert.Empty(result.SortOrderChanges);
+        Assert.Empty(result.Findings.SortOrderChanges);
     });
 
     /// <summary>
@@ -1349,8 +1314,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             await context.SaveChangesAsync();
         });
 
-        // Import a csmo-a-iii problem — apply reconciles the generation before reusing the node.
-        await ApplyOpenAsync(service,
+        // Import a csmo-a-iii problem — the import reconciles the generation before reusing the node.
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // Both rounds now sit at their registry orders, the inversion untangled.
@@ -1389,8 +1354,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             await context.SaveChangesAsync();
         });
 
-        // Import a csmo-a-iii problem — apply reconciles csmo's children, which shifts category c up.
-        await ApplyOpenAsync(service,
+        // Import a csmo-a-iii problem — the import reconciles csmo's children, which shifts category c up.
+        await ImportOpenAsync(service,
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // Both moved nodes and their descendants carry paths built from the new positions.
@@ -1407,67 +1372,234 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A node the registry can't place has no position to give it, so apply refuses the draft outright rather
-    /// than writing a row whose sort order is invented.
+    /// A node the registry can't place has no position to give it, so the import throws rather than writing a row
+    /// whose sort order is invented.
     /// </summary>
     [Fact]
-    public Task A_draft_naming_an_unregistered_competition_is_refused() => RunTestAsync(async service =>
+    public Task A_draft_naming_an_unregistered_competition_throws() => RunTestAsync(async service =>
     {
         // Import a draft whose competition the registry doesn't carry.
-        var refusal = await Assert.ThrowsAsync<InvalidOperationException>(() => ApplyOpenAsync(service,
+        await Assert.ThrowsAsync<InvalidOperationException>(() => ImportOpenAsync(service,
             new DraftTarget("notacomp-i", 2024, null), RoundDate,
             [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath()));
-
-        // The refusal names the path it couldn't place.
-        Assert.Contains("notacomp", refusal.Message);
 
         // Nothing was written on the way to the throw.
         await QueryAsync(async context => Assert.Empty(await context.Competitions.ToListAsync()));
     });
 
     /// <summary>
-    /// The dry run and the write walk the same generations, so what the preview reports as re-sequencing has to
-    /// be exactly what applying then performs — the two walks living in different services is what would let
-    /// them drift, leaving the preview quietly lying about what the import is about to renumber.
+    /// A dry run reports what the real import of the same draft then does, and keeps nothing: no renumbering, no row,
+    /// no upload. The draft renumbers two generations, updates a problem, creates one and carries a figure, so each
+    /// part of the report has something to agree on.
     /// </summary>
     [Fact]
-    public Task The_preview_predicts_the_resequencing_apply_performs() => RunTestAsync(async service =>
+    public Task A_dry_run_reports_what_the_import_then_does_and_keeps_nothing() => RunTestAsync(async service =>
     {
-        // Seed drift at two different depths: memo sits a slot early among the roots, and iii a slot early
-        // among its category's rounds.
+        // Seed drift at two different depths, memo a slot early among the roots and iii three slots early among its
+        // category's rounds, plus a 2024 round of iii already holding problem 1.
         await QueryAsync(async context =>
         {
             // csmo takes the first root slot, iii the first round slot under category a.
-            CompetitionTreeSeed.Chain(context, "csmo-a-iii");
+            var nationalRound = CompetitionTreeSeed.Chain(context, "csmo-a-iii");
 
             // memo follows csmo at the second root slot, where the registry now puts tst.
             CompetitionTreeSeed.Root(context, "memo", 2);
+
+            // The 2024 season.
+            var season = new Season { Id = Guid.NewGuid(), StartYear = 2024, EditionNumber = 74 };
+            context.Seasons.Add(season);
+
+            // The season's sitting of csmo-a-iii.
+            var round = new Round
+            {
+                Id = Guid.NewGuid(),
+                CompetitionId = nationalRound.Id,
+                SeasonId = season.Id,
+                Date = RoundDate
+            };
+            context.Rounds.Add(round);
+
+            // Problem 1 in the round.
+            var problem = new Problem { Id = Guid.NewGuid(), RoundId = round.Id, Number = 1, Slug = ProblemSlug };
+            context.Problems.Add(problem);
+
+            // Problem 1's Slovak original statement.
+            context.ProblemTexts.Add(new ProblemText
+            {
+                ProblemId = problem.Id,
+                DocumentType = DocumentType.Statement,
+                Language = Language.SK,
+                IsOriginal = true,
+                MarkdownText = "statement",
+                DateModified = DateTime.UtcNow
+            });
 
             // Persist the seed.
             await context.SaveChangesAsync();
         });
 
-        // The draft both the dry run and the write are given.
-        var target = CsmoTarget();
-        var problems = new[] { Problem(1, Original(Language.SK, "statement")) };
+        // A draft folder holding the figure the new problem references.
+        var folder = Path.Combine(Path.GetTempPath(), $"bulkimport-dry-run-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(Path.Combine(folder, "images"));
+        await File.WriteAllTextAsync(
+            Path.Combine(folder, "images", "fig.svg"), "<svg width=\"100px\" height=\"80px\"></svg>");
 
-        // What the dry run says the import would renumber.
-        var predicted = ImmutableArray<SortOrderChange>.Empty;
-        await QueryAsync<IDraftResolutionService>(async (_, resolution) =>
-            predicted = (await resolution.PreviewAsync(target, visibleSince: null, problems, Path.GetTempPath()))
-                .SortOrderChanges);
+        // Problem 1 corrected, and a new problem 2 carrying the figure.
+        DraftProblemContent[] problems =
+        [
+            Problem(1, Original(Language.SK, "corrected")),
+            new(2, HasSidecar: true, ["Jaromír Šimša"], SolutionLink: null, Tags: null, Proposal: null,
+                [Original(Language.SK, "see ![f](images/fig.svg)")], Images: ["fig.svg"])
+        ];
 
-        // The dry run has something to predict, or the comparison below would pass on two empty sets.
-        Assert.NotEmpty(predicted);
+        // The dry run.
+        var dryRun = Assert.IsType<DraftImportFinished>(await service.ImportAsync(
+            CsmoTarget(), RoundDate, visibleSince: null, problems, folder, dryRun: true));
 
-        // What applying actually renumbers.
-        var result = await ApplyOpenAsync(service, target, RoundDate, problems, Path.GetTempPath());
-
-        // The two agree, path by path.
+        // The dry run has something to report in every part the comparison below reads.
+        Assert.NotEmpty(dryRun.Findings.SortOrderChanges);
         Assert.Equal(
-            predicted.OrderBy(change => change.Path),
-            result.SortOrderChanges.OrderBy(change => change.Path));
+            [ResolutionAction.Update, ResolutionAction.Create],
+            dryRun.Findings.Problems.Select(problem => problem.Action));
+        Assert.NotEmpty(dryRun.Findings.TextResolutions);
+
+        // Nothing the dry run reported was kept: the drift is still there, problem 1 reads as it did, and problem 2
+        // never landed.
+        await QueryAsync(async context =>
+        {
+            Assert.Equal(2, (await context.Competitions.SingleAsync(node => node.Path == "memo")).SortOrder);
+            Assert.Equal("statement", (await context.ProblemTexts.SingleAsync()).MarkdownText);
+            Assert.Equal(1, await context.Problems.CountAsync());
+        });
+
+        // And no figure went up.
+        Assert.Empty(_uploader.Uploads);
+
+        // The real import of the same draft.
+        var imported = Assert.IsType<DraftImportFinished>(await service.ImportAsync(
+            CsmoTarget(), RoundDate, visibleSince: null, problems, folder, dryRun: false));
+
+        // The two agree, part by part.
+        Assert.Equal([.. dryRun.Findings.Entities], imported.Findings.Entities.ToList());
+        Assert.Equal([.. dryRun.Findings.SortOrderChanges], imported.Findings.SortOrderChanges.ToList());
+        Assert.Equal(
+            [.. dryRun.Findings.Problems.Select(Describe)], imported.Findings.Problems.Select(Describe).ToList());
+        Assert.Equal([.. dryRun.Findings.TextResolutions], imported.Findings.TextResolutions.ToList());
+
+        // Only the real import pushed the figure.
+        Assert.Null(dryRun.Uploads);
+        Assert.Equal(new ImageUploads(1, 0), imported.Uploads);
     });
+
+    /// <summary>
+    /// A draft the database refuses comes back with every refusal at once, and nothing of it is kept: not the
+    /// problem before the refused one, not its figure, and not what a later problem flushes to the database before
+    /// the refusal is known.
+    /// </summary>
+    [Fact]
+    public Task A_refused_import_reports_every_refusal_and_keeps_nothing() => RunTestAsync(async service =>
+    {
+        // Problems 1 and 2, with Slovak originals.
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
+            [Problem(1, Original(Language.SK, "one")), Problem(2, Original(Language.SK, "two"))], Path.GetTempPath());
+
+        // A draft folder holding the figure the new problem references.
+        var folder = Path.Combine(Path.GetTempPath(), $"bulkimport-refused-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(Path.Combine(folder, "images"));
+        await File.WriteAllTextAsync(
+            Path.Combine(folder, "images", "fig.svg"), "<svg width=\"100px\" height=\"80px\"></svg>");
+
+        // A clean new problem 3 carrying the figure, a Czech original of problem 2, problem 1 crediting another
+        // author, whose replaced credits are flushed on the spot, and a problem 5 leaving a gap.
+        var outcome = await ImportOpenAsync(service, CsmoTarget(), RoundDate,
+        [
+            new(3, HasSidecar: true, ["Jaromír Šimša"], SolutionLink: null, Tags: null, Proposal: null,
+                [Original(Language.SK, "see ![f](images/fig.svg)")], Images: ["fig.svg"]),
+            Problem(2, Original(Language.CS, "dva")),
+            ProblemBy(1, ["Alice"], Original(Language.SK, "one")),
+            Problem(5, Original(Language.SK, "five"))
+        ], folder);
+
+        // Both refusals come back.
+        Assert.Contains(outcome.Findings.TextResolutions, text => text.Action == DraftTextAction.SecondOriginal);
+        Assert.Equal([4], outcome.Findings.MissingProblemOrders.ToList());
+
+        // The round holds what it did, problem 1 still credits its first author, and problem 2 one original.
+        await QueryAsync(async context =>
+        {
+            Assert.Equal([1, 2], await context.Problems
+                .Select(problem => problem.Number)
+                .OrderBy(number => number)
+                .ToListAsync());
+            Assert.Equal(["Jaromír Šimša"], await context.ProblemAuthors
+                .Where(problemAuthor => problemAuthor.Problem.Slug == ProblemSlug)
+                .Select(problemAuthor => problemAuthor.Author.Name)
+                .ToListAsync());
+            Assert.Equal(2, await context.ProblemTexts.CountAsync());
+        });
+
+        // And no figure went up.
+        Assert.Empty(_uploader.Uploads);
+    });
+
+    /// <summary>
+    /// A pick naming a number another pick holds is refused even when a later problem flushes to the database before
+    /// the refusal is known, and nothing of the draft is kept: the refused pick goes in without its filing, so the
+    /// flush doesn't trip over the number either.
+    /// </summary>
+    [Fact]
+    public Task A_refused_filing_keeps_nothing_through_a_flush() => RunTestAsync(async service =>
+    {
+        // #14 at place 8, with no authors.
+        await ImportPoolAsync(service, Pick(8, new DraftProposal(14, "Chameleons", ProposalArea.Combinatorics, [])));
+
+        // A new pick at place 9 naming #14 too, then #14 again crediting an author, whose credits flush on the spot.
+        var outcome = await ImportPoolAsync(service,
+            Pick(9, new DraftProposal(14, "Lattice", ProposalArea.Geometry, [])),
+            Pick(8, new DraftProposal(14, "Chameleons", ProposalArea.Combinatorics, [])) with { Authors = ["Alice"] });
+
+        // The number is refused, naming the pick that holds it.
+        Assert.Equal(
+            new ProposalNumberTaken("76-mathcomps-proposals-9", 14, "76-mathcomps-proposals-8"),
+            Assert.Single(outcome.Findings.ProposalConflicts));
+
+        // The pool holds what it did: one problem, one proposal, and nobody credited.
+        await QueryAsync(async context =>
+        {
+            Assert.Equal(1, await context.Problems.CountAsync());
+            Assert.Equal(1, await context.Proposals.CountAsync());
+            Assert.Equal(0, await context.ProblemAuthors.CountAsync());
+        });
+    });
+
+    /// <summary>
+    /// An upload that fails takes the import down with it. The figure never reached storage, so nothing that would
+    /// point at it is kept, the taxonomy raised on the way included.
+    /// </summary>
+    [Fact]
+    public Task A_failed_upload_keeps_nothing() => RunTestAsync(async service =>
+    {
+        // A draft folder holding the figure the problem references.
+        var folder = Path.Combine(Path.GetTempPath(), $"bulkimport-unreachable-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(Path.Combine(folder, "images"));
+        await File.WriteAllTextAsync(
+            Path.Combine(folder, "images", "fig.svg"), "<svg width=\"100px\" height=\"80px\"></svg>");
+
+        // A problem carrying the figure.
+        var problem = new DraftProblemContent(
+            1, true, ["Author"], null, null, Proposal: null, [Original(Language.SK, "see ![f](images/fig.svg)")],
+            ["fig.svg"]);
+
+        // Importing the problem fails at the upload.
+        await Assert.ThrowsAsync<IOException>(() =>
+            ImportOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder));
+
+        // Neither the problem nor its competition was kept.
+        var kept = await QueryValueAsync(async context =>
+            (await context.Problems.CountAsync(), await context.Competitions.CountAsync()));
+        Assert.Equal((0, 0), kept);
+    }, overrides: services => services.AddSingleton<ITrackedFileUploader>(_ => new TrackedFileUploader(
+        new UnreachableStorage(), Create(new UploadLedgerOptions { LedgerPath = _ledgerPath }))));
 
     /// <summary>
     /// A pick written in English alone goes into the pool. Its problem lands with the English text as the original.
@@ -1480,7 +1612,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         var pick = Pick(8, new DraftProposal(14, "Chameleons", ProposalArea.Combinatorics, ["advanced", "elementary"]));
 
         // Import it.
-        await ApplyPoolAsync(service, pick);
+        await ImportPoolAsync(service, pick);
 
         // Read back what landed.
         await QueryAsync(async context =>
@@ -1510,7 +1642,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// A pick enters the pool of the organization its draft names, which is what keeps the olympiad's proposals out of
-    /// MathComps' selection.
+    /// MathComps' selection. It is recommended for that organization's category of the name its block gives, never
+    /// for MathComps' category of the same name.
     /// </summary>
     [Fact]
     public Task A_pick_enters_the_pool_its_draft_names() => RunTestAsync(async service =>
@@ -1518,28 +1651,35 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         // The olympiad's id, once seeded
         var olympiadId = Guid.Empty;
 
-        // The olympiad, beside MathComps
+        // The olympiad, beside MathComps, listing a category named like one of MathComps'
         await QueryAsync(async context =>
         {
-            // Its row
-            olympiadId = SelectionSeed.NewOrganization(context, "olympiad");
+            // The olympiad's row and its category
+            olympiadId = SelectionSeed.NewOrganization(context, "olympiad", "elementary");
 
             // Persist the seed
             await context.SaveChangesAsync();
         });
 
-        // #1 at place 8, through a draft for the olympiad's pool
-        await service.ApplyAsync(
+        // #1 at place 8, recommended for elementary, through a draft for the olympiad's pool
+        await service.ImportAsync(
             new DraftTarget(HostedTaxonomy.ProposalsPath, 2026, "olympiad"), new DateOnly(2026, 9, 14),
             HostedTaxonomy.ProposalsVisibleSince,
-            [Pick(8, new DraftProposal(1, "Chameleons", ProposalArea.Combinatorics, []))], Path.GetTempPath());
+            [Pick(8, new DraftProposal(1, "Chameleons", ProposalArea.Combinatorics, ["elementary"]))],
+            Path.GetTempPath(), dryRun: false);
 
         // The organization the proposal is filed under
         var organizationId = await QueryValueAsync(context =>
             context.Proposals.Select(proposal => proposal.OrganizationId).SingleAsync());
 
-        // The olympiad
+        // The organizations of the categories the proposal is recommended for
+        var categoryOrganizationIds = await QueryValueAsync(context => context.ProposalRecommendations
+            .Select(recommendation => recommendation.Category.OrganizationId)
+            .ToListAsync());
+
+        // Both belong to the olympiad
         Assert.Equal(olympiadId, organizationId);
+        Assert.Equal([olympiadId], categoryOrganizationIds);
     });
 
     /// <summary>
@@ -1550,7 +1690,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_reimport_refreshes_the_title_area_and_categories() => RunTestAsync(async service =>
     {
         // Import #14 at place 8, recommended for the elementary paper.
-        await ApplyPoolAsync(service, Pick(8, new DraftProposal(
+        await ImportPoolAsync(service, Pick(8, new DraftProposal(
             14, "Chameleons", ProposalArea.Combinatorics, ["elementary"])));
 
         // The reviewers set it aside.
@@ -1564,11 +1704,11 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         });
 
         // Re-import it under a new title and area, recommended for advanced and intermediate.
-        var second = await ApplyPoolAsync(service, Pick(8, new DraftProposal(
+        var second = await ImportPoolAsync(service, Pick(8, new DraftProposal(
             14, "Chameleons on the island", ProposalArea.Algebra, ["advanced", "intermediate"])));
 
         // The proposal moved, so the problem counts as updated.
-        Assert.Equal(1, second.ProblemsUpdated);
+        Assert.Equal(1, CountOf(second, ResolutionAction.Update));
 
         // Read back the proposal.
         await QueryAsync(async context =>
@@ -1592,125 +1732,44 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_reimport_naming_the_categories_in_any_order_changes_nothing() => RunTestAsync(async service =>
     {
         // Import #14 at place 8, recommended for advanced and elementary.
-        await ApplyPoolAsync(service, Pick(8, new DraftProposal(
+        await ImportPoolAsync(service, Pick(8, new DraftProposal(
             14, "Chameleons", ProposalArea.Combinatorics, ["advanced", "elementary"])));
 
         // Re-import it naming the two in the same order.
-        var sameOrder = await ApplyPoolAsync(service, Pick(8, new DraftProposal(
+        var sameOrder = await ImportPoolAsync(service, Pick(8, new DraftProposal(
             14, "Chameleons", ProposalArea.Combinatorics, ["advanced", "elementary"])));
 
         // Re-import it naming them the other way round.
-        var otherOrder = await ApplyPoolAsync(service, Pick(8, new DraftProposal(
+        var otherOrder = await ImportPoolAsync(service, Pick(8, new DraftProposal(
             14, "Chameleons", ProposalArea.Combinatorics, ["elementary", "advanced"])));
 
         // Both leave the problem unchanged.
-        Assert.Equal((1, 1), (sameOrder.ProblemsUnchanged, otherOrder.ProblemsUnchanged));
-    });
-
-    /// <summary>
-    /// A pick recommended for a category the pool's organization doesn't list is refused, never filed under the
-    /// categories that do resolve. A clean validate never lets one through, so this proves the guard behind it fires.
-    /// </summary>
-    [Fact]
-    public Task A_category_the_organization_does_not_list_is_rejected() => RunTestAsync(async service =>
-    {
-        // #14 at place 8, recommended for elementary and for a category nobody lists.
-        var pick = Pick(8, new DraftProposal(14, "Chameleons", ProposalArea.Combinatorics, ["elementary", "nowhere"]));
-
-        // Importing it is refused.
-        await Assert.ThrowsAsync<InvalidOperationException>(() => ApplyPoolAsync(service, pick));
-    });
-
-    /// <summary>
-    /// The dry run's problem outcomes are what applying then counts: a problem whose draft leaves out the fields it
-    /// stores is unchanged, a new slug is inserted, and an existing problem is updated when any one of its text,
-    /// solution link, authors or tags moves. Each update moves exactly one of them, so a comparison the preview
-    /// skipped would show as an unchanged problem apply counts as updated.
-    /// </summary>
-    [Fact]
-    public Task The_preview_predicts_the_problem_counts_apply_reports() => RunTestAsync(async service =>
-    {
-        // Five problems, tagged and linked where a later draft leaves out or moves the tags and the link.
-        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
-        [
-            new DraftProblemContent(1, HasSidecar: true, ["Jaromír Šimša"], "https://example.com/1", ["algebra"],
-                Proposal: null, [Original(Language.SK, "one")], Images: []),
-            Problem(2, Original(Language.SK, "two")),
-            ProblemWithTags(3, ["algebra"], Original(Language.SK, "three")),
-            Problem(4, Original(Language.SK, "four")),
-            ProblemWithLink(5, "https://example.com/5", Original(Language.SK, "five"))
-        ], Path.GetTempPath());
-
-        // The same five, the first leaving out its authors, link and tags, each of the rest moving one thing, plus a
-        // sixth the round doesn't hold yet.
-        DraftProblemContent[] problems =
-        [
-            ProblemBy(1, authors: null, Original(Language.SK, "one")),
-            Problem(2, Original(Language.SK, "two, corrected")),
-            ProblemWithTags(3, ["am-gm-inequality"], Original(Language.SK, "three")),
-            ProblemBy(4, ["Alice"], Original(Language.SK, "four")),
-            ProblemWithLink(5, "https://example.com/five", Original(Language.SK, "five")),
-            Problem(6, Original(Language.SK, "six"))
-        ];
-
-        // What the dry run says importing them does to each problem.
-        var predicted = ImmutableArray<ProblemResolution>.Empty;
-        await QueryAsync<IDraftResolutionService>(async (_, resolution) =>
-            predicted = (await resolution.PreviewAsync(CsmoTarget(), visibleSince: null, problems, Path.GetTempPath()))
-                .Problems);
-
-        // What applying them actually counts.
-        var result = await ApplyOpenAsync(service, CsmoTarget(), RoundDate, problems, Path.GetTempPath());
-
-        // The first is left as it was, the next four are updated, and the last is created.
         Assert.Equal(
-            [
-                ResolutionAction.Reuse, ResolutionAction.Update, ResolutionAction.Update, ResolutionAction.Update,
-                ResolutionAction.Update, ResolutionAction.Create
-            ],
-            predicted.Select(problem => problem.Action).ToList());
-
-        // Applying counts the same.
-        Assert.Equal((1, 4, 1), (result.ProblemsInserted, result.ProblemsUpdated, result.ProblemsUnchanged));
+            (1, 1), (CountOf(sameOrder, ResolutionAction.Reuse), CountOf(otherOrder, ResolutionAction.Reuse)));
     });
 
     /// <summary>
-    /// The dry run reads a moved proposal as an update the way applying counts one: a pick filed exactly as its block
-    /// says is unchanged, one recommended for other categories is updated, and a new one is inserted.
+    /// A moved proposal counts its problem as updated: a pick filed exactly as its block says is unchanged, one
+    /// recommended for other categories is updated, and a new one is inserted.
     /// </summary>
     [Fact]
-    public Task The_preview_predicts_a_proposal_update() => RunTestAsync(async service =>
+    public Task A_moved_proposal_counts_its_problem_as_updated() => RunTestAsync(async service =>
     {
-        // #14 and #15, both recommended for the elementary paper.
-        await ApplyPoolAsync(service,
+        // #14 and #15, both recommended for elementary.
+        await ImportPoolAsync(service,
             Pick(8, new DraftProposal(14, "Chameleons", ProposalArea.Combinatorics, ["elementary"])),
             Pick(9, new DraftProposal(15, "Lattice", ProposalArea.Geometry, ["elementary"])));
 
         // #14 as it stands, #15 recommended for advanced instead, and a new #16.
-        DraftProblemContent[] problems =
-        [
+        var outcome = await ImportPoolAsync(service,
             Pick(8, new DraftProposal(14, "Chameleons", ProposalArea.Combinatorics, ["elementary"])),
             Pick(9, new DraftProposal(15, "Lattice", ProposalArea.Geometry, ["advanced"])),
-            Pick(10, new DraftProposal(16, "Coins", ProposalArea.NumberTheory, []))
-        ];
-
-        // What the dry run says importing them does to each problem.
-        var predicted = ImmutableArray<ProblemResolution>.Empty;
-        await QueryAsync<IDraftResolutionService>(async (_, resolution) =>
-            predicted = (await resolution.PreviewAsync(
-                new DraftTarget(HostedTaxonomy.ProposalsPath, 2026, Organization.MathCompsSlug),
-                HostedTaxonomy.ProposalsVisibleSince, problems, Path.GetTempPath())).Problems);
-
-        // What applying them actually counts.
-        var result = await ApplyPoolAsync(service, problems);
+            Pick(10, new DraftProposal(16, "Coins", ProposalArea.NumberTheory, [])));
 
         // #14 is left as it was, #15 is updated, and #16 is created.
         Assert.Equal(
             [ResolutionAction.Reuse, ResolutionAction.Update, ResolutionAction.Create],
-            predicted.Select(problem => problem.Action).ToList());
-
-        // Applying counts the same.
-        Assert.Equal((1, 1, 1), (result.ProblemsInserted, result.ProblemsUpdated, result.ProblemsUnchanged));
+            outcome.Findings.Problems.Select(problem => problem.Action).ToList());
     });
 
     /// <summary>
@@ -1785,34 +1844,64 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     private static DraftTarget CsmoTarget() => new("csmo-a-iii", 2024, null);
 
     /// <summary>
-    /// Applies a draft whose round is open to readers, which is what every test that isn't about the embargo
+    /// Imports a draft whose round is open to readers, which is what every test that isn't about the embargo
     /// wants. The ones that are call the service directly, so their interest in the field is visible at the call.
     /// </summary>
     /// <param name="service">The service under test.</param>
-    /// <param name="target"><inheritdoc cref="IDraftApplyService.ApplyAsync" path="/param[@name='target']"/></param>
-    /// <param name="date"><inheritdoc cref="IDraftApplyService.ApplyAsync" path="/param[@name='date']"/></param>
-    /// <param name="problems"><inheritdoc cref="IDraftApplyService.ApplyAsync" path="/param[@name='problems']"/></param>
-    /// <param name="draftFolder"><inheritdoc cref="IDraftApplyService.ApplyAsync" path="/param[@name='draftFolder']"/></param>
-    /// <returns><inheritdoc cref="IDraftApplyService.ApplyAsync" path="/returns"/></returns>
-    private static Task<DraftApplyResult> ApplyOpenAsync(
-        IDraftApplyService service,
+    /// <param name="target"><inheritdoc cref="IDraftImportService.ImportAsync" path="/param[@name='target']"/></param>
+    /// <param name="date"><inheritdoc cref="IDraftImportService.ImportAsync" path="/param[@name='date']"/></param>
+    /// <param name="problems">
+    /// <inheritdoc cref="IDraftImportService.ImportAsync" path="/param[@name='problems']"/>
+    /// </param>
+    /// <param name="draftFolder">
+    /// <inheritdoc cref="IDraftImportService.ImportAsync" path="/param[@name='draftFolder']"/>
+    /// </param>
+    /// <returns><inheritdoc cref="IDraftImportService.ImportAsync" path="/returns"/></returns>
+    private static async Task<DraftImportFinished> ImportOpenAsync(
+        IDraftImportService service,
         DraftTarget target,
         DateOnly date,
         IReadOnlyList<DraftProblemContent> problems,
         string draftFolder) =>
-        service.ApplyAsync(target, date, visibleSince: null, problems, draftFolder);
+        // The import, which went through the whole draft
+        Assert.IsType<DraftImportFinished>(
+            await service.ImportAsync(target, date, visibleSince: null, problems, draftFolder, dryRun: false));
 
     /// <summary>
-    /// Applies a draft for the 2026 round of the pool, under <see cref="HostedTaxonomy.ProposalsVisibleSince"/>.
+    /// Imports a draft for the 2026 round of MathComps' pool, under
+    /// <see cref="HostedTaxonomy.ProposalsVisibleSince"/>.
     /// </summary>
     /// <param name="service">The service under test.</param>
-    /// <param name="problems"><inheritdoc cref="IDraftApplyService.ApplyAsync" path="/param[@name='problems']"/></param>
-    /// <returns><inheritdoc cref="IDraftApplyService.ApplyAsync" path="/returns"/></returns>
-    private static Task<DraftApplyResult> ApplyPoolAsync(
-        IDraftApplyService service, params DraftProblemContent[] problems) =>
-        service.ApplyAsync(
+    /// <param name="problems">
+    /// <inheritdoc cref="IDraftImportService.ImportAsync" path="/param[@name='problems']"/>
+    /// </param>
+    /// <returns><inheritdoc cref="IDraftImportService.ImportAsync" path="/returns"/></returns>
+    private static async Task<DraftImportFinished> ImportPoolAsync(
+        IDraftImportService service, params DraftProblemContent[] problems) =>
+        // The import, which went through the whole draft
+        Assert.IsType<DraftImportFinished>(await service.ImportAsync(
             new DraftTarget(HostedTaxonomy.ProposalsPath, 2026, Organization.MathCompsSlug), new DateOnly(2026, 9, 14),
-            HostedTaxonomy.ProposalsVisibleSince, problems, Path.GetTempPath());
+            HostedTaxonomy.ProposalsVisibleSince, problems, Path.GetTempPath(), dryRun: false));
+
+    /// <summary>
+    /// How many of an import's problems it treated the given way.
+    /// </summary>
+    /// <param name="outcome">What the import did.</param>
+    /// <param name="action">What the import did to the problems counted.</param>
+    /// <returns>The count.</returns>
+    private static int CountOf(DraftImportFinished outcome, ResolutionAction action) =>
+        // The import's problems treated that way
+        outcome.Findings.Problems.Count(problem => problem.Action == action);
+
+    /// <summary>
+    /// A problem's outcome as one string, so two compare by value with their languages included, which the record's
+    /// own equality compares by reference.
+    /// </summary>
+    /// <param name="problem">The problem's outcome.</param>
+    /// <returns>The problem's slug, action and languages, joined into one string.</returns>
+    private static string Describe(ProblemResolution problem) =>
+        // The slug, the action and the languages in draft order
+        $"{problem.Slug} {problem.Action} {string.Join(",", problem.Languages)}";
 
     /// <summary>
     /// Builds a pick: a problem written in English alone, with a statement and a solution.
@@ -1870,18 +1959,6 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             Texts: [.. texts], Images: []);
 
     /// <summary>
-    /// Builds a draft problem carrying the given solution link and a single author.
-    /// </summary>
-    /// <param name="order">The problem's 1-based order.</param>
-    /// <param name="solutionLink">The <c>solutionLink:</c> the draft declares.</param>
-    /// <param name="texts">The problem's text variants.</param>
-    /// <returns>The configured problem content.</returns>
-    private static DraftProblemContent ProblemWithLink(
-        int order, string solutionLink, params DraftTextContent[] texts) =>
-        new(order, HasSidecar: true, ["Jaromír Šimša"], solutionLink, Tags: null, Proposal: null,
-            Texts: [.. texts], Images: []);
-
-    /// <summary>
     /// Builds an original text variant.
     /// </summary>
     /// <param name="language">The original's language.</param>
@@ -1920,21 +1997,13 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         texts.Single(text => text.DocumentType == DocumentType.Solution);
 
     /// <summary>
-    /// A test double for <see cref="IFileUploader"/> that records uploads instead of hitting remote storage.
+    /// Remote storage that can't be reached, so every upload fails.
     /// </summary>
-    private sealed class RecordingFileUploader : IFileUploader
+    private sealed class UnreachableStorage : IFileUploader
     {
-        /// <summary>
-        /// Every upload, in call order.
-        /// </summary>
-        public ImmutableList<(string LocalPath, string Key)> Uploads { get; private set; } = [];
-
         /// <inheritdoc/>
-        public Task UploadAsync(string localFilePath, string key)
-        {
-            // Record the call; nothing leaves the process.
-            Uploads = Uploads.Add((localFilePath, key));
-            return Task.CompletedTask;
-        }
+        public Task UploadAsync(string localFilePath, string key) =>
+            // Nothing gets through
+            throw new IOException("Remote storage is unreachable.");
     }
 }

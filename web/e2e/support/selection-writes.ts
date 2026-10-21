@@ -8,13 +8,15 @@ import {
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
 
 /**
- * The categories the backend seeds for MathComps, in the order they run, each named after the hosted level it is.
- * Written out, so the fake keeps those rows whatever order the app lists its levels in.
+ * The selection's categories, in the order they run: the ones the backend seeds for MathComps, each named after the
+ * hosted level it is, then a C no hosted round runs, like the olympiad's. Written out, so the fake keeps those rows
+ * whatever order the app lists its levels in.
  */
 export const SELECTION_CATEGORIES: SelectionCategory[] = [
   { name: 'elementary', hostedCategory: 'elementary' },
   { name: 'intermediate', hostedCategory: 'intermediate' },
   { name: 'advanced', hostedCategory: 'advanced' },
+  { name: 'C', hostedCategory: null },
 ]
 
 /**

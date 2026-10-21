@@ -13,8 +13,7 @@ public record DescendedNode(string? ParentPath, string Slug, string Path);
 /// <summary>
 /// The shape of the stored competition tree — how a path descends through it, and how the sort paths that order
 /// it are built. Pure operations over <see cref="Competition"/> rows, so a caller loads and persists them and
-/// this decides nothing about storage. One definition so the dry run, the write and the test seeds all walk the
-/// tree the same way; a second walk drifting from the first is what makes a preview lie.
+/// this decides nothing about storage. One definition so every walk over the tree descends it the same way.
 /// </summary>
 public static class CompetitionTree
 {

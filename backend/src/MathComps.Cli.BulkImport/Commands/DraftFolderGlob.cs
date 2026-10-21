@@ -1,10 +1,9 @@
 namespace MathComps.Cli.BulkImport.Commands;
 
 /// <summary>
-/// Expands the folder argument(s) the <c>validate</c> and <c>apply</c> commands accept into the concrete draft
-/// folders to run over. Each argument is a literal path or a wildcard pattern whose leaf segment selects sibling
-/// directories — the directory analog of the file glob the Handouts CLI uses — so one invocation can sweep a whole
-/// batch (e.g. <c>data/problems/skmo-2025-*</c>).
+/// Expands the folder argument(s) the bulk import accepts into the concrete draft folders to run over. Each argument is
+/// a literal path or a wildcard pattern whose leaf segment selects sibling directories — the directory analog of the
+/// file glob the Handouts CLI uses — so one invocation can sweep a whole batch (e.g. <c>data/problems/skmo-2025-*</c>).
 /// </summary>
 public static class DraftFolderGlob
 {
