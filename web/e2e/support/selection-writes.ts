@@ -25,6 +25,7 @@ export const SELECTION_WRITE_REFUSALS = {
   MalformedRequest: 400,
   ProposalRatingValue: 400,
   SelectionNotLead: 403,
+  ProposalNotLead: 403,
   SelectionTargetNotFound: 404,
   SelectionBoardOpened: 409,
   SelectionBoardFinalized: 409,

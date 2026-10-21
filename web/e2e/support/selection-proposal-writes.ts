@@ -225,12 +225,21 @@ function rate(held: HeldSelection, proposalId: string, scores: RatingScores): He
  * @param held - What the backend holds.
  * @param proposalId - The proposal.
  * @param isSetAside - Whether it is set aside afterwards.
+ * @param leadCategories - The names of the categories the writer leads.
  *
  * @returns What the backend holds afterwards.
  */
-function setAside(held: HeldSelection, proposalId: string, isSetAside: boolean): HeldSelection {
+function setAside(
+  held: HeldSelection,
+  proposalId: string,
+  isSetAside: boolean,
+  leadCategories: readonly string[]
+): HeldSelection {
   // The proposal, as it stands
   const proposal = liveProposal(held, proposalId)
+
+  // Only a lead of some category sets the proposal aside or brings it back
+  if (leadCategories.length === 0) refuseWith('ProposalNotLead')
 
   // Set aside or back, as asked
   return withProposal(held, { ...proposal, isSetAside })
@@ -243,16 +252,21 @@ function setAside(held: HeldSelection, proposalId: string, isSetAside: boolean):
  * @param held - What the backend holds.
  * @param proposalId - The proposal.
  * @param recommendation - The category and which way it goes.
+ * @param leadCategories - The names of the categories the writer leads.
  *
  * @returns What the backend holds afterwards.
  */
 function recommend(
   held: HeldSelection,
   proposalId: string,
-  { category, isRecommended }: Recommendation
+  { category, isRecommended }: Recommendation,
+  leadCategories: readonly string[]
 ): HeldSelection {
   // The proposal, as it stands
   const proposal = liveProposal(held, proposalId)
+
+  // Only a lead of some category switches the proposal's categories
+  if (leadCategories.length === 0) refuseWith('ProposalNotLead')
 
   // Every category the organization lists by name, in the order they run
   const names = SELECTION_CATEGORIES.map((candidate) => candidate.name)
@@ -275,12 +289,20 @@ function recommend(
  *
  * @param held - What the backend holds.
  * @param proposalId - The proposal.
+ * @param leadCategories - The names of the categories the writer leads.
  *
  * @returns What the backend holds afterwards.
  */
-function remove(held: HeldSelection, proposalId: string): HeldSelection {
+function remove(
+  held: HeldSelection,
+  proposalId: string,
+  leadCategories: readonly string[]
+): HeldSelection {
   // The proposal, as it stands
   const proposal = liveProposal(held, proposalId)
+
+  // Only a lead of some category deletes the proposal
+  if (leadCategories.length === 0) refuseWith('ProposalNotLead')
 
   // A problem a paper has taken stays in its round
   if (proposal.isUsed) refuseWith('SelectionProposalUsed')
@@ -299,6 +321,7 @@ function remove(held: HeldSelection, proposalId: string): HeldSelection {
  * read is refused first.
  *
  * @param held - What the backend holds.
+ * @param leadCategories - The names of the categories the writer leads.
  * @param method - The write's HTTP method.
  * @param change - The trailing part of the address naming the change; undefined at the proposal's own.
  * @param proposalId - The proposal.
@@ -308,6 +331,7 @@ function remove(held: HeldSelection, proposalId: string): HeldSelection {
  */
 export function proposalWrite(
   held: HeldSelection,
+  leadCategories: readonly string[],
   method: string,
   change: string | undefined,
   proposalId: string,
@@ -315,19 +339,19 @@ export function proposalWrite(
 ): HeldSelection {
   // A set-aside, put at its address
   if (change === '/set-aside' && method === 'PUT') {
-    return setAside(held, proposalId, readSetAside(body))
+    return setAside(held, proposalId, readSetAside(body), leadCategories)
   }
 
   // A recommendation, put at its address
   if (change === '/recommended' && method === 'PUT') {
-    return recommend(held, proposalId, readRecommendation(body))
+    return recommend(held, proposalId, readRecommendation(body), leadCategories)
   }
 
   // A rating, put at its address
   if (change === '/rating' && method === 'PUT') return rate(held, proposalId, readScores(body))
 
   // A delete, at the proposal's own address
-  if (change === undefined && method === 'DELETE') return remove(held, proposalId)
+  if (change === undefined && method === 'DELETE') return remove(held, proposalId, leadCategories)
 
   // Nothing the app sends, so a fake that reaches here has drifted from the app
   throw new Error(`The backend routes no proposal write as ${method} ${change ?? ''}`)

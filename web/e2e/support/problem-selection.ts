@@ -1123,9 +1123,16 @@ export async function stubSelection(
     const [, proposalId = '', change] =
       PROPOSAL_WRITE_PATH.exec(new URL(request.url()).pathname) ?? []
 
-    // Saved or refused
+    // Saved or refused, against the categories the reader leads at the time of the write
     return answerWrite(route, (held) =>
-      proposalWrite(held, request.method(), change, proposalId, request.postData())
+      proposalWrite(
+        held,
+        memory.leadCategories,
+        request.method(),
+        change,
+        proposalId,
+        request.postData()
+      )
     )
   })
 

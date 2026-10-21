@@ -1,40 +1,64 @@
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Organizations;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
 /// Implements <see cref="IProposalService"/> over the database, each change one write through
-/// <see cref="SelectionRules.RunWriteAsync"/>.
+/// <see cref="SelectionRules.RunWriteAsync"/>. The account's lead categories are read before the write waits its
+/// turn, since no selection write changes them.
 /// </summary>
 /// <param name="dbContextFactory">Creates the context each change runs on.</param>
-public sealed class ProposalService(IDbContextFactory<MathCompsDbContext> dbContextFactory) : IProposalService
+/// <param name="members">Reads which categories the account making a change leads.</param>
+public sealed class ProposalService(
+    IDbContextFactory<MathCompsDbContext> dbContextFactory,
+    IOrganizationMemberService members)
+    : IProposalService
 {
     /// <inheritdoc/>
-    public Task SetAsideAsync(
-        string organizationSlug, Guid proposalId, bool isSetAside, CancellationToken cancellationToken = default) =>
+    public async Task SetAsideAsync(
+        string organizationSlug, Guid userId, Guid proposalId, bool isSetAside,
+        CancellationToken cancellationToken = default)
+    {
+        // Whether the account leads any of the organization's categories
+        var isLead = (await members.GetLeadCategoryIdsAsync(userId, organizationSlug, cancellationToken)).Count > 0;
+
         // The change, as one selection write
-        SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
+        await SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
             // The proposal
             var proposal = await SelectionRules.ReadProposalAsync(
                 dbContext, organizationSlug, proposalId, cancellationToken);
+
+            // Only a lead sets a proposal aside or brings it back
+            if (!isLead)
+                throw new ProposalNotLeadException();
 
             // Set aside or back, as asked
             proposal.IsSetAside = isSetAside;
         }, cancellationToken);
+    }
 
     /// <inheritdoc/>
-    public Task SetRecommendedAsync(
-        string organizationSlug, Guid proposalId, string category, bool isRecommended,
-        CancellationToken cancellationToken = default) =>
+    public async Task SetRecommendedAsync(
+        string organizationSlug, Guid userId, Guid proposalId, string category, bool isRecommended,
+        CancellationToken cancellationToken = default)
+    {
+        // Whether the account leads any of the organization's categories
+        var isLead = (await members.GetLeadCategoryIdsAsync(userId, organizationSlug, cancellationToken)).Count > 0;
+
         // The change, as one selection write
-        SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
+        await SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
             // The proposal
             var proposal = await SelectionRules.ReadProposalAsync(
                 dbContext, organizationSlug, proposalId, cancellationToken);
+
+            // Only a lead recommends a proposal for a category, or takes it back
+            if (!isLead)
+                throw new ProposalNotLeadException();
 
             // The category, one of the proposal's organization's
             var categoryId = await dbContext.OrganizationCategories
@@ -56,6 +80,7 @@ public sealed class ProposalService(IDbContextFactory<MathCompsDbContext> dbCont
             if (!isRecommended && recommendation is not null)
                 dbContext.ProposalRecommendations.Remove(recommendation);
         }, cancellationToken);
+    }
 
     /// <inheritdoc/>
     public async Task RateAsync(
@@ -103,13 +128,22 @@ public sealed class ProposalService(IDbContextFactory<MathCompsDbContext> dbCont
     }
 
     /// <inheritdoc/>
-    public Task DeleteAsync(string organizationSlug, Guid proposalId, CancellationToken cancellationToken = default) =>
+    public async Task DeleteAsync(
+        string organizationSlug, Guid userId, Guid proposalId, CancellationToken cancellationToken = default)
+    {
+        // Whether the account leads any of the organization's categories
+        var isLead = (await members.GetLeadCategoryIdsAsync(userId, organizationSlug, cancellationToken)).Count > 0;
+
         // The delete, as one selection write
-        SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
+        await SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
             // The proposal
             var proposal = await SelectionRules.ReadProposalAsync(
                 dbContext, organizationSlug, proposalId, cancellationToken);
+
+            // Only a lead deletes a proposal
+            if (!isLead)
+                throw new ProposalNotLeadException();
 
             // A problem a paper has taken stays in its round, so its proposal stays with it
             if (!SelectionRules.IsInPool(proposal.Problem.Round.Competition.Path))
@@ -121,6 +155,7 @@ public sealed class ProposalService(IDbContextFactory<MathCompsDbContext> dbCont
             // And the proposal off every board it stood on
             await SelectionRules.RemoveSlotsAsync(dbContext, [proposal.ProblemId], cancellationToken);
         }, cancellationToken);
+    }
 
     /// <summary>
     /// Says whether a score is one a rating can hold: none at all, or one of the scale's steps.

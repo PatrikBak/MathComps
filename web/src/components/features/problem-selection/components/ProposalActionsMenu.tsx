@@ -40,8 +40,9 @@ type ProposalActionsMenuProps = {
 
 /**
  * The rarer things done to a problem: changing the categories it is recommended for, rating it, setting it aside,
- * bringing it back, deleting it. A problem a round has taken sits in no pool view and can't be deleted, so
- * it is offered the categories and the rating alone.
+ * bringing it back, deleting it. Only a lead of some category changes a problem's categories, sets it aside or
+ * deletes it, whatever the problem is recommended for, so everyone else is offered the rating alone. A problem a round
+ * has taken sits in no pool view and can't be deleted, so a lead is offered its categories and the rating alone.
  */
 export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenuProps) {
   // Actions-menu copy
@@ -65,8 +66,11 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
   // Lists in the reader's language
   const format = useFormatter()
 
-  // The selection's categories, in the order they run
-  const { categories } = useLoadedSelection()
+  // The selection's categories in the order they run, and the ones the reader leads
+  const { categories, leadCategories } = useLoadedSelection()
+
+  // Whether the reader leads any category, whatever the problem is recommended for
+  const isLead = leadCategories.length > 0
 
   // What each category is called
   const categoryLabel = useCategoryLabel()
@@ -89,9 +93,9 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-48">
-          {/* The categories the problem is recommended for, each switched on its own and the menu kept open, where
-              the organization lists any */}
-          {categories.length > 0 && (
+          {/* The categories the problem is recommended for, each switched on its own and the menu kept open, for a
+              lead where the organization lists any */}
+          {isLead && categories.length > 0 && (
             <>
               <DropdownMenuGroup aria-labelledby={recommendedId}>
                 <p id={recommendedId} className="px-2 pt-1.5 pb-1 text-xs font-semibold text-muted">
@@ -121,8 +125,9 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
           {/* The reader's own rating */}
           <RatingRows proposal={proposal} />
 
-          {/* Setting the problem aside or bringing it back, and deleting it, while no round has taken it */}
-          {!proposal.isUsed && (
+          {/* Setting the problem aside or bringing it back, and deleting it, for a lead while no round has
+              taken it */}
+          {isLead && !proposal.isUsed && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem
