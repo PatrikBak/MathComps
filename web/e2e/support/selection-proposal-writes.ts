@@ -37,11 +37,23 @@ const DECIMAL_NUMBER = /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/
 /** The largest size of number the backend binds, which it holds as a decimal. */
 const LARGEST_BINDABLE_SIZE = 79228162514264337593543950335
 
+/** The lowest score the backend's rating scale holds. */
+const MIN_SCORE = 1
+
+/** The highest score the backend's rating scale holds. */
+const MAX_SCORE = 5
+
+/** How many steps of the backend's rating scale make up one whole score. */
+const STEPS_PER_POINT = 10
+
 /**
- * Every score the backend's rating scale holds, the tenths from 1 to 5. Built here rather than imported, so the fake
- * refuses what the backend refuses whatever the app's own scale offers.
+ * Every score the backend's rating scale holds, lowest first. Built here rather than imported, so the fake refuses
+ * what the backend refuses whatever the app's own scale offers.
  */
-const SCORES: number[] = Array.from({ length: 41 }, (_slot, tenth) => (10 + tenth) / 10)
+const SCORES: number[] = Array.from(
+  { length: (MAX_SCORE - MIN_SCORE) * STEPS_PER_POINT + 1 },
+  (_slot, step) => (MIN_SCORE * STEPS_PER_POINT + step) / STEPS_PER_POINT
+)
 
 /**
  * A proposal's recommendation for one category, as a write switches it.

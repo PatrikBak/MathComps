@@ -1,11 +1,7 @@
-using MathComps.Domain.Contracts.Competitions;
-using MathComps.Domain.Contracts.Selection;
 using MathComps.Domain.EfCoreEntities;
-using MathComps.Domain.Localization;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Competitions;
-using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Problems;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,65 +11,10 @@ namespace MathComps.Infrastructure.Services.Selection;
 /// Implements <see cref="IBoardFinalizationService"/> over the database, each finalize one write through
 /// <see cref="SelectionRules.RunWriteAsync"/>.
 /// </summary>
-/// <param name="dbContextFactory">Creates the context each read and finalize runs on.</param>
-/// <param name="localization">The names the taxonomy gives the groups' nodes.</param>
-public sealed class BoardFinalizationService(
-    IDbContextFactory<MathCompsDbContext> dbContextFactory,
-    IMetadataLocalizationService localization)
+/// <param name="dbContextFactory">Creates the context each finalize runs on.</param>
+public sealed class BoardFinalizationService(IDbContextFactory<MathCompsDbContext> dbContextFactory)
     : IBoardFinalizationService
 {
-    /// <inheritdoc/>
-    public async Task<IReadOnlyList<SelectionCycleDto>> GetCyclesAsync(
-        Language language, CancellationToken cancellationToken = default)
-    {
-        // A fresh context for this read.
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-
-        // The instant every group's opening is read against.
-        var now = DateTimeOffset.UtcNow;
-
-        // Every group that has not opened, soonest first, its rounds in the taxonomy's order with how many problems
-        // each holds.
-        var groups = await dbContext.HostedGroups
-            .AsNoTracking()
-            .Where(group => group.OpensAt > now)
-            .OrderBy(group => group.OpensAt)
-            .Select(group => new
-            {
-                group.Id,
-                group.OpensAt,
-                group.ClosesAt,
-                group.ProblemCount,
-                Rounds = group.Rounds
-                    .OrderBy(round => round.Competition.SortPath)
-                    .Select(round => new
-                    {
-                        CompetitionPath = round.Competition.Path,
-                        ProblemsHeld = round.Problems.Count,
-                    })
-                    .ToList(),
-            })
-            .ToListAsync(cancellationToken);
-
-        // The groups still taking a board, each named by its first round
-        return
-        [
-            .. groups
-                .Where(group => TakesBoard(
-                    group.OpensAt, group.ClosesAt, [.. group.Rounds.Select(round => round.ProblemsHeld)], now))
-                .Select(group => new SelectionCycleDto(
-                    group.Id,
-                    HostedGroupName.Of(localization, group.Rounds.FirstOrDefault()?.CompetitionPath)[language],
-                    group.OpensAt,
-                    [
-                        .. group.Rounds
-                            .Select(round => HostedTaxonomy.CategoryOf(round.CompetitionPath))
-                            .OfType<HostedCompetitionCategory>(),
-                    ],
-                    group.ProblemCount)),
-        ];
-    }
-
     /// <inheritdoc/>
     public Task FinalizeAsync(
         string organizationSlug, Guid boardId, Guid cycleId, CancellationToken cancellationToken = default) =>
@@ -204,7 +145,8 @@ public sealed class BoardFinalizationService(
         SelectionBoard board, HostedGroup group, IReadOnlyList<Round> rounds, DateTimeOffset now)
     {
         // A group that no longer takes a board has nothing to pair the papers with
-        if (!TakesBoard(group.OpensAt, group.ClosesAt, [.. rounds.Select(round => round.Problems.Count)], now))
+        if (!SelectionRules.TakesBoard(
+                group.OpensAt, group.ClosesAt, [.. rounds.Select(round => round.Problems.Count)], now))
             throw new SelectionFinalizeBlockedException();
 
         // The hosted level each round runs at
@@ -229,21 +171,7 @@ public sealed class BoardFinalizationService(
             .. board.Papers.Select(paper => (
                 paper,
                 rounds.Single(round =>
-                    HostedTaxonomy.CategoryOf(round.Competition.Path) == paper.Category.HostedCategory))),
+                    SelectionRules.IsRoundFor(round.Competition.Path, paper.Category.HostedCategory)))),
         ];
     }
-
-    /// <summary>
-    /// Whether a hosted group still takes a board: it has not opened, it closes at some point, and it runs rounds
-    /// nothing has filled yet. A group that never closes is the practice one, which nobody picks papers for.
-    /// </summary>
-    /// <param name="opensAt"><inheritdoc cref="HostedGroup.OpensAt" path="/summary"/></param>
-    /// <param name="closesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
-    /// <param name="problemsHeld">How many problems each of the group's rounds holds.</param>
-    /// <param name="now">The instant the group's opening is read against.</param>
-    /// <returns>Whether a board can be finalized into it.</returns>
-    private static bool TakesBoard(
-        DateTimeOffset opensAt, DateTimeOffset? closesAt, IReadOnlyCollection<int> problemsHeld, DateTimeOffset now) =>
-        // Not yet open, closing at some point, with rounds that are all still empty
-        opensAt > now && closesAt is not null && problemsHeld.Count > 0 && problemsHeld.All(held => held == 0);
 }

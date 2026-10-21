@@ -2,32 +2,22 @@
 
 import { type KeyboardEvent, type PointerEvent, useRef, useState } from 'react'
 
-import { useKeyedState } from '@/hooks/use-keyed-state'
-
 import { SCORE_KEYS, scoreAt } from '../model/rating-scale'
 
 /**
- * How a score bar draws the score it shows: the score as it stands, the step a press or a drag is on, or the step a
+ * How a score bar draws the score it shows: the score given, the step a press or a drag is on, or the step a
  * hovering mouse would give.
  */
 export type ScoreBarLook = 'standing' | 'pressed' | 'hovered'
 
 /**
- * A step a pointer over the bar shows in place of the score as it stands.
+ * A step a pointer over the bar shows in place of the score given.
  */
 type ScoreBarPreview = {
   /** The step shown. */
   score: number
   /** Whether a press shows it, or a mouse hovering over it. */
   look: 'pressed' | 'hovered'
-}
-
-/**
- * A score the reader has just set, held until the score given catches up with it.
- */
-type HeldScore = {
-  /** The score set; null where it was taken back. */
-  score: number | null
 }
 
 /**
@@ -38,6 +28,8 @@ type UseScoreBarOptions = {
   score: number | null
   /** Sets the score; null takes it back. */
   onScore: (score: number | null) => void
+  /** Sets the score from a key, which may come again at once while the key is held; null takes it back. */
+  onKeyScore: (score: number | null) => void
 }
 
 /**
@@ -62,13 +54,11 @@ type ScoreBarHandlers = {
  * Return type for {@link useScoreBar}.
  */
 type UseScoreBarResult = {
-  /** The score as it stands: the one just set until the score given catches up, the score given otherwise. */
-  standingScore: number | null
   /** The score the bar shows; null for none. */
   shownScore: number | null
   /** How the bar draws it. */
   look: ScoreBarLook
-  /** Sets the score, unless it already stands, holding it in view until the score given catches up. */
+  /** Sets the score, unless it is already the score given. */
   setScore: (score: number | null) => void
   /** The bar's handlers. */
   handlers: ScoreBarHandlers
@@ -92,37 +82,30 @@ function fractionAlong(event: PointerEvent<HTMLElement>): number {
 /**
  * A slider over a score, driven by a pointer in half steps and by keys in tenths. A press shows the step under it at
  * once and a drag carries it along, and a release or a key sets the score. A hovering mouse previews the step a press
- * would give. A score set is held in view until the score given catches up with it, so the bar never shows the old
- * one in between.
+ * would give.
  *
- * @param options - The score given and the way to set it.
+ * @param options - The score given and the ways to set it.
  *
  * @returns The score to show, how to draw it, the way to set it, and the bar's handlers.
  */
-export function useScoreBar({ score, onScore }: UseScoreBarOptions): UseScoreBarResult {
+export function useScoreBar({ score, onScore, onKeyScore }: UseScoreBarOptions): UseScoreBarResult {
   // The step a pointer shows in place of the score, none while no pointer does
   const [preview, setPreview] = useState<ScoreBarPreview | null>(null)
 
   // Whether a press on the bar is going on
   const isPressed = useRef(false)
 
-  // The score the reader has just set, dropped once the score given moves
-  const [held, setHeld] = useKeyedState<HeldScore | null>(score, null)
+  // A function which sets the score through the callback given, unless it is already the score given
+  const setIfMoved = (next: number | null, set: (score: number | null) => void) => {
+    // The score already given, nothing to set
+    if (next === score) return
 
-  // The score as it stands: the one just set until the score given catches up, the score given otherwise
-  const standingScore = held === null ? score : held.score
-
-  // A function which sets the score, unless it is already the one standing
-  const setScore = (next: number | null) => {
-    // The score already standing, nothing to set
-    if (next === standingScore) return
-
-    // Held in view until the score given catches up
-    setHeld({ score: next })
-
-    // And set
-    onScore(next)
+    // The score, set
+    set(next)
   }
+
+  // A function which sets the score, unless it is already the score given
+  const setScore = (next: number | null) => setIfMoved(next, onScore)
 
   // A function which starts a press on the step under it
   const onPointerDown = (event: PointerEvent<HTMLElement>) => {
@@ -156,8 +139,8 @@ export function useScoreBar({ score, onScore }: UseScoreBarOptions): UseScoreBar
     // A finger shows a step only by pressing it
     if (event.pointerType !== 'mouse') return
 
-    // A mouse previews the step a press would give, nothing over the score standing
-    setPreview(step === standingScore ? null : { score: step, look: 'hovered' })
+    // A mouse previews the step a press would give, nothing over the score given
+    setPreview(step === score ? null : { score: step, look: 'hovered' })
   }
 
   // A function which ends a press, setting the step it lets go on
@@ -207,19 +190,18 @@ export function useScoreBar({ score, onScore }: UseScoreBarOptions): UseScoreBar
     // A mouse's preview dropped, so the bar shows the score the key sets
     setPreview(null)
 
-    // The score it moves to
-    setScore(key(standingScore, event.shiftKey))
+    // The score the key moves to, set as a key's score
+    setIfMoved(key(score, event.shiftKey), onKeyScore)
   }
 
-  // The step a pointer shows, else the score as it stands
-  const shownScore = preview === null ? standingScore : preview.score
+  // The step a pointer shows, else the score given
+  const shownScore = preview === null ? score : preview.score
 
   // Drawn as the pointer shows it, else as standing
   const look: ScoreBarLook = preview === null ? 'standing' : preview.look
 
-  // The score standing and shown, how to draw it, the way to set it, and the bar's handlers
+  // The score shown, how to draw it, the way to set it, and the bar's handlers
   return {
-    standingScore,
     shownScore,
     look,
     setScore,

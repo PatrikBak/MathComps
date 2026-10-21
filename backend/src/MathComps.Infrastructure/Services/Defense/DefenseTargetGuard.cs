@@ -1,9 +1,9 @@
 using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
-using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Organizations;
+using MathComps.Infrastructure.Services.Selection;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.Services.Defense;
@@ -81,7 +81,7 @@ public sealed class DefenseTargetGuard(
             ?? throw new HostedProblemNotFoundException();
 
         // Whether the problem sits among the proposals.
-        var isProposal = TaxonomySlugs.IsAtOrUnder(round.CompetitionPath, HostedTaxonomy.ProposalsPath);
+        var isProposal = SelectionRules.IsInPool(round.CompetitionPath);
 
         // Anything outside the proposals is arguable only where the site hosts its round.
         if (!isProposal && !round.IsHosted)

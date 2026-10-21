@@ -31,6 +31,11 @@ type ScoreBarProps = {
   score: number | null
   /** Sets the reader's score for the aspect; null takes it back. */
   onScore: (score: number | null) => void
+  /**
+   * Sets the reader's score for the aspect from a key, which may come again at once while the key is held; null
+   * takes it back.
+   */
+  onKeyScore: (score: number | null) => void
 }
 
 /**
@@ -39,7 +44,7 @@ type ScoreBarProps = {
  * and a drag sets the step it lets go on. The arrows beside the score move it a tenth and the cross takes it back,
  * as the arrow keys and Backspace do on the bar. Up and down stay the menu's.
  */
-export function ScoreBar({ aspect, score, onScore }: ScoreBarProps) {
+export function ScoreBar({ aspect, score, onScore, onKeyScore }: ScoreBarProps) {
   // Rating copy
   const t = useTranslations('problemSelection.ratings')
 
@@ -49,8 +54,8 @@ export function ScoreBar({ aspect, score, onScore }: ScoreBarProps) {
   // The id of the aspect's name
   const labelId = useId()
 
-  // The score standing and shown, how to draw it, the way to set it, and the bar's handlers
-  const bar = useScoreBar({ score, onScore })
+  // The score shown, how to draw it, the way to set it, and the bar's handlers
+  const bar = useScoreBar({ score, onScore, onKeyScore })
 
   // The aspect's name
   const name = t(aspect)
@@ -65,8 +70,8 @@ export function ScoreBar({ aspect, score, onScore }: ScoreBarProps) {
         <ScoreButton
           icon={ChevronLeft}
           label={t('lowerScore', { aspect: name })}
-          disabled={bar.standingScore === null || bar.standingScore === MIN_SCORE}
-          onPress={() => bar.setScore(stepScore(bar.standingScore, -1))}
+          disabled={score === null || score === MIN_SCORE}
+          onPress={() => bar.setScore(stepScore(score, -1))}
         />
         <span
           aria-hidden
@@ -77,13 +82,13 @@ export function ScoreBar({ aspect, score, onScore }: ScoreBarProps) {
         <ScoreButton
           icon={ChevronRight}
           label={t('raiseScore', { aspect: name })}
-          disabled={bar.standingScore === MAX_SCORE}
-          onPress={() => bar.setScore(stepScore(bar.standingScore, 1))}
+          disabled={score === MAX_SCORE}
+          onPress={() => bar.setScore(stepScore(score, 1))}
         />
         <ScoreButton
           icon={X}
           label={t('clearScore', { aspect: name })}
-          disabled={bar.standingScore === null}
+          disabled={score === null}
           onPress={() => bar.setScore(null)}
           className="disabled:invisible"
         />
