@@ -30,6 +30,11 @@ public sealed class PostgresContainerFixture : IAsyncLifetime
     private string DbPassword { get; } = "postgres";
 
     /// <summary>
+    /// pgvector's image: Postgres 16 with the vector extension.
+    /// </summary>
+    private const string PostgresImage = "pgvector/pgvector:pg16";
+
+    /// <summary>
     /// The port PostgreSQL listens on inside the container.
     /// </summary>
     private const int InternalPort = 5432;
@@ -59,9 +64,7 @@ public sealed class PostgresContainerFixture : IAsyncLifetime
         {
             // The Postgres module's builder, for its wait strategy: pg_isready over TCP, which the socket-only
             // server the image's entrypoint runs for its init scripts cannot answer
-            _postgresContainer = new PostgreSqlBuilder()
-                // pgvector's image: Postgres 16 with the vector extension
-                .WithImage("pgvector/pgvector:pg16")
+            _postgresContainer = new PostgreSqlBuilder(PostgresImage)
                 // The server's credentials
                 .WithUsername(DbUser)
                 .WithPassword(DbPassword)
