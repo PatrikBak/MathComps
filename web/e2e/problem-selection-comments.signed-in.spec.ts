@@ -2,6 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
 import {
+  detailQuery,
   OPEN_PAPER_PARAM,
   OPEN_PROPOSAL_PARAM,
   POOL_VIEW_PARAM,
@@ -24,12 +25,14 @@ import {
   addressedParam,
   ALGEBRA,
   BILINGUAL,
+  cardOf,
   DRAFT_BOARD,
   FIRST,
   GEOMETRY,
   headingOf,
   LANDING_WINDOW_MS,
   OPENED,
+  OPENED_COMMENT,
   openPool,
   pluralText,
   READY,
@@ -37,9 +40,11 @@ import {
   selectedTab,
   SELECTION_ENDPOINT,
   selectionCopy,
+  selectionText,
   SET_ASIDE,
   SETTLE_TIMEOUT_MS,
   stubSelection,
+  tabRowOn,
 } from './support/problem-selection'
 import { expect, test } from './support/test'
 
@@ -51,6 +56,9 @@ const ELEMENTARY = DRAFT_BOARD.papers[0]
 
 /** Where the pool lives, laid out as its discussions. */
 const COMMENTS_ADDRESS = `${SELECTION_PATH}?${POOL_VIEW_PARAM}=comments`
+
+/** What Zuzana asks in {@link FIRST}'s discussion. */
+const FIRST_REMARK = 'Is this not too easy?'
 
 /** What Martin's reply in {@link FIRST}'s discussion says, the newest post a test starts with. */
 const LATE_REPLY = 'Then it should go into the intermediate paper.'
@@ -76,6 +84,16 @@ const SECOND_REMARK = 'The second part could stand alone.'
 /** What the reader says in {@link GEOMETRY}'s discussion, posted just after {@link PAPER_REMARK}. */
 const OWN_REMARK = 'Maybe as the opener of the advanced paper?'
 
+/** What the comments a test here finds marked as new say, each telling its comment apart. */
+const MARKABLE_TEXTS = [
+  OPENED_COMMENT.content,
+  FIRST_REMARK,
+  LATE_REPLY,
+  PAPER_REMARK,
+  COLLEAGUE_REPLY,
+  GEOMETRY_REMARK,
+]
+
 /** What Zuzana says in {@link SET_ASIDE}'s discussion. */
 const SET_ASIDE_REMARK = 'Set aside until its solution is fixed.'
 
@@ -87,6 +105,12 @@ const LONG_REMARK = Array.from(
 
 /** Where the pool's discussions are read, all of them at once. */
 const DISCUSSIONS_ADDRESS = `${SELECTION_ENDPOINT}/comments`
+
+/**
+ * The moment a test has the reader seen every discussion up to: after the elementary paper's remark, before
+ * {@link OPENED_COMMENT} and the reply in {@link FIRST}'s discussion.
+ */
+const SEEN_UP_TO = '2026-09-26T00:00:00.000Z'
 
 declare global {
   interface Window {
@@ -139,7 +163,7 @@ function discussedSelection(): ReturnType<typeof rememberedSelection> {
 
   // FIRST's thread, posted early and answered last of all
   memory.discussions.set(threadKey('Proposal', FIRST.id), [
-    commentOf('c-first', 'Zuzana', 'Is this not too easy?', '2026-09-20T08:00:00.000Z', [
+    commentOf('c-first', 'Zuzana', FIRST_REMARK, '2026-09-20T08:00:00.000Z', [
       commentOf('c-late', 'Martin', LATE_REPLY, '2026-10-01T08:00:00.000Z'),
     ]),
   ])
@@ -207,7 +231,57 @@ function threadOf(page: Page, proposal: Proposal): Locator {
  */
 function countLineOf(page: Page, count: number): Locator {
   // The line holding the count
-  return page.getByText(pluralText('comments', { count }), { exact: true }).locator('..')
+  return page
+    .getByText(pluralText('comments', { count }), { exact: true })
+    .locator('xpath=ancestor::p[1]')
+}
+
+/**
+ * The comments drawn as new to the reader, by what they say, in the order they read.
+ *
+ * @param scope - Where to look: the page, or one part of it.
+ *
+ * @returns What each says, among {@link MARKABLE_TEXTS}.
+ */
+function newCommentTexts(scope: Page | Locator): Promise<string[]> {
+  // Each mark of a new comment, read back to what the comment carrying it says
+  return scope.getByText(commentsCopy.newMark, { exact: true }).evaluateAll((marks, texts) => {
+    // A function which reads the comment text an element holds, if it holds one
+    const textIn = (element: Element) =>
+      texts.find((text) => element.textContent?.includes(text) === true)
+
+    // A function which reads the text of the nearest element around the mark holding one, the mark's own comment's
+    const textAround = (element: Element | null): string =>
+      element === null ? '' : (textIn(element) ?? textAround(element.parentElement))
+
+    // Each mark's comment
+    return marks.map(textAround)
+  }, MARKABLE_TEXTS)
+}
+
+/**
+ * Every discussion the backend holds, marked seen by the reader up to {@link SEEN_UP_TO}.
+ *
+ * @param memory - What the backend holds.
+ */
+function seeEverything(memory: ReturnType<typeof rememberedSelection>): void {
+  // Each discussion the backend holds, seen up to the moment
+  memory.discussions.forEach((_comments, key) => memory.seen.marks.set(key, SEEN_UP_TO))
+}
+
+/**
+ * What the line over the pool says while it counts the comments its threads hold.
+ *
+ * @param count - How many comments it counts.
+ * @param fresh - How many of them are new to the reader.
+ *
+ * @returns The line's text.
+ */
+function lineText(count: number, fresh: number): string {
+  // The count, then how many are new where any are
+  return fresh === 0
+    ? pluralText('comments', { count })
+    : `${pluralText('comments', { count })}, ${selectionText('pool.newCount', { count: fresh })}`
 }
 
 /**
@@ -456,8 +530,8 @@ test.describe("the pool's discussions", () => {
       page.getByRole('button', { name: selectionCopy.filters.category, exact: true })
     ).toHaveCount(0)
 
-    // The line over the pool counting the threads' comments alone
-    await expect(countLineOf(page, 6)).toHaveText(pluralText('comments', { count: 6 }))
+    // The line over the pool counting the threads' comments alone, every one of them new
+    await expect(countLineOf(page, 6)).toHaveText(lineText(6, 6))
 
     // The pool laid out as its problems again
     await poolView(page, selectionCopy.pool.views.problems).click()
@@ -469,7 +543,7 @@ test.describe("the pool's discussions", () => {
     await poolView(page, selectionCopy.pool.views.comments).click()
 
     // The threads' comments counted again
-    await expect(countLineOf(page, 6)).toHaveText(pluralText('comments', { count: 6 }))
+    await expect(countLineOf(page, 6)).toHaveText(lineText(6, 6))
   })
 
   test('says when the discussions could not be read, and reads them again on asking', async ({
@@ -1087,5 +1161,264 @@ test.describe("the pool's discussions", () => {
       headingText(OPENED),
       `${ELEMENTARY.name} ${DRAFT_BOARD.name}`,
     ])
+  })
+})
+
+test.describe("what is new in the pool's discussions", () => {
+  test("marks every comment somebody else posted as new where nothing was seen, never the reader's own", async ({
+    page,
+  }) => {
+    // What the backend keeps, none of it ever seen
+    const memory = discussedSelection()
+
+    // The reader's own remark in the geometry problem's discussion
+    addToGeometry(memory, {
+      ...commentOf('c-own', 'Reader', OWN_REMARK, '2026-09-27T08:00:00.000Z'),
+      author: { id: READER_ID, name: READER_NAME, avatarUrl: null },
+    })
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // Five of the six comments new, the line saying so
+    await expect(countLineOf(page, 6)).toHaveText(lineText(6, 5), { timeout: SETTLE_TIMEOUT_MS })
+
+    // Everybody else's comments, the reader's own left plain
+    expect((await newCommentTexts(page)).toSorted()).toEqual(
+      [OPENED_COMMENT.content, FIRST_REMARK, LATE_REPLY, PAPER_REMARK, GEOMETRY_REMARK].toSorted()
+    )
+  })
+
+  test('counts as new only what was posted after the mark, never an older comment edited or reacted to since', async ({
+    page,
+  }) => {
+    // What the backend keeps
+    const memory = discussedSelection()
+
+    // Every discussion seen up to the mark
+    seeEverything(memory)
+
+    // The geometry remark edited and liked after the mark
+    memory.discussions.set(threadKey('Proposal', GEOMETRY.id), [
+      {
+        ...commentOf('c-geometry', 'Martin', GEOMETRY_REMARK, '2026-09-10T08:00:00.000Z'),
+        editedAt: '2026-10-05T08:00:00.000Z',
+        reactions: [{ userId: 'user_zuzana', name: 'Zuzana', kind: 'thumbsUp' }],
+      },
+    ])
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // Two new, the line saying so
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 2), { timeout: SETTLE_TIMEOUT_MS })
+
+    // The reply in the first problem's thread and the opened problem's comment, top to bottom
+    expect(await newCommentTexts(page)).toEqual([LATE_REPLY, OPENED_COMMENT.content])
+  })
+
+  test("marks what the tab shows as seen with the eye, which then goes, and the cards' counts with it", async ({
+    page,
+  }) => {
+    // What the backend keeps, nothing in it ever seen
+    const memory = discussedSelection()
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The pool
+    await openPool(page)
+
+    // The first problem's comment count standing out
+    await expect(tabRowOn(cardOf(page, FIRST), 'comments', 2, true)).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The pool's discussions
+    await poolView(page, selectionCopy.pool.views.comments).click()
+
+    // Every comment new
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 5), { timeout: SETTLE_TIMEOUT_MS })
+
+    // The eye pressed
+    await page.getByRole('button', { name: selectionCopy.comments.markSeen }).click()
+
+    // Nothing new, the eye gone and the focus on the line
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 0))
+    expect(await newCommentTexts(page)).toEqual([])
+    await expect(page.getByRole('button', { name: selectionCopy.comments.markSeen })).toHaveCount(0)
+    await expect(countLineOf(page, 5)).toBeFocused()
+
+    // The backend told every problem and paper whose thread the tab showed was seen
+    expect(memory.seen.writes.at(-1)?.proposalIds.toSorted()).toEqual(
+      [FIRST.id, GEOMETRY.id, OPENED.id].toSorted()
+    )
+    expect(memory.seen.writes.at(-1)?.paperIds).toEqual([ELEMENTARY.id])
+
+    // The pool's problems again
+    await poolView(page, selectionCopy.pool.views.problems).click()
+
+    // The first problem's comment count plain
+    await expect(tabRowOn(cardOf(page, FIRST), 'comments', 2)).toBeVisible()
+  })
+
+  test('leaves new a reply the eye was pressed over while it waited to be shown', async ({
+    page,
+  }) => {
+    // What the backend keeps, nothing in it ever seen
+    const memory = discussedSelection()
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // Every comment new
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 5), { timeout: SETTLE_TIMEOUT_MS })
+
+    // Zuzana answering the geometry problem's comment meanwhile, after everything the list shows
+    answerGeometry(memory)
+
+    // The first problem, opened from its thread's heading
+    await threadOf(page, FIRST).getByRole('link').first().click()
+
+    // The first problem's own page
+    await expect(headingOf(page, FIRST)).toBeVisible()
+
+    // Back to the pool, which reads the discussions again
+    await page.goBack()
+
+    // The button the reply waits behind
+    const whatsNew = page.getByRole('button', { name: selectionCopy.pool.showWhatsNew })
+
+    // Standing over the list
+    await expect(whatsNew).toBeVisible()
+
+    // The eye pressed while it waits
+    await page.getByRole('button', { name: selectionCopy.comments.markSeen }).click()
+
+    // Nothing the list shows is new any more
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 0))
+
+    // The backend told the threads were seen up to the newest comment they showed, the first problem's reply
+    expect(memory.seen.writes.at(-1)?.seenUpTo).toBe('2026-10-01T08:00:00.000Z')
+
+    // What waited, shown
+    await whatsNew.click()
+
+    // Zuzana's reply in, and new
+    await expect(countLineOf(page, 6)).toHaveText(lineText(6, 1))
+    expect(await newCommentTexts(page)).toEqual([COLLEAGUE_REPLY])
+  })
+
+  test("opens a problem from the pool's discussions on the same marks, its own tab offering the eye", async ({
+    page,
+  }) => {
+    // A selection whose problems and paper are discussed, nothing in it ever seen
+    await stubSelection(page, 'selection', discussedSelection())
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // Every comment new
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 5), { timeout: SETTLE_TIMEOUT_MS })
+
+    // The first problem opened from its thread's heading
+    await threadOf(page, FIRST).getByRole('link').first().click()
+
+    // The problem's discussion
+    const panel = page.getByRole('tabpanel')
+
+    // As new as it was in the list
+    await expect.poll(() => newCommentTexts(panel)).toEqual([FIRST_REMARK, LATE_REPLY])
+
+    // The eye pressed
+    await page.getByRole('button', { name: selectionCopy.comments.markSeen }).click()
+
+    // Nothing new in it any more
+    await expect.poll(() => newCommentTexts(panel)).toEqual([])
+
+    // Back to the pool
+    await page.goBack()
+
+    // The problem's thread not new there either
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 3), { timeout: SETTLE_TIMEOUT_MS })
+    expect(await newCommentTexts(page)).toEqual([
+      OPENED_COMMENT.content,
+      PAPER_REMARK,
+      GEOMETRY_REMARK,
+    ])
+  })
+
+  test("marks a paper's discussion seen with the eye on its own tab, the focus staying in the discussion", async ({
+    page,
+  }) => {
+    // What the backend keeps, nothing in it ever seen
+    const memory = discussedSelection()
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The elementary paper's discussion
+    await page.goto(
+      `${SELECTION_PATH}?${detailQuery({ kind: 'paper', id: ELEMENTARY.id, tab: 'comments' })}`
+    )
+
+    // The paper's discussion
+    const panel = page.getByRole('tabpanel')
+
+    // Martin's remark new in it
+    await expect
+      .poll(() => newCommentTexts(panel), { timeout: SETTLE_TIMEOUT_MS })
+      .toEqual([PAPER_REMARK])
+
+    // The eye pressed
+    await page.getByRole('button', { name: selectionCopy.comments.markSeen }).click()
+
+    // Nothing new in it any more
+    await expect.poll(() => newCommentTexts(panel)).toEqual([])
+
+    // The focus handed to the discussion as the eye left
+    await expect
+      .poll(() => panel.evaluate((element) => element.contains(document.activeElement)))
+      .toBe(true)
+
+    // The backend told the paper's discussion was seen up to its remark
+    expect(memory.seen.writes.at(-1)).toEqual({
+      proposalIds: [],
+      paperIds: [ELEMENTARY.id],
+      seenUpTo: '2026-09-25T08:00:00.000Z',
+    })
+  })
+
+  test("says beside a folded thread's reply count that a reply it hides is new", async ({
+    page,
+  }) => {
+    // A selection whose problems and paper are discussed, nothing in it ever seen
+    await stubSelection(page, 'selection', discussedSelection())
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // Every comment new
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 5), { timeout: SETTLE_TIMEOUT_MS })
+
+    // The first problem's thread folded, Martin's new reply under it
+    await threadOf(page, FIRST).getByRole('button', { name: commentsCopy.hideReplies }).click()
+
+    // The fold's button saying a reply it hides is new
+    await expect(
+      threadOf(page, FIRST).getByRole('button', {
+        name: `${commentsCopy.show} ${pluralText('replies', { count: 1 })} ${messages.ui.content.includingNew}`,
+        exact: true,
+      })
+    ).toBeVisible()
   })
 })

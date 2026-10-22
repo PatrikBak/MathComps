@@ -25,20 +25,37 @@ type ProblemRowLabelProps = {
   icon: LucideIcon
   /** How many things the row leads to, said once there are any; null where the row counts nothing. */
   count: number | null
+  /** Whether some of what the row counts is new to the reader. */
+  hasNews?: boolean
 }
 
 /**
- * What a row under a problem says: its mark, its name, and how many things it leads to.
+ * What a row under a problem says: its mark, its name, and how many things it leads to. While some of them are new to
+ * the reader, the count is filled in and says so to a screen reader.
  */
-export function ProblemRowLabel({ label, icon: Icon, count }: ProblemRowLabelProps) {
+export function ProblemRowLabel({
+  label,
+  icon: Icon,
+  count,
+  hasNews = false,
+}: ProblemRowLabelProps) {
+  // Content copy
+  const tContent = useTranslations('ui.content')
+
   return (
     <span className="inline-flex items-center gap-2 text-foreground">
       <Icon size={15} className="text-muted" />
       {label}
       {/* A space between the name and the count, so the row's accessible name reads them apart */}{' '}
       {count !== null && count > 0 && (
-        <span className="rounded-full bg-brand/15 px-1.5 text-xs font-semibold tabular-nums text-brand-light">
+        <span
+          className={cn(
+            'rounded-full px-1.5 text-xs font-semibold tabular-nums',
+            hasNews ? 'bg-brand text-brand-foreground' : 'bg-brand/15 text-brand-light'
+          )}
+        >
           {count}
+          {hasNews && <span className="sr-only">{tContent('includingNew')}</span>}
         </span>
       )}
     </span>

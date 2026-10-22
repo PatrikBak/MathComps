@@ -1,8 +1,8 @@
 'use client'
 
-import { useAuth } from '@clerk/nextjs'
 import { ArrowUp } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import type { RefObject } from 'react'
 import { createPortal } from 'react-dom'
 
 import { CommentList } from '@/components/features/comments/components/CommentList'
@@ -11,10 +11,7 @@ import {
   type UseCollapsedCommentsResult,
 } from '@/components/features/comments/hooks/use-collapsed-comments'
 import { useCommentReply } from '@/components/features/comments/hooks/use-comment-reply'
-import {
-  convertToCommentData,
-  countAllComments,
-} from '@/components/features/comments/utils/comment-utils'
+import { countAllComments } from '@/components/features/comments/utils/comment-utils'
 import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
@@ -28,14 +25,15 @@ import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
 import { useShowFromTop } from '@/hooks/use-show-from-top'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
+import { type DrawnThread, useDrawnThreads } from '../hooks/use-drawn-threads'
 import { usePoolThreads } from '../hooks/use-pool-threads'
 import {
   type DiscussedSubject,
   discussionTargetOf,
-  type DiscussionThread,
   threadKeyOf,
 } from '../model/selection-discussions'
 import { categoryHue } from '../model/selection-state'
+import { MarkSeenButton } from './MarkSeenButton'
 import { PoolSkeleton } from './PoolSkeleton'
 import { ProposalBox } from './ProposalBody'
 import { DetailLink } from './SelectionLinks'
@@ -55,7 +53,8 @@ type PoolCommentsProps = {
  * gives. Anything new anybody else says while the list is open waits behind a button, so it never moves the list
  * under the reader. The reader's own writes show at once, and so do others' reactions and deletions. A problem opened
  * from the list and closed again finds it as it was left. The line over the pool says how many comments the threads
- * hold, that they are on their way, or that they are not to be had.
+ * hold, that they are on their way, or that they are not to be had. While some comments are new to the reader, it
+ * says how many, with the eye marking them seen.
  */
 export function PoolComments({ countSlot }: PoolCommentsProps) {
   // Pool copy
@@ -91,8 +90,22 @@ export function PoolComments({ countSlot }: PoolCommentsProps) {
       ? tPlurals('comments', { count: countAllComments(threads.map((thread) => thread.comment)) })
       : t(waitingLineKey(uiState))
 
-  // The comment count or the waiting line, drawn in the line over the pool
-  const count = countSlot === null ? null : createPortal(countLine, countSlot)
+  // Each thread as the list draws it, how many comments in them are new to the reader, and the way to mark them seen
+  const { drawn, newCount, markShownSeen } = useDrawnThreads({ threads })
+
+  // The comment count or the waiting line, with what is new, drawn in the line over the pool
+  const count =
+    countSlot === null
+      ? null
+      : createPortal(
+          <>
+            <span>{countLine}</span>
+            {newCount > 0 && (
+              <NewCommentTools count={newCount} onMarkSeen={markShownSeen} countRef={countRef} />
+            )}
+          </>,
+          countSlot
+        )
 
   // Which comments of the list have their replies folded away
   const collapsed = useCollapsedComments()
@@ -113,7 +126,7 @@ export function PoolComments({ countSlot }: PoolCommentsProps) {
   return (
     // The threads, and what waits over them
     <div>
-      {/* How many comments show, in the line over the pool */}
+      {/* How many comments show and how many of them are new, in the line over the pool */}
       {count}
 
       {/* What arrived since the threads were shown, waiting to be asked for */}
@@ -135,9 +148,9 @@ export function PoolComments({ countSlot }: PoolCommentsProps) {
         ) : (
           // The threads, only those in or near the window drawn
           <WindowVirtualList
-            items={threads}
-            keyOf={threadKeyOf}
-            renderItem={(thread) => <PoolThread thread={thread} collapsed={collapsed} />}
+            items={drawn}
+            keyOf={(item) => threadKeyOf(item.thread)}
+            renderItem={(item) => <PoolThread drawn={item} collapsed={collapsed} />}
             fallbackRef={countRef}
           />
         )}
@@ -226,11 +239,42 @@ function ThreadsPlaceholder({ uiState, onRetry }: ThreadsPlaceholderProps) {
 }
 
 /**
+ * Props for the {@link NewCommentTools} component.
+ */
+type NewCommentToolsProps = {
+  /** How many comments of the list are new to the reader. */
+  count: number
+  /** Marks what the list shows as seen. */
+  onMarkSeen: () => void
+  /** The line over the pool. */
+  countRef: RefObject<HTMLParagraphElement | null>
+}
+
+/**
+ * The part of the line over the pool about new comments: how many are new to the reader, and the eye marking them all
+ * seen.
+ */
+function NewCommentTools({ count, onMarkSeen, countRef }: NewCommentToolsProps) {
+  // Pool copy
+  const t = useTranslations('problemSelection.pool')
+
+  return (
+    <span className="inline-flex items-center gap-0.5">
+      {/* How many are new */}
+      <span className="mr-1 font-medium text-brand-light">{`, ${t('newCount', { count })}`}</span>
+
+      {/* The eye marking the new comments seen */}
+      <MarkSeenButton onPress={onMarkSeen} fallbackRef={countRef} />
+    </span>
+  )
+}
+
+/**
  * Props for the {@link PoolThread} component.
  */
 type PoolThreadProps = {
-  /** The thread, with what its discussion hangs off. */
-  thread: DiscussionThread<DiscussedSubject>
+  /** The thread as the list draws it. */
+  drawn: DrawnThread
   /** Which comments of the tab have their replies folded away. */
   collapsed: UseCollapsedCommentsResult
 }
@@ -238,17 +282,14 @@ type PoolThreadProps = {
 /**
  * One top-level comment with its replies, under a heading naming its problem or paper. It is replied to, edited,
  * deleted and reacted to in place, the way it is on its problem's or paper's own page, the reply shared with every
- * other thread in the tab.
+ * other thread in the tab, and what in it is new to the reader shows as such.
  */
-function PoolThread({ thread, collapsed }: PoolThreadProps) {
-  // The reader, whose comments and reactions are marked as theirs
-  const { userId } = useAuth()
+function PoolThread({ drawn, collapsed }: PoolThreadProps) {
+  // The thread, how the comment components draw it, and how far its discussion is seen
+  const { thread, comments, newness } = drawn
 
   // The discussion the thread was posted in
   const target = discussionTargetOf(thread.subject)
-
-  // The thread as the comment components draw it
-  const comments = [convertToCommentData(thread.comment, userId ?? null)]
 
   // The reply, open in this thread while it is opened under one of its comments
   const reply = useCommentReply({ target, comments })
@@ -267,6 +308,7 @@ function PoolThread({ thread, collapsed }: PoolThreadProps) {
           showReactions
           reply={reply}
           collapsed={collapsed}
+          newness={newness}
         />
       </div>
     </ProposalBox>

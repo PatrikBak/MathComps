@@ -279,6 +279,7 @@
     "hideReplies": "Skrýt odpovědi",
     "lastEdited": "Naposledy upraveno {date}",
     "loadError": "Nepodařilo se načíst komentáře. Zkus to později.",
+    "newMark": "nový",
     "reply": "Odpovědět",
     "replyPlaceholder": "Napiš odpověď...",
     "show": "Zobrazit",
@@ -1301,6 +1302,8 @@
       "unfold": "Rozbalit sestavu"
     },
     "comments": {
+      "markSeen": "Označit jako přečtené",
+      "markSeenFailed": "Komentáře se nepodařilo označit jako přečtené.",
       "placeholder": "Co si o úloze myslíš a kam se hodí?"
     },
     "conversations": {
@@ -1376,6 +1379,7 @@
       "emptySetAsideFiltered": "Těmto filtrům neodpovídá žádná odložená úloha.",
       "loading": "Načítám úlohy",
       "loadingComments": "Načítám komentáře",
+      "newCount": "{count, plural, =1 {# nový} =2 {# nové} =3 {# nové} =4 {# nové} other {# nových}}",
       "resort": "Znovu seřadit",
       "search": "Hledat úlohy",
       "searchPlaceholder": "Číslo, název nebo text",
@@ -1485,7 +1489,8 @@
       "submit": "Odeslat"
     },
     "content": {
-      "imageMissing": "Obrázek se ztratil"
+      "imageMissing": "Obrázek se ztratil",
+      "includingNew": "včetně nových"
     },
     "editor": {
       "attachment": "Příloha (PDF, TXT, MD)",

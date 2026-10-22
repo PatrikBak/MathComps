@@ -75,6 +75,23 @@ export type CommentDto = {
 }
 
 /**
+ * How far a reader has seen one comment thread, beside when somebody else last posted in it, which together say
+ * whether anything in it is new to them.
+ */
+export type CommentThreadSeenDto = {
+  /**
+   * The moment up to which the reader has seen every comment posted in the thread (ISO 8601 string); null when they
+   * have seen nothing in it.
+   */
+  seenUpTo: string | null
+  /**
+   * When the newest comment still standing that somebody else posted in the thread was posted (ISO 8601 string), an
+   * edit keeping the moment it was first posted; null when the thread holds none.
+   */
+  lastPostedByOthersAt: string | null
+}
+
+/**
  * Result returned after updating a comment.
  */
 export type UpdateCommentResult = {

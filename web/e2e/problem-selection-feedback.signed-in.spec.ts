@@ -191,12 +191,30 @@ async function openMathildaOnBilingual(page: Page): Promise<AnswerGate> {
   return history
 }
 
+/**
+ * The backend's memory every selection test starts from, the comment under {@link OPENED} already seen, so the
+ * problem's comment count reads plain.
+ *
+ * @returns The memory.
+ */
+function openedCommentSeen(): ReturnType<typeof rememberedSelection> {
+  // The memory every selection test starts from
+  const memory = rememberedSelection(null)
+
+  // The comment under the opened problem, seen
+  memory.seen.marks.set(threadKey('Proposal', OPENED.id), OPENED_COMMENT.createdAt)
+
+  // The memory
+  return memory
+}
+
 test.describe('what reviewers said about a problem', () => {
   test('counts the conversations and comments on each card, the comments row opening its tab and taking the focus back', async ({
     page,
   }) => {
-    // A reviewer whose selection holds a pool of problems, one of them argued and discussed
-    await stubSelection(page, 'selection')
+    // A reviewer whose selection holds a pool of problems, one of them argued and discussed, the comment under it
+    // already seen
+    await stubSelection(page, 'selection', openedCommentSeen())
 
     // The pool, every card drawn
     await openPool(page)
@@ -241,8 +259,9 @@ test.describe('what reviewers said about a problem', () => {
     // The clock under the test's hand, so the next read comes when the test says
     await page.clock.install()
 
-    // What the backend keeps, which another reviewer is about to add to
-    const memory = rememberedSelection(null)
+    // What the backend keeps, which another reviewer is about to add to, the comment under the discussed problem
+    // already seen
+    const memory = openedCommentSeen()
 
     // A reviewer whose selection holds a pool of problems, one of them discussed
     await stubSelection(page, 'selection', memory)
@@ -259,8 +278,8 @@ test.describe('what reviewers said about a problem', () => {
     // Long enough for what is on screen to be read again
     await page.clock.fastForward('00:31')
 
-    // The card's comments row, counting both
-    const commentsRow = tabRowOn(cardOf(page, OPENED), 'comments', 2)
+    // The card's comments row, counting both, the later one new to the reader
+    const commentsRow = tabRowOn(cardOf(page, OPENED), 'comments', 2, true)
 
     // Once the read has landed
     await expect(commentsRow).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
@@ -1017,8 +1036,8 @@ test.describe('what reviewers said about a problem', () => {
     // A reviewer with a username, which the discussion asks for before it takes a comment
     await stubNamedReader(page)
 
-    // Whose selection holds a pool of problems, one of them discussed
-    await stubSelection(page, 'selection')
+    // Whose selection holds a pool of problems, one of them discussed, its comment already seen
+    await stubSelection(page, 'selection', openedCommentSeen())
 
     // The problem's discussion
     await page.goto(`${OPENED_ADDRESS}&tab=comments`)
@@ -1047,8 +1066,8 @@ test.describe('what reviewers said about a problem', () => {
     // A reviewer with a username, which the discussion asks for before it takes a comment
     await stubNamedReader(page)
 
-    // Whose selection holds a pool of problems, one of them discussed
-    await stubSelection(page, 'selection')
+    // Whose selection holds a pool of problems, one of them discussed, its comment already seen
+    await stubSelection(page, 'selection', openedCommentSeen())
 
     // The problem's discussion
     await page.goto(`${OPENED_ADDRESS}&tab=comments`)

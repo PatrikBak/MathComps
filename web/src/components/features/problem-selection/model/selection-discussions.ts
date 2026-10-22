@@ -1,6 +1,6 @@
 import type {
   CommentDto,
-  CommentTarget,
+  CommentTargetType,
 } from '@/components/features/comments/services/comment-api-types'
 import {
   newestPostOf,
@@ -58,13 +58,23 @@ export type DiscussionThread<TSubject> = {
 }
 
 /**
+ * The comment target one of the selection's discussions is held under.
+ */
+export type DiscussionTarget = {
+  /** The kind of discussion: a problem's, or a paper's. */
+  targetType: Extract<CommentTargetType, 'Proposal' | 'SelectionPaper'>
+  /** The id of the problem or the paper. */
+  targetId: string
+}
+
+/**
  * The comment target a subject's discussion is held under.
  *
  * @param subject - The subject.
  *
  * @returns The thread's target.
  */
-export function discussionTargetOf(subject: DiscussedSubject): CommentTarget {
+export function discussionTargetOf(subject: DiscussedSubject): DiscussionTarget {
   // Named by the subject's own id, under its kind of thread
   switch (subject.kind) {
     case 'proposal':

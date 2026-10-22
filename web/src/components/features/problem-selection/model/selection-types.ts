@@ -1,4 +1,7 @@
-import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
+import type {
+  CommentDto,
+  CommentThreadSeenDto,
+} from '@/components/features/comments/services/comment-api-types'
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 import type { Locale } from '@/i18n/i18n'
@@ -272,4 +275,37 @@ export type SelectionDiscussions = {
   proposals: Record<string, CommentDto[]>
   /** The discussions of the papers on the selection's boards, by the paper's id. */
   papers: Record<string, CommentDto[]>
+}
+
+/**
+ * How far the reader has seen the discussions of everything the selection holds, each kind of subject's by the
+ * subject's id. Every proposal and paper the selection holds has an entry, one nothing has been said in included.
+ */
+export type SelectionDiscussionsSeen = {
+  /** How far the reader has seen each proposal's discussion, by the proposal's id. */
+  proposals: Record<string, CommentThreadSeenDto>
+  /** How far the reader has seen each paper's discussion, by the paper's id. */
+  papers: Record<string, CommentThreadSeenDto>
+}
+
+/**
+ * The discussions of some of what the selection holds, marked as seen by the reader up to a moment.
+ */
+export type DiscussionsSeenWrite = {
+  /** The proposals whose discussions were seen. */
+  proposalIds: string[]
+  /** The papers whose discussions were seen. */
+  paperIds: string[]
+  /** The moment up to which the reader has seen every comment posted in the discussions named (ISO 8601 string). */
+  seenUpTo: string
+}
+
+/**
+ * The moment the discussions a mark named were marked as seen up to.
+ */
+export type DiscussionsMarked = {
+  /**
+   * The moment up to which the reader has now seen every comment posted in the discussions named (ISO 8601 string).
+   */
+  seenUpTo: string
 }

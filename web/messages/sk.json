@@ -279,6 +279,7 @@
     "hideReplies": "Skryť odpovede",
     "lastEdited": "Naposledy upravené {date}",
     "loadError": "Nepodarilo sa načítať komentáre. Skús to neskôr.",
+    "newMark": "nový",
     "reply": "Odpovedať",
     "replyPlaceholder": "Napíš odpoveď...",
     "show": "Zobraziť",
@@ -1301,6 +1302,8 @@
       "unfold": "Rozbaliť zostavu"
     },
     "comments": {
+      "markSeen": "Označiť ako prečítané",
+      "markSeenFailed": "Komentáre sa nepodarilo označiť ako prečítané.",
       "placeholder": "Čo si o úlohe myslíš a kam sa hodí?"
     },
     "conversations": {
@@ -1376,6 +1379,7 @@
       "emptySetAsideFiltered": "Týmto filtrom nezodpovedá žiadna odložená úloha.",
       "loading": "Načítavam úlohy",
       "loadingComments": "Načítavam komentáre",
+      "newCount": "{count, plural, =1 {# nový} =2 {# nové} =3 {# nové} =4 {# nové} other {# nových}}",
       "resort": "Znova zoradiť",
       "search": "Hľadať úlohy",
       "searchPlaceholder": "Číslo, názov alebo text",
@@ -1485,7 +1489,8 @@
       "submit": "Odoslať"
     },
     "content": {
-      "imageMissing": "Obrázok sa stratil"
+      "imageMissing": "Obrázok sa stratil",
+      "includingNew": "vrátane nových"
     },
     "editor": {
       "attachment": "Príloha (PDF, TXT, MD)",

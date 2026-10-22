@@ -279,6 +279,7 @@
     "hideReplies": "Hide replies",
     "lastEdited": "Last edited {date}",
     "loadError": "Failed to load comments. Please try again later.",
+    "newMark": "new",
     "reply": "Reply",
     "replyPlaceholder": "Write a reply...",
     "show": "Show",
@@ -1301,6 +1302,8 @@
       "unfold": "Unfold the board"
     },
     "comments": {
+      "markSeen": "Mark as read",
+      "markSeenFailed": "The comments could not be marked as read.",
       "placeholder": "What do you think of it, and where does it fit?"
     },
     "conversations": {
@@ -1376,6 +1379,7 @@
       "emptySetAsideFiltered": "No set-aside problem matches these filters.",
       "loading": "Loading the pool",
       "loadingComments": "Loading comments",
+      "newCount": "{count, plural, =1 {# new} other {# new}}",
       "resort": "Re-sort",
       "search": "Search the pool",
       "searchPlaceholder": "Number, name or text",
@@ -1485,7 +1489,8 @@
       "submit": "Submit"
     },
     "content": {
-      "imageMissing": "Image missing"
+      "imageMissing": "Image missing",
+      "includingNew": "including new ones"
     },
     "editor": {
       "attachment": "Attachment (PDF, TXT, MD)",

@@ -14,6 +14,7 @@ import { useSelectionOrganization } from './selection-organization'
 import { useBoardPicking, type UseBoardPickingResult } from './use-board-picking'
 import { useOpenDetail, type UseOpenDetailResult } from './use-open-detail'
 import { usePoolFilters, type UsePoolFiltersResult } from './use-pool-filters'
+import { useSeenMarks, type UseSeenMarksResult } from './use-seen-marks'
 import { useIsChangingSlots } from './use-selection-write'
 
 /**
@@ -26,7 +27,8 @@ export type LoadedSelection = SelectionIndex & {
 
 /**
  * What every part of the selection shares: the read, whether a write changing its slots is out, the page open in
- * full, what the pool is narrowed to, and the slot waiting for a problem with the ways to move it.
+ * full, what the pool is narrowed to, the slot waiting for a problem with the ways to move it, and how far the reader
+ * has seen the discussions.
  */
 export type SelectionWorkspace = UseOpenDetailResult &
   Omit<UseBoardPickingResult, 'activeBoard'> & {
@@ -40,6 +42,8 @@ export type SelectionWorkspace = UseOpenDetailResult &
     selection: LoadedSelection | null
     /** What the pool is narrowed to, and the ways of changing it. */
     poolFilters: UsePoolFiltersResult
+    /** How far the reader has seen each discussion, and the way to mark some seen. */
+    seenMarks: UseSeenMarksResult
   }
 
 /**
@@ -90,6 +94,9 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
   // Whether a write changing the slots is still out
   const isChangingSlots = useIsChangingSlots()
 
+  // How far the reader has seen each discussion, and the way to mark some seen
+  const seenMarks = useSeenMarks()
+
   // Everything the parts share, held steady while none of it moves
   return useMemo(
     () => ({
@@ -108,6 +115,7 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
       selectBoard,
       toggleWaiting,
       stopWaiting,
+      seenMarks,
     }),
     [
       uiState,
@@ -125,6 +133,7 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
       selectBoard,
       toggleWaiting,
       stopWaiting,
+      seenMarks,
     ]
   )
 }
