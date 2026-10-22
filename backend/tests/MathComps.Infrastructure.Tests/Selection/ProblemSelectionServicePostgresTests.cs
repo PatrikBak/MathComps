@@ -1,3 +1,4 @@
+using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.Contracts.Selection;
 using MathComps.Domain.Contracts.Users;
@@ -15,9 +16,10 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MathComps.Infrastructure.Tests.Selection;
 
 /// <summary>
-/// Covers <see cref="ProblemSelectionService"/>: the field mapping of the selection read, which proposals, boards and
-/// cycles it holds once groups open, which conversations it lists, which discussions the discussions read holds, and
-/// that each organization's selection holds its own alone and names the categories its reader leads.
+/// Covers <see cref="ProblemSelectionService"/> and <see cref="SelectionDiscussionService"/> over one seed: the field
+/// mapping of the selection read, which proposals, boards and cycles it holds once groups open, which conversations
+/// it lists, which discussions the discussions read holds, which of them a mark lands on and how far the seen read
+/// finds each, and that each organization's selection holds its own alone and names the categories its reader leads.
 /// </summary>
 /// <remarks>
 /// The seed is a pool of three proposals with a draft holding one. The October group has not opened and its
@@ -47,6 +49,11 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     /// A reviewer whose account is deleted.
     /// </summary>
     private readonly Guid _goneReviewerId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// A second reviewer, who posted in no discussion.
+    /// </summary>
+    private readonly Guid _secondReviewerId = Guid.CreateVersion7();
 
     /// <summary>
     /// A member of the olympiad's commission, on its list alone.
@@ -116,7 +123,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services) =>
-        // The service under test, with the rest of the selection.
+        // The services under test, with the rest of the selection.
         services.AddProblemSelectionServices();
 
     /// <summary>
@@ -296,32 +303,139 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     /// and paper. The second proposal, which nobody discusses, gets no entry.
     /// </summary>
     [Fact]
-    public Task The_discussions_are_those_of_what_the_selection_holds() => RunTestAsync(async service =>
-    {
-        // The discussions, as the live reviewer reads them
-        var discussions = await service.GetDiscussionsAsync(
-            Organization.MathCompsSlug, new CommentViewer(_reviewerId, IsAdmin: false));
+    public Task The_discussions_are_those_of_what_the_selection_holds() =>
+        QueryAsync<ISelectionDiscussionService>(async (_, discussionService) =>
+        {
+            // The discussions, as the live reviewer reads them
+            var discussions = await discussionService.GetDiscussionsAsync(
+                Organization.MathCompsSlug, new CommentViewer(_reviewerId, IsAdmin: false));
 
-        // The first proposal's and the November problem's discussions alone, each holding its one comment
-        Assert.Equivalent(
-            new Dictionary<string, string>
-            {
-                [_pool[1].ToString()] = $"On {_pool[1]}",
-                [_november[0].ToString()] = $"On {_november[0]}",
-            },
-            discussions.Proposals.ToDictionary(thread => thread.Key, thread => Assert.Single(thread.Value).Content),
-            strict: true);
+            // The first proposal's and the November problem's discussions alone, each holding its one comment
+            Assert.Equivalent(
+                new Dictionary<string, string>
+                {
+                    [_pool[1].ToString()] = $"On {_pool[1]}",
+                    [_november[0].ToString()] = $"On {_november[0]}",
+                },
+                discussions.Proposals.ToDictionary(thread => thread.Key, thread => Assert.Single(thread.Value).Content),
+                strict: true);
 
-        // The draft paper's and the November paper's discussions alone, each holding its one comment
-        Assert.Equivalent(
-            new Dictionary<string, string>
-            {
-                [_draftPaperId.ToString()] = $"On {_draftPaperId}",
-                [_novemberPaperId.ToString()] = $"On {_novemberPaperId}",
-            },
-            discussions.Papers.ToDictionary(thread => thread.Key, thread => Assert.Single(thread.Value).Content),
-            strict: true);
-    });
+            // The draft paper's and the November paper's discussions alone, each holding its one comment
+            Assert.Equivalent(
+                new Dictionary<string, string>
+                {
+                    [_draftPaperId.ToString()] = $"On {_draftPaperId}",
+                    [_novemberPaperId.ToString()] = $"On {_novemberPaperId}",
+                },
+                discussions.Papers.ToDictionary(thread => thread.Key, thread => Assert.Single(thread.Value).Content),
+                strict: true);
+        });
+
+    /// <summary>
+    /// A mark lands on the discussions the selection holds, one nobody has posted in included, and passes over the
+    /// opened group's problem and the paper on its board. The read then finds the moment the mark handed back beside
+    /// when the reviewer who wrote every seeded comment last posted, and a discussion left unmarked carries that alone.
+    /// A later mark moves the moment on, a moment yet to come held to now, while a discussion it leaves out keeps the
+    /// first.
+    /// </summary>
+    [Fact]
+    public Task A_mark_lands_on_the_discussions_the_selection_holds() =>
+        QueryAsync<ISelectionDiscussionService>(async (context, discussionService) =>
+        {
+            // The second reviewer, who posted in no discussion
+            var secondReviewer = new CommentViewer(_secondReviewerId, IsAdmin: false);
+
+            // MathComps' discussions, as the second reviewer reads them
+            var discussions = await discussionService.GetDiscussionsAsync(Organization.MathCompsSlug, secondReviewer);
+
+            // When each seeded comment was posted, as the database keeps it, by its discussion
+            var postedAt = discussions.Proposals.Concat(discussions.Papers)
+                .ToDictionary(thread => thread.Key, thread => Assert.Single(thread.Value).CreatedAt);
+
+            // The second reviewer marks what they saw up to now, the opened group's problem and the September paper
+            // among it
+            var seenUpTo = await discussionService.MarkDiscussionsSeenAsync(
+                Organization.MathCompsSlug,
+                secondReviewer,
+                [_pool[1], _pool[2], _openedId],
+                [_draftPaperId, _septemberPaperId],
+                DateTimeOffset.UtcNow);
+
+            // The opened group's problem and the September paper, which the selection does not hold
+            List<string> passedOver = [_openedId.ToString(), _septemberPaperId.ToString()];
+
+            // No mark written on the opened group's problem or the September paper
+            Assert.False(await context.CommentSeenMarks.AnyAsync(mark => passedOver.Contains(mark.TargetId)));
+
+            // How far the second reviewer has seen the discussions
+            var seen = await discussionService.GetDiscussionsSeenAsync(Organization.MathCompsSlug, secondReviewer);
+
+            // A discussion the second reviewer never saw and nobody else posted in
+            var untouched = new CommentThreadSeenDto(null, null);
+
+            // Past the untouched ones, the marked proposals still in the selection and the November problem nobody
+            // marked
+            Assert.Equivalent(
+                new Dictionary<string, CommentThreadSeenDto>
+                {
+                    [_pool[1].ToString()] = new(seenUpTo, postedAt[_pool[1].ToString()]),
+                    [_pool[2].ToString()] = new(seenUpTo, null),
+                    [_november[0].ToString()] = new(null, postedAt[_november[0].ToString()]),
+                },
+                seen.Proposals.Where(entry => entry.Value != untouched).ToDictionary(),
+                strict: true);
+
+            // Past the untouched ones, the marked draft paper and the November paper nobody marked
+            Assert.Equivalent(
+                new Dictionary<string, CommentThreadSeenDto>
+                {
+                    [_draftPaperId.ToString()] = new(seenUpTo, postedAt[_draftPaperId.ToString()]),
+                    [_novemberPaperId.ToString()] = new(null, postedAt[_novemberPaperId.ToString()]),
+                },
+                seen.Papers.Where(entry => entry.Value != untouched).ToDictionary(),
+                strict: true);
+
+            // A later mark of the first proposal alone, claiming a moment a day ahead
+            var later = await discussionService.MarkDiscussionsSeenAsync(
+                Organization.MathCompsSlug, secondReviewer, [_pool[1]], [], DateTimeOffset.UtcNow.AddDays(1));
+
+            // Held to now, since nothing posted tomorrow has been seen
+            Assert.True(later <= DateTimeOffset.UtcNow);
+
+            // How far the second reviewer has seen the discussions now
+            var seenLater = await discussionService.GetDiscussionsSeenAsync(
+                Organization.MathCompsSlug, secondReviewer);
+
+            // The first proposal seen up to the later moment, the draft paper still up to the first
+            Assert.Equal(later, seenLater.Proposals[_pool[1].ToString()].SeenUpTo);
+            Assert.Equal(seenUpTo, seenLater.Papers[_draftPaperId.ToString()].SeenUpTo);
+        });
+
+    /// <summary>
+    /// A reviewer outside the organization, on another one's list, marks none of its discussions and reads how far
+    /// they have seen none of them.
+    /// </summary>
+    [Fact]
+    public Task A_reviewer_outside_the_organization_marks_and_reads_none_of_its_discussions() =>
+        QueryAsync<ISelectionDiscussionService>(async (context, discussionService) =>
+        {
+            // The commissioner, on the olympiad's list alone
+            var commissioner = new CommentViewer(_commissionerId, IsAdmin: false);
+
+            // The commissioner marks MathComps' first proposal and its draft paper as seen
+            await discussionService.MarkDiscussionsSeenAsync(
+                Organization.MathCompsSlug, commissioner, [_pool[1]], [_draftPaperId], DateTimeOffset.UtcNow);
+
+            // No mark written
+            Assert.False(await context.CommentSeenMarks.AnyAsync(mark => mark.UserId == _commissionerId));
+
+            // How far the commissioner has seen MathComps' discussions
+            var seen = await discussionService.GetDiscussionsSeenAsync(Organization.MathCompsSlug, commissioner);
+
+            // None of them
+            Assert.Empty(seen.Proposals);
+            Assert.Empty(seen.Papers);
+        });
 
     /// <summary>
     /// The cycles are the groups still taking a board: not the opened one, nor one already filled. Each carries
@@ -509,8 +623,9 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             mathComps.Conversations, conversation => conversation.ProposalId == _olympiadProposalId);
 
         // The olympiad's discussions, as the commissioner reads them
-        var discussions = await service.GetDiscussionsAsync(
-            OlympiadSlug, new CommentViewer(_commissionerId, IsAdmin: false));
+        var discussions = await QueryValueAsync<ISelectionDiscussionService, SelectionDiscussionsDto>(
+            (_, discussionService) => discussionService.GetDiscussionsAsync(
+                OlympiadSlug, new CommentViewer(_commissionerId, IsAdmin: false)));
 
         // Its proposal's and its paper's alone
         Assert.Equal([_olympiadProposalId.ToString()], discussions.Proposals.Keys);
@@ -534,6 +649,12 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
         // The reviewer made a lead of MathComps' advanced category
         SelectionSeed.NewLead(context, "reviewer@example.com", "advanced");
+
+        // The second reviewer
+        context.Users.Add(HostedSeed.NewUser(_secondReviewerId, "Second"));
+
+        // The second reviewer on the MathComps organization's list too
+        SelectionSeed.NewMember(context, "second@example.com", DateTimeOffset.UtcNow.AddDays(-30));
 
         // The season every round sits in
         var season = SelectionSeed.NewSeason(context);
