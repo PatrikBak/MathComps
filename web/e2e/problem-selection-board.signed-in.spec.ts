@@ -167,8 +167,8 @@ test.describe('the board being filled', () => {
       'Spare',
     ])
 
-    // That paper's second slot holding the problem set aside
-    await expect(slotOf(page, 'S2').getByRole('link', { name: SET_ASIDE.title })).toBeVisible()
+    // That paper's second slot, named for its category, holding the problem set aside
+    await expect(slotOf(page, 'C2').getByRole('link', { name: SET_ASIDE.title })).toBeVisible()
 
     // The finalized board, picked in turn
     await pickBoard(page, LATER_DRAFT, FINALIZED_BOARD)

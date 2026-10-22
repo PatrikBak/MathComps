@@ -196,28 +196,28 @@ export function pickActiveBoard(
 }
 
 /**
- * The letter a paper goes by in its slots' short labels: its name's initial, in capitals.
+ * The letter a paper goes by in its slots' short labels: the initial of the category it fills, in capitals.
  *
- * @param paperName - The paper's name.
+ * @param paper - The paper.
  *
  * @returns The initial.
  */
-export function paperInitial(paperName: string): string {
-  // The name's first letter, in capitals
-  return paperName.charAt(0).toUpperCase()
+export function paperInitial(paper: Paper): string {
+  // The category's first letter, in capitals
+  return paper.category.charAt(0).toUpperCase()
 }
 
 /**
  * The short label a slot goes by: the paper's initial and the slot's number, like E2.
  *
- * @param paperName - The name of the paper holding the slot.
+ * @param paper - The paper holding the slot.
  * @param index - The slot's position, from zero.
  *
  * @returns The label.
  */
-export function slotLabel(paperName: string, index: number): string {
+export function slotLabel(paper: Paper, index: number): string {
   // The paper's initial in capitals, then the slot counted from one
-  return `${paperInitial(paperName)}${index + 1}`
+  return `${paperInitial(paper)}${index + 1}`
 }
 
 /**
