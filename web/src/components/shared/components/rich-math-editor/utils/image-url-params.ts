@@ -1,14 +1,21 @@
 /**
  * Shared parser for image URL query parameters used by problem-content images:
- * `?width=`, `?height=`, `?inline=`, `?scale=`. Used by both the renderer
+ * `?width=`, `?height=`, `?inline=`, `?scale=`, `?v=`. Used by both the renderer
  * (best-effort, degrades gracefully) and the validator (strict, reports errors).
  *
- * Recognised params are stripped from the returned `cleanUrl`, so callers can
- * pass it directly to `next/image`.
+ * The params read here are stripped from the returned `cleanUrl`, so callers can
+ * pass it directly to `next/image`; the version stays on it.
  */
 
-/** The set of query parameters this module recognises and consumes. */
-const RECOGNIZED_PARAMS = ['width', 'height', 'inline', 'scale'] as const
+/** The query parameters this module reads and strips from the clean URL. */
+const CONSUMED_PARAMS = ['width', 'height', 'inline', 'scale'] as const
+
+/**
+ * The query parameter carrying a version of the image's bytes. Known, so it
+ * raises no error, and kept on the clean URL: a new version is a new URL, so
+ * the browser fetches the new image instead of reusing its cached copy.
+ */
+const VERSION_PARAM = 'v'
 
 /** A placeholder origin used when the input URL is relative. */
 const PLACEHOLDER_BASE = 'http://__rendererplaceholder__/'
@@ -40,7 +47,7 @@ type ParsedImageUrl = {
   params: ImageParams
   /** Validation errors discovered during parsing */
   errors: ImageParamError[]
-  /** The original URL with all recognised parameters removed — safe to pass to `next/image` */
+  /** The original URL with the consumed parameters removed — safe to pass to `next/image` */
   cleanUrl: string
 }
 
@@ -61,10 +68,10 @@ function tryParseUrl(rawUrl: string): URL | null {
 }
 
 /**
- * Reconstructs a clean URL string after recognised params have been stripped,
+ * Reconstructs a clean URL string after the consumed params have been stripped,
  * preserving whether the original URL was absolute or relative.
  *
- * @param url - The mutated `URL` object with recognised params removed.
+ * @param url - The mutated `URL` object with the consumed params removed.
  * @param rawUrl - The original input URL string (used to detect relative shape).
  * @returns The cleaned URL in the same shape as the input (absolute or relative).
  */
@@ -118,7 +125,8 @@ function parsePositiveIntegerParam(
  * errors for malformed values, partial dimensions, and unknown params.
  *
  * @param rawUrl - The image URL (absolute or relative, with optional query string).
- * @returns Best-effort parsed values, validation errors, and the URL with recognised params removed.
+ * @returns Best-effort parsed values, validation errors, and the URL with the consumed params
+ *   removed.
  */
 export function parseImageUrl(rawUrl: string): ParsedImageUrl {
   // Accumulate validation errors as we scan
@@ -138,7 +146,10 @@ export function parseImageUrl(rawUrl: string): ParsedImageUrl {
   // Detect unknown params first (typo guard, e.g. "widht=400") so a misspelled
   // key doesn't get diagnosed as a partial-dimension or missing-value error
   for (const paramName of url.searchParams.keys()) {
-    if (!RECOGNIZED_PARAMS.includes(paramName as (typeof RECOGNIZED_PARAMS)[number])) {
+    if (
+      !CONSUMED_PARAMS.includes(paramName as (typeof CONSUMED_PARAMS)[number]) &&
+      paramName !== VERSION_PARAM
+    ) {
       errors.push({ message: `Image URL has unknown parameter "${paramName}"` })
     }
   }
@@ -182,9 +193,9 @@ export function parseImageUrl(rawUrl: string): ParsedImageUrl {
     }
   }
 
-  // Strip recognised params before reconstructing — unknown params are kept verbatim
-  for (const recognizedParam of RECOGNIZED_PARAMS) {
-    url.searchParams.delete(recognizedParam)
+  // Strip the consumed params before reconstructing, keeping the version and unknown params
+  for (const consumedParam of CONSUMED_PARAMS) {
+    url.searchParams.delete(consumedParam)
   }
 
   // Reconstruct preserving absolute/relative shape of the input

@@ -1,7 +1,7 @@
-using System.Security.Cryptography;
 using System.Text.Json;
 
 using Microsoft.Extensions.Options;
+using MathComps.Shared.Io;
 using MathComps.Shared.Serialization;
 
 namespace MathComps.Infrastructure.Storage;
@@ -52,7 +52,7 @@ public sealed class TrackedFileUploader(IFileUploader inner, IOptions<UploadLedg
     public async Task<bool> UploadIfChangedAsync(string sourcePath, string key)
     {
         // Capture the version we're about to push up front — this is what we record as "the bytes R2 has now".
-        var sourceHash = HashFile(sourcePath);
+        var sourceHash = FileUtilities.HashFile(sourcePath);
 
         // Skip when a sibling source already sent this key this run, or remote storage has these exact bytes.
         if (_uploadedThisRun.Contains(key)
@@ -86,21 +86,6 @@ public sealed class TrackedFileUploader(IFileUploader inner, IOptions<UploadLedg
             // Nothing usable in there, so start over rather than failing the run
             return [];
         }
-    }
-
-    /// <summary>
-    /// Hashes a file's bytes into the form the ledger records. SHA-256 hex, chosen for being the boring default
-    /// rather than for any property of the content — this only ever answers "are these the same bytes".
-    /// </summary>
-    /// <param name="sourcePath">Absolute path to the file to hash.</param>
-    /// <returns>The lowercase hex digest.</returns>
-    private static string HashFile(string sourcePath)
-    {
-        // Streamed rather than read whole, since handout PDFs run to megabytes
-        using var stream = File.OpenRead(sourcePath);
-
-        // The digest, lowercased so a ledger written on any platform compares equal
-        return Convert.ToHexStringLower(SHA256.HashData(stream));
     }
 
     /// <inheritdoc/>

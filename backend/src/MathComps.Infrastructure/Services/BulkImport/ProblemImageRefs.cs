@@ -1,21 +1,30 @@
+using MathComps.Shared.Io;
+
 namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// A draft image ref resolved for the markdown rewrite: the bare <c>media:</c> key plus the figure's intrinsic
-/// pixel dimensions.
+/// pixel dimensions and the version of its bytes.
 /// </summary>
 /// <param name="MediaKey">The bare <c>media:</c> ref, e.g. <c>media:75-csmo-b-ii-1-incircle</c> — no query string.</param>
 /// <param name="Width">The figure's intrinsic width in whole pixels.</param>
 /// <param name="Height">The figure's intrinsic height in whole pixels.</param>
-public readonly record struct ResolvedImageRef(string MediaKey, int Width, int Height);
+/// <param name="Version">
+/// A short hash of the figure's bytes. The media key stays fixed across re-imports, so the version is what changes a
+/// redrawn figure's ref while an unchanged one keeps its old ref.
+/// </param>
+public readonly record struct ResolvedImageRef(string MediaKey, int Width, int Height, string Version);
 
 /// <summary>
 /// Builds the relative-ref → <see cref="ResolvedImageRef"/> map a problem's markdown is rewritten against. The map
-/// is fully determined by the problem slug and the images' intrinsic dimensions, so it is known before anything
-/// uploads, and a dry run rewrites every body exactly as the real import does.
+/// is fully determined by the problem slug and the image files on disk, so it is known before anything uploads, and a
+/// dry run rewrites every body exactly as the real import does.
 /// </summary>
 public static class ProblemImageRefs
 {
+    /// <summary>How many leading hex digits of the figure's content hash its version keeps.</summary>
+    private const int VersionLength = 8;
+
     /// <summary>
     /// The media content id for one image: the slug keeps it stable across edits, the filename stem disambiguates
     /// within a problem. Extension-less for every format, so the whole corpus shares one key shape; two images in one
@@ -29,7 +38,8 @@ public static class ProblemImageRefs
 
     /// <summary>
     /// Builds the relative-ref → <see cref="ResolvedImageRef"/> map for a problem's images, reading each image's
-    /// intrinsic dimensions off disk so they can be stamped onto the ref's query string. Writes nothing.
+    /// intrinsic dimensions and content hash off disk so they can be stamped onto the ref's query string. Writes
+    /// nothing.
     /// </summary>
     /// <param name="images">The image basenames the problem references.</param>
     /// <param name="slug">The owning problem's slug, the content-id prefix.</param>
@@ -51,8 +61,12 @@ public static class ProblemImageRefs
             var localPath = Path.Combine(draftFolder, "images", basename);
             var (width, height) = ImageDimensions.Read(localPath);
 
-            // The bare media key plus the dimensions the rewriter stamps onto the ref's query string.
-            replacements[relativeRef] = new ResolvedImageRef($"media:{ContentId(slug, basename)}", width, height);
+            // The version of the figure's bytes.
+            var version = FileUtilities.HashFile(localPath)[..VersionLength];
+
+            // The bare media key plus the dimensions and version the rewriter stamps onto the ref's query string.
+            replacements[relativeRef] = new ResolvedImageRef(
+                $"media:{ContentId(slug, basename)}", width, height, version);
         }
 
         // The full map; a body that uses only some of the images simply leaves the rest unmatched.

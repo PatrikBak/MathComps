@@ -72,6 +72,12 @@ describe('parseImageUrl', () => {
       expect(result.cleanUrl).toBe('images/fig.svg#anchor')
     })
 
+    it('keeps the version in cleanUrl without flagging it', () => {
+      const result = parseImageUrl('media:abc123?width=240&height=160&v=1a2b3c4d')
+      expect(result.cleanUrl).toBe('media:abc123?v=1a2b3c4d')
+      expect(result.errors).toEqual([])
+    })
+
     it('keeps unknown params verbatim in cleanUrl while still flagging them', () => {
       const result = parseImageUrl('images/fig.svg?keep=yes&width=100&height=100')
       expect(result.cleanUrl).toBe('images/fig.svg?keep=yes')

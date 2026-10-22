@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace MathComps.Shared.Io;
 
 /// <summary>
@@ -58,5 +60,20 @@ public static class FileUtilities
 
         // Read the whole file back.
         return await File.ReadAllTextAsync(path, cancellationToken);
+    }
+
+    /// <summary>
+    /// Hashes a file's bytes. SHA-256 hex, chosen for being the boring default rather than for any property of the
+    /// content — this only ever answers "are these the same bytes".
+    /// </summary>
+    /// <param name="path">Absolute path to the file to hash.</param>
+    /// <returns>The lowercase hex digest.</returns>
+    public static string HashFile(string path)
+    {
+        // Streamed, so a large file never sits in memory whole
+        using var stream = File.OpenRead(path);
+
+        // The digest, lowercased so a hash recorded on any platform compares equal
+        return Convert.ToHexStringLower(SHA256.HashData(stream));
     }
 }
