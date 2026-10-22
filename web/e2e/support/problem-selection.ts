@@ -68,10 +68,10 @@ export const selectionText = createTranslator({
 export const pluralText = createTranslator({ locale: 'en', messages, namespace: 'plurals' })
 
 /**
- * How many paragraphs an English statement runs to, enough that a problem's own page scrolls well past any
- * spot a test leaves the pool at, on any machine, CI's runner included.
+ * How many paragraphs a statement written out at length runs to, enough that a problem's own page scrolls well past
+ * any spot a test leaves it at, on any machine, CI's runner included.
  */
-const STATEMENT_PARAGRAPHS = 48
+const LONG_STATEMENT_PARAGRAPHS = 48
 
 /** {@link BILINGUAL}'s statement in Slovak. */
 export const SLOVAK_STATEMENT =
@@ -84,21 +84,47 @@ export const HINT = 'Pair the numbers up.'
 export const REVISION = 'Revised: the two numbers left must also differ by more than one.'
 
 /**
- * A problem's statement, {@link STATEMENT_PARAGRAPHS} paragraphs of the same erasing game.
+ * A problem's statement, paragraph after paragraph of the same erasing game.
+ *
+ * @param number - The number of the problem it states.
+ * @param paragraphs - How many paragraphs it runs to.
+ *
+ * @returns The statement as markdown.
+ */
+function paragraphsOf(number: number, paragraphs: number): string {
+  // Paragraph after paragraph of the same game, each saying which problem it belongs to
+  return Array.from(
+    { length: paragraphs },
+    (_unused, index) =>
+      `Part ${index + 1} of problem ${number}. A board holds the numbers from one to a hundred, and two ` +
+      'players take turns erasing one of them until only two are left, the first player winning when ' +
+      'those two are coprime.'
+  ).join('\n\n')
+}
+
+/**
+ * A problem's statement in a single paragraph, short enough that a desktop window draws every card of the pool at
+ * once.
  *
  * @param number - The number of the problem it states.
  *
  * @returns The statement as markdown.
  */
 function statementOf(number: number): string {
-  // Paragraph after paragraph of the same game, each saying which problem it belongs to
-  return Array.from(
-    { length: STATEMENT_PARAGRAPHS },
-    (_unused, index) =>
-      `Part ${index + 1} of problem ${number}. A board holds the numbers from one to a hundred, and two ` +
-      'players take turns erasing one of them until only two are left, the first player winning when ' +
-      'those two are coprime.'
-  ).join('\n\n')
+  // The game in one paragraph
+  return paragraphsOf(number, 1)
+}
+
+/**
+ * A problem's statement written out at length, {@link LONG_STATEMENT_PARAGRAPHS} paragraphs of the same game.
+ *
+ * @param number - The number of the problem it states.
+ *
+ * @returns The statement as markdown.
+ */
+function longStatementOf(number: number): string {
+  // The game, paragraph after paragraph
+  return paragraphsOf(number, LONG_STATEMENT_PARAGRAPHS)
 }
 
 /**
@@ -128,6 +154,14 @@ function proposalNumbered(number: number, distinction: Partial<Proposal> = {}): 
 
 /** A problem on offer, partway down the pool. */
 export const OPENED = proposalNumbered(4)
+
+/**
+ * {@link OPENED} written out at length, so its own page scrolls, and so does the pool, the cards after it standing
+ * far below the ones before.
+ */
+const OPENED_AT_LENGTH = proposalNumbered(OPENED.number, {
+  texts: { en: { statement: longStatementOf(OPENED.number), solution: null, hints: [] } },
+})
 
 /** A problem written in Slovak as well, solved and hinted in English alone. */
 export const BILINGUAL = proposalNumbered(2, {
@@ -435,10 +469,14 @@ const LATER_DRAFT_WITHOUT_READY: Board = {
   })),
 }
 
-/** {@link OPENED} as its author revised it, with a paragraph added at the end. */
+/** {@link OPENED} as its author revised it, written out at length with a paragraph added at the end. */
 const REVISED = proposalNumbered(OPENED.number, {
   texts: {
-    en: { statement: `${statementOf(OPENED.number)}\n\n${REVISION}`, solution: null, hints: [] },
+    en: {
+      statement: `${longStatementOf(OPENED.number)}\n\n${REVISION}`,
+      solution: null,
+      hints: [],
+    },
   },
 })
 
@@ -795,6 +833,8 @@ export function isFinalization(url: URL): boolean {
 type SelectionReply =
   /** With every problem in the selection, and every conversation held about one. */
   | 'selection'
+  /** With every problem in the selection, {@link OPENED} written out at length, and the conversations about them. */
+  | 'openedAtLength'
   /** With every problem as a later read finds them, and the conversations about them. */
   | 'later'
   /** With every problem in the selection, one of them revised in English, and the conversations about them. */
@@ -842,6 +882,14 @@ function selectionHeldAt(reply: SelectionReply): HeldSelection {
     case 'forbidden':
     case 'failure':
       return { proposals: SELECTION, boards: BOARDS, cycles: CYCLES }
+
+    // Every problem as first read, but for the one written out at length
+    case 'openedAtLength':
+      return {
+        proposals: SELECTION.map((proposal) => (proposal === OPENED ? OPENED_AT_LENGTH : proposal)),
+        boards: BOARDS,
+        cycles: CYCLES,
+      }
 
     // Every problem as a later read finds them, one revised and another set aside
     case 'later':
@@ -1011,6 +1059,7 @@ export async function stubSelection(
     switch (reply) {
       // What the read reads
       case 'selection':
+      case 'openedAtLength':
       case 'later':
       case 'revisedInEnglish':
       case 'rated':

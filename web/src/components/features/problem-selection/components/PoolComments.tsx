@@ -3,9 +3,7 @@
 import { useAuth } from '@clerk/nextjs'
 import { ArrowUp } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import type { RefObject } from 'react'
 import { createPortal } from 'react-dom'
-import { type ContextProp, type ItemProps, Virtuoso } from 'react-virtuoso'
 
 import { CommentList } from '@/components/features/comments/components/CommentList'
 import {
@@ -21,11 +19,11 @@ import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
 import { WaitingChangeButton } from '@/components/shared/components/WaitingChangeButton'
+import { WindowVirtualList } from '@/components/shared/components/WindowVirtualList'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { focusForReader } from '@/components/shared/utils/focus-utils'
 import { hueTextStyle } from '@/components/shared/utils/hue-colors'
-import { useFocusHandOff } from '@/hooks/use-focus-hand-off'
 import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
 import { useShowFromTop } from '@/hooks/use-show-from-top'
 import type { QueryUiState } from '@/lib/query-ui-state'
@@ -42,9 +40,6 @@ import { PoolSkeleton } from './PoolSkeleton'
 import { ProposalBox } from './ProposalBody'
 import { DetailLink } from './SelectionLinks'
 import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
-
-/** How far past the window's edges threads are drawn, in pixels, so a scroll finds them ready. */
-const THREADS_DRAWN_BEYOND = { top: 800, bottom: 1200 } as const
 
 /**
  * Props for the {@link PoolComments} component.
@@ -138,8 +133,13 @@ export function PoolComments({ countSlot }: PoolCommentsProps) {
             <p className="text-sm text-muted">{t('emptyComments')}</p>
           </div>
         ) : (
-          // The threads
-          <PoolThreadList threads={threads} collapsed={collapsed} countRef={countRef} />
+          // The threads, only those in or near the window drawn
+          <WindowVirtualList
+            items={threads}
+            keyOf={threadKeyOf}
+            renderItem={(thread) => <PoolThread thread={thread} collapsed={collapsed} />}
+            fallbackRef={countRef}
+          />
         )}
       </div>
     </div>
@@ -223,64 +223,6 @@ function ThreadsPlaceholder({ uiState, onRetry }: ThreadsPlaceholderProps) {
     default:
       return assertNever(uiState)
   }
-}
-
-/**
- * What every thread's place in {@link PoolThreadList} reaches through the list.
- */
-type PoolThreadItemContext = {
-  /** The line over the pool, which takes the focus when a thread leaves holding it with none in its place. */
-  countRef: RefObject<HTMLParagraphElement | null>
-}
-
-/**
- * Props for the {@link PoolThreadList} component.
- */
-type PoolThreadListProps = PoolThreadItemContext & {
-  /** Every thread, in the order they are held in. */
-  threads: DiscussionThread<DiscussedSubject>[]
-  /** Which comments of the tab have their replies folded away. */
-  collapsed: UseCollapsedCommentsResult
-}
-
-/**
- * Every thread, only those in or near the window drawn, since a list of long comments full of math takes a while to
- * draw whole.
- */
-function PoolThreadList({ threads, collapsed, countRef }: PoolThreadListProps) {
-  return (
-    // The threads in or near the window, the page scrolling them
-    <Virtuoso
-      useWindowScroll
-      data={threads}
-      context={{ countRef }}
-      components={{ Item: PoolThreadItem }}
-      increaseViewportBy={THREADS_DRAWN_BEYOND}
-      computeItemKey={(_index, thread) => threadKeyOf(thread)}
-      itemContent={(_index, thread) => <PoolThread thread={thread} collapsed={collapsed} />}
-    />
-  )
-}
-
-/**
- * One thread's place in {@link PoolThreadList}, spaced from the next. A thread leaving the page while it holds the
- * focus, deleted or scrolled far out of the window, hands it on as {@link useFocusHandOff} does, among the places of
- * the threads still drawn.
- */
-function PoolThreadItem({
-  children,
-  context,
-  item: _thread,
-  ...placement
-}: ItemProps<DiscussionThread<DiscussedSubject>> & ContextProp<PoolThreadItemContext>) {
-  // The focus handed on as the thread leaves the page holding it
-  const handOff = useFocusHandOff<HTMLDivElement>(context.countRef)
-
-  return (
-    <div {...placement} {...handOff} className="pb-4">
-      {children}
-    </div>
-  )
 }
 
 /**
