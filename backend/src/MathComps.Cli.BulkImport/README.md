@@ -17,7 +17,7 @@ A folder with an error here never reaches the database. A clean one is imported 
 
 On the way the import collects every reason the database refuses the draft: a gap in the round's numbering, a new problem without its `pN.yaml` or without an original text, a second original, a hosted round's announced problem count or embargo, and [the pool's own checks](#filling-the-pool). The report lists every refusal at once. A stored taxonomy node the registry can't place is the one refusal that stops the import before the rest are checked.
 
-A dry run is the same import, rolled back before it commits and before any figure uploads, so a clean dry run of a folder is a clean import of it into the database as it stands. A real run uploads the figures to R2 once the import is known to land, then commits. The import rewrites each figure ref to the `media:` key the site resolves.
+A dry run is the same import, rolled back before it commits and before any figure uploads, so a clean dry run of a folder is a clean import of it into the database as it stands. A real run uploads the figures to R2 once the import is known to land, then commits. The import rewrites each figure ref to the `media:` key the site resolves, stamped with the figure's size and a hash of its bytes. So a redrawn figure gets a new URL, and its re-import rewrites every text showing it.
 
 Image uploads are deduplicated against a gitignored ledger (`data/problems/.r2-uploads.json`) mapping each storage key to a hash of the bytes last pushed under it. The report's `Images` line counts what was uploaded and skipped; delete the ledger to force a fresh upload of everything.
 

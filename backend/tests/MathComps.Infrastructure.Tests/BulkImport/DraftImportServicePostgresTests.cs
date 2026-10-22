@@ -616,7 +616,7 @@ public class DraftImportServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// A problem's image is uploaded under the slug-based key and its relative ref is rewritten into the stored
-    /// markdown, dimensions carried in the query string.
+    /// markdown, dimensions and version carried in the query string.
     /// </summary>
     [Fact]
     public Task An_image_is_uploaded_and_its_ref_rewritten() => RunTestAsync(async service =>
@@ -639,12 +639,13 @@ public class DraftImportServicePostgresTests(PostgresContainerFixture fixture)
         var (_, key) = Assert.Single(_uploader.Uploads);
         Assert.Equal($"problems/{ProblemSlug}-incircle", key);
 
-        // The stored markdown points at the resolved media ref, dimensions and all — no relative ref left.
+        // The stored markdown points at the resolved media ref, carrying the SVG's dimensions and version — no
+        // relative ref left.
         await QueryAsync(async context =>
         {
             var stored = await context.ProblemTexts.SingleAsync(text => text.DocumentType == DocumentType.Statement);
             Assert.Equal(
-                $"see ![fig](media:{ProblemSlug}-incircle?width=100&height=80)", stored.MarkdownText);
+                $"see ![fig](media:{ProblemSlug}-incircle?width=100&height=80&v=bb746d85)", stored.MarkdownText);
         });
     });
 
