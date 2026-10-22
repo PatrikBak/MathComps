@@ -90,7 +90,8 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
         variant="primary"
         shape="pill"
         // Unavailable by its ARIA state alone, so a reader tabbing through still hears where the problem stands
-        aria-disabled={isThere || isChangingSlots}
+        aria-disabled={isThere}
+        // A press while a write changing the slots is out is turned away by the placement itself
         onClick={putInWaitingSlot}
       >
         {isThere
@@ -115,16 +116,7 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
             event.preventDefault()
         }}
       >
-        <Button
-          ref={placeButtonRef}
-          size="sm"
-          variant="outline"
-          shape="pill"
-          className="gap-1"
-          // Unavailable while a write changing the slots is out, by its ARIA state alone, so it keeps its place in
-          // the Tab order
-          aria-disabled={isChangingSlots}
-        >
+        <Button ref={placeButtonRef} size="sm" variant="outline" shape="pill" className="gap-1">
           {t('label')}
           <ChevronDown size={14} />
         </Button>
