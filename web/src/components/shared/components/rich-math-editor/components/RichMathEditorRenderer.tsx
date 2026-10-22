@@ -201,7 +201,6 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
           ol: ({ children, className }) => (
             <ol className={resolveListClassName(className, 'list-decimal')}>{children}</ol>
           ),
-          li: ({ children }) => <li className="text-muted-foreground">{children}</li>,
           del: ({ children }) => <del className="line-through text-muted">{children}</del>,
           a: ({ href, children }) => {
             // Resolve media: URLs to full R2 URLs
