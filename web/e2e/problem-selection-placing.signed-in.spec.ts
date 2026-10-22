@@ -180,9 +180,6 @@ test.describe('placing a problem from the pool', () => {
     // The grid on a problem's card
     await placeButton(cardOf(page, OPENED)).click()
 
-    // Naming the board on screen
-    await expect(page.getByRole('menu')).toContainText(DRAFT_BOARD.name)
-
     // A filled slot, showing its problem's number and named by it
     await expect(gridSlot(page, 'E1')).toHaveText(`#${FIRST.number}`)
 

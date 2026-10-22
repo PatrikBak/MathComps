@@ -9,8 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MathComps.Infrastructure.Tests.Selection;
 
 /// <summary>
-/// Covers <see cref="ProposalService"/>: what the reviewers record about a proposal, and the soft delete that
-/// takes one out of the selection, stamping its row and emptying its slots.
+/// Covers <see cref="ProposalService"/>: what the reviewers record about a proposal, the soft delete that takes one
+/// out of the selection, stamping its row and emptying its slots, and which of those changes only a lead makes.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
@@ -36,6 +36,16 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     /// </summary>
     private readonly Guid _otherRaterId = Guid.CreateVersion7();
 
+    /// <summary>
+    /// A MathComps member leading its elementary category alone.
+    /// </summary>
+    private readonly Guid _leadId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// A MathComps member leading none of its categories.
+    /// </summary>
+    private readonly Guid _memberId = Guid.CreateVersion7();
+
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services) =>
         // The service under test, with the rest of the selection.
@@ -49,19 +59,22 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_recommendation_switches_one_category_and_keeps_the_rest() => RunTestAsync(async service =>
     {
         // Elementary switched on beside the advanced one already there
-        await service.SetRecommendedAsync(Organization.MathCompsSlug, _pooledId, "elementary", isRecommended: true);
+        await service.SetRecommendedAsync(
+            Organization.MathCompsSlug, _leadId, _pooledId, "elementary", isRecommended: true);
 
         // Both stand
         Assert.Equal(["elementary", "advanced"], await RecommendedAsync());
 
         // Advanced switched on again
-        await service.SetRecommendedAsync(Organization.MathCompsSlug, _pooledId, "advanced", isRecommended: true);
+        await service.SetRecommendedAsync(
+            Organization.MathCompsSlug, _leadId, _pooledId, "advanced", isRecommended: true);
 
         // Both still stand
         Assert.Equal(["elementary", "advanced"], await RecommendedAsync());
 
         // Advanced switched off
-        await service.SetRecommendedAsync(Organization.MathCompsSlug, _pooledId, "advanced", isRecommended: false);
+        await service.SetRecommendedAsync(
+            Organization.MathCompsSlug, _leadId, _pooledId, "advanced", isRecommended: false);
 
         // Leaving elementary alone
         Assert.Equal(["elementary"], await RecommendedAsync());
@@ -77,7 +90,8 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     {
         // The olympiad's category, switched on for MathComps' proposal, refused
         await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
-            () => service.SetRecommendedAsync(Organization.MathCompsSlug, _pooledId, "C", isRecommended: true));
+            () => service.SetRecommendedAsync(
+                Organization.MathCompsSlug, _leadId, _pooledId, "C", isRecommended: true));
 
         // The proposal still recommended for advanced alone
         Assert.Equal(["advanced"], await RecommendedAsync());
@@ -167,7 +181,7 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_delete_stamps_the_proposal_and_empties_its_slots() => RunTestAsync(async service =>
     {
         // Deleted
-        await service.DeleteAsync(Organization.MathCompsSlug, _pooledId);
+        await service.DeleteAsync(Organization.MathCompsSlug, _leadId, _pooledId);
 
         // The pooled proposal's deletion stamp, its row still there
         var deletedAt = await QueryValueAsync(context => context.Proposals
@@ -191,7 +205,7 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_used_proposal_cannot_be_deleted() => RunTestAsync(async service =>
         // Deleting the used proposal, refused
         await Assert.ThrowsAsync<SelectionProposalUsedException>(
-            () => service.DeleteAsync(Organization.MathCompsSlug, _usedId)));
+            () => service.DeleteAsync(Organization.MathCompsSlug, _leadId, _usedId)));
 
     /// <summary>
     /// A deleted proposal is gone from the selection, so it can't be set aside or rated. A change slipping through
@@ -201,11 +215,11 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_deleted_proposal_takes_no_change() => RunTestAsync(async service =>
     {
         // Deleted
-        await service.DeleteAsync(Organization.MathCompsSlug, _pooledId);
+        await service.DeleteAsync(Organization.MathCompsSlug, _leadId, _pooledId);
 
         // Setting the deleted proposal aside, refused
         await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
-            () => service.SetAsideAsync(Organization.MathCompsSlug, _pooledId, isSetAside: true));
+            () => service.SetAsideAsync(Organization.MathCompsSlug, _leadId, _pooledId, isSetAside: true));
 
         // And rating it, refused too
         await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
@@ -221,10 +235,11 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Setting the pooled proposal aside through the olympiad's selection, refused
         await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
-            () => service.SetAsideAsync("olympiad", _pooledId, isSetAside: true));
+            () => service.SetAsideAsync("olympiad", _leadId, _pooledId, isSetAside: true));
 
         // Deleting the pooled proposal through the olympiad's selection, refused too
-        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(() => service.DeleteAsync("olympiad", _pooledId));
+        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
+            () => service.DeleteAsync("olympiad", _leadId, _pooledId));
 
         // The proposal as it stood
         var proposal = await QueryValueAsync(context => context.Proposals
@@ -234,6 +249,76 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
 
         // Neither set aside nor deleted
         Assert.Equal((false, null), (proposal.IsSetAside, proposal.DeletedAt));
+    });
+
+    /// <summary>
+    /// A lead of any category changes any proposal, whatever it is recommended for: the elementary lead takes back
+    /// the advanced recommendation of a proposal recommended for nothing of theirs, then sets it aside and deletes it.
+    /// A check against the proposal's categories would lock a lead out of every proposal they had just unticked.
+    /// </summary>
+    [Fact]
+    public Task A_lead_changes_a_proposal_recommended_for_none_of_their_categories() => RunTestAsync(async service =>
+    {
+        // The advanced recommendation taken back
+        await service.SetRecommendedAsync(
+            Organization.MathCompsSlug, _leadId, _pooledId, "advanced", isRecommended: false);
+
+        // Leaving the proposal recommended for nothing
+        Assert.Empty(await RecommendedAsync());
+
+        // Set aside
+        await service.SetAsideAsync(Organization.MathCompsSlug, _leadId, _pooledId, isSetAside: true);
+
+        // And deleted
+        await service.DeleteAsync(Organization.MathCompsSlug, _leadId, _pooledId);
+
+        // The proposal as it stands
+        var proposal = await QueryValueAsync(context => context.Proposals
+            .Where(candidate => candidate.ProblemId == _pooledId)
+            .Select(candidate => new { candidate.IsSetAside, candidate.DeletedAt })
+            .SingleAsync());
+
+        // Set aside and deleted
+        Assert.True(proposal.IsSetAside);
+        Assert.NotNull(proposal.DeletedAt);
+    });
+
+    /// <summary>
+    /// A member leading no category sets aside, recommends and deletes nothing, and the proposal stays as it stood,
+    /// while their rating lands like anyone's.
+    /// </summary>
+    [Fact]
+    public Task A_member_who_leads_nothing_sets_aside_recommends_and_deletes_nothing() => RunTestAsync(async service =>
+    {
+        // Setting the pooled proposal aside, refused
+        await Assert.ThrowsAsync<ProposalNotLeadException>(
+            () => service.SetAsideAsync(Organization.MathCompsSlug, _memberId, _pooledId, isSetAside: true));
+
+        // Recommending it for elementary, refused
+        await Assert.ThrowsAsync<ProposalNotLeadException>(() => service.SetRecommendedAsync(
+            Organization.MathCompsSlug, _memberId, _pooledId, "elementary", isRecommended: true));
+
+        // Deleting it, refused
+        await Assert.ThrowsAsync<ProposalNotLeadException>(
+            () => service.DeleteAsync(Organization.MathCompsSlug, _memberId, _pooledId));
+
+        // The proposal as it stood
+        var proposal = await QueryValueAsync(context => context.Proposals
+            .Where(candidate => candidate.ProblemId == _pooledId)
+            .Select(candidate => new { candidate.IsSetAside, candidate.DeletedAt })
+            .SingleAsync());
+
+        // Neither set aside nor deleted
+        Assert.Equal((false, null), (proposal.IsSetAside, proposal.DeletedAt));
+
+        // Still recommended for advanced alone
+        Assert.Equal(["advanced"], await RecommendedAsync());
+
+        // Rated all the same
+        await service.RateAsync(Organization.MathCompsSlug, _pooledId, _memberId, beauty: 4, difficulty: 2);
+
+        // The rating standing
+        Assert.Equal([(_memberId, 4, 2)], await RatingsAsync());
     });
 
     /// <inheritdoc/>
@@ -265,6 +350,16 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
 
         // The reviewers rating the pooled proposal
         context.Users.AddRange(HostedSeed.NewUser(_raterId, "Rater"), HostedSeed.NewUser(_otherRaterId, "Other"));
+
+        // The lead and the member
+        context.Users.AddRange(HostedSeed.NewUser(_leadId, "Lead"), HostedSeed.NewUser(_memberId, "Member"));
+
+        // The lead's and the member's addresses on MathComps' list
+        SelectionSeed.NewMember(context, "lead@example.com", DateTimeOffset.UtcNow);
+        SelectionSeed.NewMember(context, "member@example.com", DateTimeOffset.UtcNow);
+
+        // The lead leading MathComps' elementary category alone
+        SelectionSeed.NewLead(context, "lead@example.com", "elementary");
 
         // Written
         await context.SaveChangesAsync();

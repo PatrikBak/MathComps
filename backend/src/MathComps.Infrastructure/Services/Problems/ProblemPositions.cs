@@ -7,21 +7,21 @@ namespace MathComps.Infrastructure.Services.Problems;
 
 /// <summary>
 /// Shared steps for moving a problem between positions. A problem's position is its round and its number there,
-/// and its slug is derived from both, so anything moving a problem has to write all three together, keep the slug
-/// unique, and wait for every other move to finish.
+/// and its slug is derived from both, so anything moving a problem has to write all three together and keep the slug
+/// unique. The lock here runs the writes that take it one at a time.
 /// </summary>
 public static class ProblemPositions
 {
     /// <summary>
-    /// The key of the advisory lock every move takes, any number nothing else locks on.
+    /// The key of the advisory lock <see cref="LockAsync"/> takes, any number nothing else locks on.
     /// </summary>
     private const long LockKey = 7_300_515_181;
 
     /// <summary>
-    /// Waits until no other move is running. The lock lets go when the caller's transaction ends, so no other move
-    /// can change what the caller reads after this until it commits.
+    /// Waits until no other transaction holds the lock. The lock lets go when the caller's transaction ends, so no
+    /// other write taking the lock can change what the caller reads after this until the caller commits.
     /// </summary>
-    /// <param name="context">The context the move runs on, inside a transaction.</param>
+    /// <param name="context">The context the caller's write runs on, inside a transaction.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the lock is held.</returns>
     public static async Task LockAsync(MathCompsDbContext context, CancellationToken cancellationToken) =>

@@ -1,26 +1,14 @@
-using MathComps.Domain.Contracts.Selection;
 using MathComps.Domain.EfCoreEntities;
-using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Services.Problems;
 
 namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
 /// Finalizes the boards of the organization <see cref="Organization.MathCompsSlug"/> names into the rounds of the
-/// hosted groups, which are its competitions, and lists the groups a board can still go into. Every finalize runs
-/// after every selection write before it has finished.
+/// hosted groups, which are its competitions. Every finalize runs after every selection write before it has finished.
 /// </summary>
 public interface IBoardFinalizationService
 {
-    /// <summary>
-    /// Reads the cycles, the hosted groups a board can still be finalized into.
-    /// </summary>
-    /// <param name="language">The language the cycles are named in.</param>
-    /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>The cycles, soonest first.</returns>
-    Task<IReadOnlyList<SelectionCycleDto>> GetCyclesAsync(
-        Language language, CancellationToken cancellationToken = default);
-
     /// <summary>
     /// Finalizes a draft board into a hosted group: each paper's problems move into the round of the hosted level the
     /// paper's category is, in slot order, and leave every other draft they stood on. The board then reads its slots

@@ -23,6 +23,11 @@ public class SelectionRulesPostgresTests(PostgresContainerFixture fixture)
     /// </summary>
     private Guid _proposalId;
 
+    /// <summary>
+    /// A MathComps member leading one of its categories.
+    /// </summary>
+    private readonly Guid _leadId = Guid.CreateVersion7();
+
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services) =>
         // A selection service to write through.
@@ -46,7 +51,7 @@ public class SelectionRulesPostgresTests(PostgresContainerFixture fixture)
         await ProblemPositions.LockAsync(running, CancellationToken.None);
 
         // A second write, started meanwhile
-        var write = service.SetAsideAsync(Organization.MathCompsSlug, _proposalId, isSetAside: true);
+        var write = service.SetAsideAsync(Organization.MathCompsSlug, _leadId, _proposalId, isSetAside: true);
 
         // A while later
         await Task.Delay(TimeSpan.FromMilliseconds(500));
@@ -75,6 +80,15 @@ public class SelectionRulesPostgresTests(PostgresContainerFixture fixture)
 
         // The one proposal in the pool
         _proposalId = SelectionSeed.NewProposal(context, pool, 1, 1);
+
+        // The lead
+        context.Users.Add(HostedSeed.NewUser(_leadId, "Lead"));
+
+        // The lead's address on MathComps' list
+        SelectionSeed.NewMember(context, "lead@example.com", DateTimeOffset.UtcNow);
+
+        // Leading MathComps' elementary category
+        SelectionSeed.NewLead(context, "lead@example.com", "elementary");
 
         // Written
         await context.SaveChangesAsync();

@@ -85,7 +85,7 @@ export function SlotNumber({ paper, index, state }: SlotNumberProps) {
       )}
       style={look.style}
     >
-      {slotLabel(paper.name, index)}
+      {slotLabel(paper, index)}
     </span>
   )
 }
@@ -146,7 +146,7 @@ export function PlacementMark({ placement }: PlacementMarkProps) {
         className="font-semibold tabular-nums"
         style={hueTextStyle(categoryHue(categories, placement.paper.category))}
       >
-        {slotLabel(placement.paper.name, placement.index)}
+        {slotLabel(placement.paper, placement.index)}
       </span>
     </span>
   )

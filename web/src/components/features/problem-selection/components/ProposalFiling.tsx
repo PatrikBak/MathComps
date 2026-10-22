@@ -12,7 +12,12 @@ import { localeCodeList } from '@/i18n/i18n'
 
 import { useAreaName } from '../hooks/use-area-name'
 import { placementsOf, unreadyLanguages, unwrittenAcross } from '../model/selection-state'
-import { type Proposal, type ProposalRating, RATING_ASPECTS } from '../model/selection-types'
+import {
+  type Proposal,
+  type ProposalArea,
+  type ProposalRating,
+  RATING_ASPECTS,
+} from '../model/selection-types'
 import { PlacementMark, RecommendedMarks, WARNING_MARK_CLASS } from './CategoryMarks'
 import { RatingBreakdown } from './RatingBreakdown'
 import { useLoadedSelection } from './SelectionWorkspaceProvider'
@@ -26,15 +31,12 @@ type ProposalFilingProps = {
 }
 
 /**
- * One line saying what a problem is filed under, where it sits, whether it is on offer, what it still lacks, and how
+ * The marks saying what a problem is filed under, where it sits, whether it is on offer, what it still lacks, and how
  * many reviewers rated it. Languages count as lacking only where the problems need every language.
  */
 export function ProposalFiling({ proposal }: ProposalFilingProps) {
   // Filing-line copy
   const t = useTranslations('problemSelection.filing')
-
-  // What each area is called
-  const areaName = useAreaName()
 
   // Every board, and whether the problems need every language
   const { boards, needsEveryLanguage } = useLoadedSelection()
@@ -51,12 +53,12 @@ export function ProposalFiling({ proposal }: ProposalFilingProps) {
     : []
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <>
       {/* The categories the problem is recommended for */}
       <RecommendedMarks recommended={proposal.recommended} />
 
       {/* The problem's area */}
-      <Chip className="border-transparent py-px leading-4 sm:py-px">{areaName(proposal.area)}</Chip>
+      <AreaChip area={proposal.area} />
 
       {/* Every slot the problem fills */}
       {placements.map((placement) => (
@@ -84,8 +86,27 @@ export function ProposalFiling({ proposal }: ProposalFilingProps) {
 
       {/* How many reviewers rated the problem */}
       <RatingsMark ratings={proposal.ratings} />
-    </div>
+    </>
   )
+}
+
+/**
+ * Props for the {@link AreaChip} component.
+ */
+type AreaChipProps = {
+  /** The problem's area. */
+  area: ProposalArea
+}
+
+/**
+ * A problem's area, as a chip.
+ */
+export function AreaChip({ area }: AreaChipProps) {
+  // What each area is called
+  const areaName = useAreaName()
+
+  // The area's name, as a chip
+  return <Chip className="border-transparent py-px leading-4 sm:py-px">{areaName(area)}</Chip>
 }
 
 /**
@@ -99,7 +120,7 @@ type RatingsMarkProps = {
 /**
  * How many reviewers rated a problem, showing who gave what while hovered, focused or pressed. Absent while nobody has.
  */
-function RatingsMark({ ratings }: RatingsMarkProps) {
+export function RatingsMark({ ratings }: RatingsMarkProps) {
   // Rating copy
   const t = useTranslations('problemSelection.ratings')
 

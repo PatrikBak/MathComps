@@ -90,12 +90,13 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
         variant="primary"
         shape="pill"
         // Unavailable by its ARIA state alone, so a reader tabbing through still hears where the problem stands
-        aria-disabled={isThere || isChangingSlots}
+        aria-disabled={isThere}
+        // A press while a write changing the slots is out is turned away by the placement itself
         onClick={putInWaitingSlot}
       >
         {isThere
-          ? t('alreadyIn', { slot: slotLabel(waitingPaper.name, waitingSlot.index) })
-          : t('putIn', { slot: slotLabel(waitingPaper.name, waitingSlot.index) })}
+          ? t('alreadyIn', { slot: slotLabel(waitingPaper, waitingSlot.index) })
+          : t('putIn', { slot: slotLabel(waitingPaper, waitingSlot.index) })}
       </Button>
     )
   }
@@ -115,25 +116,13 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
             event.preventDefault()
         }}
       >
-        <Button
-          ref={placeButtonRef}
-          size="sm"
-          variant="outline"
-          shape="pill"
-          className="gap-1"
-          // Unavailable while a write changing the slots is out, by its ARIA state alone, so it keeps its place in
-          // the Tab order
-          aria-disabled={isChangingSlots}
-        >
+        <Button ref={placeButtonRef} size="sm" variant="outline" shape="pill" className="gap-1">
           {t('label')}
           <ChevronDown size={14} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="p-3">
-        {/* Which board the slots belong to */}
-        <p className="mb-2 text-xs font-semibold text-foreground">{activeBoard.name}</p>
-
-        {/* Each paper as a row of its slots named for the paper, laid out the way the board is */}
+        {/* Each paper as a row named for it, holding its slots laid out the way the board is */}
         <div className="space-y-1.5">
           {activeBoard.papers.map((paper, paperIndex) => (
             <div
@@ -148,7 +137,7 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
                 className="w-4 shrink-0 text-xs font-semibold"
                 style={hueTextStyle(categoryHue(categories, paper.category))}
               >
-                {paperInitial(paper.name)}
+                {paperInitial(paper)}
               </span>
 
               {/* Each slot: its problem's number when filled, its own number when empty */}
@@ -157,7 +146,7 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
                 const occupant = occupantId === null ? undefined : proposalsById.get(occupantId)
 
                 // The slot's short label
-                const slot = slotLabel(paper.name, index)
+                const slot = slotLabel(paper, index)
 
                 // What the slot is and holds: nothing, or its problem's number and name
                 const label =

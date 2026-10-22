@@ -167,8 +167,8 @@ test.describe('the board being filled', () => {
       'Spare',
     ])
 
-    // That paper's second slot holding the problem set aside
-    await expect(slotOf(page, 'S2').getByRole('link', { name: SET_ASIDE.title })).toBeVisible()
+    // That paper's second slot, named for its category, holding the problem set aside
+    await expect(slotOf(page, 'C2').getByRole('link', { name: SET_ASIDE.title })).toBeVisible()
 
     // The finalized board, picked in turn
     await pickBoard(page, LATER_DRAFT, FINALIZED_BOARD)
@@ -272,8 +272,11 @@ test.describe('the board being filled', () => {
     // Whose reviewer's selection holds a finalized board and the drafts after it
     await stubSelection(page, 'selection')
 
-    // The pool
-    await openPool(page)
+    // The pool, whose cards run too tall on a phone to be drawn all at once
+    await page.goto(SELECTION_PATH)
+
+    // Once its problems are counted
+    await expect(problemCount(page, ON_OFFER_COUNT)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
     // How full the board is, in the bar
     await expect(boardPanel(page)).toContainText(

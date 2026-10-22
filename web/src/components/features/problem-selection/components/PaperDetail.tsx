@@ -22,6 +22,7 @@ import { DetailHeading, DetailMissing, type DetailTabContent } from './DetailFra
 import { LanguageSwitch } from './LanguageSwitch'
 import { ProposalBox } from './ProposalBody'
 import { ProposalCard } from './ProposalCard'
+import { AreaChip, RatingsMark } from './ProposalFiling'
 import { RatingsTable } from './RatingsTable'
 import { BackLink } from './SelectionLinks'
 import { useLoadedSelection } from './SelectionWorkspaceProvider'
@@ -255,8 +256,8 @@ type PaperProblemProps = SlotPosition & {
 }
 
 /**
- * One slot of a paper's page: the problem's card marked with the slot's label, or a box saying the slot is
- * empty.
+ * One slot of a paper's page: the problem's card marked with the slot's label and showing the problem's area and how
+ * many reviewers rated it, or a box saying the slot is empty.
  */
 function PaperProblem({ paper, index, proposal, language }: PaperProblemProps) {
   // Board copy
@@ -274,7 +275,7 @@ function PaperProblem({ paper, index, proposal, language }: PaperProblemProps) {
     )
   }
 
-  // The problem's card, marked with the slot's label
+  // The problem's card, marked with the slot's label and showing the problem's area and ratings
   return (
     <li>
       <ProposalCard
@@ -283,7 +284,13 @@ function PaperProblem({ paper, index, proposal, language }: PaperProblemProps) {
         leadsToPage
         mark={<SlotNumber paper={paper} index={index} state="filled" />}
         actions={null}
-        details={null}
+        details={
+          // The problem's area and how many reviewers rated it
+          <>
+            <AreaChip area={proposal.area} />
+            <RatingsMark ratings={proposal.ratings} />
+          </>
+        }
       />
     </li>
   )

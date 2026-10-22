@@ -7,8 +7,9 @@ import {
 } from '@/components/features/problem-selection/model/selection-routes'
 import type { Proposal } from '@/components/features/problem-selection/model/selection-types'
 
+import { refuse } from './support/backend-routes'
 import { READER_NAME } from './support/comments'
-import { SELECTION_PATH } from './support/competitions'
+import { holdClock, SELECTION_PATH } from './support/competitions'
 import {
   actionsButton,
   addressedParam,
@@ -18,6 +19,7 @@ import {
   FIRST,
   GEOMETRY,
   headingOf,
+  holdReads,
   isProposalWrite,
   LATER_DRAFT,
   ON_OFFER,
@@ -397,9 +399,12 @@ test.describe('rating a problem', () => {
       .toEqual([{ beauty: 4.5, difficulty: null }])
   })
 
-  test('moves a score a tenth with the left and right arrows, half a score with Shift, and leaves up and down to the menu', async ({
+  test('moves a score a tenth with the left and right arrows, half a score with Shift, writing it once the keys stop, and leaves up and down to the menu', async ({
     page,
   }) => {
+    // A clock the spec can hold still, so every key lands before any of their scores could be written
+    await page.clock.install()
+
     // A reviewer who gave the algebra problem a beauty of 5 and a difficulty of 2
     await stubSelection(page, 'selection')
 
@@ -414,6 +419,9 @@ test.describe('rating a problem', () => {
 
     // The beauty's bar, focused
     await scoreBar(page, ratingsCopy.beauty).focus()
+
+    // Time stopped while the keys come
+    await holdClock(page)
 
     // Left, a tenth down
     await page.keyboard.press('ArrowLeft')
@@ -433,20 +441,230 @@ test.describe('rating a problem', () => {
     // On 4.5
     await expect(scoreBar(page, ratingsCopy.beauty)).toHaveAttribute('aria-valuenow', '4.5')
 
-    // Each move written, the difficulty kept
+    // Nothing written while the keys keep coming
+    expect(writes()).toHaveLength(0)
+
+    // The keys stopped for a second
+    await page.clock.runFor(1000)
+
+    // Written once, as the keys left it, the difficulty kept
     await expect
       .poll(() => writes().map((write) => write.postDataJSON()))
-      .toEqual([
-        { beauty: 4.9, difficulty: 2 },
-        { beauty: 4.4, difficulty: 2 },
-        { beauty: 4.5, difficulty: 2 },
-      ])
+      .toEqual([{ beauty: 4.5, difficulty: 2 }])
+
+    // Time running again
+    await page.clock.resume()
 
     // Down, which the menu's own keys handle
     await page.keyboard.press('ArrowDown')
 
     // Onto the difficulty's bar
     await expect(scoreBar(page, ratingsCopy.difficulty)).toBeFocused()
+  })
+
+  test("writes the scores keys set on two of a problem's aspects as one write, the moment the menu closes", async ({
+    page,
+  }) => {
+    // A clock the spec can hold still, so the menu closes before any key's score could be written
+    await page.clock.install()
+
+    // A reviewer who gave the algebra problem a beauty of 5 and a difficulty of 2
+    await stubSelection(page, 'selection')
+
+    // Every write the page sends to a problem
+    const writes = recordWrites(page, isProposalWrite)
+
+    // The pool
+    await openPool(page)
+
+    // The menu on the problem's card
+    await actionsButton(cardOf(page, ALGEBRA), ALGEBRA).click()
+
+    // The beauty's bar, focused
+    await scoreBar(page, ratingsCopy.beauty).focus()
+
+    // Time stopped while the keys come
+    await holdClock(page)
+
+    // Left on the beauty, a tenth down
+    await page.keyboard.press('ArrowLeft')
+
+    // On 4.9
+    await expect(scoreBar(page, ratingsCopy.beauty)).toHaveAttribute('aria-valuenow', '4.9')
+
+    // The difficulty's bar, focused
+    await scoreBar(page, ratingsCopy.difficulty).focus()
+
+    // Right on the difficulty, a tenth up
+    await page.keyboard.press('ArrowRight')
+
+    // On 2.1
+    await expect(scoreBar(page, ratingsCopy.difficulty)).toHaveAttribute('aria-valuenow', '2.1')
+
+    // The menu, closed from the keyboard before either key's score is written
+    await page.keyboard.press('Escape')
+
+    // The menu gone, its bars with it
+    await expect(scoreBar(page, ratingsCopy.beauty)).toHaveCount(0)
+
+    // Written once as the menu closed, carrying each aspect's new score
+    await expect
+      .poll(() => writes().map((write) => write.postDataJSON()))
+      .toEqual([{ beauty: 4.9, difficulty: 2.1 }])
+  })
+
+  test('writes a press on a bar at once, carrying a score a key left waiting on another aspect', async ({
+    page,
+  }) => {
+    // A clock the spec can hold still, so the press comes while the key's score still waits
+    await page.clock.install()
+
+    // A reviewer who gave the algebra problem a beauty of 5 and a difficulty of 2
+    await stubSelection(page, 'selection')
+
+    // Every write the page sends to a problem
+    const writes = recordWrites(page, isProposalWrite)
+
+    // The pool
+    await openPool(page)
+
+    // The menu on the problem's card
+    await actionsButton(cardOf(page, ALGEBRA), ALGEBRA).click()
+
+    // The beauty's bar, focused
+    await scoreBar(page, ratingsCopy.beauty).focus()
+
+    // Time stopped while the key's score waits
+    await holdClock(page)
+
+    // Left on the beauty, a tenth down
+    await page.keyboard.press('ArrowLeft')
+
+    // On 4.9
+    await expect(scoreBar(page, ratingsCopy.beauty)).toHaveAttribute('aria-valuenow', '4.9')
+
+    // A difficulty of 3 from its bar
+    await pressStep(scoreBar(page, ratingsCopy.difficulty), 3)
+
+    // Written at once, carrying the beauty the key left
+    await expect
+      .poll(() => writes().map((write) => write.postDataJSON()))
+      .toEqual([{ beauty: 4.9, difficulty: 3 }])
+
+    // Long past when the key's own score would have been written
+    await page.clock.runFor(1000)
+
+    // Time running again
+    await page.clock.resume()
+
+    // The beauty raised a tenth from its arrow, a write that lands after anything the key still had coming
+    await page
+      .getByRole('button', {
+        name: selectionText('ratings.raiseScore', { aspect: ratingsCopy.beauty }),
+      })
+      .click()
+
+    // Nothing between the two writes: the key's score went out with the press, never on its own
+    await expect
+      .poll(() => writes().map((write) => write.postDataJSON()))
+      .toEqual([
+        { beauty: 4.9, difficulty: 3 },
+        { beauty: 5, difficulty: 3 },
+      ])
+  })
+
+  test('keeps a score a key set while an earlier write of the rating lands on the page', async ({
+    page,
+  }) => {
+    // A clock the spec can hold still, so the earlier write lands on the page only once the key is in
+    await page.clock.install()
+
+    // A reviewer whose pool's first problem nobody has rated
+    await stubSelection(page, 'selection')
+
+    // Every write the page sends to a problem
+    const writes = recordWrites(page, isProposalWrite)
+
+    // The pool
+    await openPool(page)
+
+    // The menu on the problem's card
+    await actionsButton(cardOf(page, FIRST), FIRST).click()
+
+    // The beauty's bar
+    const bar = scoreBar(page, ratingsCopy.beauty)
+
+    // Time stopped before the bar is pressed
+    await holdClock(page)
+
+    // A beauty of 3.5 from the bar, written at once
+    await pressStep(bar, 3.5)
+
+    // A tenth up from the keyboard, before that write has landed on the page
+    await page.keyboard.press('ArrowRight')
+
+    // On 3.6
+    await expect(bar).toHaveAttribute('aria-valuenow', '3.6')
+
+    // Long enough for the write of 3.5 to land on the page, short of the key's own write
+    await page.clock.runFor(100)
+
+    // The write of 3.5 landed, which the card's count of raters shows
+    await expect(ratingsMark(page, FIRST, 1)).toBeVisible()
+
+    // The bar still on the score the key set
+    await expect(bar).toHaveAttribute('aria-valuenow', '3.6')
+
+    // Another tenth up, from there
+    await page.keyboard.press('ArrowRight')
+
+    // Long past the wait before a key's score is written
+    await page.clock.runFor(1000)
+
+    // The press written, then the keys' score once
+    await expect
+      .poll(() => writes().map((write) => write.postDataJSON()))
+      .toEqual([
+        { beauty: 3.5, difficulty: null },
+        { beauty: 3.7, difficulty: null },
+      ])
+  })
+
+  test('puts a bar back on the score the backend holds when it refuses the write', async ({
+    page,
+  }) => {
+    // A reviewer who gave the algebra problem a beauty of 5 and a difficulty of 2
+    await stubSelection(page, 'selection')
+
+    // Where the problem's rating is written
+    const ratingAddress = `${SELECTION_ENDPOINT}/proposals/${ALGEBRA.id}/rating`
+
+    // Every write of the rating refused
+    await page.route(ratingAddress, (route) => refuse(route, 400, 'ProposalRatingValue'))
+
+    // The pool
+    await openPool(page)
+
+    // The menu on the problem's card
+    await actionsButton(cardOf(page, ALGEBRA), ALGEBRA).click()
+
+    // Every read held from here, so the page has only the refusal to go on
+    const releaseReads = await holdReads(page)
+
+    // The refusal, once it comes
+    const refused = page.waitForResponse(ratingAddress)
+
+    // A beauty of 3 from the bar
+    await pressStep(scoreBar(page, ratingsCopy.beauty), 3)
+
+    // Refused
+    await refused
+
+    // The bar back on the 5 the backend holds
+    await expect(scoreBar(page, ratingsCopy.beauty)).toHaveAttribute('aria-valuenow', '5')
+
+    // The reads let through again
+    releaseReads()
   })
 
   test('fills a bar to the score its arrow keys set while the mouse rests on another step', async ({

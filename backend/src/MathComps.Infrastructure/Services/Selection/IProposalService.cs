@@ -3,8 +3,9 @@ using MathComps.Domain.EfCoreEntities;
 namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
-/// Changes what the reviewers record about the proposals. Every change runs after every one before it has
-/// finished, so none of them acts on a state another is moving.
+/// Changes what the reviewers record about the proposals. Only a lead of one of the organization's categories sets a
+/// proposal aside, changes what it is recommended for or deletes it, whichever proposal it is. Every change runs after
+/// every one before it has finished, so none of them acts on a state another is moving.
 /// </summary>
 public interface IProposalService
 {
@@ -14,15 +15,22 @@ public interface IProposalService
     /// <param name="organizationSlug">
     /// The <see cref="Organization.Slug"/> of the organization whose pool the proposal is in.
     /// </param>
+    /// <param name="userId">
+    /// The account making the change, which has to lead one of the organization's categories.
+    /// </param>
     /// <param name="proposalId">The proposal.</param>
     /// <param name="isSetAside">Whether the proposal should be set aside.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the change is saved.</returns>
+    /// <exception cref="ProposalNotLeadException">
+    /// Thrown when the account leads none of the organization's categories.
+    /// </exception>
     /// <exception cref="SelectionTargetNotFoundException">
     /// Thrown when no live proposal of the organization's pool has the id.
     /// </exception>
     Task SetAsideAsync(
-        string organizationSlug, Guid proposalId, bool isSetAside, CancellationToken cancellationToken = default);
+        string organizationSlug, Guid userId, Guid proposalId, bool isSetAside,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Recommends a proposal for one category, or takes the recommendation back, leaving the other categories as
@@ -31,17 +39,23 @@ public interface IProposalService
     /// <param name="organizationSlug">
     /// The <see cref="Organization.Slug"/> of the organization whose pool the proposal is in.
     /// </param>
+    /// <param name="userId">
+    /// The account making the change, which has to lead one of the organization's categories.
+    /// </param>
     /// <param name="proposalId">The proposal.</param>
     /// <param name="category">The category, by its <see cref="OrganizationCategory.Name"/>.</param>
     /// <param name="isRecommended">Whether the proposal should be recommended for <paramref name="category"/>.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the change is saved.</returns>
+    /// <exception cref="ProposalNotLeadException">
+    /// Thrown when the account leads none of the organization's categories.
+    /// </exception>
     /// <exception cref="SelectionTargetNotFoundException">
     /// Thrown when no live proposal of the organization's pool has the id, or the organization lists no category of
     /// the name.
     /// </exception>
     Task SetRecommendedAsync(
-        string organizationSlug, Guid proposalId, string category, bool isRecommended,
+        string organizationSlug, Guid userId, Guid proposalId, string category, bool isRecommended,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -80,14 +94,21 @@ public interface IProposalService
     /// <param name="organizationSlug">
     /// The <see cref="Organization.Slug"/> of the organization whose pool the proposal is in.
     /// </param>
+    /// <param name="userId">
+    /// The account making the change, which has to lead one of the organization's categories.
+    /// </param>
     /// <param name="proposalId">The proposal.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the deletion is saved.</returns>
+    /// <exception cref="ProposalNotLeadException">
+    /// Thrown when the account leads none of the organization's categories.
+    /// </exception>
     /// <exception cref="SelectionTargetNotFoundException">
     /// Thrown when no live proposal of the organization's pool has the id.
     /// </exception>
     /// <exception cref="SelectionProposalUsedException">Thrown when a paper has taken it.</exception>
-    Task DeleteAsync(string organizationSlug, Guid proposalId, CancellationToken cancellationToken = default);
+    Task DeleteAsync(
+        string organizationSlug, Guid userId, Guid proposalId, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -101,6 +122,13 @@ public sealed class SelectionTargetNotFoundException()
 /// may move.
 /// </summary>
 public sealed class SelectionProposalUsedException() : Exception("A paper has already taken this problem");
+
+/// <summary>
+/// Thrown when a proposal is set aside, has its recommended categories changed or is deleted by an account leading
+/// none of its organization's categories.
+/// </summary>
+public sealed class ProposalNotLeadException()
+    : Exception("Only the leads of the organization's categories make this change");
 
 /// <summary>
 /// Thrown when a rating would hold a score off its scale or between its steps.

@@ -244,6 +244,8 @@ public static class ProblemSelectionEndpoints
             string organization,
             Guid proposalId,
             SetAsideRequest request,
+            HttpContext context,
+            IUserManager userManager,
             IProposalService proposalService,
             CancellationToken cancellationToken) =>
         {
@@ -251,8 +253,11 @@ public static class ProblemSelectionEndpoints
             if (request.IsSetAside is not { } isSetAside)
                 throw new BadHttpRequestException("The change must say whether the proposal is set aside.");
 
+            // The reviewer setting it aside or bringing it back
+            var reviewerId = await userManager.RequireUserIdAsync(context);
+
             // Change it
-            await proposalService.SetAsideAsync(organization, proposalId, isSetAside, cancellationToken);
+            await proposalService.SetAsideAsync(organization, reviewerId, proposalId, isSetAside, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -265,6 +270,8 @@ public static class ProblemSelectionEndpoints
             string organization,
             Guid proposalId,
             SetRecommendedRequest request,
+            HttpContext context,
+            IUserManager userManager,
             IProposalService proposalService,
             CancellationToken cancellationToken) =>
         {
@@ -272,9 +279,12 @@ public static class ProblemSelectionEndpoints
             if (request is not { Category: { } category, IsRecommended: { } isRecommended })
                 throw new BadHttpRequestException("The change must name the category and say which way it goes.");
 
+            // The reviewer switching the category
+            var reviewerId = await userManager.RequireUserIdAsync(context);
+
             // Change it
             await proposalService.SetRecommendedAsync(
-                organization, proposalId, category, isRecommended, cancellationToken);
+                organization, reviewerId, proposalId, category, isRecommended, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
@@ -309,11 +319,16 @@ public static class ProblemSelectionEndpoints
         app.MapDelete(ProposalPath, async (
             string organization,
             Guid proposalId,
+            HttpContext context,
+            IUserManager userManager,
             IProposalService proposalService,
             CancellationToken cancellationToken) =>
         {
+            // The reviewer deleting it
+            var reviewerId = await userManager.RequireUserIdAsync(context);
+
             // Delete it
-            await proposalService.DeleteAsync(organization, proposalId, cancellationToken);
+            await proposalService.DeleteAsync(organization, reviewerId, proposalId, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();

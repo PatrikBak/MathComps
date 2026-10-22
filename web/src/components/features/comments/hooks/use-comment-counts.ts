@@ -1,3 +1,5 @@
+import { keepPreviousData } from '@tanstack/react-query'
+
 import { useApiQuery } from '@/hooks/use-api-query'
 import { cachePolicy } from '@/lib/query-config'
 import { isAwaitingAnswer } from '@/lib/query-ui-state'
@@ -16,9 +18,12 @@ type CommentCounts = Record<string, number>
  * What {@link useCommentCounts} hands back.
  */
 type UseCommentCountsResult = {
-  /** How many comments each target carries, keyed by target id; empty until the read lands. */
+  /**
+   * How many comments each target carries, keyed by target id; empty until the first read lands, and the previous
+   * set's counts while a new set is being read.
+   */
   counts: CommentCounts
-  /** Whether a count may still be coming, which is what a badge waits on. */
+  /** Whether the first counts may still be coming. */
   isLoading: boolean
 }
 
@@ -51,6 +56,8 @@ export function useCommentCounts(
     requireAuth: false,
     // Anybody can comment, so the counts keep up while they are on screen
     cachePolicy: cachePolicy.live,
+    // A set gaining or losing a target is read anew, and the counts already shown stay up until that read lands
+    placeholderData: keepPreviousData,
   })
 
   // The counts and whether more may yet arrive
