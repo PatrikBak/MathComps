@@ -272,8 +272,11 @@ test.describe('the board being filled', () => {
     // Whose reviewer's selection holds a finalized board and the drafts after it
     await stubSelection(page, 'selection')
 
-    // The pool
-    await openPool(page)
+    // The pool, whose cards run too tall on a phone to be drawn all at once
+    await page.goto(SELECTION_PATH)
+
+    // Once its problems are counted
+    await expect(problemCount(page, ON_OFFER_COUNT)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
     // How full the board is, in the bar
     await expect(boardPanel(page)).toContainText(

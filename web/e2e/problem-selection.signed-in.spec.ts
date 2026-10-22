@@ -12,6 +12,7 @@ import {
   boardPanel,
   cardOf,
   DRAFT_BOARD,
+  FIRST,
   GEOMETRY,
   headingOf,
   HINT,
@@ -23,6 +24,7 @@ import {
   openPool,
   pickBoard,
   pickState,
+  problemCount,
   rememberedSelection,
   REVISION,
   selectedTab,
@@ -252,10 +254,8 @@ async function openFromPool(page: Page): Promise<void> {
   // The pool
   await page.goto(SELECTION_PATH)
 
-  // Once every card is drawn
-  await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT, {
-    timeout: SETTLE_TIMEOUT_MS,
-  })
+  // Once the problem's card is drawn
+  await expect(cardOf(page, OPENED)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
   // Left part of the way down
   await scrollWindowTo(page, POOL_SPOT)
@@ -269,8 +269,8 @@ async function openFromPool(page: Page): Promise<void> {
 
 test.describe("the selection's address and history", () => {
   test('opens a clicked problem at its top, and names it in the address', async ({ page }) => {
-    // A reviewer whose selection holds a pool of problems
-    await stubSelection(page, 'selection')
+    // A reviewer whose selection holds a pool of problems, the one opened written out at length
+    await stubSelection(page, 'openedAtLength')
 
     // A problem opened from part of the way down the pool
     await openFromPool(page)
@@ -289,8 +289,8 @@ test.describe("the selection's address and history", () => {
   })
 
   test('returns by the Pool link to wherever the pool was last left', async ({ page }) => {
-    // A reviewer whose selection holds a pool of problems
-    await stubSelection(page, 'selection')
+    // A reviewer whose selection holds a pool of problems, the one opened written out at length
+    await stubSelection(page, 'openedAtLength')
 
     // A problem opened from part of the way down the pool
     await openFromPool(page)
@@ -302,7 +302,7 @@ test.describe("the selection's address and history", () => {
     await expect(page).toHaveURL(SELECTION_PATH)
 
     // The pool again
-    await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT)
+    await expect(problemCount(page, ON_OFFER_COUNT)).toBeVisible()
 
     // Where it was left
     await expect.poll(() => windowScroll(page)).toBe(POOL_SPOT)
@@ -326,7 +326,7 @@ test.describe("the selection's address and history", () => {
     await expect(page).toHaveURL(SELECTION_PATH)
 
     // The pool again
-    await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT)
+    await expect(problemCount(page, ON_OFFER_COUNT)).toBeVisible()
 
     // Where it was scrolled since, rather than where the problem was first opened from
     await expect.poll(() => windowScroll(page)).toBe(NEWER_SPOT)
@@ -391,7 +391,61 @@ test.describe("the selection's address and history", () => {
     await clickInPlace(page, selectionCopy.detail.backToPool)
 
     // The pool again, the problem set aside gone from above
-    await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT - 1)
+    await expect(problemCount(page, ON_OFFER_COUNT - 1)).toBeVisible()
+
+    // The link where it stood, give or take the pixel a scroll rounds to
+    expect(Math.abs((await topInView(link)) - linkTop)).toBeLessThanOrEqual(1)
+  })
+
+  test('comes back from a problem opened far down the pool to its card, the cards far above it not drawn', async ({
+    page,
+  }) => {
+    // A reviewer whose pool runs long, a problem written out at length standing between its first card and its last
+    await stubSelection(page, 'openedAtLength')
+
+    // The pool
+    await page.goto(SELECTION_PATH)
+
+    // Its first card on top
+    await expect(cardOf(page, FIRST)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The link of the geometry problem, whose card comes last
+    const link = cardOf(page, GEOMETRY).getByRole('link', { name: GEOMETRY.title })
+
+    // The page scrolled to its bottom until that card is drawn, the bottom moving as cards coming into view are
+    // measured
+    await expect
+      .poll(async () => {
+        // The page at its bottom as it stands
+        await page.evaluate(() =>
+          window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })
+        )
+
+        // Whether the card is drawn yet
+        return link.count()
+      })
+      .toBe(1)
+
+    // The first card, far above, no longer drawn
+    await expect(cardOf(page, FIRST)).toHaveCount(0)
+
+    // Once the cards drawn last are measured and painted
+    await twoFramesLater(page)
+
+    // Where the link stands in the view
+    const linkTop = await topInView(link)
+
+    // The geometry problem, opened by its link where it sits
+    await link.evaluate((element: HTMLElement) => element.click())
+
+    // Its page
+    await expect(headingOf(page, GEOMETRY)).toBeVisible()
+
+    // Back
+    await page.goBack()
+
+    // The focus on the link again
+    await expect(link).toBeFocused()
 
     // The link where it stood, give or take the pixel a scroll rounds to
     expect(Math.abs((await topInView(link)) - linkTop)).toBeLessThanOrEqual(1)
@@ -577,8 +631,8 @@ test.describe("the selection's address and history", () => {
     // The clock under the test's hand, so the next read comes when the test says
     await page.clock.install()
 
-    // A reviewer whose selection holds a pool of problems
-    const answerSelectionWith = await stubSelection(page, 'selection')
+    // A reviewer whose selection holds a pool of problems, the one opened written out at length
+    const answerSelectionWith = await stubSelection(page, 'openedAtLength')
 
     // A problem opened from the pool
     await openFromPool(page)

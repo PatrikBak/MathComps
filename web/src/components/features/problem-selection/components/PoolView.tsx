@@ -2,17 +2,17 @@
 
 import { ArrowDownUp, Search, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { type ReactNode, type RefObject, useCallback, useState } from 'react'
+import { type RefObject, useCallback, useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
 import { SegmentedSwitch } from '@/components/shared/components/SegmentedSwitch'
 import { WaitingChangeButton } from '@/components/shared/components/WaitingChangeButton'
+import { WindowVirtualList } from '@/components/shared/components/WindowVirtualList'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { focusForReader } from '@/components/shared/utils/focus-utils'
 import type { TableSort } from '@/components/shared/utils/table-sort'
-import { useFocusHandOff } from '@/hooks/use-focus-hand-off'
 import { useResortableOrder } from '@/hooks/use-resortable-order'
 import type { Locale } from '@/i18n/i18n'
 
@@ -316,18 +316,17 @@ function PoolLayout({
 
   // The layout asked for
   switch (mode) {
-    // A card for every problem, or the note while none shows
+    // A card for every problem, only those in or near the window drawn, or the note while none shows
     case 'problems':
       return proposals.length === 0 ? (
         emptyNote
       ) : (
-        <div className="space-y-4">
-          {proposals.map((proposal) => (
-            <PoolEntry key={proposal.id} countRef={countRef}>
-              <PoolCard proposal={proposal} language={language} />
-            </PoolEntry>
-          ))}
-        </div>
+        <WindowVirtualList
+          items={proposals}
+          keyOf={(proposal) => proposal.id}
+          renderItem={(proposal) => <PoolCard proposal={proposal} language={language} />}
+          fallbackRef={countRef}
+        />
       )
 
     // A row for every problem, with its ratings, or the note while none shows
@@ -351,28 +350,6 @@ function PoolLayout({
     default:
       return assertNever(mode)
   }
-}
-
-/**
- * Props for the {@link PoolEntry} component.
- */
-type PoolEntryProps = {
-  /** The line saying how many problems show. */
-  countRef: RefObject<HTMLParagraphElement | null>
-  /** The card. */
-  children: ReactNode
-}
-
-/**
- * One card's place in the pool. A card leaving the pool while it holds the focus, like one placed on the board while
- * the pool shows only what the board doesn't hold, hands the focus on as {@link useFocusHandOff} does, the count line
- * taking it when no card stands in its place.
- */
-function PoolEntry({ countRef, children }: PoolEntryProps) {
-  // The focus handed on as the card leaves holding it
-  const handOff = useFocusHandOff<HTMLDivElement>(countRef)
-
-  return <div {...handOff}>{children}</div>
 }
 
 /**
