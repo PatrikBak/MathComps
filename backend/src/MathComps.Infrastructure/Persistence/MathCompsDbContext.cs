@@ -66,6 +66,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Reactions on comments.</summary>
     public DbSet<CommentReaction> CommentReactions => Set<CommentReaction>();
 
+    /// <summary>How far each reader has seen each comment target's discussion.</summary>
+    public DbSet<CommentSeenMark> CommentSeenMarks => Set<CommentSeenMark>();
+
     /// <summary>Join table: comments on problems.</summary>
     public DbSet<ProblemComment> ProblemComments => Set<ProblemComment>();
 
@@ -700,6 +703,22 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion CommentReaction
+
+        #region CommentSeenMark
+
+        modelBuilder.Entity<CommentSeenMark>(e =>
+        {
+            // One mark per reader per target
+            e.HasKey(mark => new { mark.UserId, mark.TargetType, mark.TargetId });
+
+            // The reader, whose marks go with their account
+            e.HasOne(mark => mark.User)
+             .WithMany()
+             .HasForeignKey(mark => mark.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        #endregion CommentSeenMark
 
         #region ProblemComment
 

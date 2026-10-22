@@ -8,9 +8,10 @@ namespace MathComps.Api.Endpoints;
 
 /// <summary>
 /// Maps the endpoints of the problem selection, each organization's selection at its own address: one read
-/// returning the whole of it, one returning its discussions, and one write per change a reviewer makes. Every
-/// route is gated by the <see cref="AuthorizationPolicies.OrganizationMember"/> policy, since the proposals are
-/// problems no student may see.
+/// returning the whole of it, one returning its discussions, one returning how far the caller has seen them, and
+/// one write per change a reviewer makes. Every route is gated by the
+/// <see cref="AuthorizationPolicies.OrganizationMember"/> policy, since the proposals are problems no student
+/// may see.
 /// </summary>
 public static class ProblemSelectionEndpoints
 {
@@ -35,6 +36,11 @@ public static class ProblemSelectionEndpoints
     /// The path of one proposal, below the base path.
     /// </summary>
     private const string ProposalPath = $"{SelectionPath}/proposals/{{proposalId:guid}}";
+
+    /// <summary>
+    /// The path of how far the caller has seen the selection's discussions, below the base path.
+    /// </summary>
+    private const string DiscussionsSeenPath = $"{SelectionPath}/comments/seen";
 
     /// <summary>
     /// Maps the <c>/problem-selection</c> endpoints onto the route builder.
@@ -68,17 +74,64 @@ public static class ProblemSelectionEndpoints
             string organization,
             HttpContext context,
             IUserManager userManager,
-            IProblemSelectionService selectionService,
+            ISelectionDiscussionService discussionService,
             CancellationToken cancellationToken) =>
         {
             // The reviewer reading the discussions
             var viewer = await CommentEndpoints.RequireViewerAsync(userManager, context);
 
             // The discussions of every proposal and paper the organization's selection holds
-            var discussions = await selectionService.GetDiscussionsAsync(organization, viewer, cancellationToken);
+            var discussions = await discussionService.GetDiscussionsAsync(organization, viewer, cancellationToken);
 
             // Return the discussions
             return Results.Ok(discussions);
+        })
+        .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Read how far the caller has seen every discussion the selection holds
+        app.MapGet(DiscussionsSeenPath, async (
+            string organization,
+            HttpContext context,
+            IUserManager userManager,
+            ISelectionDiscussionService discussionService,
+            CancellationToken cancellationToken) =>
+        {
+            // The reviewer reading
+            var viewer = await CommentEndpoints.RequireViewerAsync(userManager, context);
+
+            // How far the reviewer has seen each discussion, beside when somebody else last posted in it
+            var discussionsSeen = await discussionService.GetDiscussionsSeenAsync(
+                organization, viewer, cancellationToken);
+
+            // Return it
+            return Results.Ok(discussionsSeen);
+        })
+        .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Mark some of the discussions as seen by the caller up to a moment
+        app.MapPut(DiscussionsSeenPath, async (
+            string organization,
+            MarkDiscussionsSeenRequest request,
+            HttpContext context,
+            IUserManager userManager,
+            ISelectionDiscussionService discussionService,
+            CancellationToken cancellationToken) =>
+        {
+            // A body leaving out either list or the moment is not a request that can be read
+            if (request is not { ProposalIds: { } proposalIds, PaperIds: { } paperIds, SeenUpTo: { } seenUpTo })
+                throw new BadHttpRequestException("A mark must name its proposals, its papers and its moment.");
+
+            // The reviewer who saw the discussions
+            var viewer = await CommentEndpoints.RequireViewerAsync(userManager, context);
+
+            // Mark the discussions as seen
+            var markedUpTo = await discussionService.MarkDiscussionsSeenAsync(
+                organization, viewer, proposalIds, paperIds, seenUpTo, cancellationToken);
+
+            // Return the moment the discussions were marked as seen up to
+            return Results.Ok(new DiscussionsMarkedDto(markedUpTo));
         })
         .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);

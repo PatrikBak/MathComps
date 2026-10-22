@@ -2,6 +2,7 @@ using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Net.Http.Headers;
 using Clerk.BackendAPI;
+using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
@@ -73,6 +74,7 @@ public static class ServiceCollectionExtensions
                     .MapEnum<Language>("language")
                     .MapEnum<CommentStatus>("comment_status")
                     .MapEnum<CommentReactionKind>("comment_reaction_kind")
+                    .MapEnum<CommentTargetType>("comment_target_type")
                     .MapEnum<TranscriptRole>("transcript_role")
                     .MapEnum<DefenseReportCategory>("defense_report_category")
                     .MapEnum<DefenseOutcome>("defense_outcome")
@@ -223,6 +225,7 @@ public static class ServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Scoped<ICommentThreadKind, ProposalThreadKind>());
         services.TryAddEnumerable(ServiceDescriptor.Scoped<ICommentThreadKind, SelectionPaperThreadKind>());
         services.TryAddScoped<ICommentService, CommentService>();
+        services.TryAddScoped<ICommentSeenService, CommentSeenService>();
 
         // The list service resolves problem slugs, so make sure the lookup is available
         services.TryAddScoped<IProblemLookupService, ProblemLookupService>();
@@ -557,11 +560,14 @@ public static class ServiceCollectionExtensions
         // The check on a conversation reads whether the viewer is on its organization's list.
         services.AddOrganizationMembers();
 
-        // The discussions are comment threads, read through the comment service.
+        // The discussions are comment threads, read and marked seen through the comment services.
         services.AddUserServices();
 
         // The read.
         services.TryAddScoped<IProblemSelectionService, ProblemSelectionService>();
+
+        // The selection's discussions, and how far each reviewer has seen them.
+        services.TryAddScoped<ISelectionDiscussionService, SelectionDiscussionService>();
 
         // Who reaches a defense conversation.
         services.TryAddScoped<IConversationAccess, ConversationAccess>();
