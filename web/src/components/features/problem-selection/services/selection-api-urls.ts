@@ -83,6 +83,19 @@ export function getDiscussionsUrl(organization: string): string {
 }
 
 /**
+ * Builds the API URL for reading and marking how far the reader has seen the discussions of everything an
+ * organization's selection holds.
+ *
+ * @param organization - The organization's slug.
+ *
+ * @returns The API URL.
+ */
+export function getDiscussionsSeenUrl(organization: string): string {
+  // How far the discussions are seen, under the discussions
+  return buildApiUrl(`${selectionPath(organization)}/comments/seen`)
+}
+
+/**
  * Builds the API URL for putting a proposal into a slot or emptying it.
  *
  * @param organization - The slug of the organization whose selection holds the slot's board.

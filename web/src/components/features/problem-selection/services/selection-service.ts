@@ -2,6 +2,8 @@ import type { ApiCaller } from '@/hooks/use-api'
 import type { ApiResult } from '@/types/api'
 
 import type {
+  DiscussionsMarked,
+  DiscussionsSeenWrite,
   FinalizationWrite,
   MoveWrite,
   PlacementWrite,
@@ -9,10 +11,12 @@ import type {
   RecommendationWrite,
   SelectionData,
   SelectionDiscussions,
+  SelectionDiscussionsSeen,
   SetAsideWrite,
   SlotAddress,
 } from '../model/selection-types'
 import {
+  getDiscussionsSeenUrl,
   getDiscussionsUrl,
   getFinalizationUrl,
   getProposalUrl,
@@ -57,6 +61,43 @@ export function getDiscussions(
   organization: string
 ): Promise<ApiResult<SelectionDiscussions>> {
   return apiCall<SelectionDiscussions>(() => getDiscussionsUrl(organization))
+}
+
+/**
+ * Reads how far the reader has seen the discussion of every proposal and paper an organization's selection holds,
+ * each beside when somebody else last posted in it.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param organization - The slug of the organization whose selection holds the discussions.
+ *
+ * @returns How far each discussion is seen, or an error.
+ */
+export function getDiscussionsSeen(
+  apiCall: ApiCaller,
+  organization: string
+): Promise<ApiResult<SelectionDiscussionsSeen>> {
+  return apiCall<SelectionDiscussionsSeen>(() => getDiscussionsSeenUrl(organization))
+}
+
+/**
+ * Marks the discussions of some of what an organization's selection holds as seen by the reader up to a moment, held
+ * to now. A discussion already seen further along stays so, and whatever the selection doesn't hold is passed over.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param organization - The slug of the organization whose selection holds the discussions.
+ * @param write - The proposals and papers whose discussions were seen, and the moment they were seen up to.
+ *
+ * @returns The moment the discussions were marked as seen up to, or an error.
+ */
+export function markDiscussionsSeen(
+  apiCall: ApiCaller,
+  organization: string,
+  write: DiscussionsSeenWrite
+): Promise<ApiResult<DiscussionsMarked>> {
+  return apiCall<DiscussionsMarked>(() => getDiscussionsSeenUrl(organization), {
+    method: 'PUT',
+    body: JSON.stringify(write),
+  })
 }
 
 /**

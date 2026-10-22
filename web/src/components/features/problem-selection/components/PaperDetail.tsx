@@ -13,6 +13,7 @@ import { type Locale, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
 import { useDetailTab } from '../hooks/use-detail-tab'
 import { usePaperCommentCount } from '../hooks/use-paper-comment-count'
+import { useSubjectDiscussion } from '../hooks/use-subject-discussion'
 import { DEFAULT_RATINGS_SORT, type RatingsColumn } from '../model/ratings-order'
 import { PAPER_TABS, type PaperTab } from '../model/selection-routes'
 import { categoryHue, type SlotPosition, unwrittenAcross } from '../model/selection-state'
@@ -20,6 +21,7 @@ import type { Board, Paper, Proposal } from '../model/selection-types'
 import { SlotNumber } from './CategoryMarks'
 import { DetailHeading, DetailMissing, type DetailTabContent } from './DetailFrame'
 import { LanguageSwitch } from './LanguageSwitch'
+import { MarkSeenButton } from './MarkSeenButton'
 import { ProposalBox } from './ProposalBody'
 import { ProposalCard } from './ProposalCard'
 import { AreaChip, RatingsMark } from './ProposalFiling'
@@ -34,6 +36,13 @@ import { useLoadedSelection } from './SelectionWorkspaceProvider'
 const SHOWS_STATEMENTS: Record<PaperTab, boolean> = {
   problems: true,
   comments: false,
+  ratings: false,
+}
+
+/** Whether each tab of a paper's page shows its discussion, and so carries the eye while something there is new. */
+const SHOWS_DISCUSSION: Record<PaperTab, boolean> = {
+  problems: false,
+  comments: true,
   ratings: false,
 }
 
@@ -142,6 +151,12 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
     pageOn: (shown) => ({ kind: 'paper', id: paper.id, tab: shown }),
   })
 
+  // The paper's discussion, with what in it is new
+  const discussion = useSubjectDiscussion({ targetType: 'SelectionPaper', targetId: paper.id })
+
+  // The discussion's panel
+  const commentsPanelRef = useRef<HTMLDivElement>(null)
+
   // What each tab holds
   const contents: Record<PaperTab, DetailTabContent<PaperTab>> = {
     problems: {
@@ -165,13 +180,21 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
     comments: {
       label: t('commentsTab'),
       count: commentCount,
+      // Read in the accent colour while somebody else's comment waits unseen behind another tab
+      isHighlighted: discussion.hasNews,
       panel: (
-        <div className="pt-4">
+        <div
+          ref={commentsPanelRef}
+          // Takes the focus when the eye marking the discussion seen leaves holding it
+          tabIndex={-1}
+          className="pt-4 focus:outline-none"
+        >
           <CommentSection
             variant="inline"
             newCommentPlaceholder={t('placeholder')}
             showEmptyText={false}
             target={{ targetType: 'SelectionPaper', targetId: paper.id }}
+            newness={discussion.newness}
           />
         </div>
       ),
@@ -239,6 +262,12 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
           selectedId={tab}
           onSelect={showTab}
           items={PAPER_TABS.map((id) => ({ id, ...contents[id] }))}
+          trailing={
+            // The eye, while the discussion's tab is open and shows something new
+            SHOWS_DISCUSSION[tab] && discussion.showsNew ? (
+              <MarkSeenButton onPress={discussion.markSeen} fallbackRef={commentsPanelRef} />
+            ) : undefined
+          }
         />
       </div>
     </article>

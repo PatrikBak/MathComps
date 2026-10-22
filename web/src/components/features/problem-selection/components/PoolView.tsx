@@ -65,6 +65,15 @@ const HOLDS_ORDER: Record<PoolViewMode, boolean> = {
 }
 
 /**
+ * Whether the line over each layout of the pool carries the eye marking what is new as seen.
+ */
+const CARRIES_EYE: Record<PoolViewMode, boolean> = {
+  problems: false,
+  ratings: false,
+  comments: true,
+}
+
+/**
  * Props for the {@link PoolView} component.
  */
 type PoolViewProps = {
@@ -221,18 +230,24 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
         </>
       )}
 
-      {/* How many problems or comments show, or a loading line */}
+      {/* How many problems or comments show, with how many comments are new, or a loading line */}
       <p
         ref={countRef}
         // Takes the focus when whatever held it goes with nothing in its place, so a reader's next Tab goes on from
         // here
         tabIndex={-1}
-        className="mt-4 mb-3 text-sm text-muted focus:outline-none"
+        className={cn(
+          'mt-4 mb-3 text-sm text-muted focus:outline-none',
+          // As tall from the start as the eye it carries, which appears on it later
+          CARRIES_EYE[mode] && 'flex min-h-9 flex-wrap items-center'
+        )}
       >
         {countLine}
         <span
           // Filled in by the discussions, which count their own comments
           ref={keepCommentCountSlot}
+          // Laid out as part of the line
+          className="contents"
         />
       </p>
 

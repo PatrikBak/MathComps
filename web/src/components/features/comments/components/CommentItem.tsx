@@ -69,12 +69,16 @@ export type CommentData = {
 type CommentItemProps = Omit<CommentData, 'id' | 'authorId' | 'replies'> & {
   /** How the comment's edit box is drawn. */
   variant: RichMathEditorVariant
+  /** Whether the comment is new to the reader. */
+  isNew: boolean
   /** Whether the comment shows its reactions. */
   showReactions: boolean
   /** Whether the comment's replies are collapsed. */
   isCollapsed: boolean
   /** Number of replies beneath the comment at any depth, deleted ones not counted. */
   replyCount: number
+  /** Whether a reply beneath the comment at any depth is new to the reader. */
+  hasNewReplies: boolean
   /** A function which collapses or expands the comment's replies. */
   onToggleCollapse: () => void
   /** A function which opens a reply to the comment, absent when replying isn't offered. */
@@ -92,10 +96,13 @@ type CommentItemProps = Omit<CommentData, 'id' | 'authorId' | 'replies'> & {
 }
 
 /**
- * A comment in a thread, editable in place, with its replies collapsible beneath it.
+ * A comment in a thread, editable in place, with its replies collapsible beneath it. A comment new to the reader is
+ * tinted and says so beside its time, so it never rests on the colour alone. Collapsed replies holding a new one say
+ * so beside their count.
  */
 export function CommentItem({
   variant,
+  isNew,
   author,
   avatarUrl,
   content,
@@ -107,6 +114,7 @@ export function CommentItem({
   showReactions,
   isCollapsed,
   replyCount,
+  hasNewReplies,
   onToggleCollapse,
   onReply,
   onReact,
@@ -135,6 +143,9 @@ export function CommentItem({
 
   // Comment copy
   const tComments = useTranslations('comments')
+
+  // Content copy
+  const tContent = useTranslations('ui.content')
 
   // Profile copy
   const tProfile = useTranslations('profile')
@@ -252,7 +263,15 @@ export function CommentItem({
       )}
 
       {/* Comment row: Avatar + Body */}
-      <div className="flex gap-3 pt-2">
+      <div className="relative flex gap-3 pt-2">
+        {/* The tint of a new comment, reaching a little past the row on either side */}
+        {isNew && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -inset-x-2 inset-y-0 rounded-lg bg-brand/[0.08]"
+          />
+        )}
+
         {/* Avatar */}
         <div className="flex-shrink-0 z-10">
           <UserAvatarImage
@@ -262,8 +281,8 @@ export function CommentItem({
           />
         </div>
 
-        {/* Comment body */}
-        <div className="flex-1 min-w-0">
+        {/* Comment body, laid over the tint */}
+        <div className="relative flex-1 min-w-0">
           {/* Header, dropping the actions to a new line before splitting the name from the time */}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-0.5">
             {/* Author and time */}
@@ -285,6 +304,11 @@ export function CommentItem({
                   </Tooltip>
                 )}
               </span>
+
+              {/* That the comment is new to the reader */}
+              {isNew && (
+                <span className="text-xs font-medium text-brand-light">{tComments('newMark')}</span>
+              )}
             </div>
 
             {/* Actions, wrapping as one unit */}
@@ -392,6 +416,9 @@ export function CommentItem({
               <span>
                 {tComments('show')} {tPlurals('replies', { count: replyCount })}
               </span>
+              {hasNewReplies && (
+                <span className="font-medium text-brand-light">{tContent('includingNew')}</span>
+              )}
             </button>
           ) : (
             // Otherwise the replies

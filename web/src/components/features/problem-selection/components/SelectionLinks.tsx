@@ -232,7 +232,7 @@ type ProposalTabRowsProps = {
 
 /**
  * A row for each tab of a problem's page, opening the problem on it, with the tab's count once it holds
- * anything.
+ * anything, standing out while some of it is new to the reader.
  */
 export function ProposalTabRows({ proposalId }: ProposalTabRowsProps) {
   // Problem page copy
@@ -240,6 +240,15 @@ export function ProposalTabRows({ proposalId }: ProposalTabRowsProps) {
 
   // How many conversations and comments the problem carries
   const counts = useProposalTabCounts(proposalId)
+
+  // A function which tells whether somebody else posted in a discussion after what the reader has seen
+  const { hasNews } = useSelectionWorkspace().seenMarks
+
+  // Whether each tab holds something new to the reader
+  const news: Record<ProposalTab, boolean> = {
+    conversations: false,
+    comments: hasNews({ targetType: 'Proposal', targetId: proposalId }),
+  }
 
   // The name of each tab
   const labels: Record<ProposalTab, string> = {
@@ -255,7 +264,12 @@ export function ProposalTabRows({ proposalId }: ProposalTabRowsProps) {
       className={PROBLEM_ROW_CLASS}
       plain
     >
-      <ProblemRowLabel label={labels[tab]} icon={TAB_ICONS[tab]} count={counts[tab]} />
+      <ProblemRowLabel
+        label={labels[tab]}
+        icon={TAB_ICONS[tab]}
+        count={counts[tab]}
+        hasNews={news[tab]}
+      />
     </DetailLink>
   ))
 }

@@ -3,17 +3,21 @@ import type { Page, Route } from '@playwright/test'
 import type {
   CommentDto,
   CommentTargetType,
+  CommentThreadSeenDto,
 } from '@/components/features/comments/services/comment-api-types'
 import { countAllComments } from '@/components/features/comments/utils/comment-utils'
 import type {
+  DiscussionsMarked,
+  DiscussionsSeenWrite,
   SelectionData,
   SelectionDiscussions,
+  SelectionDiscussionsSeen,
 } from '@/components/features/problem-selection/model/selection-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { parseMember } from '@/components/shared/utils/collection-utils'
 
-import { answerJson, BACKEND_ORIGIN } from './backend-routes'
-import { asSentTo, senderOf, stubComments, threadKey } from './comments'
+import { answerJson, BACKEND_ORIGIN, refuse } from './backend-routes'
+import { asSentTo, READER_ID, senderOf, stubComments, threadKey } from './comments'
 import { type HeldSelection, SELECTION_API_PATH } from './selection-writes'
 
 /** The kinds of thread the selection's backend keeps. */
@@ -33,6 +37,38 @@ type CountsRequestBody = {
   targetType: CommentTargetType
   /** The threads counted, by their ids. */
   targetIds: string[]
+}
+
+/**
+ * How far the reader has seen the selection's discussions, as the backend keeps it, and every mark the app wrote.
+ */
+export type SeenMemory = {
+  /** The moment up to which the reader has seen each discussion, by {@link threadKey}, as an ISO 8601 string. */
+  marks: Map<string, string>
+  /** Every mark the app wrote, oldest first, as it sent it. */
+  writes: DiscussionsSeenWrite[]
+}
+
+/**
+ * When somebody other than the reader last posted, in a discussion, a comment still standing.
+ *
+ * @param comments - The discussion's comments, replies nested.
+ *
+ * @returns The posting time, or null where nobody else posted one.
+ */
+function lastPostedByOthersAt(comments: readonly CommentDto[]): string | null {
+  // When each standing comment somebody else posted was posted, replies included
+  const posted = comments.flatMap(function postedIn(comment): number[] {
+    // The comment, where somebody else posted it and it stands
+    const itself =
+      !comment.isDeleted && comment.author.id !== READER_ID ? [Date.parse(comment.createdAt)] : []
+
+    // The comment's own time, followed by those of the replies under it
+    return [...itself, ...comment.replies.flatMap(postedIn)]
+  })
+
+  // The newest, as the backend writes a time
+  return posted.length === 0 ? null : new Date(Math.max(...posted)).toISOString()
 }
 
 /**
@@ -78,12 +114,14 @@ function holdsSubject(
 export type AnswerSelectionRead = (route: Route, read: () => unknown) => Promise<void>
 
 /**
- * Stands in for the selection's discussions: each read and written into, how many comments each holds, and all of
- * them read at once. Any other kind of thread goes to the stubs beneath.
+ * Stands in for the selection's discussions: each read and written into, how many comments each holds, all of them
+ * read at once, and how far the reader has seen them. Any other kind of thread goes to the stubs beneath.
  *
  * @param page - The page to answer the discussions' calls on.
  * @param discussions - Each discussion's comments, by {@link threadKey}, oldest first, replies nested, which each
  * write that goes through changes.
+ * @param seen - How far the reader has seen the discussions, which each mark written changes, and every mark the app
+ * wrote.
  * @param held - A function reading what the backend holds right now, which a discussion hangs off.
  * @param shown - A function reading what the selection's read shows right now, whose discussions are all read at
  * once.
@@ -92,6 +130,7 @@ export type AnswerSelectionRead = (route: Route, read: () => unknown) => Promise
 export async function stubSelectionComments(
   page: Page,
   discussions: Map<string, CommentDto[]>,
+  seen: SeenMemory,
   held: () => HeldSelection,
   shown: () => Pick<SelectionData, 'proposals' | 'boards'>,
   answer: AnswerSelectionRead
@@ -142,6 +181,103 @@ export async function stubSelectionComments(
       return read
     })
   )
+
+  // How far the reader has seen every discussion of what the selection's read shows, and the marks written
+  await page.route(`${BACKEND_ORIGIN}${SELECTION_API_PATH}/comments/seen`, async (route) => {
+    // A function which reads what the read shows, as the ids of each kind of discussion
+    const subjectIds = () => {
+      // The problems and the boards shown
+      const { proposals, boards } = shown()
+
+      // Each kind's ids
+      return {
+        Proposal: proposals.map((proposal) => proposal.id),
+        SelectionPaper: boards.flatMap((board) => board.papers.map((paper) => paper.id)),
+      } satisfies Record<SelectionThreadType, string[]>
+    }
+
+    // A mark written, answered with the moment, the discussions the read does not show passed over
+    if (route.request().method() === 'PUT') {
+      // What was marked, as the app sent it
+      const write = route.request().postDataJSON() as Partial<DiscussionsSeenWrite>
+
+      // A body leaving out either list or the moment, refused as the backend refuses one
+      if (
+        write.proposalIds === undefined ||
+        write.paperIds === undefined ||
+        write.seenUpTo === undefined
+      ) {
+        return refuse(route, 400, 'MalformedRequest')
+      }
+
+      // Logged, as the app sent it
+      seen.writes.push({
+        proposalIds: write.proposalIds,
+        paperIds: write.paperIds,
+        seenUpTo: write.seenUpTo,
+      })
+
+      // The moment given, held to now
+      const seenUpTo = new Date(Math.min(Date.parse(write.seenUpTo), Date.now())).toISOString()
+
+      // The discussions shown
+      const ids = subjectIds()
+
+      // A function which tells whether a discussion is unmarked or marked short of the moment
+      const fallsShort = (key: string) => {
+        // The mark before the write
+        const before = seen.marks.get(key)
+
+        // Short of the moment, or never written
+        return before === undefined || Date.parse(before) < Date.parse(seenUpTo)
+      }
+
+      // Each discussion named that the read shows
+      const named = [
+        ...write.proposalIds
+          .filter((id) => ids.Proposal.includes(id))
+          .map((id) => threadKey('Proposal', id)),
+        ...write.paperIds
+          .filter((id) => ids.SelectionPaper.includes(id))
+          .map((id) => threadKey('SelectionPaper', id)),
+      ]
+
+      // Seen up to the moment, a mark already further along left where it is
+      named.filter(fallsShort).forEach((key) => seen.marks.set(key, seenUpTo))
+
+      // The moment
+      return answerJson(route, 200, { seenUpTo } satisfies DiscussionsMarked)
+    }
+
+    // Answered as the selection's read is, refused alike
+    return answer(route, () => {
+      // The discussions shown
+      const ids = subjectIds()
+
+      // A function which reads how far each discussion of one kind is seen, one nothing has happened in included
+      const seenOf = (targetType: SelectionThreadType) =>
+        Object.fromEntries(
+          ids[targetType].map((targetId): [string, CommentThreadSeenDto] => [
+            targetId,
+            {
+              seenUpTo: seen.marks.get(threadKey(targetType, targetId)) ?? null,
+              lastPostedByOthersAt: lastPostedByOthersAt(
+                discussions.get(threadKey(targetType, targetId)) ?? []
+              ),
+            },
+          ])
+        )
+
+      // How far each kind is seen
+      const read: SelectionDiscussionsSeen = {
+        proposals: seenOf('Proposal'),
+        papers: seenOf('SelectionPaper'),
+      }
+
+      // The marks
+      return read
+    })
+  })
 
   // How many comments each of the selection's discussions holds
   await page.route(`${BACKEND_ORIGIN}/comments/counts`, async (route) => {

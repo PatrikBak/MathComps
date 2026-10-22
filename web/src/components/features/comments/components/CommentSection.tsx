@@ -22,6 +22,7 @@ import { useFetchComments } from '../hooks/use-fetch-comments'
 import { usePendingCommentReaction } from '../hooks/use-pending-comment-reaction'
 import { usePendingCommentTarget } from '../hooks/use-pending-comment-target'
 import { commentDraftStorageKey } from '../model/comment-drafts'
+import type { CommentNewness } from '../model/comment-newness'
 import type { CommentTarget } from '../services/comment-api-types'
 import { convertToCommentData, shouldHideComment } from '../utils/comment-utils'
 import { CommentList, type CommentListVariant } from './CommentList'
@@ -42,6 +43,8 @@ type CommentSectionProps = {
   showEmptyText?: boolean
   /** Whether the box for a new comment takes the cursor as it appears. */
   autoFocus?: boolean
+  /** How far the reader has seen the thread. */
+  newness?: CommentNewness
 }
 
 /**
@@ -54,6 +57,7 @@ export function CommentSection({
   newCommentPlaceholder,
   showEmptyText = true,
   autoFocus = false,
+  newness = { kind: 'untracked' },
 }: CommentSectionProps) {
   // The reader, the name they sign comments with, and how much of that is known yet
   const { userId, isSignInLoaded, username, isIdentityLoaded } = useCommentReader()
@@ -190,6 +194,7 @@ export function CommentSection({
                 showReactions={showReactions}
                 reply={reply}
                 collapsed={collapsed}
+                newness={newness}
               />
             ) : (
               // The note that there are none, with a sign-in button for a visitor

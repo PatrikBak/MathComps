@@ -13,6 +13,7 @@ import type { UseCommentReplyResult } from '../hooks/use-comment-reply'
 import { useDeleteComment } from '../hooks/use-delete-comment'
 import { usePressCommentReaction } from '../hooks/use-press-comment-reaction'
 import { useUpdateComment } from '../hooks/use-update-comment'
+import { type CommentNewness, countNewComments, isNewComment } from '../model/comment-newness'
 import type { CommentReactionKind, CommentTarget } from '../services/comment-api-types'
 import { countAllComments, shouldHideComment } from '../utils/comment-utils'
 import { type CommentData, CommentItem } from './CommentItem'
@@ -40,11 +41,14 @@ type CommentListProps = {
   reply: UseCommentReplyResult
   /** Which comments have their replies folded away. */
   collapsed: UseCollapsedCommentsResult
+  /** How far the reader has seen the thread. */
+  newness: CommentNewness
 }
 
 /**
- * Comments of one thread with their nested replies, edited, deleted, reacted to and replied to in place. The open
- * reply's editor sits under the comment it answers, or on a phone opens over the whole screen.
+ * Comments of one thread with their nested replies, edited, deleted, reacted to and replied to in place, those new to
+ * the reader marked as such. The open reply's editor sits under the comment it answers, or on a phone opens over the
+ * whole screen.
  */
 export function CommentList({
   target,
@@ -53,6 +57,7 @@ export function CommentList({
   showReactions,
   reply,
   collapsed,
+  newness,
 }: CommentListProps) {
   // The reader, the name they sign comments with, and how much of that is known yet
   const { userId, isSignInLoaded, username, isIdentityLoaded } = useCommentReader()
@@ -116,14 +121,21 @@ export function CommentList({
     // How many live replies sit under the comment, nested ones included
     const replyCount = countAllComments(replies)
 
+    // Whether a reply under the comment, nested ones included, is new to the reader, once the reader is known
+    const hasNewReplies = isSignInLoaded && countNewComments(replies, newness, userId ?? null) > 0
+
     // Whether the reader wrote the comment
     const isOwnComment = isSignInLoaded && comment.authorId === userId
+
+    // Whether the comment is new to the reader, once the reader is known
+    const isNew = isSignInLoaded && isNewComment(comment, newness, userId ?? null)
 
     // Render the comment
     return (
       <CommentItem
         key={comment.id}
         variant={variant}
+        isNew={isNew}
         author={comment.author}
         avatarUrl={comment.avatarUrl}
         content={comment.content}
@@ -135,6 +147,7 @@ export function CommentList({
         showReactions={showReactions}
         isCollapsed={collapsed.isCollapsed(comment.id)}
         replyCount={replyCount}
+        hasNewReplies={hasNewReplies}
         onToggleCollapse={() => collapsed.toggle(comment.id)}
         onReply={
           // Replying is offered on a comment still standing, once there is somebody to sign it: a signed-in

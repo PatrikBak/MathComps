@@ -1,7 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { CommentSection } from '@/components/features/comments/components/CommentSection'
 import { Tabs } from '@/components/shared/components/Tabs'
@@ -9,11 +9,13 @@ import type { Locale } from '@/i18n/i18n'
 
 import { useDetailTab } from '../hooks/use-detail-tab'
 import { useProposalTabCounts } from '../hooks/use-proposal-tab-counts'
+import { useSubjectDiscussion } from '../hooks/use-subject-discussion'
 import { PROPOSAL_TABS, type ProposalTab } from '../model/selection-routes'
 import { resolveText, unwrittenAcross } from '../model/selection-state'
 import type { Proposal } from '../model/selection-types'
 import { DetailMissing, type DetailTabContent } from './DetailFrame'
 import { LanguageSwitch } from './LanguageSwitch'
+import { MarkSeenButton } from './MarkSeenButton'
 import { PlaceControl } from './PlaceControl'
 import { ProposalActionsMenu } from './ProposalActionsMenu'
 import { ProposalCard } from './ProposalCard'
@@ -21,6 +23,12 @@ import { ProposalConversations } from './ProposalConversations'
 import { ProposalFiling } from './ProposalFiling'
 import { BackLink } from './SelectionLinks'
 import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
+
+/** Whether each tab of a problem's page shows its discussion, and so carries the eye while something there is new. */
+const SHOWS_DISCUSSION: Record<ProposalTab, boolean> = {
+  conversations: false,
+  comments: true,
+}
 
 /**
  * Props for the {@link ProposalDetail} component.
@@ -97,6 +105,12 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
     pageOn: (shown) => ({ kind: 'proposal', id: proposal.id, tab: shown }),
   })
 
+  // The problem's discussion, with what in it is new
+  const discussion = useSubjectDiscussion({ targetType: 'Proposal', targetId: proposal.id })
+
+  // The discussion's panel
+  const commentsPanelRef = useRef<HTMLDivElement>(null)
+
   // What each tab holds
   const contents: Record<ProposalTab, DetailTabContent<ProposalTab>> = {
     conversations: {
@@ -111,13 +125,21 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
     comments: {
       label: t('commentsTab'),
       count: counts.comments,
+      // Read in the accent colour while somebody else's comment waits unseen behind another tab
+      isHighlighted: discussion.hasNews,
       panel: (
-        <div className="pt-4">
+        <div
+          ref={commentsPanelRef}
+          // Takes the focus when the eye marking the discussion seen leaves holding it
+          tabIndex={-1}
+          className="pt-4 focus:outline-none"
+        >
           <CommentSection
             variant="inline"
             newCommentPlaceholder={tComments('placeholder')}
             showEmptyText={false}
             target={{ targetType: 'Proposal', targetId: proposal.id }}
+            newness={discussion.newness}
           />
         </div>
       ),
@@ -167,6 +189,12 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
           selectedId={tab}
           onSelect={showTab}
           items={PROPOSAL_TABS.map((id) => ({ id, ...contents[id] }))}
+          trailing={
+            // The eye, while the discussion's tab is open and shows something new
+            SHOWS_DISCUSSION[tab] && discussion.showsNew ? (
+              <MarkSeenButton onPress={discussion.markSeen} fallbackRef={commentsPanelRef} />
+            ) : undefined
+          }
         />
       </div>
     </article>

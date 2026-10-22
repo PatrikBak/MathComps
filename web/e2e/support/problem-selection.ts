@@ -26,7 +26,11 @@ import { threadKey } from './comments'
 import { SELECTION_PATH } from './competitions'
 import { installConversationBackend } from './conversation-backend'
 import type { HostedBackend } from './hosted-backend'
-import { type AnswerSelectionRead, stubSelectionComments } from './selection-comments'
+import {
+  type AnswerSelectionRead,
+  type SeenMemory,
+  stubSelectionComments,
+} from './selection-comments'
 import { FINALIZATION_PATH, finalizationWrite } from './selection-finalization'
 import { PROPOSAL_WRITE_PATH, proposalWrite, READER } from './selection-proposal-writes'
 import { SLOT_WRITE_PATH, slotWrite } from './selection-slot-writes'
@@ -651,6 +655,8 @@ type SelectionMemory = {
   conversations: HeldConversation[]
   /** Each of the selection's discussions, by {@link threadKey}, oldest comment first. */
   discussions: Map<string, CommentDto[]>
+  /** How far the reader has seen the discussions, and every mark the app wrote. */
+  seen: SeenMemory
   /** The backend the chat with Mathilda talks to, whose conversations are held as well; null where none is. */
   chat: HostedBackend | null
 }
@@ -658,7 +664,7 @@ type SelectionMemory = {
 /**
  * What the backend keeps as a test begins: an organization needing every language, as MathComps does, a reader
  * leading every one of its categories that is a hosted level, {@link RECENT} and {@link EARLIER} about
- * {@link OPENED}, and {@link OPENED_COMMENT} under it.
+ * {@link OPENED}, and {@link OPENED_COMMENT} under it, no discussion seen yet.
  *
  * @param chat - The backend the chat with Mathilda talks to; null where the test talks to her nowhere.
  *
@@ -673,6 +679,7 @@ export function rememberedSelection(chat: HostedBackend | null): SelectionMemory
     ),
     conversations: [RECENT, EARLIER],
     discussions: new Map([[threadKey('Proposal', OPENED.id), [OPENED_COMMENT]]]),
+    seen: { marks: new Map(), writes: [] },
     chat,
   }
 }
@@ -1109,10 +1116,11 @@ export async function stubSelection(
     () => null
   )
 
-  // The selection's discussions, and their counts
+  // The selection's discussions, their counts, and how far the reader has seen them
   await stubSelectionComments(
     page,
     memory.discussions,
+    memory.seen,
     () => stored,
     () => readableSelection(stored),
     answerRead
@@ -1240,15 +1248,22 @@ export function actionsButton(scope: Locator | Page, proposal: Proposal): Locato
  * @param card - The card.
  * @param tab - The tab.
  * @param count - How much the tab holds, which the row shows once it is above zero.
+ * @param hasNews - Whether some of what the tab holds is new to the reader, which the row says after its count.
  *
  * @returns The row.
  */
-export function tabRowOn(card: Locator, tab: ProposalTab, count: number) {
+export function tabRowOn(card: Locator, tab: ProposalTab, count: number, hasNews = false) {
   // The tab's name
   const label = selectionCopy.detail[`${tab}Tab`]
 
-  // The card's only link named after the tab, with the count where there is one
-  return card.getByRole('link', { name: count === 0 ? label : `${label} ${count}`, exact: true })
+  // The tab's name with the count where there is one
+  const counted = count === 0 ? label : `${label} ${count}`
+
+  // The card's only link named so, saying what is new where something is
+  return card.getByRole('link', {
+    name: hasNews ? `${counted} ${messages.ui.content.includingNew}` : counted,
+    exact: true,
+  })
 }
 
 /**
