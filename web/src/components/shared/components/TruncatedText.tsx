@@ -34,8 +34,15 @@ export function TruncatedText({
 
     // This function checks for truncation
     const checkTruncation = () => {
-      // Find the current value
-      const currentlyTruncated = node.scrollWidth > node.clientWidth
+      // The text's laid-out width, which the ellipsis leaves whole
+      const textRange = document.createRange()
+      textRange.selectNodeContents(node)
+      const textWidth = textRange.getBoundingClientRect().width
+
+      // Truncated once the text runs past its box, compared in fractional px: under page zoom WebKit
+      // rounds the integer scrollWidth and clientWidth apart, so a label that fits reads 1px over
+      const currentlyTruncated = textWidth > node.getBoundingClientRect().width
+
       // Set the value only if it changed
       setIsTruncated((previouslyTruncated) => {
         if (previouslyTruncated === currentlyTruncated) {
