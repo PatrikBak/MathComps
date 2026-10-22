@@ -95,8 +95,8 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
         onClick={putInWaitingSlot}
       >
         {isThere
-          ? t('alreadyIn', { slot: slotLabel(waitingPaper.name, waitingSlot.index) })
-          : t('putIn', { slot: slotLabel(waitingPaper.name, waitingSlot.index) })}
+          ? t('alreadyIn', { slot: slotLabel(waitingPaper, waitingSlot.index) })
+          : t('putIn', { slot: slotLabel(waitingPaper, waitingSlot.index) })}
       </Button>
     )
   }
@@ -122,10 +122,7 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="p-3">
-        {/* Which board the slots belong to */}
-        <p className="mb-2 text-xs font-semibold text-foreground">{activeBoard.name}</p>
-
-        {/* Each paper as a row of its slots named for the paper, laid out the way the board is */}
+        {/* Each paper as a row named for it, holding its slots laid out the way the board is */}
         <div className="space-y-1.5">
           {activeBoard.papers.map((paper, paperIndex) => (
             <div
@@ -140,7 +137,7 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
                 className="w-4 shrink-0 text-xs font-semibold"
                 style={hueTextStyle(categoryHue(categories, paper.category))}
               >
-                {paperInitial(paper.name)}
+                {paperInitial(paper)}
               </span>
 
               {/* Each slot: its problem's number when filled, its own number when empty */}
@@ -149,7 +146,7 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
                 const occupant = occupantId === null ? undefined : proposalsById.get(occupantId)
 
                 // The slot's short label
-                const slot = slotLabel(paper.name, index)
+                const slot = slotLabel(paper, index)
 
                 // What the slot is and holds: nothing, or its problem's number and name
                 const label =
