@@ -39,7 +39,10 @@ const SHOWS_STATEMENTS: Record<PaperTab, boolean> = {
   ratings: false,
 }
 
-/** Whether each tab of a paper's page shows its discussion, and so carries the eye while something there is new. */
+/**
+ * Whether each tab of a paper's page shows its discussion, and so is a Comments tab the reader visits, carrying the
+ * eye while something there is new.
+ */
 const SHOWS_DISCUSSION: Record<PaperTab, boolean> = {
   problems: false,
   comments: true,
@@ -151,8 +154,11 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
     pageOn: (shown) => ({ kind: 'paper', id: paper.id, tab: shown }),
   })
 
-  // The paper's discussion, with what in it is new
-  const discussion = useSubjectDiscussion({ targetType: 'SelectionPaper', targetId: paper.id })
+  // The paper's discussion, a visit to it while its tab shows, with what in it is new
+  const discussion = useSubjectDiscussion({
+    target: { targetType: 'SelectionPaper', targetId: paper.id },
+    isShowing: SHOWS_DISCUSSION[tab],
+  })
 
   // The discussion's panel
   const commentsPanelRef = useRef<HTMLDivElement>(null)
