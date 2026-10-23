@@ -29,21 +29,19 @@ public interface ICommentSeenService
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Marks several threads of one kind as seen by a viewer up to a moment, a mark already further along left where it
-    /// is. The caller vouches that the viewer may reach the threads.
+    /// Marks several threads of one kind as seen by a viewer, each up to its own moment, a mark already further along
+    /// left where it is. The caller vouches that the viewer may reach the threads.
     /// </summary>
     /// <param name="targetType">The kind of the threads.</param>
-    /// <param name="targetIds">The threads' target ids.</param>
-    /// <param name="viewer">The reader.</param>
     /// <param name="seenUpTo">
-    /// The moment up to which the viewer has seen every comment and reply posted in the threads.
+    /// The moment up to which the viewer has seen every comment and reply posted in each thread, by its target id.
     /// </param>
+    /// <param name="viewer">The reader.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the marks are saved.</returns>
     Task MarkSeenAsync(
         CommentTargetType targetType,
-        ImmutableList<string> targetIds,
+        ImmutableDictionary<string, DateTimeOffset> seenUpTo,
         CommentViewer viewer,
-        DateTimeOffset seenUpTo,
         CancellationToken cancellationToken = default);
 }

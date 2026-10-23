@@ -46,27 +46,28 @@ public interface ISelectionDiscussionService
         string organizationSlug, CommentViewer viewer, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Marks the discussions of some of what an organization's selection holds as seen by a reviewer up to a moment. A
-    /// proposal or paper the selection does not hold is passed over, as is every one for a reviewer outside the
-    /// organization, and a discussion already seen further keeps its mark.
+    /// Marks the discussions of some of what an organization's selection holds as seen by a reviewer, each up to its
+    /// own moment. A proposal or paper the selection does not hold is passed over, as is every one for a reviewer
+    /// outside the organization, and a discussion already seen further keeps its mark.
     /// </summary>
     /// <param name="organizationSlug">
     /// The <see cref="Organization.Slug"/> of the organization whose selection it is.
     /// </param>
     /// <param name="viewer">The reviewer.</param>
-    /// <param name="proposalIds">The proposals whose discussions were seen.</param>
-    /// <param name="paperIds">The papers whose discussions were seen.</param>
-    /// <param name="seenUpTo">
-    /// The moment up to which the reviewer has seen every comment posted in the discussions named; a moment yet to
-    /// come counts as now.
+    /// <param name="proposalsSeenUpTo">
+    /// The moment up to which the reviewer has seen every comment posted in each proposal's discussion, by the
+    /// proposal's id; a moment yet to come counts as now.
+    /// </param>
+    /// <param name="papersSeenUpTo">
+    /// The moment up to which the reviewer has seen every comment posted in each paper's discussion, by the paper's
+    /// id; a moment yet to come counts as now.
     /// </param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>The moment the discussions were marked as seen up to.</returns>
-    Task<DateTimeOffset> MarkDiscussionsSeenAsync(
+    /// <returns>Each discussion marked, with the moment it is now seen at least up to.</returns>
+    Task<DiscussionsMarkedDto> MarkDiscussionsSeenAsync(
         string organizationSlug,
         CommentViewer viewer,
-        ImmutableList<Guid> proposalIds,
-        ImmutableList<Guid> paperIds,
-        DateTimeOffset seenUpTo,
+        ImmutableDictionary<Guid, DateTimeOffset> proposalsSeenUpTo,
+        ImmutableDictionary<Guid, DateTimeOffset> papersSeenUpTo,
         CancellationToken cancellationToken = default);
 }

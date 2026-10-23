@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.Contracts.Selection;
@@ -332,11 +333,11 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         });
 
     /// <summary>
-    /// A mark lands on the discussions the selection holds, one nobody has posted in included, and passes over the
-    /// opened group's problem and the paper on its board. The read then finds the moment the mark handed back beside
-    /// when the reviewer who wrote every seeded comment last posted, and a discussion left unmarked carries that alone.
-    /// A later mark moves the moment on, a moment yet to come held to now, while a discussion it leaves out keeps the
-    /// first.
+    /// A mark lands on the discussions the selection holds, each at its own moment, one nobody has posted in included,
+    /// and passes over the opened group's problem and the paper on its board. Its answer names each discussion marked
+    /// with that moment, and the read then finds the moment beside when the reviewer who wrote every seeded comment
+    /// last posted, a discussion left unmarked carrying that alone. A later mark moves the moment on, a moment yet to
+    /// come held to now, while a discussion it leaves out keeps the first.
     /// </summary>
     [Fact]
     public Task A_mark_lands_on_the_discussions_the_selection_holds() =>
@@ -352,14 +353,45 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             var postedAt = discussions.Proposals.Concat(discussions.Papers)
                 .ToDictionary(thread => thread.Key, thread => Assert.Single(thread.Value).CreatedAt);
 
-            // The second reviewer marks what they saw up to now, the opened group's problem and the September paper
-            // among it
-            var seenUpTo = await discussionService.MarkDiscussionsSeenAsync(
+            // When the first proposal's comment was posted
+            var firstPostedAt = postedAt[_pool[1].ToString()];
+
+            // The moment the mark is written, as precise as the database keeps it
+            var now = DateTimeOffset.UtcNow.TruncateToMicroseconds();
+
+            // An hour before the draft paper's comment was posted, so the comment stays new
+            var paperSeenUpTo = postedAt[_draftPaperId.ToString()].AddHours(-1);
+
+            // The second reviewer marks what they saw, each discussion up to its own moment, the opened group's
+            // problem and the September paper among them
+            var marked = await discussionService.MarkDiscussionsSeenAsync(
                 Organization.MathCompsSlug,
                 secondReviewer,
-                [_pool[1], _pool[2], _openedId],
-                [_draftPaperId, _septemberPaperId],
-                DateTimeOffset.UtcNow);
+                new Dictionary<Guid, DateTimeOffset>
+                {
+                    [_pool[1]] = firstPostedAt,
+                    [_pool[2]] = now,
+                    [_openedId] = now,
+                }.ToImmutableDictionary(),
+                new Dictionary<Guid, DateTimeOffset>
+                {
+                    [_draftPaperId] = paperSeenUpTo,
+                    [_septemberPaperId] = now,
+                }.ToImmutableDictionary());
+
+            // The proposals still in the selection marked, each at its own moment
+            Assert.Equal(
+                ImmutableDictionary.CreateRange(
+                [
+                    KeyValuePair.Create(_pool[1].ToString(), firstPostedAt),
+                    KeyValuePair.Create(_pool[2].ToString(), now),
+                ]),
+                marked.Proposals);
+
+            // The draft paper marked at its moment
+            Assert.Equal(
+                ImmutableDictionary.CreateRange([KeyValuePair.Create(_draftPaperId.ToString(), paperSeenUpTo)]),
+                marked.Papers);
 
             // The opened group's problem and the September paper, which the selection does not hold
             List<string> passedOver = [_openedId.ToString(), _septemberPaperId.ToString()];
@@ -378,8 +410,8 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             Assert.Equivalent(
                 new Dictionary<string, CommentThreadSeenDto>
                 {
-                    [_pool[1].ToString()] = new(seenUpTo, postedAt[_pool[1].ToString()]),
-                    [_pool[2].ToString()] = new(seenUpTo, null),
+                    [_pool[1].ToString()] = new(firstPostedAt, firstPostedAt),
+                    [_pool[2].ToString()] = new(now, null),
                     [_november[0].ToString()] = new(null, postedAt[_november[0].ToString()]),
                 },
                 seen.Proposals.Where(entry => entry.Value != untouched).ToDictionary(),
@@ -389,7 +421,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             Assert.Equivalent(
                 new Dictionary<string, CommentThreadSeenDto>
                 {
-                    [_draftPaperId.ToString()] = new(seenUpTo, postedAt[_draftPaperId.ToString()]),
+                    [_draftPaperId.ToString()] = new(paperSeenUpTo, postedAt[_draftPaperId.ToString()]),
                     [_novemberPaperId.ToString()] = new(null, postedAt[_novemberPaperId.ToString()]),
                 },
                 seen.Papers.Where(entry => entry.Value != untouched).ToDictionary(),
@@ -397,18 +429,28 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
             // A later mark of the first proposal alone, claiming a moment a day ahead
             var later = await discussionService.MarkDiscussionsSeenAsync(
-                Organization.MathCompsSlug, secondReviewer, [_pool[1]], [], DateTimeOffset.UtcNow.AddDays(1));
+                Organization.MathCompsSlug,
+                secondReviewer,
+                ImmutableDictionary.CreateRange([KeyValuePair.Create(_pool[1], DateTimeOffset.UtcNow.AddDays(1))]),
+                []);
+
+            // The one discussion the later mark landed on, with its moment
+            var (laterId, laterMoment) = Assert.Single(later.Proposals);
+
+            // The first proposal, and no paper
+            Assert.Equal(_pool[1].ToString(), laterId);
+            Assert.Empty(later.Papers);
 
             // Held to now, since nothing posted tomorrow has been seen
-            Assert.True(later <= DateTimeOffset.UtcNow);
+            Assert.True(laterMoment <= DateTimeOffset.UtcNow);
 
             // How far the second reviewer has seen the discussions now
             var seenLater = await discussionService.GetDiscussionsSeenAsync(
                 Organization.MathCompsSlug, secondReviewer);
 
             // The first proposal seen up to the later moment, the draft paper still up to the first
-            Assert.Equal(later, seenLater.Proposals[_pool[1].ToString()].SeenUpTo);
-            Assert.Equal(seenUpTo, seenLater.Papers[_draftPaperId.ToString()].SeenUpTo);
+            Assert.Equal(laterMoment, seenLater.Proposals[_pool[1].ToString()].SeenUpTo);
+            Assert.Equal(paperSeenUpTo, seenLater.Papers[_draftPaperId.ToString()].SeenUpTo);
         });
 
     /// <summary>
@@ -422,11 +464,16 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             // The commissioner, on the olympiad's list alone
             var commissioner = new CommentViewer(_commissionerId, IsAdmin: false);
 
-            // The commissioner marks MathComps' first proposal and its draft paper as seen
-            await discussionService.MarkDiscussionsSeenAsync(
-                Organization.MathCompsSlug, commissioner, [_pool[1]], [_draftPaperId], DateTimeOffset.UtcNow);
+            // The commissioner marks MathComps' first proposal and its draft paper as seen up to now
+            var marked = await discussionService.MarkDiscussionsSeenAsync(
+                Organization.MathCompsSlug,
+                commissioner,
+                ImmutableDictionary.CreateRange([KeyValuePair.Create(_pool[1], DateTimeOffset.UtcNow)]),
+                ImmutableDictionary.CreateRange([KeyValuePair.Create(_draftPaperId, DateTimeOffset.UtcNow)]));
 
-            // No mark written
+            // None marked, and no mark written
+            Assert.Empty(marked.Proposals);
+            Assert.Empty(marked.Papers);
             Assert.False(await context.CommentSeenMarks.AnyAsync(mark => mark.UserId == _commissionerId));
 
             // How far the commissioner has seen MathComps' discussions

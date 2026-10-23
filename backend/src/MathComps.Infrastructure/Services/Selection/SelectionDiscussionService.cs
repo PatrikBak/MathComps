@@ -75,45 +75,38 @@ public sealed class SelectionDiscussionService(
     }
 
     /// <inheritdoc/>
-    public async Task<DateTimeOffset> MarkDiscussionsSeenAsync(
+    public async Task<DiscussionsMarkedDto> MarkDiscussionsSeenAsync(
         string organizationSlug,
         CommentViewer viewer,
-        ImmutableList<Guid> proposalIds,
-        ImmutableList<Guid> paperIds,
-        DateTimeOffset seenUpTo,
+        ImmutableDictionary<Guid, DateTimeOffset> proposalsSeenUpTo,
+        ImmutableDictionary<Guid, DateTimeOffset> papersSeenUpTo,
         CancellationToken cancellationToken = default)
     {
         // Everything the selection holds
         var held = await ReadHeldSubjectsAsync(organizationSlug, viewer, cancellationToken);
 
-        // The moment the mark is written at
+        // The moment the marks are written at
         var now = DateTimeOffset.UtcNow;
 
-        // The moment given, held to now since nothing yet to be posted has been seen, as precise as the database keeps
-        // it so a mark this writes reads back as the moment handed back
-        var markedUpTo = (seenUpTo < now ? seenUpTo : now).ToUniversalTime().TruncateToMicroseconds();
+        // The proposals named that the selection holds, each with the moment the mark carries for it
+        var proposalsMarkedUpTo = MarkedUpTo(proposalsSeenUpTo, held.ProposalIds, now);
 
-        // The proposals named that the selection holds, marked.
+        // The papers named that the selection holds, each with the moment the mark carries for it
+        var papersMarkedUpTo = MarkedUpTo(papersSeenUpTo, held.PaperIds, now);
+
+        // The proposals marked.
         var proposalsMarked = seen.MarkSeenAsync(
-            CommentTargetType.Proposal,
-            [.. proposalIds.Select(id => id.ToString()).Intersect(held.ProposalIds)],
-            viewer,
-            markedUpTo,
-            cancellationToken);
+            CommentTargetType.Proposal, proposalsMarkedUpTo, viewer, cancellationToken);
 
-        // The papers named that the selection holds, marked.
+        // The papers marked.
         var papersMarked = seen.MarkSeenAsync(
-            CommentTargetType.SelectionPaper,
-            [.. paperIds.Select(id => id.ToString()).Intersect(held.PaperIds)],
-            viewer,
-            markedUpTo,
-            cancellationToken);
+            CommentTargetType.SelectionPaper, papersMarkedUpTo, viewer, cancellationToken);
 
         // Wait for both writes, started together since neither needs the other.
         await Task.WhenAll(proposalsMarked, papersMarked);
 
-        // The moment the discussions were marked as seen up to
-        return markedUpTo;
+        // Each discussion marked, with the moment it is now seen at least up to
+        return new DiscussionsMarkedDto(proposalsMarkedUpTo, papersMarkedUpTo);
     }
 
     /// <summary>
@@ -176,5 +169,29 @@ public sealed class SelectionDiscussionService(
 
         // Both, each as the ids their discussions go by
         return new HeldSubjects(proposalIds, paperIds);
+    }
+
+    /// <summary>
+    /// The moments a mark carries for some discussions of one kind: those of subjects the selection holds, each held
+    /// to now since nothing yet to be posted has been seen, as precise as the database keeps it so a mark this writes
+    /// reads back as the moment handed back.
+    /// </summary>
+    /// <param name="seenUpTo">The moment each discussion was seen up to, by its subject's id.</param>
+    /// <param name="heldIds">
+    /// The subjects of the kind the selection holds, each as the id its discussion goes by.
+    /// </param>
+    /// <param name="now">The moment the marks are written at.</param>
+    /// <returns>
+    /// Each discussion the selection holds, by the id it goes by, with the moment the mark carries for it.
+    /// </returns>
+    private static ImmutableDictionary<string, DateTimeOffset> MarkedUpTo(
+        ImmutableDictionary<Guid, DateTimeOffset> seenUpTo, ImmutableList<string> heldIds, DateTimeOffset now)
+    {
+        // Each discussion named that the selection holds, its moment held to now and cut to the database's precision
+        return seenUpTo
+            .Where(entry => heldIds.Contains(entry.Key.ToString()))
+            .ToImmutableDictionary(
+                entry => entry.Key.ToString(),
+                entry => (entry.Value < now ? entry.Value : now).ToUniversalTime().TruncateToMicroseconds());
     }
 }

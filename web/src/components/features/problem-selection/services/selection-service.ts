@@ -2,8 +2,7 @@ import type { ApiCaller } from '@/hooks/use-api'
 import type { ApiResult } from '@/types/api'
 
 import type {
-  DiscussionsMarked,
-  DiscussionsSeenWrite,
+  DiscussionsSeenUpTo,
   FinalizationWrite,
   MoveWrite,
   PlacementWrite,
@@ -80,21 +79,22 @@ export function getDiscussionsSeen(
 }
 
 /**
- * Marks the discussions of some of what an organization's selection holds as seen by the reader up to a moment, held
- * to now. A discussion already seen further along stays so, and whatever the selection doesn't hold is passed over.
+ * Marks the discussions of some of what an organization's selection holds as seen by the reader, each up to its own
+ * moment, held to now. A discussion already seen further along stays so, and whatever the selection doesn't hold is
+ * passed over.
  *
  * @param apiCall - The authenticated API caller.
  * @param organization - The slug of the organization whose selection holds the discussions.
- * @param write - The proposals and papers whose discussions were seen, and the moment they were seen up to.
+ * @param write - The moment each discussion was seen up to.
  *
- * @returns The moment the discussions were marked as seen up to, or an error.
+ * @returns Each discussion marked, with the moment it is now seen at least up to, or an error.
  */
 export function markDiscussionsSeen(
   apiCall: ApiCaller,
   organization: string,
-  write: DiscussionsSeenWrite
-): Promise<ApiResult<DiscussionsMarked>> {
-  return apiCall<DiscussionsMarked>(() => getDiscussionsSeenUrl(organization), {
+  write: DiscussionsSeenUpTo
+): Promise<ApiResult<DiscussionsSeenUpTo>> {
+  return apiCall<DiscussionsSeenUpTo>(() => getDiscussionsSeenUrl(organization), {
     method: 'PUT',
     body: JSON.stringify(write),
   })
