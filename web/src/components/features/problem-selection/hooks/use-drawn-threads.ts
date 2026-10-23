@@ -10,7 +10,6 @@ import {
 import { convertToCommentData } from '@/components/features/comments/utils/comment-utils'
 
 import { useSelectionWorkspace } from '../components/SelectionWorkspaceProvider'
-import { markKeyOf } from '../model/seen-marks'
 import {
   type DiscussedSubject,
   discussionTargetOf,
@@ -80,16 +79,13 @@ export function useDrawnThreads({ threads }: UseDrawnThreadsOptions): UseDrawnTh
   )
 
   // A function which marks the discussion of every thread the list shows as seen, as the list shows them
-  const markShownSeen = () => {
-    // The discussion of every thread shown
-    const targets = drawn.map(({ thread }) => discussionTargetOf(thread.subject))
-
-    // Marked, each discussion named once
+  const markShownSeen = () =>
     markSeen(
-      [...new Map(targets.map((target) => [markKeyOf(target), target])).values()],
-      drawn.flatMap(({ comments }) => comments)
+      drawn.map(({ thread, comments }) => ({
+        target: discussionTargetOf(thread.subject),
+        comments,
+      }))
     )
-  }
 
   // The drawn threads, how many comments in them are new, and the way to mark them seen
   return { drawn, newCount, markShownSeen }

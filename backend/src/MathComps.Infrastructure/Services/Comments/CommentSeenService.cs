@@ -79,26 +79,25 @@ public class CommentSeenService(
     /// <inheritdoc />
     public async Task MarkSeenAsync(
         CommentTargetType targetType,
-        ImmutableList<string> targetIds,
+        ImmutableDictionary<string, DateTimeOffset> seenUpTo,
         CommentViewer viewer,
-        DateTimeOffset seenUpTo,
         CancellationToken cancellationToken = default)
     {
         // No thread named, nothing to mark
-        if (targetIds.IsEmpty)
+        if (seenUpTo.IsEmpty)
             return;
 
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Each thread marked as seen up to the moment, a mark already further along left where it is
+        // Each thread marked as seen up to its own moment, a mark already further along left where it is
         await dbContext.CommentSeenMarks
-            .UpsertRange(targetIds.Select(targetId => new CommentSeenMark
+            .UpsertRange(seenUpTo.Select(thread => new CommentSeenMark
             {
                 UserId = viewer.UserId,
                 TargetType = targetType,
-                TargetId = targetId,
-                SeenUpTo = seenUpTo,
+                TargetId = thread.Key,
+                SeenUpTo = thread.Value,
             }))
             .On(mark => new { mark.UserId, mark.TargetType, mark.TargetId })
             .UpdateIf((stored, marked) => stored.SeenUpTo < marked.SeenUpTo)

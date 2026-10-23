@@ -72,6 +72,9 @@ const PAPER_REMARK = 'The paper needs an easier opener.'
 /** What Zuzana replies in {@link GEOMETRY}'s discussion while the reader has the tab open. */
 const COLLEAGUE_REPLY = 'Surely too hard for the intermediate paper.'
 
+/** What Martin replies in {@link FIRST}'s discussion after {@link COLLEAGUE_REPLY}. */
+const NEWER_REPLY = 'Or as the opener of the second day.'
+
 /** What the reader writes as a new comment on {@link GEOMETRY}'s own page. */
 const READER_COMMENT = 'On second thought, it fits the intermediate paper.'
 
@@ -91,6 +94,7 @@ const MARKABLE_TEXTS = [
   LATE_REPLY,
   PAPER_REMARK,
   COLLEAGUE_REPLY,
+  NEWER_REPLY,
   GEOMETRY_REMARK,
 ]
 
@@ -285,24 +289,41 @@ function lineText(count: number, fresh: number): string {
 }
 
 /**
+ * A reply under each comment in a problem's discussion, in what the backend holds.
+ *
+ * @param memory - What the backend holds.
+ * @param proposal - The problem.
+ * @param reply - The reply.
+ */
+function replyIn(
+  memory: ReturnType<typeof rememberedSelection>,
+  proposal: Proposal,
+  reply: CommentDto
+): void {
+  // Where the backend keeps the problem's discussion
+  const key = threadKey('Proposal', proposal.id)
+
+  // Each comment in the problem's discussion, answered by the reply
+  memory.discussions.set(
+    key,
+    (memory.discussions.get(key) ?? []).map((posted) => ({
+      ...posted,
+      replies: [...posted.replies, reply],
+    }))
+  )
+}
+
+/**
  * Zuzana answering the comment in {@link GEOMETRY}'s discussion, in what the backend holds.
  *
  * @param memory - What the backend holds.
  */
 function answerGeometry(memory: ReturnType<typeof rememberedSelection>): void {
-  // Where the backend keeps the geometry problem's discussion
-  const geometryKey = threadKey('Proposal', GEOMETRY.id)
-
-  // Each comment in the geometry problem's discussion, answered by Zuzana
-  memory.discussions.set(
-    geometryKey,
-    (memory.discussions.get(geometryKey) ?? []).map((posted) => ({
-      ...posted,
-      replies: [
-        ...posted.replies,
-        commentOf('c-news', 'Zuzana', COLLEAGUE_REPLY, '2026-10-02T08:00:00.000Z'),
-      ],
-    }))
+  // Zuzana's reply, after everything the discussions start with
+  replyIn(
+    memory,
+    GEOMETRY,
+    commentOf('c-news', 'Zuzana', COLLEAGUE_REPLY, '2026-10-02T08:00:00.000Z')
   )
 }
 
@@ -1255,11 +1276,15 @@ test.describe("what is new in the pool's discussions", () => {
     await expect(page.getByRole('button', { name: selectionCopy.comments.markSeen })).toHaveCount(0)
     await expect(countLineOf(page, 5)).toBeFocused()
 
-    // The backend told every problem and paper whose thread the tab showed was seen
-    expect(memory.seen.writes.at(-1)?.proposalIds.toSorted()).toEqual(
-      [FIRST.id, GEOMETRY.id, OPENED.id].toSorted()
-    )
-    expect(memory.seen.writes.at(-1)?.paperIds).toEqual([ELEMENTARY.id])
+    // The backend told every problem and paper whose thread the tab showed was seen, each up to its newest comment
+    expect(memory.seen.writes.at(-1)).toEqual({
+      proposals: {
+        [FIRST.id]: '2026-10-01T08:00:00.000Z',
+        [GEOMETRY.id]: '2026-09-10T08:00:00.000Z',
+        [OPENED.id]: OPENED_COMMENT.createdAt,
+      },
+      papers: { [ELEMENTARY.id]: '2026-09-25T08:00:00.000Z' },
+    })
 
     // The pool's problems again
     await poolView(page, selectionCopy.pool.views.problems).click()
@@ -1268,9 +1293,12 @@ test.describe("what is new in the pool's discussions", () => {
     await expect(tabRowOn(cardOf(page, FIRST), 'comments', 2)).toBeVisible()
   })
 
-  test('leaves new a reply the eye was pressed over while it waited to be shown', async ({
+  test('leaves new a waiting reply, though a problem opened meanwhile read a newer comment', async ({
     page,
   }) => {
+    // The clock under the test's hand, so the problem's own read comes when the test says
+    await page.clock.install()
+
     // What the backend keeps, nothing in it ever seen
     const memory = discussedSelection()
 
@@ -1286,35 +1314,46 @@ test.describe("what is new in the pool's discussions", () => {
     // Zuzana answering the geometry problem's comment meanwhile, after everything the list shows
     answerGeometry(memory)
 
+    // Martin answering in the first problem's discussion later still
+    replyIn(memory, FIRST, commentOf('c-newer', 'Martin', NEWER_REPLY, '2026-10-03T08:00:00.000Z'))
+
     // The first problem, opened from its thread's heading
     await threadOf(page, FIRST).getByRole('link').first().click()
 
     // The first problem's own page
     await expect(headingOf(page, FIRST)).toBeVisible()
 
+    // Long enough for the first problem's discussion to be read again
+    await page.clock.fastForward('00:31')
+
+    // Martin's reply read into the first problem's discussion
+    await expect(page.getByRole('tabpanel')).toContainText(NEWER_REPLY, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
     // Back to the pool, which reads the discussions again
     await page.goBack()
 
-    // The button the reply waits behind
+    // The button Zuzana's reply waits behind
     const whatsNew = page.getByRole('button', { name: selectionCopy.pool.showWhatsNew })
 
-    // Standing over the list
+    // The button standing over the list
     await expect(whatsNew).toBeVisible()
 
-    // The eye pressed while it waits
+    // Martin's reply in the first problem's thread already
+    await expect(threadOf(page, FIRST)).toContainText(NEWER_REPLY)
+
+    // The eye pressed while Zuzana's reply waits
     await page.getByRole('button', { name: selectionCopy.comments.markSeen }).click()
 
     // Nothing the list shows is new any more
-    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 0))
-
-    // The backend told the threads were seen up to the newest comment they showed, the first problem's reply
-    expect(memory.seen.writes.at(-1)?.seenUpTo).toBe('2026-10-01T08:00:00.000Z')
+    await expect(countLineOf(page, 6)).toHaveText(lineText(6, 0))
 
     // What waited, shown
     await whatsNew.click()
 
-    // Zuzana's reply in, and new
-    await expect(countLineOf(page, 6)).toHaveText(lineText(6, 1))
+    // Zuzana's reply in, and new, though it is older than Martin's
+    await expect(countLineOf(page, 7)).toHaveText(lineText(7, 1))
     expect(await newCommentTexts(page)).toEqual([COLLEAGUE_REPLY])
   })
 
@@ -1392,9 +1431,8 @@ test.describe("what is new in the pool's discussions", () => {
 
     // The backend told the paper's discussion was seen up to its remark
     expect(memory.seen.writes.at(-1)).toEqual({
-      proposalIds: [],
-      paperIds: [ELEMENTARY.id],
-      seenUpTo: '2026-09-25T08:00:00.000Z',
+      proposals: {},
+      papers: { [ELEMENTARY.id]: '2026-09-25T08:00:00.000Z' },
     })
   })
 

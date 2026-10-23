@@ -321,13 +321,22 @@ public abstract class ReviewerCommentPostgresTests(PostgresContainerFixture fixt
         await QueryAsync<ICommentSeenService>(async (_, seen) =>
         {
             // The reviewer's mark on the subject
-            await seen.MarkSeenAsync(TargetType, [SubjectId.ToString()], Reviewer, seenUpTo);
+            await seen.MarkSeenAsync(
+                TargetType,
+                ImmutableDictionary.CreateRange([KeyValuePair.Create(SubjectId.ToString(), seenUpTo)]),
+                Reviewer);
 
             // A second mark by the reviewer, a minute earlier, as a stale view would write it
-            await seen.MarkSeenAsync(TargetType, [SubjectId.ToString()], Reviewer, seenUpTo.AddMinutes(-1));
+            await seen.MarkSeenAsync(
+                TargetType,
+                ImmutableDictionary.CreateRange([KeyValuePair.Create(SubjectId.ToString(), seenUpTo.AddMinutes(-1))]),
+                Reviewer);
 
             // The other reviewer's mark on the other subject
-            await seen.MarkSeenAsync(TargetType, [OtherSubjectId.ToString()], OtherReviewer, seenUpTo);
+            await seen.MarkSeenAsync(
+                TargetType,
+                ImmutableDictionary.CreateRange([KeyValuePair.Create(OtherSubjectId.ToString(), seenUpTo)]),
+                OtherReviewer);
 
             // Both subjects as the reviewer reads them
             var states = await seen.GetSeenAsync(

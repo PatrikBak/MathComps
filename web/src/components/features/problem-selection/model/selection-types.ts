@@ -289,23 +289,18 @@ export type SelectionDiscussionsSeen = {
 }
 
 /**
- * The discussions of some of what the selection holds, marked as seen by the reader up to a moment.
+ * How far the reader has seen some of the discussions of what the selection holds, each up to its own moment, each kind
+ * of subject's by the subject's id.
  */
-export type DiscussionsSeenWrite = {
-  /** The proposals whose discussions were seen. */
-  proposalIds: string[]
-  /** The papers whose discussions were seen. */
-  paperIds: string[]
-  /** The moment up to which the reader has seen every comment posted in the discussions named (ISO 8601 string). */
-  seenUpTo: string
-}
-
-/**
- * The moment the discussions a mark named were marked as seen up to.
- */
-export type DiscussionsMarked = {
+export type DiscussionsSeenUpTo = {
   /**
-   * The moment up to which the reader has now seen every comment posted in the discussions named (ISO 8601 string).
+   * The moment up to which the reader has seen every comment posted in each proposal's discussion, by the proposal's id
+   * (ISO 8601 strings).
    */
-  seenUpTo: string
+  proposals: Record<string, string>
+  /**
+   * The moment up to which the reader has seen every comment posted in each paper's discussion, by the paper's id (ISO
+   * 8601 strings).
+   */
+  papers: Record<string, string>
 }

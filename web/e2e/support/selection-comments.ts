@@ -7,8 +7,7 @@ import type {
 } from '@/components/features/comments/services/comment-api-types'
 import { countAllComments } from '@/components/features/comments/utils/comment-utils'
 import type {
-  DiscussionsMarked,
-  DiscussionsSeenWrite,
+  DiscussionsSeenUpTo,
   SelectionData,
   SelectionDiscussions,
   SelectionDiscussionsSeen,
@@ -46,7 +45,19 @@ export type SeenMemory = {
   /** The moment up to which the reader has seen each discussion, by {@link threadKey}, as an ISO 8601 string. */
   marks: Map<string, string>
   /** Every mark the app wrote, oldest first, as it sent it. */
-  writes: DiscussionsSeenWrite[]
+  writes: DiscussionsSeenUpTo[]
+}
+
+/**
+ * One discussion a mark written lands on.
+ */
+type MarkedDiscussion = {
+  /** The id of what the discussion hangs off. */
+  targetId: string
+  /** The discussion, by {@link threadKey}. */
+  key: string
+  /** The moment the mark carries for the discussion, as an ISO 8601 string. */
+  markedUpTo: string
 }
 
 /**
@@ -196,57 +207,76 @@ export async function stubSelectionComments(
       } satisfies Record<SelectionThreadType, string[]>
     }
 
-    // A mark written, answered with the moment, the discussions the read does not show passed over
+    // A mark written, answered with each discussion marked and its moment, the discussions the read does not show
+    // passed over
     if (route.request().method() === 'PUT') {
       // What was marked, as the app sent it
-      const write = route.request().postDataJSON() as Partial<DiscussionsSeenWrite>
+      const write = route.request().postDataJSON() as Partial<DiscussionsSeenUpTo>
 
-      // A body leaving out either list or the moment, refused as the backend refuses one
+      // A body leaving out either kind of discussion, or naming a moment that is no time, refused as the backend
+      // refuses one
       if (
-        write.proposalIds === undefined ||
-        write.paperIds === undefined ||
-        write.seenUpTo === undefined
+        write.proposals === undefined ||
+        write.papers === undefined ||
+        [...Object.values(write.proposals), ...Object.values(write.papers)].some((moment) =>
+          Number.isNaN(Date.parse(moment))
+        )
       ) {
         return refuse(route, 400, 'MalformedRequest')
       }
 
       // Logged, as the app sent it
-      seen.writes.push({
-        proposalIds: write.proposalIds,
-        paperIds: write.paperIds,
-        seenUpTo: write.seenUpTo,
-      })
+      seen.writes.push({ proposals: write.proposals, papers: write.papers })
 
-      // The moment given, held to now
-      const seenUpTo = new Date(Math.min(Date.parse(write.seenUpTo), Date.now())).toISOString()
+      // The moment the marks are written at
+      const now = Date.now()
 
       // The discussions shown
       const ids = subjectIds()
 
-      // A function which tells whether a discussion is unmarked or marked short of the moment
-      const fallsShort = (key: string) => {
+      // A function which reads the discussions of one kind named that the read shows, each with its moment held to now
+      const markedOf = (
+        targetType: SelectionThreadType,
+        moments: Record<string, string>
+      ): MarkedDiscussion[] =>
+        Object.entries(moments)
+          .filter(([targetId]) => ids[targetType].includes(targetId))
+          .map(([targetId, moment]) => ({
+            targetId,
+            key: threadKey(targetType, targetId),
+            markedUpTo: new Date(Math.min(Date.parse(moment), now)).toISOString(),
+          }))
+
+      // The proposals marked
+      const proposals = markedOf('Proposal', write.proposals)
+
+      // The papers marked
+      const papers = markedOf('SelectionPaper', write.papers)
+
+      // A function which tells whether a discussion is unmarked or marked short of its moment
+      const fallsShort = ({ key, markedUpTo }: MarkedDiscussion) => {
         // The mark before the write
         const before = seen.marks.get(key)
 
         // Short of the moment, or never written
-        return before === undefined || Date.parse(before) < Date.parse(seenUpTo)
+        return before === undefined || Date.parse(before) < Date.parse(markedUpTo)
       }
 
-      // Each discussion named that the read shows
-      const named = [
-        ...write.proposalIds
-          .filter((id) => ids.Proposal.includes(id))
-          .map((id) => threadKey('Proposal', id)),
-        ...write.paperIds
-          .filter((id) => ids.SelectionPaper.includes(id))
-          .map((id) => threadKey('SelectionPaper', id)),
-      ]
+      // Every discussion marked
+      const marked = [...proposals, ...papers]
 
-      // Seen up to the moment, a mark already further along left where it is
-      named.filter(fallsShort).forEach((key) => seen.marks.set(key, seenUpTo))
+      // Each seen up to its moment, a mark already further along left where it is
+      marked.filter(fallsShort).forEach(({ key, markedUpTo }) => seen.marks.set(key, markedUpTo))
 
-      // The moment
-      return answerJson(route, 200, { seenUpTo } satisfies DiscussionsMarked)
+      // A function which reads the discussions of one kind marked, by the subject's id, each with its moment
+      const answerOf = (ofKind: MarkedDiscussion[]) =>
+        Object.fromEntries(ofKind.map(({ targetId, markedUpTo }) => [targetId, markedUpTo]))
+
+      // Each discussion marked, with its moment
+      return answerJson(route, 200, {
+        proposals: answerOf(proposals),
+        papers: answerOf(papers),
+      } satisfies DiscussionsSeenUpTo)
     }
 
     // Answered as the selection's read is, refused alike

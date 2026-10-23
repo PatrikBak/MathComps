@@ -1,7 +1,10 @@
+import type { CommentData } from '@/components/features/comments/components/CommentItem'
+import { lastPostedByOthersAt } from '@/components/features/comments/model/comment-newness'
 import type { CommentThreadSeenDto } from '@/components/features/comments/services/comment-api-types'
+import { groupBy } from '@/components/shared/utils/collection-utils'
 
 import type { DiscussionTarget } from './selection-discussions'
-import type { DiscussionsSeenWrite, SelectionDiscussionsSeen } from './selection-types'
+import type { DiscussionsSeenUpTo, SelectionDiscussionsSeen } from './selection-types'
 
 /**
  * How far the reader has seen one discussion, as the server holds it, beside when somebody else last posted in it.
@@ -15,6 +18,16 @@ type ServerMark = {
 
 /** How far the reader has seen each discussion, as the server holds it, by the discussion's key. */
 export type ServerMarks = ReadonlyMap<string, ServerMark>
+
+/**
+ * One discussion, or one thread of it, as a view shows it to the reader.
+ */
+export type ShownDiscussion = {
+  /** The comment target the discussion is held under. */
+  target: DiscussionTarget
+  /** The comments the view shows of it, each carrying its replies. */
+  comments: readonly CommentData[]
+}
 
 /**
  * The key a discussion goes by among the marks.
@@ -80,49 +93,68 @@ export function hasNewsIn(server: ServerMarks, key: string): boolean {
 }
 
 /**
- * Splits the discussions named into the write telling the server they were seen up to a moment.
+ * The write telling the server some discussions were seen as a view shows them, each up to the newest comment it shows
+ * that can be new to the reader, so a comment still waiting to be shown in it stays new. A discussion shown as several
+ * threads is named once, up to the newest comment across them, and one showing no comment that can be new is left out,
+ * since nothing new in it has been seen.
  *
- * @param targets - The discussions.
- * @param seenUpTo - The moment, in milliseconds.
+ * @param shown - The discussions as the view shows them, a discussion shown as several threads once per thread.
+ * @param readerId - The reader's id with the sign-in provider, or null when nobody is signed in.
  *
- * @returns The write, the proposals' ids apart from the papers'.
+ * @returns The write, the proposals' moments apart from the papers'.
  */
 export function seenWriteOf(
-  targets: readonly DiscussionTarget[],
-  seenUpTo: number
-): DiscussionsSeenWrite {
-  // A function which reads the ids of the discussions of one kind
-  const idsOf = (targetType: DiscussionTarget['targetType']) =>
-    targets.filter((target) => target.targetType === targetType).map((target) => target.targetId)
+  shown: readonly ShownDiscussion[],
+  readerId: string | null
+): DiscussionsSeenUpTo {
+  // Each discussion shown, once, with when the newest comment it shows that can be new was posted, a discussion
+  // showing none left out
+  const moments = [...groupBy(shown, ({ target }) => markKeyOf(target)).values()].flatMap(
+    (threads) => {
+      // When the newest comment that can be new was posted, across every thread of the discussion
+      const seenUpTo = lastPostedByOthersAt(
+        threads.flatMap(({ comments }) => comments),
+        readerId
+      )
 
-  // Each kind's ids, with the moment
-  return {
-    proposalIds: idsOf('Proposal'),
-    paperIds: idsOf('SelectionPaper'),
-    seenUpTo: new Date(seenUpTo).toISOString(),
-  }
+      // The discussion with its moment, where it shows such a comment
+      return seenUpTo === null ? [] : [{ target: threads[0].target, seenUpTo }]
+    }
+  )
+
+  // A function which reads the moments of the discussions of one kind, by the subject's id
+  const momentsOf = (targetType: DiscussionTarget['targetType']) =>
+    Object.fromEntries(
+      moments
+        .filter(({ target }) => target.targetType === targetType)
+        .map(({ target, seenUpTo }) => [target.targetId, new Date(seenUpTo).toISOString()])
+    )
+
+  // Each kind's moments
+  return { proposals: momentsOf('Proposal'), papers: momentsOf('SelectionPaper') }
 }
 
 /**
- * The marks with the discussions a write named seen up to the moment the server marked them seen up to, a mark already
- * further along left where it is, as the server leaves it.
+ * The marks with each discussion the server marked seen up to the moment it answered, a mark already further along
+ * left where it is, as the server leaves it.
  *
  * @param seen - The marks as cached.
- * @param write - The discussions written.
- * @param seenUpTo - The moment the server marked them seen up to.
+ * @param marked - Each discussion the server marked, with the moment it marked it seen up to.
  *
  * @returns The marks afterwards, a discussion they did not hold yet carrying no post by anybody else.
  */
 export function withSeenUpTo(
   seen: SelectionDiscussionsSeen,
-  write: DiscussionsSeenWrite,
-  seenUpTo: string
+  marked: DiscussionsSeenUpTo
 ): SelectionDiscussionsSeen {
-  // A function which marks the discussions of one kind
-  const marked = (marks: SelectionDiscussionsSeen['proposals'], ids: readonly string[]) => ({
+  // A function which marks the discussions of one kind, each up to its answered moment
+  const markedOf = (
+    marks: SelectionDiscussionsSeen['proposals'],
+    moments: DiscussionsSeenUpTo['proposals']
+  ) => ({
     ...marks,
     ...Object.fromEntries(
-      ids.map((id) => {
+      Object.entries(moments).map(([id, seenUpTo]) => {
         // The discussion's mark before the write, if it had one
         const before = marks[id]?.seenUpTo ?? null
 
@@ -141,7 +173,7 @@ export function withSeenUpTo(
 
   // Each kind's marks
   return {
-    proposals: marked(seen.proposals, write.proposalIds),
-    papers: marked(seen.papers, write.paperIds),
+    proposals: markedOf(seen.proposals, marked.proposals),
+    papers: markedOf(seen.papers, marked.papers),
   }
 }

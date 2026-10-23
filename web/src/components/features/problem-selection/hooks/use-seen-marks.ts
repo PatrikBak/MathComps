@@ -5,22 +5,21 @@ import { type QueryKey, useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useCallback, useMemo } from 'react'
 
-import type { CommentData } from '@/components/features/comments/components/CommentItem'
-import {
-  type CommentNewness,
-  lastPostedByOthersAt,
-} from '@/components/features/comments/model/comment-newness'
+import type { CommentNewness } from '@/components/features/comments/model/comment-newness'
 import { useApiQuery } from '@/hooks/use-api-query'
 import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 import { cachePolicy, dropReadsInFlight } from '@/lib/query-config'
 
-import { hasNewsIn, markKeyOf, seenWriteOf, serverMarksOf, withSeenUpTo } from '../model/seen-marks'
+import {
+  hasNewsIn,
+  markKeyOf,
+  seenWriteOf,
+  serverMarksOf,
+  type ShownDiscussion,
+  withSeenUpTo,
+} from '../model/seen-marks'
 import type { DiscussionTarget } from '../model/selection-discussions'
-import type {
-  DiscussionsMarked,
-  DiscussionsSeenWrite,
-  SelectionDiscussionsSeen,
-} from '../model/selection-types'
+import type { DiscussionsSeenUpTo, SelectionDiscussionsSeen } from '../model/selection-types'
 import { getDiscussionsSeen, markDiscussionsSeen } from '../services/selection-service'
 import { useSelectionOrganization } from './selection-organization'
 
@@ -34,10 +33,10 @@ export type UseSeenMarksResult = {
   /** Whether somebody else posted in a discussion after what the reader has seen; false until the marks are read. */
   hasNews: (target: DiscussionTarget) => boolean
   /**
-   * Tells the server some discussions were seen as a view shows them: up to the newest comment it shows that can be
-   * new, or up to now where it shows none, so a comment still waiting to be shown stays new.
+   * Tells the server some discussions were seen as a view shows them, each up to the newest comment it shows that can
+   * be new, so a comment still waiting to be shown stays new. A discussion showing none is left as it is.
    */
-  markSeen: (targets: readonly DiscussionTarget[], shown: readonly CommentData[]) => void
+  markSeen: (shown: readonly ShownDiscussion[]) => void
 }
 
 /**
@@ -93,32 +92,28 @@ export function useSeenMarks(): UseSeenMarksResult {
   // The cache the marks are held in
   const queryClient = useQueryClient()
 
-  // The write telling the server some discussions were seen, which puts the moment the server marked into the cached
+  // The write telling the server some discussions were seen, which puts the moments the server marked into the cached
   // marks
-  const { mutateAsync } = useOptimisticMutation<DiscussionsMarked, DiscussionsSeenWrite, void>({
+  const { mutateAsync } = useOptimisticMutation<DiscussionsSeenUpTo, DiscussionsSeenUpTo, void>({
     apiFn: (apiCall, write) => markDiscussionsSeen(apiCall, organization, write),
-    onSuccess: ({ seenUpTo }, write) => {
-      // Every read still out may predate the write, so it is dropped before the moment goes in
+    onSuccess: (marked) => {
+      // Every read still out may predate the write, so it is dropped before the moments go in
       dropReadsInFlight(queryClient, queryKey)
 
-      // Each discussion written, seen up to the moment the server marked
+      // Each discussion the server marked, seen up to the moment it marked
       queryClient.setQueryData<SelectionDiscussionsSeen>(queryKey, (current) =>
-        current === undefined ? current : withSeenUpTo(current, write, seenUpTo)
+        current === undefined ? current : withSeenUpTo(current, marked)
       )
     },
     authReason: t('markSeenFailed'),
     errorMessage: t('markSeenFailed'),
   })
 
-  // A function which tells the server some discussions were seen as a view shows them
+  // A function which tells the server some discussions were seen as a view shows them, each up to its own moment, the
+  // write's failure told by the write itself
   const markSeen = useCallback(
-    (targets: readonly DiscussionTarget[], shown: readonly CommentData[]) => {
-      // Up to the newest comment shown that can be new, or up to now where none is shown
-      const seenUpTo = lastPostedByOthersAt(shown, readerId) ?? Date.now()
-
-      // The write, its failure told by the write itself
-      void mutateAsync(seenWriteOf(targets, seenUpTo)).catch(() => undefined)
-    },
+    (shown: readonly ShownDiscussion[]) =>
+      void mutateAsync(seenWriteOf(shown, readerId)).catch(() => undefined),
     [mutateAsync, readerId]
   )
 

@@ -110,7 +110,7 @@ public static class ProblemSelectionEndpoints
         .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
-        // Mark some of the discussions as seen by the caller up to a moment
+        // Mark some of the discussions as seen by the caller, each up to its own moment
         app.MapPut(DiscussionsSeenPath, async (
             string organization,
             MarkDiscussionsSeenRequest request,
@@ -119,19 +119,19 @@ public static class ProblemSelectionEndpoints
             ISelectionDiscussionService discussionService,
             CancellationToken cancellationToken) =>
         {
-            // A body leaving out either list or the moment is not a request that can be read
-            if (request is not { ProposalIds: { } proposalIds, PaperIds: { } paperIds, SeenUpTo: { } seenUpTo })
-                throw new BadHttpRequestException("A mark must name its proposals, its papers and its moment.");
+            // A body leaving out either kind of discussion is not a request that can be read
+            if (request is not { Proposals: { } proposals, Papers: { } papers })
+                throw new BadHttpRequestException("A mark must name its proposals and its papers.");
 
             // The reviewer who saw the discussions
             var viewer = await CommentEndpoints.RequireViewerAsync(userManager, context);
 
             // Mark the discussions as seen
-            var markedUpTo = await discussionService.MarkDiscussionsSeenAsync(
-                organization, viewer, proposalIds, paperIds, seenUpTo, cancellationToken);
+            var marked = await discussionService.MarkDiscussionsSeenAsync(
+                organization, viewer, proposals, papers, cancellationToken);
 
-            // Return the moment the discussions were marked as seen up to
-            return Results.Ok(new DiscussionsMarkedDto(markedUpTo));
+            // Return each discussion marked, with the moment it is now seen at least up to
+            return Results.Ok(marked);
         })
         .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);

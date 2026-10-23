@@ -80,9 +80,14 @@ public class ProblemSelectionEndpointsTests
                     beauty = 3,
                     difficulty = 3,
                     cycleId = Guid.CreateVersion7(),
-                    proposalIds = new[] { Guid.CreateVersion7() },
-                    paperIds = new[] { Guid.CreateVersion7() },
-                    seenUpTo = DateTimeOffset.UtcNow,
+                    proposals = new Dictionary<Guid, DateTimeOffset>
+                    {
+                        [Guid.CreateVersion7()] = DateTimeOffset.UtcNow,
+                    },
+                    papers = new Dictionary<Guid, DateTimeOffset>
+                    {
+                        [Guid.CreateVersion7()] = DateTimeOffset.UtcNow,
+                    },
                 });
 
             // Through the olympiad's address, every other value its pattern holds filled

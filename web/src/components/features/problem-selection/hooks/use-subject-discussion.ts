@@ -56,7 +56,7 @@ export function useSubjectDiscussion(target: DiscussionTarget): UseSubjectDiscus
   const hasNews = hasNewsOf(target)
 
   // A function which marks the discussion as seen as last read
-  const markSeen = () => markSeenOf([target], shown)
+  const markSeen = () => markSeenOf([{ target, comments: shown }])
 
   // What in the discussion is new to the reader, and the way to mark it seen
   return { newness, hasNews, showsNew, markSeen }
