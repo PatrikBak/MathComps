@@ -1,4 +1,13 @@
-import { facetsCopy, filtersCopy, KEPT_FILTER, recordTreeReadings } from './support/archive-filters'
+import { URL_PARAMS } from '@/components/features/problems/utils/search-url-serialization'
+import { FACET_ROW_ATTRIBUTE } from '@/components/shared/components/facets/hooks/use-facet-row-navigation'
+
+import {
+  facetsCopy,
+  filtersCopy,
+  filtersInUrl,
+  KEPT_FILTER,
+  recordTreeReadings,
+} from './support/archive-filters'
 import {
   BACKEND_ORIGIN,
   PROBLEMS_PATH,
@@ -24,6 +33,9 @@ const QUIET_MS = 1500
  * and a wrong reading nobody painted is one the test could never have caught.
  */
 const SEARCH_DELAY_MS = 400
+
+/** How long the pointer is held down for a long press, with room to spare over what counts as one. */
+const LONG_PRESS_MS = 800
 
 /** The competition the fixture's one problem comes from, which is the one a reader would pick. */
 const FOUND_COMPETITION = 'tst-d3'
@@ -62,7 +74,7 @@ test.describe('the competition facet', () => {
     await page.getByRole('button', { name: COMPETITION_FACET_BUTTON }).click()
 
     // The row of the competition the search found
-    const foundRow = page.locator(`[data-facet-row-id="${FOUND_COMPETITION}"]`)
+    const foundRow = page.locator(`[${FACET_ROW_ATTRIBUTE}="${FOUND_COMPETITION}"]`)
 
     // Its count once the search's own answer is painted, the fixture's one problem: until then the tree
     // can still show the counts the page was first drawn with, and a slow machine opens the facet on those
@@ -100,5 +112,51 @@ test.describe('the competition facet', () => {
     // facet itself sets, so picking a competition can only leave every number where it was, and a
     // number that flickers is the library reading its counts off something that is not this search.
     expect(readings().slice(readingsBeforePick)).toEqual([])
+  })
+
+  test('narrows to the competition a long press lands on, and keeps it', async ({ page }) => {
+    // Every search answered with one and the same page of the archive
+    await stubProblemSearch(page, () => null)
+
+    // The archive
+    await page.goto(PROBLEMS_PATH)
+
+    // Open the facet
+    await page.getByRole('button', { name: COMPETITION_FACET_BUTTON }).click()
+
+    // The row of the competition the search found
+    const foundRow = page.locator(`[${FACET_ROW_ATTRIBUTE}="${FOUND_COMPETITION}"]`)
+
+    // Settled on the search's own answer, so the row holds still under the pointer
+    await expect(foundRow).toHaveAttribute('aria-label', /\(1\)$/, { timeout: SETTLE_TIMEOUT_MS })
+
+    // Scrolled into the list's view, since the pointer has to land on it
+    await foundRow.scrollIntoViewIfNeeded()
+
+    // Where its middle sits
+    const box = (await foundRow.boundingBox())!
+
+    // The pointer on it
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+
+    // Held down long enough to count as a long press
+    await page.mouse.down()
+    await page.waitForTimeout(LONG_PRESS_MS)
+
+    // And let go, which sends a click of its own
+    await page.mouse.up()
+
+    // A function which reads the competitions picked off the address
+    const picked = () => filtersInUrl(page).get(URL_PARAMS.COMPETITIONS)
+
+    // The facet narrowed to the competition
+    await expect.poll(picked, { timeout: SETTLE_TIMEOUT_MS }).toBe(FOUND_COMPETITION)
+
+    // Given time for the click to land
+    await page.waitForTimeout(QUIET_MS)
+
+    // And the click after the press left it so
+    expect(picked()).toBe(FOUND_COMPETITION)
+    expect(await foundRow.getAttribute('aria-checked')).toBe('true')
   })
 })

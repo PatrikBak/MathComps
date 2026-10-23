@@ -3,11 +3,11 @@
  * modifier through a click or a keypress means. A touchscreen has no modifier to hold, so a long
  * press stands in for it and is recognised at the press.
  *
- * @param event - The click, tap or keypress to read.
+ * @param event - The click, tap or keypress to read, as React or the browser hands it over.
  * @returns True when the modifier was down.
  */
 export function isExclusiveSelection(
-  event: React.MouseEvent | React.TouchEvent | React.KeyboardEvent
+  event: React.MouseEvent | React.TouchEvent | React.KeyboardEvent | MouseEvent
 ): boolean {
   // Ctrl on Windows and Linux, Cmd on macOS
   return event.ctrlKey || event.metaKey

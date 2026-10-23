@@ -3,7 +3,7 @@ import { type KeyboardEvent, type RefObject, useRef } from 'react'
 import { isFacetNavigationKey, nextFocusedOptionIndex } from '../model/facet-logic'
 
 /** Marks an element as one of the rows focus walks, and carries which row it is. */
-const FACET_ROW_ATTRIBUTE = 'data-facet-row-id'
+export const FACET_ROW_ATTRIBUTE = 'data-facet-row-id'
 
 /** The rows themselves, whichever element each facet hangs the mark on. */
 const FACET_ROW_SELECTOR = `[${FACET_ROW_ATTRIBUTE}]`
