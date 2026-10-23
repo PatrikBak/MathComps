@@ -24,7 +24,10 @@ import { ProposalFiling } from './ProposalFiling'
 import { BackLink } from './SelectionLinks'
 import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
-/** Whether each tab of a problem's page shows its discussion, and so carries the eye while something there is new. */
+/**
+ * Whether each tab of a problem's page shows its discussion, and so is a Comments tab the reader visits, carrying the
+ * eye while something there is new.
+ */
 const SHOWS_DISCUSSION: Record<ProposalTab, boolean> = {
   conversations: false,
   comments: true,
@@ -105,8 +108,11 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
     pageOn: (shown) => ({ kind: 'proposal', id: proposal.id, tab: shown }),
   })
 
-  // The problem's discussion, with what in it is new
-  const discussion = useSubjectDiscussion({ targetType: 'Proposal', targetId: proposal.id })
+  // The problem's discussion, a visit to it while its tab shows, with what in it is new
+  const discussion = useSubjectDiscussion({
+    target: { targetType: 'Proposal', targetId: proposal.id },
+    isShowing: SHOWS_DISCUSSION[tab],
+  })
 
   // The discussion's panel
   const commentsPanelRef = useRef<HTMLDivElement>(null)

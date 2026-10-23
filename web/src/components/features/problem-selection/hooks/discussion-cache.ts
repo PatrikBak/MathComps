@@ -9,9 +9,14 @@ import type {
   CommentTarget,
   CommentTargetType,
 } from '@/components/features/comments/services/comment-api-types'
-import { saysNothingNew } from '@/components/features/comments/utils/comment-utils'
+import {
+  convertToCommentData,
+  saysNothingNew,
+} from '@/components/features/comments/utils/comment-utils'
 import type { ApiResult } from '@/types/api'
 
+import type { ShownDiscussion } from '../model/seen-marks'
+import type { DiscussionTarget } from '../model/selection-discussions'
 import type { SelectionDiscussions } from '../model/selection-types'
 
 /**
@@ -163,6 +168,29 @@ export function threadsAfterParking(
     // What parking would write there, or else the reader's copy, or else nothing
     return parked.get(hashKey(queryKey)) ?? queryClient.getQueryData<CommentDto[]>(queryKey) ?? []
   })
+}
+
+/**
+ * Each discussion as the reader's copy of its thread holds it, and no comments where nothing holds the thread.
+ *
+ * @param queryClient - The cache the threads are held in.
+ * @param readerId - Who is reading, whose threads they are.
+ * @param targets - The discussions asked about.
+ *
+ * @returns Each discussion with its comments read for the reader, in the targets' order.
+ */
+export function shownDiscussionsOf(
+  queryClient: QueryClient,
+  readerId: string | null,
+  targets: readonly DiscussionTarget[]
+): ShownDiscussion[] {
+  // Each discussion with the reader's copy of its thread
+  return targets.map((target) => ({
+    target,
+    comments: (
+      queryClient.getQueryData<CommentDto[]>(commentQueryKeys.target(target, readerId)) ?? []
+    ).map((comment) => convertToCommentData(comment, readerId)),
+  }))
 }
 
 /**

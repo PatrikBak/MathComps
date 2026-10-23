@@ -14,14 +14,23 @@ import { useLoginRedirect } from '@/hooks/use-login-redirect'
 import type { Locale } from '@/i18n/i18n'
 import { errorCodeOf } from '@/lib/api/api-error'
 
+import { useDiscussionVisit } from '../hooks/use-discussion-visit'
 import { PINNED_ATTRIBUTE } from '../hooks/use-open-detail'
-import type { OpenDetail } from '../model/selection-routes'
+import { usePoolViewMode } from '../hooks/use-pool-view-mode'
+import type { OpenDetail, PoolViewMode } from '../model/selection-routes'
 import { PROPOSAL_AUTHORING_LANGUAGE } from '../model/selection-types'
 import { BoardPanel } from './BoardPanel'
 import { type PaperChoices, PaperDetail } from './PaperDetail'
 import { PoolView } from './PoolView'
 import { ProposalDetail } from './ProposalDetail'
 import { SelectionWorkspaceProvider, useSelectionWorkspace } from './SelectionWorkspaceProvider'
+
+/** Whether each layout of the pool shows the discussions, and so is a Comments tab the reader visits. */
+const SHOWS_DISCUSSIONS: Record<PoolViewMode, boolean> = {
+  problems: false,
+  ratings: false,
+  comments: true,
+}
 
 /**
  * Props for the {@link SelectionShell} component.
@@ -183,10 +192,30 @@ function SelectionNotice({ children }: SelectionNoticeProps) {
  * built again. A page opens in the pool's language where what it shows is written in that language. A paper's page
  * opens in the language last picked for it, if any, with its ratings ordered as they were last left. Where any one
  * text will do, everything reads in the site's language, or in the one a problem has where it lacks that.
+ *
+ * A visit to the pool's Comments tab lasts while a page is open over it, and the hidden pool's effects stop as the page
+ * opens, so the visit is held here, outside the pool.
  */
 function SelectionContent() {
   // The page open in full, if any, and the selection, if its read has landed
   const { detail, selection } = useSelectionWorkspace()
+
+  // Which layout the pool shows
+  const { mode: poolMode } = usePoolViewMode()
+
+  // Where the pool's Comments tab stands
+  const poolCommentsPresence =
+    // Closed unless the pool is laid out as its discussions and the selection has arrived
+    !SHOWS_DISCUSSIONS[poolMode] || selection === null
+      ? 'closed'
+      : // Showing while no page is open over the pool
+        detail === null
+        ? 'shown'
+        : // Behind the page open over it
+          'behind'
+
+  // The pool's Comments tab, visited while it is open
+  useDiscussionVisit({ tab: { kind: 'pool' }, presence: poolCommentsPresence })
 
   // The site's language
   const siteLanguage = useLocale() as Locale

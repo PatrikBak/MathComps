@@ -1,5 +1,8 @@
 import {
   type DefaultOptions,
+  focusManager,
+  hashKey,
+  type MutationFilters,
   type Query,
   QueryClient,
   type QueryKey,
@@ -72,7 +75,7 @@ type TieredQuery = Pick<Query, 'state'>
 /**
  * Whether a read is worth making again on its own: anything short of a failure no repeat could change.
  *
- * @param query - The read React Query is deciding about.
+ * @param query - The read to decide about.
  *
  * @returns Whether to make it again.
  */
@@ -140,6 +143,97 @@ export function dropReadsInFlight(queryClient: QueryClient, queryKey: QueryKey):
   // Every read out for an answer already there. Dropping takes effect at once, so whatever the caller writes
   // next is the last word
   void queryClient.cancelQueries({ queryKey, predicate: (query) => query.state.data !== undefined })
+}
+
+/**
+ * Calls back once the page is on screen, as React Query tells it for its own reads: at once where it already is,
+ * otherwise as the reader brings it up, as after opening a link in a browser tab of its own behind the one they read.
+ * The page is asked as it stands, so a wait set off from an effect neither waits for a render nor restarts with one.
+ *
+ * @param onShown - Called once, as the page shows.
+ *
+ * @returns A function which stops the wait.
+ */
+export function oncePageShows(onShown: () => void): () => void {
+  // On screen already
+  if (focusManager.isFocused()) {
+    // Called back at once
+    onShown()
+
+    // Nothing left to stop
+    return () => {}
+  }
+
+  // The page's coming on screen listened for, until it comes
+  const stop = focusManager.subscribe((isFocused) => {
+    // Still out of sight
+    if (!isFocused) return
+
+    // Listened for no longer
+    stop()
+
+    // Called back
+    onShown()
+  })
+
+  // The way to stop the wait
+  return stop
+}
+
+/**
+ * Calls back once a read's answer lands in one cached query, an answer written straight into the cache aside. It
+ * watches the cache, since a refetch's own promise also resolves when its read is dropped, as happens when the query's
+ * last reader leaves.
+ *
+ * Where the cache holds the query, it sets a read off, joining one already out. It sets none off after a failure no
+ * repeat could change, nor while a write that could have the read land over its edit is out. A read that is dropped,
+ * fails or waits for the connection is waited past, until an answer lands.
+ *
+ * @param queryClient - The cache.
+ * @param queryKey - Exactly what the answer is cached under.
+ * @param heldBy - The writes that hold the read back while they are out.
+ * @param onLanded - Called once, as the answer lands.
+ *
+ * @returns A function which stops the wait.
+ */
+export function onceAnswerLands(
+  queryClient: QueryClient,
+  queryKey: QueryKey,
+  heldBy: MutationFilters,
+  onLanded: () => void
+): () => void {
+  // How the cache tells the query apart
+  const queryHash = hashKey(queryKey)
+
+  // Every change in the cache watched, until a read's answer lands in the query
+  const stop = queryClient.getQueryCache().subscribe((event) => {
+    // Anything but a read's answer landing in the query
+    if (
+      event.type !== 'updated' ||
+      event.query.queryHash !== queryHash ||
+      event.action.type !== 'success' ||
+      event.action.manual === true
+    ) {
+      return
+    }
+
+    // Watched no longer
+    stop()
+
+    // Called back
+    onLanded()
+  })
+
+  // The query as the cache holds it, absent while the cache knows none
+  const query = queryClient.getQueryCache().find({ queryKey, exact: true })
+
+  // A read set off, joining one already out, where one is worth making and no write holds it back
+  if (query !== undefined && isWorthRefreshing(query) && queryClient.isMutating(heldBy) === 0) {
+    void queryClient.refetchQueries({ queryKey, exact: true }, { cancelRefetch: false })
+  }
+
+  // The way to stop the wait
+  return stop
 }
 
 /**
