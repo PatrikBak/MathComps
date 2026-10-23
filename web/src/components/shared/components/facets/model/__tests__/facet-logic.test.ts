@@ -2,17 +2,22 @@ import { describe, expect, it } from 'vitest'
 
 import {
   compareFacetOptions,
+  drawnSectionRowIds,
+  type FacetDisplayOrderInput,
   facetOptionAccessibleName,
+  facetTabStopRowId,
   filterOptionsBySearch,
   groupOptionsByKey,
+  headingRowId,
   nextFocusedOptionIndex,
   orderFlatOptions,
   orderGroupedOptions,
+  orderOptionsForDisplay,
   sectionsWorthSorting,
   soleSelectionLabel,
   toVisibleSections,
 } from '../facet-logic'
-import type { FacetGrouping, FacetOption, FacetSortMode } from '../facet-types'
+import type { FacetGrouping, FacetOption, FacetSortMode, VisibleSection } from '../facet-types'
 
 /** Slovak tag names, whose diacritics are the point of the search behaviour. */
 const accentedOptions: FacetOption[] = [
@@ -31,6 +36,7 @@ const accentedOptions: FacetOption[] = [
  * @returns The ids of the matching options.
  */
 function matchedIds(searchTerm: string): string[] {
+  // The ids of the options the search kept
   return filterOptionsBySearch(accentedOptions, searchTerm).map((option) => option.id)
 }
 
@@ -157,6 +163,7 @@ describe('facet-logic', () => {
      * @returns The display names, in the order the mode produced.
      */
     function sortedNames(options: FacetOption[], sortMode: FacetSortMode): string[] {
+      // A sorted copy, read back as names
       return [...options]
         .sort((first, second) => compareFacetOptions(first, second, sortMode, 'sk'))
         .map((option) => option.displayName)
@@ -312,8 +319,10 @@ describe('facet-logic', () => {
     }
 
     it('concatenates the sections in the configured key order', () => {
-      // Act with both sections under the same ordering
+      // Both sections under the same ordering
       const sortModes: Record<string, FacetSortMode> = { area: 'alpha', technique: 'alpha' }
+
+      // Act with nothing selected
       const result = orderGroupedOptions(options, grouping, sortModes, [], 'sk')
 
       // Every option of the first section precedes every option of the second
@@ -321,8 +330,10 @@ describe('facet-logic', () => {
     })
 
     it('applies each section its own sort mode', () => {
-      // Act with the two sections deliberately under different orderings
+      // The two sections deliberately under different orderings
       const sortModes: Record<string, FacetSortMode> = { area: 'count-desc', technique: 'alpha' }
+
+      // Act with nothing selected
       const result = orderGroupedOptions(options, grouping, sortModes, [], 'sk')
 
       // The first section reads by descending count, the second by name
@@ -330,8 +341,10 @@ describe('facet-logic', () => {
     })
 
     it('leads each section with its own selected options', () => {
-      // Act with one option selected in each section, neither of which would sort first
+      // Both sections ordered by name
       const sortModes: Record<string, FacetSortMode> = { area: 'alpha', technique: 'alpha' }
+
+      // Act with one option selected in each section, neither of which would sort first
       const result = orderGroupedOptions(options, grouping, sortModes, ['a2', 't2'], 'sk')
 
       // Each selected option leads its own section rather than the whole list
@@ -339,13 +352,17 @@ describe('facet-logic', () => {
     })
 
     it('drops options belonging to no configured section', () => {
-      // Act on a list carrying one ungrouped option and one under an unknown key
+      // The options plus one ungrouped option and one under an unknown key
       const strays: FacetOption[] = [
         ...options,
         { id: 'x1', displayName: 'Bez skupiny' },
         { id: 'x2', displayName: 'Neznáma', groupKey: 'mystery' },
       ]
+
+      // Both sections ordered by name
       const sortModes: Record<string, FacetSortMode> = { area: 'alpha', technique: 'alpha' }
+
+      // Act on the list carrying the strays
       const result = orderGroupedOptions(strays, grouping, sortModes, [], 'sk')
 
       // Neither stray survived, since no section could hold it
@@ -355,19 +372,57 @@ describe('facet-logic', () => {
     })
   })
 
+  describe('orderOptionsForDisplay', () => {
+    // One section whose incoming and count orders disagree, so a reordering shows
+    const options: FacetOption[] = [
+      { id: 'a1', displayName: 'Algebra', count: 5, groupKey: 'area' },
+      { id: 'a2', displayName: 'Zeta', count: 90, groupKey: 'area' },
+      { id: 'a3', displayName: 'Mika', count: 50, groupKey: 'area' },
+    ]
+
+    // That section open and unsearched, sorted by count, with its last option standing
+    const openList: FacetDisplayOrderInput<FacetOption> = {
+      options,
+      isOpen: true,
+      query: '',
+      grouping: { keys: ['area'], labels: { area: 'Oblasť' } },
+      sortModes: { area: 'count-desc' },
+      leadingIds: ['a3'],
+      locale: 'sk',
+    }
+
+    it('leads an open list with its standing options, the rest under the section ordering', () => {
+      // Act on the open list nobody is searching
+      const result = orderOptionsForDisplay(openList)
+
+      // The standing option first, then the others by descending count
+      expect(result.map((option) => option.id)).toEqual(['a3', 'a2', 'a1'])
+    })
+
+    it('keeps the incoming order while a search is running', () => {
+      // Act on the same list mid-search
+      const result = orderOptionsForDisplay({ ...openList, query: 'a' })
+
+      // Neither the standing option nor the count ordering moved anything under the caret
+      expect(result.map((option) => option.id)).toEqual(['a1', 'a2', 'a3'])
+    })
+  })
+
   describe('toVisibleSections', () => {
-    // One section holding options and one that a search could empty
+    // Three sections, which the cases below fill only in part
     const grouping: FacetGrouping = {
       keys: ['area', 'technique', 'goal'],
       labels: { area: 'Oblasť', technique: 'Technika', goal: 'Cieľ' },
     }
 
     it('splits options back into their sections, in the configured key order', () => {
-      // Act on options belonging to two of the three sections
+      // Options belonging to two of the three sections, arriving in the opposite order to theirs
       const options: FacetOption[] = [
         { id: 't1', displayName: 'Indukcia', groupKey: 'technique' },
         { id: 'a1', displayName: 'Algebra', groupKey: 'area' },
       ]
+
+      // Act on those options
       const result = toVisibleSections(options, grouping)
 
       // The sections read in the configured order, not the order the options arrived in
@@ -376,8 +431,10 @@ describe('facet-logic', () => {
     })
 
     it('drops the sections nothing landed in', () => {
-      // Act on options covering a single section
+      // Options covering a single section
       const options: FacetOption[] = [{ id: 'a1', displayName: 'Algebra', groupKey: 'area' }]
+
+      // Act on those options
       const result = toVisibleSections(options, grouping)
 
       // Only the section with something to show survives
@@ -391,6 +448,40 @@ describe('facet-logic', () => {
 
       // No section is offered, rather than three empty ones
       expect(result).toEqual([])
+    })
+  })
+
+  describe('drawnSectionRowIds', () => {
+    it('draws every heading, and the options of the sections left unrolled', () => {
+      // Two sections of one option each
+      const sections: VisibleSection[] = [
+        { groupKey: 'area', sectionOptions: [{ id: 'a1', displayName: 'Algebra' }] },
+        { groupKey: 'goal', sectionOptions: [{ id: 'g1', displayName: 'Dokázať' }] },
+      ]
+
+      // Act with the first of them rolled up
+      const result = drawnSectionRowIds(sections, { area: true, goal: false })
+
+      // The rolled-up section keeps its heading and loses its option
+      expect(result).toEqual([headingRowId('area'), headingRowId('goal'), 'g1'])
+    })
+  })
+
+  describe('facetTabStopRowId', () => {
+    it('lands on the first picked row as drawn, whatever order the picks were made in', () => {
+      // Act on two picks made bottom first
+      const result = facetTabStopRowId(['a', 'b', 'c'], ['c', 'b'])
+
+      // The higher of them on the list takes the stop
+      expect(result).toBe('b')
+    })
+
+    it('falls back to the top row when nothing picked is drawn', () => {
+      // Act on a pick sitting in a rolled-up section, which the list draws none of
+      const result = facetTabStopRowId([headingRowId('area'), 'a1'], ['hidden'])
+
+      // The top of the list takes the stop, which here is a heading
+      expect(result).toBe(headingRowId('area'))
     })
   })
 
@@ -409,6 +500,7 @@ describe('facet-logic', () => {
      * @returns The options, named apart within their section.
      */
     function sectionOf(groupKey: string, howMany: number): FacetOption[] {
+      // One option per slot, each naming the section it belongs to
       return Array.from({ length: howMany }, (_unused, index) => ({
         id: `${groupKey}-${index}`,
         displayName: `${groupKey} ${index}`,

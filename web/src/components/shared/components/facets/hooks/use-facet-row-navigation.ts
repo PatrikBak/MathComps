@@ -11,38 +11,10 @@ const FACET_ROW_SELECTOR = `[${FACET_ROW_ATTRIBUTE}]`
 /** The key advancing the focused section to its next ordering. */
 const SORT_KEY = 's'
 
-/** Tells a heading's row id apart from an option's, the two being drawn from separate namings. */
-const HEADING_ROW_PREFIX = 'heading:'
-
 /**
  * What a key asks of the row focus sits on, beyond moving off it.
  */
 export type FacetRowAction = 'collapse' | 'expand' | 'cycle-sort'
-
-/**
- * Names the row a section's heading is drawn as.
- *
- * @param groupKey - The section.
- * @returns Its row id.
- */
-export function headingRowId(groupKey: string): string {
-  // Marked, since an option could carry the same name as a section and mean something else entirely
-  return `${HEADING_ROW_PREFIX}${groupKey}`
-}
-
-/**
- * Reads which section a row heads.
- *
- * @param rowId - The row.
- * @returns The section it heads, or nothing where the row is an option.
- */
-export function headingKeyOf(rowId: string): string | undefined {
-  // An option's row id is its own, so anything unmarked is one
-  if (!rowId.startsWith(HEADING_ROW_PREFIX)) return undefined
-
-  // What is left once the mark is taken off is the section itself
-  return rowId.slice(HEADING_ROW_PREFIX.length)
-}
 
 /**
  * What a facet lets its rows do beyond being walked.
@@ -197,15 +169,12 @@ export function useFacetRowNavigation({
 function rowActionForKey(key: string): FacetRowAction | undefined {
   // The keys a row claims for itself, the rest belonging to the walk between rows
   switch (key) {
-    // Left rolls up whatever the row heads
     case 'ArrowLeft':
       return 'collapse'
-
-    // Right unrolls it
     case 'ArrowRight':
       return 'expand'
 
-    // And the ordering sits on a letter, the sections having taken both arrows
+    // The ordering sits on a letter, the sections having taken both arrows
     case SORT_KEY:
     case SORT_KEY.toUpperCase():
       return 'cycle-sort'

@@ -1,10 +1,8 @@
 import type { Locator, Page } from '@playwright/test'
 
 import { URL_PARAMS } from '@/components/features/problems/utils/search-url-serialization'
-import {
-  FACET_ROW_ATTRIBUTE,
-  headingRowId,
-} from '@/components/shared/components/facets/hooks/use-facet-row-navigation'
+import { FACET_ROW_ATTRIBUTE } from '@/components/shared/components/facets/hooks/use-facet-row-navigation'
+import { headingRowId } from '@/components/shared/components/facets/model/facet-logic'
 
 import { facetsCopy, filtersCopy, filtersInUrl } from './support/archive-filters'
 import { PROBLEMS_PATH, stubProblemSearch } from './support/backend-routes'
