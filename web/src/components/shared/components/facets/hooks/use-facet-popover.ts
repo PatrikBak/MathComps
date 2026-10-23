@@ -181,7 +181,10 @@ export function useFacetPopover<T extends FacetOption>(
   // popover while it stands open.
   const { refs, floatingStyles, context, placement } = useFloatingPanel({
     open,
-    onOpenChange: (nextOpen, _event, reason) => {
+    onOpenChange: (nextOpen, event, reason) => {
+      // An Escape a control inside has already answered, the search box emptying itself on one, is spent there
+      if (!nextOpen && reason === 'escape-key' && event?.defaultPrevented) return
+
       // Only a close has a reason worth keeping, and recording an opening one would leave it standing
       // as the answer for whatever closes the popover next
       closeReason.current = nextOpen ? undefined : reason

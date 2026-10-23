@@ -6,7 +6,15 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { memo, type MouseEvent, type ReactNode, useCallback, useMemo, useRef } from 'react'
+import {
+  type ChangeEvent,
+  memo,
+  type MouseEvent,
+  type ReactNode,
+  useCallback,
+  useMemo,
+  useRef,
+} from 'react'
 
 import { FOCUS_RING_ROW_CLASS } from '@/components/shared/components/Button'
 import { FLOATING_PANEL_FILL_CLASS } from '@/components/shared/components/DropdownMenu'
@@ -14,6 +22,7 @@ import { SegmentedSwitch } from '@/components/shared/components/SegmentedSwitch'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
+import { useKeyedState } from '@/hooks/use-keyed-state'
 import { useSmartLongPress } from '@/hooks/use-smart-long-press'
 
 import { useFacetGroups } from '../hooks/use-facet-groups'
@@ -70,7 +79,7 @@ type SelectionModeBehavior = {
   replacesSelection: boolean
   /** Whether the rows' controls answer to one shared name, which makes the browser treat them as one group. */
   groupsUnderOneName: boolean
-  /** Whether the options standing float to the top of their section while the popover sits idle. */
+  /** Whether the options standing as the popover opens lead their section until it closes. */
   floatsSelectedFirst: boolean
   /** Whether the list scrolls to the option standing as it appears. */
   revealsStandingOption: boolean
@@ -155,14 +164,36 @@ const OptionItem = memo(function OptionItem({
   const { inputType, controlClass, replacesSelection, groupsUnderOneName } =
     SELECTION_MODE_BEHAVIORS[selectionMode]
 
-  // A function which adds this option to the selection, or takes it back out; where only one option may
-  // stand it unseats whatever stood before instead
-  const onToggle = useCallback(() => {
-    // The change is expressed against whatever the selection is when it lands
-    onChange((previousSelected) =>
-      replacesSelection ? [option.id] : toggleOptionSelection(option.id, previousSelected)
-    )
-  }, [replacesSelection, onChange, option.id])
+  // A function which drops every other option from the selection
+  const onExclusiveSelect = useCallback(() => {
+    // Whatever was selected before is irrelevant, so the previous value goes unread
+    onChange(() => [option.id])
+  }, [onChange, option.id])
+
+  // A function which applies a change of the control: it adds this option to the selection, or takes it back
+  // out, and where only one option may stand it unseats whatever stood before instead. A click held with the
+  // modifier narrows to this option.
+  const onToggle = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      // The change rides on the click that made it, which says whether the modifier was down
+      if (
+        event.nativeEvent instanceof globalThis.MouseEvent &&
+        isExclusiveSelection(event.nativeEvent)
+      ) {
+        // Narrow to this one option
+        onExclusiveSelect()
+
+        // The toggle below is not this click's business
+        return
+      }
+
+      // The change is expressed against whatever the selection is when it lands
+      onChange((previousSelected) =>
+        replacesSelection ? [option.id] : toggleOptionSelection(option.id, previousSelected)
+      )
+    },
+    [replacesSelection, onChange, onExclusiveSelect, option.id]
+  )
 
   // A function which clears the facet
   const onClearSelection = useCallback(() => {
@@ -170,24 +201,25 @@ const OptionItem = memo(function OptionItem({
     onChange(() => [])
   }, [onChange])
 
-  // A function which drops every other option from the selection
-  const onExclusiveSelect = useCallback(() => {
-    // Whatever was selected before is irrelevant, so the previous value goes unread
-    onChange(() => [option.id])
-  }, [onChange, option.id])
-
   // A long-press stands in for the modifier click on a touchscreen
   const longPressHandlers = useSmartLongPress(onExclusiveSelect)
 
   /**
-   * Intercepts a modified click, and the click on a standing radio that no change event follows, leaving every
-   * other plain click to the control itself.
+   * Intercepts a modified click landing beside the control, and the click on a standing radio that no change
+   * event follows, leaving every other click to the control itself.
    *
    * @param event - The click, read for the modifier key it was made with.
    */
   function handleClick(event: MouseEvent<HTMLLabelElement>) {
+    // Whether the click landed on the control itself, which it has already changed by now. Such a click is never
+    // cancelled, since the browser would then restore the control's old state after React drew the new one.
+    const isOnControl = event.target === event.currentTarget.control
+
     // A modified click narrows to this option however many stand
     if (isExclusiveSelection(event)) {
+      // One on the control is narrowed by the change event that follows it
+      if (isOnControl) return
+
       // The label would otherwise toggle the control on top of the narrowing
       event.preventDefault()
 
@@ -202,7 +234,7 @@ const OptionItem = memo(function OptionItem({
     // has to happen from the click. It is the only way back to showing everything from a row.
     if (replacesSelection && checked) {
       // The label would otherwise hand the click on to a control that has nothing left to say
-      event.preventDefault()
+      if (!isOnControl) event.preventDefault()
 
       // Back to showing everything
       onClearSelection()
@@ -483,8 +515,10 @@ type MultiSelectFacetProps = {
  * A facet offering a flat list of values, one or several of which may stand at once, optionally
  * split into sections that each carry their own ordering and can be rolled up.
  *
- * Where several may stand, the selected options float to the top of their section while the popover
- * sits idle, but hold their place during a search, so results don't jump around as the user types.
+ * Where several may stand, the options standing as the popover opens lead their section. An option picked while it
+ * stays open keeps the place the incoming order gives it, so a run of quick picks lands where it was aimed, and a
+ * search lists its results in their incoming order. A list ordered by count still re-sorts when a pick changes the
+ * counts.
  */
 export function MultiSelectFacet({
   title,
@@ -586,6 +620,9 @@ export function MultiSelectFacet({
     facet.filtered.length
   )
 
+  // The options standing as the popover last opened, held while it stays open
+  const [standingAtOpen] = useKeyedState(facet.open, selected)
+
   // The options in the order they should render
   const displayOptions = useMemo(() => {
     // A closed or actively searched list keeps the incoming order, so nothing shifts under the caret
@@ -593,10 +630,12 @@ export function MultiSelectFacet({
       return facet.filtered
     }
 
-    // Which options float to the top. Only a facet several may stand in floats them, where they would
-    // otherwise be scattered down a list with no way to see what is on. One value is already named on the
-    // trigger, and lifting it out of the order its options were authored in reads as a sorting fault.
-    const leadingIds = selectionBehavior.floatsSelectedFirst ? selected : []
+    // Which options float to the top: those standing as the popover opened, so a pick made since stays in the
+    // incoming order.
+    // Only a facet several may stand in floats them, where they would otherwise be scattered down a list with no
+    // way to see what is on. One value is already named on the trigger, and lifting it out of the order its
+    // options were authored in reads as a sorting fault.
+    const leadingIds = selectionBehavior.floatsSelectedFirst ? standingAtOpen : []
 
     // Grouped: every section under its own ordering, concatenated in the configured key order
     if (grouping) {
@@ -611,7 +650,7 @@ export function MultiSelectFacet({
     facet.filtered,
     grouping,
     groups.sortModes,
-    selected,
+    standingAtOpen,
     selectionBehavior,
     locale,
   ])
