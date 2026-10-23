@@ -269,6 +269,54 @@ export function orderGroupedOptions<T extends FacetOption>(
 }
 
 /**
+ * The options a facet's list draws, and everything their order turns on.
+ */
+export type FacetDisplayOrderInput<T extends FacetOption> = {
+  /** The options surviving the search, in their incoming order. */
+  options: T[]
+  /** Whether the popover is open. */
+  isOpen: boolean
+  /** The current search term. */
+  query: string
+  /** The labelled sections the options are split into, absent on a flat facet. */
+  grouping: FacetGrouping | undefined
+  /** The ordering each section is under, keyed by section. */
+  sortModes: Record<string, FacetSortMode>
+  /** Ids of the options to float to the top of their section. */
+  leadingIds: string[]
+  /** Locale driving the display-name collation. */
+  locale: string
+}
+
+/**
+ * Orders a facet's options the way its list draws them. A grouped facet puts every section under its own sort
+ * mode, and a flat one holds the incoming order, the named options leading either way. A closed or searched list
+ * is left in the incoming order.
+ *
+ * @param input - What the order is worked out from.
+ * @returns The options in the order they render.
+ */
+export function orderOptionsForDisplay<T extends FacetOption>({
+  options,
+  isOpen,
+  query,
+  grouping,
+  sortModes,
+  leadingIds,
+  locale,
+}: FacetDisplayOrderInput<T>): T[] {
+  // A closed list draws nothing to order, and a searched one keeps the incoming order so nothing shifts under
+  // the caret
+  if (!isOpen || query) return options
+
+  // Grouped: every section under its own ordering, concatenated in the configured key order
+  if (grouping) return orderGroupedOptions(options, grouping, sortModes, leadingIds, locale)
+
+  // Flat: the leading options first, and the rest hold their incoming order
+  return orderFlatOptions(options, leadingIds)
+}
+
+/**
  * Splits already-ordered options back into the sections a grouped facet renders,
  * dropping any section nothing landed in.
  *
@@ -287,6 +335,72 @@ export function toVisibleSections<T extends FacetOption>(
   return grouping.keys
     .map((groupKey) => ({ groupKey, sectionOptions: bucketed[groupKey] }))
     .filter(({ sectionOptions }) => sectionOptions.length > 0)
+}
+
+/** Tells a heading's row id apart from an option's, the two being drawn from separate namings. */
+const HEADING_ROW_PREFIX = 'heading:'
+
+/**
+ * Names the row a section's heading is drawn as.
+ *
+ * @param groupKey - The section.
+ * @returns Its row id.
+ */
+export function headingRowId(groupKey: string): string {
+  // Marked, since an option could carry the same name as a section and mean something else entirely
+  return `${HEADING_ROW_PREFIX}${groupKey}`
+}
+
+/**
+ * Reads which section a row heads.
+ *
+ * @param rowId - The row.
+ * @returns The section it heads, or nothing where the row is an option.
+ */
+export function headingKeyOf(rowId: string): string | undefined {
+  // An option's row id is its own, so anything unmarked is one
+  if (!rowId.startsWith(HEADING_ROW_PREFIX)) return undefined
+
+  // What is left once the mark is taken off is the section itself
+  return rowId.slice(HEADING_ROW_PREFIX.length)
+}
+
+/**
+ * Lists the rows a grouped facet draws, top to bottom: each section's heading, followed by its options unless the
+ * section is rolled up.
+ *
+ * @param sections - The sections with something to show, in the order they render.
+ * @param collapsed - Which sections are rolled up, keyed by section.
+ * @returns The row ids, in the order they are drawn.
+ */
+export function drawnSectionRowIds(
+  sections: VisibleSection[],
+  collapsed: Record<string, boolean>
+): string[] {
+  // Every section in turn, in the order the list draws them
+  return sections.flatMap(({ groupKey, sectionOptions }) => [
+    // The section's heading, drawn whether or not the section is rolled up
+    headingRowId(groupKey),
+
+    // Then the section's options, which a rolled-up section leaves undrawn
+    ...(collapsed[groupKey] ? [] : sectionOptions.map((option) => option.id)),
+  ])
+}
+
+/**
+ * Picks the one row a facet's panel offers the page's tab order: the first row drawn that is selected, so a
+ * reopened facet lands on what it is already filtered by, and the top row where none is.
+ *
+ * @param drawnRowIds - The rows the list draws, top to bottom.
+ * @param selectedIds - The ids currently selected.
+ * @returns The row's id, or undefined while the list draws nothing.
+ */
+export function facetTabStopRowId(
+  drawnRowIds: string[],
+  selectedIds: string[]
+): string | undefined {
+  // The first row standing, and otherwise the top of the list
+  return drawnRowIds.find((rowId) => selectedIds.includes(rowId)) ?? drawnRowIds[0]
 }
 
 /** The keys an option list walks itself, rather than leaving them to the browser. */
