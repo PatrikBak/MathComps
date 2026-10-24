@@ -4,13 +4,14 @@ import { comment } from '@/components/features/comments/model/__tests__/support/
 
 import {
   advanceMarks,
-  hasNewsIn,
   holdMarks,
   type KeptMarks,
+  newCountAcross,
   releaseMarks,
   seenUpToOf,
   seenWriteOf,
   type ServerMarks,
+  serverMarksOf,
   withSeenUpTo,
 } from '../seen-marks'
 
@@ -30,17 +31,17 @@ const PAPER = 'SelectionPaper:paper'
 const READER = 'user_rita'
 
 /**
- * The server's marks: the first problem seen up to 100, the second never seen, somebody else posting in each at 200.
+ * The server's marks: the first problem seen up to 100, the second never seen, a comment by somebody else new in each.
  */
 const SERVER: ServerMarks = new Map([
-  [FIRST, { seenUpTo: 100, lastPostedByOthersAt: 200 }],
-  [SECOND, { seenUpTo: null, lastPostedByOthersAt: 200 }],
+  [FIRST, { seenUpTo: 100, newCount: 1 }],
+  [SECOND, { seenUpTo: null, newCount: 1 }],
 ])
 
-/** The server's marks once told both problems were seen, holding both at 300. */
+/** The server's marks once told both problems were seen, holding both at 300 with nothing new. */
 const TOLD: ServerMarks = new Map([
-  [FIRST, { seenUpTo: 300, lastPostedByOthersAt: 200 }],
-  [SECOND, { seenUpTo: 300, lastPostedByOthersAt: 200 }],
+  [FIRST, { seenUpTo: 300, newCount: 0 }],
+  [SECOND, { seenUpTo: 300, newCount: 0 }],
 ])
 
 /** Nothing kept yet. */
@@ -109,16 +110,20 @@ describe('seenWriteOf', () => {
 
 describe('withSeenUpTo', () => {
   it('moves a mark to its answer, keeps one further along or unanswered, adds one never cached', () => {
-    // A problem seen past its answer, one seen short of it, one the answer leaves out, and a paper the cached marks
-    // don't hold yet
+    // A problem seen past its answer, one seen short of it with three posts since, one the answer leaves out, and a
+    // paper the cached marks don't hold yet
     const cached = {
       proposals: {
-        ahead: { seenUpTo: '2026-10-12T08:00:00.000Z', lastPostedByOthersAt: null },
+        ahead: { seenUpTo: '2026-10-12T08:00:00.000Z', newPostedAt: [] },
         behind: {
           seenUpTo: '2026-10-01T08:00:00.000Z',
-          lastPostedByOthersAt: '2026-10-05T08:00:00.000Z',
+          newPostedAt: [
+            '2026-10-05T08:00:00.000Z',
+            '2026-10-08T08:00:00.000Z',
+            '2026-10-09T08:00:00.000Z',
+          ],
         },
-        unanswered: { seenUpTo: null, lastPostedByOthersAt: '2026-10-05T08:00:00.000Z' },
+        unanswered: { seenUpTo: null, newPostedAt: ['2026-10-05T08:00:00.000Z'] },
       },
       papers: {},
     }
@@ -129,18 +134,15 @@ describe('withSeenUpTo', () => {
       papers: { fresh: '2026-10-10T08:00:00.000Z' },
     })
 
-    // The mark ahead kept, the one behind moved up to its answer with its last post kept, the unanswered one as it
-    // was, the paper marked with none
+    // The mark ahead kept, the one behind moved up to its answer with only the post after it still new, the
+    // unanswered one as it was, the paper marked with nothing new
     expect(marked).toEqual({
       proposals: {
-        ahead: { seenUpTo: '2026-10-12T08:00:00.000Z', lastPostedByOthersAt: null },
-        behind: {
-          seenUpTo: '2026-10-08T08:00:00.000Z',
-          lastPostedByOthersAt: '2026-10-05T08:00:00.000Z',
-        },
-        unanswered: { seenUpTo: null, lastPostedByOthersAt: '2026-10-05T08:00:00.000Z' },
+        ahead: { seenUpTo: '2026-10-12T08:00:00.000Z', newPostedAt: [] },
+        behind: { seenUpTo: '2026-10-08T08:00:00.000Z', newPostedAt: ['2026-10-09T08:00:00.000Z'] },
+        unanswered: { seenUpTo: null, newPostedAt: ['2026-10-05T08:00:00.000Z'] },
       },
-      papers: { fresh: { seenUpTo: '2026-10-10T08:00:00.000Z', lastPostedByOthersAt: null } },
+      papers: { fresh: { seenUpTo: '2026-10-10T08:00:00.000Z', newPostedAt: [] } },
     })
   })
 })
@@ -182,8 +184,8 @@ describe('kept marks', () => {
     // The two problems as the server holds them, beside a third seen up to 50 and a paper seen up to 400
     const server: ServerMarks = new Map([
       ...SERVER,
-      [THIRD, { seenUpTo: 50, lastPostedByOthersAt: 200 }],
-      [PAPER, { seenUpTo: 400, lastPostedByOthersAt: 200 }],
+      [THIRD, { seenUpTo: 50, newCount: 1 }],
+      [PAPER, { seenUpTo: 400, newCount: 0 }],
     ])
 
     // All four kept by a visit to the pool's tab
@@ -202,24 +204,31 @@ describe('kept marks', () => {
   })
 })
 
-describe('hasNewsIn', () => {
-  it('finds news posted after the mark, and anywhere the reader has seen nothing', () => {
-    // News in both
-    expect([hasNewsIn(SERVER, FIRST), hasNewsIn(SERVER, SECOND)]).toEqual([true, true])
-  })
+describe('newCountAcross', () => {
+  it('counts what is still new in every discussion once a write moved one mark part way', () => {
+    // A problem never seen with three posts by others, a paper never seen with one, and a problem with nothing new
+    const cached = {
+      proposals: {
+        first: {
+          seenUpTo: null,
+          newPostedAt: [
+            '2026-10-05T08:00:00.000Z',
+            '2026-10-07T08:00:00.000Z',
+            '2026-10-09T08:00:00.000Z',
+          ],
+        },
+        second: { seenUpTo: '2026-10-01T08:00:00.000Z', newPostedAt: [] },
+      },
+      papers: { paper: { seenUpTo: null, newPostedAt: ['2026-10-06T08:00:00.000Z'] } },
+    }
 
-  it('finds nothing new where nobody else posted, nor where the last post is the mark itself', () => {
-    // One discussion nobody else posted in, one seen exactly up to its last post
-    const server: ServerMarks = new Map([
-      [FIRST, { seenUpTo: null, lastPostedByOthersAt: null }],
-      [SECOND, { seenUpTo: 200, lastPostedByOthersAt: 200 }],
-    ])
+    // The first problem seen up to its oldest post, as a visit leaving the newer ones waiting would mark it
+    const marked = withSeenUpTo(cached, {
+      proposals: { first: '2026-10-05T08:00:00.000Z' },
+      papers: {},
+    })
 
-    // Nothing new in either, nor in one the server knows nothing of
-    expect([
-      hasNewsIn(server, FIRST),
-      hasNewsIn(server, SECOND),
-      hasNewsIn(server, 'Proposal:unknown'),
-    ]).toEqual([false, false, false])
+    // The newer posts of the first problem and the paper's post
+    expect(newCountAcross(serverMarksOf(marked))).toBe(3)
   })
 })

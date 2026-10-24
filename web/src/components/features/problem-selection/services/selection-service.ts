@@ -64,7 +64,7 @@ export function getDiscussions(
 
 /**
  * Reads how far the reader has seen the discussion of every proposal and paper an organization's selection holds,
- * each beside when somebody else last posted in it.
+ * each beside what somebody else posted in it since.
  *
  * @param apiCall - The authenticated API caller.
  * @param organization - The slug of the organization whose selection holds the discussions.

@@ -12,10 +12,10 @@ import { cachePolicy, dropReadsInFlight } from '@/lib/query-config'
 
 import {
   advanceMarks,
-  hasNewsIn,
   holdMarks,
   type KeptMarks,
   markKeyOf,
+  newCountAcross,
   releaseMarks,
   seenUpToOf,
   seenWriteOf,
@@ -60,6 +60,11 @@ export type UseSeenMarksResult = {
    * keeps; false until the marks are read.
    */
   hasNews: (target: DiscussionTarget) => boolean
+  /**
+   * How many comments somebody else posted after the reader's mark as the server holds it, across every discussion the
+   * selection holds, whatever marks a visit keeps; none until the marks are read.
+   */
+  newCount: number
   /** The ways a visit keeps its marks and tells what it saw; null until the server's marks are read. */
   visits: VisitMarks | null
   /**
@@ -90,8 +95,9 @@ function seenQueryKey(organization: string, readerId: string | null): QueryKey {
  * How far the reader has seen each of the selection's discussions, read every little while in view, and the ways to
  * mark some seen. A mark the server takes goes into the cached marks at once. A visit to a Comments tab keeps the marks
  * of the discussions it shows as they stood when it started, so what was new then stays new while it lasts, until the
- * reader marks it seen. Whether a discussion holds news reads the server's mark alone, so the news goes out once a
- * visit's write lands, while the comments the visit shows stay new.
+ * reader marks it seen. Whether a discussion holds news, and how many comments are new across the discussions, read
+ * the server's marks alone, so the news goes out once a visit's write lands, while the comments the visit shows stay
+ * new.
  *
  * Each write marks what a view shows as {@link seenWriteOf} builds it, and one naming no discussion is never sent.
  *
@@ -235,9 +241,13 @@ export function useSeenMarks(): UseSeenMarksResult {
 
   // A function which tells whether a discussion holds anything new to the reader, as the server holds their mark
   const hasNews = useCallback(
-    (target: DiscussionTarget) => server !== null && hasNewsIn(server, markKeyOf(target)),
+    (target: DiscussionTarget) =>
+      server !== null && (server.get(markKeyOf(target))?.newCount ?? 0) > 0,
     [server]
   )
+
+  // How many comments are new to the reader across the discussions, as the server holds their marks
+  const newCount = server === null ? 0 : newCountAcross(server)
 
   // Whether the server's marks have been read
   const isLoaded = server !== null
@@ -250,7 +260,7 @@ export function useSeenMarks(): UseSeenMarksResult {
 
   // The marks and the ways to keep and move them, held steady while none of it moves
   return useMemo(
-    () => ({ newnessOf, hasNews, visits, markSeen }),
-    [newnessOf, hasNews, visits, markSeen]
+    () => ({ newnessOf, hasNews, newCount, visits, markSeen }),
+    [newnessOf, hasNews, newCount, visits, markSeen]
   )
 }

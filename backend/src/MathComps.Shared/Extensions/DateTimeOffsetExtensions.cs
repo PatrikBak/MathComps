@@ -13,4 +13,13 @@ public static class DateTimeOffsetExtensions
     public static DateTimeOffset TruncateToMicroseconds(this DateTimeOffset instant) =>
         // A tick is a tenth of a microsecond, so the remainder is everything below one
         instant.AddTicks(-(instant.Ticks % TimeSpan.TicksPerMicrosecond));
+
+    /// <summary>
+    /// Drops whatever an instant carries below a whole millisecond.
+    /// </summary>
+    /// <param name="instant">The instant to truncate.</param>
+    /// <returns>The instant at whole milliseconds.</returns>
+    public static DateTimeOffset TruncateToMilliseconds(this DateTimeOffset instant) =>
+        // The remainder is everything below a whole millisecond
+        instant.AddTicks(-(instant.Ticks % TimeSpan.TicksPerMillisecond));
 }

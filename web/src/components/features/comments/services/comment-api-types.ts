@@ -75,8 +75,8 @@ export type CommentDto = {
 }
 
 /**
- * How far a reader has seen one comment thread, beside when somebody else last posted in it, which together say
- * whether anything in it is new to them.
+ * How far a reader has seen one comment thread, beside what somebody else posted in it since, which together say what
+ * in it is new to them.
  */
 export type CommentThreadSeenDto = {
   /**
@@ -85,10 +85,11 @@ export type CommentThreadSeenDto = {
    */
   seenUpTo: string | null
   /**
-   * When the newest comment still standing that somebody else posted in the thread was posted (ISO 8601 string), an
-   * edit keeping the moment it was first posted; null when the thread holds none.
+   * When each comment still standing that somebody else posted in the thread was posted, for those posted in a later
+   * millisecond than {@link CommentThreadSeenDto.seenUpTo}, oldest first (ISO 8601 strings), an edit keeping the moment
+   * it was first posted; every one of them when the reader has seen nothing.
    */
-  lastPostedByOthersAt: string | null
+  newPostedAt: string[]
 }
 
 /**

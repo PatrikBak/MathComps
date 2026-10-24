@@ -4,13 +4,13 @@ using System.Collections.Immutable;
 namespace MathComps.Infrastructure.Services.Comments;
 
 /// <summary>
-/// Keeps how far each reader has seen each comment target's whole discussion, and tells when anybody else last
-/// posted in one, which is what says whether anything in it is new to a reader.
+/// Keeps how far each reader has seen each comment target's whole discussion, and tells what anybody else posted in
+/// one since, which is what in it is new to that reader.
 /// </summary>
 public interface ICommentSeenService
 {
     /// <summary>
-    /// Reads how far a viewer has seen several threads of one kind, each beside when somebody else last posted in it.
+    /// Reads how far a viewer has seen several threads of one kind, each beside what somebody else posted in it since.
     /// </summary>
     /// <param name="targetType">The kind of the threads.</param>
     /// <param name="targetIds">The threads' target ids.</param>

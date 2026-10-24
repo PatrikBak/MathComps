@@ -7,13 +7,14 @@ import type { DiscussionTarget } from './selection-discussions'
 import type { DiscussionsSeenUpTo, SelectionDiscussionsSeen } from './selection-types'
 
 /**
- * How far the reader has seen one discussion, as the server holds it, beside when somebody else last posted in it.
+ * How far the reader has seen one discussion, as the server holds it, beside how many comments somebody else posted in
+ * it since.
  */
 type ServerMark = {
   /** The moment up to which the reader has seen the discussion, in milliseconds; null when they have seen nothing. */
   seenUpTo: number | null
-  /** When somebody else last posted a still-standing comment in the discussion, in milliseconds; null when nobody has. */
-  lastPostedByOthersAt: number | null
+  /** How many still-standing comments somebody else posted in the discussion after the reader's mark. */
+  newCount: number
 }
 
 /** How far the reader has seen each discussion, as the server holds it, by the discussion's key. */
@@ -97,9 +98,9 @@ function entriesByMarkKey<TValue, TRead>(
  */
 export function serverMarksOf(seen: SelectionDiscussionsSeen): ServerMarks {
   // A function which reads one discussion's answer
-  const markOf = ({ seenUpTo, lastPostedByOthersAt }: CommentThreadSeenDto): ServerMark => ({
+  const markOf = ({ seenUpTo, newPostedAt }: CommentThreadSeenDto): ServerMark => ({
     seenUpTo: seenUpTo === null ? null : Date.parse(seenUpTo),
-    lastPostedByOthersAt: lastPostedByOthersAt === null ? null : Date.parse(lastPostedByOthersAt),
+    newCount: newPostedAt.length,
   })
 
   // Each proposal's discussion and each paper's, by its key
@@ -218,23 +219,15 @@ export function seenUpToOf(kept: KeptMarks, server: ServerMarks, key: string): n
 }
 
 /**
- * Whether a discussion holds anything new to the reader: whether somebody else posted in it after what the reader has
- * seen.
+ * How many comments somebody else posted after what the reader has seen, across every discussion the marks hold.
  *
  * @param server - How far the reader has seen each discussion, as the server holds it.
- * @param key - The discussion's key.
  *
- * @returns Whether anything in it is new to the reader.
+ * @returns How many comments are new to the reader.
  */
-export function hasNewsIn(server: ServerMarks, key: string): boolean {
-  // When somebody else last posted in the discussion, if anybody has
-  const lastPostedAt = server.get(key)?.lastPostedByOthersAt ?? null
-
-  // How far the reader has seen the discussion
-  const seenUpTo = server.get(key)?.seenUpTo ?? null
-
-  // A post by somebody else, after the reader's mark where they hold one
-  return lastPostedAt !== null && (seenUpTo === null || lastPostedAt > seenUpTo)
+export function newCountAcross(server: ServerMarks): number {
+  // Each discussion's new comments, added up
+  return [...server.values()].reduce((total, { newCount }) => total + newCount, 0)
 }
 
 /**
@@ -281,7 +274,7 @@ export function seenWriteOf(
 
 /**
  * The marks with each discussion the server marked seen up to the moment it answered, a mark already further along
- * left where it is, as the server leaves it.
+ * left where it is, as the server leaves it. Only what others posted after the mark stays new in the discussion.
  *
  * @param seen - The marks as cached.
  * @param marked - Each discussion the server marked, with the moment it marked it seen up to.
@@ -303,13 +296,18 @@ export function withSeenUpTo(
         // The discussion's mark before the write, if it had one
         const before = marks[id]?.seenUpTo ?? null
 
-        // Seen up to the later of the discussion's mark and the server's moment, its last post by others kept
+        // The later of the discussion's mark and the server's moment
+        const after =
+          before !== null && Date.parse(before) > Date.parse(seenUpTo) ? before : seenUpTo
+
+        // Seen up to that moment, with only what others posted after it still new
         return [
           id,
           {
-            lastPostedByOthersAt: marks[id]?.lastPostedByOthersAt ?? null,
-            seenUpTo:
-              before !== null && Date.parse(before) > Date.parse(seenUpTo) ? before : seenUpTo,
+            seenUpTo: after,
+            newPostedAt: (marks[id]?.newPostedAt ?? []).filter(
+              (postedAt) => Date.parse(postedAt) > Date.parse(after)
+            ),
           },
         ]
       })

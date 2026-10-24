@@ -284,22 +284,23 @@ public abstract class ReviewerCommentPostgresTests(PostgresContainerFixture fixt
     });
 
     /// <summary>
-    /// How far a reviewer has seen a discussion reads as their mark beside when somebody else last posted in it. A
-    /// reply counts, while the reviewer's own comments never do, nor does a deleted one, and an edit keeps the moment
-    /// its comment was first posted. An earlier mark written later leaves the mark where it is. Another reviewer's mark
-    /// stays theirs: the other subject, which the reviewer never saw and nobody posted in, reads as neither seen nor
-    /// posted in. A caller on no organization's list is refused.
+    /// How far a reviewer has seen a discussion reads as their mark beside when each comment somebody else posted in
+    /// it since was posted. A comment posted up to the mark is seen, while a reply posted after it counts. The
+    /// reviewer's own comments never do, nor does a deleted one, and an edit keeps the moment its comment was first
+    /// posted. An earlier mark written later leaves the mark where it is. Another reviewer's mark stays theirs: the
+    /// other subject, which the reviewer never saw and nobody posted in, reads as neither seen nor posted in. A caller
+    /// on no organization's list is refused.
     /// </summary>
     [Fact]
-    public Task A_discussion_reads_as_seen_up_to_its_mark_beside_others_last_post() => RunTestAsync(async service =>
+    public Task A_discussion_reads_as_seen_up_to_its_mark_beside_others_posts_since() => RunTestAsync(async service =>
     {
         // The discussion of the subject
         var target = Discussion(SubjectId);
 
-        // The other reviewer's comment
+        // The other reviewer's comment, the one the reviewer has seen
         var answered = await service.CreateCommentAsync(target, OtherReviewer, "Too easy for the slot.");
 
-        // The other reviewer's reply under their comment, the newest thing they post that stands, later edited
+        // The other reviewer's reply under their comment, posted after it, later edited
         var reply = await service.CreateCommentAsync(target, OtherReviewer, "Unless it goes first.", answered.Id);
 
         // The other reviewer's comment, later deleted
@@ -314,8 +315,17 @@ public abstract class ReviewerCommentPostgresTests(PostgresContainerFixture fixt
         // The delete
         await service.DeleteCommentAsync(deleted.Id, OtherReviewer);
 
-        // The moment the reviewer has seen the discussion up to, as precise as the database keeps it
-        var seenUpTo = DateTimeOffset.UtcNow.TruncateToMicroseconds();
+        // The discussion as the reviewer reads it
+        var thread = await service.GetCommentsAsync(target, Reviewer);
+
+        // The other reviewer's comment, with its reply
+        var answeredRead = thread.Single(comment => comment.Id == answered.Id);
+
+        // The moment the reviewer has seen the discussion up to: when the other reviewer's comment was posted
+        var seenUpTo = answeredRead.CreatedAt;
+
+        // When the reply was first posted, as the database keeps it
+        var replyPostedAt = Assert.Single(answeredRead.Replies).CreatedAt;
 
         // The marks, and the read through the service keeping them
         await QueryAsync<ICommentSeenService>(async (_, seen) =>
@@ -342,20 +352,15 @@ public abstract class ReviewerCommentPostgresTests(PostgresContainerFixture fixt
             var states = await seen.GetSeenAsync(
                 TargetType, [SubjectId.ToString(), OtherSubjectId.ToString()], Reviewer);
 
-            // The discussion as the reviewer reads it
-            var thread = await service.GetCommentsAsync(target, Reviewer);
-
-            // When the reply was first posted, as the database keeps it
-            var replyPostedAt = Assert.Single(thread.Single(comment => comment.Id == answered.Id).Replies).CreatedAt;
-
-            // The subject seen up to the mark and last posted in by the reply, the other subject by neither
-            Assert.Equal(
-                ImmutableDictionary.CreateRange(
-                [
-                    KeyValuePair.Create(SubjectId.ToString(), new CommentThreadSeenDto(seenUpTo, replyPostedAt)),
-                    KeyValuePair.Create(OtherSubjectId.ToString(), new CommentThreadSeenDto(null, null)),
-                ]),
-                states);
+            // The subject seen up to the mark with the reply posted since, the other subject neither seen nor posted in
+            Assert.Equivalent(
+                new Dictionary<string, CommentThreadSeenDto>
+                {
+                    [SubjectId.ToString()] = new(seenUpTo, [replyPostedAt]),
+                    [OtherSubjectId.ToString()] = new(null, []),
+                },
+                states,
+                strict: true);
 
             // The student, refused like a missing thread
             await Assert.ThrowsAsync<CommentTargetNotFoundException>(

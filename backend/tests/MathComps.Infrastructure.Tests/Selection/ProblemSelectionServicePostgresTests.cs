@@ -335,9 +335,10 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     /// <summary>
     /// A mark lands on the discussions the selection holds, each at its own moment, one nobody has posted in included,
     /// and passes over the opened group's problem and the paper on its board. Its answer names each discussion marked
-    /// with that moment, and the read then finds the moment beside when the reviewer who wrote every seeded comment
-    /// last posted, a discussion left unmarked carrying that alone. A later mark moves the moment on, a moment yet to
-    /// come held to now, while a discussion it leaves out keeps the first.
+    /// with that moment, and the read then finds the moment beside the seeded comments posted after it, a comment
+    /// posted within the millisecond the moment names seen, and a discussion left unmarked carrying its comment alone.
+    /// A later mark moves the moment on, a moment yet to come held to now, while a discussion it leaves out keeps the
+    /// first.
     /// </summary>
     [Fact]
     public Task A_mark_lands_on_the_discussions_the_selection_holds() =>
@@ -356,6 +357,9 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             // When the first proposal's comment was posted
             var firstPostedAt = postedAt[_pool[1].ToString()];
 
+            // When the first proposal's comment was posted, to the millisecond, as a reader in the browser names it
+            var firstSeenUpTo = firstPostedAt.AddTicks(-(firstPostedAt.Ticks % TimeSpan.TicksPerMillisecond));
+
             // The moment the mark is written, as precise as the database keeps it
             var now = DateTimeOffset.UtcNow.TruncateToMicroseconds();
 
@@ -369,7 +373,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
                 secondReviewer,
                 new Dictionary<Guid, DateTimeOffset>
                 {
-                    [_pool[1]] = firstPostedAt,
+                    [_pool[1]] = firstSeenUpTo,
                     [_pool[2]] = now,
                     [_openedId] = now,
                 }.ToImmutableDictionary(),
@@ -383,7 +387,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             Assert.Equal(
                 ImmutableDictionary.CreateRange(
                 [
-                    KeyValuePair.Create(_pool[1].ToString(), firstPostedAt),
+                    KeyValuePair.Create(_pool[1].ToString(), firstSeenUpTo),
                     KeyValuePair.Create(_pool[2].ToString(), now),
                 ]),
                 marked.Proposals);
@@ -402,29 +406,30 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             // How far the second reviewer has seen the discussions
             var seen = await discussionService.GetDiscussionsSeenAsync(Organization.MathCompsSlug, secondReviewer);
 
-            // A discussion the second reviewer never saw and nobody else posted in
-            var untouched = new CommentThreadSeenDto(null, null);
+            // A function which tells whether the second reviewer saw a discussion or somebody else posted in it since
+            static bool IsTouched(CommentThreadSeenDto discussion) =>
+                discussion.SeenUpTo is not null || !discussion.NewPostedAt.IsEmpty;
 
             // Past the untouched ones, the marked proposals still in the selection and the November problem nobody
             // marked
             Assert.Equivalent(
                 new Dictionary<string, CommentThreadSeenDto>
                 {
-                    [_pool[1].ToString()] = new(firstPostedAt, firstPostedAt),
-                    [_pool[2].ToString()] = new(now, null),
-                    [_november[0].ToString()] = new(null, postedAt[_november[0].ToString()]),
+                    [_pool[1].ToString()] = new(firstSeenUpTo, []),
+                    [_pool[2].ToString()] = new(now, []),
+                    [_november[0].ToString()] = new(null, [postedAt[_november[0].ToString()]]),
                 },
-                seen.Proposals.Where(entry => entry.Value != untouched).ToDictionary(),
+                seen.Proposals.Where(entry => IsTouched(entry.Value)).ToDictionary(),
                 strict: true);
 
             // Past the untouched ones, the marked draft paper and the November paper nobody marked
             Assert.Equivalent(
                 new Dictionary<string, CommentThreadSeenDto>
                 {
-                    [_draftPaperId.ToString()] = new(paperSeenUpTo, postedAt[_draftPaperId.ToString()]),
-                    [_novemberPaperId.ToString()] = new(null, postedAt[_novemberPaperId.ToString()]),
+                    [_draftPaperId.ToString()] = new(paperSeenUpTo, [postedAt[_draftPaperId.ToString()]]),
+                    [_novemberPaperId.ToString()] = new(null, [postedAt[_novemberPaperId.ToString()]]),
                 },
-                seen.Papers.Where(entry => entry.Value != untouched).ToDictionary(),
+                seen.Papers.Where(entry => IsTouched(entry.Value)).ToDictionary(),
                 strict: true);
 
             // A later mark of the first proposal alone, claiming a moment a day ahead
