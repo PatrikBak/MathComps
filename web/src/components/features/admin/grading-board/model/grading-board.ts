@@ -1,3 +1,4 @@
+import type { StudentBackground } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import type { TableSort } from '@/components/shared/utils/table-sort'
@@ -33,7 +34,7 @@ export type BoardRow = {
   isFinal: boolean
   /** How far into their own clock they last wrote about each problem, summed, in seconds. */
   finishedAfterSeconds: number
-}
+} & StudentBackground
 
 /**
  * How far grading a competition has got.
@@ -107,7 +108,7 @@ export function buildRows(
   nameOf: (user: UserIdentity) => string
 ): BoardRow[] {
   // One row per entrant
-  const rows = competition.entrants.map(({ user, finishedAfterSeconds }) => {
+  const rows = competition.entrants.map(({ user, finishedAfterSeconds, countryCode, grade }) => {
     // Their grades, problem by problem, including the problems they never discussed
     const summaries = competition.problems.map((problem) =>
       grades.get(pairKey(user.id, problem.id))
@@ -129,7 +130,7 @@ export function buildRows(
       discussed.length > 0 && discussed.every((summary) => summary?.grade?.isFinal === true)
 
     // The row
-    return { user, name: nameOf(user), total, isFinal, finishedAfterSeconds }
+    return { user, name: nameOf(user), total, isFinal, finishedAfterSeconds, countryCode, grade }
   })
 
   // Read by name

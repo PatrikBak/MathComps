@@ -43,11 +43,14 @@ const NEXT = conversationCopy.next
  * @returns The cell's button.
  */
 function cellOf(page: Page, student: string, problemNumber: number): Locator {
-  // The student's row, whose cells run place, problems in order, then the sum
+  // The student's row, whose cells run place, country and school year, problems in order, then the sum
   const row = page.getByRole('row').filter({ has: page.getByRole('rowheader', { name: student }) })
 
-  // The button in that problem's cell, past the place
-  return row.getByRole('cell').nth(problemNumber).getByRole('button')
+  // The button in that problem's cell, past the place and the country and school year
+  return row
+    .getByRole('cell')
+    .nth(problemNumber + 1)
+    .getByRole('button')
 }
 
 /**
@@ -184,7 +187,10 @@ test.describe('the grading board', () => {
     const names = page.getByRole('rowheader')
 
     // By name to begin with
-    await expect(names).toHaveText(['Ada', 'Bruno', 'Cyril'], { timeout: SETTLE_TIMEOUT_MS })
+    await expect(names).toHaveText(['Ada', 'Bruno', 'Cyril'], {
+      useInnerText: true,
+      timeout: SETTLE_TIMEOUT_MS,
+    })
 
     // Five entries by four students, Ada having entered both, counted once
     await expect(page.getByText('4 students', { exact: true })).toBeVisible()
@@ -193,13 +199,13 @@ test.describe('the grading board', () => {
     await page.getByRole('button', { name: copy.grid.total }).click()
 
     // From the best, the student with nothing graded last
-    await expect(names).toHaveText(['Bruno', 'Ada', 'Cyril'])
+    await expect(names).toHaveText(['Bruno', 'Ada', 'Cyril'], { useInnerText: true })
 
     // The other competition
     await page.getByRole('button', { name: /^Intermediate/ }).click()
 
     // Its own students
-    await expect(names).toHaveText(['Ada', 'Dora'])
+    await expect(names).toHaveText(['Ada', 'Dora'], { useInnerText: true })
   })
 
   test('holds the rows where they stood while a mark moves them, until the grader asks', async ({
@@ -218,7 +224,7 @@ test.describe('the grading board', () => {
     await page.getByRole('button', { name: copy.grid.total }).click({ timeout: SETTLE_TIMEOUT_MS })
 
     // From the best
-    await expect(names).toHaveText(['Bruno', 'Ada', 'Cyril'])
+    await expect(names).toHaveText(['Bruno', 'Ada', 'Cyril'], { useInnerText: true })
 
     // Cyril's first problem, opened
     await cellOf(page, 'Cyril', 1).click()
@@ -237,13 +243,13 @@ test.describe('the grading board', () => {
 
     // His row where it stood, with the mark in it
     await expect(cellOf(page, 'Cyril', 1)).toHaveText('5')
-    await expect(names).toHaveText(['Bruno', 'Ada', 'Cyril'])
+    await expect(names).toHaveText(['Bruno', 'Ada', 'Cyril'], { useInnerText: true })
 
     // The way to show the new order, asked for
     await page.getByRole('button', { name: copy.showWhatsNew }).click()
 
     // Which moves him up, takes the button away, and puts the focus on the progress line above the rows
-    await expect(names).toHaveText(['Bruno', 'Cyril', 'Ada'])
+    await expect(names).toHaveText(['Bruno', 'Cyril', 'Ada'], { useInnerText: true })
     await expect(page.getByRole('button', { name: copy.showWhatsNew })).toHaveCount(0)
     await expect(page.getByText(/ graded, /)).toBeFocused()
   })
@@ -261,7 +267,10 @@ test.describe('the grading board', () => {
     const names = page.getByRole('rowheader')
 
     // By name to begin with
-    await expect(names).toHaveText(['Ada', 'Bruno', 'Cyril'], { timeout: SETTLE_TIMEOUT_MS })
+    await expect(names).toHaveText(['Ada', 'Bruno', 'Cyril'], {
+      useInnerText: true,
+      timeout: SETTLE_TIMEOUT_MS,
+    })
 
     // Zora writes about the first problem for the first time, her name sorting her last, and another grader gives her
     // a 7, the best total on the board
@@ -283,7 +292,7 @@ test.describe('the grading board', () => {
     // The way to show her, offered, with nobody moved meanwhile
     const showWhatsNew = page.getByRole('button', { name: copy.showWhatsNew })
     await expect(showWhatsNew).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
-    await expect(names).toHaveText(['Ada', 'Bruno', 'Cyril'])
+    await expect(names).toHaveText(['Ada', 'Bruno', 'Cyril'], { useInnerText: true })
 
     // Bruno's 6 placed behind her 7, though she isn't shown yet
     await expect(
@@ -298,7 +307,7 @@ test.describe('the grading board', () => {
     await showWhatsNew.click()
 
     // Which shows her in her place by name
-    await expect(names).toHaveText(['Ada', 'Bruno', 'Cyril', 'Zora'])
+    await expect(names).toHaveText(['Ada', 'Bruno', 'Cyril', 'Zora'], { useInnerText: true })
   })
 
   test('reads a pair whole, and walks every pair with a conversation', async ({ page }) => {
@@ -503,7 +512,7 @@ test.describe("the board's address", () => {
       'aria-pressed',
       'true'
     )
-    await expect(page.getByRole('rowheader')).toHaveText(['Ada', 'Dora'])
+    await expect(page.getByRole('rowheader')).toHaveText(['Ada', 'Dora'], { useInnerText: true })
 
     // Whose address now names the competition alone
     await expect.poll(() => addressOf(page)).toBe(`${BOARD_PATH}?category=intermediate`)
@@ -1005,6 +1014,7 @@ test.describe('a round still running', () => {
 
     // Every student on it so far
     await expect(page.getByRole('rowheader')).toHaveText(['Ada', 'Bruno', 'Cyril'], {
+      useInnerText: true,
       timeout: SETTLE_TIMEOUT_MS,
     })
 

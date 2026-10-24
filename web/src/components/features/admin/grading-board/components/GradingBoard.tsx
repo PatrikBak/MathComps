@@ -4,6 +4,7 @@ import { ArrowDownUp, Check, CheckCheck } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useRef } from 'react'
 
+import { StudentDetails } from '@/components/features/hosted-competitions/components/StudentDetails'
 import { useCategoryName } from '@/components/features/hosted-competitions/hooks/use-category-name'
 import { useEntryWindowLabel } from '@/components/features/hosted-competitions/hooks/use-entry-window-label'
 import { formatScore } from '@/components/features/hosted-competitions/model/hosted-competition-score'
@@ -302,6 +303,9 @@ function GradingGrid({
   // Grading copy
   const t = useTranslations('admin.grading.grid')
 
+  // Copy for where a student is from and in school
+  const tDetails = useTranslations('competitions.studentDetails')
+
   return (
     <div className="-mx-4 mt-3 overflow-x-auto bg-surface/30 sm:mx-0 sm:rounded-lg">
       <table className="w-full border-collapse text-xs hyphens-none sm:text-sm">
@@ -325,6 +329,9 @@ function GradingGrid({
               onSort={onSort}
               className="w-full whitespace-nowrap py-2 pl-2 pr-2 font-medium sm:px-3"
             />
+            <th className="w-px p-0 sm:py-2 sm:pr-3">
+              <span className="sr-only">{tDetails('label')}</span>
+            </th>
             {competition.problems.map((problem) => (
               <th key={problem.id} className="w-px px-0.5 py-2 text-center font-medium sm:px-2">
                 {t('problem', { number: problem.number })}
@@ -359,7 +366,7 @@ function GradingGrid({
                   {rankOf(standings, row) ?? <span className="text-muted/50">–</span>}
                 </td>
 
-                {/* Who, and whether they may still write */}
+                {/* Who, whether they may still write, and where they are from and in school on a phone */}
                 <th
                   scope="row"
                   className="w-full max-w-0 py-0.5 pl-2 pr-2 text-left font-medium text-foreground sm:px-3 sm:py-1.5"
@@ -370,7 +377,18 @@ function GradingGrid({
                     </div>
                     {run !== undefined && <RunMarker run={run} />}
                   </div>
+                  <div className="sm:hidden">
+                    <StudentDetails student={row} />
+                  </div>
                 </th>
+
+                {/* Where they are from and in school on a wide screen, a column of no width on a phone so the
+                    footer spans the same columns at every width */}
+                <td className="w-px whitespace-nowrap p-0 sm:py-1.5 sm:pr-3">
+                  <div className="hidden sm:block">
+                    <StudentDetails student={row} />
+                  </div>
+                </td>
 
                 {/* Each problem */}
                 {competition.problems.map((problem) => {
@@ -424,9 +442,9 @@ function GradingGrid({
         </tbody>
         <tfoot>
           <tr className="border-t border-foreground/10">
-            {/* What the row does, over the place and the name */}
+            {/* What the row does, over the place, the name and the student's country and school year */}
             <td
-              colSpan={2}
+              colSpan={3}
               className="py-1 pl-4 pr-2 text-right text-[10px] font-medium uppercase tracking-wide text-muted sm:py-2 sm:px-3 sm:text-xs"
             >
               {t('makeFinal')}

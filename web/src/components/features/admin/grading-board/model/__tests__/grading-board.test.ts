@@ -67,18 +67,24 @@ const COMPETITION: GradingCompetition = {
   entrants: [
     {
       user: { id: 'zora', username: 'Zora', email: null },
+      countryCode: 'SK',
+      grade: { kind: 'highSchool', year: 2 },
       startedAt: '2026-09-10T08:00:00Z',
       finishedAt: null,
       finishedAfterSeconds: 2400,
     },
     {
       user: { id: 'adam', username: 'Adam', email: null },
+      countryCode: 'SK',
+      grade: { kind: 'highSchool', year: 2 },
       startedAt: '2026-09-10T08:00:00Z',
       finishedAt: null,
       finishedAfterSeconds: 600,
     },
     {
       user: { id: 'emil', username: 'Emil', email: null },
+      countryCode: 'SK',
+      grade: { kind: 'highSchool', year: 2 },
       startedAt: '2026-09-10T08:00:00Z',
       finishedAt: null,
       finishedAfterSeconds: 1200,

@@ -1,3 +1,4 @@
+using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.Contracts.Users;
 
 namespace MathComps.Domain.Contracts.Admin;
@@ -6,6 +7,8 @@ namespace MathComps.Domain.Contracts.Admin;
 /// One entrant of a competition being graded.
 /// </summary>
 /// <param name="User">Who they are.</param>
+/// <param name="CountryCode"><inheritdoc cref="ResultStudentDto.CountryCode" path="/summary"/></param>
+/// <param name="Grade"><inheritdoc cref="ResultStudentDto.Grade" path="/summary"/></param>
 /// <param name="StartedAt">When their clock started.</param>
 /// <param name="FinishedAt"><inheritdoc cref="EfCoreEntities.HostedEntry.FinishedAt" path="/summary"/></param>
 /// <param name="FinishedAfterSeconds">
@@ -14,6 +17,8 @@ namespace MathComps.Domain.Contracts.Admin;
 /// </param>
 public record GradingEntrantDto(
     UserIdentityDto User,
+    string? CountryCode,
+    SchoolGradeDto Grade,
     DateTimeOffset StartedAt,
     DateTimeOffset? FinishedAt,
     double FinishedAfterSeconds);

@@ -1,4 +1,7 @@
-import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
+import type {
+  HostedCompetitionCategory,
+  StudentBackground,
+} from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 import type { LocalizedString } from '@/i18n/i18n'
 
@@ -31,7 +34,7 @@ export type GradingEntrant = {
    * their entry counted, in seconds.
    */
   finishedAfterSeconds: number
-}
+} & StudentBackground
 
 /**
  * One entrant's grade on one problem, with how many conversations it is read from.

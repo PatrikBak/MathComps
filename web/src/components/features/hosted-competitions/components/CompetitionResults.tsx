@@ -1,12 +1,10 @@
 'use client'
 
 import { useLocale, useTranslations } from 'next-intl'
-import { useMemo } from 'react'
 
 import { UserAvatarImage } from '@/components/layout/UserAvatarImage'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { Button } from '@/components/shared/components/Button'
-import { CountryFlag } from '@/components/shared/components/CountryFlag'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { Modal } from '@/components/shared/components/Modal'
 import { TruncatedText } from '@/components/shared/components/TruncatedText'
@@ -31,9 +29,9 @@ import type {
   ResultCell,
   ResultRow,
   ResultStudent,
-  SchoolGrade,
 } from '../model/hosted-competition-types'
 import { competitionAreaHref } from '../services/hosted-competition-routes'
+import { StudentDetails } from './StudentDetails'
 
 /**
  * Props for the {@link CompetitionResultsModal}.
@@ -188,6 +186,9 @@ function ResultsGrid({ rows, ownHref }: ResultsGridProps) {
   // Results copy
   const t = useTranslations('competitions.resultsView')
 
+  // Copy for where a student is from and in school
+  const tDetails = useTranslations('competitions.studentDetails')
+
   // How many problems the set holds
   const problemCount = rows[0]?.cells.length ?? 0
 
@@ -203,7 +204,7 @@ function ResultsGrid({ rows, ownHref }: ResultsGridProps) {
             </th>
             <th className="w-full py-2 pl-1.5 pr-1 font-medium sm:px-3">{t('student')}</th>
             <th className="hidden w-px py-2 pr-3 sm:table-cell">
-              <span className="sr-only">{t('details')}</span>
+              <span className="sr-only">{tDetails('label')}</span>
             </th>
             {Array.from({ length: problemCount }, (_unused, index) => (
               <th key={index} className="w-px px-0 py-2 text-center font-medium">
@@ -324,78 +325,6 @@ function StudentLabel({ student, isReader, ownHref }: StudentLabelProps) {
       </span>
     </span>
   )
-}
-
-/**
- * Props for the {@link StudentDetails}.
- */
-type StudentDetailsProps = {
-  /** Who. */
-  student: ResultStudent
-}
-
-/**
- * Where a student competes from and where they are in school: a flag and a few words.
- */
-function StudentDetails({ student }: StudentDetailsProps) {
-  // Results copy
-  const t = useTranslations('competitions.resultsView')
-
-  // The language countries are named in
-  const locale = useLocale() as Locale
-
-  // What countries are called here
-  const regionNames = useMemo(() => new Intl.DisplayNames([locale], { type: 'region' }), [locale])
-
-  return (
-    <span className="flex min-w-0 items-center gap-1.5">
-      {student.countryCode !== null && (
-        <CountryFlag
-          code={student.countryCode}
-          name={regionNames.of(student.countryCode) ?? student.countryCode}
-          width={14}
-          height={10}
-          className="shrink-0 rounded-[2px]"
-        />
-      )}
-
-      <span className="min-w-0 truncate text-[10px] font-normal text-muted sm:text-xs">
-        {schoolGradeWords(student.grade, t)}
-      </span>
-    </span>
-  )
-}
-
-/**
- * Where a student is in school, in words.
- *
- * @param grade - Where they are.
- * @param t - Results copy.
- *
- * @returns The words.
- */
-function schoolGradeWords(
-  grade: SchoolGrade,
-  t: ReturnType<typeof useTranslations<'competitions.resultsView'>>
-): string {
-  // The words for each kind of school year
-  switch (grade.kind) {
-    // A year of primary school
-    case 'primarySchool':
-      return t('primarySchoolGrade', { year: grade.year })
-
-    // A year of high school
-    case 'highSchool':
-      return t('highSchoolGrade', { year: grade.year })
-
-    // Done with high school
-    case 'pastHighSchool':
-      return t('pastHighSchool')
-
-    // Every grade is handled above
-    default:
-      return assertNever(grade)
-  }
 }
 
 /**
