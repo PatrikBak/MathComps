@@ -61,13 +61,15 @@ type MarkedDiscussion = {
 }
 
 /**
- * When somebody other than the reader last posted, in a discussion, a comment still standing.
+ * When each comment still standing that somebody other than the reader posted in a discussion was posted, for those
+ * posted after the reader's mark, oldest first.
  *
  * @param comments - The discussion's comments, replies nested.
+ * @param seenUpTo - The reader's mark on the discussion, as an ISO 8601 string; null where they have seen nothing.
  *
- * @returns The posting time, or null where nobody else posted one.
+ * @returns The posting times, as the backend writes a time.
  */
-function lastPostedByOthersAt(comments: readonly CommentDto[]): string | null {
+function newPostedAt(comments: readonly CommentDto[], seenUpTo: string | null): string[] {
   // When each standing comment somebody else posted was posted, replies included
   const posted = comments.flatMap(function postedIn(comment): number[] {
     // The comment, where somebody else posted it and it stands
@@ -78,8 +80,11 @@ function lastPostedByOthersAt(comments: readonly CommentDto[]): string | null {
     return [...itself, ...comment.replies.flatMap(postedIn)]
   })
 
-  // The newest, as the backend writes a time
-  return posted.length === 0 ? null : new Date(Math.max(...posted)).toISOString()
+  // Those after the mark, oldest first, as the backend writes a time
+  return posted
+    .filter((postedAt) => seenUpTo === null || postedAt > Date.parse(seenUpTo))
+    .sort((earlier, later) => earlier - later)
+    .map((postedAt) => new Date(postedAt).toISOString())
 }
 
 /**
@@ -287,15 +292,22 @@ export async function stubSelectionComments(
       // A function which reads how far each discussion of one kind is seen, one nothing has happened in included
       const seenOf = (targetType: SelectionThreadType) =>
         Object.fromEntries(
-          ids[targetType].map((targetId): [string, CommentThreadSeenDto] => [
-            targetId,
-            {
-              seenUpTo: seen.marks.get(threadKey(targetType, targetId)) ?? null,
-              lastPostedByOthersAt: lastPostedByOthersAt(
-                discussions.get(threadKey(targetType, targetId)) ?? []
-              ),
-            },
-          ])
+          ids[targetType].map((targetId): [string, CommentThreadSeenDto] => {
+            // The reader's mark on the discussion
+            const seenUpTo = seen.marks.get(threadKey(targetType, targetId)) ?? null
+
+            // The discussion with its mark and what others posted in it since
+            return [
+              targetId,
+              {
+                seenUpTo,
+                newPostedAt: newPostedAt(
+                  discussions.get(threadKey(targetType, targetId)) ?? [],
+                  seenUpTo
+                ),
+              },
+            ]
+          })
         )
 
       // How far each kind is seen

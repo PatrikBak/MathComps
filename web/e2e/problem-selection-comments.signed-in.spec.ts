@@ -1677,6 +1677,47 @@ test.describe("what is new in the pool's discussions", () => {
     await expect(countLineOf(page, 5)).toHaveText(lineText(5, 5))
   })
 
+  test("counts on the pool's Comments option what is new across the discussions, until a visit tells the backend it was seen", async ({
+    page,
+  }) => {
+    // What the backend keeps
+    const memory = discussedSelection()
+
+    // Every discussion seen up to the mark, the reply in the first problem's thread and the opened problem's comment
+    // posted since
+    seeEverything(memory)
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The pool, laid out as its problems
+    await openPool(page)
+
+    // The way to the discussions on the pool's switch
+    const commentsView = poolView(page, selectionCopy.pool.views.comments)
+
+    // Both new comments on it, as a screen reader says them
+    await expect(commentsView).toHaveAccessibleName(
+      `${selectionCopy.pool.views.comments} ${selectionText('pool.newCount', { count: 2 })}`,
+      { timeout: SETTLE_TIMEOUT_MS }
+    )
+
+    // Both new comments on it, as the number beside the name
+    await expect(commentsView.locator('[aria-hidden="true"]')).toHaveText('2')
+
+    // The discussions
+    await commentsView.click()
+
+    // The backend told what they show was seen
+    await expect.poll(() => memory.seen.writes.length).toBe(1)
+
+    // Nothing counted on the switch any more
+    await expect(commentsView).toHaveAccessibleName(selectionCopy.pool.views.comments)
+
+    // Both comments still new in the discussions
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 2))
+  })
+
   test("marks a paper's discussion seen with the eye on its own tab, the focus staying in the discussion", async ({
     page,
   }) => {

@@ -29,7 +29,7 @@ public interface ISelectionDiscussionService
 
     /// <summary>
     /// Reads how far a reviewer has seen the discussions of everything an organization's selection holds, each beside
-    /// when somebody else last posted in it.
+    /// what somebody else posted in it since.
     /// </summary>
     /// <param name="organizationSlug">
     /// The <see cref="Organization.Slug"/> of the organization whose selection it is.
