@@ -118,6 +118,16 @@ const config = [
           message: Z_LADDER_MESSAGE,
         },
       ],
+
+      // URL.parse is missing from Safari before 18, so a call to it throws there
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'URL',
+          property: 'parse',
+          message: 'Use parseUrl from url-utils: Safari only has URL.parse from version 18.',
+        },
+      ],
     },
   },
   // App dir tweak - prefer default exports (except API routes)
