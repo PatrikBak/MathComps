@@ -70,6 +70,12 @@ export type ResultStudent = {
   username: string | null
   /** The avatar, or null when there is none. */
   avatarUrl: string | null
+} & StudentBackground
+
+/**
+ * Where a student competes from and where they were in school at a competition.
+ */
+export type StudentBackground = {
   /** Where they compete from, as an ISO 3166-1 alpha-2 code; null while unsaid. */
   countryCode: string | null
   /** Where they were in school when the round was held. */

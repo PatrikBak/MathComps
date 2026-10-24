@@ -1,3 +1,4 @@
+using MathComps.Domain;
 using MathComps.Domain.Contracts.Admin;
 using MathComps.Domain.Contracts.Users;
 using MathComps.Domain.EfCoreEntities;
@@ -81,6 +82,10 @@ public class AdminGradingService(
                 entry.FinishedAt,
                 User = new UserIdentityDto(
                     entry.User.Id, entry.User.IsDeleted ? null : entry.User.Username, entry.User.Email),
+                // A deleted account's country stays off its row.
+                CountryCode = entry.User.IsDeleted ? null : entry.User.CountryCode,
+                entry.User.GraduationYear,
+                entry.User.HasLeftHighSchool,
             })
             .ToListAsync(cancellationToken);
 
@@ -130,12 +135,14 @@ public class AdminGradingService(
                             ?? throw new InvalidOperationException(
                                 $"Round {round.Id} of a graded group has no level."),
                         round.Problems,
-                        // The round's entrants who spoke while their entry counted, each with when their clock
-                        // started, when they handed in, and how far into the clock they last wrote about each
-                        // problem, summed.
+                        // The round's entrants who spoke while their entry counted, each with where they compete
+                        // from, where they were in school when the group opened, when their clock started, when
+                        // they handed in, and how far into the clock they last wrote about each problem, summed.
                         [
                             .. roundEntries.Select(entry => new GradingEntrantDto(
                                 entry.User,
+                                entry.CountryCode,
+                                SchoolYear.GradeAt(entry.GraduationYear, entry.HasLeftHighSchool, group.OpensAt),
                                 entry.StartedAt,
                                 entry.FinishedAt,
                                 gradings.FinishedAfter(entry.Id).TotalSeconds)),

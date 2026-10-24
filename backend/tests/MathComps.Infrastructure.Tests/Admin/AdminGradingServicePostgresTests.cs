@@ -179,7 +179,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     /// their entry counted: Alice's third conversation came after she handed in, her practice on the second problem
     /// after the close, and Bob's second after his clock ran out. Each entrant carries when their clock started,
     /// when they handed in, and how far into their own clock they last wrote about each problem while the entry
-    /// counted, summed.
+    /// counted, summed, with where they compete from and where they were in school when the group opened.
     /// Nobody holds a grade yet.
     /// </summary>
     [Fact]
@@ -217,6 +217,14 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Alice finished half an hour in, what she wrote after handing in left out, and Bob just inside his clock,
         // what he wrote past it left out
         Assert.Equal([30d, 170d], advanced.Entrants.Select(entrant => entrant.FinishedAfterSeconds / 60));
+
+        // Alice competes from Slovakia, and Bob never said where from
+        Assert.Equal(["SK", null], advanced.Entrants.Select(entrant => entrant.CountryCode));
+
+        // Alice was in her third year of high school when the group opened, and Bob, with no maturita given, past it
+        Assert.Equal(
+            [new HighSchoolGradeDto(3), new PastHighSchoolDto()],
+            advanced.Entrants.Select(entrant => entrant.Grade));
 
         // Each of them on each problem
         Assert.Equal(4, advanced.Grades.Count);
@@ -1086,11 +1094,16 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
+        // Alice, from Slovakia, in her third year of high school when the graded group opened
+        var alice = NewUser(_aliceId, "Alice");
+        alice.CountryCode = "SK";
+        alice.GraduationYear = 2028;
+
         // The graders and the students
         context.Users.AddRange(
             NewUser(_graderId, "Grader"),
             NewUser(_otherGraderId, "OtherGrader"),
-            NewUser(_aliceId, "Alice"),
+            alice,
             NewUser(_bobId, "Bob"),
             NewUser(_carolId, "Carol"),
             NewUser(_preparerId, "Preparer"),

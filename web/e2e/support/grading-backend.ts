@@ -58,18 +58,24 @@ const BOARD: GradingBoard = {
       entrants: [
         {
           user: { id: 'ada', username: 'Ada', email: null },
+          countryCode: 'SK',
+          grade: { kind: 'highSchool', year: 2 },
           startedAt: '2026-09-10T08:00:00Z',
           finishedAt: '2026-09-10T09:00:00Z',
           finishedAfterSeconds: 2400,
         },
         {
           user: { id: 'bruno', username: 'Bruno', email: null },
+          countryCode: 'CZ',
+          grade: { kind: 'primarySchool', year: 8 },
           startedAt: '2026-09-11T08:00:00Z',
           finishedAt: null,
           finishedAfterSeconds: 1800,
         },
         {
           user: { id: 'cyril', username: 'Cyril', email: null },
+          countryCode: null,
+          grade: { kind: 'pastHighSchool' },
           startedAt: '2026-09-12T08:00:00Z',
           finishedAt: null,
           finishedAfterSeconds: 3000,
@@ -96,12 +102,16 @@ const BOARD: GradingBoard = {
       entrants: [
         {
           user: { id: 'ada', username: 'Ada', email: null },
+          countryCode: 'SK',
+          grade: { kind: 'highSchool', year: 2 },
           startedAt: '2026-09-10T12:00:00Z',
           finishedAt: null,
           finishedAfterSeconds: 900,
         },
         {
           user: { id: 'dora', username: 'Dora', email: null },
+          countryCode: 'SK',
+          grade: { kind: 'highSchool', year: 4 },
           startedAt: '2026-09-13T08:00:00Z',
           finishedAt: null,
           finishedAfterSeconds: 1200,
@@ -471,9 +481,11 @@ export async function installGradingBackend(
     // Their id, which the fake spells as the name in lower case
     const userId = username.toLowerCase()
 
-    // The student, on the clock since before the group closed
+    // The student, from Slovakia in their first year of high school, on the clock since before the group closed
     competition.entrants.push({
       user: { id: userId, username, email: null },
+      countryCode: 'SK',
+      grade: { kind: 'highSchool', year: 1 },
       startedAt: '2026-09-14T21:00:00Z',
       finishedAt: null,
       finishedAfterSeconds: 600,
