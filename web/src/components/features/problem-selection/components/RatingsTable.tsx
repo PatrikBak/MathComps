@@ -29,7 +29,7 @@ import { ProposalLink } from './SelectionLinks'
  * Props for the {@link RatingsTable} component.
  */
 type RatingsTableProps = {
-  /** The problems, in any order. */
+  /** The problems, in the order they run, which the table opens in. */
   proposals: readonly Proposal[]
   /** How the rows are ordered. */
   sort: TableSort<RatingsColumn>
@@ -63,7 +63,7 @@ export function RatingsTable({ proposals, sort, onSort, fallbackRef }: RatingsTa
           <tr className="text-left text-[10px] uppercase tracking-wide text-muted sm:text-xs">
             <SortHeader
               label="#"
-              by="number"
+              by="place"
               sort={sort}
               startsAscending={RATINGS_STARTS_ASCENDING}
               onSort={onSort}

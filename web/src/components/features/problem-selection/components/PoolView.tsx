@@ -56,11 +56,11 @@ const SHOWS_STATEMENTS: Record<PoolViewMode, boolean> = {
 
 /**
  * Whether each layout of the pool keeps its problems where they stood until their order is set again, and so offers
- * to set it. The ratings table orders its rows by the column picked.
+ * to set it. The ratings table opens in that order, and keeps it among the rows whose averages are level.
  */
 const HOLDS_ORDER: Record<PoolViewMode, boolean> = {
   problems: true,
-  ratings: false,
+  ratings: true,
   comments: false,
 }
 
