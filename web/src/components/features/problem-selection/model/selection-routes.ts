@@ -40,8 +40,11 @@ export const PROPOSAL_TABS = ['conversations', 'comments'] as const
 /** One tab of a problem's page. */
 export type ProposalTab = (typeof PROPOSAL_TABS)[number]
 
-/** The tabs of a paper's page, the first being the one a paper opens on by default. */
-export const PAPER_TABS = ['problems', 'comments', 'ratings'] as const
+/**
+ * The tabs of a paper's page, the first being the one a paper opens on by default. Tabs the pool also offers as views
+ * keep their order in {@link POOL_VIEWS}.
+ */
+export const PAPER_TABS = ['problems', 'ratings', 'comments'] as const
 
 /** One tab of a paper's page. */
 export type PaperTab = (typeof PAPER_TABS)[number]
