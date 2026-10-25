@@ -35,8 +35,8 @@ import { useLoadedSelection } from './SelectionWorkspaceProvider'
  */
 const SHOWS_STATEMENTS: Record<PaperTab, boolean> = {
   problems: true,
-  comments: false,
   ratings: false,
+  comments: false,
 }
 
 /**
@@ -45,8 +45,8 @@ const SHOWS_STATEMENTS: Record<PaperTab, boolean> = {
  */
 const SHOWS_DISCUSSION: Record<PaperTab, boolean> = {
   problems: false,
-  comments: true,
   ratings: false,
+  comments: true,
 }
 
 /**
@@ -183,28 +183,6 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
         </ol>
       ),
     },
-    comments: {
-      label: t('commentsTab'),
-      count: commentCount,
-      // Read in the accent colour while somebody else's comment waits unseen behind another tab
-      isHighlighted: discussion.hasNews,
-      panel: (
-        <div
-          ref={commentsPanelRef}
-          // Takes the focus when the eye marking the discussion seen leaves holding it
-          tabIndex={-1}
-          className="pt-4 focus:outline-none"
-        >
-          <CommentSection
-            variant="inline"
-            newCommentPlaceholder={t('placeholder')}
-            showEmptyText={false}
-            target={{ targetType: 'SelectionPaper', targetId: paper.id }}
-            newness={discussion.newness}
-          />
-        </div>
-      ),
-    },
     ratings: {
       label: t('ratingsTab'),
       count: null,
@@ -230,6 +208,28 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
               fallbackRef={ratingsPanelRef}
             />
           )}
+        </div>
+      ),
+    },
+    comments: {
+      label: t('commentsTab'),
+      count: commentCount,
+      // Read in the accent colour while somebody else's comment waits unseen behind another tab
+      isHighlighted: discussion.hasNews,
+      panel: (
+        <div
+          ref={commentsPanelRef}
+          // Takes the focus when the eye marking the discussion seen leaves holding it
+          tabIndex={-1}
+          className="pt-4 focus:outline-none"
+        >
+          <CommentSection
+            variant="inline"
+            newCommentPlaceholder={t('placeholder')}
+            showEmptyText={false}
+            target={{ targetType: 'SelectionPaper', targetId: paper.id }}
+            newness={discussion.newness}
+          />
         </div>
       ),
     },

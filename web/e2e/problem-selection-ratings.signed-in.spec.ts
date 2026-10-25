@@ -849,7 +849,7 @@ test.describe('the ratings table', () => {
     )
   })
 
-  test("puts a paper's ratings on its last tab, named in the address, which Back from a problem lands on as it was left", async ({
+  test("puts a paper's ratings on its second tab, as the pool orders its views, named in the address, which Back from a problem lands on as it was left", async ({
     page,
   }) => {
     // A selection three of whose problems on offer are rated
@@ -863,13 +863,13 @@ test.describe('the ratings table', () => {
     // The paper's tabs
     const tabs = page.getByRole('tablist', { name: selectionCopy.paper.tabsLabel }).getByRole('tab')
 
-    // The ratings tab, the last of them
-    await expect(tabs.last()).toHaveAccessibleName(selectionCopy.paper.ratingsTab, {
+    // The ratings tab, the second of them
+    await expect(tabs.nth(1)).toHaveAccessibleName(selectionCopy.paper.ratingsTab, {
       timeout: SETTLE_TIMEOUT_MS,
     })
 
     // The ratings, picked
-    await tabs.last().click()
+    await tabs.nth(1).click()
 
     // Named in the address
     await expect.poll(() => addressedParam(page, DETAIL_TAB_PARAM)).toBe('ratings')
