@@ -305,7 +305,7 @@ const RATED_SELECTION: Proposal[] = SELECTION.map((proposal) => ({
  * Every problem the pool offers, lowest number first: each one in the selection neither set aside nor taken by a
  * round.
  */
-export const ON_OFFER = [FIRST, BILINGUAL, OPENED, READY, GEOMETRY, ALGEBRA, UNWRITTEN]
+const ON_OFFER = [FIRST, BILINGUAL, OPENED, READY, GEOMETRY, ALGEBRA, UNWRITTEN]
 
 /** How many problems the pool offers. */
 export const ON_OFFER_COUNT = ON_OFFER.length

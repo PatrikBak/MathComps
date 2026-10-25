@@ -4,24 +4,27 @@ import type { TableSort } from '@/components/shared/utils/table-sort'
 import { averageScore } from './selection-state'
 import type { Proposal, RatingAspect } from './selection-types'
 
-/** A column the ratings table orders its problems by: the problem's number, or one aspect's average. */
-export type RatingsColumn = 'number' | RatingAspect
+/**
+ * A column the ratings table orders its problems by: their place in the order they run, or one aspect's average.
+ */
+export type RatingsColumn = 'place' | RatingAspect
 
-/** Which way each column reads when it is first pressed: numbers from the lowest, averages from the highest. */
+/** Which way each column reads when it is first pressed: places from the first, averages from the highest. */
 export const RATINGS_STARTS_ASCENDING: Record<RatingsColumn, boolean> = {
-  number: true,
+  place: true,
   beauty: false,
   difficulty: false,
 }
 
-/** The order the ratings table opens in. */
-export const DEFAULT_RATINGS_SORT: TableSort<RatingsColumn> = { by: 'number', ascending: true }
+/** The order the ratings table opens in: the order its problems run. */
+export const DEFAULT_RATINGS_SORT: TableSort<RatingsColumn> = { by: 'place', ascending: true }
 
 /**
- * Orders problems for the ratings table. By an aspect, the problems nobody scored on it stay last either way round,
- * and the lower number goes first where two averages are level.
+ * Orders problems for the ratings table. By place, the problems keep the order they come in, or turn it round. By an
+ * aspect, the problems nobody scored on it stay last either way round, and two problems whose averages are level keep
+ * the order they come in.
  *
- * @param proposals - The problems.
+ * @param proposals - The problems, in the order they run.
  * @param sort - The order asked for.
  *
  * @returns The problems in that order.
@@ -30,33 +33,35 @@ export function sortByRatings(
   proposals: readonly Proposal[],
   sort: TableSort<RatingsColumn>
 ): Proposal[] {
-  // Which way round the column reads
-  const direction = sort.ascending ? 1 : -1
+  // Which column decides
+  switch (sort.by) {
+    // By place: the order they come in, or the same turned round
+    case 'place':
+      return sort.ascending ? [...proposals] : proposals.toReversed()
 
-  // The problems in the order asked for
-  return [...proposals].sort((first, second) => {
-    // Which column decides
-    switch (sort.by) {
-      // By number, which every problem has
-      case 'number':
-        return direction * (first.number - second.number)
+    // By an aspect's average, the sort being stable, so level problems keep the order they come in
+    case 'beauty':
+    case 'difficulty': {
+      // The aspect whose averages decide
+      const aspect = sort.by
 
-      // By an aspect's average, the lower number settling a tie
-      case 'beauty':
-      case 'difficulty':
-        return (
-          compareAverages(
-            averageScore(first.ratings, sort.by),
-            averageScore(second.ratings, sort.by),
-            direction
-          ) || first.number - second.number
+      // Which way round the column reads
+      const direction = sort.ascending ? 1 : -1
+
+      // The problems by the aspect's average
+      return proposals.toSorted((first, second) =>
+        compareAverages(
+          averageScore(first.ratings, aspect),
+          averageScore(second.ratings, aspect),
+          direction
         )
-
-      // Every column is handled above
-      default:
-        return assertNever(sort.by)
+      )
     }
-  })
+
+    // Every column is handled above
+    default:
+      return assertNever(sort.by)
+  }
 }
 
 /**

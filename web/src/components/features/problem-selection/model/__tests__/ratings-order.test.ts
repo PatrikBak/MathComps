@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { sortByRatings } from '../ratings-order'
+import { DEFAULT_RATINGS_SORT, sortByRatings } from '../ratings-order'
 import type { Proposal, ProposalRating } from '../selection-types'
 
 /**
@@ -42,8 +42,8 @@ function proposal(number: number, ratings: ProposalRating[]): Proposal {
 }
 
 /**
- * The pool used by every case: beauties of 3, 5, 4.5 and 3, a problem scored on difficulty alone, and one nobody
- * rated, out of number order.
+ * The pool used by every case, in the order it runs, which is out of number order: beauties of 3, 5, 4.5 and 3, a
+ * problem scored on difficulty alone, and one nobody rated.
  */
 const POOL = [
   proposal(6, [rating('Ann', 3, 4)]),
@@ -55,24 +55,38 @@ const POOL = [
 ]
 
 describe('sortByRatings', () => {
-  it('puts the best average first, the lower number first on a tie, and the problems nobody scored on the aspect last', () => {
+  it('opens in the order the problems run, and turns it round by place', () => {
+    // The order the table opens in
+    const opening = sortByRatings(POOL, DEFAULT_RATINGS_SORT)
+
+    // By place from the last
+    const reversed = sortByRatings(POOL, { by: 'place', ascending: false })
+
+    // The pool's own order
+    expect(opening.map((candidate) => candidate.number)).toEqual([6, 1, 4, 2, 5, 3])
+
+    // The same turned round
+    expect(reversed.map((candidate) => candidate.number)).toEqual([3, 5, 2, 4, 1, 6])
+  })
+
+  it('puts the best average first, level ones in the order they run, and the problems nobody scored on the aspect last', () => {
     // Beauty from the highest
     const order = sortByRatings(POOL, { by: 'beauty', ascending: false })
 
-    // 5, 4.5, the two 3s by number, then the unscored ones by number: the one nobody rated, then the one scored on
+    // 5, 4.5, the two 3s as they run, then the unscored ones as they run: the one nobody rated, then the one scored on
     // difficulty alone
-    expect(order.map((candidate) => candidate.number)).toEqual([4, 2, 3, 6, 1, 5])
+    expect(order.map((candidate) => candidate.number)).toEqual([4, 2, 6, 3, 1, 5])
   })
 
   it('keeps the problems nobody scored on the aspect last when turned round', () => {
     // Beauty from the lowest
     const order = sortByRatings(POOL, { by: 'beauty', ascending: true })
 
-    // The two 3s by number, 4.5, 5, and the unscored ones still last
-    expect(order.map((candidate) => candidate.number)).toEqual([3, 6, 2, 4, 1, 5])
+    // The two 3s as they run, 4.5, 5, and the unscored ones still last
+    expect(order.map((candidate) => candidate.number)).toEqual([6, 3, 2, 4, 1, 5])
   })
 
-  it('ties two averages of different tenths that come to the same score, the lower number first', () => {
+  it('ties two averages of different tenths that come to the same score, keeping the order they run', () => {
     // Both average 1.2, though 1.1 and 1.3 added as they stand come to a hair more than 1 and 1.4
     const tied = [
       proposal(8, [rating('Ann', 1.1, null), rating('Ben', 1.3, null)]),
@@ -82,7 +96,7 @@ describe('sortByRatings', () => {
     // Beauty from the highest
     const order = sortByRatings(tied, { by: 'beauty', ascending: false })
 
-    // By number, as a tie
-    expect(order.map((candidate) => candidate.number)).toEqual([7, 8])
+    // As they run, as a tie
+    expect(order.map((candidate) => candidate.number)).toEqual([8, 7])
   })
 })
