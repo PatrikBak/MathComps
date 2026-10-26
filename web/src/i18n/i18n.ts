@@ -1,12 +1,11 @@
 import { defineRouting } from 'next-intl/routing'
 
-import type { Country } from '@/components/features/guide/content/guide-content-types'
 import { invert } from '@/components/shared/utils/collection-utils'
 
-/** Supported locales as a tuple for type inference. */
+/** The locales the site is read in, as a tuple so {@link Locale} is their union. */
 export const SUPPORTED_LOCALES = ['sk', 'cs', 'en'] as const
 
-/** Union type of all supported locale codes. */
+/** A locale the site is read in. */
 export type Locale = (typeof SUPPORTED_LOCALES)[number]
 
 /** A string value that exists in all supported locales. */
@@ -24,22 +23,15 @@ export const UNMATCHED_VISITOR_LOCALE = 'en' as const satisfies Locale
 /** Canonical locale whose paths match the folder names in app/[locale]/. */
 const CANONICAL_LOCALE = 'en' as const satisfies Locale
 
-/** Human-readable display names for each locale. */
+/** Each locale's name, written in its own language. */
 export const LOCALE_NAMES: Record<Locale, string> = {
   sk: 'Slovenčina',
   cs: 'Čeština',
   en: 'English',
 }
 
-/** Maps each locale to its country code. */
-export const LOCALE_TO_COUNTRY: Record<Locale, Country> = {
-  sk: 'SK',
-  cs: 'CZ',
-  en: 'EN',
-}
-
 /**
- * Builds the per-locale value → id reverse maps for a localized id → token table.
+ * Builds the per-locale token → id reverse maps for a localized id → token table.
  *
  * @param byLocale - The id → token table for each locale.
  *
@@ -67,8 +59,7 @@ export function localeCodeList(locales: readonly Locale[]): string {
 }
 
 /**
- * Centralized route constants for the application.
- * English paths are canonical (matching folder names in app/[locale]/).
+ * The site's routes, each as its path in the canonical locale.
  */
 export const ROUTES = {
   HOME: '/',
@@ -86,19 +77,17 @@ export const ROUTES = {
   NEWS: '/news',
   ADMIN_DEFENSES: '/admin/defenses',
   ADMIN_GRADING: '/admin/grading/[slug]',
-  PROBLEM_SELECTION: '/problem-selection',
   ORGANIZATION_SELECTION: '/problem-selection/[slug]',
 } as const
 
-/** Union type of all possible route paths. */
+/** A route, as its path in the canonical locale. */
 type RouteKey = (typeof ROUTES)[keyof typeof ROUTES]
 
 /** Localized value for every non-canonical locale. */
 type NonCanonicalLocaleTranslations = Record<Exclude<Locale, typeof CANONICAL_LOCALE>, string>
 
 /**
- * Localized route paths for the non-canonical locales.
- * English is canonical, so each route's own value is the English path.
+ * Each route's path in every non-canonical locale, keyed by its path in the canonical locale.
  */
 const ROUTE_TRANSLATIONS: Record<RouteKey, NonCanonicalLocaleTranslations> = {
   '/': { sk: '/', cs: '/' },
@@ -116,17 +105,16 @@ const ROUTE_TRANSLATIONS: Record<RouteKey, NonCanonicalLocaleTranslations> = {
   '/news': { sk: '/novinky', cs: '/novinky' },
   '/admin/defenses': { sk: '/admin/obhajoby', cs: '/admin/obhajoby' },
   '/admin/grading/[slug]': { sk: '/admin/hodnotenie/[slug]', cs: '/admin/hodnoceni/[slug]' },
-  '/problem-selection': { sk: '/vyber-uloh', cs: '/vyber-uloh' },
   '/problem-selection/[slug]': { sk: '/vyber-uloh/[slug]', cs: '/vyber-uloh/[slug]' },
 }
 
-/** Common anchor fragments used for in-page navigation. English is canonical. */
+/** The site's in-page anchors, each as its fragment in the canonical locale. */
 export const ANCHORS = {
   COMMENTS: 'comments',
   ABOUT_AUTHOR: 'aboutAuthor',
 } as const
 
-/** Union type of all anchor keys. */
+/** An in-page anchor, as its fragment in the canonical locale. */
 type AnchorKey = (typeof ANCHORS)[keyof typeof ANCHORS]
 
 /** Localized anchors for the non-canonical locales. */
@@ -136,15 +124,15 @@ const ANCHOR_TRANSLATIONS: Record<AnchorKey, NonCanonicalLocaleTranslations> = {
 }
 
 /**
- * A locale's path fragment for an in-page anchor; the canonical locale uses the anchor key verbatim.
+ * A locale's URL fragment for an in-page anchor, the canonical locale using the anchor as it is.
  *
- * @param anchor - The anchor key to localize.
+ * @param anchor - The anchor to localize.
  * @param locale - The target locale.
  *
- * @returns The anchor fragment for that locale (the bare key for the canonical locale).
+ * @returns The fragment in that locale.
  */
 export function getLocalizedAnchor(anchor: AnchorKey, locale: Locale): string {
-  // Canonical locale uses the anchor key as-is
+  // The canonical locale uses the anchor as it is
   if (locale === CANONICAL_LOCALE) return anchor
 
   // Every other locale uses its translated anchor
@@ -152,8 +140,8 @@ export function getLocalizedAnchor(anchor: AnchorKey, locale: Locale): string {
 }
 
 /**
- * Builds the pathnames map from the routes and their localized paths.
- * English is canonical; non-canonical paths come from {@link ROUTE_TRANSLATIONS}.
+ * Builds the pathnames map out of {@link ROUTES} and {@link ROUTE_TRANSLATIONS}: each route's path in every locale,
+ * or the bare route where no locale changes it.
  *
  * @returns The pathnames map keyed by canonical route.
  */
@@ -170,13 +158,13 @@ function buildPathnames(): Record<string, string | Record<Locale, string>> {
       // Collapse to a single shared path when nothing is localized
       if (allSame) return [route, route]
 
-      // Otherwise spell out the per-locale map, English keyed by the canonical path
+      // Otherwise spell out the per-locale map, the canonical locale taking the route itself
       return [route, { [CANONICAL_LOCALE]: route, ...translations }]
     })
   )
 }
 
-/** Pathname mappings for next-intl. */
+/** Each localized route's path per locale, keyed by its canonical path. */
 export const pathnames = buildPathnames()
 
 /** Locale prefix strategy for URLs. Always show the locale prefix. */

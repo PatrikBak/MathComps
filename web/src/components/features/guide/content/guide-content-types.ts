@@ -1,4 +1,4 @@
-import type { LocalizedString } from '@/i18n/i18n'
+import type { Locale, LocalizedString } from '@/i18n/i18n'
 
 /**
  * The guide content model: one multilingual record per entity. Presentation (icons, accents, layout)
@@ -28,6 +28,13 @@ export type Country = keyof typeof COUNTRY_FLAG_CODES
 
 /** Countries in canonical display order. */
 export const COUNTRIES = Object.keys(COUNTRY_FLAG_CODES) as Country[]
+
+/** The country whose flag stands for each locale. */
+export const LOCALE_TO_COUNTRY: Record<Locale, Country> = {
+  sk: 'SK',
+  cs: 'CZ',
+  en: 'EN',
+}
 
 /** Competition kinds in canonical display order. */
 export const COMPETITION_KINDS = ['team', 'individual'] as const

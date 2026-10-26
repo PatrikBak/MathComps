@@ -222,8 +222,8 @@ public static class SelectionSeed
     /// <returns>The organization's id.</returns>
     public static Guid NewOrganization(MathCompsDbContext context, string slug, params string[] categories)
     {
-        // The organization
-        var organization = new Organization { Slug = slug, NeedsEveryLanguage = false };
+        // The organization, named by its slug
+        var organization = new Organization { Slug = slug, Name = slug, NeedsEveryLanguage = false };
         context.Organizations.Add(organization);
 
         // Its categories, each at its place in the order given

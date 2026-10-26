@@ -15,7 +15,7 @@ export type ProposalArea = (typeof PROPOSAL_AREAS)[number]
 /** The longest working title a proposal holds, in characters. */
 export const PROPOSAL_TITLE_MAX_LENGTH = 200
 
-/** The language most proposals are authored in. */
+/** The language most proposals are authored in, in a selection whose problems need every language. */
 export const PROPOSAL_AUTHORING_LANGUAGE = 'en' as const satisfies Locale
 
 /** Every aspect a reviewer rates a proposal on. */
@@ -94,9 +94,9 @@ export type Paper = {
  * The rounds a board was finalized into.
  */
 type Finalization = {
-  /** The name of the cycle whose rounds took the papers, in the language the site is read in. */
+  /** The name of the cycle whose rounds took the board's papers, in the language the site is read in. */
   cycleName: string
-  /** When those rounds open, as an ISO-8601 string; the board leaves the selection once they do. */
+  /** When the cycle's rounds open, as an ISO-8601 string; the board leaves the selection once they do. */
   opensAt: string
 }
 
@@ -238,12 +238,18 @@ export type SelectionCategory = {
 }
 
 /**
- * The slug of the organization preparing the competitions the site hosts, as the API names it.
+ * An organization whose selection a reader may open.
  */
-export const MATHCOMPS_ORGANIZATION_SLUG = 'mathcomps'
+export type Organization = {
+  /** The slug identifying the organization. */
+  slug: string
+  /** What its members call it, the same in every language the site is read in. */
+  name: string
+}
 
 /**
- * Everything the selection reads, which arrives in one go.
+ * The selection as its one read returns it. Its discussions, and how far the reader has seen them, are read on
+ * their own.
  */
 export type SelectionData = {
   /** The categories the selection picks problems for, in the order they run. */
@@ -266,9 +272,9 @@ export type SelectionData = {
 }
 
 /**
- * The reviewers' discussions of everything the selection holds, each kind of subject's by the subject's id. Each
- * discussion is its top-level comments, oldest first, each carrying its replies, and one nothing has been said in is
- * left out.
+ * The reviewers' discussions of every proposal and paper the selection holds, each kind of subject's by the
+ * subject's id. Each discussion is its top-level comments, oldest first, each carrying its replies, and one nothing
+ * has been said in is left out.
  */
 export type SelectionDiscussions = {
   /** The discussions of the proposals still in the selection, by the proposal's id. */
@@ -278,8 +284,8 @@ export type SelectionDiscussions = {
 }
 
 /**
- * How far the reader has seen the discussions of everything the selection holds, each kind of subject's by the
- * subject's id. Every proposal and paper the selection holds has an entry, one nothing has been said in included.
+ * How far the reader has seen the discussions of every proposal and paper the selection holds, each kind of
+ * subject's by the subject's id. Every one of them has an entry, one nothing has been said in included.
  */
 export type SelectionDiscussionsSeen = {
   /** How far the reader has seen each proposal's discussion, by the proposal's id. */

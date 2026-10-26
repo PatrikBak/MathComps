@@ -1,9 +1,10 @@
 'use client'
 
+import { LOCALE_TO_COUNTRY } from '@/components/features/guide/content/guide-content-types'
 import { FlagIcon } from '@/components/features/guide/layout/FlagIcon'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useLanguageSwitcher } from '@/hooks/useLanguageSwitcher'
-import { LOCALE_NAMES, LOCALE_TO_COUNTRY, SUPPORTED_LOCALES } from '@/i18n/i18n'
+import { LOCALE_NAMES, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
 /**
  * Props for the {@link MobileLanguageSwitcher} component.

@@ -20,10 +20,16 @@ public class Organization
     public Guid Id { get; set; } = Guid.CreateVersion7();
 
     /// <summary>
-    /// URL-safe unique slug (lowercase, hyphenated) the organization is named by.
+    /// URL-safe unique slug (lowercase, hyphenated) identifying the organization.
     /// </summary>
     [MaxLength(100)]
     public required string Slug { get; set; }
+
+    /// <summary>
+    /// What its members call it, the same in every language the site is read in.
+    /// </summary>
+    [MaxLength(100)]
+    public required string Name { get; set; }
 
     /// <summary>
     /// Whether its problems need a statement and a solution in every language the site is read in, as a hosted round

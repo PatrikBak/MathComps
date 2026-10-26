@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 import type { ComponentPropsWithoutRef } from 'react'
 import { forwardRef, useEffect, useState } from 'react'
 
+import { useOwnOrganizations } from '@/components/features/problem-selection/hooks/use-own-organizations'
 import { LoginNavItem } from '@/components/login/LoginNavItem'
 import { DropdownMenuContent } from '@/components/shared/components/DropdownMenu'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -17,10 +18,10 @@ import { usePathname } from '@/i18n/navigation'
 import { UserAvatarImage } from './UserAvatarImage'
 import { UserInfoHeader } from './UserInfoHeader'
 import { UserMenuItem } from './UserMenuItem'
+import { UserMenuSelections } from './UserMenuSelections'
 
 /**
- * Shared trigger button layout for the user menu, keeping dimensions consistent.
- * It is meant to be passed to a Radix/headless component as the trigger.
+ * The button the user menu opens from, ringed on hover and focus, and forwarding its ref so the menu can anchor to it.
  */
 const UserMenuTrigger = forwardRef<HTMLButtonElement, ComponentPropsWithoutRef<'button'>>(
   ({ className, children, ...rest }, ref) => (
@@ -50,40 +51,42 @@ type UserMenuProps = {
 }
 
 /**
- * User menu dropdown component for the header.
- * Handles all auth states: loading, logged out (shows login), and logged in (shows dropdown).
- * Built with Radix UI Dropdown for better accessibility.
+ * The header's account control: a skeleton while sign-in settles, the way to sign in for a guest, and for a signed-in
+ * user a Radix dropdown holding their account's items.
  */
 export default function UserMenu({ onOpenDefenses, onPrepareDefenses }: UserMenuProps) {
   // Get the logged-in user
   const { user, isLoaded } = useUser()
 
-  // Keep track of whether the component has mounted yet
+  // Whether the menu has mounted yet
   const [mounted, setMounted] = useState(false)
 
-  // Setup that the component has mounted after the first render
+  // Mounted from the first render on
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Disable profile menu item if already on profile page
+  // Whether the user is on their profile already
   const isProfileDisabled = usePathname() === ROUTES.PROFILE
 
   // Whether the user reviews defenses
   const isAdmin = useIsAdmin()
 
-  // Loads the defenses as the menu goes up, so they are in hand by the time their item is picked
+  // The organizations the user is a member of, read with the page so the menu opens with them in hand
+  const organizations = useOwnOrganizations()
+
+  // A function loading the defenses as the menu goes up, so they are in hand by the time their item is picked
   const handleMenuOpenChange = (isMenuOpen: boolean) => {
     // A menu on its way down has nothing to load
     if (!isMenuOpen) {
       return
     }
 
-    // Start loading them
+    // The defenses on their way
     onPrepareDefenses()
   }
 
-  // Get translations
+  // The user menu's copy, and the profile's
   const tUserMenu = useTranslations('ui.userMenu')
   const tProfile = useTranslations('profile')
 
@@ -133,6 +136,9 @@ export default function UserMenu({ onOpenDefenses, onPrepareDefenses }: UserMenu
 
           {/* Everyone's defenses */}
           {isAdmin && <UserMenuItem type="defenseReview" variant="dropdown" />}
+
+          {/* The selections they pick problems in */}
+          <UserMenuSelections organizations={organizations} variant="dropdown" />
 
           {/* Their profile */}
           <UserMenuItem type="profile" variant="dropdown" disabled={isProfileDisabled} />

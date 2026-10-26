@@ -1,3 +1,4 @@
+using MathComps.Domain.Contracts.Selection;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
@@ -10,7 +11,8 @@ namespace MathComps.Infrastructure.Tests.Organizations;
 
 /// <summary>
 /// Covers <see cref="OrganizationMemberService"/>: who is a member of an organization, since when, which
-/// organizations an account is a member of, and which of an organization's categories it leads.
+/// organizations an account is a member of and in what order they come, and which of an organization's categories
+/// it leads.
 /// </summary>
 /// <remarks>
 /// Membership is an account's address matched against a list, so the cases that matter are the near misses: the same
@@ -99,17 +101,7 @@ public class OrganizationMemberServicePostgresTests(PostgresContainerFixture fix
     public Task An_accounts_organizations_come_back() => RunTestAsync(async members =>
     {
         // The member's address on the other organization's list as well
-        await QueryAsync(async context =>
-        {
-            // The other organization
-            var other = await context.Organizations.SingleAsync(organization => organization.Slug == "other");
-
-            // The member's address on the other organization's list too
-            SelectionSeed.NewMember(context, other.Id, "member@example.com", _addedAt);
-
-            // Written
-            await context.SaveChangesAsync();
-        });
+        await ListMemberOnOtherAsync();
 
         // The member's two
         Assert.Equal(2, (await members.GetOrganizationIdsAsync(_memberId)).Count);
@@ -119,6 +111,24 @@ public class OrganizationMemberServicePostgresTests(PostgresContainerFixture fix
 
         // And none for the account with no address
         Assert.Empty(await members.GetOrganizationIdsAsync(_addresslessId));
+    });
+
+    /// <summary>
+    /// An account's organizations come back each under its own slug and name, MathComps under the name the migrations
+    /// gave it, in the order of the names: the other organization, named Alpha, ahead of MathComps, which its slug
+    /// would put first. A slug and a name swapped would offer each selection under its slug, at an address naming no
+    /// organization.
+    /// </summary>
+    [Fact]
+    public Task An_accounts_organizations_come_back_named() => RunTestAsync(async members =>
+    {
+        // The member's address on the other organization's list as well
+        await ListMemberOnOtherAsync();
+
+        // The member's two, the other organization first
+        Assert.Equal(
+            [new OrganizationDto("other", "Alpha"), new OrganizationDto(Organization.MathCompsSlug, "MathComps")],
+            await members.GetOrganizationsAsync(_memberId));
     });
 
     /// <summary>
@@ -197,8 +207,8 @@ public class OrganizationMemberServicePostgresTests(PostgresContainerFixture fix
         // The member's address on the MathComps organization's list.
         SelectionSeed.NewMember(context, "member@example.com", _addedAt);
 
-        // Another organization.
-        var other = new Organization { Slug = "other", NeedsEveryLanguage = false };
+        // Another organization, whose name runs ahead of MathComps' where its slug runs after.
+        var other = new Organization { Slug = "other", Name = "Alpha", NeedsEveryLanguage = false };
         context.Organizations.Add(other);
 
         // The outsider's address on the other organization's list.
@@ -212,4 +222,20 @@ public class OrganizationMemberServicePostgresTests(PostgresContainerFixture fix
         // Submit changes
         await context.SaveChangesAsync();
     }
+
+    /// <summary>
+    /// Puts the member's address on the other organization's list as well.
+    /// </summary>
+    /// <returns>A task completing once the address is written.</returns>
+    private Task ListMemberOnOtherAsync() => QueryAsync(async context =>
+    {
+        // The other organization
+        var other = await context.Organizations.SingleAsync(organization => organization.Slug == "other");
+
+        // The member's address on the other organization's list too
+        SelectionSeed.NewMember(context, other.Id, "member@example.com", _addedAt);
+
+        // Written
+        await context.SaveChangesAsync();
+    });
 }

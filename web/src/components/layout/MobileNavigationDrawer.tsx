@@ -6,10 +6,12 @@ import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import React, { Fragment } from 'react'
 
+import { useOwnOrganizations } from '@/components/features/problem-selection/hooks/use-own-organizations'
 import MathCompsLogo from '@/components/layout/MathCompsLogo'
 import { MobileLanguageSwitcher } from '@/components/layout/MobileLanguageSwitcher'
 import { UserInfoHeader } from '@/components/layout/UserInfoHeader'
 import { UserMenuItem } from '@/components/layout/UserMenuItem'
+import { UserMenuSelections } from '@/components/layout/UserMenuSelections'
 import { LoginNavItem } from '@/components/login/LoginNavItem'
 import { Button, buttonVariants } from '@/components/shared/components/Button'
 import { NavLink } from '@/components/shared/components/NavLink'
@@ -25,14 +27,48 @@ import { NAVIGATION_ITEMS } from './navigation-items'
 type MobileNavigationDrawerProps = {
   /** Whether the drawer is currently open */
   isOpen: boolean
-  /** Callback function to close the drawer */
+  /** Closes the drawer */
   onClose: () => void
   /** Opens the user's defenses. */
   onOpenDefenses: () => void
 }
 
 /**
- * Mobile-friendly navigation drawer using Headless UI Dialog.
+ * Props for the {@link MobileLink} component.
+ */
+type MobileLinkProps = {
+  /** The page it opens */
+  href: string
+  /** Called when the link is pressed */
+  onClick: () => void
+  /** What it reads */
+  children: React.ReactNode
+}
+
+/**
+ * One of the site's pages as a link in the drawer, lit when it is the page being read.
+ */
+function MobileLink({ href, onClick, children }: MobileLinkProps) {
+  // Whether it is the page being read
+  const isActive = usePathname() === href
+
+  return (
+    <NavLink
+      href={href}
+      onClick={onClick}
+      className={cn(
+        'block -mx-6 px-6 py-3 text-lg font-semibold border-b border-foreground/5 last:border-0 transition-colors',
+        isActive ? 'text-foreground bg-foreground/5' : 'text-muted-foreground hover:text-foreground'
+      )}
+    >
+      {children}
+    </NavLink>
+  )
+}
+
+/**
+ * The navigation a phone or tablet gets in place of the header's links and user menu: the site's pages, the account's
+ * items, and the language switcher, in a Headless UI dialog sliding down from the top.
  */
 export const MobileNavigationDrawer = ({
   isOpen,
@@ -42,7 +78,7 @@ export const MobileNavigationDrawer = ({
   // Get the logged-in user
   const { user, isLoaded } = useUser()
 
-  // Closes the drawer and opens the defenses
+  // A function closing the drawer and opening the defenses
   const handleOpenDefenses = () => {
     // Get the drawer out of the way
     onClose()
@@ -51,35 +87,14 @@ export const MobileNavigationDrawer = ({
     onOpenDefenses()
   }
 
-  // Get the current pathname for active state detection
-  const pathname = usePathname()
-
   // Whether the user reviews defenses
   const isAdmin = useIsAdmin()
 
-  // Translations for navigation links
+  // The organizations the user is a member of, read with the page so the drawer opens with them in hand
+  const organizations = useOwnOrganizations()
+
+  // The navigation's copy
   const tNav = useTranslations('navigation')
-
-  // Helper component for mobile navigation links
-  const MobileLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
-    // We will higlight the current page in the navigation drawer
-    const isActive = pathname === href
-
-    return (
-      <NavLink
-        href={href}
-        onClick={onClose}
-        className={cn(
-          'block -mx-6 px-6 py-3 text-lg font-semibold border-b border-foreground/5 last:border-0 transition-colors',
-          isActive
-            ? 'text-foreground bg-foreground/5'
-            : 'text-muted-foreground hover:text-foreground'
-        )}
-      >
-        {children}
-      </NavLink>
-    )
-  }
 
   return (
     <Transition show={isOpen} as={Fragment}>
@@ -134,13 +149,13 @@ export const MobileNavigationDrawer = ({
                 {/* Main navigation */}
                 <nav className="flex flex-col">
                   {NAVIGATION_ITEMS.map((item) => (
-                    <MobileLink key={item.href} href={item.href}>
+                    <MobileLink key={item.href} href={item.href} onClick={onClose}>
                       {tNav(item.labelKey)}
                     </MobileLink>
                   ))}
                 </nav>
 
-                {/* Separator — only when logged in */}
+                {/* Separator, for a signed-in user */}
                 {isLoaded && user && <div className="-mx-6 -mt-2 border-t border-foreground/10" />}
 
                 {/* Auth actions */}
@@ -159,6 +174,13 @@ export const MobileNavigationDrawer = ({
                         {isAdmin && (
                           <UserMenuItem type="defenseReview" variant="mobile" onClick={onClose} />
                         )}
+
+                        {/* The selections they pick problems in */}
+                        <UserMenuSelections
+                          organizations={organizations}
+                          variant="mobile"
+                          onClick={onClose}
+                        />
 
                         {/* Their profile */}
                         <UserMenuItem type="profile" variant="mobile" onClick={onClose} />
@@ -184,7 +206,7 @@ export const MobileNavigationDrawer = ({
                   </div>
                 )}
 
-                {/* Separator — only when logged in */}
+                {/* Separator, for a signed-in user */}
                 {isLoaded && user && <div className="-mx-6 border-t border-foreground/10" />}
 
                 {/* Language switcher */}

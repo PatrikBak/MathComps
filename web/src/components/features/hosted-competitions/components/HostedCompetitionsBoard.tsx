@@ -1,23 +1,21 @@
 'use client'
 
-import { ArrowRight, MessageSquarePlus } from 'lucide-react'
+import { MessageSquarePlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { ProseContactLink } from '@/components/features/contact/ProseContactLink'
-import { selectionHref } from '@/components/features/problem-selection/model/selection-routes'
-import { MATHCOMPS_ORGANIZATION_SLUG } from '@/components/features/problem-selection/model/selection-types'
-import { AppLink } from '@/components/shared/components/AppLink'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { PageHeader } from '@/components/shared/components/PageHeader'
 import { useAddressedDisclosure } from '@/hooks/use-addressed-disclosure'
 
 import { useHostedCompetitionsBoard } from '../hooks/use-hosted-competitions-board'
+import type { EntryBlocker } from '../model/entry-reader'
 import { RESULTS_PARAM } from '../services/hosted-competition-routes'
 import { CategoryLegend } from './CategoryLegend'
 import { CompetitionResultsModal } from './CompetitionResults'
 import { DisclosureNote } from './DisclosureNote'
 import { EntryGate } from './EntryGate'
-import { HEADER_ROW_CLASS, HeaderDisclosure } from './HeaderDisclosure'
+import { HeaderDisclosure } from './HeaderDisclosure'
 import { HostedCompetitionEntryDialog } from './HostedCompetitionEntryDialog'
 import { HostedCompetitionSeason } from './HostedCompetitionSeason'
 import { HowItWorks } from './HowItWorks'
@@ -45,9 +43,6 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
   // The page's own name and description
   const tPage = useTranslations('pages.competitions')
 
-  // The name and description of the page the competitions' problems are picked on
-  const tSelection = useTranslations('pages.problemSelection')
-
   // What there is to draw, and what its presses go through
   const {
     layout,
@@ -64,23 +59,29 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
   // Which competition's results are open, one answer for every row on the page
   const openedResults = useAddressedDisclosure(RESULTS_PARAM)
 
+  // The way to hide each step the reader still owes, where one can be hidden
+  const dismissFor: Record<EntryBlocker, (() => void) | undefined> = {
+    signIn: undefined,
+    profile: dismissProfilePrompt,
+  }
+
   return (
-    // Hyphenation off: the global setting is for article prose, and the words here are names and labels
+    // Hyphenation off: the global setting is for article prose, and here it would break names and labels mid-word
     <div className="mx-auto max-w-4xl hyphens-none">
-      {/* What this page is, before anything can be pressed on it */}
+      {/* What this page is, before any competition on it can be pressed */}
       <PageHeader title={tPage('title')} className="mb-0">
+        {/* Page description */}
         <p>{tPage('description')}</p>
 
         {/* The header's rows */}
         <div className="space-y-2">
-          {/* What the thing is */}
+          {/* How a competition runs */}
           <HowItWorks />
 
           {/* Which category to pick */}
           <CategoryLegend />
 
-          {/* The rules, readable without going near an irreversible press. The same lines appear inside
-              the entry dialog on the one entry that accepts them; after that, this is where they live */}
+          {/* The rules, readable without going near an irreversible press */}
           <HeaderDisclosure label={t('rulesButton')}>
             {/* The terms themselves */}
             <RulesList />
@@ -92,30 +93,15 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
               })}
             </DisclosureNote>
           </HeaderDisclosure>
-
-          {/* The way to where the problems are picked, for the accounts that prepare competitions */}
-          {preparesCompetitions && (
-            <AppLink
-              href={selectionHref(MATHCOMPS_ORGANIZATION_SLUG)}
-              plain
-              className={HEADER_ROW_CLASS}
-            >
-              <ArrowRight size={15} />
-              {tSelection('title')}
-            </AppLink>
-          )}
         </div>
 
         {/* What the reader still owes, said before they reach for a button */}
         {gateBlocker !== null && (
-          <EntryGate
-            blocker={gateBlocker}
-            onDismiss={gateBlocker === 'profile' ? dismissProfilePrompt : undefined}
-          />
+          <EntryGate blocker={gateBlocker} onDismiss={dismissFor[gateBlocker]} />
         )}
       </PageHeader>
 
-      {/* The list, once there is one to draw */}
+      {/* The list once there is one to draw, and where its read stands until then */}
       <div className="mt-8 sm:mt-10">
         {listState.kind !== 'ready' || layout === null ? (
           <FetchStatePlaceholder
