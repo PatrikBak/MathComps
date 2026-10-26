@@ -1,3 +1,4 @@
+using MathComps.Domain.Contracts.Selection;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -59,6 +60,20 @@ public sealed class OrganizationMemberService(IDbContextFactory<MathCompsDbConte
         // The id of each organization whose list carries the account's address.
         return await OrganizationsOf(dbContext, userId)
             .Select(organization => organization.Id)
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<OrganizationDto>> GetOrganizationsAsync(
+        Guid userId, CancellationToken cancellationToken = default)
+    {
+        // A fresh context for this read.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // Each organization whose list carries the account's address, as its slug and name, in the order of the names.
+        return await OrganizationsOf(dbContext, userId)
+            .OrderBy(organization => organization.Name)
+            .Select(organization => new OrganizationDto(organization.Slug, organization.Name))
             .ToListAsync(cancellationToken);
     }
 

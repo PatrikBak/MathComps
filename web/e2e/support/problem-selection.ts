@@ -9,7 +9,6 @@ import type { ProposalTab } from '@/components/features/problem-selection/model/
 import {
   type Board,
   type Cycle,
-  MATHCOMPS_ORGANIZATION_SLUG,
   type Paper,
   type Proposal,
   type ProposalRating,
@@ -38,6 +37,7 @@ import {
   hasOpened,
   type HeldCycle,
   type HeldSelection,
+  MATHCOMPS_ORGANIZATION_SLUG,
   SELECTION_API_PATH,
   SELECTION_CATEGORIES,
   SELECTION_WRITE_REFUSALS,

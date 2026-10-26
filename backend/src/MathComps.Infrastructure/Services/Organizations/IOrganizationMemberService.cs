@@ -1,3 +1,4 @@
+using MathComps.Domain.Contracts.Selection;
 using MathComps.Domain.EfCoreEntities;
 
 namespace MathComps.Infrastructure.Services.Organizations;
@@ -54,6 +55,17 @@ public interface IOrganizationMemberService
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The <see cref="Organization.Id"/> of each, none for an account on no list.</returns>
     Task<IReadOnlyList<Guid>> GetOrganizationIdsAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The organizations an account is a member of, in the order of their names.
+    /// </summary>
+    /// <param name="userId">The account membership is read for.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>
+    /// Each organization's slug and name, ordered by <see cref="Organization.Name"/>; none for an account on no list.
+    /// </returns>
+    Task<IReadOnlyList<OrganizationDto>> GetOrganizationsAsync(
+        Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Which of an organization's categories an account leads.

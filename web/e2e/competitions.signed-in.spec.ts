@@ -1,27 +1,17 @@
 import messages from '../messages/en.json'
 import { stubProblemSearch } from './support/backend-routes'
-import {
-  areaCopy,
-  areaPath,
-  holdClock,
-  LIST_PATH,
-  SELECTION_PATH,
-  showRoundHolding,
-} from './support/competitions'
+import { areaCopy, areaPath, holdClock, LIST_PATH, showRoundHolding } from './support/competitions'
 import { COMPETITION_SLUG, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
 import { expect, test } from './support/test'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
 const SETTLE_TIMEOUT_MS = 15_000
 
-/** How long a landing gets to happen before a spec is willing to say none did. */
+/** How long something a spec says never happens gets to happen first. */
 const LANDING_WINDOW_MS = 1_000
 
 /** The practice run, the one competition anybody gets a second go at. */
 const PRACTICE_COMPETITION_SLUG = 'practice-set'
-
-/** What the page the competitions' problems are picked on is called. */
-const SELECTION_TITLE = messages.pages.problemSelection.title
 
 test.describe('the competitions list', () => {
   test('asks a reader with an unfilled profile for the fields a result would name them by', async ({
@@ -58,7 +48,7 @@ test.describe('the competitions list', () => {
     // The button the clock starts from
     const confirm = page.getByRole('button', { name: areaCopy.dialog.confirm })
 
-    // Which is held shut while the rules are unaccepted
+    // The button, held shut while the rules are unaccepted
     await expect(confirm).toBeDisabled({ timeout: SETTLE_TIMEOUT_MS })
 
     // Accept the rules
@@ -81,7 +71,7 @@ test.describe('the competitions list', () => {
     // Give the entry up for the problems
     await page.getByRole('button', { name: areaCopy.dialog.forfeit }).click()
 
-    // Which is asked about before it happens
+    // Confirm giving the entry up, which the dialog asks about first
     await page.getByRole('button', { name: areaCopy.dialog.forfeitConfirm }).click()
 
     // Inside the area, with the entry named as given up
@@ -89,7 +79,7 @@ test.describe('the competitions list', () => {
       timeout: SETTLE_TIMEOUT_MS,
     })
 
-    // And no clock over any of it
+    // And no run-out clock over the problems
     await expect(page.getByText(areaCopy.clockSpent)).toHaveCount(0)
   })
 
@@ -102,14 +92,17 @@ test.describe('the competitions list', () => {
     // A student with an entry still to spend
     await installHostedBackend(page, 'ready')
 
-    // The archive, which the walk below passes through on its way somewhere that is not the list
+    // The archive's searches answered, so the problems page the walk goes to can draw
     await stubProblemSearch(page, () => null)
 
     // Open the list
     await page.goto(LIST_PATH)
 
     // Walk somewhere else, through the app's own navigation so the history entry is a client one
-    await page.getByRole('link', { name: 'Problems', exact: true }).first().click()
+    await page
+      .getByRole('link', { name: messages.navigation.problems, exact: true })
+      .first()
+      .click()
 
     // Once the problems page is there to walk back from
     await expect(page).toHaveURL(/\/en\/problems/, { timeout: SETTLE_TIMEOUT_MS })
@@ -117,7 +110,7 @@ test.describe('the competitions list', () => {
     // Back to the list the same way
     await page.goBack()
 
-    // Press enter, which spends the entry
+    // Press enter, which opens the dialog
     await page.getByRole('button', { name: areaCopy.enter, exact: true }).first().click()
 
     // The button the entry is confirmed on
@@ -173,10 +166,10 @@ test.describe('the competitions list', () => {
     // Confirm, which spends the entry and starts the clock
     await confirm.click()
 
-    // One answer's worth of time, and no more
+    // Time enough for the entry's answer, the clock held again after it
     await page.clock.fastForward('00:01')
 
-    // Which is enough to be reading the statements, the entry having brought them back with it
+    // The statements on screen, brought back with the entry
     await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
       timeout: SETTLE_TIMEOUT_MS,
     })
@@ -186,8 +179,8 @@ test.describe('the competitions list', () => {
     // A student with an entry still to spend
     await installHostedBackend(page, 'ready')
 
-    // The area is held on its way over, which is the window this is about: the entry has landed, its clock
-    // is running, and the page the student reads it on has not arrived yet
+    // A gate the area's reads wait behind until the spec releases it, which is the window this is about: the
+    // entry has landed, its clock is running, and the page the student reads it on has not arrived yet
     let releaseArea = (): void => {}
     const isAreaReleased = new Promise<void>((resolve) => {
       releaseArea = resolve
@@ -197,7 +190,10 @@ test.describe('the competitions list', () => {
     await page.route(
       (url) => url.pathname === areaPath(COMPETITION_SLUG),
       async (route) => {
+        // Held at the gate
         await isAreaReleased
+
+        // Then on to the page
         await route.continue()
       }
     )
@@ -208,7 +204,7 @@ test.describe('the competitions list', () => {
     // The row of the competition being entered
     const row = page.locator(`[data-competition-slug="${COMPETITION_SLUG}"]`)
 
-    // Its round, brought into view
+    // The row's round, brought into view
     await showRoundHolding(page, row)
 
     // Press enter, which opens the dialog
@@ -234,17 +230,17 @@ test.describe('the competitions list', () => {
     // not: the assertions alone would read the page before the answer they are about has been drawn
     await page.waitForTimeout(LANDING_WINDOW_MS)
 
-    // The row they pressed is not what they are looking at while they wait: it counts a clock down from
-    // here, and a student meets their own clock beside the problems it is being spent on
+    // The row the student pressed is off the page while they wait, since from here it would count their
+    // clock down away from the problems
     await expect(row).toHaveCount(0)
 
-    // Nor is the way back into it anywhere else on the page
+    // Nor is the way back into the competition anywhere else on the page
     await expect(page.getByRole('link', { name: areaCopy.continue })).toHaveCount(0)
 
     // The area arrives
     releaseArea()
 
-    // And the statements are what the clock is first read beside
+    // And the area draws every statement
     await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
       timeout: SETTLE_TIMEOUT_MS,
     })
@@ -261,9 +257,9 @@ test.describe('the competitions list', () => {
     const row = page.locator(`[data-competition-slug="${COMPETITION_SLUG}"]`)
 
     // The way back, addressed by where it goes
-    const back = row.locator(`a[href="/en/mathilding/${COMPETITION_SLUG}"]`)
+    const back = row.locator(`a[href="${areaPath(COMPETITION_SLUG)}"]`)
 
-    // Which reads as a way back into the clock
+    // The link reads as the way back into the clock
     await expect(back).toHaveText(areaCopy.continue, { timeout: SETTLE_TIMEOUT_MS })
 
     // And nothing anywhere in that row to take the entry a second time
@@ -288,7 +284,7 @@ test.describe('the competitions list', () => {
     // And confirm the dialog
     await page.getByRole('button', { name: areaCopy.dialog.confirm }).click()
 
-    // Which lands on its statements
+    // The practice run's statements, once the entry lands
     await expect(page.getByRole('article').first()).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
     // Past the minute this run's clock lasts
@@ -297,14 +293,13 @@ test.describe('the competitions list', () => {
     // Back out to the list
     await page.goto(LIST_PATH)
 
-    // Where the run they just spent offers the way back into it, beside the second go that would start a
-    // clock and close the solutions it opened
-    await expect(page.locator(`a[href="/en/mathilding/${PRACTICE_COMPETITION_SLUG}"]`)).toHaveText(
+    // The spent practice run offers the way back into its solutions
+    await expect(page.locator(`a[href="${areaPath(PRACTICE_COMPETITION_SLUG)}"]`)).toHaveText(
       areaCopy.mySolutions,
       { timeout: SETTLE_TIMEOUT_MS }
     )
 
-    // And that second go is still offered beside it
+    // And the second go at the practice run is still offered beside the way back
     await expect(page.getByRole('button', { name: areaCopy.tryAgain })).toBeVisible()
   })
 
@@ -354,9 +349,11 @@ test.describe('the competitions list', () => {
 
     // The way to be rid of the sentence, which only an unfinished profile is offered
     const dismiss = page.getByRole('button', { name: areaCopy.readiness.dismiss })
+
+    // Once the list has drawn the dismiss button
     await expect(dismiss).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
-    // Take it
+    // Hide the sentence
     await dismiss.click()
 
     // And the sentence goes
@@ -390,40 +387,7 @@ test.describe('the competitions list', () => {
       timeout: SETTLE_TIMEOUT_MS,
     })
 
-    // And it stays gone, the answer having been kept against the account rather than the tab
+    // And the sentence stays gone after the reload
     await expect(page.getByRole('button', { name: areaCopy.readiness.dismiss })).toHaveCount(0)
-  })
-
-  test('shows an account that prepares competitions the way to where the problems are picked', async ({
-    page,
-  }) => {
-    // One of the accounts that prepare competitions
-    await installHostedBackend(page, 'prepares-competitions')
-
-    // Open the list
-    await page.goto(LIST_PATH)
-
-    // The way to the problem selection, in English
-    await expect(page.getByRole('link', { name: SELECTION_TITLE, exact: true })).toHaveAttribute(
-      'href',
-      SELECTION_PATH,
-      { timeout: SETTLE_TIMEOUT_MS }
-    )
-  })
-
-  test('shows a student no way to where the problems are picked', async ({ page }) => {
-    // A student with everything an entry needs
-    await installHostedBackend(page, 'ready')
-
-    // Open the list
-    await page.goto(LIST_PATH)
-
-    // Wait for the list itself, which arrives with the answer to whether the reader prepares competitions
-    await expect(page.getByRole('button', { name: areaCopy.try }).first()).toBeVisible({
-      timeout: SETTLE_TIMEOUT_MS,
-    })
-
-    // Nothing leads to the problem selection, which would only turn them away
-    await expect(page.getByRole('link', { name: SELECTION_TITLE, exact: true })).toHaveCount(0)
   })
 })

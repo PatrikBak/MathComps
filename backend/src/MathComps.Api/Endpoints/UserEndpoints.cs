@@ -1,13 +1,14 @@
 using MathComps.Api.Constants;
 using MathComps.Domain.Contracts.Users;
+using MathComps.Infrastructure.Services.Organizations;
 using MathComps.Infrastructure.Services.Users;
 
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
 /// Maps the authenticated user's own account endpoints: reading and recording their acknowledgement of what
-/// talking to the AI tutor entails, taking the username the site calls them by, and reading and replacing what
-/// they have told us about their competing.
+/// talking to the AI tutor entails, taking the username the site calls them by, reading and replacing what they
+/// have told us about their competing, and reading which organizations they are a member of.
 /// </summary>
 public static class UserEndpoints
 {
@@ -25,6 +26,11 @@ public static class UserEndpoints
     /// Path the profile route lives at.
     /// </summary>
     private const string ProfilePath = "/users/me/profile";
+
+    /// <summary>
+    /// Path the route listing the user's organizations lives at.
+    /// </summary>
+    private const string OrganizationsPath = "/users/me/organizations";
 
     /// <summary>
     /// Maps the <c>/users/me</c> endpoints onto the route builder.
@@ -116,6 +122,24 @@ public static class UserEndpoints
 
             // No reason to return anything
             return Results.NoContent();
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Read the organizations whose lists carry the authenticated user's address
+        app.MapGet(OrganizationsPath, async (
+            HttpContext context,
+            IUserManager userManager,
+            IOrganizationMemberService members) =>
+        {
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
+
+            // Read their organizations, in the order of their names
+            var organizations = await members.GetOrganizationsAsync(userId, context.RequestAborted);
+
+            // Return their organizations
+            return Results.Ok(organizations);
         })
         .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);

@@ -5,7 +5,7 @@ import type { SlotAddress } from '../model/selection-types'
 /**
  * The path each organization's selection hangs off.
  */
-const ORGANIZATIONS_PATH = '/problem-selection'
+const SELECTIONS_PATH = '/problem-selection'
 
 /**
  * The base path of one organization's selection.
@@ -16,7 +16,7 @@ const ORGANIZATIONS_PATH = '/problem-selection'
  */
 function selectionPath(organization: string): string {
   // The organization's selection, under the path every selection hangs off
-  return `${ORGANIZATIONS_PATH}/${encodeURIComponent(organization)}`
+  return `${SELECTIONS_PATH}/${encodeURIComponent(organization)}`
 }
 
 /**
@@ -59,6 +59,16 @@ function proposalPath(organization: string, proposalId: string): string {
 }
 
 /**
+ * Builds the API URL for reading the organizations the reader is a member of.
+ *
+ * @returns The API URL.
+ */
+export function getOrganizationsUrl(): string {
+  // The reader's own organizations
+  return buildApiUrl('/users/me/organizations')
+}
+
+/**
  * Builds the API URL for reading an organization's whole selection.
  *
  * @param organization - The organization's slug.
@@ -71,7 +81,7 @@ export function getSelectionUrl(organization: string): string {
 }
 
 /**
- * Builds the API URL for reading the discussions of everything an organization's selection holds.
+ * Builds the API URL for reading the discussions of every proposal and paper an organization's selection holds.
  *
  * @param organization - The organization's slug.
  *
@@ -83,8 +93,8 @@ export function getDiscussionsUrl(organization: string): string {
 }
 
 /**
- * Builds the API URL for reading and marking how far the reader has seen the discussions of everything an
- * organization's selection holds.
+ * Builds the API URL for reading and marking how far the reader has seen the discussions of every proposal and
+ * paper an organization's selection holds.
  *
  * @param organization - The organization's slug.
  *

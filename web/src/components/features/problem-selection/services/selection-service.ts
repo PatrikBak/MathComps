@@ -5,6 +5,7 @@ import type {
   DiscussionsSeenUpTo,
   FinalizationWrite,
   MoveWrite,
+  Organization,
   PlacementWrite,
   RatingWrite,
   RecommendationWrite,
@@ -18,6 +19,7 @@ import {
   getDiscussionsSeenUrl,
   getDiscussionsUrl,
   getFinalizationUrl,
+  getOrganizationsUrl,
   getProposalUrl,
   getRatingUrl,
   getRecommendedUrl,
@@ -30,6 +32,17 @@ import {
 /**
  * The backend behind the problem selection: authenticated calls to the .NET API.
  */
+
+/**
+ * Reads the organizations the reader is a member of, in the order of their names.
+ *
+ * @param apiCall - The authenticated API caller.
+ *
+ * @returns The organizations, or an error.
+ */
+export function getOrganizations(apiCall: ApiCaller): Promise<ApiResult<Organization[]>> {
+  return apiCall<Organization[]>(() => getOrganizationsUrl())
+}
 
 /**
  * Reads an organization's whole selection in one go.

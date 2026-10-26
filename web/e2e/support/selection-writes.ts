@@ -1,9 +1,8 @@
-import {
-  type Board,
-  type Cycle,
-  MATHCOMPS_ORGANIZATION_SLUG,
-  type Proposal,
-  type SelectionCategory,
+import type {
+  Board,
+  Cycle,
+  Proposal,
+  SelectionCategory,
 } from '@/components/features/problem-selection/model/selection-types'
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
 
@@ -115,6 +114,9 @@ export function liveProposal(held: HeldSelection, proposalId: string): Proposal 
     refuseWith('SelectionTargetNotFound')
   )
 }
+
+/** The slug of the organization preparing the competitions the site hosts, whose selection the specs open. */
+export const MATHCOMPS_ORGANIZATION_SLUG = 'mathcomps'
 
 /** The path MathComps' selection hangs off on the backend, which every read and write of it goes under. */
 export const SELECTION_API_PATH = `/problem-selection/${MATHCOMPS_ORGANIZATION_SLUG}`

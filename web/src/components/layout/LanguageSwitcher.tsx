@@ -5,13 +5,14 @@ import { ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
+import { LOCALE_TO_COUNTRY } from '@/components/features/guide/content/guide-content-types'
 import { FlagIcon } from '@/components/features/guide/layout/FlagIcon'
 import { DropdownMenuContent } from '@/components/shared/components/DropdownMenu'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { ACCENT_COLOR_MAP } from '@/components/shared/utils/accent-colors'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useLanguageSwitcher } from '@/hooks/useLanguageSwitcher'
-import { LOCALE_NAMES, LOCALE_TO_COUNTRY, SUPPORTED_LOCALES } from '@/i18n/i18n'
+import { LOCALE_NAMES, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
 /**
  * Language switcher dropdown for the header.
