@@ -9,7 +9,7 @@ import type { Proposal } from '@/components/features/problem-selection/model/sel
 
 import { refuse } from './support/backend-routes'
 import { READER_NAME } from './support/comments'
-import { holdClock, SELECTION_PATH } from './support/competitions'
+import { areaCopy, holdClock, SELECTION_PATH } from './support/competitions'
 import {
   actionsButton,
   addressedParam,
@@ -22,7 +22,6 @@ import {
   holdReads,
   isProposalWrite,
   LATER_DRAFT,
-  ON_OFFER,
   OPENED,
   openPool,
   OTHER_RATER,
@@ -43,6 +42,13 @@ const ratingsCopy = selectionCopy.ratings
 
 /** The advanced paper of the later draft, {@link GEOMETRY} its one problem. */
 const ADVANCED = LATER_DRAFT.papers[1]
+
+/**
+ * Every problem the pool offers, in the order its cards run under the first draft: {@link FIRST} in E1, then
+ * {@link ALGEBRA}, recommended for the elementary paper; {@link READY} in I2, then the rest recommended for the
+ * intermediate paper, by number; {@link GEOMETRY} under the advanced paper.
+ */
+const IN_POOL_ORDER = [FIRST, ALGEBRA, READY, BILINGUAL, OPENED, UNWRITTEN, GEOMETRY]
 
 /**
  * The table of the problems' ratings on screen.
@@ -736,14 +742,21 @@ test.describe('the ratings table', () => {
     // The pool
     await openPool(page)
 
+    // The cards in the pool's order
+    await expect(page.getByRole('article')).toContainText(
+      IN_POOL_ORDER.map((proposal) => proposal.title)
+    )
+
     // Laid out as ratings
     await page
       .getByRole('radiogroup', { name: selectionCopy.pool.views.label })
       .getByRole('radio', { name: selectionCopy.pool.views.ratings })
       .click()
 
-    // A row per problem on offer, lowest number first, in the cards' place
-    await expect(rowHeadings(page)).toHaveText(ON_OFFER.map((proposal) => proposal.title))
+    // A row per problem on offer, in the order the cards ran
+    await expect(rowHeadings(page)).toHaveText(IN_POOL_ORDER.map((proposal) => proposal.title))
+
+    // In the cards' place
     await expect(page.getByRole('article')).toHaveCount(0)
 
     // Named in the address
@@ -787,6 +800,60 @@ test.describe('the ratings table', () => {
     await expect(rowHeadings(page)).toHaveText([ALGEBRA.title])
   })
 
+  test("keeps the pool's order on coming back from a problem that changed it, and offers to set it again", async ({
+    page,
+  }) => {
+    // A reviewer whose geometry problem, recommended for the advanced category alone, comes last in the pool
+    await stubSelection(page, 'selection')
+
+    // The pool, laid out as ratings by its address
+    await page.goto(`${SELECTION_PATH}?${POOL_VIEW_PARAM}=ratings`)
+
+    // The geometry problem's row last
+    await expect(rowHeadings(page).last()).toHaveText(GEOMETRY.title, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Opened from its row
+    await rowOf(page, GEOMETRY).getByRole('link').click()
+
+    // The geometry problem's own page
+    await expect(headingOf(page, GEOMETRY)).toBeVisible()
+
+    // The menu on the problem's page
+    await actionsButton(page, GEOMETRY).click()
+
+    // The answer to the read after the write
+    const readAfterWrite = page.waitForResponse(SELECTION_ENDPOINT)
+
+    // The elementary category, switched on, which the board's elementary paper runs first
+    await page.getByRole('menuitemcheckbox', { name: areaCopy.categories.elementary }).click()
+
+    // Once the read has landed
+    await readAfterWrite
+
+    // The menu, closed from the keyboard
+    await page.keyboard.press('Escape')
+
+    // Back to the table
+    await page.goBack()
+
+    // The button setting the order again
+    const resort = page.getByRole('button', { name: selectionText('pool.resort') })
+
+    // The geometry problem's row still last
+    await expect(rowHeadings(page).last()).toHaveText(GEOMETRY.title)
+
+    // The button offered
+    await expect(resort).toBeVisible()
+
+    // Pressed
+    await resort.click()
+
+    // The row among the elementary problems, after the paper's slot and the algebra one
+    await expect(rowHeadings(page).nth(2)).toHaveText(GEOMETRY.title)
+  })
+
   test('shows behind an average who gave that aspect a score, leaving out who scored only the other', async ({
     page,
   }) => {
@@ -811,7 +878,7 @@ test.describe('the ratings table', () => {
     ])
   })
 
-  test('orders the rows by an aspect from the highest, then turned round, the problems nobody scored last either way', async ({
+  test("opens in the pool's order, then orders the rows by an aspect from the highest, then turned round, the problems nobody scored last either way", async ({
     page,
   }) => {
     // A selection three of whose problems on offer are rated
@@ -820,9 +887,9 @@ test.describe('the ratings table', () => {
     // The pool, laid out as ratings by its address
     await page.goto(`${SELECTION_PATH}?${POOL_VIEW_PARAM}=ratings`)
 
-    // Lowest number first
+    // In the pool's order
     await expect(rowHeadings(page)).toHaveText(
-      ON_OFFER.map((proposal) => proposal.title),
+      IN_POOL_ORDER.map((proposal) => proposal.title),
       {
         timeout: SETTLE_TIMEOUT_MS,
       }
@@ -831,9 +898,9 @@ test.describe('the ratings table', () => {
     // Ordered by beauty
     await sortHeader(page, ratingsCopy.beauty).click()
 
-    // 5, 4.25 and 3, then the problems nobody scored on beauty by number
+    // 5, 4.25 and 3, then the problems nobody scored on beauty in the pool's order
     await expect(rowHeadings(page)).toHaveText(
-      [BILINGUAL, ALGEBRA, GEOMETRY, FIRST, OPENED, READY, UNWRITTEN].map(
+      [BILINGUAL, ALGEBRA, GEOMETRY, FIRST, READY, OPENED, UNWRITTEN].map(
         (proposal) => proposal.title
       )
     )
@@ -843,13 +910,13 @@ test.describe('the ratings table', () => {
 
     // 3, 4.25 and 5, the problems nobody scored still last
     await expect(rowHeadings(page)).toHaveText(
-      [GEOMETRY, ALGEBRA, BILINGUAL, FIRST, OPENED, READY, UNWRITTEN].map(
+      [GEOMETRY, ALGEBRA, BILINGUAL, FIRST, READY, OPENED, UNWRITTEN].map(
         (proposal) => proposal.title
       )
     )
   })
 
-  test("puts a paper's ratings on its last tab, named in the address, which Back from a problem lands on as it was left", async ({
+  test("puts a paper's ratings on its second tab, as the pool orders its views, named in the address, which Back from a problem lands on as it was left", async ({
     page,
   }) => {
     // A selection three of whose problems on offer are rated
@@ -863,13 +930,13 @@ test.describe('the ratings table', () => {
     // The paper's tabs
     const tabs = page.getByRole('tablist', { name: selectionCopy.paper.tabsLabel }).getByRole('tab')
 
-    // The ratings tab, the last of them
-    await expect(tabs.last()).toHaveAccessibleName(selectionCopy.paper.ratingsTab, {
+    // The ratings tab, the second of them
+    await expect(tabs.nth(1)).toHaveAccessibleName(selectionCopy.paper.ratingsTab, {
       timeout: SETTLE_TIMEOUT_MS,
     })
 
     // The ratings, picked
-    await tabs.last().click()
+    await tabs.nth(1).click()
 
     // Named in the address
     await expect.poll(() => addressedParam(page, DETAIL_TAB_PARAM)).toBe('ratings')

@@ -35,15 +35,18 @@ import { useLoadedSelection } from './SelectionWorkspaceProvider'
  */
 const SHOWS_STATEMENTS: Record<PaperTab, boolean> = {
   problems: true,
-  comments: false,
   ratings: false,
+  comments: false,
 }
 
-/** Whether each tab of a paper's page shows its discussion, and so carries the eye while something there is new. */
+/**
+ * Whether each tab of a paper's page shows its discussion, and so is a Comments tab the reader visits, carrying the
+ * eye while something there is new.
+ */
 const SHOWS_DISCUSSION: Record<PaperTab, boolean> = {
   problems: false,
-  comments: true,
   ratings: false,
+  comments: true,
 }
 
 /**
@@ -151,8 +154,11 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
     pageOn: (shown) => ({ kind: 'paper', id: paper.id, tab: shown }),
   })
 
-  // The paper's discussion, with what in it is new
-  const discussion = useSubjectDiscussion({ targetType: 'SelectionPaper', targetId: paper.id })
+  // The paper's discussion, a visit to it while its tab shows, with what in it is new
+  const discussion = useSubjectDiscussion({
+    target: { targetType: 'SelectionPaper', targetId: paper.id },
+    isShowing: SHOWS_DISCUSSION[tab],
+  })
 
   // The discussion's panel
   const commentsPanelRef = useRef<HTMLDivElement>(null)
@@ -175,28 +181,6 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
             />
           ))}
         </ol>
-      ),
-    },
-    comments: {
-      label: t('commentsTab'),
-      count: commentCount,
-      // Read in the accent colour while somebody else's comment waits unseen behind another tab
-      isHighlighted: discussion.hasNews,
-      panel: (
-        <div
-          ref={commentsPanelRef}
-          // Takes the focus when the eye marking the discussion seen leaves holding it
-          tabIndex={-1}
-          className="pt-4 focus:outline-none"
-        >
-          <CommentSection
-            variant="inline"
-            newCommentPlaceholder={t('placeholder')}
-            showEmptyText={false}
-            target={{ targetType: 'SelectionPaper', targetId: paper.id }}
-            newness={discussion.newness}
-          />
-        </div>
       ),
     },
     ratings: {
@@ -224,6 +208,28 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
               fallbackRef={ratingsPanelRef}
             />
           )}
+        </div>
+      ),
+    },
+    comments: {
+      label: t('commentsTab'),
+      count: commentCount,
+      // Read in the accent colour while somebody else's comment waits unseen behind another tab
+      isHighlighted: discussion.hasNews,
+      panel: (
+        <div
+          ref={commentsPanelRef}
+          // Takes the focus when the eye marking the discussion seen leaves holding it
+          tabIndex={-1}
+          className="pt-4 focus:outline-none"
+        >
+          <CommentSection
+            variant="inline"
+            newCommentPlaceholder={t('placeholder')}
+            showEmptyText={false}
+            target={{ targetType: 'SelectionPaper', targetId: paper.id }}
+            newness={discussion.newness}
+          />
         </div>
       ),
     },

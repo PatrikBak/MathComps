@@ -100,7 +100,7 @@ public static class ProblemSelectionEndpoints
             // The reviewer reading
             var viewer = await CommentEndpoints.RequireViewerAsync(userManager, context);
 
-            // How far the reviewer has seen each discussion, beside when somebody else last posted in it
+            // How far the reviewer has seen each discussion, beside what somebody else posted in it since
             var discussionsSeen = await discussionService.GetDiscussionsSeenAsync(
                 organization, viewer, cancellationToken);
 

@@ -1,15 +1,16 @@
 using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 
 namespace MathComps.Infrastructure.Services.Comments;
 
 /// <summary>
-/// An <see cref="ICommentSeenService"/> over EF Core. When somebody else last posted in a thread is read with one
-/// recursive SQL query walking each standing comment back to its first version, whose time is when it was posted.
-/// Who may reach a thread is up to the <see cref="ICommentThreadKind"/> serving its target type.
+/// An <see cref="ICommentSeenService"/> over EF Core. The moment each comment somebody else posted in a thread was
+/// posted is read with one recursive SQL query walking each standing comment back to its first version, whose time is
+/// when it was posted. Who may reach a thread is up to the <see cref="ICommentThreadKind"/> serving its target type.
 /// </summary>
 /// <param name="dbContextFactory">The factory minting a context per operation.</param>
 /// <param name="kinds">Every kind of thread.</param>
@@ -53,11 +54,6 @@ public class CommentSeenService(
         // When each standing comment somebody else posted in the threads was posted
         var posted = await ReadPostedByOthersAsync(dbContext, [.. targetOf.Keys], viewer.UserId, cancellationToken);
 
-        // When somebody else last posted in each thread, by its target id
-        var lastPostedAt = posted
-            .GroupBy(comment => targetOf[comment.CommentId])
-            .ToDictionary(group => group.Key, group => group.Max(comment => comment.PostedAt));
-
         // How far the viewer has seen each of the threads, by its target id
         var seenUpTo = await dbContext.CommentSeenMarks
             .AsNoTracking()
@@ -66,14 +62,24 @@ public class CommentSeenService(
                            && targetIds.Contains(mark.TargetId))
             .ToDictionaryAsync(mark => mark.TargetId, mark => mark.SeenUpTo, cancellationToken);
 
-        // Every thread asked for, with how far it is seen and when somebody else last posted in it
+        // The moments of what somebody else posted in each thread in a later millisecond than the viewer's mark, oldest
+        // first, by the thread's target id
+        var newPostedAt = posted
+            .Where(comment => !seenUpTo.TryGetValue(targetOf[comment.CommentId], out var seen)
+                              || comment.PostedAt.TruncateToMilliseconds() > seen)
+            .GroupBy(comment => targetOf[comment.CommentId])
+            .ToDictionary(
+                group => group.Key,
+                group => group.Select(comment => comment.PostedAt).Order().ToImmutableList());
+
+        // Every thread asked for, with how far it is seen and what somebody else posted in it since
         return targetIds
             .Distinct()
             .ToImmutableDictionary(
                 targetId => targetId,
                 targetId => new CommentThreadSeenDto(
                     seenUpTo.TryGetValue(targetId, out var seen) ? seen : null,
-                    lastPostedAt.TryGetValue(targetId, out var last) ? last : null));
+                    newPostedAt.GetValueOrDefault(targetId, [])));
     }
 
     /// <inheritdoc />

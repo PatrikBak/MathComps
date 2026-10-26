@@ -7,17 +7,42 @@ import type { DiscussionTarget } from './selection-discussions'
 import type { DiscussionsSeenUpTo, SelectionDiscussionsSeen } from './selection-types'
 
 /**
- * How far the reader has seen one discussion, as the server holds it, beside when somebody else last posted in it.
+ * How far the reader has seen one discussion, as the server holds it, beside how many comments somebody else posted in
+ * it since.
  */
 type ServerMark = {
   /** The moment up to which the reader has seen the discussion, in milliseconds; null when they have seen nothing. */
   seenUpTo: number | null
-  /** When somebody else last posted a still-standing comment in the discussion, in milliseconds; null when nobody has. */
-  lastPostedByOthersAt: number | null
+  /** How many still-standing comments somebody else posted in the discussion after the reader's mark. */
+  newCount: number
 }
 
 /** How far the reader has seen each discussion, as the server holds it, by the discussion's key. */
 export type ServerMarks = ReadonlyMap<string, ServerMark>
+
+/**
+ * One discussion's mark as the page keeps it while a visit to a Comments tab showing the discussion lasts, left where
+ * it stands as the server's moves on, until the reader marks the discussion seen.
+ */
+type KeptMark = {
+  /** The moment up to which the reader had seen the discussion, in milliseconds; null when they had seen nothing. */
+  seenUpTo: number | null
+  /** The visits holding the mark, by an id each keeps, never none; the mark goes once the last lets it go. */
+  holders: readonly [string, ...string[]]
+}
+
+/** The marks the page keeps, by the discussion's key. */
+export type KeptMarks = ReadonlyMap<string, KeptMark>
+
+/**
+ * A value for each of some discussions, each kind of subject's by the subject's id.
+ */
+type ByDiscussionKind<TValue> = {
+  /** What there is for each proposal's discussion, by the proposal's id. */
+  proposals: Record<string, TValue>
+  /** What there is for each paper's discussion, by the paper's id. */
+  papers: Record<string, TValue>
+}
 
 /**
  * One discussion, or one thread of it, as a view shows it to the reader.
@@ -42,6 +67,29 @@ export function markKeyOf(target: DiscussionTarget): string {
 }
 
 /**
+ * Reads what an answer holds for each discussion it names, under the discussion's key.
+ *
+ * @param byKind - What the answer holds, each kind of subject's by the subject's id.
+ * @param read - Reads what the answer holds for one discussion.
+ *
+ * @returns What was read for each proposal's discussion, then each paper's, under the discussion's key.
+ */
+function entriesByMarkKey<TValue, TRead>(
+  byKind: ByDiscussionKind<TValue>,
+  read: (value: TValue) => TRead
+): [string, TRead][] {
+  // A function which reads one kind's discussions, each under its key
+  const entriesOf = (targetType: DiscussionTarget['targetType'], values: Record<string, TValue>) =>
+    Object.entries(values).map(([targetId, value]): [string, TRead] => [
+      markKeyOf({ targetType, targetId }),
+      read(value),
+    ])
+
+  // Each proposal's discussion, then each paper's
+  return [...entriesOf('Proposal', byKind.proposals), ...entriesOf('SelectionPaper', byKind.papers)]
+}
+
+/**
  * Reads the server's answer into the marks by the discussion's key.
  *
  * @param seen - How far the reader has seen the selection's discussions, as the server answered.
@@ -50,46 +98,136 @@ export function markKeyOf(target: DiscussionTarget): string {
  */
 export function serverMarksOf(seen: SelectionDiscussionsSeen): ServerMarks {
   // A function which reads one discussion's answer
-  const markOf = ({ seenUpTo, lastPostedByOthersAt }: CommentThreadSeenDto): ServerMark => ({
+  const markOf = ({ seenUpTo, newPostedAt }: CommentThreadSeenDto): ServerMark => ({
     seenUpTo: seenUpTo === null ? null : Date.parse(seenUpTo),
-    lastPostedByOthersAt: lastPostedByOthersAt === null ? null : Date.parse(lastPostedByOthersAt),
+    newCount: newPostedAt.length,
   })
 
-  // A function which reads one kind's discussions, each under its key
-  const entriesOf = (
-    targetType: DiscussionTarget['targetType'],
-    marks: Record<string, CommentThreadSeenDto>
-  ) =>
-    Object.entries(marks).map(([targetId, mark]): [string, ServerMark] => [
-      markKeyOf({ targetType, targetId }),
-      markOf(mark),
-    ])
-
   // Each proposal's discussion and each paper's, by its key
+  return new Map(entriesByMarkKey(seen, markOf))
+}
+
+/**
+ * Keeps the marks of the discussions a visit shows. A discussion another visit already keeps is shared, so every visit
+ * holding it reads alike; any other is kept as the server holds it now.
+ *
+ * @param kept - The marks the page keeps.
+ * @param holderId - The id the visit keeps its marks under.
+ * @param keys - The keys of the discussions the visit shows.
+ * @param server - How far the reader has seen each discussion, as the server holds it.
+ *
+ * @returns The marks kept afterwards.
+ */
+export function holdMarks(
+  kept: KeptMarks,
+  holderId: string,
+  keys: readonly string[],
+  server: ServerMarks
+): KeptMarks {
+  // Every kept mark, each discussion the visit shows with the visit among its holders
   return new Map([
-    ...entriesOf('Proposal', seen.proposals),
-    ...entriesOf('SelectionPaper', seen.papers),
+    ...kept,
+    ...keys.map((key): [string, KeptMark] => {
+      // The mark already kept, if one is
+      const held = kept.get(key)
+
+      // Kept as the server holds it, or shared, the visit among its holders once
+      return [
+        key,
+        held === undefined
+          ? { seenUpTo: server.get(key)?.seenUpTo ?? null, holders: [holderId] }
+          : {
+              ...held,
+              holders: held.holders.includes(holderId) ? held.holders : [...held.holders, holderId],
+            },
+      ]
+    }),
   ])
 }
 
 /**
- * Whether a discussion holds anything new to the reader: whether somebody else posted in it after what the reader has
- * seen.
+ * Lets go of the marks a visit kept as it ends. A mark no visit keeps any more goes.
  *
+ * @param kept - The marks the page keeps.
+ * @param holderId - The id the visit kept its marks under.
+ *
+ * @returns The marks kept afterwards.
+ */
+export function releaseMarks(kept: KeptMarks, holderId: string): KeptMarks {
+  // Every mark with the visit gone from its holders, those left with none dropped
+  return new Map(
+    [...kept].flatMap(([key, mark]): [string, KeptMark][] => {
+      // The visits still holding the mark
+      const [first, ...rest] = mark.holders.filter((holder) => holder !== holderId)
+
+      // The mark kept while any visit still holds it
+      return first === undefined ? [] : [[key, { ...mark, holders: [first, ...rest] }]]
+    })
+  )
+}
+
+/**
+ * Moves the kept marks of the discussions seen on to the moments they were seen up to, wherever they are kept. A mark
+ * already further along stays where it is, as the server leaves it.
+ *
+ * @param kept - The marks the page keeps.
+ * @param marked - Each discussion seen, with the moment it was seen up to.
+ *
+ * @returns The marks kept afterwards.
+ */
+export function advanceMarks(kept: KeptMarks, marked: DiscussionsSeenUpTo): KeptMarks {
+  // Each marked discussion's moment, by its key, in milliseconds
+  const moments = new Map(entriesByMarkKey(marked, (seenUpTo) => Date.parse(seenUpTo)))
+
+  // Each kept mark of a discussion seen moved on to the later of where it stands and its moment, the rest as they were
+  return new Map(
+    [...kept].map(([key, mark]): [string, KeptMark] => {
+      // The moment the discussion was seen up to, absent where it wasn't
+      const moment = moments.get(key)
+
+      // The later of the kept mark and the moment, or whichever of them there is
+      return [
+        key,
+        {
+          ...mark,
+          seenUpTo:
+            moment === undefined || mark.seenUpTo === null
+              ? (moment ?? mark.seenUpTo)
+              : Math.max(mark.seenUpTo, moment),
+        },
+      ]
+    })
+  )
+}
+
+/**
+ * How far the reader has seen a discussion as the page reads it: as kept while a visit keeps it, and as the server
+ * holds it otherwise.
+ *
+ * @param kept - The marks the page keeps.
  * @param server - How far the reader has seen each discussion, as the server holds it.
  * @param key - The discussion's key.
  *
- * @returns Whether anything in it is new to the reader.
+ * @returns The moment, in milliseconds; null when the reader has seen nothing in it.
  */
-export function hasNewsIn(server: ServerMarks, key: string): boolean {
-  // When somebody else last posted in the discussion, if anybody has
-  const lastPostedAt = server.get(key)?.lastPostedByOthersAt ?? null
+export function seenUpToOf(kept: KeptMarks, server: ServerMarks, key: string): number | null {
+  // The mark a visit keeps, if one does
+  const held = kept.get(key)
 
-  // How far the reader has seen the discussion
-  const seenUpTo = server.get(key)?.seenUpTo ?? null
+  // The kept mark, or the server's where no visit keeps one
+  return held === undefined ? (server.get(key)?.seenUpTo ?? null) : held.seenUpTo
+}
 
-  // A post by somebody else, after the reader's mark where they hold one
-  return lastPostedAt !== null && (seenUpTo === null || lastPostedAt > seenUpTo)
+/**
+ * How many comments somebody else posted after what the reader has seen, across every discussion the marks hold.
+ *
+ * @param server - How far the reader has seen each discussion, as the server holds it.
+ *
+ * @returns How many comments are new to the reader.
+ */
+export function newCountAcross(server: ServerMarks): number {
+  // Each discussion's new comments, added up
+  return [...server.values()].reduce((total, { newCount }) => total + newCount, 0)
 }
 
 /**
@@ -136,7 +274,7 @@ export function seenWriteOf(
 
 /**
  * The marks with each discussion the server marked seen up to the moment it answered, a mark already further along
- * left where it is, as the server leaves it.
+ * left where it is, as the server leaves it. Only what others posted after the mark stays new in the discussion.
  *
  * @param seen - The marks as cached.
  * @param marked - Each discussion the server marked, with the moment it marked it seen up to.
@@ -158,13 +296,18 @@ export function withSeenUpTo(
         // The discussion's mark before the write, if it had one
         const before = marks[id]?.seenUpTo ?? null
 
-        // Seen up to the later of the discussion's mark and the server's moment, its last post by others kept
+        // The later of the discussion's mark and the server's moment
+        const after =
+          before !== null && Date.parse(before) > Date.parse(seenUpTo) ? before : seenUpTo
+
+        // Seen up to that moment, with only what others posted after it still new
         return [
           id,
           {
-            lastPostedByOthersAt: marks[id]?.lastPostedByOthersAt ?? null,
-            seenUpTo:
-              before !== null && Date.parse(before) > Date.parse(seenUpTo) ? before : seenUpTo,
+            seenUpTo: after,
+            newPostedAt: (marks[id]?.newPostedAt ?? []).filter(
+              (postedAt) => Date.parse(postedAt) > Date.parse(after)
+            ),
           },
         ]
       })

@@ -6,6 +6,7 @@ import { useKeyedState } from '@/hooks/use-keyed-state'
 import { useLoadedSelection } from '../components/SelectionWorkspaceProvider'
 import {
   type DiscussedSubject,
+  discussedSubjectsOf,
   type DiscussionThread,
   showTheSame,
   threadKeyOf,
@@ -42,14 +43,8 @@ type UsePoolThreadsResult = Pick<
  * @returns The threads, what waits to be shown, and the state of the read.
  */
 export function usePoolThreads(): UsePoolThreadsResult {
-  // Every problem, and every paper with the board it is on
-  const { proposalsById, papersById } = useLoadedSelection()
-
-  // Every problem and every paper
-  const subjects: DiscussedSubject[] = [
-    ...[...proposalsById.values()].map((proposal) => ({ kind: 'proposal' as const, proposal })),
-    ...[...papersById.values()].map((place) => ({ kind: 'paper' as const, ...place })),
-  ]
+  // Every problem and every paper, each paper with the board it is on
+  const subjects = discussedSubjectsOf(useLoadedSelection())
 
   // The subjects' discussions, as shown and as the latest read would leave them, and how far the read has got
   const { shown, uiState, retry, showNews } = useSelectionDiscussions({ subjects })

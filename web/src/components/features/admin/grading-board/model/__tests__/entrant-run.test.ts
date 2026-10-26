@@ -28,6 +28,8 @@ function entrantOf(finishedAt: number | null): GradingEntrant {
   // A late starter, handed in or not
   return {
     user: { id: 'ada', username: 'Ada', email: null },
+    countryCode: 'SK',
+    grade: { kind: 'highSchool', year: 2 },
     startedAt: new Date(STARTED_AT).toISOString(),
     finishedAt: finishedAt === null ? null : new Date(finishedAt).toISOString(),
     finishedAfterSeconds: 0,

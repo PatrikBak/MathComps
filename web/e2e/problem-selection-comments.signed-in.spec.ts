@@ -110,6 +110,9 @@ const LONG_REMARK = Array.from(
 /** Where the pool's discussions are read, all of them at once. */
 const DISCUSSIONS_ADDRESS = `${SELECTION_ENDPOINT}/comments`
 
+/** Where the backend keeps how far the reader has seen the discussions. */
+const SEEN_ADDRESS = `${SELECTION_ENDPOINT}/comments/seen`
+
 /**
  * The moment a test has the reader seen every discussion up to: after the elementary paper's remark, before
  * {@link OPENED_COMMENT} and the reply in {@link FIRST}'s discussion.
@@ -120,6 +123,10 @@ declare global {
   interface Window {
     /** Hands the test run what the notice that something waits says, each time it changes. */
     reportWhatsNewNotice: (text: string) => void
+    /** Brings on screen a page the test put out of sight. */
+    showPage: () => void
+    /** Puts out of sight a page the test keeps on screen, as the reader does switching to another browser tab. */
+    hidePage: () => void
   }
 }
 
@@ -422,6 +429,37 @@ function poolView(page: Page, name: string): Locator {
     .getByRole('radio', { name })
 }
 
+/**
+ * Puts whether the page is on screen in the test's hands, through {@link Window.showPage} and {@link Window.hidePage},
+ * as the reader brings a browser tab up or puts it behind another.
+ *
+ * @param page - The page.
+ * @param initially - Whether the page opens on screen or out of sight.
+ */
+async function stubPageVisibility(page: Page, initially: DocumentVisibilityState): Promise<void> {
+  // The page's visibility, as the test sets it
+  await page.addInitScript((startsAs: DocumentVisibilityState) => {
+    // Whether the page is on screen
+    let visibility = startsAs
+
+    // What the page says about being on screen
+    Object.defineProperty(document, 'visibilityState', { get: () => visibility })
+
+    // A function which brings the page on screen or puts it out of sight, saying so up to the window as a browser does
+    const turnTo = (next: DocumentVisibilityState) => {
+      // On screen or out of sight
+      visibility = next
+
+      // Said so
+      document.dispatchEvent(new Event('visibilitychange', { bubbles: true }))
+    }
+
+    // The ways to bring the page on screen and to put it out of sight
+    window.showPage = () => turnTo('visible')
+    window.hidePage = () => turnTo('hidden')
+  }, initially)
+}
+
 test.describe("the pool's discussions", () => {
   test('lays the pool out as its threads, newest activity first, kept in the address so Back from a problem lands on it', async ({
     page,
@@ -563,15 +601,18 @@ test.describe("the pool's discussions", () => {
     // The pool laid out as its discussions once more
     await poolView(page, selectionCopy.pool.views.comments).click()
 
-    // The threads' comments counted again
-    await expect(countLineOf(page, 6)).toHaveText(lineText(6, 6))
+    // The threads' comments counted again, none new any more, the tab's first visit having marked them seen
+    await expect(countLineOf(page, 6)).toHaveText(lineText(6, 0))
   })
 
-  test('says when the discussions could not be read, and reads them again on asking', async ({
+  test('says when the discussions could not be read, reads them again on asking, and marks them seen once they show', async ({
     page,
   }) => {
+    // What the backend keeps
+    const memory = discussedSelection()
+
     // A selection whose problems and paper are discussed
-    await stubSelection(page, 'selection', discussedSelection())
+    await stubSelection(page, 'selection', memory)
 
     // The discussions' first read refused for good, a refusal the read never tries again by itself
     await page.route(DISCUSSIONS_ADDRESS, (route) => refuse(route, 404, 'CommentTargetNotFound'), {
@@ -595,6 +636,9 @@ test.describe("the pool's discussions", () => {
     // Every thread in, and counted, the focus on the count where the button was
     await expect(threadHeadings(page)).toHaveCount(4)
     await expect(countLineOf(page, 5)).toBeFocused()
+
+    // The backend told what the threads show was seen, now that they show
+    await expect.poll(() => memory.seen.writes.length).toBe(1)
   })
 
   test('keeps the threads on screen when a later read fails', async ({ page }) => {
@@ -1186,7 +1230,7 @@ test.describe("the pool's discussions", () => {
 })
 
 test.describe("what is new in the pool's discussions", () => {
-  test("marks every comment somebody else posted as new where nothing was seen, never the reader's own", async ({
+  test("marks every comment somebody else posted as new where nothing was seen, never the reader's own, and tells the backend each discussion was seen up to the newest of them", async ({
     page,
   }) => {
     // What the backend keeps, none of it ever seen
@@ -1201,6 +1245,12 @@ test.describe("what is new in the pool's discussions", () => {
     // A selection whose problems and paper are discussed
     await stubSelection(page, 'selection', memory)
 
+    // The backend's answer to the mark the visit writes
+    const told = page.waitForResponse(
+      (response) => response.url() === SEEN_ADDRESS && response.request().method() === 'PUT',
+      { timeout: SETTLE_TIMEOUT_MS }
+    )
+
     // The pool's discussions
     await page.goto(COMMENTS_ADDRESS)
 
@@ -1211,6 +1261,30 @@ test.describe("what is new in the pool's discussions", () => {
     expect((await newCommentTexts(page)).toSorted()).toEqual(
       [OPENED_COMMENT.content, FIRST_REMARK, LATE_REPLY, PAPER_REMARK, GEOMETRY_REMARK].toSorted()
     )
+
+    // The backend told once that each discussion the tab shows was seen up to its newest comment by somebody else
+    await expect
+      .poll(() => memory.seen.writes)
+      .toEqual([
+        {
+          proposals: {
+            [FIRST.id]: '2026-10-01T08:00:00.000Z',
+            [GEOMETRY.id]: '2026-09-10T08:00:00.000Z',
+            [OPENED.id]: OPENED_COMMENT.createdAt,
+          },
+          papers: { [ELEMENTARY.id]: '2026-09-25T08:00:00.000Z' },
+        },
+      ])
+
+    // The backend's answer arrived
+    await told
+
+    // Long enough for it to have landed
+    await page.waitForTimeout(LANDING_WINDOW_MS)
+
+    // The same five still new, for the rest of the visit, with nothing more told
+    await expect(countLineOf(page, 6)).toHaveText(lineText(6, 5))
+    expect(memory.seen.writes).toHaveLength(1)
   })
 
   test('counts as new only what was posted after the mark, never an older comment edited or reacted to since', async ({
@@ -1244,6 +1318,175 @@ test.describe("what is new in the pool's discussions", () => {
     expect(await newCommentTexts(page)).toEqual([LATE_REPLY, OPENED_COMMENT.content])
   })
 
+  test('keeps what was new through the visit, shows what waited behind the button, and drops the rest next visit', async ({
+    page,
+  }) => {
+    // What the backend keeps
+    const memory = discussedSelection()
+
+    // Every discussion seen up to the mark
+    seeEverything(memory)
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // Two of their comments new
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 2), { timeout: SETTLE_TIMEOUT_MS })
+
+    // The backend told what they show was seen
+    await expect.poll(() => memory.seen.writes.length).toBe(1)
+
+    // Zuzana answering the geometry problem's comment after the visit's mark
+    answerGeometry(memory)
+
+    // The first problem, opened from its thread's heading
+    await threadOf(page, FIRST).getByRole('link').first().click()
+
+    // The first problem's own page
+    await expect(headingOf(page, FIRST)).toBeVisible()
+
+    // Back to the pool, which reads the discussions again
+    await page.goBack()
+
+    // The button the reply waits behind
+    const whatsNew = page.getByRole('button', { name: selectionCopy.pool.showWhatsNew })
+
+    // What was new still new, the reply waiting
+    await expect(whatsNew).toBeVisible()
+    expect(await newCommentTexts(page)).toEqual([LATE_REPLY, OPENED_COMMENT.content])
+
+    // What waited, shown
+    await whatsNew.click()
+
+    // The reply new too, its thread first
+    await expect
+      .poll(() => newCommentTexts(page))
+      .toEqual([COLLEAGUE_REPLY, LATE_REPLY, OPENED_COMMENT.content])
+
+    // The pool laid out as its problems
+    await poolView(page, selectionCopy.pool.views.problems).click()
+
+    // The pool laid out as its discussions again
+    await poolView(page, selectionCopy.pool.views.comments).click()
+
+    // Only the reply that arrived during the last visit still new
+    await expect(countLineOf(page, 6)).toHaveText(lineText(6, 1), { timeout: SETTLE_TIMEOUT_MS })
+    expect(await newCommentTexts(page)).toEqual([COLLEAGUE_REPLY])
+  })
+
+  test("tells the backend nothing while the tab's own read is out, then marks seen what it brought", async ({
+    page,
+  }) => {
+    // What the backend keeps
+    const memory = discussedSelection()
+
+    // Every discussion seen up to the mark
+    seeEverything(memory)
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // Every read of the discussions passing a gate, open to begin with
+    const gate = await gateReads(page, DISCUSSIONS_ADDRESS)
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // Two of their comments new
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 2), { timeout: SETTLE_TIMEOUT_MS })
+
+    // The backend told what they show was seen
+    await expect.poll(() => memory.seen.writes.length).toBe(1)
+
+    // The pool laid out as its problems
+    await poolView(page, selectionCopy.pool.views.problems).click()
+
+    // Zuzana answering the geometry problem's comment meanwhile
+    answerGeometry(memory)
+
+    // The gate, shut
+    const release = gate.hold()
+
+    // The pool laid out as its discussions again, their read held at the gate
+    await poolView(page, selectionCopy.pool.views.comments).click()
+
+    // The threads as the last visit left them
+    await expect(countLineOf(page, 5)).toBeVisible()
+
+    // Long enough for a mark to have gone out
+    await page.waitForTimeout(LANDING_WINDOW_MS)
+
+    // None did while the read was out
+    expect(memory.seen.writes).toHaveLength(1)
+
+    // The read let through
+    release()
+
+    // The backend told the geometry problem was seen up to the reply once the reply shows
+    await expect
+      .poll(() => memory.seen.writes[1]?.proposals[GEOMETRY.id])
+      .toBe('2026-10-02T08:00:00.000Z')
+
+    // The reply new for the rest of the visit
+    await expect(countLineOf(page, 6)).toHaveText(lineText(6, 1))
+    expect(await newCommentTexts(page)).toEqual([COLLEAGUE_REPLY])
+  })
+
+  test("opens again on what the last visit marked seen, though the backend hasn't answered yet", async ({
+    page,
+  }) => {
+    // What the backend keeps, nothing in it ever seen
+    const memory = discussedSelection()
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The gate every mark written waits at
+    const gate = createAnswerGate()
+
+    // The gate, shut until the test lets the mark through
+    const release = gate.hold()
+
+    // Each mark written held at the gate
+    await page.route(SEEN_ADDRESS, async (route) => {
+      // A mark waiting at the gate
+      if (route.request().method() === 'PUT') await gate.passed()
+
+      // Then answered by the fake behind this
+      await route.fallback()
+    })
+
+    // The mark the visit writes, as it leaves
+    const sent = page.waitForRequest(
+      (request) => request.url() === SEEN_ADDRESS && request.method() === 'PUT',
+      { timeout: SETTLE_TIMEOUT_MS }
+    )
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // Every comment new
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 5), { timeout: SETTLE_TIMEOUT_MS })
+
+    // The visit's mark on its way
+    await sent
+
+    // The pool laid out as its problems, the mark still waiting
+    await poolView(page, selectionCopy.pool.views.problems).click()
+
+    // The pool laid out as its discussions again
+    await poolView(page, selectionCopy.pool.views.comments).click()
+
+    // Nothing new, the mark still on its way counted in
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 0))
+
+    // The mark let through
+    release()
+  })
+
   test("marks what the tab shows as seen with the eye, which then goes, and the cards' counts with it", async ({
     page,
   }) => {
@@ -1267,6 +1510,9 @@ test.describe("what is new in the pool's discussions", () => {
     // Every comment new
     await expect(countLineOf(page, 5)).toHaveText(lineText(5, 5), { timeout: SETTLE_TIMEOUT_MS })
 
+    // The backend told what the tab shows was seen
+    await expect.poll(() => memory.seen.writes.length).toBe(1)
+
     // The eye pressed
     await page.getByRole('button', { name: selectionCopy.comments.markSeen }).click()
 
@@ -1276,7 +1522,8 @@ test.describe("what is new in the pool's discussions", () => {
     await expect(page.getByRole('button', { name: selectionCopy.comments.markSeen })).toHaveCount(0)
     await expect(countLineOf(page, 5)).toBeFocused()
 
-    // The backend told every problem and paper whose thread the tab showed was seen, each up to its newest comment
+    // The backend told again that every discussion the tab shows was seen, each up to its newest comment
+    await expect.poll(() => memory.seen.writes.length).toBe(2)
     expect(memory.seen.writes.at(-1)).toEqual({
       proposals: {
         [FIRST.id]: '2026-10-01T08:00:00.000Z',
@@ -1296,9 +1543,6 @@ test.describe("what is new in the pool's discussions", () => {
   test('leaves new a waiting reply, though a problem opened meanwhile read a newer comment', async ({
     page,
   }) => {
-    // The clock under the test's hand, so the problem's own read comes when the test says
-    await page.clock.install()
-
     // What the backend keeps, nothing in it ever seen
     const memory = discussedSelection()
 
@@ -1323,10 +1567,7 @@ test.describe("what is new in the pool's discussions", () => {
     // The first problem's own page
     await expect(headingOf(page, FIRST)).toBeVisible()
 
-    // Long enough for the first problem's discussion to be read again
-    await page.clock.fastForward('00:31')
-
-    // Martin's reply read into the first problem's discussion
+    // Martin's reply read into the first problem's discussion as it opens
     await expect(page.getByRole('tabpanel')).toContainText(NEWER_REPLY, {
       timeout: SETTLE_TIMEOUT_MS,
     })
@@ -1360,14 +1601,20 @@ test.describe("what is new in the pool's discussions", () => {
   test("opens a problem from the pool's discussions on the same marks, its own tab offering the eye", async ({
     page,
   }) => {
-    // A selection whose problems and paper are discussed, nothing in it ever seen
-    await stubSelection(page, 'selection', discussedSelection())
+    // What the backend keeps, nothing in it ever seen
+    const memory = discussedSelection()
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
 
     // The pool's discussions
     await page.goto(COMMENTS_ADDRESS)
 
     // Every comment new
     await expect(countLineOf(page, 5)).toHaveText(lineText(5, 5), { timeout: SETTLE_TIMEOUT_MS })
+
+    // The backend told what they show was seen
+    await expect.poll(() => memory.seen.writes.length).toBe(1)
 
     // The first problem opened from its thread's heading
     await threadOf(page, FIRST).getByRole('link').first().click()
@@ -1396,6 +1643,81 @@ test.describe("what is new in the pool's discussions", () => {
     ])
   })
 
+  test("says no more that a problem's comments hold news once the pool's visit told the backend, the pool keeping them new", async ({
+    page,
+  }) => {
+    // What the backend keeps, nothing in it ever seen
+    const memory = discussedSelection()
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // Every comment new
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 5), { timeout: SETTLE_TIMEOUT_MS })
+
+    // The backend told what they show was seen
+    await expect.poll(() => memory.seen.writes.length).toBe(1)
+
+    // The paper opened from its thread's heading
+    await page.getByRole('link', { name: `${ELEMENTARY.name} ${DRAFT_BOARD.name}` }).click()
+
+    // The paper's problems
+    await page.getByRole('tab', { name: selectionCopy.paper.problemsTab }).click()
+
+    // The first problem's comment count plain on its card among them
+    await expect(tabRowOn(cardOf(page, FIRST), 'comments', 2)).toBeVisible()
+
+    // Back to the pool
+    await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
+
+    // Every comment still new in the pool
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 5))
+  })
+
+  test("counts on the pool's Comments option what is new across the discussions, until a visit tells the backend it was seen", async ({
+    page,
+  }) => {
+    // What the backend keeps
+    const memory = discussedSelection()
+
+    // Every discussion seen up to the mark, the reply in the first problem's thread and the opened problem's comment
+    // posted since
+    seeEverything(memory)
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The pool, laid out as its problems
+    await openPool(page)
+
+    // The way to the discussions on the pool's switch
+    const commentsView = poolView(page, selectionCopy.pool.views.comments)
+
+    // Both new comments on it, as a screen reader says them
+    await expect(commentsView).toHaveAccessibleName(
+      `${selectionCopy.pool.views.comments} ${selectionText('pool.newCount', { count: 2 })}`,
+      { timeout: SETTLE_TIMEOUT_MS }
+    )
+
+    // Both new comments on it, as the number beside the name
+    await expect(commentsView.locator('[aria-hidden="true"]')).toHaveText('2')
+
+    // The discussions
+    await commentsView.click()
+
+    // The backend told what they show was seen
+    await expect.poll(() => memory.seen.writes.length).toBe(1)
+
+    // Nothing counted on the switch any more
+    await expect(commentsView).toHaveAccessibleName(selectionCopy.pool.views.comments)
+
+    // Both comments still new in the discussions
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 2))
+  })
+
   test("marks a paper's discussion seen with the eye on its own tab, the focus staying in the discussion", async ({
     page,
   }) => {
@@ -1418,6 +1740,9 @@ test.describe("what is new in the pool's discussions", () => {
       .poll(() => newCommentTexts(panel), { timeout: SETTLE_TIMEOUT_MS })
       .toEqual([PAPER_REMARK])
 
+    // The backend told the paper's discussion was seen
+    await expect.poll(() => memory.seen.writes.length).toBe(1)
+
     // The eye pressed
     await page.getByRole('button', { name: selectionCopy.comments.markSeen }).click()
 
@@ -1429,11 +1754,155 @@ test.describe("what is new in the pool's discussions", () => {
       .poll(() => panel.evaluate((element) => element.contains(document.activeElement)))
       .toBe(true)
 
-    // The backend told the paper's discussion was seen up to its remark
+    // The backend told again that the paper's discussion was seen up to its remark
+    await expect.poll(() => memory.seen.writes.length).toBe(2)
     expect(memory.seen.writes.at(-1)).toEqual({
       proposals: {},
       papers: { [ELEMENTARY.id]: '2026-09-25T08:00:00.000Z' },
     })
+  })
+
+  test('tells the backend nothing about a problem opened on its conversations until its discussion shows, nor about the pool behind it until the pool shows', async ({
+    page,
+  }) => {
+    // What the backend keeps, nothing in it ever seen
+    const memory = discussedSelection()
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The first problem on its conversations, opened over the pool laid out as its discussions
+    await page.goto(
+      `${COMMENTS_ADDRESS}&${detailQuery({ kind: 'proposal', id: FIRST.id, tab: 'conversations' })}`
+    )
+
+    // The problem's conversations showing
+    await expect(selectedTab(page, selectionCopy.detail.tabsLabel)).toContainText(
+      selectionCopy.detail.conversationsTab,
+      { timeout: SETTLE_TIMEOUT_MS }
+    )
+
+    // Long enough for a mark to have gone out
+    await page.waitForTimeout(LANDING_WINDOW_MS)
+
+    // None did
+    expect(memory.seen.writes).toEqual([])
+
+    // The problem's discussion
+    await page.getByRole('tab', { name: new RegExp(selectionCopy.detail.commentsTab) }).click()
+
+    // The backend told the problem alone was seen, up to Martin's reply
+    await expect
+      .poll(() => memory.seen.writes)
+      .toEqual([{ proposals: { [FIRST.id]: '2026-10-01T08:00:00.000Z' }, papers: {} }])
+
+    // Back to the pool
+    await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
+
+    // The pool's discussions told as they show
+    await expect.poll(() => memory.seen.writes.length).toBe(2)
+
+    // The problem read on its page no longer new there
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 3))
+    expect(await newCommentTexts(page)).toEqual([
+      OPENED_COMMENT.content,
+      PAPER_REMARK,
+      GEOMETRY_REMARK,
+    ])
+  })
+
+  test('tells the backend nothing about a discussion opened in a browser tab out of sight, until it comes on screen', async ({
+    page,
+  }) => {
+    // What the backend keeps, nothing in it ever seen
+    const memory = discussedSelection()
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The page out of sight, as a link opened in a browser tab of its own behind the one the reader reads
+    await stubPageVisibility(page, 'hidden')
+
+    // The first problem's discussion, opened out of sight
+    await page.goto(
+      `${SELECTION_PATH}?${detailQuery({ kind: 'proposal', id: FIRST.id, tab: 'comments' })}`
+    )
+
+    // Martin's reply in it
+    await expect(page.getByRole('tabpanel')).toContainText(LATE_REPLY, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Long enough for a mark to have gone out
+    await page.waitForTimeout(LANDING_WINDOW_MS)
+
+    // None did
+    expect(memory.seen.writes).toEqual([])
+
+    // The page brought on screen
+    await page.evaluate(() => window.showPage())
+
+    // The backend told the problem was seen, up to Martin's reply
+    await expect
+      .poll(() => memory.seen.writes)
+      .toEqual([{ proposals: { [FIRST.id]: '2026-10-01T08:00:00.000Z' }, papers: {} }])
+  })
+
+  test('tells the backend nothing about what a read brought while the page was out of sight, until the page comes back', async ({
+    page,
+  }) => {
+    // What the backend keeps, nothing in it ever seen
+    const memory = discussedSelection()
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The page on screen, for the test to put out of sight and back
+    await stubPageVisibility(page, 'visible')
+
+    // Every read of the discussions passing a gate, open to begin with
+    const gate = await gateReads(page, DISCUSSIONS_ADDRESS)
+
+    // The pool
+    await openPool(page)
+
+    // The first problem's comment count standing out, the reader's marks read
+    await expect(tabRowOn(cardOf(page, FIRST), 'comments', 2, true)).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The gate, shut
+    const release = gate.hold()
+
+    // The discussions' read, as it goes out
+    const held = page.waitForRequest(DISCUSSIONS_ADDRESS, { timeout: SETTLE_TIMEOUT_MS })
+
+    // The pool laid out as its discussions
+    await poolView(page, selectionCopy.pool.views.comments).click()
+
+    // The discussions' read out, held at the gate
+    await held
+
+    // The page put out of sight
+    await page.evaluate(() => window.hidePage())
+
+    // The read let through, landing while the page is out of sight
+    release()
+
+    // Every comment in, and new
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 5), { timeout: SETTLE_TIMEOUT_MS })
+
+    // Long enough for a mark to have gone out
+    await page.waitForTimeout(LANDING_WINDOW_MS)
+
+    // None did
+    expect(memory.seen.writes).toEqual([])
+
+    // The page back on screen
+    await page.evaluate(() => window.showPage())
+
+    // The backend told what the threads show was seen, now that they show
+    await expect.poll(() => memory.seen.writes.length).toBe(1)
   })
 
   test("says beside a folded thread's reply count that a reply it hides is new", async ({

@@ -2,7 +2,7 @@
 
 import { ArrowDownUp, Search, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { type RefObject, useCallback, useState } from 'react'
+import { type ReactNode, type RefObject, useCallback, useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
@@ -56,11 +56,11 @@ const SHOWS_STATEMENTS: Record<PoolViewMode, boolean> = {
 
 /**
  * Whether each layout of the pool keeps its problems where they stood until their order is set again, and so offers
- * to set it. The ratings table orders its rows by the column picked.
+ * to set it. The ratings table opens in that order, and keeps it among the rows whose averages are level.
  */
 const HOLDS_ORDER: Record<PoolViewMode, boolean> = {
   problems: true,
-  ratings: false,
+  ratings: true,
   comments: false,
 }
 
@@ -134,11 +134,29 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
           ? t('setAsideCount', { count: matches.shown.length })
           : tPlurals('problems', { count: matches.shown.length })
 
-  // What each of the pool's layouts is called
-  const modeLabels: Record<PoolViewMode, string> = {
+  // How many comments across the discussions are new to the reader
+  const { newCount: newCommentCount } = useSelectionWorkspace().seenMarks
+
+  // What each of the pool's layouts is called, the discussions with how many of their comments are new
+  const modeLabels: Record<PoolViewMode, ReactNode> = {
     problems: t('views.problems'),
     ratings: t('views.ratings'),
-    comments: t('views.comments'),
+    comments: (
+      <>
+        {t('views.comments')}
+        {newCommentCount > 0 && (
+          <>
+            {/* The new comments, as a number beside the name */}
+            <span aria-hidden className="ml-1.5 text-brand-light">
+              {newCommentCount}
+            </span>
+
+            {/* The new comments, as a screen reader says them */}
+            <span className="sr-only">{t('newCount', { count: newCommentCount })}</span>
+          </>
+        )}
+      </>
+    ),
   }
 
   // Why nothing shows: the filters hiding problems, or no problem there to hide, in the view on screen

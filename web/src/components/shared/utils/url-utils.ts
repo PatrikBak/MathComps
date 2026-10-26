@@ -73,6 +73,24 @@ export function getDisplayDomain(href: string): string {
 }
 
 /**
+ * Reads an absolute address. {@link URL.parse} does the same, but Safari only has it from version 18, and nothing
+ * here polyfills it.
+ *
+ * @param address - The address to read.
+ *
+ * @returns The address parsed, or null when it isn't a valid one.
+ */
+export function parseUrl(address: string): URL | null {
+  // A valid address parses
+  try {
+    return new URL(address)
+  } catch {
+    // An invalid address parses to nothing
+    return null
+  }
+}
+
+/**
  * Checks if the given URL is an external link (i.e. a link to a different domain)
  *
  * @param href - The URL to check

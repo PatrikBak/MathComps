@@ -9,7 +9,7 @@ import {
 } from '@/components/features/comments/utils/comment-utils'
 import { assertNever } from '@/components/shared/utils/assert-never'
 
-import type { PaperOnBoard } from './selection-state'
+import type { PaperOnBoard, SelectionIndex } from './selection-state'
 import type { Proposal } from './selection-types'
 
 /**
@@ -65,6 +65,24 @@ export type DiscussionTarget = {
   targetType: Extract<CommentTargetType, 'Proposal' | 'SelectionPaper'>
   /** The id of the problem or the paper. */
   targetId: string
+}
+
+/**
+ * Every problem and every paper the selection holds, each as something the reviewers discuss.
+ *
+ * @param selection - The selection, its problems and papers looked up by id.
+ *
+ * @returns The problems, then the papers, each paper with the board it is on.
+ */
+export function discussedSubjectsOf({
+  proposalsById,
+  papersById,
+}: Pick<SelectionIndex, 'proposalsById' | 'papersById'>): DiscussedSubject[] {
+  // Every problem, then every paper
+  return [
+    ...[...proposalsById.values()].map((proposal) => ({ kind: 'proposal' as const, proposal })),
+    ...[...papersById.values()].map((place) => ({ kind: 'paper' as const, ...place })),
+  ]
 }
 
 /**

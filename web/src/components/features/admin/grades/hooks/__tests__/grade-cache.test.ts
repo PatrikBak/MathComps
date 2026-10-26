@@ -60,12 +60,16 @@ function boardOf(name: string, problemId: string): GradingBoard {
         entrants: [
           {
             user: { id: 'ada', username: 'Ada', email: null },
+            countryCode: 'SK',
+            grade: { kind: 'highSchool', year: 2 },
             startedAt: '2026-09-10T10:00:00Z',
             finishedAt: null,
             finishedAfterSeconds: 600,
           },
           {
             user: { id: 'bruno', username: 'Bruno', email: null },
+            countryCode: 'SK',
+            grade: { kind: 'highSchool', year: 2 },
             startedAt: '2026-09-10T10:00:00Z',
             finishedAt: null,
             finishedAfterSeconds: 900,
