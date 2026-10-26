@@ -17,7 +17,7 @@ type FacetHeaderProps = {
   /** Empties the selection. */
   onClear: () => void
   /** Hides the clear button while keeping its space. */
-  suppressClear?: boolean
+  suppressClear: boolean
   /** Explanation offered beside the title. */
   titleTooltip?: string
 }
@@ -30,7 +30,7 @@ export function FacetHeader({
   labelId,
   anySelected,
   onClear,
-  suppressClear = false,
+  suppressClear,
   titleTooltip,
 }: FacetHeaderProps) {
   // Translations for the shared filter controls

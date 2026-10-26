@@ -1,12 +1,14 @@
 import { useLocale } from 'next-intl'
 import { useMemo } from 'react'
 
+import { useFirstSeenOrder } from '@/hooks/use-first-seen-order'
 import { useKeyedState } from '@/hooks/use-keyed-state'
 
 import {
   drawnSectionRowIds,
   facetTabStopRowId,
   orderOptionsForDisplay,
+  sectionRowsStandingForSelection,
   toVisibleSections,
 } from '../model/facet-logic'
 import type {
@@ -22,9 +24,7 @@ import type {
 export type UseFacetOptionRowsOptions = {
   /** Whether the popover is open. */
   isOpen: boolean
-  /** The current search term. */
-  query: string
-  /** The options surviving that term, in their incoming order. */
+  /** The options surviving the search term, in their incoming order. */
   filteredOptions: FacetOption[]
   /** The labelled sections the options are split into, absent on a flat facet. */
   grouping: FacetGrouping | undefined
@@ -36,6 +36,8 @@ export type UseFacetOptionRowsOptions = {
   selected: string[]
   /** Whether the options standing as the popover opens lead their section until it closes. */
   floatsSelectedFirst: boolean
+  /** The row focus last landed on while it stays among the rows, or null for none. */
+  lastFocusedRowId: string | null
 }
 
 /**
@@ -54,23 +56,22 @@ export type UseFacetOptionRowsResult = {
  * Lays out a facet's option rows: the order they render in, the sections they fall into, and the one row the
  * page's tab order reaches.
  *
- * Where the facet floats them, the options standing as the popover opens lead their section. An option picked while
- * it stays open keeps the place the incoming order gives it, so a run of quick picks lands where it was aimed, and a
- * search lists its results in their incoming order. A list ordered by count still re-sorts when a pick changes the
- * counts.
+ * Where the facet floats them, the options standing as the popover opens lead their section. While it stays open
+ * every row keeps the place it opened in, an option picked since and a count a pick changes alike, so a run of quick
+ * picks lands where it was aimed. A new ordering on any section lays the whole list out afresh.
  *
  * @param options - What the rows are laid out from.
  * @returns The rows described by {@link UseFacetOptionRowsResult}.
  */
 export function useFacetOptionRows({
   isOpen,
-  query,
   filteredOptions,
   grouping,
   sortModes,
   collapsed,
   selected,
   floatsSelectedFirst,
+  lastFocusedRowId,
 }: UseFacetOptionRowsOptions): UseFacetOptionRowsResult {
   // The active locale
   const locale = useLocale()
@@ -78,8 +79,8 @@ export function useFacetOptionRows({
   // The options standing as the popover last opened, held while it stays open
   const [standingAtOpen] = useKeyedState(isOpen, selected)
 
-  // The options in the order they should render
-  const displayOptions = useMemo(() => {
+  // The options in the order they would render, worked out afresh
+  const orderedOptions = useMemo(() => {
     // Which options float to the top: those standing as the popover opened, so a pick made since stays in the
     // incoming order
     const leadingIds = floatsSelectedFirst ? standingAtOpen : []
@@ -88,22 +89,21 @@ export function useFacetOptionRows({
     return orderOptionsForDisplay({
       options: filteredOptions,
       isOpen,
-      query,
       grouping,
       sortModes,
       leadingIds,
       locale,
     })
-  }, [
-    filteredOptions,
-    isOpen,
-    query,
-    grouping,
-    sortModes,
-    floatsSelectedFirst,
-    standingAtOpen,
-    locale,
-  ])
+  }, [filteredOptions, isOpen, grouping, sortModes, floatsSelectedFirst, standingAtOpen, locale])
+
+  // The options in the order they render: held where they stood as the popover opened, so a pick changing the counts
+  // moves nothing under the pointer, and taken afresh as it opens or a section is given a new ordering
+  const displayOptions = useFirstSeenOrder({
+    items: orderedOptions,
+    keyOf: (option) => option.id,
+    resetKey: `${isOpen}|${Object.values(sortModes).join()}`,
+    newcomerPlace: 'inPlace',
+  })
 
   // The sections that currently have something to show, empty for a flat facet
   const visibleSections = useMemo(
@@ -119,9 +119,14 @@ export function useFacetOptionRows({
       ? drawnSectionRowIds(visibleSections, collapsed)
       : displayOptions.map((option) => option.id)
 
+    // The rows standing for the selection, a rolled-up section's heading among them for the options it hides
+    const standingRowIds = grouping
+      ? sectionRowsStandingForSelection(visibleSections, collapsed, selected)
+      : selected
+
     // The tab stop among them
-    return facetTabStopRowId(drawnRowIds, selected)
-  }, [collapsed, displayOptions, grouping, selected, visibleSections])
+    return facetTabStopRowId(drawnRowIds, standingRowIds, lastFocusedRowId)
+  }, [collapsed, displayOptions, grouping, lastFocusedRowId, selected, visibleSections])
 
   // The rows in their order, the sections holding them, and the one the tab order reaches
   return { displayOptions, visibleSections, tabStopRowId }

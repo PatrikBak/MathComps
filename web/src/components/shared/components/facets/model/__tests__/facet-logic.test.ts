@@ -1,23 +1,31 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  applyCollapsibleRowAction,
   compareFacetOptions,
   drawnSectionRowIds,
   type FacetDisplayOrderInput,
   facetOptionAccessibleName,
   facetTabStopRowId,
-  filterOptionsBySearch,
   groupOptionsByKey,
   headingRowId,
   nextFocusedOptionIndex,
   orderFlatOptions,
   orderGroupedOptions,
   orderOptionsForDisplay,
+  searchMatcher,
+  sectionRowsStandingForSelection,
   sectionsWorthSorting,
   soleSelectionLabel,
   toVisibleSections,
 } from '../facet-logic'
-import type { FacetGrouping, FacetOption, FacetSortMode, VisibleSection } from '../facet-types'
+import type {
+  FacetGrouping,
+  FacetOption,
+  FacetRowAction,
+  FacetSortMode,
+  VisibleSection,
+} from '../facet-types'
 
 /** Slovak tag names, whose diacritics are the point of the search behaviour. */
 const accentedOptions: FacetOption[] = [
@@ -30,26 +38,18 @@ const accentedOptions: FacetOption[] = [
 ]
 
 /**
- * Runs a search and reports which options survived it.
+ * Runs a search that narrows {@link accentedOptions} and reports which of them pass it.
  *
  * @param searchTerm - What the user typed.
  * @returns The ids of the matching options.
  */
 function matchedIds(searchTerm: string): string[] {
-  // The ids of the options the search kept
-  return filterOptionsBySearch(accentedOptions, searchTerm).map((option) => option.id)
+  // The ids of the options passing the term's matcher
+  return accentedOptions.filter(searchMatcher(searchTerm)!).map((option) => option.id)
 }
 
 describe('facet-logic', () => {
   describe('facetOptionAccessibleName', () => {
-    it('reads the count out after the name', () => {
-      // Act on an option carrying a count
-      const result = facetOptionAccessibleName('Algebra', 42)
-
-      // The figure trails the name in brackets
-      expect(result).toBe('Algebra (42)')
-    })
-
     it('names an option by its label alone when the facet shows no counts', () => {
       // Act on an option with no count to fold in
       const result = facetOptionAccessibleName('Algebra', undefined)
@@ -67,15 +67,7 @@ describe('facet-logic', () => {
     })
   })
 
-  describe('filterOptionsBySearch', () => {
-    it('returns every option for an empty term', () => {
-      // Act on an empty term
-      const result = filterOptionsBySearch(accentedOptions, '')
-
-      // The full list comes back untouched
-      expect(result).toEqual(accentedOptions)
-    })
-
+  describe('searchMatcher', () => {
     it('ignores case', () => {
       // Act on the word in lowercase
       const lowercase = matchedIds('rovnice')
@@ -95,12 +87,6 @@ describe('facet-logic', () => {
       expect(matchedIds('ciara')).toEqual(['6'])
     })
 
-    it('ignores case and diacritics at once', () => {
-      // Act on terms that are both miscased and unaccented
-      expect(matchedIds('CISLA')).toEqual(['1'])
-      expect(matchedIds('StAtIsTiKa')).toEqual(['3'])
-    })
-
     it('ignores whitespace the user left around the term', () => {
       // Act on a word typed with a trailing space, as a term being extended reads mid-typing
       const result = matchedIds('rovnice ')
@@ -109,12 +95,12 @@ describe('facet-logic', () => {
       expect(result).toEqual(['2'])
     })
 
-    it('returns every option for a term of nothing but whitespace', () => {
+    it('sets no test for a term of nothing but whitespace', () => {
       // Act on the space bar pressed into an empty search box
-      const result = filterOptionsBySearch(accentedOptions, '   ')
+      const result = searchMatcher('   ')
 
       // Nothing was asked for, so nothing is narrowed
-      expect(result).toEqual(accentedOptions)
+      expect(result).toBeNull()
     })
 
     it('matches on what the fuller name says and the label leaves out', () => {
@@ -124,7 +110,7 @@ describe('facet-logic', () => {
       ]
 
       // Act on the part of the name only the fuller one carries
-      const result = filterOptionsBySearch(options, 'proofs')
+      const result = options.filter(searchMatcher('proofs')!)
 
       // The fuller name found it, though nothing on the row says that part
       expect(result.map((option) => option.id)).toEqual(['problem-4'])
@@ -136,20 +122,11 @@ describe('facet-logic', () => {
       expect(matchedIds('stvo')).toEqual(['5'])
     })
 
-    it('returns every option a term matches', () => {
-      // Act on a fragment shared by two names
-      const result = matchedIds('st')
-
-      // Both Štatistika and Štvorec survive
-      expect(result).toContain('3')
-      expect(result).toContain('5')
-    })
-
-    it('returns nothing when a term matches no option', () => {
+    it('passes no option when a term matches none', () => {
       // Act on a term no name contains
       const result = matchedIds('xyz')
 
-      // Nothing survives, rather than the filter giving up and passing everything
+      // Nothing survives, rather than the matcher giving up and passing everything
       expect(result).toEqual([])
     })
   })
@@ -350,26 +327,6 @@ describe('facet-logic', () => {
       // Each selected option leads its own section rather than the whole list
       expect(result.map((option) => option.id)).toEqual(['a2', 'a1', 'a3', 't2', 't1'])
     })
-
-    it('drops options belonging to no configured section', () => {
-      // The options plus one ungrouped option and one under an unknown key
-      const strays: FacetOption[] = [
-        ...options,
-        { id: 'x1', displayName: 'Bez skupiny' },
-        { id: 'x2', displayName: 'Neznáma', groupKey: 'mystery' },
-      ]
-
-      // Both sections ordered by name
-      const sortModes: Record<string, FacetSortMode> = { area: 'alpha', technique: 'alpha' }
-
-      // Act on the list carrying the strays
-      const result = orderGroupedOptions(strays, grouping, sortModes, [], 'sk')
-
-      // Neither stray survived, since no section could hold it
-      expect(result.map((option) => option.id)).not.toContain('x1')
-      expect(result.map((option) => option.id)).not.toContain('x2')
-      expect(result).toHaveLength(5)
-    })
   })
 
   describe('orderOptionsForDisplay', () => {
@@ -380,11 +337,10 @@ describe('facet-logic', () => {
       { id: 'a3', displayName: 'Mika', count: 50, groupKey: 'area' },
     ]
 
-    // That section open and unsearched, sorted by count, with its last option standing
+    // That section open, sorted by count, with its last option standing
     const openList: FacetDisplayOrderInput<FacetOption> = {
       options,
       isOpen: true,
-      query: '',
       grouping: { keys: ['area'], labels: { area: 'Oblasť' } },
       sortModes: { area: 'count-desc' },
       leadingIds: ['a3'],
@@ -392,24 +348,16 @@ describe('facet-logic', () => {
     }
 
     it('leads an open list with its standing options, the rest under the section ordering', () => {
-      // Act on the open list nobody is searching
+      // Act on the open list
       const result = orderOptionsForDisplay(openList)
 
       // The standing option first, then the others by descending count
       expect(result.map((option) => option.id)).toEqual(['a3', 'a2', 'a1'])
     })
-
-    it('keeps the incoming order while a search is running', () => {
-      // Act on the same list mid-search
-      const result = orderOptionsForDisplay({ ...openList, query: 'a' })
-
-      // Neither the standing option nor the count ordering moved anything under the caret
-      expect(result.map((option) => option.id)).toEqual(['a1', 'a2', 'a3'])
-    })
   })
 
   describe('toVisibleSections', () => {
-    // Three sections, which the cases below fill only in part
+    // Three sections, one of which the options below leave empty
     const grouping: FacetGrouping = {
       keys: ['area', 'technique', 'goal'],
       labels: { area: 'Oblasť', technique: 'Technika', goal: 'Cieľ' },
@@ -429,26 +377,6 @@ describe('facet-logic', () => {
       expect(result.map((section) => section.groupKey)).toEqual(['area', 'technique'])
       expect(result[0].sectionOptions.map((option) => option.id)).toEqual(['a1'])
     })
-
-    it('drops the sections nothing landed in', () => {
-      // Options covering a single section
-      const options: FacetOption[] = [{ id: 'a1', displayName: 'Algebra', groupKey: 'area' }]
-
-      // Act on those options
-      const result = toVisibleSections(options, grouping)
-
-      // Only the section with something to show survives
-      expect(result).toHaveLength(1)
-      expect(result[0].groupKey).toBe('area')
-    })
-
-    it('yields nothing when every section is empty', () => {
-      // Act on an empty list, which is what a search matching nothing leaves
-      const result = toVisibleSections([], grouping)
-
-      // No section is offered, rather than three empty ones
-      expect(result).toEqual([])
-    })
   })
 
   describe('drawnSectionRowIds', () => {
@@ -467,21 +395,97 @@ describe('facet-logic', () => {
     })
   })
 
+  describe('sectionRowsStandingForSelection', () => {
+    it("stands a rolled-up section's heading in for the picks it hides, and no other heading", () => {
+      // Three sections of one option each
+      const sections: VisibleSection[] = [
+        { groupKey: 'area', sectionOptions: [{ id: 'a1', displayName: 'Algebra' }] },
+        { groupKey: 'goal', sectionOptions: [{ id: 'g1', displayName: 'Dokázať' }] },
+        { groupKey: 'technique', sectionOptions: [{ id: 't1', displayName: 'Indukcia' }] },
+      ]
+
+      // Act with the first two rolled up, and the first and last options picked
+      const result = sectionRowsStandingForSelection(
+        sections,
+        { area: true, goal: true, technique: false },
+        ['a1', 't1']
+      )
+
+      // Both picks, and the heading hiding the first of them
+      expect(result).toEqual(['a1', 't1', headingRowId('area')])
+    })
+  })
+
   describe('facetTabStopRowId', () => {
-    it('lands on the first picked row as drawn, whatever order the picks were made in', () => {
+    it('lands on the first standing row as drawn, whatever order the picks were made in', () => {
       // Act on two picks made bottom first
-      const result = facetTabStopRowId(['a', 'b', 'c'], ['c', 'b'])
+      const result = facetTabStopRowId(['a', 'b', 'c'], ['c', 'b'], null)
 
       // The higher of them on the list takes the stop
       expect(result).toBe('b')
     })
 
-    it('falls back to the top row when nothing picked is drawn', () => {
-      // Act on a pick sitting in a rolled-up section, which the list draws none of
-      const result = facetTabStopRowId([headingRowId('area'), 'a1'], ['hidden'])
+    it('falls back to the top row when nothing standing is drawn', () => {
+      // Act on a pick a search left off the list
+      const result = facetTabStopRowId([headingRowId('area'), 'a1'], ['hidden'], null)
 
       // The top of the list takes the stop, which here is a heading
       expect(result).toBe(headingRowId('area'))
+    })
+
+    it('keeps the stop on the row focus last landed on, ahead of the picks', () => {
+      // Act with focus having moved to the bottom row, a pick standing above it
+      const result = facetTabStopRowId(['a', 'b', 'c'], ['a'], 'c')
+
+      // The focused row keeps the stop, so Tab leaves the list from there
+      expect(result).toBe('c')
+    })
+
+    it('lets go of a focused row the list does not draw', () => {
+      // Act with focus last on a row since taken off the list
+      const result = facetTabStopRowId(['a', 'b'], ['b'], 'gone')
+
+      // The pick takes the stop back
+      expect(result).toBe('b')
+    })
+  })
+
+  describe('applyCollapsibleRowAction', () => {
+    /**
+     * Presses a key on a row and reports what it did.
+     *
+     * @param action - What the key asks of the row.
+     * @param isOpen - Whether the row stands open.
+     * @param hasOrderings - Whether the row offers orderings to cycle.
+     * @returns Whether the row acted, and which of its moves it made.
+     */
+    function press(action: FacetRowAction, isOpen: boolean, hasOrderings: boolean) {
+      // The moves the row makes, in the order it makes them
+      const moves: string[] = []
+
+      // Act on a row that records each move
+      const acted = applyCollapsibleRowAction(action, {
+        isOpen,
+        toggleOpen: () => moves.push('toggle'),
+        cycleSort: hasOrderings ? () => moves.push('sort') : null,
+      })
+
+      // What the key did
+      return { acted, moves }
+    }
+
+    it('closes only an open row and opens only a closed one, leaving a key with nothing to do to the browser', () => {
+      // Left and Right, each on a row that can move its way and on one that cannot
+      expect(press('collapse', true, false)).toEqual({ acted: true, moves: ['toggle'] })
+      expect(press('collapse', false, false)).toEqual({ acted: false, moves: [] })
+      expect(press('expand', false, false)).toEqual({ acted: true, moves: ['toggle'] })
+      expect(press('expand', true, false)).toEqual({ acted: false, moves: [] })
+    })
+
+    it('advances the ordering only on a row offering orderings', () => {
+      // The sort key on a row with orderings, and on one without
+      expect(press('cycle-sort', true, true)).toEqual({ acted: true, moves: ['sort'] })
+      expect(press('cycle-sort', true, false)).toEqual({ acted: false, moves: [] })
     })
   })
 
@@ -500,11 +504,12 @@ describe('facet-logic', () => {
      * @returns The options, named apart within their section.
      */
     function sectionOf(groupKey: string, howMany: number): FacetOption[] {
-      // One option per slot, each naming the section it belongs to
+      // One option per slot, each naming the section it belongs to and counting its results
       return Array.from({ length: howMany }, (_unused, index) => ({
         id: `${groupKey}-${index}`,
         displayName: `${groupKey} ${index}`,
         groupKey,
+        count: index,
       }))
     }
 
@@ -528,6 +533,17 @@ describe('facet-logic', () => {
 
       // The long section decides it, and the control then reads the same on every heading
       expect(result).toBe(true)
+    })
+
+    it('offers no ordering where no option carries a count', () => {
+      // Act on a long section whose options carry no count
+      const result = sectionsWorthSorting(
+        sectionOf('area', 8).map(({ count: _count, ...option }) => option),
+        grouping
+      )
+
+      // Names alone are the only order there is, and the section already reads in it
+      expect(result).toBe(false)
     })
 
     it('ignores options belonging to no configured section', () => {

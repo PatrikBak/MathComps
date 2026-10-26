@@ -216,7 +216,7 @@ export const SearchFilters = ({
               options={competitionTreeOpts}
               selected={selectedTreeIds}
               onChange={handleCompetitionTreeChange}
-              searchPlaceholder={t('facets.searchCompetitions')}
+              search={{ placeholder: t('facets.searchCompetitions') }}
               closedLabel={t('facets.allCompetitions')}
               defaultExpandedIds={defaultExpandedIds}
             />
@@ -231,7 +231,7 @@ export const SearchFilters = ({
                   next.map((slug: string) => ({ slug, displayName: slug, fullName: null }))
                 )
               }}
-              searchPlaceholder={t('facets.searchSeasons')}
+              search={{ placeholder: t('facets.searchSeasons') }}
               closedLabel={t('facets.allSeasons')}
             />
 
@@ -245,7 +245,6 @@ export const SearchFilters = ({
                   problemNumbers: next.map((id: string) => parseInt(id, 10)),
                 })
               }}
-              showSearch={false}
               closedLabel={t('facets.anyOrder')}
             />
           </div>
@@ -264,7 +263,7 @@ export const SearchFilters = ({
                   next.map((slug: string) => ({ slug, displayName: slug, fullName: null }))
                 )
               }}
-              searchPlaceholder={t('facets.searchTags')}
+              search={{ placeholder: t('facets.searchTags') }}
               logic={{
                 mode: filters.tagLogic,
                 onChange: (mode) => updateFilter('tagLogic', mode),
@@ -295,7 +294,7 @@ export const SearchFilters = ({
                   next.map((slug: string) => ({ slug, displayName: slug, fullName: null }))
                 )
               }}
-              searchPlaceholder={t('facets.searchAuthors')}
+              search={{ placeholder: t('facets.searchAuthors') }}
               logic={{
                 mode: filters.authorLogic,
                 onChange: (mode) => updateFilter('authorLogic', mode),

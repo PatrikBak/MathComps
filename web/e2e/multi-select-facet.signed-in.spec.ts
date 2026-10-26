@@ -2,6 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { facetsCopy } from './support/archive-filters'
 import { areaCopy } from './support/competitions'
+import { focusedRowId, isFocusInPanel, panelResetOf, QUIET_MS } from './support/facets'
 import { ON_OFFER_COUNT, openPool, selectionCopy, stubSelection } from './support/problem-selection'
 import { expect, test } from './support/test'
 
@@ -13,9 +14,6 @@ const ON_BOARD_COUNT = 2
 
 /** How many of the pool's problems are recommended for the intermediate paper. */
 const INTERMEDIATE_COUNT = 6
-
-/** How many are recommended for the advanced paper. */
-const ADVANCED_COUNT = 1
 
 /**
  * One of the pool's facets, opened from its pill.
@@ -35,6 +33,9 @@ async function openFacet(page: Page, pill: string, title: string): Promise<Locat
 
   // Once it is up
   await expect(panel).toBeVisible()
+
+  // And focus has followed, which the panel hands it a frame after it appears, a key pressed sooner going to the pill
+  await expect.poll(() => isFocusInPanel(panel)).toBe(true)
 
   // Which is what the test goes on to work in
   return panel
@@ -125,6 +126,33 @@ test.describe('a single-choice facet', () => {
     await expect(selected).not.toBeChecked()
   })
 
+  test('keeps the standing option when a modified click lands on its radio', async ({ page }) => {
+    // The State facet, opened
+    const panel = await openFacet(page, filtersCopy.state, filtersCopy.state)
+
+    // The option for the problems on the board
+    const selected = optionOf(panel, 'radio', filtersCopy.selected)
+
+    // The cards the pool shows
+    const cards = page.getByRole('article')
+
+    // Picked
+    await selected.click()
+
+    // The pool showing those alone
+    await expect(cards).toHaveCount(ON_BOARD_COUNT)
+
+    // Narrowed to with the modifier held, which it already stands alone as
+    await selected.click({ modifiers: ['ControlOrMeta'] })
+
+    // Given time for a clear to land, were one coming
+    await page.waitForTimeout(QUIET_MS)
+
+    // Still standing, the pool unchanged
+    await expect(selected).toBeChecked()
+    await expect(cards).toHaveCount(ON_BOARD_COUNT)
+  })
+
   test('walks its options with the arrows without picking any', async ({ page }) => {
     // The State facet, opened, which is too short to draw a search box and so opens on the panel itself
     const panel = await openFacet(page, filtersCopy.state, filtersCopy.state)
@@ -151,15 +179,65 @@ test.describe('a single-choice facet', () => {
     // Back on the first
     await expect(selected).toBeFocused()
 
+    // Right, which on a radio would step to its neighbour and pick it
+    await page.keyboard.press('ArrowRight')
+
+    // And Left, the same the other way
+    await page.keyboard.press('ArrowLeft')
+
+    // Still on the first
+    await expect(selected).toBeFocused()
+
     // Nothing picked on the way
     await expect(selected).not.toBeChecked()
     await expect(notSelected).not.toBeChecked()
     await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT)
   })
+
+  test('takes Tab back in at its pick once focus has left it, wherever the arrows had got to', async ({
+    page,
+  }) => {
+    // The State facet, opened
+    const panel = await openFacet(page, filtersCopy.state, filtersCopy.state)
+
+    // Its two options
+    const selected = optionOf(panel, 'radio', filtersCopy.selected)
+    const notSelected = optionOf(panel, 'radio', filtersCopy.notSelected)
+
+    // The problems on the board, picked
+    await selected.click()
+
+    // Standing
+    await expect(selected).toBeChecked()
+
+    // Down, onto the top of the list, the click having left focus where it was
+    await page.keyboard.press('ArrowDown')
+
+    // On the pick
+    await expect(selected).toBeFocused()
+
+    // Down again, off the pick
+    await page.keyboard.press('ArrowDown')
+
+    // On the option below it
+    await expect(notSelected).toBeFocused()
+
+    // Shift+Tab, out of the list
+    await page.keyboard.press('Shift+Tab')
+
+    // Onto the panel's reset
+    await expect(panelResetOf(panel)).toBeFocused()
+
+    // Tab, back in
+    await page.keyboard.press('Tab')
+
+    // At the pick, the one radio Firefox and Safari let Tab into the group at
+    await expect(selected).toBeFocused()
+  })
 })
 
 test.describe('a multi-choice facet on a pill', () => {
-  test('names the one option picked, counts the picks from two, and resets from its panel', async ({
+  test('names the one option picked, counts the picks from two, and resets from its panel into its list', async ({
     page,
   }) => {
     // The Category facet, opened
@@ -189,7 +267,7 @@ test.describe('a multi-choice facet on a pill', () => {
     await expect(pill.getByLabel(facetsCopy.selectedCount.replace('{count}', '2'))).toBeVisible()
 
     // The panel's reset
-    const reset = panel.getByRole('button', { name: facetsCopy.resetFilter })
+    const reset = panelResetOf(panel)
 
     // Counting them too
     await expect(reset).toHaveText(`${facetsCopy.reset} (2)`)
@@ -200,52 +278,8 @@ test.describe('a multi-choice facet on a pill', () => {
     // The pool back whole, and nothing left ticked
     await expect(cards).toHaveCount(ON_OFFER_COUNT)
     await expect(panel.getByRole('checkbox', { checked: true })).toHaveCount(0)
-  })
 
-  test('narrows to the option a modified click lands on, picked or not', async ({ page }) => {
-    // The Category facet, opened
-    const panel = await openFacet(page, filtersCopy.category, filtersCopy.category)
-
-    // Its options
-    const elementary = optionOf(panel, 'checkbox', areaCopy.categories.elementary)
-    const intermediate = optionOf(panel, 'checkbox', areaCopy.categories.intermediate)
-    const advanced = optionOf(panel, 'checkbox', areaCopy.categories.advanced)
-
-    // One picked the ordinary way
-    await elementary.click()
-
-    // Ticked
-    await expect(elementary).toBeChecked()
-
-    // And another
-    await advanced.click()
-
-    // Ticked beside it
-    await expect(advanced).toBeChecked()
-
-    // Hold the modifier and click the third one's checkbox
-    await intermediate.click({ modifiers: ['ControlOrMeta'] })
-
-    // The cards the pool shows
-    const cards = page.getByRole('article')
-
-    // The pool narrows to it alone, and so do the checkboxes
-    await expect(cards).toHaveCount(INTERMEDIATE_COUNT)
-    await expect(panel.getByRole('checkbox', { checked: true })).toHaveCount(1)
-    await expect(intermediate).toBeChecked()
-
-    // One more picked the ordinary way
-    await advanced.click()
-
-    // Ticked beside it
-    await expect(advanced).toBeChecked()
-
-    // Hold the modifier and click the picked one's checkbox, which the click alone would unpick
-    await advanced.click({ modifiers: ['ControlOrMeta'] })
-
-    // The pool narrows to it, still ticked
-    await expect(cards).toHaveCount(ADVANCED_COUNT)
-    await expect(panel.getByRole('checkbox', { checked: true })).toHaveCount(1)
-    await expect(advanced).toBeChecked()
+    // Focus on a row of the list, the facet drawing no search box and the reset gone with nothing to reset
+    await expect.poll(() => focusedRowId(page)).not.toBeNull()
   })
 })

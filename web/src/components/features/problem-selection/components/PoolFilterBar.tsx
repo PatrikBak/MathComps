@@ -152,7 +152,6 @@ function PoolFacet<TValue extends string>({
       selected={selected}
       onChange={(picked) => onChange(values.filter((value) => picked.includes(value)))}
       selectionMode={selectionMode}
-      showSearch={false}
     />
   )
 }

@@ -1580,7 +1580,6 @@
       "resetFilter": "Resetovať výber v tomto filtri",
       "resetSelection": "Resetovať výber v {name}",
       "searchIn": "Hľadať {name}",
-      "searchPlaceholder": "Hľadať…",
       "selectedCount": "Počet vybraných: {count}",
       "selectedInGroup": "{count} vybraných",
       "selectionLogic": "Logika výberu",

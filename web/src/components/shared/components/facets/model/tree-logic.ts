@@ -1,5 +1,4 @@
-import { normalizeForSearch } from '@/components/shared/utils/string-utils'
-
+import { searchMatcher } from './facet-logic'
 import type { TreeCheckState, TreeNode } from './facet-types'
 
 /**
@@ -9,7 +8,7 @@ import type { TreeCheckState, TreeNode } from './facet-types'
  * @param includeNode - Whether the node's own id joins the result.
  * @returns The ids in depth-first order.
  */
-export function getAllDescendantIds(node: TreeNode, includeNode = false): string[] {
+function getAllDescendantIds(node: TreeNode, includeNode = false): string[] {
   // The node itself leads the list when asked for
   const selfIds = includeNode ? [node.id] : []
 
@@ -57,9 +56,9 @@ export function getAllAncestorIds(nodeId: string, allNodes: TreeNode[]): string[
 }
 
 /**
- * Decides how a node's checkbox should read. A node selected in its own right counts
- * as checked whatever its descendants do, which is what lets one selected parent stand
- * in for its whole subtree.
+ * Decides how a node reads from its own selection and its subtree's, any selected ancestor set aside. A node
+ * selected in its own right counts as checked whatever its descendants do, which is what lets one selected
+ * parent stand in for its whole subtree.
  *
  * @param node - The node to judge.
  * @param selectedIds - The ids selected in their own right.
@@ -123,12 +122,33 @@ export function isNodeEffectivelyChecked(
 }
 
 /**
+ * Decides how a node's checkbox reads in a tree. A node the selection covers, in its own right or through an
+ * ancestor, reads checked whatever its subtree is doing; any other node reads as its subtree does.
+ *
+ * @param node - The node to judge, with its whole subtree.
+ * @param selectedIds - The ids selected in their own right.
+ * @param allNodes - The roots of the tree the node belongs to.
+ * @returns The state its checkbox should show.
+ */
+export function treeCheckState(
+  node: TreeNode,
+  selectedIds: string[],
+  allNodes: TreeNode[]
+): TreeCheckState {
+  // Covered by the selection, which outranks whatever lies beneath
+  if (isNodeEffectivelyChecked(node.id, selectedIds, allNodes)) return 'checked'
+
+  // Otherwise the subtree decides
+  return calculateParentState(node, selectedIds)
+}
+
+/**
  * Applies a click on a node to the selection. Deselecting a node that is only covered
  * by a selected ancestor has to break that ancestor apart, replacing it with each of
- * its leaves except the one being turned off.
+ * its leaves outside the node being turned off.
  *
  * @param node - The node that was clicked.
- * @param currentSelected - The ids selected in their own right.
+ * @param currentSelected - The ids selected in their own right, none of them under another.
  * @param allNodes - The roots of the tree the node belongs to.
  * @returns The resulting selection, as a new array.
  */
@@ -137,82 +157,54 @@ export function toggleNodeSelection(
   currentSelected: string[],
   allNodes: TreeNode[]
 ): string[] {
-  // A node with nothing under it stands only for itself
-  const isLeaf = !node.children || node.children.length === 0
-
-  // A leaf can be covered in two different ways, which have to be undone differently
-  if (isLeaf) {
-    // Selected in its own right, so it can simply be dropped
-    if (currentSelected.includes(node.id)) {
-      return currentSelected.filter((id) => id !== node.id)
-    }
-
-    // Failing that, the whole path above it is where a stand-in could be sitting
-    const ancestors = getAllAncestorIds(node.id, allNodes)
-
-    // The nearest one actually selected, which is what stands in for this leaf
-    const selectedAncestor = ancestors.find((ancestorId) => currentSelected.includes(ancestorId))
-
-    // Covered by an ancestor, which now has to be expressed as its individual leaves
-    if (selectedAncestor) {
-      // The ancestor goes, since it can no longer stand for a subtree with a hole in it
-      const withoutAncestor = currentSelected.filter((id) => id !== selectedAncestor)
-
-      // The ancestor's real node, which is what says who it was standing for
-      const ancestorNode = findNodeById(allNodes, selectedAncestor)
-
-      // A selection naming a node the tree does not hold is simply dropped
-      if (!ancestorNode?.children) {
-        return withoutAncestor
-      }
-
-      // Only leaves, since naming an intermediate node would re-cover the leaf being turned off
-      const leafDescendants = getAllDescendantIds(ancestorNode).filter((id) => {
-        // The id's real node, which is what says whether anything hangs off it
-        const descendant = findNodeById(allNodes, id)
-
-        // Only a node the tree holds and that has nothing under it counts
-        return descendant && (!descendant.children || descendant.children.length === 0)
-      })
-
-      // The ancestor gives way to every leaf under it except the one being turned off
-      return [...withoutAncestor, ...leafDescendants.filter((id) => id !== node.id)]
-    }
-
-    // Free of any selected ancestor, so it just joins the selection
-    return [...currentSelected, node.id]
-  }
-
-  // A parent selected in its own right is simply dropped
+  // Selected in its own right, so it can simply be dropped
   if (currentSelected.includes(node.id)) {
     return currentSelected.filter((id) => id !== node.id)
   }
 
-  // Descendants the parent will supersede, so one branch is never recorded twice over
-  const allDescendants = getAllDescendantIds(node)
+  // Failing that, the whole path above it is where a stand-in could be sitting
+  const ancestors = getAllAncestorIds(node.id, allNodes)
 
-  // Everything the parent does not already stand for, which is what survives alongside it
-  const unrelated = currentSelected.filter((id) => !allDescendants.includes(id))
+  // The one actually selected, which is what stands in for this node, a selection naming no node under another
+  const selectedAncestor = ancestors.find((ancestorId) => currentSelected.includes(ancestorId))
 
-  // The branch is now recorded once, at the node the user clicked
-  return [...unrelated, node.id]
-}
+  // Covered by an ancestor, which now has to be expressed as its individual leaves
+  if (selectedAncestor) {
+    // The ancestor goes, since it can no longer stand for a subtree with a hole in it
+    const withoutAncestor = currentSelected.filter((id) => id !== selectedAncestor)
 
-/**
- * Adds a node to the expanded set, or removes it when it is already there.
- *
- * @param nodeId - The node being toggled.
- * @param expandedIds - The currently expanded node ids.
- * @returns The resulting expansion, as a new array.
- */
-export function toggleExpansion(nodeId: string, expandedIds: string[]): string[] {
-  // Already expanded, so the toggle collapses it
-  if (expandedIds.includes(nodeId)) {
-    return expandedIds.filter((id) => id !== nodeId)
+    // The ancestor's real node, which is what says who it was standing for
+    const ancestorNode = findNodeById(allNodes, selectedAncestor)
+
+    // Always there and a branch, having been reached through its children, though the type cannot tell
+    if (!ancestorNode?.children) {
+      return withoutAncestor
+    }
+
+    // Only leaves, since an intermediate node above the one being turned off would re-cover it
+    const leafDescendants = getAllDescendantIds(ancestorNode).filter((id) => {
+      // The id's real node, which is what says whether anything hangs off it
+      const descendant = findNodeById(allNodes, id)
+
+      // Only a node the tree holds and that has nothing under it counts
+      return descendant && (!descendant.children || descendant.children.length === 0)
+    })
+
+    // The node being turned off, with everything under it
+    const turnedOffIds = getAllDescendantIds(node, true)
+
+    // The ancestor gives way to every leaf under it outside the node being turned off
+    return [...withoutAncestor, ...leafDescendants.filter((id) => !turnedOffIds.includes(id))]
   }
 
-  // Not expanded yet, so the toggle opens it
-  return [...expandedIds, nodeId]
+  // Descendants the node will supersede, so one branch is never recorded twice over
+  const allDescendants = getAllDescendantIds(node)
+
+  // Everything the node does not already stand for, which is what survives alongside it
+  const unrelated = currentSelected.filter((id) => !allDescendants.includes(id))
+
+  // The node joins the selection, standing for everything under it
+  return [...unrelated, node.id]
 }
 
 /**
@@ -226,20 +218,19 @@ export type FilteredTree = {
 }
 
 /**
- * Narrows a tree to the nodes matching a term, keeping each match's ancestors so the
- * result stays navigable. Matching ignores case and diacritics alike, so "cisla" finds
- * "Čísla", and a node's full name counts alongside the name it is shown under.
+ * Narrows a tree to the nodes carrying a term, as {@link searchMatcher} reads it, keeping each match's ancestors
+ * so the result stays navigable.
  *
  * @param nodes - The roots of the tree to narrow.
  * @param searchTerm - What the user typed; an empty term returns the tree untouched.
  * @returns The narrowed tree and the ids that have to be expanded to reveal the matches.
  */
 export function filterTreeBySearch(nodes: TreeNode[], searchTerm: string): FilteredTree {
-  // The term as it is compared: trimmed, case-folded and stripped of diacritics
-  const query = normalizeForSearch(searchTerm.trim())
+  // What a node's own names have to carry for it to match
+  const matches = searchMatcher(searchTerm)
 
   // An empty term narrows nothing, and the same array back means no node is recreated
-  if (!query) {
+  if (!matches) {
     return { tree: nodes, expandedIds: new Set() }
   }
 
@@ -252,13 +243,11 @@ export function filterTreeBySearch(nodes: TreeNode[], searchTerm: string): Filte
    * @param candidates - The nodes at the level being narrowed.
    * @returns Those worth keeping, each carrying whichever children survived.
    */
-  function keepMatching(candidates: TreeNode[]): TreeNode[] {
+  const keepMatching = (candidates: TreeNode[]): TreeNode[] =>
     // Each node either survives, survives trimmed, or disappears
-    return candidates.flatMap((node) => {
-      // Either name the node goes by can carry the term
-      const labelMatches =
-        normalizeForSearch(node.displayName).includes(query) ||
-        Boolean(node.fullName && normalizeForSearch(node.fullName).includes(query))
+    candidates.flatMap((node) => {
+      // Whether the node's own names carry the term
+      const labelMatches = matches(node)
 
       // Whatever survives below, which decides whether the node is worth keeping as a path
       const matchingChildren = node.children ? keepMatching(node.children) : []
@@ -287,7 +276,6 @@ export function filterTreeBySearch(nodes: TreeNode[], searchTerm: string): Filte
       // Neither the node nor anything below it matched, so the whole branch goes
       return []
     })
-  }
 
   // The narrowed tree, plus the ids the walk marked for opening
   return { tree: keepMatching(nodes), expandedIds }
@@ -330,35 +318,88 @@ export function indexTreeById(nodes: TreeNode[]): Map<string, TreeNode> {
 }
 
 /**
- * Walks the rows a hierarchy currently draws, a closed branch standing for itself alone.
- *
- * @param nodes - The nodes at this depth, already narrowed by whatever a search left.
- * @param expandedIds - Which branches stand open.
- * @returns The ids of the drawn rows, in the order they appear.
+ * One row a hierarchy draws, and where it sits in the hierarchy as drawn.
  */
-export function drawnRowIds(nodes: TreeNode[], expandedIds: Set<string>): string[] {
-  // A node draws its own row, and an open branch draws everything under it as well
-  return nodes.flatMap((node) =>
-    expandedIds.has(node.id) && node.children?.length
-      ? [node.id, ...drawnRowIds(node.children, expandedIds)]
-      : [node.id]
-  )
+export type DrawnTreeRow = {
+  /** The node this row stands for, as a search left it. */
+  node: TreeNode
+  /** How deep it sits, the roots being at zero. */
+  level: number
+  /** Where it stands among the siblings drawn beside it, counting from one. */
+  positionInSet: number
+  /** How many siblings are drawn at its level. */
+  setSize: number
+  /**
+   * Whether its children are showing, or undefined where it has none on show to open, which a search can leave a
+   * branch without.
+   */
+  expanded: boolean | undefined
 }
 
 /**
- * Collects the nodes a hierarchy can open, judged on the tree as it is drawn: a search that strips a
- * node's children leaves it nothing to open, whatever hangs off it in the tree it came from.
+ * Walks the rows a hierarchy currently draws, a closed branch standing for itself alone.
  *
- * @param nodes - The nodes at this depth, already narrowed by whatever a search left.
- * @returns The ids of every node with children on show.
+ * @param nodes - The roots, already narrowed by whatever a search left.
+ * @param expandedIds - Which branches stand open.
+ * @returns The drawn rows, in the order they appear.
  */
-export function expandableRowIds(nodes: TreeNode[]): Set<string> {
-  // Each branch contributes itself, and whatever branches hang below it
-  return new Set(
-    nodes.flatMap((node) =>
-      node.children?.length ? [node.id, ...expandableRowIds(node.children)] : []
+export function drawnTreeRows(nodes: TreeNode[], expandedIds: Set<string>): DrawnTreeRow[] {
+  /**
+   * Walks the rows one level of siblings draws, and the open branches among them.
+   *
+   * @param siblings - The nodes side by side at this level.
+   * @param level - How deep they sit.
+   * @returns Their rows, each followed by whatever its open branch draws.
+   */
+  function walk(siblings: TreeNode[], level: number): DrawnTreeRow[] {
+    // Each sibling in turn, in the order the hierarchy declares them
+    return siblings.flatMap((node, index) => {
+      // Whether its children are showing, for a node with any on show to open
+      const expanded = node.children?.length ? expandedIds.has(node.id) : undefined
+
+      // The node's own row
+      const row = { node, level, positionInSet: index + 1, setSize: siblings.length, expanded }
+
+      // An open branch draws its children under it, one level further in
+      return expanded ? [row, ...walk(node.children ?? [], level + 1)] : [row]
+    })
+  }
+
+  // Walked from the roots
+  return walk(nodes, 0)
+}
+
+/**
+ * Lists the rows standing for a tree's selection: every node selected in its own right, and for one the tree does
+ * not draw, the deepest branch above it that it does, since that branch is the nearest the tree comes to it. A pick
+ * goes undrawn under a closed branch, and under a search drawing its branch without it.
+ *
+ * @param selectedIds - The ids selected in their own right.
+ * @param rows - The rows the tree draws.
+ * @param allNodes - The roots of the tree the selection belongs to.
+ * @returns The row ids standing for the selection, in no particular order.
+ */
+export function treeRowsStandingForSelection(
+  selectedIds: string[],
+  rows: DrawnTreeRow[],
+  allNodes: TreeNode[]
+): string[] {
+  // The nodes the tree draws a row for
+  const drawnIds = new Set(rows.map((row) => row.node.id))
+
+  // Each selected node, followed, where it goes undrawn, by the deepest of its ancestors that is drawn
+  return selectedIds.flatMap((nodeId) => {
+    // A pick on show stands for itself
+    if (drawnIds.has(nodeId)) return [nodeId]
+
+    // The nearest the tree comes to it, absent where a search drew nothing of its branch
+    const drawnAncestorId = getAllAncestorIds(nodeId, allNodes).findLast((ancestorId) =>
+      drawnIds.has(ancestorId)
     )
-  )
+
+    // The pick, and the branch standing in for it
+    return drawnAncestorId ? [nodeId, drawnAncestorId] : [nodeId]
+  })
 }
 
 /**

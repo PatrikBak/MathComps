@@ -14,6 +14,7 @@ import {
   FLOATING_PANEL_FILLS,
 } from '@/components/shared/components/DropdownMenu'
 import { cn } from '@/components/shared/utils/css-utils'
+import { preventFocusLoss } from '@/components/shared/utils/dom-utils'
 
 import type { FacetTriggerVariant } from './FacetTrigger'
 
@@ -156,6 +157,8 @@ export function FacetPopoverHeader({ title, titleId, onClear, count }: FacetPopo
         'sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-foreground/10 px-2.5 sm:px-3 py-1.5 sm:py-2',
         FLOATING_PANEL_FILL_CLASS
       )}
+      // A press anywhere along the header leaves focus where it was
+      onMouseDown={preventFocusLoss}
     >
       {/* The facet's name */}
       <span

@@ -77,6 +77,8 @@ export function preventFocusLoss(event: MouseEvent) {
  * A data attribute one component stamps on an element and another finds the element by.
  */
 export type DataAttribute<TName extends `data-${string}`> = {
+  /** The attribute's name. */
+  name: TName
   /** Stamps an element as standing for an id, spread onto it; stamps nothing for no id. */
   stamp: (id: string | null) => Partial<Record<TName, string>>
   /** Builds the selector matching the element standing for an id. */
@@ -90,7 +92,7 @@ export type DataAttribute<TName extends `data-${string}`> = {
  * rename on either side can't leave the lookup matching nothing.
  *
  * @param name - The attribute's name.
- * @returns The ways to stamp it and to find by it, as described by {@link DataAttribute}.
+ * @returns Its name and the ways to stamp it and to find by it, as described by {@link DataAttribute}.
  */
 export function dataAttribute<TName extends `data-${string}`>(name: TName): DataAttribute<TName> {
   // A function which stamps the attribute carrying the id, or nothing for no id
@@ -104,8 +106,8 @@ export function dataAttribute<TName extends `data-${string}`>(name: TName): Data
   // The selector matching every element carrying the attribute
   const anySelector = `[${name}]`
 
-  // The ways to stamp the attribute and to find by it
-  return { stamp, selectorFor, anySelector }
+  // The attribute's name, and the ways to stamp it and to find by it
+  return { name, stamp, selectorFor, anySelector }
 }
 
 /**

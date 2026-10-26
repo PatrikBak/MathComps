@@ -1,10 +1,12 @@
-import { type ChangeEvent, memo, type MouseEvent, useCallback } from 'react'
+import { type ChangeEvent, type KeyboardEvent, memo, type MouseEvent, useCallback } from 'react'
 
 import { FOCUS_RING_ROW_CLASS } from '@/components/shared/components/Button'
 import { cn } from '@/components/shared/utils/css-utils'
+import { preventFocusLoss } from '@/components/shared/utils/dom-utils'
 import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
 import { useSmartLongPress } from '@/hooks/use-smart-long-press'
 
+import { FACET_ROW_ATTRIBUTE, followPressFromRow } from '../hooks/use-facet-row-navigation'
 import { facetOptionAccessibleName, toggleOptionSelection } from '../model/facet-logic'
 import type { FacetOption, FacetSelectionMode } from '../model/facet-types'
 import { FacetItemCount, FacetItemLabel } from './FacetItem'
@@ -83,9 +85,21 @@ export const OptionItem = memo(function OptionItem({
     onChange(() => [option.id])
   }, [onChange, option.id])
 
-  // A function which applies a change of the control: it adds this option to the selection, or takes it back
-  // out, and where only one option may stand it unseats whatever stood before instead. A click held with the
-  // modifier narrows to this option.
+  // A function which applies a plain pick of the row: it adds this option to the selection, or takes it back out.
+  // Where only one option may stand it unseats whatever stood before instead, and picking the one standing clears
+  // the facet, the only way back to showing everything from a row.
+  const onPick = useCallback(() => {
+    // The pick is expressed against whatever the selection is when it lands
+    onChange((previousSelected) => {
+      // One option at a time: this one in, or out where it was the one standing
+      if (replacesSelection) return previousSelected.includes(option.id) ? [] : [option.id]
+
+      // Several at once: this one joins them, or leaves
+      return toggleOptionSelection(option.id, previousSelected)
+    })
+  }, [replacesSelection, onChange, option.id])
+
+  // A function which applies a change of the control, a click held with the modifier narrowing to this option
   const onToggle = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       // The change rides on the click that made it, which says whether the modifier was down
@@ -96,68 +110,59 @@ export const OptionItem = memo(function OptionItem({
         // Narrow to this one option
         onExclusiveSelect()
 
-        // The toggle below is not this click's business
+        // The pick below is not this click's business
         return
       }
 
-      // The change is expressed against whatever the selection is when it lands
-      onChange((previousSelected) =>
-        replacesSelection ? [option.id] : toggleOptionSelection(option.id, previousSelected)
-      )
+      // An ordinary pick
+      onPick()
     },
-    [replacesSelection, onChange, onExclusiveSelect, option.id]
+    [onExclusiveSelect, onPick]
   )
-
-  // A function which clears the facet
-  const onClearSelection = useCallback(() => {
-    // Whatever stood before is going, so the previous value goes unread
-    onChange(() => [])
-  }, [onChange])
 
   // A long-press stands in for the modifier click on a touchscreen
   const longPressHandlers = useSmartLongPress(onExclusiveSelect)
 
   /**
-   * Intercepts a modified click landing beside the control, and the click on a standing radio that no change
-   * event follows, leaving every other click to the control itself.
+   * Answers a click landing beside the control, and the click on a standing radio that no change event follows,
+   * leaving every other click to the control itself.
    *
    * @param event - The click, read for the modifier key it was made with.
    */
   function handleClick(event: MouseEvent<HTMLLabelElement>) {
+    // The row's control, which is the row the keys walk
+    const control = event.currentTarget.control
+
+    // Focus on another row comes along to this one, the press itself having moved none
+    if (control) followPressFromRow(control)
+
     // Whether the click landed on the control itself, which it has already changed by now. Such a click is never
     // cancelled, since the browser would then restore the control's old state after React drew the new one.
-    const isOnControl = event.target === event.currentTarget.control
+    const isOnControl = event.target === control
 
-    // A modified click narrows to this option however many stand
-    if (isExclusiveSelection(event)) {
-      // One on the control is narrowed by the change event that follows it
-      if (isOnControl) return
-
-      // The label would otherwise toggle the control on top of the narrowing
+    // Beside the control, the label would hand the click on and move focus onto the control with it, which takes
+    // the caret out of the search box, so the row answers the click itself
+    if (!isOnControl) {
+      // The control and focus both stay where they are
       event.preventDefault()
 
-      // Narrow to this one option
-      onExclusiveSelect()
+      // A modified click narrows to this option however many stand, and a plain one picks it
+      if (isExclusiveSelection(event)) onExclusiveSelect()
+      else onPick()
 
-      // The plain-click paths below are not this click's business
+      // The click is answered
       return
     }
 
-    // Picking the radio already standing leaves it checked, so no change event follows and clearing the facet
-    // has to happen from the click. It is the only way back to showing everything from a row.
-    if (replacesSelection && checked) {
-      // The label would otherwise hand the click on to a control that has nothing left to say
-      if (!isOnControl) event.preventDefault()
-
-      // Back to showing everything
-      onClearSelection()
-    }
+    // Picking the radio already standing leaves it checked, so no change event follows and the pick has to come
+    // from the click, a modified one leaving the option standing alone as it already does
+    if (replacesSelection && checked && !isExclusiveSelection(event)) onPick()
   }
 
   return (
     <div
       className={cn(
-        'flex items-center gap-2 sm:gap-3 rounded-md px-2.5 sm:px-3 py-1.5 sm:py-2 transition-colors',
+        'flex items-center gap-2 sm:gap-3 rounded-md transition-colors',
         checked ? 'bg-focus/15' : 'hover:bg-foreground/5',
         // Drawn as an edge rather than a fill, so it reads apart from the tint saying it is standing
         FOCUS_RING_ROW_CLASS,
@@ -167,8 +172,10 @@ export const OptionItem = memo(function OptionItem({
     >
       {/* The row, which a click anywhere along means the same thing for */}
       <label
-        className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer"
+        className="flex items-center gap-2 flex-1 min-w-0 px-2.5 sm:px-3 py-1.5 sm:py-2 cursor-pointer"
         onClick={handleClick}
+        // A press leaves focus where it was
+        onMouseDown={preventFocusLoss}
         {...longPressHandlers}
       >
         {/* The checkbox, or the radio where only one option may stand */}
@@ -179,11 +186,14 @@ export const OptionItem = memo(function OptionItem({
           name={groupsUnderOneName ? groupName : undefined}
           checked={checked}
           onChange={onToggle}
-          className={cn(controlClass, 'shrink-0')}
+          // Brought into view with the row's padding around it, so a row the keys reach shows whole, its ring
+          // and all
+          className={cn(controlClass, 'shrink-0 scroll-my-1.5 sm:scroll-my-2')}
           aria-label={facetOptionAccessibleName(option.displayName, option.count)}
           // Which row this is, so the walk down the list knows what it has landed on
-          data-facet-row-id={option.id}
+          {...FACET_ROW_ATTRIBUTE.stamp(option.id)}
           tabIndex={isTabStop ? 0 : -1}
+          onKeyDown={holdSideArrowsOff}
         />
 
         {/* The option's name */}
@@ -195,3 +205,17 @@ export const OptionItem = memo(function OptionItem({
     </div>
   )
 })
+
+/**
+ * Holds Left and Right off a row's control, the list's arrows only walking its rows: a radio would otherwise step to
+ * the neighbouring option and pick it.
+ *
+ * @param event - The keypress on the control.
+ */
+function holdSideArrowsOff(event: KeyboardEvent<HTMLInputElement>) {
+  // A key held with a modifier stays the browser's, Alt+Left and Cmd+Left going back a page
+  if (event.altKey || event.ctrlKey || event.metaKey) return
+
+  // The side arrows lose what the browser would do with them, every other key keeping it
+  if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') event.preventDefault()
+}

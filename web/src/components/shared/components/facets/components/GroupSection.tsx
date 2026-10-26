@@ -6,12 +6,14 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import type { ReactNode } from 'react'
+import type { MouseEvent, ReactNode } from 'react'
 
 import { FLOATING_PANEL_FILL_CLASS } from '@/components/shared/components/DropdownMenu'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
+import { preventFocusLoss } from '@/components/shared/utils/dom-utils'
 
+import { FACET_ROW_ATTRIBUTE, followPressFromRow } from '../hooks/use-facet-row-navigation'
 import { headingRowId } from '../model/facet-logic'
 import type { FacetOption, FacetSortMode } from '../model/facet-types'
 
@@ -81,7 +83,7 @@ type GroupSectionProps = {
   label: string
   /** The options belonging to it, already ordered. */
   options: FacetOption[]
-  /** How many of them are selected, absent on a facet whose sections carry no such badge. */
+  /** How many of them are selected, absent where the heading carries no such badge. */
   selectedCount: number | undefined
   /** Whether the section is rolled up. */
   isCollapsed: boolean
@@ -120,6 +122,20 @@ export function GroupSection({
   // Translations for the shared filter controls
   const tFilters = useTranslations('ui.filters')
 
+  /**
+   * Rolls the section up or out from its heading, focus on any row, one about to be rolled away included, moving
+   * to the heading.
+   *
+   * @param event - The click, or the key standing in for one.
+   */
+  function handleHeadingClick(event: MouseEvent<HTMLButtonElement>) {
+    // Focus on a row comes along to the heading
+    followPressFromRow(event.currentTarget)
+
+    // The section rolls up, or out
+    onToggleCollapsed()
+  }
+
   return (
     <div>
       {/* Section heading */}
@@ -130,14 +146,16 @@ export function GroupSection({
           '-ml-0.5 sm:-ml-1 px-3 sm:px-4 py-1.5 sm:py-2 border-b border-foreground/10 sticky top-0 z-10 flex items-center gap-2',
           FLOATING_PANEL_FILL_CLASS
         )}
+        // A press anywhere along the heading leaves focus where it was
+        onMouseDown={preventFocusLoss}
       >
         {/* The name, which rolls the section up and unrolls it */}
         <button
           type="button"
-          onClick={onToggleCollapsed}
+          onClick={handleHeadingClick}
           aria-expanded={!isCollapsed}
           // The heading is a row of the list in its own right, so the arrows reach it like any option
-          data-facet-row-id={headingRowId(groupKey)}
+          {...FACET_ROW_ATTRIBUTE.stamp(headingRowId(groupKey))}
           tabIndex={isTabStop ? 0 : -1}
           className="flex flex-1 min-w-0 items-center gap-2 rounded-sm text-left text-[11px] sm:text-xs font-semibold text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
         >
@@ -164,7 +182,7 @@ export function GroupSection({
           )}
         </button>
 
-        {/* The ordering, offered where the sections are long enough for it to move anything */}
+        {/* The ordering, where the section offers one */}
         {showSortButton && <GroupSortButton sortMode={sortMode} onCycle={onCycleSortMode} />}
       </div>
 

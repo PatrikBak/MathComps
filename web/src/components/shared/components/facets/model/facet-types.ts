@@ -59,6 +59,26 @@ export type VisibleSection<T extends FacetOption = FacetOption> = {
   sectionOptions: T[]
 }
 
+/**
+ * What a key asks of the row focus sits on, beyond moving off it.
+ */
+export type FacetRowAction = 'collapse' | 'expand' | 'cycle-sort'
+
+/**
+ * Applies a key's action to the row focus sits on, answering whether it did anything. A row with nothing to do
+ * answers no, and the key goes back to the browser rather than being swallowed by a handler with no use for it.
+ *
+ * @param rowId - The row focus sits on.
+ * @param action - What the key asked of it.
+ * @param focusRow - Moves focus onto another row, for an action that takes the reader elsewhere.
+ * @returns Whether the row acted.
+ */
+export type FacetRowActionHandler = (
+  rowId: string,
+  action: FacetRowAction,
+  focusRow: (rowId: string) => void
+) => boolean
+
 /** The ways a facet can combine its selected values, in the order a facet offers them. */
 export const FACET_LOGIC_MODES = ['or', 'and'] as const
 
@@ -82,4 +102,12 @@ export type FacetLogicConfig = {
     /** Wording for the AND mode. */
     and: string
   }
+}
+
+/**
+ * The search a facet offers over what it lists.
+ */
+export type FacetSearchConfig = {
+  /** Prompt shown in the empty search box. */
+  placeholder: string
 }
