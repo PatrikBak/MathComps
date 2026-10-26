@@ -4,8 +4,24 @@ import { URL_PARAMS } from '@/components/features/problems/utils/search-url-seri
 import { FACET_ROW_ATTRIBUTE } from '@/components/shared/components/facets/hooks/use-facet-row-navigation'
 import { headingRowId } from '@/components/shared/components/facets/model/facet-logic'
 
-import { facetsCopy, filtersCopy, filtersInUrl } from './support/archive-filters'
+import {
+  facetsCopy,
+  filtersCopy,
+  searchAnswered,
+  SHORT_WINDOW,
+  TALL_WINDOW,
+} from './support/archive-filters'
 import { PROBLEMS_PATH, stubProblemSearch } from './support/backend-routes'
+import {
+  focusedRowId,
+  headingResetOf,
+  openFacet,
+  panelResetOf,
+  QUIET_MS,
+  rowTabStops,
+  triggerOf,
+  urlParam,
+} from './support/facets'
 import { expect, test } from './support/test'
 
 /** The facet listing problem numbers, too short to offer a search box. */
@@ -18,59 +34,13 @@ const SEASON = filtersCopy.facets.season
 const TAGS = filtersCopy.facets.tags
 
 /** Every option's checkbox in an open facet, which names the option it stands for. */
-const OPTION_CHECKBOX = `input[${FACET_ROW_ATTRIBUTE}]`
-
-/** How many times Tab is pressed walking through a panel at most, which is more stops than any panel holds. */
-const TAB_WALK_LIMIT = 10
+const OPTION_CHECKBOX = `input${FACET_ROW_ATTRIBUTE.anySelector}`
 
 /** How long a finger is held down for a long press, with room to spare over what counts as one. */
 const LONG_PRESS_MS = 800
 
-/**
- * How long to wait after a press before calling its outcome final: long enough for a click the release sends to
- * land. A check that something did NOT happen needs a window like this, or it only proves the thing was slow.
- */
-const QUIET_MS = 1000
-
 /** A phone's screen, narrow enough that the filters move into a panel of their own. */
 const PHONE_VIEWPORT = { width: 390, height: 844 }
-
-/**
- * The button opening a facet, in the words the reader is given.
- *
- * @param page - The page.
- * @param title - The facet's name.
- *
- * @returns The button.
- */
-function triggerOf(page: Page, title: string): Locator {
-  // Named after the facet it opens
-  return page.getByRole('button', {
-    name: facetsCopy.openPopover.replace('{name}', title.toLowerCase()),
-  })
-}
-
-/**
- * Opens a facet and waits for its panel.
- *
- * @param page - The page.
- * @param title - The facet's name.
- *
- * @returns The open panel.
- */
-async function openFacet(page: Page, title: string): Promise<Locator> {
-  // Open it
-  await triggerOf(page, title).click()
-
-  // The panel, named after the facet
-  const panel = page.getByRole('dialog', { name: title })
-
-  // Once its options are drawn
-  await expect(panel.locator(OPTION_CHECKBOX).first()).toBeVisible()
-
-  // Which is what the test goes on to work in
-  return panel
-}
 
 /**
  * One option's checkbox in an open facet.
@@ -82,7 +52,7 @@ async function openFacet(page: Page, title: string): Promise<Locator> {
  */
 function optionOf(panel: Locator, id: string): Locator {
   // Marked with the option it stands for
-  return panel.locator(`input[${FACET_ROW_ATTRIBUTE}="${id}"]`)
+  return panel.locator(`input[${FACET_ROW_ATTRIBUTE.name}="${id}"]`)
 }
 
 /**
@@ -108,7 +78,7 @@ function rowOf(panel: Locator, id: string): Locator {
  */
 function headingOf(panel: Locator, groupKey: string): Locator {
   // Marked as the row the section's heading is
-  return panel.locator(`[${FACET_ROW_ATTRIBUTE}="${headingRowId(groupKey)}"]`)
+  return panel.locator(`[${FACET_ROW_ATTRIBUTE.name}="${headingRowId(groupKey)}"]`)
 }
 
 /**
@@ -138,7 +108,7 @@ async function drawnIds(scope: Locator): Promise<string[]> {
     .evaluateAll(
       (checkboxes, attribute) =>
         checkboxes.map((checkbox) => checkbox.getAttribute(attribute) ?? ''),
-      FACET_ROW_ATTRIBUTE
+      FACET_ROW_ATTRIBUTE.name
     )
 }
 
@@ -156,7 +126,7 @@ async function checkedIds(panel: Locator): Promise<string[]> {
     .evaluateAll(
       (checkboxes, attribute) =>
         checkboxes.map((checkbox) => checkbox.getAttribute(attribute) ?? ''),
-      FACET_ROW_ATTRIBUTE
+      FACET_ROW_ATTRIBUTE.name
     )
 }
 
@@ -220,48 +190,6 @@ async function longPress(page: Page, target: Locator): Promise<void> {
 
   // And lifted
   await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-}
-
-/**
- * The id of the option holding focus.
- *
- * @param page - The page.
- *
- * @returns The focused row's id, or null where focus sits on no row.
- */
-async function focusedRowId(page: Page): Promise<string | null> {
-  // Read off whatever the document says is focused
-  return page.evaluate(
-    (attribute) => document.activeElement?.getAttribute(attribute) ?? null,
-    FACET_ROW_ATTRIBUTE
-  )
-}
-
-/**
- * Whether focus sits inside an open facet's panel.
- *
- * @param panel - The open panel.
- *
- * @returns True while it does.
- */
-async function isFocusInPanel(panel: Locator): Promise<boolean> {
-  // The panel holding whatever is focused, read without waiting since focus leaving it closes it
-  return panel.evaluateAll((panels) =>
-    panels.some((element) => element.contains(document.activeElement))
-  )
-}
-
-/**
- * Reads one filter off the address.
- *
- * @param page - The page.
- * @param key - The filter's parameter.
- *
- * @returns A function reading it, null where the address carries none.
- */
-function urlParam(page: Page, key: string): () => string | null {
-  // Read afresh every call, so a poll sees the address move
-  return () => filtersInUrl(page).get(key)
 }
 
 test.beforeEach(async ({ page }) => {
@@ -451,27 +379,31 @@ test.describe('picking in a multi-select facet', () => {
       })
     )
 
+    // The answer to the search naming all three, which is what would move a row if anything did
+    const answered = searchAnswered(
+      page,
+      (parameters) => parameters.problemNumbers.length === aimed.length
+    )
+
     // Clicked back to back, the way a reader running down the list does
     for (const centre of centres) await page.mouse.click(centre.x, centre.y)
 
     // Exactly the options aimed at end up picked
     await expect.poll(async () => (await checkedIds(panel)).sort()).toEqual([...aimed].sort())
 
+    // Answered
+    await answered
+
+    // And given time to be drawn
+    await page.waitForTimeout(QUIET_MS)
+
     // And not one row moved
     expect(await drawnIds(panel)).toEqual(incoming)
   })
 
-  test('resets the facet from its heading', async ({ page }) => {
+  test('resets the facet from its heading, handing focus to its trigger', async ({ page }) => {
     // The facet, opened
     const panel = await openFacet(page, PROBLEM_NUMBER)
-
-    // The reset beside the facet's name
-    const reset = page.getByRole('button', {
-      name: facetsCopy.resetSelection.replace('{name}', PROBLEM_NUMBER),
-    })
-
-    // Not offered while there is nothing to reset, read once the facet is there to offer it
-    await expect(reset).toBeHidden()
 
     // Two options picked
     await pickInTurn(panel, ['1', '2'])
@@ -490,7 +422,10 @@ test.describe('picking in a multi-select facet', () => {
       triggerOf(page, PROBLEM_NUMBER).getByLabel(facetsCopy.selectedCount.replace('{count}', '2'))
     ).toBeVisible()
 
-    // Reset
+    // The reset beside the facet's name
+    const reset = headingResetOf(page, PROBLEM_NUMBER)
+
+    // Pressed
     await reset.click()
 
     // Nothing left picked
@@ -498,6 +433,9 @@ test.describe('picking in a multi-select facet', () => {
 
     // And nothing left to reset
     await expect(reset).toBeHidden()
+
+    // Focus handed on to the trigger as the reset fades, where the next Tab goes on from
+    await expect(triggerOf(page, PROBLEM_NUMBER)).toBeFocused()
   })
 })
 
@@ -557,6 +495,40 @@ test.describe('a multi-select facet from the keyboard', () => {
     await expect.poll(picked).toBe(ids[0])
   })
 
+  test('hands focus to the option a click lands on while focus sits on another, so the keys go on from it', async ({
+    page,
+  }) => {
+    // The facet, opened on the panel itself
+    const panel = await openFacet(page, PROBLEM_NUMBER)
+
+    // The options in the order they are drawn
+    const ids = await drawnIds(panel)
+
+    // Down, into the list at its top
+    await page.keyboard.press('ArrowDown')
+
+    // On the top option
+    await expect.poll(() => focusedRowId(page)).toBe(ids[0])
+
+    // The third option, clicked by its name
+    await rowOf(panel, ids[2]).click()
+
+    // The problem numbers picked
+    const picked = urlParam(page, URL_PARAMS.PROBLEM_NUMBERS)
+
+    // That option
+    await expect.poll(picked).toBe(ids[2])
+
+    // With focus come along to it
+    await expect.poll(() => focusedRowId(page)).toBe(ids[2])
+
+    // Space
+    await page.keyboard.press('Space')
+
+    // Unpicks the option clicked, rather than the one the arrows had reached
+    await expect.poll(picked).toBeNull()
+  })
+
   test('stands in the tab order as one stop, on the option picked', async ({ page }) => {
     // The facet, opened
     let panel = await openFacet(page, TAGS)
@@ -573,26 +545,110 @@ test.describe('a multi-select facet from the keyboard', () => {
     // And opened again
     panel = await openFacet(page, TAGS)
 
-    // Every row Tab stops on as it goes through the panel, which it leaves once past its last stop
-    const stops: string[] = []
-
-    // Tab through the panel, no further than one stop per control it could hold
-    for (let press = 0; press < TAB_WALK_LIMIT; press++) {
-      // On to the next stop
-      await page.keyboard.press('Tab')
-
-      // Out of the panel, which ends the walk
-      if (!(await isFocusInPanel(panel))) break
-
-      // The row it stopped on, where it stopped on one
-      const rowId = await focusedRowId(page)
-
-      // Recorded
-      if (rowId !== null) stops.push(rowId)
-    }
+    // Tab through the panel, noting each stop among the rows
+    const stops = await rowTabStops(page, panel)
 
     // One stop among the rows, and that on the option picked rather than the heading at the top of the list
     expect(stops).toEqual(['prove-existence'])
+  })
+
+  test('keeps its one stop on the row the arrows reached, so Tab and Shift+Tab leave from there', async ({
+    page,
+  }) => {
+    // The facet, opened with nothing picked, the heading at the top of the list holding the stop
+    let panel = await openFacet(page, TAGS)
+
+    // Down twice, past the heading to the first option under it
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('ArrowDown')
+
+    // On that option
+    await expect.poll(() => focusedRowId(page)).toBe((await drawnIds(sectionOf(panel, 'area')))[0])
+
+    // Shift+Tab
+    await page.keyboard.press('Shift+Tab')
+
+    // Off the rows altogether, past the heading at the top of the list onto the logic above it
+    await expect(
+      panel.getByRole('radio', { name: filtersCopy.facets.logic.or, exact: true })
+    ).toBeFocused()
+
+    // A goal picked, which leads its own section below the area section
+    await optionOf(panel, 'prove-existence').click()
+
+    // In the address
+    await expect.poll(urlParam(page, URL_PARAMS.TAGS)).toBe('prove-existence')
+
+    // The facet, closed
+    await page.keyboard.press('Escape')
+
+    // And opened again, on its search box
+    panel = await openFacet(page, TAGS)
+
+    // Down, onto the heading at the top of the list
+    await page.keyboard.press('ArrowDown')
+
+    // On the area heading
+    await expect(headingOf(panel, 'area')).toBeFocused()
+
+    // Tab leaves the panel from there, passing the picked goal by
+    expect(await rowTabStops(page, panel)).toEqual([])
+  })
+
+  test('hands the stop to the rolled-up section a pick sits hidden in', async ({ page }) => {
+    // The facet, opened
+    let panel = await openFacet(page, TAGS)
+
+    // A goal picked
+    await optionOf(panel, 'prove-existence').click()
+
+    // In the address
+    await expect.poll(urlParam(page, URL_PARAMS.TAGS)).toBe('prove-existence')
+
+    // Its section, rolled up over it
+    await headingOf(panel, 'goal').click()
+
+    // Rolled up
+    await expect(headingOf(panel, 'goal')).toHaveAttribute('aria-expanded', 'false')
+
+    // The facet, closed
+    await page.keyboard.press('Escape')
+
+    // And opened again
+    panel = await openFacet(page, TAGS)
+
+    // Tab through the panel, noting each stop among the rows
+    const stops = await rowTabStops(page, panel)
+
+    // One stop among the rows, on the heading of the section holding the pick
+    expect(stops).toEqual([headingRowId('goal')])
+  })
+
+  test('hands focus to a heading whose click rolls away the option focus was on', async ({
+    page,
+  }) => {
+    // The facet, opened
+    const panel = await openFacet(page, TAGS)
+
+    // A goal picked, which takes the tab stop once no row holds focus
+    await optionOf(panel, 'prove-existence').click()
+
+    // In the address
+    await expect.poll(urlParam(page, URL_PARAMS.TAGS)).toBe('prove-existence')
+
+    // Down twice, past the heading to the first option under it
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('ArrowDown')
+
+    // On that option
+    await expect.poll(() => focusedRowId(page)).toBe((await drawnIds(sectionOf(panel, 'area')))[0])
+
+    // Its section's heading, clicked
+    await headingOf(panel, 'area').click()
+
+    // Rolled up, focus on the heading that rolled it
+    await expect(headingOf(panel, 'area')).toHaveAttribute('aria-expanded', 'false')
+    await expect(headingOf(panel, 'area')).toBeFocused()
   })
 
   test('closes on Escape, handing focus back to the button that opened it', async ({ page }) => {
@@ -611,7 +667,9 @@ test.describe('a multi-select facet from the keyboard', () => {
 })
 
 test.describe('searching a multi-select facet', () => {
-  test('narrows the options to the search, and says so when nothing matches', async ({ page }) => {
+  test('narrows the options to the search, and says so when nothing matches, the caret staying in the box', async ({
+    page,
+  }) => {
     // The facet, opened
     const panel = await openFacet(page, SEASON)
 
@@ -630,9 +688,78 @@ test.describe('searching a multi-select facet', () => {
     // A search matching nothing
     await search.fill('no such year')
 
-    // Said to match nothing
-    await expect(panel.getByText(facetsCopy.noResults, { exact: true })).toBeVisible()
+    // The words saying nothing matches
+    const noResults = panel.getByText(facetsCopy.noResults, { exact: true })
+
+    // Shown, with no option left
+    await expect(noResults).toBeVisible()
     await expect(panel.locator(OPTION_CHECKBOX)).toHaveCount(0)
+
+    // The words, pressed
+    await noResults.click()
+
+    // The search typed straight on
+    await page.keyboard.type('s')
+
+    // Into the box it was in
+    await expect(search).toHaveValue('no such years')
+  })
+
+  test('keeps the caret in the box through a click on each control, and a new term reopens every section', async ({
+    page,
+  }) => {
+    // The facet, opened
+    const panel = await openFacet(page, TAGS)
+
+    // Half a search typed
+    await page.keyboard.type('geo')
+
+    // A keyword it finds, picked by the edge of its row, clear of its name
+    await rowOf(panel, 'geometry')
+      .locator('..')
+      .click({ position: { x: 4, y: 4 } })
+
+    // In the address
+    await expect.poll(urlParam(page, URL_PARAMS.TAGS)).toBe('geometry')
+
+    // The heading of the section holding it
+    const area = headingOf(panel, 'area')
+
+    // Its ordering button
+    const sort = area.locator('xpath=following-sibling::button')
+
+    // Pressed
+    await sort.click()
+
+    // Now by count with the largest first
+    await expect(sort).toHaveAccessibleName(facetsCopy.sortByCountDesc)
+
+    // The heading's strip, pressed clear of its name
+    await area.locator('..').click({ position: { x: 4, y: 4 } })
+
+    // The section, rolled up by its heading
+    await area.click()
+
+    // Rolled up
+    await expect(area).toHaveAttribute('aria-expanded', 'false')
+
+    // The choice of matching every keyword picked
+    const matchAll = panel.getByRole('radio', { name: filtersCopy.facets.logic.and, exact: true })
+
+    // Asked for rather than any
+    await matchAll.click()
+
+    // Standing, though the address only carries it once two keywords are picked
+    await expect(matchAll).toBeChecked()
+
+    // The rest of the search typed straight on
+    await page.keyboard.type('metry')
+
+    // Into the box it started in
+    await expect(panel.getByRole('textbox')).toHaveValue('geometry')
+
+    // The section unrolled again, a new term opening every section afresh
+    await expect(area).toHaveAttribute('aria-expanded', 'true')
   })
 
   test('empties the search on the first Escape and closes on the second', async ({ page }) => {
@@ -717,9 +844,6 @@ test.describe('searching a multi-select facet', () => {
     // In the address
     await expect.poll(picked).toBe(matches[2])
 
-    // Still where it was, the others around it unmoved
-    expect(await drawnIds(panel)).toEqual(matches)
-
     // The search, emptied
     await panel
       .getByRole('button', { name: facetsCopy.clearSearch.replace('{name}', SEASON.toLowerCase()) })
@@ -766,6 +890,12 @@ test.describe('a multi-select facet split into sections', () => {
     await expect(area).toHaveAttribute('aria-expanded', 'false')
     await expect(geometry).toHaveCount(0)
 
+    // Down from the search box the click left the caret in, onto the heading at the top of the list
+    await page.keyboard.press('ArrowDown')
+
+    // On the heading
+    await expect(area).toBeFocused()
+
     // Right
     await page.keyboard.press('ArrowRight')
 
@@ -779,25 +909,6 @@ test.describe('a multi-select facet split into sections', () => {
     // Rolls it back up
     await expect(area).toHaveAttribute('aria-expanded', 'false')
     await expect(geometry).toHaveCount(0)
-  })
-
-  test('walks from the search box into the first heading and on into its options', async ({
-    page,
-  }) => {
-    // The facet, opened on its search box
-    const panel = await openFacet(page, TAGS)
-
-    // Down
-    await page.keyboard.press('ArrowDown')
-
-    // On the first section's heading, which is a row like any option
-    await expect(headingOf(panel, 'area')).toBeFocused()
-
-    // Down again
-    await page.keyboard.press('ArrowDown')
-
-    // On the first option under it
-    await expect.poll(() => focusedRowId(page)).toBe((await drawnIds(sectionOf(panel, 'area')))[0])
   })
 
   test('counts the options picked under each heading', async ({ page }) => {
@@ -862,6 +973,32 @@ test.describe('a multi-select facet split into sections', () => {
     expect((await drawnIds(section)).at(-1)).toBe('combinatorics')
   })
 
+  test('orders what a search finds the way its section is ordered, the button reordering it there and then', async ({
+    page,
+  }) => {
+    // The facet, opened
+    const panel = await openFacet(page, TAGS)
+
+    // A search finding combinatorics beside another area keyword
+    await page.keyboard.type('com')
+
+    // The area section
+    const section = sectionOf(panel, 'area')
+
+    // The names it shows
+    const byName = await drawnNames(section)
+
+    // More than one of them, in alphabetical order as the section starts
+    expect(byName.length).toBeGreaterThan(1)
+    expect(byName).toEqual([...byName].sort((first, second) => first.localeCompare(second, 'en')))
+
+    // The section's ordering button, pressed
+    await headingOf(panel, 'area').locator('xpath=following-sibling::button').click()
+
+    // Combinatorics, the only one counting a problem, now on top
+    await expect.poll(async () => (await drawnIds(section))[0]).toBe('combinatorics')
+  })
+
   test('opens a rolled-up section for the length of a search that finds something in it', async ({
     page,
   }) => {
@@ -894,6 +1031,48 @@ test.describe('a multi-select facet split into sections', () => {
     await expect(headingOf(panel, 'area')).toHaveAttribute('aria-expanded', 'true')
   })
 
+  test('keeps a section the reader rolled up under a search shut while a pick lands in another', async ({
+    page,
+  }) => {
+    // The facet, opened
+    const panel = await openFacet(page, TAGS)
+
+    // A search finding keywords in two sections
+    await panel.getByRole('textbox').fill('num')
+
+    // The type section's heading
+    const type = headingOf(panel, 'type')
+
+    // Open, to show what the search found in it
+    await expect(type).toHaveAttribute('aria-expanded', 'true')
+
+    // Rolled up by its heading
+    await type.click()
+
+    // Rolled up
+    await expect(type).toHaveAttribute('aria-expanded', 'false')
+
+    // The answer to the search the pick sends, which is what would roll the section back out if anything did
+    const answered = searchAnswered(page, (parameters) =>
+      parameters.tagSlugs.includes('number-theory')
+    )
+
+    // A keyword the search found in the area section, picked
+    await optionOf(panel, 'number-theory').click()
+
+    // In the address
+    await expect.poll(urlParam(page, URL_PARAMS.TAGS)).toBe('number-theory')
+
+    // Answered
+    await answered
+
+    // And given time to be drawn
+    await page.waitForTimeout(QUIET_MS)
+
+    // The type section still rolled up
+    await expect(type).toHaveAttribute('aria-expanded', 'false')
+  })
+
   test('switches between matching any of the picks and all of them', async ({ page }) => {
     // The facet, opened
     const panel = await openFacet(page, TAGS)
@@ -921,6 +1100,58 @@ test.describe('a multi-select facet split into sections', () => {
 
     // Gone from the address, any being the default
     await expect.poll(logic).toBeNull()
+
+    // Tab, from the search box the clicks left the caret in
+    await page.keyboard.press('Tab')
+
+    // Onto the mode standing
+    await expect(matchAny).toBeFocused()
+
+    // The next mode, from the keyboard
+    await page.keyboard.press('ArrowRight')
+
+    // All of them asked for again
+    await expect.poll(logic).toBe('and')
+
+    // Focus on that mode, where the arrow moved it
+    await expect(
+      panel.getByRole('radio', { name: filtersCopy.facets.logic.and, exact: true })
+    ).toBeFocused()
+  })
+})
+
+test.describe('the header of a multi-select facet', () => {
+  test('moves into the panel while the panel opens over the heading, and stays beside the heading otherwise', async ({
+    page,
+  }) => {
+    // A window short enough for the panel to open above its trigger
+    await page.setViewportSize(SHORT_WINDOW)
+
+    // The facet, opened
+    let panel = await openFacet(page, PROBLEM_NUMBER)
+
+    // An option picked, which gives the reset something to do
+    await optionOf(panel, '1').click()
+
+    // In the address
+    await expect.poll(urlParam(page, URL_PARAMS.PROBLEM_NUMBERS)).toBe('1')
+
+    // The panel carries the reset, the heading's being covered
+    await expect(panelResetOf(panel)).toBeVisible()
+    await expect(headingResetOf(page, PROBLEM_NUMBER)).toBeHidden()
+
+    // The facet, closed
+    await page.keyboard.press('Escape')
+
+    // A window tall enough for the panel to open below its trigger
+    await page.setViewportSize(TALL_WINDOW)
+
+    // The facet, opened again
+    panel = await openFacet(page, PROBLEM_NUMBER)
+
+    // The reset stays beside the heading, and the panel carries none
+    await expect(headingResetOf(page, PROBLEM_NUMBER)).toBeVisible()
+    await expect(panelResetOf(panel)).toHaveCount(0)
   })
 })
 

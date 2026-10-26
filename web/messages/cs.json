@@ -1578,7 +1578,6 @@
       "resetFilter": "Resetovat výběr v tomto filtru",
       "resetSelection": "Resetovat výběr v {name}",
       "searchIn": "Hledat {name}",
-      "searchPlaceholder": "Hledat…",
       "selectedCount": "Počet vybraných: {count}",
       "selectedInGroup": "{count} vybraných",
       "selectionLogic": "Logika výběru",

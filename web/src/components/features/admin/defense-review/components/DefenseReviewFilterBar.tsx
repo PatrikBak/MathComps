@@ -104,7 +104,6 @@ export function DefenseReviewFilterBar({
         options={signalOptions}
         selected={selectedSignals}
         onChange={applySignals}
-        showSearch={false}
       />
 
       {/* Which flaws a guard caught in it, on any of its drafts */}
@@ -115,7 +114,6 @@ export function DefenseReviewFilterBar({
         options={flawOptions}
         selected={filter.caughtFlaws ?? []}
         onChange={(selected) => onFieldChange('caughtFlaws', toCaughtFlaws(selected))}
-        showSearch={false}
       />
 
       {/* Whose conversation it is */}
@@ -123,7 +121,7 @@ export function DefenseReviewFilterBar({
         variant="pill"
         title={t('filters.student')}
         closedLabel={t('filters.any')}
-        searchPlaceholder={t('filters.searchStudent')}
+        search={{ placeholder: t('filters.searchStudent') }}
         options={studentOptions}
         selectionMode="single"
         selected={filter.userId === undefined ? [] : [filter.userId]}
@@ -135,7 +133,7 @@ export function DefenseReviewFilterBar({
         variant="pill"
         title={t('filters.problem')}
         closedLabel={t('filters.any')}
-        searchPlaceholder={t('filters.searchProblem')}
+        search={{ placeholder: t('filters.searchProblem') }}
         options={problemOptions}
         grouping={problemGrouping}
         selectionMode="single"
@@ -169,7 +167,6 @@ export function DefenseReviewFilterBar({
           // The options are keyed by the day count itself, so the id is the value
           onFieldChange('withinDays', picked === undefined ? undefined : Number(picked))
         }}
-        showSearch={false}
       />
 
       {/* Which examiner settings it ran on */}
@@ -181,7 +178,6 @@ export function DefenseReviewFilterBar({
         selectionMode="single"
         selected={filter.promptVersion === undefined ? [] : [filter.promptVersion]}
         onChange={(selected) => onFieldChange('promptVersion', selected.at(-1))}
-        showSearch={false}
       />
 
       {/* The way back to showing everything, offered only once something is narrowing */}

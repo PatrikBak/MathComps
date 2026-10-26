@@ -1578,7 +1578,6 @@
       "resetFilter": "Reset selection in this filter",
       "resetSelection": "Reset selection in {name}",
       "searchIn": "Search {name}",
-      "searchPlaceholder": "Search…",
       "selectedCount": "Selected count: {count}",
       "selectedInGroup": "{count} selected",
       "selectionLogic": "Selection logic",

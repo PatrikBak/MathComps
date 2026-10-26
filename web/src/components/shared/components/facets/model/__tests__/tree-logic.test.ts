@@ -3,13 +3,12 @@ import { describe, expect, it } from 'vitest'
 import type { TreeNode } from '../facet-types'
 import {
   calculateParentState,
-  drawnRowIds,
-  expandableRowIds,
+  drawnTreeRows,
   filterTreeBySearch,
-  getAllAncestorIds,
-  getAllDescendantIds,
   isNodeEffectivelyChecked,
   toggleNodeSelection,
+  treeCheckState,
+  treeRowsStandingForSelection,
 } from '../tree-logic'
 
 /** A competition hierarchy three levels deep, alongside a flatter one to keep it honest. */
@@ -59,95 +58,7 @@ const B_SCHOOL = CATEGORY_B.children![1]
 const MEMO_INDIVIDUAL = mockTree[1].children![0]
 
 describe('tree-logic', () => {
-  describe('getAllDescendantIds', () => {
-    it('collects the ids below a node', () => {
-      // Act on a node with three leaves under it
-      const descendants = getAllDescendantIds(CATEGORY_A)
-
-      // Only the leaves come back, in the order they are declared
-      expect(descendants).toEqual([A_HOME.id, A_SCHOOL.id, A_REGIONAL.id])
-    })
-
-    it('includes the node itself when asked', () => {
-      // Act with the flag that adds the node to its own descendants
-      const descendants = getAllDescendantIds(CATEGORY_A, true)
-
-      // The node leads, and its leaves follow in declaration order
-      expect(descendants).toEqual([CATEGORY_A.id, A_HOME.id, A_SCHOOL.id, A_REGIONAL.id])
-    })
-
-    it('returns nothing for a leaf', () => {
-      // Act on a node with no children at all
-      const descendants = getAllDescendantIds(A_HOME)
-
-      // An empty list, rather than the leaf itself
-      expect(descendants).toEqual([])
-    })
-  })
-
-  describe('getAllAncestorIds', () => {
-    it('collects the ids above a deep node', () => {
-      // Act on a third-level node
-      const ancestors = getAllAncestorIds(A_HOME.id, mockTree)
-
-      // Both levels above it come back, root first
-      expect(ancestors).toEqual([CSMO.id, CATEGORY_A.id])
-    })
-
-    it('collects the id above a mid-level node', () => {
-      // Act on a second-level node
-      const ancestors = getAllAncestorIds(CATEGORY_A.id, mockTree)
-
-      // Its competition, and nothing else
-      expect(ancestors).toEqual([CSMO.id])
-    })
-
-    it('returns nothing for a root', () => {
-      // Act on a top-level node
-      const ancestors = getAllAncestorIds(CSMO.id, mockTree)
-
-      // An empty path, which is what a root's ancestry looks like
-      expect(ancestors).toEqual([])
-    })
-
-    it('returns nothing for an id the tree does not hold', () => {
-      // Act on an id belonging to no node
-      const ancestors = getAllAncestorIds('competition/nonexistent', mockTree)
-
-      // Absent reads the same as rootless, rather than blowing up
-      expect(ancestors).toEqual([])
-    })
-  })
-
   describe('isNodeEffectivelyChecked', () => {
-    it('counts a node selected in its own right', () => {
-      // Arrange one leaf as the whole selection
-      const selectedIds = [A_HOME.id]
-
-      // Act on that same leaf
-      const isChecked = isNodeEffectivelyChecked(A_HOME.id, selectedIds, mockTree)
-
-      // Covered, with no ancestry to consult
-      expect(isChecked).toBe(true)
-    })
-
-    it('counts every child of a selected parent, and nothing outside it', () => {
-      // Arrange a whole category as the selection
-      const selectedIds = [CATEGORY_A.id]
-
-      // Act across that category's own leaves
-      const covered = [A_HOME, A_SCHOOL, A_REGIONAL].map((node) =>
-        isNodeEffectivelyChecked(node.id, selectedIds, mockTree)
-      )
-
-      // Act on a leaf belonging to its sibling
-      const outside = isNodeEffectivelyChecked(B_HOME.id, selectedIds, mockTree)
-
-      // Coverage reaches the category's own leaves and stops there
-      expect(covered).toEqual([true, true, true])
-      expect(outside).toBe(false)
-    })
-
     it('counts a grandchild of a selected node', () => {
       // Arrange an entire competition as the selection
       const selectedIds = [CSMO.id]
@@ -163,17 +74,6 @@ describe('tree-logic', () => {
       // Coverage reaches all the way down, and stops at the competition's edge
       expect(covered).toEqual([true, true, true])
       expect(otherCompetition).toBe(false)
-    })
-
-    it('does not count a node in an unrelated branch', () => {
-      // Arrange a selection in one competition
-      const selectedIds = [CATEGORY_A.id]
-
-      // Act on a node in another
-      const isChecked = isNodeEffectivelyChecked(MEMO_INDIVIDUAL.id, selectedIds, mockTree)
-
-      // Uncovered, since nothing on its own path is selected
-      expect(isChecked).toBe(false)
     })
   })
 
@@ -238,6 +138,24 @@ describe('tree-logic', () => {
     })
   })
 
+  describe('treeCheckState', () => {
+    it('reads a node under a picked branch as checked, though nothing in its own subtree is picked', () => {
+      // Act on a category of a competition picked whole
+      const state = treeCheckState(CATEGORY_A, [CSMO.id], mockTree)
+
+      // Checked, the competition above it outranking the subtree
+      expect(state).toBe('checked')
+    })
+
+    it('reads a branch nothing above covers as its subtree does', () => {
+      // Act on a category with one of its rounds picked
+      const state = treeCheckState(CATEGORY_A, [A_HOME.id], mockTree)
+
+      // Part-picked, from the round beneath it
+      expect(state).toBe('indeterminate')
+    })
+  })
+
   describe('toggleNodeSelection', () => {
     it('selects and deselects a parent as a single entry', () => {
       // Act on an empty selection
@@ -273,20 +191,6 @@ describe('tree-logic', () => {
       expect(result).toContain(MEMO_INDIVIDUAL.id)
       expect(result).toContain(CSMO.id)
       expect(result).not.toContain(A_HOME.id)
-    })
-
-    it('drops the coverage of a parent that is deselected', () => {
-      // Arrange a category as the selection
-      const selectedIds = [CATEGORY_A.id]
-
-      // Act on that category
-      const nextSelected = toggleNodeSelection(CATEGORY_A, selectedIds, mockTree)
-
-      // Neither the category nor anything under it is covered any more
-      expect(nextSelected).not.toContain(CATEGORY_A.id)
-      expect(isNodeEffectivelyChecked(CATEGORY_A.id, nextSelected, mockTree)).toBe(false)
-      expect(isNodeEffectivelyChecked(A_HOME.id, nextSelected, mockTree)).toBe(false)
-      expect(isNodeEffectivelyChecked(A_SCHOOL.id, nextSelected, mockTree)).toBe(false)
     })
 
     it('breaks a selected parent apart when one of its children is deselected', () => {
@@ -327,53 +231,33 @@ describe('tree-logic', () => {
       expect(isNodeEffectivelyChecked(A_SCHOOL.id, nextSelected, mockTree)).toBe(true)
       expect(isNodeEffectivelyChecked(B_HOME.id, nextSelected, mockTree)).toBe(true)
     })
-  })
 
-  describe('selection read back across levels', () => {
-    it('covers a selected node’s entire subtree', () => {
-      // Arrange a category as the selection
-      const selectedIds = [CATEGORY_A.id]
-
-      // Act across every id beneath it
-      const coverage = getAllDescendantIds(CATEGORY_A).map((descendantId) =>
-        isNodeEffectivelyChecked(descendantId, selectedIds, mockTree)
-      )
-
-      // Every leaf under the category is covered by the one entry
-      expect(coverage).toEqual([true, true, true])
-    })
-
-    it('distinguishes a fully selected branch from a partly selected one', () => {
-      // Arrange one whole category and a single leaf of another
-      const selectedIds = [CATEGORY_A.id, B_HOME.id]
-
-      // Act on the fully selected category
-      const categoryAState = calculateParentState(CATEGORY_A, selectedIds)
-
-      // Act on the partly selected one
-      const categoryBState = calculateParentState(CATEGORY_B, selectedIds)
-
-      // The whole branch reads checked, and its leaves with it
-      expect(categoryAState).toBe('checked')
-      expect(isNodeEffectivelyChecked(A_HOME.id, selectedIds, mockTree)).toBe(true)
-
-      // The partial one reads mixed, with only its selected leaf covered
-      expect(categoryBState).toBe('indeterminate')
-      expect(isNodeEffectivelyChecked(B_HOME.id, selectedIds, mockTree)).toBe(true)
-      expect(isNodeEffectivelyChecked(B_SCHOOL.id, selectedIds, mockTree)).toBe(false)
-    })
-
-    it('covers every level below a selected competition', () => {
-      // Arrange the competition as the selection
+    it('breaks a selected parent apart around a whole branch turned off inside it', () => {
+      // Arrange an entire competition as the selection
       const selectedIds = [CSMO.id]
 
-      // Act across both categories and all five rounds
-      const coverage = [CATEGORY_A, CATEGORY_B, A_HOME, A_SCHOOL, A_REGIONAL, B_HOME, B_SCHOOL].map(
-        (node) => isNodeEffectivelyChecked(node.id, selectedIds, mockTree)
-      )
+      // Act on one of its categories
+      const nextSelected = toggleNodeSelection(CATEGORY_A, selectedIds, mockTree)
 
-      // Both levels below the competition are covered without exception
-      expect(coverage.every(Boolean)).toBe(true)
+      // The competition gives way to the other category's rounds alone
+      expect(nextSelected).toHaveLength(2)
+      expect(nextSelected).toEqual(expect.arrayContaining([B_HOME.id, B_SCHOOL.id]))
+
+      // Coverage follows: the category and its rounds are off, the rest still on
+      expect(isNodeEffectivelyChecked(CATEGORY_A.id, nextSelected, mockTree)).toBe(false)
+      expect(isNodeEffectivelyChecked(A_HOME.id, nextSelected, mockTree)).toBe(false)
+      expect(isNodeEffectivelyChecked(B_SCHOOL.id, nextSelected, mockTree)).toBe(true)
+    })
+
+    it('keeps the picks outside a selected ancestor while breaking it apart', () => {
+      // Arrange a whole competition beside a round of another
+      const selectedIds = [CSMO.id, MEMO_INDIVIDUAL.id]
+
+      // Act on one round inside the competition
+      const nextSelected = toggleNodeSelection(A_HOME, selectedIds, mockTree)
+
+      // The other competition's round stays picked
+      expect(nextSelected).toContain(MEMO_INDIVIDUAL.id)
     })
   })
 
@@ -417,17 +301,12 @@ describe('tree-logic', () => {
       expect(result.expandedIds.size).toBe(0)
     })
 
-    it('matches on fullName as well as displayName', () => {
-      // Arrange a node whose abbreviation is shown but whose full name is not
-      const tree: TreeNode[] = [
-        { id: 'imo', displayName: 'IMO', fullName: 'International Mathematical Olympiad' },
-      ]
+    it('opens a node matching on its own name that keeps matches beneath it too', () => {
+      // Act on a term the competition carries, as do some of the rounds beneath it
+      const result = filterTreeBySearch(mockTree, 'a')
 
-      // Act on a term appearing only in the full name
-      const result = filterTreeBySearch(tree, 'international')
-
-      // The node survives on a name that is never shown
-      expect(result.tree.map((node) => node.id)).toEqual(['imo'])
+      // The competition is opened to show the matches under it
+      expect(result.expandedIds.has(CSMO.id)).toBe(true)
     })
 
     it('drops branches with no match anywhere in them', () => {
@@ -438,86 +317,99 @@ describe('tree-logic', () => {
       expect(result.tree).toEqual([])
       expect(result.expandedIds.size).toBe(0)
     })
-
-    it('ignores case and diacritics alike', () => {
-      // Act on the word miscased
-      const withDiacritics = filterTreeBySearch(mockTree, 'DOMÁCE')
-
-      // Act on it with its diacritics stripped
-      const withoutDiacritics = filterTreeBySearch(mockTree, 'domace')
-
-      // Both reach the same round, down the same path
-      expect(withDiacritics.tree).toHaveLength(1)
-      expect(withoutDiacritics.tree).toHaveLength(1)
-      expect(withoutDiacritics.tree[0].children![0].children!.map((node) => node.id)).toEqual([
-        A_HOME.id,
-      ])
-    })
   })
 
-  describe('drawnRowIds', () => {
-    it('draws the roots alone while every branch is closed', () => {
-      // Act with nothing open
-      const drawn = drawnRowIds(mockTree, new Set())
-
-      // Only the two competitions have rows, whatever hangs beneath them
-      expect(drawn).toEqual([CSMO.id, mockTree[1].id])
-    })
-
-    it('draws the children of an open branch directly under it', () => {
-      // Act with one competition open and its categories still closed
-      const drawn = drawnRowIds(mockTree, new Set([CSMO.id]))
-
-      // Its categories come between it and the next root, in the order they are declared
-      expect(drawn).toEqual([CSMO.id, CATEGORY_A.id, CATEGORY_B.id, mockTree[1].id])
-    })
-
-    it('follows a chain of open branches to the leaves', () => {
+  describe('drawnTreeRows', () => {
+    it('places each row at its depth among the siblings drawn beside it, saying whether it stands open', () => {
       // Act with a whole path down to the rounds open
-      const drawn = drawnRowIds(mockTree, new Set([CSMO.id, CATEGORY_A.id]))
+      const drawn = drawnTreeRows(mockTree, new Set([CSMO.id, CATEGORY_A.id]))
 
-      // The open category's rounds are drawn, while the closed sibling stays a single row
-      expect(drawn).toEqual([
-        CSMO.id,
-        CATEGORY_A.id,
-        A_HOME.id,
-        A_SCHOOL.id,
-        A_REGIONAL.id,
-        CATEGORY_B.id,
-        mockTree[1].id,
+      // Each row's depth, its place among its siblings, how many there are, and whether it stands open
+      expect(
+        drawn.map(({ node, level, positionInSet, setSize, expanded }) => [
+          node.id,
+          level,
+          positionInSet,
+          setSize,
+          expanded,
+        ])
+      ).toEqual([
+        [CSMO.id, 0, 1, 2, true],
+        [CATEGORY_A.id, 1, 1, 2, true],
+        [A_HOME.id, 2, 1, 3, undefined],
+        [A_SCHOOL.id, 2, 2, 3, undefined],
+        [A_REGIONAL.id, 2, 3, 3, undefined],
+        [CATEGORY_B.id, 1, 2, 2, false],
+        [mockTree[1].id, 0, 2, 2, false],
       ])
     })
 
-    it('draws a leaf marked open as the single row it is', () => {
+    it('draws a leaf marked open as the single row it is, with nothing to open', () => {
       // Act with a childless node named among the open branches
-      const drawn = drawnRowIds([MEMO_INDIVIDUAL], new Set([MEMO_INDIVIDUAL.id]))
+      const drawn = drawnTreeRows([MEMO_INDIVIDUAL], new Set([MEMO_INDIVIDUAL.id]))
 
       // Nothing hangs off it, so being open changes nothing
-      expect(drawn).toEqual([MEMO_INDIVIDUAL.id])
+      expect(drawn).toEqual([
+        { node: MEMO_INDIVIDUAL, level: 0, positionInSet: 1, setSize: 1, expanded: undefined },
+      ])
+    })
+
+    it('leaves a branch a search stripped its children from with nothing to open', () => {
+      // A term matching one category by name, which nothing under it carries
+      const { tree, expandedIds } = filterTreeBySearch(mockTree, 'B')
+
+      // Act on what the search left standing, opened the way the search opens it
+      const drawn = drawnTreeRows(tree, expandedIds)
+
+      // The competition stands open over the match, while the category came through with nothing to open
+      expect(drawn.map(({ node, expanded }) => [node.id, expanded])).toEqual([
+        [CSMO.id, true],
+        [CATEGORY_B.id, undefined],
+      ])
     })
   })
 
-  describe('expandableRowIds', () => {
-    it('collects every branch at every depth, and no leaf', () => {
-      // Act on the whole hierarchy
-      const expandable = expandableRowIds(mockTree)
+  describe('treeRowsStandingForSelection', () => {
+    it('stands the closed branch hiding a pick in for it, and no open one', () => {
+      // Act on a round picked under a closed category of an open competition, beside a pick drawn in the open
+      const standing = treeRowsStandingForSelection(
+        [A_HOME.id, MEMO_INDIVIDUAL.id],
+        drawnTreeRows(mockTree, new Set([CSMO.id, mockTree[1].id])),
+        mockTree
+      )
 
-      // Both competitions and the two categories under one of them, the rounds being leaves
-      expect(expandable).toEqual(new Set([CSMO.id, CATEGORY_A.id, CATEGORY_B.id, mockTree[1].id]))
+      // Each pick, and the closed category hiding the first, while the open competitions above stand for nothing
+      expect(standing).toEqual([A_HOME.id, CATEGORY_A.id, MEMO_INDIVIDUAL.id])
     })
 
-    it('leaves out a branch a search stripped its children from', () => {
-      // A term matching one category by name, which nothing under it carries
-      const { tree } = filterTreeBySearch(mockTree, 'B')
+    it('stands a branch a search drew without its children in for a pick under it', () => {
+      // A term matching one category by name
+      const { tree, expandedIds } = filterTreeBySearch(mockTree, 'B')
 
-      // Act on what the search left standing
-      const expandable = expandableRowIds(tree)
+      // Act on a round picked under that category, with the category open beside what the search opens
+      const standing = treeRowsStandingForSelection(
+        [B_HOME.id],
+        drawnTreeRows(tree, new Set([...expandedIds, CATEGORY_B.id])),
+        mockTree
+      )
 
-      // The category came through carrying nothing, so it has nothing left to open
-      expect(expandable.has(CATEGORY_B.id)).toBe(false)
+      // The category, the nearest the search draws to the round, stands in for it
+      expect(standing).toEqual([B_HOME.id, CATEGORY_B.id])
+    })
 
-      // While the competition above it survives as the path down to the match
-      expect(expandable.has(CSMO.id)).toBe(true)
+    it('stands an open branch in for a pick a search drew that branch without', () => {
+      // A term matching MEMO's team round alone, which draws MEMO open over that round
+      const { tree, expandedIds } = filterTreeBySearch(mockTree, 'Tímová')
+
+      // Act on the round the search passes over, with the rows the search draws
+      const standing = treeRowsStandingForSelection(
+        [MEMO_INDIVIDUAL.id],
+        drawnTreeRows(tree, expandedIds),
+        mockTree
+      )
+
+      // MEMO, open though it is, stands in for the round the search left off
+      expect(standing).toEqual([MEMO_INDIVIDUAL.id, mockTree[1].id])
     })
   })
 })

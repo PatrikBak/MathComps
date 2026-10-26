@@ -1,7 +1,13 @@
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { normalizeForSearch } from '@/components/shared/utils/string-utils'
 
-import type { FacetGrouping, FacetOption, FacetSortMode, VisibleSection } from './facet-types'
+import type {
+  FacetGrouping,
+  FacetOption,
+  FacetRowAction,
+  FacetSortMode,
+  VisibleSection,
+} from './facet-types'
 
 /**
  * Names an option for assistive tech, folding in the result count so the figure shown
@@ -71,31 +77,25 @@ export function soleSelectionLabel(
 }
 
 /**
- * Narrows options to those whose name contains the search term, ignoring both case and diacritics, so
- * "cisla" finds "Čísla" and "STATISTIKA" finds "Štatistika". An option carrying a fuller name than its
- * label is searched by both, so what the label leaves out still finds it.
+ * Reads a search term as the test an option passes when its name contains the term, ignoring both case and
+ * diacritics, so "cisla" finds "Čísla" and "STATISTIKA" finds "Štatistika". An option carrying a fuller name than
+ * its label is searched by both, so what the label leaves out still finds it.
  *
- * @param options - The options to narrow.
- * @param searchTerm - What the user typed; a term of nothing but whitespace matches everything.
- * @returns The matching options, in their original order.
+ * @param searchTerm - What the user typed.
+ * @returns The test, or null for a term of nothing but whitespace, which narrows nothing.
  */
-export function filterOptionsBySearch<T extends FacetOption>(
-  options: T[],
-  searchTerm: string
-): T[] {
+export function searchMatcher(searchTerm: string): ((option: FacetOption) => boolean) | null {
   // The term as it is compared: trimmed, case-folded and stripped of diacritics
   const normalizedSearch = normalizeForSearch(searchTerm.trim())
 
-  // An empty term filters nothing
-  if (!normalizedSearch) return options
+  // An empty term tests nothing
+  if (!normalizedSearch) return null
 
-  // Keep the options either of whose normalized names contains the normalized term
-  return options.filter(
-    (option) =>
-      normalizeForSearch(option.displayName).includes(normalizedSearch) ||
-      (option.fullName !== undefined &&
-        normalizeForSearch(option.fullName).includes(normalizedSearch))
-  )
+  // A test passed by an option either of whose normalized names contains the normalized term
+  return (option) =>
+    normalizeForSearch(option.displayName).includes(normalizedSearch) ||
+    (option.fullName !== undefined &&
+      normalizeForSearch(option.fullName).includes(normalizedSearch))
 }
 
 /**
@@ -173,13 +173,17 @@ export function groupOptionsByKey<T extends FacetOption>(
 const SORT_MIN_SECTION_OPTIONS = 5
 
 /**
- * Whether a grouped facet's sections should each offer a control over their ordering.
+ * Whether a grouped facet's sections should each offer a control over their ordering, which takes options carrying
+ * counts to order by and a section long enough for an order to show.
  *
  * @param options - The options the sections are filled from.
  * @param grouping - The sections they are split into.
  * @returns Whether ordering is worth a control on the section headings.
  */
 export function sectionsWorthSorting(options: FacetOption[], grouping: FacetGrouping): boolean {
+  // Options with no counts have nothing but their names to be ordered by, which they already are
+  if (!options.some((option) => option.count !== undefined)) return false
+
   // The options split into their sections
   const bucketed = groupOptionsByKey(options, grouping.keys)
 
@@ -276,8 +280,6 @@ export type FacetDisplayOrderInput<T extends FacetOption> = {
   options: T[]
   /** Whether the popover is open. */
   isOpen: boolean
-  /** The current search term. */
-  query: string
   /** The labelled sections the options are split into, absent on a flat facet. */
   grouping: FacetGrouping | undefined
   /** The ordering each section is under, keyed by section. */
@@ -290,8 +292,8 @@ export type FacetDisplayOrderInput<T extends FacetOption> = {
 
 /**
  * Orders a facet's options the way its list draws them. A grouped facet puts every section under its own sort
- * mode, and a flat one holds the incoming order, the named options leading either way. A closed or searched list
- * is left in the incoming order.
+ * mode, and a flat one holds the incoming order, the named options leading either way. A search keeps that order
+ * among the options it leaves, and a closed list is left in the incoming order.
  *
  * @param input - What the order is worked out from.
  * @returns The options in the order they render.
@@ -299,15 +301,13 @@ export type FacetDisplayOrderInput<T extends FacetOption> = {
 export function orderOptionsForDisplay<T extends FacetOption>({
   options,
   isOpen,
-  query,
   grouping,
   sortModes,
   leadingIds,
   locale,
 }: FacetDisplayOrderInput<T>): T[] {
-  // A closed list draws nothing to order, and a searched one keeps the incoming order so nothing shifts under
-  // the caret
-  if (!isOpen || query) return options
+  // A closed list draws nothing to order
+  if (!isOpen) return options
 
   // Grouped: every section under its own ordering, concatenated in the configured key order
   if (grouping) return orderGroupedOptions(options, grouping, sortModes, leadingIds, locale)
@@ -388,19 +388,114 @@ export function drawnSectionRowIds(
 }
 
 /**
- * Picks the one row a facet's panel offers the page's tab order: the first row drawn that is selected, so a
- * reopened facet lands on what it is already filtered by, and the top row where none is.
+ * Lists the rows standing for a grouped facet's selection: every option selected, and the heading of every
+ * rolled-up section holding one, since that heading is all the list draws of it.
+ *
+ * @param sections - The sections with something to show, in the order they render.
+ * @param collapsed - Which sections are rolled up, keyed by section.
+ * @param selectedIds - The ids currently selected.
+ * @returns The row ids standing for the selection, in no particular order.
+ */
+export function sectionRowsStandingForSelection(
+  sections: VisibleSection[],
+  collapsed: Record<string, boolean>,
+  selectedIds: string[]
+): string[] {
+  // The headings of the rolled-up sections a selected option sits hidden in
+  const hidingHeadings = sections
+    .filter(
+      ({ groupKey, sectionOptions }) =>
+        collapsed[groupKey] && sectionOptions.some((option) => selectedIds.includes(option.id))
+    )
+    .map(({ groupKey }) => headingRowId(groupKey))
+
+  // The selected options themselves, and the headings hiding any of them
+  return [...selectedIds, ...hidingHeadings]
+}
+
+/**
+ * Picks the one row a facet's panel offers the page's tab order. The row focus last landed on keeps it while the
+ * list still draws it, so Tab leaves the list from wherever the arrows took the reader. Otherwise it is the first
+ * row drawn standing for the selection, so a reopened facet lands on what it is already filtered by, and the
+ * top row where none is.
  *
  * @param drawnRowIds - The rows the list draws, top to bottom.
- * @param selectedIds - The ids currently selected.
+ * @param standingRowIds - The rows standing for the selection.
+ * @param lastFocusedRowId - The row focus last landed on while focus stays inside the list, or null for none.
  * @returns The row's id, or undefined while the list draws nothing.
  */
 export function facetTabStopRowId(
   drawnRowIds: string[],
-  selectedIds: string[]
+  standingRowIds: string[],
+  lastFocusedRowId: string | null
 ): string | undefined {
+  // The row focus last landed on, as long as the list still draws it
+  if (lastFocusedRowId !== null && drawnRowIds.includes(lastFocusedRowId)) return lastFocusedRowId
+
   // The first row standing, and otherwise the top of the list
-  return drawnRowIds.find((rowId) => selectedIds.includes(rowId)) ?? drawnRowIds[0]
+  return drawnRowIds.find((rowId) => standingRowIds.includes(rowId)) ?? drawnRowIds[0]
+}
+
+/**
+ * A row that opens and closes what lies under it, as the keys acting on it see it.
+ */
+export type CollapsibleRow = {
+  /** Whether what lies under it is showing. */
+  isOpen: boolean
+  /** Closes the row where it is open, and opens it where it is closed. */
+  toggleOpen: () => void
+  /** Advances what lies under it to the next ordering, or null where it has no orderings to cycle. */
+  cycleSort: (() => void) | null
+}
+
+/**
+ * Applies a row action to a row that opens and closes: collapse acts only on an open row, expand only on a closed
+ * one, and cycle-sort only where the row has orderings.
+ *
+ * @param action - What the key asked of the row.
+ * @param row - The row, and what it can do.
+ * @returns Whether the row acted.
+ */
+export function applyCollapsibleRowAction(action: FacetRowAction, row: CollapsibleRow): boolean {
+  // What the action asks for, each answering whether the row was in a state to do it
+  switch (action) {
+    // Collapsing closes an open row
+    case 'collapse':
+      // A row already closed leaves the key to the browser
+      if (!row.isOpen) return false
+
+      // Close it
+      row.toggleOpen()
+
+      // The key is spoken for
+      return true
+
+    // Expanding opens a closed row
+    case 'expand':
+      // A row already open leaves the key to the browser
+      if (row.isOpen) return false
+
+      // Open it
+      row.toggleOpen()
+
+      // The key is spoken for
+      return true
+
+    // Cycling advances the row's ordering, where it has one
+    case 'cycle-sort':
+      // A row with no orderings has nothing to advance
+      if (!row.cycleSort) return false
+
+      // On to the next ordering
+      row.cycleSort()
+
+      // The key is spoken for
+      return true
+
+    // An action outside the union, which the type system rules out
+    default:
+      return assertNever(action)
+  }
 }
 
 /** The keys an option list walks itself, rather than leaving them to the browser. */
@@ -421,6 +516,34 @@ const PAGE_FRACTION = 10
 export function isFacetNavigationKey(key: string): key is FacetNavigationKey {
   // Read as plain strings, since the key being compared is not known to be one of them yet
   return (FACET_NAVIGATION_KEYS as readonly string[]).includes(key)
+}
+
+/** The key advancing the focused section to its next ordering. */
+const SORT_KEY = 's'
+
+/**
+ * Reads which of a row's own actions a key asks for.
+ *
+ * @param key - The key pressed.
+ * @returns The action, or nothing for a key the rows have no claim on.
+ */
+export function rowActionForKey(key: string): FacetRowAction | undefined {
+  // The keys a row claims for itself, the rest belonging to the walk between rows
+  switch (key) {
+    case 'ArrowLeft':
+      return 'collapse'
+    case 'ArrowRight':
+      return 'expand'
+
+    // The ordering sits on a letter, collapse and expand having taken both arrows
+    case SORT_KEY:
+    case SORT_KEY.toUpperCase():
+      return 'cycle-sort'
+
+    // Every other key belongs to the walk, or to the browser
+    default:
+      return undefined
+  }
 }
 
 /**

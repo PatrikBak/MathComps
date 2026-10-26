@@ -1,21 +1,31 @@
 import { type RefObject, useEffect } from 'react'
 
 /**
+ * What a facet's standing option is revealed in, and when.
+ */
+export type UseRevealSelectedOptionOptions = {
+  /** The scrolling list holding the option rows. */
+  listRef: RefObject<HTMLDivElement | null>
+  /** Whether the standing option is to be brought into view. */
+  isActive: boolean
+  /** How many options the facet offers, so that one opened ahead of its options still reveals. */
+  optionCount: number
+}
+
+/**
  * Scrolls the standing option into view as a facet's list appears.
  *
  * A facet that leaves its options in the order they were authored in can open with the option
  * that stands sitting well below the fold, so the list is moved to it rather than it to the top
  * of the list.
  *
- * @param listRef - The scrolling list holding the option rows.
- * @param isActive - Whether the standing option is to be brought into view.
- * @param optionCount - How many rows the list holds, so that one opened ahead of its options still reveals.
+ * @param options - What the option is revealed in, and when.
  */
-export function useRevealSelectedOption(
-  listRef: RefObject<HTMLDivElement | null>,
-  isActive: boolean,
-  optionCount: number
-) {
+export function useRevealSelectedOption({
+  listRef,
+  isActive,
+  optionCount,
+}: UseRevealSelectedOptionOptions) {
   // Bring the row over the fold once the list is up
   useEffect(() => {
     // Nothing to reveal until the list is up and the facet asks for it

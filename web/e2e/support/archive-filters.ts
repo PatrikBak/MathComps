@@ -1,8 +1,14 @@
-import type { Page } from '@playwright/test'
+import type { Page, Response } from '@playwright/test'
 
+import type {
+  FilterParameters,
+  FilterQuery,
+} from '@/components/features/problems/types/problem-api-types'
 import { URL_PARAMS } from '@/components/features/problems/utils/search-url-serialization'
+import { FACET_ROW_ATTRIBUTE } from '@/components/shared/components/facets/hooks/use-facet-row-navigation'
 
 import messages from '../../messages/en.json'
+import { SEARCH_PATH } from './backend-routes'
 
 /**
  * The copy the assertions match on, taken from the app's own English messages: what each of them
@@ -21,6 +27,12 @@ export const signInCopy = authCopy
 
 /** The copy every facet control reads under, whichever facet it belongs to. */
 export const facetsCopy = uiCopy.filters
+
+/** A window short enough that the archive's facets open their panels above their triggers, over their headings. */
+export const SHORT_WINDOW = { width: 1280, height: 720 }
+
+/** A window tall enough that a facet near the top of the archive's filters opens its panel below its trigger. */
+export const TALL_WINDOW = { width: 1280, height: 1000 }
 
 /**
  * The key {@link KEPT_FILTER} is written under, taken from the library's own spelling of it. A
@@ -64,6 +76,27 @@ export function filtersInUrl(page: Page): URLSearchParams {
   return new URL(page.url()).searchParams
 }
 
+/**
+ * Waits for the archive's answer to one search the page sends. Start it before whatever sends the search, since an
+ * answer that arrives first is never seen.
+ *
+ * @param page - The page searching.
+ * @param isAwaited - Whether a search is the one waited for, read off what it asked for.
+ *
+ * @returns The answer, once it arrives.
+ */
+export function searchAnswered(
+  page: Page,
+  isAwaited: (parameters: FilterParameters) => boolean
+): Promise<Response> {
+  // The search the predicate picks out, answered
+  return page.waitForResponse(
+    (response) =>
+      response.url().endsWith(SEARCH_PATH) &&
+      isAwaited((response.request().postDataJSON() as FilterQuery).parameters)
+  )
+}
+
 declare global {
   interface Window {
     /** Hands one reading of a facet tree over to the test run. */
@@ -81,8 +114,10 @@ declare global {
  * of the rows on show are the counts as the reader has them. Written to be installed twice over a
  * page's life, it refuses to watch a document it is already watching: two watchers would hand the
  * same reading over twice, and each would then read as a count that moved and came back.
+ *
+ * @param rowSelector - The selector matching every row of a facet, handed in since this runs in the page.
  */
-function watchTree(): void {
+function watchTree(rowSelector: string): void {
   // This document is already accounted for
   if (window.isWatchingTree) return
 
@@ -95,7 +130,7 @@ function watchTree(): void {
   // A function which reads the rows as they stand and hands over anything that has moved
   const readTree = () => {
     // Every row on show, each named as it is read aloud, which is name and count together
-    const reading = [...document.querySelectorAll('[data-facet-row-id]')]
+    const reading = [...document.querySelectorAll(rowSelector)]
       .map((row) => row.getAttribute('aria-label'))
       .join(', ')
 
@@ -136,10 +171,10 @@ export async function recordTreeReadings(page: Page): Promise<() => string[]> {
   })
 
   // Every document from the next one on, since the counts are drawn long before a test can look
-  await page.addInitScript(watchTree)
+  await page.addInitScript(watchTree, FACET_ROW_ATTRIBUTE.anySelector)
 
   // And the document already open, so that calling this after a page has loaded records that page
-  await page.evaluate(watchTree)
+  await page.evaluate(watchTree, FACET_ROW_ATTRIBUTE.anySelector)
 
   // Hand back a snapshot on each read, so a list cannot grow underneath an assertion mid-check
   return () => [...readings]

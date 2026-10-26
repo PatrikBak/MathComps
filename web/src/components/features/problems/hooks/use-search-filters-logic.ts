@@ -136,10 +136,11 @@ export function useSearchFiltersLogic({
     [baseOptions.competitions]
   )
 
-  // The filters' competition selection, addressed the way the tree addresses its nodes, with a
-  // selection naming a node the taxonomy no longer holds left out
+  // The filters' competition selection, addressed the way the tree addresses its nodes and folded the way
+  // the tree records one, since a hand-written address can name a node together with its ancestor. A
+  // selection naming a node the taxonomy no longer holds is left out.
   const selectionTreeNodeIds = useMemo(
-    () => filters.competitionSelection.filter((selection) => competitionTree.byPath.has(selection)),
+    () => foldPickedPaths(filters.competitionSelection, competitionTree).map((node) => node.path),
     [filters.competitionSelection, competitionTree]
   )
 
