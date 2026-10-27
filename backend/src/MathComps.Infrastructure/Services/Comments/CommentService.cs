@@ -3,7 +3,6 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 
 namespace MathComps.Infrastructure.Services.Comments;
@@ -15,11 +14,9 @@ namespace MathComps.Infrastructure.Services.Comments;
 /// </summary>
 /// <param name="dbContextFactory">The factory minting a context per operation.</param>
 /// <param name="kinds">Every kind of thread, exactly one per <see cref="CommentTargetType"/>.</param>
-/// <param name="logger">The logger.</param>
 public class CommentService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
-    IEnumerable<ICommentThreadKind> kinds,
-    ILogger<CommentService> logger) : ICommentService
+    IEnumerable<ICommentThreadKind> kinds) : ICommentService
 {
     /// <summary>
     /// Every kind of thread, in the order they were registered, which is the order a stored comment's thread is
@@ -77,12 +74,6 @@ public class CommentService(
         // The thread's top-level comments, each with its replies nested under it
         var topLevel = await BuildTreesAsync(dbContext, flatComments);
 
-        // Log the number of comments fetched
-        logger.LogDebug("Fetched {Count} comments for {TargetType}:{TargetId}",
-            flatComments.Count,
-            target.TargetType,
-            target.TargetId);
-
         // Return the top-level comments
         return topLevel;
     }
@@ -114,12 +105,6 @@ public class CommentService(
 
         // Every thread's top-level comments, each with its replies nested under it
         var topLevel = await BuildTreesAsync(dbContext, flatComments, cancellationToken);
-
-        // Log the number of comments fetched
-        logger.LogDebug("Fetched {Count} comments across {TargetCount} {TargetType} threads",
-            flatComments.Count,
-            targetIds.Count,
-            targetType);
 
         // Each thread's top-level comments by its target, oldest first
         return topLevel
@@ -187,14 +172,6 @@ public class CommentService(
 
         // Save the comment
         await dbContext.SaveChangesAsync();
-
-        // Log the creation of the comment
-        logger.LogInformation(
-            "Created comment {CommentId} by user {AuthorId} on {TargetType}:{TargetId}",
-            comment.Id,
-            viewer.UserId,
-            target.TargetType,
-            target.TargetId);
 
         // Return the comment's data
         return new CommentDto(
@@ -284,13 +261,6 @@ public class CommentService(
         // Save all changes
         await dbContext.SaveChangesAsync();
 
-        // Log the update
-        logger.LogInformation(
-            "Updated comment {OldCommentId} -> {NewCommentId} by user {UserId}",
-            commentId,
-            newComment.Id,
-            viewer.UserId);
-
         // Return the new version's id and when it was written
         return new UpdateCommentResult(newComment.Id, newComment.CreatedAt);
     }
@@ -316,12 +286,6 @@ public class CommentService(
 
         // Save all changes
         await dbContext.SaveChangesAsync();
-
-        // Log the deletion
-        logger.LogInformation(
-            "Soft-deleted comment {CommentId} by user {UserId}",
-            commentId,
-            viewer.UserId);
     }
 
     /// <inheritdoc />
@@ -367,13 +331,6 @@ public class CommentService(
             ON CONFLICT (user_id, comment_id) DO UPDATE
             SET kind = excluded.kind, created_at = excluded.created_at
         ");
-
-        // Log the press
-        logger.LogInformation(
-            "Pressed {ReactionKind} for user {UserId} on comment {CommentId}",
-            reactionKind,
-            viewer.UserId,
-            commentId);
     }
 
     /// <inheritdoc />

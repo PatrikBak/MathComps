@@ -179,9 +179,6 @@ public partial class UserManager(
         // Save the changes to the database.
         // We do NOT remove the user entity, keeping foreign key relationships intact.
         await dbContext.SaveChangesAsync(cancellationToken);
-
-        // Log the soft deletion of the user.
-        logger.LogInformation("Soft-deleted user: {ExternalId}", externalId);
     }
 
     /// <inheritdoc />

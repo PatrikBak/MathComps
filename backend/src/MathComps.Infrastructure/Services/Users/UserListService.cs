@@ -3,7 +3,6 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Problems;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 
 namespace MathComps.Infrastructure.Services.Users;
@@ -13,11 +12,9 @@ namespace MathComps.Infrastructure.Services.Users;
 /// </summary>
 /// <param name="dbContext">The database context.</param>
 /// <param name="problemLookup">Resolves problem slugs to internal ids.</param>
-/// <param name="logger">The logger.</param>
 public class UserListService(
     MathCompsDbContext dbContext,
-    IProblemLookupService problemLookup,
-    ILogger<UserListService> logger) : IUserListService
+    IProblemLookupService problemLookup) : IUserListService
 {
     /// <inheritdoc />
     public async Task<UserListsResponse> GetListsAsync(Guid userId)
@@ -65,9 +62,6 @@ public class UserListService(
         dbContext.UserProblemLists.Add(list);
         await dbContext.SaveChangesAsync();
 
-        // Log the creation
-        logger.LogInformation("Created list '{ContentId}' for user {UserId}", list.ContentId, userId);
-
         // Return the created list
         return new UserListDto(list.ContentId, list.Name, ProblemCount: 0, list.IsShared);
     }
@@ -89,9 +83,6 @@ public class UserListService(
         // Save changes
         await dbContext.SaveChangesAsync();
 
-        // Log the update
-        logger.LogInformation("Renamed list '{ContentId}' to '{NewName}' for user {UserId}", contentId, newName, userId);
-
         // Return the updated list
         return new UserListDto(list.ContentId, list.Name, list.Items.Count, list.IsShared);
     }
@@ -108,9 +99,6 @@ public class UserListService(
         // Remove the list (cascade deletes items)
         dbContext.UserProblemLists.Remove(list);
         await dbContext.SaveChangesAsync();
-
-        // Log the deletion
-        logger.LogInformation("Deleted list '{ContentId}' for user {UserId}", contentId, userId);
     }
 
     /// <inheritdoc />
@@ -143,9 +131,6 @@ public class UserListService(
 
         // Save changes
         await dbContext.SaveChangesAsync();
-
-        // Log the addition
-        logger.LogInformation("Added problem '{ProblemSlug}' to list '{ContentId}' for user {UserId}", problemSlug, contentId, userId);
     }
 
     /// <inheritdoc />
@@ -171,9 +156,6 @@ public class UserListService(
         // Remove the item
         dbContext.UserProblemListItems.Remove(item);
         await dbContext.SaveChangesAsync();
-
-        // Log the removal
-        logger.LogInformation("Removed problem '{ProblemSlug}' from list '{ContentId}' for user {UserId}", problemSlug, contentId, userId);
     }
 
     /// <inheritdoc />
@@ -206,9 +188,6 @@ public class UserListService(
 
         // Save all changes atomically
         await dbContext.SaveChangesAsync();
-
-        // Log the reorder
-        logger.LogInformation("Reordered {Count} lists for user {UserId}", lists.Count, userId);
     }
 
     /// <inheritdoc />
@@ -227,10 +206,6 @@ public class UserListService(
 
         // Save changes
         await dbContext.SaveChangesAsync();
-
-        // Log the change
-        logger.LogInformation("{Action} sharing for list '{ContentId}' for user {UserId}",
-            enabled ? "Enabled" : "Disabled", contentId, userId);
 
         // Return the updated list
         return new UserListDto(list.ContentId, list.Name, list.Items.Count, list.IsShared);
