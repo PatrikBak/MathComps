@@ -7,6 +7,7 @@ import {
   FLOATING_PANEL_FILLS,
   FLOATING_PANEL_MOTION_CLASS,
   type FloatingPanelContentProps,
+  WINDOW_EDGE_CLEARANCE_PX,
 } from './DropdownMenu'
 
 /** Root component that manages open/close state of the popover. */
@@ -17,7 +18,8 @@ export const PopoverTrigger = PopoverPrimitive.Trigger
 
 /**
  * Positioned content panel rendered inside a portal.
- * Provides the house panel chrome, its motion, and the padding its rows sit in.
+ * Provides the house panel chrome, its motion, and the padding its rows sit in. A panel taller than the room the
+ * window leaves for it scrolls inside itself.
  */
 export const PopoverContent = React.forwardRef<
   React.ComponentRef<typeof PopoverPrimitive.Content>,
@@ -33,8 +35,12 @@ export const PopoverContent = React.forwardRef<
         FLOATING_PANEL_FILLS[opensOver],
         FLOATING_PANEL_MOTION_CLASS,
         'min-w-[8rem] p-1',
+        // No taller than the room the window leaves on its side of the trigger, scrolling the rest
+        'max-h-[var(--radix-popover-content-available-height)] overflow-y-auto overscroll-contain',
         className
       )}
+      // Kept clear of the window's edges
+      collisionPadding={WINDOW_EDGE_CLEARANCE_PX}
       {...props}
     />
   </PopoverPrimitive.Portal>

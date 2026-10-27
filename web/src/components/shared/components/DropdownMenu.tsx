@@ -57,6 +57,9 @@ export const FLOATING_PANEL_MOTION_CLASS = cn(
   'data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2'
 )
 
+/** The room a panel keeps clear between itself and the window's edges, in pixels. */
+export const WINDOW_EDGE_CLEARANCE_PX = 8
+
 /** Root component that manages open/close state of the dropdown. */
 export const DropdownMenu = DropdownMenuPrimitive.Root
 
@@ -68,7 +71,8 @@ export const DropdownMenuGroup = DropdownMenuPrimitive.Group
 
 /**
  * Positioned content panel rendered inside a portal.
- * Provides the house panel chrome, its motion, and the padding its rows sit in.
+ * Provides the house panel chrome, its motion, and the padding its rows sit in. A panel taller than the room the
+ * window leaves for it scrolls inside itself.
  *
  * A pointer closing it hands focus back to the trigger unringed. Radix's own hand-back is a bare
  * `focus()`, which the browser rings unless the last focus it saw came from the mouse, and the click
@@ -126,9 +130,14 @@ export const DropdownMenuContent = React.forwardRef<
           FLOATING_PANEL_CLASS,
           FLOATING_PANEL_FILLS[opensOver],
           FLOATING_PANEL_MOTION_CLASS,
-          'min-w-[8rem] overflow-hidden p-1',
+          'min-w-[8rem] p-1',
+          // No taller than the room the window leaves on its side of the trigger, scrolling the rest, since a panel
+          // pinned to the window and running past its edge can never be scrolled to
+          'max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto overscroll-contain',
           className
         )}
+        // Kept clear of the window's edges
+        collisionPadding={WINDOW_EDGE_CLEARANCE_PX}
         onCloseAutoFocus={handleCloseAutoFocus}
         {...props}
       />
