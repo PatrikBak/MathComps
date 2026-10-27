@@ -2,14 +2,26 @@
 
 import type { ReactNode } from 'react'
 
+import { cn } from '@/components/shared/utils/css-utils'
 import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
 import type { Locale } from '@/i18n/i18n'
 
 import type { Proposal } from '../model/selection-types'
 import { DetailHeading } from './DetailFrame'
+import { PlaceControl } from './PlaceControl'
+import { ProposalActionsMenu } from './ProposalActionsMenu'
 import { ProposalBody, ProposalBox } from './ProposalBody'
 import { ProposalChatTrigger } from './ProposalChatTrigger'
 import { ProposalLink, ProposalTabRows } from './SelectionLinks'
+
+/**
+ * What a {@link ProposalCard} offers besides talking to Mathilda: its {@link PlaceControl} and its
+ * {@link ProposalActionsMenu}, which takes Mathilda in on a phone.
+ */
+type ProposalCardActions = {
+  /** Runs as a delete from the menu fires, once the reader confirms it. */
+  onDeleted?: () => void
+}
 
 /**
  * Props for the {@link ProposalCard} component.
@@ -27,7 +39,7 @@ type ProposalCardProps = {
   /** What stands in front of the problem's name, such as the slot it fills; null for nothing. */
   mark: ReactNode
   /** What can be done to the problem besides talking to Mathilda about it; null for nothing more. */
-  actions: ReactNode
+  actions: ProposalCardActions | null
   /** The marks saying more about the problem, on a line under its name. */
   details: ReactNode
   /** Classes on the card, for how it stands out where it is. */
@@ -86,8 +98,20 @@ export function ProposalCard({
             // In the top corner, after the name
             className="ml-auto flex shrink-0 items-center gap-1"
           >
-            <ProposalChatTrigger proposal={proposal} />
-            {actions}
+            <div
+              // Mathilda, who moves into the menu of actions on a phone where the card has one, since beside the name
+              // she would squeeze it
+              className={cn('contents', actions !== null && 'max-sm:hidden')}
+            >
+              <ProposalChatTrigger proposal={proposal} />
+            </div>
+            {/* Placing the problem, and its menu of actions */}
+            {actions !== null && (
+              <>
+                <PlaceControl proposal={proposal} />
+                <ProposalActionsMenu proposal={proposal} onDeleted={actions.onDeleted} />
+              </>
+            )}
           </div>
         </div>
 

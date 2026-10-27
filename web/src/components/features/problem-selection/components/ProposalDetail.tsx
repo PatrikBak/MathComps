@@ -16,8 +16,6 @@ import type { Proposal } from '../model/selection-types'
 import { DetailMissing, type DetailTabContent } from './DetailFrame'
 import { LanguageSwitch } from './LanguageSwitch'
 import { MarkSeenButton } from './MarkSeenButton'
-import { PlaceControl } from './PlaceControl'
-import { ProposalActionsMenu } from './ProposalActionsMenu'
 import { ProposalCard } from './ProposalCard'
 import { ProposalConversations } from './ProposalConversations'
 import { ProposalFiling } from './ProposalFiling'
@@ -178,12 +176,7 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
         language={language}
         leadsToPage={false}
         mark={null}
-        actions={
-          <>
-            <PlaceControl proposal={proposal} />
-            <ProposalActionsMenu proposal={proposal} onDeleted={onDeleted} />
-          </>
-        }
+        actions={{ onDeleted }}
         details={<ProposalFiling proposal={proposal} />}
         className="mt-4"
       />
