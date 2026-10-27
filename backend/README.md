@@ -451,7 +451,7 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
 
 #### Error tracking
 
-`Sentry.AspNetCore` ships every `LogError` to Better Stack, which is the route an unhandled exception takes out of [GlobalExceptionHandler](src/MathComps.Api/Extensions/GlobalExceptionHandler.cs). The business failures that handler maps to a status are filtered back out in [Program.cs](src/MathComps.Api/Program.cs). `SENTRY_DSN` in `.env` turns it on, and an empty one leaves the SDK disabled.
+`Sentry.AspNetCore` ships every `LogError` to Better Stack, which is the route an unhandled exception takes out of [GlobalExceptionHandler](src/MathComps.Api/Extensions/GlobalExceptionHandler.cs). That handler logs each business failure at the level its exception states, so only the ones a bug causes go out. [Program.cs](src/MathComps.Api/Program.cs) drops the SDK middleware's second capture of each. `SENTRY_DSN` in `.env` turns it on, and an empty one leaves the SDK disabled.
 
 #### Mail
 

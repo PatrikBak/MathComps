@@ -1,5 +1,6 @@
 using MathComps.Domain.Contracts.Competitions;
 using MathComps.Infrastructure.Options;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.Competitions;
 
@@ -137,54 +138,92 @@ public interface IHostedCompetitionService
 /// <summary>
 /// Thrown when a slug addresses no round the site hosts, so there is no competition under the name.
 /// </summary>
-public sealed class HostedCompetitionNotFoundException() : Exception("Competition not found");
+public sealed class HostedCompetitionNotFoundException()
+    : MathCompsException(
+        "Competition not found",
+        RefusalKind.NotFound,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when an entry is taken into a group that is not currently taking them, before it opens or after it
 /// has closed.
 /// </summary>
-public sealed class HostedGroupNotOpenException() : Exception("This competition is not taking entries");
+public sealed class HostedGroupNotOpenException()
+    : MathCompsException(
+        "This competition is not taking entries",
+        RefusalKind.PreconditionUnmet,
+        LogLevel.Information);
 
 /// <summary>
-/// Thrown when an entry is taken into a competition holding fewer problems than its group announced.
+/// Thrown when an entry is taken into a competition whose round holds none of its problems yet. A round holding some
+/// but fewer than its group announced is broken data, refused with an <see cref="InvalidOperationException"/> instead.
 /// </summary>
 public sealed class HostedCompetitionNotReadyException()
-    : Exception("This competition's problems are not all there yet");
+    : MathCompsException(
+        "This competition's problems are not all there yet",
+        RefusalKind.PreconditionUnmet,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when a student takes a second entry into a competition whose group allows only one.
 /// </summary>
-public sealed class HostedEntryAlreadySpentException() : Exception("This entry has already been spent");
+public sealed class HostedEntryAlreadySpentException()
+    : MathCompsException(
+        "This entry has already been spent",
+        RefusalKind.Conflict,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when an entry is handed in that is not one the student is currently sitting.
 /// </summary>
-public sealed class HostedEntryNotRunningException() : Exception("There is no entry to hand in");
+public sealed class HostedEntryNotRunningException()
+    : MathCompsException(
+        "There is no entry to hand in",
+        RefusalKind.PreconditionUnmet,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when a note for the graders is left or taken back under a preparer's run, which nobody grades.
 /// </summary>
 public sealed class HostedEntryNotGradedException()
-    : Exception("This entry is not being graded, so there is nobody to leave a note for");
+    : MathCompsException(
+        "This entry is not being graded, so there is nobody to leave a note for",
+        RefusalKind.PreconditionUnmet,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when what a student says about their own solution carries no words, so nothing stands to record.
 /// </summary>
-public sealed class HostedNoteEmptyException() : Exception("A note has to say something");
+public sealed class HostedNoteEmptyException()
+    : MathCompsException(
+        "A note has to say something",
+        RefusalKind.Invalid,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when what a student says about their own solution runs past the longest note a competition takes.
 /// </summary>
-public sealed class HostedNoteTooLongException() : Exception("The note is too long");
+public sealed class HostedNoteTooLongException()
+    : MathCompsException(
+        "The note is too long",
+        RefusalKind.Invalid,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when a competition's results are read before its group has closed, for one that never closes, or by a
 /// student whose own clock in it still runs past the close.
 /// </summary>
-public sealed class HostedResultsNotOutException() : Exception("This competition's results are not out yet");
+public sealed class HostedResultsNotOutException()
+    : MathCompsException(
+        "This competition's results are not out yet",
+        RefusalKind.PreconditionUnmet,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when a student enters without the account details an entry asks of them.
 /// </summary>
 public sealed class HostedEntryProfileIncompleteException()
-    : Exception("This competition needs a name, a graduation year and an email address");
+    : MathCompsException(
+        "This competition needs a name, a graduation year and an email address",
+        RefusalKind.PreconditionUnmet,
+        LogLevel.Error);

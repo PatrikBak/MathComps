@@ -1,5 +1,6 @@
 using MathComps.Domain.Contracts.ConversationReview;
 using MathComps.Domain.EfCoreEntities;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.ConversationReview;
 
@@ -68,20 +69,36 @@ public interface IReviewNoteService
 /// Thrown when a note carries a value the contract can't take: no text at all, more text than a note may carry,
 /// or a category outside the ones <see cref="DefenseReportCategory"/> defines.
 /// </summary>
-public sealed class ReviewNoteValueException() : Exception("The note is not valid");
+public sealed class ReviewNoteValueException()
+    : MathCompsException(
+        "The note is not valid",
+        RefusalKind.Invalid,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when a note stands against a reply the conversation it is about doesn't hold.
 /// </summary>
-public sealed class ReviewNoteTargetException() : Exception("The noted reply is not valid");
+public sealed class ReviewNoteTargetException()
+    : MathCompsException(
+        "The noted reply is not valid",
+        RefusalKind.Invalid,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when no note exists under the id.
 /// </summary>
-public sealed class ReviewNoteNotFoundException() : Exception("The note was not found");
+public sealed class ReviewNoteNotFoundException()
+    : MathCompsException(
+        "The note was not found",
+        RefusalKind.NotFound,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when a reviewer tries to revise or drop a note somebody else wrote. A note is that reviewer's own
 /// reading of a conversation, and a second one rewriting it would leave the byline naming the wrong person.
 /// </summary>
-public sealed class NotReviewNoteAuthorException() : Exception("The note was written by somebody else");
+public sealed class NotReviewNoteAuthorException()
+    : MathCompsException(
+        "The note was written by somebody else",
+        RefusalKind.Forbidden,
+        LogLevel.Error);

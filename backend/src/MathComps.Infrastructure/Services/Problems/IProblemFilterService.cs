@@ -2,6 +2,7 @@ using MathComps.Domain.Contracts.ProblemQuery;
 using MathComps.Domain.Contracts.SearchBar;
 using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Services.Users;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.Problems;
 
@@ -36,11 +37,19 @@ public interface IProblemFilterService
 /// <summary>
 /// Thrown when a favorites-only filter is requested without an authenticated user.
 /// </summary>
-public sealed class FavoritesRequireAuthenticationException() : Exception("Cannot filter favorites without an authenticated user");
+public sealed class FavoritesRequireAuthenticationException()
+    : MathCompsException(
+        "Cannot filter favorites without an authenticated user",
+        RefusalKind.Unauthenticated,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when a mark-status filter is requested without an authenticated user.
 /// </summary>
-public sealed class MarkStatusRequiresAuthenticationException() : Exception("Cannot filter by mark status without an authenticated user");
+public sealed class MarkStatusRequiresAuthenticationException()
+    : MathCompsException(
+        "Cannot filter by mark status without an authenticated user",
+        RefusalKind.Unauthenticated,
+        LogLevel.Information);
 
 

@@ -1,4 +1,5 @@
 using MathComps.Api.Constants;
+using MathComps.Infrastructure.Services;
 using MathComps.Infrastructure.Services.Users;
 
 namespace MathComps.Api.Endpoints;
@@ -45,4 +46,8 @@ internal static class UserManagerExtensions
 /// Thrown when an authenticated request reaches a handler that needs a user but the caller
 /// can't be resolved to one.
 /// </summary>
-public sealed class UserNotResolvedException() : Exception("The authenticated caller could not be resolved to a user");
+public sealed class UserNotResolvedException()
+    : MathCompsException(
+        "The authenticated caller could not be resolved to a user",
+        RefusalKind.Unauthenticated,
+        LogLevel.Error);

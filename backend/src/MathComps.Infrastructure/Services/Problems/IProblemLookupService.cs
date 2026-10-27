@@ -1,4 +1,5 @@
 using MathComps.Domain.Contracts.ProblemQuery;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.Problems;
 
@@ -49,4 +50,8 @@ public interface IProblemLookupService
 /// Thrown when a problem slug matches no problem.
 /// </summary>
 /// <param name="slug">The slug that matched no problem.</param>
-public sealed class ProblemNotFoundException(string slug) : Exception($"Problem '{slug}' not found");
+public sealed class ProblemNotFoundException(string slug)
+    : MathCompsException(
+        $"Problem '{slug}' not found",
+        RefusalKind.NotFound,
+        LogLevel.Information);
