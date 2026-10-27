@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.Ai;
+using Microsoft.Extensions.Logging.Abstractions;
 using OpenAI;
 using MsOptions = Microsoft.Extensions.Options.Options;
 
@@ -112,7 +113,7 @@ public class LlmChatCallerTests
     /// <param name="reasoningEffort">The reasoning-effort level to send.</param>
     /// <returns>The request, ready to send.</returns>
     private static ChatCallRequest Request(IReadOnlyList<string> fallbackModels, string reasoningEffort) =>
-        new("instructions", "the input", "google/gemini-3.6-flash", fallbackModels, reasoningEffort,
+        new("test-step", "instructions", "the input", "google/gemini-3.6-flash", fallbackModels, reasoningEffort,
             MaxOutputTokens: 2048);
 
     /// <summary>
@@ -147,7 +148,8 @@ public class LlmChatCallerTests
         };
 
         // The real caller over that client.
-        var caller = new LlmChatCaller(openAIClient, new LlmSpendTracker(), MsOptions.Create(settings));
+        var caller = new LlmChatCaller(
+            openAIClient, new LlmSpendTracker(), NullLogger<LlmChatCaller>.Instance, MsOptions.Create(settings));
 
         // Make the call.
         var result = await caller.CompleteTextAsync(request);

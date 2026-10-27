@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using System.Text.Json;
 using MathComps.Infrastructure.Options;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenAI;
 using Polly;
@@ -15,7 +17,8 @@ namespace MathComps.Infrastructure.Services.Ai;
 /// OpenAI-compatible endpoint. Derives a model-bound client per call, sets the reasoning level on the request, patches
 /// the fallback chain onto its raw body, and retries a configured number of times because the endpoint occasionally
 /// hands back an unusable response, so a retry draws a fresh one. A reply that hit the output-token cap is retried the
-/// same way. Each reply's billed cost is folded into the spend tally as it lands, retries included.
+/// same way. Each reply's billed cost is folded into the spend tally as it lands, retries included, and each attempt
+/// is logged with its step, its model and how long it took.
 /// </summary>
 /// <remarks>
 /// The retry and the fallback chain cover different failures: a retry re-draws when a reply came back unusable,
@@ -24,9 +27,13 @@ namespace MathComps.Infrastructure.Services.Ai;
 /// <param name="openAIClient">The connection to the configured endpoint; each call derives its model-bound client
 /// from it.</param>
 /// <param name="spendTracker">The tally every reply's billed cost is folded into.</param>
+/// <param name="logger">The logger.</param>
 /// <param name="settings">The connection settings, carrying the retry count and delay the pipeline is built from.</param>
 public class LlmChatCaller(
-    OpenAIClient openAIClient, ILlmSpendTracker spendTracker, IOptions<LlmSettings> settings)
+    OpenAIClient openAIClient,
+    ILlmSpendTracker spendTracker,
+    ILogger<LlmChatCaller> logger,
+    IOptions<LlmSettings> settings)
     : ILlmChatCaller
 {
     /// <summary>
@@ -133,40 +140,81 @@ public class LlmChatCaller(
         // usage must count it too.
         var accumulatedUsage = ModelUsage.Zero;
 
+        // How many attempts this call has made so far.
+        var attempts = 0;
+
         try
         {
             // Run request and reading inside the retry boundary: an unusable reply fails at the read, after the HTTP
             // call already succeeded, so the read must be re-issued along with the request.
             return await _retryPipeline.ExecuteAsync(async retryToken =>
             {
-                // Issue this attempt's request.
-                var response = await send(chatClient, messages, options, retryToken);
+                // This attempt's number, counted from one.
+                var attempt = ++attempts;
 
-                // The model that answered, which a fallback chain can route past the primary. A reply naming none
-                // leaves the model asked for as the closest thing to true.
-                var servedModel =
-                    response.RawRepresentation is ChatCompletion served
-                    && !string.IsNullOrWhiteSpace(served.Model)
-                        ? served.Model
-                        : request.Model;
+                // Time the attempt, so a slow or hung model shows in the log.
+                var stopwatch = Stopwatch.StartNew();
 
-                // What this attempt billed.
-                var usage = ReadUsage(response);
+                // Make the attempt, logging however it ends.
+                try
+                {
+                    // Issue this attempt's request.
+                    var response = await send(chatClient, messages, options, retryToken);
 
-                // Fold it in before any verdict on the reply, so a rejected attempt still counts — in both the
-                // process-wide tally and the usage this call ultimately returns.
-                accumulatedUsage += usage;
-                spendTracker.Add(usage.Cost);
+                    // The model that answered, which a fallback chain can route past the primary. A reply naming none
+                    // leaves the model asked for as the closest thing to true.
+                    var servedModel =
+                        response.RawRepresentation is ChatCompletion served
+                        && !string.IsNullOrWhiteSpace(served.Model)
+                            ? served.Model
+                            : request.Model;
 
-                // A Length finish means the reply hit the token cap before finishing; throw so the retry draws a
-                // fresh sample.
-                if (response.FinishReason == ChatFinishReason.Length)
-                    throw new InvalidOperationException(
-                        "The reply hit the output-token cap before finishing; raise MaxOutputTokens for this step.");
+                    // What this attempt billed.
+                    var usage = ReadUsage(response);
 
-                // Read the result out of the reply and pair it with what answered and everything this call billed,
-                // retries included.
-                return new ChatCallResult<TResult>(read(response), servedModel, accumulatedUsage);
+                    // Fold it in before any verdict on the reply, so a rejected attempt still counts — in both the
+                    // process-wide tally and the usage this call ultimately returns.
+                    accumulatedUsage += usage;
+                    spendTracker.Add(usage.Cost);
+
+                    // A Length finish means the reply hit the token cap before finishing; throw so the retry draws a
+                    // fresh sample.
+                    if (response.FinishReason == ChatFinishReason.Length)
+                        throw new InvalidOperationException(
+                            "The reply hit the output-token cap before finishing; raise MaxOutputTokens for this step.");
+
+                    // Read the result out of the reply, which throws when the reply is unusable.
+                    var result = read(response);
+
+                    // The attempt that came back usable.
+                    logger.LogInformation(
+                        "Model step {Step} attempt {Attempt} on {Model} answered by {ServedModel} in {ElapsedMs} ms",
+                        request.StepName, attempt, request.Model, servedModel, stopwatch.ElapsedMilliseconds);
+
+                    // Pair the result with what answered and everything this call billed, retries included.
+                    return new ChatCallResult<TResult>(result, servedModel, accumulatedUsage);
+                }
+                catch (Exception exception) when (!retryToken.IsCancellationRequested)
+                {
+                    // The attempt that failed, a timeout included, before the retry decides what comes next.
+                    logger.LogWarning(
+                        exception,
+                        "Model step {Step} attempt {Attempt} on {Model} failed after {ElapsedMs} ms",
+                        request.StepName, attempt, request.Model, stopwatch.ElapsedMilliseconds);
+
+                    // Hand the failure to the retry.
+                    throw;
+                }
+                catch (OperationCanceledException)
+                {
+                    // The attempt its caller called off.
+                    logger.LogInformation(
+                        "Model step {Step} attempt {Attempt} on {Model} cancelled after {ElapsedMs} ms",
+                        request.StepName, attempt, request.Model, stopwatch.ElapsedMilliseconds);
+
+                    // Pass the cancellation on.
+                    throw;
+                }
             }, cancellationToken);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
