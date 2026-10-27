@@ -1,28 +1,29 @@
 import { useMediaQuery } from '@mantine/hooks'
 
 /**
- * Tailwind's default breakpoint minimums in pixels. Mirrors the framework's `screens` scale so a JS
- * viewport check flips at the same width as the matching `md:` / `lg:` utility.
+ * Tailwind's default breakpoint minimums in rem, mirroring the framework's `--breakpoint-*` scale
+ * so a JS viewport check flips at the same width as the matching `md:` / `lg:` utility. The unit
+ * matters: a media query's rem follows the browser's default font size, which the reader can set.
  */
-const BREAKPOINT_PX = {
-  sm: 640,
-  md: 768,
-  lg: 1024,
-  xl: 1280,
-  '2xl': 1536,
+const BREAKPOINT_REM = {
+  sm: 40,
+  md: 48,
+  lg: 64,
+  xl: 80,
+  '2xl': 96,
 } as const
 
 /**
  * A Tailwind breakpoint name.
  */
-type Breakpoint = keyof typeof BREAKPOINT_PX
+type Breakpoint = keyof typeof BREAKPOINT_REM
 
 /**
  * Whether the viewport is at least the given breakpoint wide, matching the `<breakpoint>:` utility
  * prefix. False on the server and the first client render, then correct after mount.
  */
 export function useMinWidth(breakpoint: Breakpoint): boolean {
-  return useMediaQuery(`(min-width: ${BREAKPOINT_PX[breakpoint]}px)`)
+  return useMediaQuery(`(width >= ${BREAKPOINT_REM[breakpoint]}rem)`)
 }
 
 /**
@@ -30,8 +31,8 @@ export function useMinWidth(breakpoint: Breakpoint): boolean {
  * False on the server and the first client render, then correct after mount.
  */
 function useMaxWidth(breakpoint: Breakpoint): boolean {
-  // Match everything up to one pixel below the breakpoint's minimum
-  return useMediaQuery(`(max-width: ${BREAKPOINT_PX[breakpoint] - 1}px)`)
+  // Match everything narrower than the breakpoint's minimum
+  return useMediaQuery(`(width < ${BREAKPOINT_REM[breakpoint]}rem)`)
 }
 
 /**
