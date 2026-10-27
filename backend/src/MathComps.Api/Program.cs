@@ -6,6 +6,7 @@ using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
@@ -112,6 +113,22 @@ builder.Services.AddApiAuthorization();
 
 // Basic observability
 builder.Services.AddLogging();
+
+// The line a request logs when it ends: what was asked, how it was answered and how long it took
+builder.Services.AddHttpLogging(options =>
+{
+    // The method, path, status and duration
+    options.LoggingFields = HttpLoggingFields.RequestMethod
+        | HttpLoggingFields.RequestPath
+        | HttpLoggingFields.ResponseStatusCode
+        | HttpLoggingFields.Duration;
+
+    // The request and its response as one entry
+    options.CombineLogs = true;
+});
+
+// The caller's Clerk id on the request line
+builder.Services.AddHttpLoggingInterceptor<ClerkIdHttpLoggingInterceptor>();
 
 // Errors reach Better Stack over the Sentry protocol, out of the lines logged at Error. GlobalExceptionHandler
 // writes one for an unexpected fault and for a refusal only a bug can cause. It answers the routine refusals too,
@@ -230,7 +247,12 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 // The app configured
 var app = builder.Build();
 
-// Catch anything that escapes the endpoints and render it as a clean problem response (outermost)
+// Log requests ahead of the middleware below, so a refusal from any of them gets its entry too. A fault's
+// entry is written as it unwinds out of the logging, so inside the exception handler it would carry the 200
+// standing before the handler wrote its 500.
+app.UseHttpLogging();
+
+// Catch anything that escapes the endpoints and render it as a clean problem response
 app.UseExceptionHandler();
 
 // Enable request localization (must be early in the pipeline)
