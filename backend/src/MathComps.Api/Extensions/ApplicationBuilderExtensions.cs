@@ -1,4 +1,3 @@
-using MathComps.Api.Constants;
 using MathComps.Infrastructure.Options;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
@@ -113,38 +112,6 @@ public static class ApplicationBuilderExtensions
 
         // Enable authorization
         app.UseAuthorization();
-
-        // Add request logging middleware
-        app.Use(async (context, next) =>
-        {
-            // Get the logger
-            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-
-            // The caller's Clerk user id, absent on an anonymous request
-            var clerkId = context.User.FindFirst(ClerkClaims.Subject)?.Value;
-
-            // Log an anonymous request without a caller
-            if (clerkId == null)
-                logger.LogInformation("Request: {Method} {Path}",
-                    context.Request.Method,
-                    context.Request.Path);
-
-            // Otherwise log the request with its caller
-            else
-                logger.LogInformation("Request: {Method} {Path} by {ClerkId}",
-                    context.Request.Method,
-                    context.Request.Path,
-                    clerkId);
-
-            // Next task
-            await next();
-
-            // Log response status
-            logger.LogInformation("Response: {StatusCode} for {Method} {Path}",
-                context.Response.StatusCode,
-                context.Request.Method,
-                context.Request.Path);
-        });
 
         // Return the app for chaining
         return app;
