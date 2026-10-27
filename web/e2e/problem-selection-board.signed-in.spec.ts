@@ -17,6 +17,7 @@ import {
   ON_OFFER_COUNT,
   OPENED,
   openPool,
+  PHONE_VIEWPORT,
   pickBoard,
   pickState,
   placementOf,
@@ -37,9 +38,6 @@ import { expect, test } from './support/test'
 const MISSING_LANGUAGES_NOTE = new RegExp(
   selectionCopy.board.missingLanguages.replace('{languages}', '.+')
 )
-
-/** A phone's screen, narrow enough that the board folds into a bar above the pool. */
-const PHONE_VIEWPORT = { width: 390, height: 844 }
 
 /**
  * One of the pool's yes-or-no filters.
@@ -278,8 +276,8 @@ test.describe('the board being filled', () => {
     // Once its problems are counted
     await expect(problemCount(page, ON_OFFER_COUNT)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
-    // How full the board is, in the bar
-    await expect(boardPanel(page)).toContainText(
+    // How full the board is, on the bar's button unfolding it
+    await expect(page.getByRole('button', { name: selectionCopy.board.unfold })).toContainText(
       selectionText('board.progress', { filled: 2, total: 9 })
     )
 

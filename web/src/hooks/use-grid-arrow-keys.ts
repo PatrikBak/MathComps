@@ -33,6 +33,37 @@ function gridKey(row: number, column: number): string {
   return `${row}:${column}`
 }
 
+/** The selector matching a menu a grid can stand in. */
+const MENU_SELECTOR = '[role="menu"]'
+
+/** The selector matching the items of a menu that take the focus. */
+const FOCUSABLE_MENU_ITEM_SELECTOR = '[role^="menuitem"]:not([data-disabled])'
+
+/**
+ * Moves the focus off a grid standing among other items of a menu, onto the menu's item just before the grid or just
+ * after it. A grid with nothing past that edge, or in no menu, keeps the focus.
+ *
+ * @param gridItems - The grid's items.
+ * @param from - The item the arrow was pressed on.
+ * @param rows - Which way the arrow points, negative for up.
+ */
+function focusBesideGrid(gridItems: ReadonlySet<HTMLElement>, from: Element, rows: number): void {
+  // Every item of the menu holding the grid that takes the focus, in the order they stand
+  const menuItems = [
+    ...(from.closest(MENU_SELECTOR)?.querySelectorAll<HTMLElement>(FOCUSABLE_MENU_ITEM_SELECTOR) ??
+      []),
+  ]
+
+  // Where the grid starts among them
+  const first = menuItems.findIndex((item) => gridItems.has(item))
+
+  // And where it ends
+  const last = menuItems.findLastIndex((item) => gridItems.has(item))
+
+  // The focus on the menu's item past the grid's edge the arrow points across, where there is one
+  menuItems[rows < 0 ? first - 1 : last + 1]?.focus()
+}
+
 /**
  * Return type for {@link useGridArrowKeys}.
  */
@@ -45,8 +76,9 @@ type UseGridArrowKeysResult = {
 
 /**
  * Arrow keys moving the focus across items laid out in rows: left and right along a row, up and down to the row
- * beside, landing on its last item where that row is shorter. An arrow pointing past the grid's edge keeps the
- * focus where it is, and every other key is left to the items.
+ * beside, landing on its last item where that row is shorter. An arrow pointing past the grid's left or right edge
+ * keeps the focus where it is. Past its top or bottom, it goes on to the item before or after the grid in the menu
+ * holding it, and keeps the focus where the grid stands alone. Every other key is left to the items.
  *
  * @param rowLengths - How many items each row holds.
  *
@@ -86,8 +118,13 @@ export function useGridArrowKeys(rowLengths: readonly number[]): UseGridArrowKey
     // The row the arrow points at
     const targetRow = row + step.rows
 
-    // How many items it holds, none past either edge of the grid
-    const targetLength = rowLengths[targetRow] ?? 0
+    // How many items it holds, none past the grid's top or bottom
+    const targetLength = rowLengths[targetRow]
+
+    // Off the grid's top or bottom, on to the menu's item beside it, where the grid stands in a menu
+    if (targetLength === undefined) {
+      return focusBesideGrid(new Set(items.current.values()), event.currentTarget, step.rows)
+    }
 
     // The item the arrow points at, the row's last where it is shorter
     const targetColumn = Math.min(column + step.columns, targetLength - 1)

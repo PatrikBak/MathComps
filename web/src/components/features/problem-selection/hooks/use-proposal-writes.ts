@@ -6,12 +6,24 @@ import { useSignedInIdentity } from '@/components/features/profile/hooks/use-sig
 
 import {
   afterDeletion,
+  afterPlacement,
   afterRating,
   afterRecommendation,
   afterSetAside,
 } from '../model/selection-edits'
-import type { RatingWrite, RecommendationWrite, SetAsideWrite } from '../model/selection-types'
-import { deleteProposal, setAside, setRating, setRecommended } from '../services/selection-service'
+import type {
+  PlacementWrite,
+  RatingWrite,
+  RecommendationWrite,
+  SetAsideWrite,
+} from '../model/selection-types'
+import {
+  deleteProposal,
+  placeProposal,
+  setAside,
+  setRating,
+  setRecommended,
+} from '../services/selection-service'
 import { type SelectionWrite, useSelectionWrite } from './use-selection-write'
 
 /**
@@ -86,5 +98,23 @@ export function useDeleteProposal(): SelectionWrite<string> {
     edit: afterDeletion,
     changesSlots: true,
     errorMessage: t('deleteFailed'),
+  })
+}
+
+/**
+ * Putting a proposal into a slot of a board.
+ *
+ * @returns The write.
+ */
+export function usePlaceProposal(): SelectionWrite<PlacementWrite> {
+  // Copy for the selection's writes
+  const t = useTranslations('problemSelection.writes')
+
+  // Putting the proposal into the slot, shown ahead of the server
+  return useSelectionWrite<PlacementWrite>({
+    apiFn: placeProposal,
+    edit: afterPlacement,
+    changesSlots: true,
+    errorMessage: t('placeFailed'),
   })
 }

@@ -130,20 +130,21 @@ export function BoardPanel() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* How full the board is */}
-        <span className="ml-auto shrink-0 text-sm tabular-nums text-muted">
+        {/* How full the board is, on a wide screen */}
+        <span className="ml-auto hidden shrink-0 text-sm tabular-nums text-muted lg:inline">
           {t('progress', { filled, total: slots.length })}
         </span>
 
-        {/* The way to fold the papers away and back, on a narrow screen */}
+        {/* How full the board is, as the way to fold the papers away and back, on a narrow screen */}
         <Button
           variant="ghost"
-          size="icon"
-          className="lg:hidden"
+          size="sm"
+          className="ml-auto shrink-0 gap-1.5 px-2 font-normal tabular-nums text-muted lg:hidden"
           aria-expanded={isUnfolded}
-          aria-label={isUnfolded ? t('fold') : t('unfold')}
           onClick={toggleFold}
         >
+          {t('progress', { filled, total: slots.length })}
+          <span className="sr-only">{isUnfolded ? t('fold') : t('unfold')}</span>
           <ChevronDown
             size={16}
             className={cn('transition-transform', isUnfolded && 'rotate-180')}

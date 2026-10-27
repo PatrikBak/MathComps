@@ -1,13 +1,17 @@
 import type { Locator, Page, Response } from '@playwright/test'
 
 import type { Board } from '@/components/features/problem-selection/model/selection-types'
+import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import messages from '../messages/en.json'
 import { createAnswerGate } from './support/answer-gate'
 import { recordNotices } from './support/backend-routes'
-import { SELECTION_PATH } from './support/competitions'
+import { SELECTION_PATH, transcriptOf } from './support/competitions'
+import { installHostedBackend } from './support/hosted-backend'
 import {
+  actionsButton,
   ALGEBRA,
+  BILINGUAL,
   boardPanel,
   cardOf,
   DRAFT_BOARD,
@@ -24,6 +28,7 @@ import {
   OPENED,
   OPENED_ADDRESS,
   openPool,
+  PHONE_VIEWPORT,
   pickBoard,
   pickState,
   placementOf,
@@ -447,6 +452,209 @@ test.describe('placing a problem from the pool', () => {
 
     // Offering none either
     await expect(placeButton(page.getByRole('article'))).toHaveCount(0)
+  })
+})
+
+test.describe('placing on a phone', () => {
+  test("talks to Mathilda and places a problem from its card's menu, the card showing neither beside its name", async ({
+    page,
+  }) => {
+    // A phone's screen
+    await page.setViewportSize(PHONE_VIEWPORT)
+
+    // The backend the chat talks to
+    const chat = await installHostedBackend(page, 'ready')
+
+    // A reviewer whose first draft holds a problem in its first elementary slot
+    await stubSelection(page, 'selection', rememberedSelection(chat))
+
+    // Every write the page sends to a board's slots
+    const writes = recordWrites(page, isSlotWrite)
+
+    // The pool, whose cards run too tall on a phone to be drawn all at once
+    await page.goto(SELECTION_PATH)
+
+    // Once its problems are counted
+    await expect(problemCount(page, ON_OFFER_COUNT)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // A problem solved in English, which the site is read in
+    const card = cardOf(page, BILINGUAL)
+
+    // Its name standing beside its menu alone
+    await expect(actionsButton(card, BILINGUAL)).toBeVisible()
+
+    // With no Mathilda there
+    await expect(card.getByRole('button', { name: MATHILDA_NAME, exact: true })).toBeHidden()
+
+    // Nor a Place button
+    await expect(placeButton(card)).toBeHidden()
+
+    // The menu
+    await actionsButton(card, BILINGUAL).click()
+
+    // Mathilda, picked from it
+    await page.getByRole('menuitem', { name: MATHILDA_NAME, exact: true }).click()
+
+    // The conversation with her, open
+    await expect(transcriptOf(page)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Once the menu has gone, which takes an Escape for itself while it fades
+    await expect(page.getByRole('menu')).toHaveCount(0)
+
+    // A task gone by, in which the gone menu would have handed the focus back to its button
+    await page.evaluate(() => new Promise((resolve) => setTimeout(resolve)))
+
+    // The focus still in the conversation, where the chat put it
+    await expect(page.locator('[role="dialog"]:focus-within')).toHaveCount(1)
+
+    // Closed
+    await page.keyboard.press('Escape')
+
+    // Gone
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+
+    // The menu again
+    await actionsButton(card, BILINGUAL).click()
+
+    // The empty slot, picked from the grid in it
+    await gridSlot(page, 'E2').click()
+
+    // In the slot, named on the card
+    await expect(placementOf(card, DRAFT_BOARD, 'E2')).toBeVisible()
+
+    // Sent once, as a placement of that problem into that slot, which the board shows ahead of the server
+    await expect
+      .poll(() => writes().map((write) => [write.method(), write.url(), write.postDataJSON()]))
+      .toEqual([['PUT', slotAddress(DRAFT_BOARD, 0, 1), { proposalId: BILINGUAL.id }]])
+  })
+
+  test("moves the arrow keys out of the slots' grid in a card's menu, onto the items above and below it", async ({
+    page,
+  }) => {
+    // A phone's screen
+    await page.setViewportSize(PHONE_VIEWPORT)
+
+    // A reviewer whose first draft has three papers of three slots each
+    await stubSelection(page, 'selection')
+
+    // The pool
+    await page.goto(SELECTION_PATH)
+
+    // Once its problems are counted
+    await expect(problemCount(page, ON_OFFER_COUNT)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // A problem's menu, open
+    await actionsButton(cardOf(page, BILINGUAL), BILINGUAL).click()
+
+    // Mathilda, over the grid
+    const mathilda = page.getByRole('menuitem', { name: MATHILDA_NAME, exact: true })
+
+    // Focused
+    await mathilda.focus()
+
+    // Down into the grid
+    await page.keyboard.press('ArrowDown')
+
+    // Onto its first slot
+    await expect(gridSlot(page, 'E1')).toBeFocused()
+
+    // Up past the grid's top
+    await page.keyboard.press('ArrowUp')
+
+    // Back onto Mathilda
+    await expect(mathilda).toBeFocused()
+
+    // Down into the grid again
+    await page.keyboard.press('ArrowDown')
+
+    // Onto its first slot
+    await expect(gridSlot(page, 'E1')).toBeFocused()
+
+    // Down to the next paper
+    await page.keyboard.press('ArrowDown')
+
+    // Onto its first slot
+    await expect(gridSlot(page, 'I1')).toBeFocused()
+
+    // Down to the last paper
+    await page.keyboard.press('ArrowDown')
+
+    // Onto its first slot
+    await expect(gridSlot(page, 'A1')).toBeFocused()
+
+    // Down past the grid's bottom
+    await page.keyboard.press('ArrowDown')
+
+    // Onto the first category the problem can be recommended for, under the grid
+    await expect(page.getByRole('menuitemcheckbox').first()).toBeFocused()
+  })
+
+  test("hands the focus to the card's menu once its problem goes into the waiting slot", async ({
+    page,
+  }) => {
+    // A phone's screen
+    await page.setViewportSize(PHONE_VIEWPORT)
+
+    // A reviewer whose first draft has empty slots
+    await stubSelection(page, 'selection')
+
+    // The pool
+    await page.goto(SELECTION_PATH)
+
+    // Once its problems are counted
+    await expect(problemCount(page, ON_OFFER_COUNT)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The board, unfolded
+    await page.getByRole('button', { name: selectionCopy.board.unfold }).click()
+
+    // The second elementary slot, which stands empty, picked
+    await slotOf(page, 'E2').getByRole('button').click()
+
+    // A problem near the top of the pool, put there
+    await putInButton(cardOf(page, BILINGUAL), 'E2').click()
+
+    // In the slot
+    await expect(slotOf(page, 'E2').getByRole('link', { name: BILINGUAL.title })).toBeVisible()
+
+    // The focus on the card's menu, which holds the grid on a phone, the Place button being hidden there
+    await expect(actionsButton(cardOf(page, BILINGUAL), BILINGUAL)).toBeFocused()
+  })
+
+  test("offers no slots' grid in a card's menu while a slot waits, the card's Put in standing in for it", async ({
+    page,
+  }) => {
+    // A phone's screen
+    await page.setViewportSize(PHONE_VIEWPORT)
+
+    // A reviewer whose first draft has empty slots
+    await stubSelection(page, 'selection')
+
+    // The pool
+    await page.goto(SELECTION_PATH)
+
+    // Once its problems are counted
+    await expect(problemCount(page, ON_OFFER_COUNT)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The board, unfolded
+    await page.getByRole('button', { name: selectionCopy.board.unfold }).click()
+
+    // The second elementary slot, which stands empty, picked
+    await slotOf(page, 'E2').getByRole('button').click()
+
+    // A problem's card
+    const card = cardOf(page, BILINGUAL)
+
+    // Offering to put the problem there
+    await expect(putInButton(card, 'E2')).toBeVisible()
+
+    // Its menu, open
+    await actionsButton(card, BILINGUAL).click()
+
+    // Holding what the card moves into it on a phone
+    await expect(page.getByRole('menuitem', { name: MATHILDA_NAME, exact: true })).toBeVisible()
+
+    // But no slot to pick, which would fill the waiting slot and leave it waiting
+    await expect(gridSlot(page, 'E2')).toHaveCount(0)
   })
 })
 
