@@ -1,6 +1,5 @@
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.Users;
 
@@ -8,8 +7,7 @@ namespace MathComps.Infrastructure.Services.Users;
 /// Service for managing user-problem interactions in the database.
 /// </summary>
 /// <param name="dbContext">The database context.</param>
-/// <param name="logger">The logger.</param>
-public class UserProblemService(MathCompsDbContext dbContext, ILogger<UserProblemService> logger) : IUserProblemService
+public class UserProblemService(MathCompsDbContext dbContext) : IUserProblemService
 {
     /// <inheritdoc />
     public async Task ToggleLikeAsync(Guid userId, Guid problemId, CancellationToken cancellationToken = default)
@@ -27,9 +25,6 @@ public class UserProblemService(MathCompsDbContext dbContext, ILogger<UserProble
             SELECT {userId}, {problemId}, {DateTimeOffset.UtcNow}
             WHERE NOT EXISTS (SELECT 1 FROM deleted)
         ", cancellationToken);
-
-        // Log the toggle
-        logger.LogInformation("Toggled like for user {UserId} on problem {ProblemId}", userId, problemId);
     }
 
     /// <inheritdoc />
@@ -48,8 +43,5 @@ public class UserProblemService(MathCompsDbContext dbContext, ILogger<UserProble
             SELECT {userId}, {problemId}, {DateTimeOffset.UtcNow}
             WHERE NOT EXISTS (SELECT 1 FROM deleted)
         ", cancellationToken);
-
-        // Log the toggle
-        logger.LogInformation("Toggled mark for user {UserId} on problem {ProblemId}", userId, problemId);
     }
 }
