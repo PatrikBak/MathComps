@@ -113,17 +113,16 @@ public static class ApplicationBuilderExtensions
         // Enable authorization
         app.UseAuthorization();
 
-        // Add request logging middleware for security monitoring
+        // Add request logging middleware
         app.Use(async (context, next) =>
         {
             // Get the logger
             var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
 
             // Log incoming requests
-            logger.LogInformation("Request: {Method} {Path} from {RemoteIp}",
+            logger.LogInformation("Request: {Method} {Path}",
                 context.Request.Method,
-                context.Request.Path,
-                context.Connection.RemoteIpAddress);
+                context.Request.Path);
 
             // Next task
             await next();

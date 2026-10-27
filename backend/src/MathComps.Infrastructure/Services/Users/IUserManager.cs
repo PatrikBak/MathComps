@@ -10,13 +10,13 @@ namespace MathComps.Infrastructure.Services.Users;
 public interface IUserManager
 {
     /// <summary>
-    /// Gets the internal user ID from an external provider ID. If the user does not exist, 
-    /// it will attempt to create the user by fetching its data from Clerk.
+    /// Gets the internal user ID for an external provider ID, creating the user from the provider's record when they
+    /// aren't stored yet. Throws when the provider can't produce that record.
     /// </summary>
     /// <param name="externalId">The external provider ID (e.g., Clerk ID).</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The internal user ID, or null if the user does not exist.</returns>
-    Task<Guid?> GetUserIdAsync(string externalId, CancellationToken cancellationToken = default);
+    /// <returns>The internal user ID.</returns>
+    Task<Guid> GetUserIdAsync(string externalId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Synchronizes a user's data from an external provider.

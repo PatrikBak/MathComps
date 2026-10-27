@@ -52,7 +52,7 @@ public class AiTaggingService(ILlmChatCaller chatCaller)
 
         // Run the call; the library binds the structured response for us.
         var response = await CallModelAsync<GeneratePassResponse>(
-            step, statement, solution, payload.ToJson(), cancellationToken);
+            "SuggestTags", step, statement, solution, payload.ToJson(), cancellationToken);
 
         // Map the names back to slugs, keeping the few unknowns aside for the human.
         return MapFitnessesToSlugs(response.Tags, candidates);
@@ -77,7 +77,7 @@ public class AiTaggingService(ILlmChatCaller chatCaller)
 
         // Run the call; the library binds the structured response for us.
         var response = await CallModelAsync<VetoPassResponse>(
-            step, statement, solution, payload.ToJson(), cancellationToken);
+            "VetoTags", step, statement, solution, payload.ToJson(), cancellationToken);
 
         // Keep only the slugs the model approved.
         return MapApprovalsToApprovedSlugs(response.Tags, candidates);
@@ -147,6 +147,7 @@ public class AiTaggingService(ILlmChatCaller chatCaller)
     /// <typeparamref name="TResponse"/>.
     /// </summary>
     /// <typeparam name="TResponse">The structured shape to bind the model's reply into.</typeparam>
+    /// <param name="stepName">The name of the pass.</param>
     /// <param name="step">The prompt, model, and reasoning level this pass runs on.</param>
     /// <param name="statement">The problem statement.</param>
     /// <param name="solution">The problem solution, or null when statement-only.</param>
@@ -154,6 +155,7 @@ public class AiTaggingService(ILlmChatCaller chatCaller)
     /// <param name="cancellationToken">A token to cancel the call.</param>
     /// <returns>The bound model response.</returns>
     private async Task<TResponse> CallModelAsync<TResponse>(
+        string stepName,
         ChatStepSettings step,
         string statement,
         string? solution,
@@ -171,7 +173,7 @@ public class AiTaggingService(ILlmChatCaller chatCaller)
 
         // Hand the prompts to the shared caller on this pass's model.
         var result = await chatCaller.CompleteAsync<TResponse>(
-            ChatCallRequest.For(step, systemPrompt, userPrompt), cancellationToken);
+            ChatCallRequest.For(stepName, step, systemPrompt, userPrompt), cancellationToken);
 
         // Return the bound reply, dropping the cost and token figures the tagging pass doesn't track.
         return result.Value;

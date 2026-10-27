@@ -28,7 +28,7 @@ internal static class UserManagerExtensions
     /// </summary>
     /// <param name="userManager">Resolves an external provider id to the internal user id.</param>
     /// <param name="context">The HTTP context carrying the caller's claims.</param>
-    /// <returns>The internal user id, or null when the request is anonymous or unresolvable.</returns>
+    /// <returns>The internal user id, or null when the request is anonymous.</returns>
     public static async Task<Guid?> GetUserIdAsync(this IUserManager userManager, HttpContext context)
     {
         // The subject claim identifying the caller, if the request carries one

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Clerk.BackendAPI;
 using MathComps.Domain;
@@ -106,7 +107,7 @@ public partial class UserManager(
     }
 
     /// <inheritdoc />
-    public async Task<Guid?> GetUserIdAsync(string externalId, CancellationToken cancellationToken = default)
+    public async Task<Guid> GetUserIdAsync(string externalId, CancellationToken cancellationToken = default)
     {
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -121,22 +122,19 @@ public partial class UserManager(
         if (userId != null)
             return userId.Value;
 
-        // If the user does not exist, then the webhook probably failed / wasn't quick enough
-        logger.LogWarning("User {ExternalId} not found in DB, fetching from Clerk...", externalId);
+        // Time asking Clerk for a user the webhook hasn't stored, having failed or not arrived yet
+        var stopwatch = Stopwatch.StartNew();
 
-        // Never mind, since I'm a perfection, we won't give up, let us call Clerk
-        var clerkUser = await GeneralUtilities.TryExecuteAsync(
-            async () => (await clerkClient.Users.GetAsync(externalId)).User,
-            error => throw new Exception($"Error fetching user {externalId} from Clerk", error)
-        );
+        // Never mind, since I'm a perfection, we won't give up, let us call Clerk, which answers a user it doesn't
+        // know with an error
+        var clerkUser = (await clerkClient.Users.GetAsync(externalId)).User
+            ?? throw new InvalidOperationException($"Clerk answered without user {externalId}");
 
-        // Okay, unknown user user after all?
-        if (clerkUser == null)
-        {
-            // Should be real weird...
-            logger.LogWarning("User {ExternalId} not found in Clerk.", externalId);
-            return null;
-        }
+        // The Clerk fetch and how long it took
+        logger.LogInformation(
+            "User {ExternalId} not found in DB, fetched from Clerk in {ElapsedMs} ms",
+            externalId,
+            stopwatch.ElapsedMilliseconds);
 
         // Happy path, we have the user
         var userDto = new UserSyncDto(
@@ -161,8 +159,10 @@ public partial class UserManager(
         // Ensure there is a user to delete.
         if (user == null)
         {
-            // Attempt to delete a deleted users are real sus
-            logger.LogWarning("Deleting a non-existent user: {ExternalId}", externalId);
+            // Clerk deleting a user who never reached the database
+            logger.LogInformation("Deleting a non-existent user: {ExternalId}", externalId);
+
+            // Nothing to delete
             return;
         }
 

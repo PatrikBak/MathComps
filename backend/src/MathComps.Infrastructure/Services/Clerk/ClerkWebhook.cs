@@ -4,102 +4,130 @@ using MathComps.Infrastructure.Services.Users;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Svix;
+using Svix.Exceptions;
 
 namespace MathComps.Infrastructure.Services.Clerk;
 
 /// <summary>
-/// Service for processing webhook events.
+/// An <see cref="IClerkWebhookService"/> that checks each delivery's Svix signature against the configured secret,
+/// then applies the user event it carries through <see cref="IUserManager"/>. Every refusal is logged at Error, since
+/// Clerk retries a refused delivery and nobody else watches it fail.
 /// </summary>
-/// <param name="clerkSettings">The Clerk settings.</param>
-/// <param name="userManager">The service that handles user syncing.</param>
+/// <param name="userManager">The users each event is applied to.</param>
 /// <param name="logger">The logger.</param>
+/// <param name="clerkSettings">The settings carrying the webhook signing secret.</param>
 public class ClerkWebhook(
-    IOptions<ClerkSettings> clerkSettings,
     IUserManager userManager,
-    ILogger<ClerkWebhook> logger) : IClerkWebhookService
+    ILogger<ClerkWebhook> logger,
+    IOptions<ClerkSettings> clerkSettings) : IClerkWebhookService
 {
-    /// <summary>
-    /// Processes a Clerk webhook event.
-    /// </summary>
-    /// <param name="payload">The raw JSON payload from the webhook.</param>
-    /// <param name="headers">The request headers containing Svix signature information.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A result indicating the outcome of webhook processing.</returns>
+    /// <inheritdoc/>
     public async Task<WebhookResult> ProcessClerkWebhookAsync(
         string payload,
         System.Net.WebHeaderCollection headers,
         CancellationToken cancellationToken = default)
     {
-        // Validate webhook secret configuration.
+        // Nothing can be verified without the signing secret
         if (string.IsNullOrEmpty(clerkSettings.Value.WebhookSecret))
-            return new WebhookResult(false, 500, "Webhook secret not configured");
+        {
+            // Every delivery fails until the secret is set, so say so
+            logger.LogError("Clerk webhook refused: no webhook secret is configured");
 
+            // Refuse the delivery, so Clerk retries it later
+            return new WebhookResult(false, 500, "Webhook secret not configured");
+        }
+
+        // The delivery's id, which Clerk's webhook dashboard lists it under
+        var deliveryId = headers["svix-id"];
+
+        // Check the delivery was signed with our secret
         try
         {
-            // Verify signature
             new Webhook(clerkSettings.Value.WebhookSecret).Verify(payload, headers);
         }
-        catch (Exception)
+        catch (WebhookVerificationException exception)
         {
-            // This would be real sus
+            // A changed signing secret refuses every delivery from here on, and nothing else would say so
+            logger.LogError(exception, "Clerk webhook {DeliveryId} failed its signature check", deliveryId);
+
+            // Refuse the delivery
             return new WebhookResult(false, 400, "Invalid signature");
         }
 
+        // The event's type and the user it concerns, which the log lines below name
+        string? type = null;
+        string? clerkId = null;
+
+        // Apply the event, where any failure refuses the delivery
         try
         {
-            // Parse and handle event
-            using var doc = JsonDocument.Parse(payload);
-            var root = doc.RootElement;
-            var type = root.GetProperty("type").GetString();
-            var data = root.GetProperty("data");
+            // The delivery's JSON
+            using var document = JsonDocument.Parse(payload);
 
-            // Extract user ID, should be present in all hook we handle
-            var clerkId = data.GetProperty("id").GetString()
+            // What kind of event it is
+            type = document.RootElement.GetProperty("type").GetString();
+
+            // The user the event is about
+            var data = document.RootElement.GetProperty("data");
+
+            // The user's Clerk id, which every event handled here carries
+            clerkId = data.GetProperty("id").GetString()
                 ?? throw new ArgumentException("User ID is missing.");
 
+            // Apply the event to the stored users
             switch (type)
             {
-                // Upsert needed
+                // A new or changed user
                 case "user.created":
                 case "user.updated":
-                    // Extract email address (assuming the first one is primary/relevant).
-                    var email = data.TryGetProperty("email_addresses", out var array)
-                        && array.GetArrayLength() > 0
-                        && array[0].TryGetProperty("email_address", out var emailProperty)
+                    // The account's first email address, taken as its primary one
+                    var email = data.TryGetProperty("email_addresses", out var addresses)
+                        && addresses.GetArrayLength() > 0
+                        && addresses[0].TryGetProperty("email_address", out var emailProperty)
                         ? emailProperty.GetString()
                         : null;
 
-                    // Extract avatar image URL
+                    // The avatar's address
                     var imageUrl = data.TryGetProperty("image_url", out var imageUrlProperty)
                         ? imageUrlProperty.GetString()
                         : null;
 
-                    // Create DTO for synchronization.
+                    // The user as Clerk describes them
                     var userDto = new UserSyncDto(clerkId, email, imageUrl);
 
-                    // Delegate synchronization to the user manager.
+                    // Write what Clerk owns over the stored user
                     await userManager.SyncUserAsync(userDto, cancellationToken);
                     break;
 
-                // Delete needed
+                // A deleted user
                 case "user.deleted":
-                    // Delegate deletion to the user manager.
+                    // Soft-delete the stored user
                     await userManager.DeleteUserAsync(clerkId, cancellationToken);
                     break;
 
-                // Unhandled events, might come if Clerk's misconfigured
+                // Any other event, which only comes if the endpoint subscribes to more in Clerk's dashboard
                 default:
                     throw new NotImplementedException($"Unhandled event type: {type}");
             }
 
             // Happy path
-            logger.LogInformation("Webhook processed successfully");
+            logger.LogInformation(
+                "Clerk webhook {DeliveryId} handled {EventType} for {ClerkId}", deliveryId, type, clerkId);
+
+            // Accept the delivery
             return new WebhookResult(true, 200);
         }
         catch (Exception exception)
         {
             // Sad path
-            logger.LogError(exception, "Webhook processing failed");
+            logger.LogError(
+                exception,
+                "Clerk webhook {DeliveryId} failed handling {EventType} for {ClerkId}",
+                deliveryId,
+                type,
+                clerkId);
+
+            // Refuse the delivery, so Clerk retries it later
             return new WebhookResult(false, 500, exception.Message);
         }
     }
