@@ -1,6 +1,7 @@
 using MathComps.Domain.Contracts.Admin;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services.Competitions;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.Admin;
 
@@ -69,15 +70,27 @@ public interface IAdminGradingService
 /// <summary>
 /// Thrown when a slug addresses no group the site grades.
 /// </summary>
-public sealed class HostedGroupNotFoundException() : Exception("No graded group goes by this slug");
+public sealed class HostedGroupNotFoundException()
+    : MathCompsException(
+        "No graded group goes by this slug",
+        RefusalKind.NotFound,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when a grade is changed for a student and a problem nobody grades, or one the student said nothing about
 /// while their entry counted.
 /// </summary>
-public sealed class HostedGradeTargetException() : Exception("Nobody grades this student on this problem, or nothing they said about it counts");
+public sealed class HostedGradeTargetException()
+    : MathCompsException(
+        "Nobody grades this student on this problem, or nothing they said about it counts",
+        RefusalKind.NotFound,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when a change would leave a grade breaking the rules its fields state (<see cref="HostedGrade"/>).
 /// </summary>
-public sealed class HostedGradeValueException() : Exception("The grade is not valid");
+public sealed class HostedGradeValueException()
+    : MathCompsException(
+        "The grade is not valid",
+        RefusalKind.Invalid,
+        LogLevel.Information);

@@ -1,6 +1,7 @@
 using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Services.Localization;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.Defense;
 
@@ -93,43 +94,74 @@ public interface IDefenseSessionService
 /// <summary>
 /// Thrown when a session does not exist, or exists but belongs to another user (indistinguishable to the caller).
 /// </summary>
-public sealed class DefenseSessionNotFoundException() : Exception("Defense session not found");
+public sealed class DefenseSessionNotFoundException()
+    : MathCompsException(
+        "Defense session not found",
+        RefusalKind.NotFound,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when a start names a target the site has no content for, in the language asked for. Covers either
 /// arm: a handout environment nothing is published under, and a problem with no statement in that language.
 /// </summary>
-public sealed class DefenseContentNotFoundException() : Exception("Statement not found");
+public sealed class DefenseContentNotFoundException()
+    : MathCompsException(
+        "Statement not found",
+        RefusalKind.NotFound,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when a submitted message or problem text exceeds its configured length cap.
 /// </summary>
-public sealed class DefenseMessageTooLongException() : Exception("The message is too long");
+public sealed class DefenseMessageTooLongException()
+    : MathCompsException(
+        "The message is too long",
+        RefusalKind.Invalid,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when the student's message is blank — there's nothing to defend.
 /// </summary>
-public sealed class DefenseMessageEmptyException() : Exception("The message is empty");
+public sealed class DefenseMessageEmptyException()
+    : MathCompsException(
+        "The message is empty",
+        RefusalKind.Invalid,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when the student has sent every message a conversation is given and cannot continue it.
 /// </summary>
-public sealed class DefenseMessageLimitException() : Exception("This defense has reached its message limit");
+public sealed class DefenseMessageLimitException()
+    : MathCompsException(
+        "This defense has reached its message limit",
+        RefusalKind.PreconditionUnmet,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when the user has reached their configured daily spend ceiling.
 /// </summary>
-public sealed class DefenseSpendLimitException() : Exception("You have reached your usage limit — try again later");
+public sealed class DefenseSpendLimitException()
+    : MathCompsException(
+        "You have reached your usage limit — try again later",
+        RefusalKind.Throttled,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when a conversation the student is graded on is rewound or deleted. What a student argued where they are
 /// graded outlives their opinion of it.
 /// </summary>
 public sealed class DefenseGradedSessionImmutableException()
-    : Exception("A graded conversation cannot be changed");
+    : MathCompsException(
+        "A graded conversation cannot be changed",
+        RefusalKind.Forbidden,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when a rewind names no cut point at all, or names one that is out of range or is not an examiner
 /// turn (so the result would not await the student's next message).
 /// </summary>
-public sealed class DefenseRewindTargetException() : Exception("The rewind point is not valid");
+public sealed class DefenseRewindTargetException()
+    : MathCompsException(
+        "The rewind point is not valid",
+        RefusalKind.Invalid,
+        LogLevel.Error);

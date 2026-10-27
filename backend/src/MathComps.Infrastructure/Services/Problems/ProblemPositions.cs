@@ -2,6 +2,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.Problems;
 
@@ -74,5 +75,8 @@ public static class ProblemPositions
 /// </summary>
 /// <param name="slug">The slug already taken.</param>
 public sealed class ProblemSlugTakenException(string slug)
-    : Exception($"The slug '{slug}' is already carried by another problem, so the move would leave two problems "
-        + "answering to it.");
+    : MathCompsException(
+        $"The slug '{slug}' is already carried by another problem, so the move would leave two problems "
+        + "answering to it.",
+        RefusalKind.Conflict,
+        LogLevel.Error);

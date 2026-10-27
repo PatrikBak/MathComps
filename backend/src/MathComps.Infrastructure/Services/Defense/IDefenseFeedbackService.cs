@@ -1,4 +1,5 @@
 using MathComps.Domain.EfCoreEntities;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.Defense;
 
@@ -73,15 +74,27 @@ public interface IDefenseFeedbackService
 /// outcome at all or picking <see cref="DefenseOutcome.SomethingElse"/> without saying what it was, or an
 /// outcome or category outside the ones the contract defines.
 /// </summary>
-public sealed class DefenseFeedbackValueException() : Exception("The feedback says nothing");
+public sealed class DefenseFeedbackValueException()
+    : MathCompsException(
+        "The feedback says nothing",
+        RefusalKind.Invalid,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when a feedback comment exceeds its configured length cap.
 /// </summary>
-public sealed class DefenseFeedbackCommentTooLongException() : Exception("The comment is too long");
+public sealed class DefenseFeedbackCommentTooLongException()
+    : MathCompsException(
+        "The comment is too long",
+        RefusalKind.Invalid,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when a report names a turn the session doesn't hold, or one the student authored, so there is no reply
 /// to report.
 /// </summary>
-public sealed class DefenseReportTargetException() : Exception("The reported turn is not valid");
+public sealed class DefenseReportTargetException()
+    : MathCompsException(
+        "The reported turn is not valid",
+        RefusalKind.Invalid,
+        LogLevel.Error);

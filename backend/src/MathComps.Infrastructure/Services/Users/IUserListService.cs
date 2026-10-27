@@ -1,4 +1,5 @@
 using MathComps.Domain.Contracts.UserLists;
+using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 
 namespace MathComps.Infrastructure.Services.Users;
@@ -86,15 +87,27 @@ public interface IUserListService
 /// Thrown when the referenced user list does not exist.
 /// </summary>
 /// <param name="contentId">The content id that matched no list.</param>
-public sealed class ListNotFoundException(string contentId) : Exception($"List '{contentId}' not found");
+public sealed class ListNotFoundException(string contentId)
+    : MathCompsException(
+        $"List '{contentId}' not found",
+        RefusalKind.NotFound,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when the user list exists but the caller may not access it.
 /// </summary>
 /// <param name="contentId">The content id of the inaccessible list.</param>
-public sealed class ListAccessDeniedException(string contentId) : Exception($"List '{contentId}' is not shared");
+public sealed class ListAccessDeniedException(string contentId)
+    : MathCompsException(
+        $"List '{contentId}' is not shared",
+        RefusalKind.Forbidden,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when a reorder request's content ids do not match the user's lists exactly.
 /// </summary>
-public sealed class ListReorderMismatchException() : Exception("The provided content IDs do not match the user's lists");
+public sealed class ListReorderMismatchException()
+    : MathCompsException(
+        "The provided content IDs do not match the user's lists",
+        RefusalKind.Invalid,
+        LogLevel.Error);

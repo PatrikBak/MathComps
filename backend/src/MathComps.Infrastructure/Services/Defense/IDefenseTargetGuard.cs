@@ -1,4 +1,5 @@
 using MathComps.Domain.Contracts.Defense;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.Defense;
 
@@ -23,4 +24,8 @@ public interface IDefenseTargetGuard
 /// Thrown when a problem is not one the caller may reach: no hosted round sets it, or it sits among the proposals
 /// out of their reach.
 /// </summary>
-public sealed class HostedProblemNotFoundException() : Exception("Competition problem not found");
+public sealed class HostedProblemNotFoundException()
+    : MathCompsException(
+        "Competition problem not found",
+        RefusalKind.NotFound,
+        LogLevel.Information);

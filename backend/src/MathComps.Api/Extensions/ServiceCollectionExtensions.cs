@@ -39,7 +39,7 @@ public static class ServiceCollectionExtensions
                     problemDetailsService,
                     rejectedContext.HttpContext,
                     StatusCodes.Status429TooManyRequests,
-                    ApiErrorCode.RateLimited,
+                    nameof(ApiErrorCode.RateLimited),
                     "You have made too many requests. Please try again shortly.");
             };
 

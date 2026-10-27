@@ -1,5 +1,6 @@
 using MathComps.Domain.Contracts.ConversationReview;
 using MathComps.Domain.Localization;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.ConversationReview;
 
@@ -55,4 +56,8 @@ public interface IConversationReviewService
 /// <summary>
 /// Thrown when a reviewer's reading is moved back to a turn the conversation it is about doesn't hold.
 /// </summary>
-public sealed class ReviewTargetException() : Exception("The turn to pick up from is not valid");
+public sealed class ReviewTargetException()
+    : MathCompsException(
+        "The turn to pick up from is not valid",
+        RefusalKind.Invalid,
+        LogLevel.Information);

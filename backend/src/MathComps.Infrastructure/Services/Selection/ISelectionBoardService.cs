@@ -1,5 +1,6 @@
 using MathComps.Domain.Contracts.Selection;
 using MathComps.Domain.EfCoreEntities;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.Selection;
 
@@ -81,14 +82,26 @@ public interface ISelectionBoardService
 /// <summary>
 /// Thrown when a board is changed after the group it was finalized into has opened.
 /// </summary>
-public sealed class SelectionBoardOpenedException() : Exception("This board's competitions have opened");
+public sealed class SelectionBoardOpenedException()
+    : MathCompsException(
+        "This board's competitions have opened",
+        RefusalKind.Conflict,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when a board already finalized into a group is changed, or finalized again.
 /// </summary>
-public sealed class SelectionBoardFinalizedException() : Exception("This board is already finalized");
+public sealed class SelectionBoardFinalizedException()
+    : MathCompsException(
+        "This board is already finalized",
+        RefusalKind.Conflict,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when a paper's slots are changed by an account that does not lead the paper's category.
 /// </summary>
-public sealed class SelectionNotLeadException() : Exception("Only the leads of this paper's category change it");
+public sealed class SelectionNotLeadException()
+    : MathCompsException(
+        "Only the leads of this paper's category change it",
+        RefusalKind.Forbidden,
+        LogLevel.Information);

@@ -1,4 +1,5 @@
 using MathComps.Domain.EfCoreEntities;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.Selection;
 
@@ -115,22 +116,36 @@ public interface IProposalService
 /// Thrown when an id or a category's name names nothing the selection holds.
 /// </summary>
 public sealed class SelectionTargetNotFoundException()
-    : Exception("Nothing in the selection answers to that id or name");
+    : MathCompsException(
+        "Nothing in the selection answers to that id or name",
+        RefusalKind.NotFound,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when a write would take or delete a problem a paper has already taken, which only the board holding it
 /// may move.
 /// </summary>
-public sealed class SelectionProposalUsedException() : Exception("A paper has already taken this problem");
+public sealed class SelectionProposalUsedException()
+    : MathCompsException(
+        "A paper has already taken this problem",
+        RefusalKind.Conflict,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when a proposal is set aside, has its recommended categories changed or is deleted by an account leading
 /// none of its organization's categories.
 /// </summary>
 public sealed class ProposalNotLeadException()
-    : Exception("Only the leads of the organization's categories make this change");
+    : MathCompsException(
+        "Only the leads of the organization's categories make this change",
+        RefusalKind.Forbidden,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when a rating would hold a score off its scale or between its steps.
 /// </summary>
-public sealed class ProposalRatingValueException() : Exception("The rating is not valid");
+public sealed class ProposalRatingValueException()
+    : MathCompsException(
+        "The rating is not valid",
+        RefusalKind.Invalid,
+        LogLevel.Error);
