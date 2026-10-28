@@ -13,6 +13,7 @@ const envMap = {
   R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
   R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
   NEXT_PUBLIC_R2_URL: process.env.NEXT_PUBLIC_R2_URL,
+  NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 }
 
 /**

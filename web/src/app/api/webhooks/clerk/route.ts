@@ -12,15 +12,16 @@ import {
   generatePasswordResetEmail,
   generateSignupVerificationEmail,
 } from '@/lib/email/verification-emails'
+import { reportError } from '@/lib/error-reporting/report-error'
 import type { ClerkWebhookEvent } from '@/types/clerk-webhook'
 import { isEmailCreatedEvent } from '@/types/clerk-webhook'
 
 /**
- * Handles Clerk webhooks. We will handle handle email.created events which
+ * Handles Clerk webhooks. We will handle email.created events which
  * send verification code for either registration or password reset. No
  * unnecessary spam 🥳
  *
- * Wrapped so a missing secret or a failing send returns a structured, logged error and svix can retry.
+ * Wrapped so a missing secret or a failing send returns a structured, reported error and svix can retry.
  * It speaks the same JSON error contract every other route does.
  */
 export const POST = withApiHandler(async (request: NextRequest) => {
@@ -49,7 +50,11 @@ export const POST = withApiHandler(async (request: NextRequest) => {
       'svix-timestamp': svixTimestamp,
       'svix-signature': svixSignature,
     }) as ClerkWebhookEvent
-  } catch {
+  } catch (error) {
+    // A bad signature is most likely a signing secret changed at Clerk's end, and then nobody gets
+    // their code, so it is reported
+    reportError(error)
+
     // Bad signature / event format
     throw new ApiError(400, 'VALIDATION_FAILED')
   }
@@ -57,14 +62,6 @@ export const POST = withApiHandler(async (request: NextRequest) => {
   // Handle email.created events only
   if (!isEmailCreatedEvent(event)) {
     return NextResponse.json({ message: 'Event ignored' }, { status: 200 })
-  }
-
-  // Try to extract the verification code from body
-  // We look for a standalone 6-digit number using regex word boundaries
-  // This approach is trully wonderful, what can I say? I wish I didn't choose Clerk
-  const code = event.data.body?.match(/\b\d{6}\b/)?.[0]
-  if (!code) {
-    return NextResponse.json({ error: 'No verification code found' }, { status: 200 })
   }
 
   // Get the recipient email address
@@ -77,24 +74,37 @@ export const POST = withApiHandler(async (request: NextRequest) => {
   const tEmail = await getTranslations({ locale, namespace: 'email' })
 
   // We'll generate the appropriate email template
-  let emailHtml: string
+  let generateEmail: typeof generateSignupVerificationEmail
   let subject: string
 
   // This is what distinguishes the email type
   switch (event.data.slug) {
     case 'verification_code':
-      emailHtml = await generateSignupVerificationEmail({ code, email: recipientEmail, locale })
+      generateEmail = generateSignupVerificationEmail
       subject = tEmail('signup.subject')
       break
     case 'reset_password_code':
-      emailHtml = await generatePasswordResetEmail({ code, email: recipientEmail, locale })
+      generateEmail = generatePasswordResetEmail
       subject = tEmail('passwordReset.subject')
       break
 
-    // Should not happen with the right configuration 🙃
+    // Clerk hands every other mail here too, and those notifications are ones we choose not to send 🙃
     default:
-      return NextResponse.json({ message: 'Unknown email type, ignored' }, { status: 200 })
+      return NextResponse.json({ message: 'Email type ignored' }, { status: 200 })
   }
+
+  // Try to extract the verification code from body
+  // We look for a standalone 6-digit number using regex word boundaries
+  // This approach is trully wonderful, what can I say? I wish I didn't choose Clerk
+  const code = event.data.body?.match(/\b\d{6}\b/)?.[0]
+
+  // A sign-up or reset mail without its code leaves the reader unable to finish, so it is a server error
+  if (!code) {
+    throw new ApiError(500, 'SERVER_ERROR')
+  }
+
+  // The mail itself, carrying the code
+  const emailHtml = await generateEmail({ code, email: recipientEmail, locale })
 
   // Send email using shared utility
   const result = await sendEmail({
@@ -103,7 +113,7 @@ export const POST = withApiHandler(async (request: NextRequest) => {
     html: emailHtml,
   })
 
-  // A failed send is a server-side error; throwing lets svix retry and leaves a logged trace
+  // A failed send is a server-side error; throwing lets svix retry and reports it
   if (!result.success) {
     throw new ApiError(502, 'SERVER_ERROR')
   }
