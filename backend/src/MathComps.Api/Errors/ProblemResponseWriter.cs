@@ -20,7 +20,7 @@ public static class ProblemResponseWriter
         IProblemDetailsService problemDetailsService,
         HttpContext httpContext,
         int status,
-        ApiErrorCode code,
+        string code,
         string? detail = null,
         Exception? exception = null)
     {
@@ -36,7 +36,7 @@ public static class ProblemResponseWriter
             {
                 Status = status,
                 Detail = detail,
-                Extensions = { ["errorCode"] = code.ToString() }
+                Extensions = { ["errorCode"] = code }
             }
         });
     }

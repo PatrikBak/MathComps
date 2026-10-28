@@ -3,6 +3,8 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { ZodError } from 'zod'
 
+import { reportError } from '@/lib/error-reporting/report-error'
+
 import { type NodeErrorCode } from './api-error-codes'
 
 /**
@@ -53,7 +55,7 @@ type AuthenticatedApiHandler = (request: NextRequest, userId: string) => Promise
 
 /**
  * Wraps an API route handler with centralized error handling, so every failure returns the same
- * `{ errorCode, ...data }` JSON body.
+ * `{ errorCode, ...data }` JSON body. A failure that is ours, a 5xx or anything unexpected, is reported.
  *
  * @param handler - The API route handler function.
  *
@@ -67,6 +69,12 @@ export function withApiHandler(handler: ApiHandler): ApiHandler {
     } catch (error) {
       // A controlled failure carries its own status and code
       if (error instanceof ApiError) {
+        // A 5xx is ours to fix, so it is reported
+        if (error.statusCode >= 500) {
+          reportError(error)
+        }
+
+        // Answer with the failure's own status and code
         return NextResponse.json(errorBody(error.errorCode, error.data), {
           status: error.statusCode,
         })
@@ -77,8 +85,8 @@ export function withApiHandler(handler: ApiHandler): ApiHandler {
         return NextResponse.json(errorBody('VALIDATION_FAILED'), { status: 400 })
       }
 
-      // Log unexpected errors so a route failure leaves a trace
-      console.error('[API Error]', error)
+      // An unexpected failure is a bug, so it is reported
+      reportError(error)
 
       // Everything else is an unexpected server error
       return NextResponse.json(errorBody('SERVER_ERROR'), { status: 500 })

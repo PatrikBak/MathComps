@@ -150,8 +150,8 @@ public sealed class MailOutbox(
                 mail.SentAt = now;
                 mail.ProviderId = sent.ProviderId;
 
-                // Log the send
-                logger.LogInformation("Sent mail {MailId}", mail.Id);
+                // Log the send, with the id the provider filed it under
+                logger.LogInformation("Sent mail {MailId}, filed under {ProviderId}", mail.Id, sent.ProviderId);
                 break;
 
             // Turned away by a spent quota, with no failure counted against it
@@ -160,7 +160,7 @@ public sealed class MailOutbox(
                 mail.LastError = quota.Reason;
 
                 // Log the refusal
-                logger.LogWarning("Mail {MailId} turned away by a spent quota: {Reason}", mail.Id, quota.Reason);
+                logger.LogError("Mail {MailId} turned away by a spent quota: {Reason}", mail.Id, quota.Reason);
                 break;
 
             // Failed after its last allowed attempt, given up
@@ -186,7 +186,7 @@ public sealed class MailOutbox(
                 mail.LastError = failed.Error;
 
                 // Log the failure and the next attempt
-                logger.LogWarning(
+                logger.LogError(
                     "Mail {MailId} failed attempt {Attempts}, next at {NextAttemptAt}: {Error}",
                     mail.Id,
                     mail.Attempts,

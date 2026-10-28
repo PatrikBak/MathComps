@@ -5,16 +5,19 @@ import {
   OPEN_PAPER_PARAM,
 } from '@/components/features/problem-selection/model/selection-routes'
 import type { Paper } from '@/components/features/problem-selection/model/selection-types'
+import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import { sendComment, stubNamedReader } from './support/comments'
 import { SELECTION_PATH } from './support/competitions'
 import {
   addressedParam,
   boardPanel,
+  cardOf,
   DRAFT_BOARD,
   FIRST,
   headingOf,
   ON_OFFER_COUNT,
+  PHONE_VIEWPORT,
   problemCount,
   READY,
   selectedTab,
@@ -247,5 +250,25 @@ test.describe("a paper's page", () => {
     // The paper again, still read in Slovak
     await expect(paperHeading(page, INTERMEDIATE)).toBeVisible()
     await expect(slovak(page)).toBeChecked()
+  })
+
+  test('keeps Mathilda beside a problem on a phone, its card there having no menu to take her in', async ({
+    page,
+  }) => {
+    // A phone's screen
+    await page.setViewportSize(PHONE_VIEWPORT)
+
+    // A selection whose board on screen holds a problem solved in every language in its intermediate paper
+    await stubSelection(page, 'selection')
+
+    // The intermediate paper's page
+    await page.goto(
+      `${SELECTION_PATH}?${detailQuery({ kind: 'paper', id: INTERMEDIATE.id, tab: undefined })}`
+    )
+
+    // The problem in I2, offering Mathilda beside its name
+    await expect(
+      cardOf(page, READY).getByRole('button', { name: MATHILDA_NAME, exact: true })
+    ).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
   })
 })

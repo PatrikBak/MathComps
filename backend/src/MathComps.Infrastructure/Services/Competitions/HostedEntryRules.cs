@@ -1,4 +1,5 @@
 using MathComps.Domain.EfCoreEntities;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.Competitions;
 
@@ -173,4 +174,8 @@ public static class HostedEntryRules
 /// <summary>
 /// Thrown when a student reaches for a competition's problems without having spent an entry into it.
 /// </summary>
-public sealed class HostedEntryRequiredException() : Exception("This competition has not been entered");
+public sealed class HostedEntryRequiredException()
+    : MathCompsException(
+        "This competition has not been entered",
+        RefusalKind.Forbidden,
+        LogLevel.Information);

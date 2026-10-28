@@ -1,5 +1,6 @@
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services.Problems;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.Selection;
 
@@ -47,10 +48,17 @@ public interface IBoardFinalizationService
 /// Thrown when a problem would enter a hosted round without a statement and a solution in every language.
 /// </summary>
 public sealed class SelectionProblemIncompleteException()
-    : Exception("A problem going into a round lacks a statement or a solution in some language");
+    : MathCompsException(
+        "A problem going into a round lacks a statement or a solution in some language",
+        RefusalKind.PreconditionUnmet,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when a board cannot be finalized into a group: the group no longer takes one, the papers don't pair up
 /// with its rounds by their categories' hosted levels and by size, or a slot stands empty.
 /// </summary>
-public sealed class SelectionFinalizeBlockedException() : Exception("This board cannot be finalized into that cycle");
+public sealed class SelectionFinalizeBlockedException()
+    : MathCompsException(
+        "This board cannot be finalized into that cycle",
+        RefusalKind.PreconditionUnmet,
+        LogLevel.Information);

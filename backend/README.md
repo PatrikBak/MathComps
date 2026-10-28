@@ -451,7 +451,11 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
 
 #### Error tracking
 
-`Sentry.AspNetCore` ships every `LogError` to Better Stack, which is the route an unhandled exception takes out of [GlobalExceptionHandler](src/MathComps.Api/Extensions/GlobalExceptionHandler.cs). The business failures that handler maps to a status are filtered back out in [Program.cs](src/MathComps.Api/Program.cs). `SENTRY_DSN` in `.env` turns it on, and an empty one leaves the SDK disabled.
+`Sentry.AspNetCore` ships every `LogError` to Better Stack, which is the route an unhandled exception takes out of [GlobalExceptionHandler](src/MathComps.Api/Extensions/GlobalExceptionHandler.cs). That handler logs each business failure at the level its exception states, so only the ones a bug causes go out. [Program.cs](src/MathComps.Api/Program.cs) drops the SDK middleware's second capture of each. `SENTRY_DSN` in `.env` turns it on, and an empty one leaves the SDK disabled.
+
+#### Logging
+
+Each request logs one line as it ends: method, path, status, duration, and the caller's Clerk id when they're signed in. `/health` logs none. Beyond that line, code logs only what it can't tell: a call to an outside service, work no request triggers, and a failure. A database write a request makes gets no line of its own. The API's `appsettings.json` says why each category sits at its level.
 
 #### Logs
 

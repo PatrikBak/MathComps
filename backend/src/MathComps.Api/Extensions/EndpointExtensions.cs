@@ -1,4 +1,5 @@
 using MathComps.Api.Endpoints;
+using Microsoft.AspNetCore.HttpLogging;
 
 namespace MathComps.Api.Extensions;
 
@@ -53,8 +54,8 @@ public static class EndpointExtensions
         // Picking the hosted competitions' papers from the proposals
         app.MapProblemSelectionEndpoints();
 
-        // Add health check endpoint for monitoring
-        app.MapHealthChecks("/health");
+        // Add health check endpoint for monitoring, with no request line, since monitors poll it all day
+        app.MapHealthChecks("/health").WithHttpLogging(HttpLoggingFields.None);
 
         // Return the app for chaining
         return app;

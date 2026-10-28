@@ -5,19 +5,22 @@ using MathComps.Shared.Cli;
 namespace MathComps.Api.Tests;
 
 /// <summary>
-/// Guards that the frontend's <c>BACKEND_ERROR_CODES</c> list names exactly the members of the backend's
-/// <see cref="ApiErrorCode"/> enum, so every code on the wire has a matching client type.
+/// Guards that the frontend's <c>BACKEND_ERROR_CODES</c> list names exactly the codes the backend can answer with: one
+/// per business exception, named after its type, plus the API's own <see cref="ApiErrorCode"/> members. Every code on
+/// the wire then has a matching client type, and a code whose exception is gone shows up as a leftover.
 /// </summary>
 public class ApiErrorCodeParityTests
 {
     /// <summary>
-    /// The committed TypeScript code list names exactly the enum members.
+    /// The committed TypeScript code list names exactly the codes the backend answers with.
     /// </summary>
     [Fact]
-    public void Ts_codes_match_the_enum()
+    public void Ts_codes_match_the_backend_codes()
     {
-        // The backend enum is the source of truth
-        var enumCodes = Enum.GetNames<ApiErrorCode>().ToHashSet();
+        // The business exceptions' codes and the API's own are the source of truth
+        var backendCodes = BusinessExceptions.Types.Select(BusinessExceptions.CodeOf)
+            .Concat(Enum.GetNames<ApiErrorCode>())
+            .ToHashSet();
 
         // Read the committed frontend list
         var tsSource = File.ReadAllText(RepoPaths.Resolve("web", "src", "types", "backend-error-codes.ts"));
@@ -28,6 +31,6 @@ public class ApiErrorCodeParityTests
             .ToHashSet();
 
         // Neither side may drift from the other
-        Assert.Equal(enumCodes, tsCodes);
+        Assert.Equal(backendCodes, tsCodes);
     }
 }

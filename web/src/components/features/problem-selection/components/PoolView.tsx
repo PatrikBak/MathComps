@@ -24,11 +24,9 @@ import { canPlaceOn } from '../model/selection-state'
 import type { Proposal } from '../model/selection-types'
 import { SlotNumber } from './CategoryMarks'
 import { LanguageSwitch } from './LanguageSwitch'
-import { PlaceControl } from './PlaceControl'
 import { PoolComments } from './PoolComments'
 import { PoolFilterBar } from './PoolFilterBar'
 import { PoolSkeleton } from './PoolSkeleton'
-import { ProposalActionsMenu } from './ProposalActionsMenu'
 import { ProposalCard } from './ProposalCard'
 import { ProposalFiling } from './ProposalFiling'
 import { RatingsTable } from './RatingsTable'
@@ -421,12 +419,8 @@ function PoolCard({ proposal, language }: PoolCardProps) {
       language={language}
       leadsToPage
       mark={null}
-      actions={
-        <>
-          <PlaceControl proposal={proposal} />
-          <ProposalActionsMenu proposal={proposal} />
-        </>
-      }
+      // Placing and the menu of actions, with nothing more to do once the problem is deleted
+      actions={{}}
       details={<ProposalFiling proposal={proposal} />}
       className={cn(
         'transition-colors',

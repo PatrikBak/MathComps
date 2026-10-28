@@ -1,5 +1,6 @@
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Contracts.Comments;
+using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 
 namespace MathComps.Infrastructure.Services.Comments;
@@ -118,7 +119,11 @@ public interface ICommentService
 /// <summary>
 /// Thrown when a comment does not exist, or is refused as though it did not.
 /// </summary>
-public sealed class CommentNotFoundException() : Exception("Comment not found");
+public sealed class CommentNotFoundException()
+    : MathCompsException(
+        "Comment not found",
+        RefusalKind.NotFound,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when a comment target does not exist, or is refused as though it did not.
@@ -126,25 +131,44 @@ public sealed class CommentNotFoundException() : Exception("Comment not found");
 /// <param name="targetType">The kind of target asked for.</param>
 /// <param name="targetId">The identifier, or comma-separated identifiers, asked for.</param>
 public sealed class CommentTargetNotFoundException(CommentTargetType targetType, string targetId)
-    : Exception($"{targetType} target '{targetId}' not found");
+    : MathCompsException(
+        $"{targetType} target '{targetId}' not found",
+        RefusalKind.NotFound,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when the caller is not the author of the comment they tried to modify.
 /// </summary>
-public sealed class NotCommentAuthorException() : Exception("Only the author can modify this comment");
+public sealed class NotCommentAuthorException()
+    : MathCompsException(
+        "Only the author can modify this comment",
+        RefusalKind.Forbidden,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when the caller tries to react to their own comment.
 /// </summary>
-public sealed class CannotReactToOwnCommentException() : Exception("You cannot react to your own comment");
+public sealed class CannotReactToOwnCommentException()
+    : MathCompsException(
+        "You cannot react to your own comment",
+        RefusalKind.Conflict,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when a comment is written from an account with no username to sign it.
 /// </summary>
-public sealed class CommentProfileIncompleteException() : Exception("A comment needs a username to sign it");
+public sealed class CommentProfileIncompleteException()
+    : MathCompsException(
+        "A comment needs a username to sign it",
+        RefusalKind.PreconditionUnmet,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when a comment carries content the contract can't take: no text at all, or more than
 /// <see cref="ICommentService.MaxCommentChars"/> characters.
 /// </summary>
-public sealed class CommentValueException() : Exception("The comment is not valid");
+public sealed class CommentValueException()
+    : MathCompsException(
+        "The comment is not valid",
+        RefusalKind.Invalid,
+        LogLevel.Error);

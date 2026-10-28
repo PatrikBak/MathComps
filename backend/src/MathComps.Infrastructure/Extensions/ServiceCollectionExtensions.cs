@@ -408,6 +408,9 @@ public static class ServiceCollectionExtensions
                 });
         });
 
+        // The logging the caller writes each attempt to, which a host registering none still has to resolve.
+        services.AddLogging();
+
         // The retrying structured-completion caller every chat consumer drives.
         services.TryAddSingleton<ILlmChatCaller, LlmChatCaller>();
 

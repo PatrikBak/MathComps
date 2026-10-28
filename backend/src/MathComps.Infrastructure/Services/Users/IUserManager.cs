@@ -1,6 +1,7 @@
 using MathComps.Domain;
 using MathComps.Domain.Contracts.Users;
 using MathComps.Infrastructure.Services.Clerk;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Infrastructure.Services.Users;
 
@@ -10,13 +11,13 @@ namespace MathComps.Infrastructure.Services.Users;
 public interface IUserManager
 {
     /// <summary>
-    /// Gets the internal user ID from an external provider ID. If the user does not exist, 
-    /// it will attempt to create the user by fetching its data from Clerk.
+    /// Gets the internal user ID for an external provider ID, creating the user from the provider's record when they
+    /// aren't stored yet. Throws when the provider can't produce that record.
     /// </summary>
     /// <param name="externalId">The external provider ID (e.g., Clerk ID).</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The internal user ID, or null if the user does not exist.</returns>
-    Task<Guid?> GetUserIdAsync(string externalId, CancellationToken cancellationToken = default);
+    /// <returns>The internal user ID.</returns>
+    Task<Guid> GetUserIdAsync(string externalId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Synchronizes a user's data from an external provider.
@@ -88,19 +89,35 @@ public interface IUserManager
 /// <summary>
 /// Thrown when a username already answers for somebody else.
 /// </summary>
-public sealed class UsernameTakenException() : Exception("That username is already taken.");
+public sealed class UsernameTakenException()
+    : MathCompsException(
+        "That username is already taken.",
+        RefusalKind.Conflict,
+        LogLevel.Information);
 
 /// <summary>
 /// Thrown when the user already has a username, which cannot be exchanged for another.
 /// </summary>
-public sealed class UsernameAlreadySetException() : Exception("A username cannot be changed once set.");
+public sealed class UsernameAlreadySetException()
+    : MathCompsException(
+        "A username cannot be changed once set.",
+        RefusalKind.Conflict,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when a username breaks the rules a name has to keep.
 /// </summary>
-public sealed class UsernameRejectedException() : Exception("That username cannot be used.");
+public sealed class UsernameRejectedException()
+    : MathCompsException(
+        "That username cannot be used.",
+        RefusalKind.Invalid,
+        LogLevel.Error);
 
 /// <summary>
 /// Thrown when a profile field is outside what it is allowed to say.
 /// </summary>
-public sealed class ProfileValueInvalidException() : Exception("That profile value cannot be used.");
+public sealed class ProfileValueInvalidException()
+    : MathCompsException(
+        "That profile value cannot be used.",
+        RefusalKind.Invalid,
+        LogLevel.Error);

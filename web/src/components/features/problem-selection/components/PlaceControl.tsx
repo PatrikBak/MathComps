@@ -7,27 +7,15 @@ import { Button } from '@/components/shared/components/Button'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/shared/components/DropdownMenu'
-import { cn } from '@/components/shared/utils/css-utils'
-import { hueTextStyle } from '@/components/shared/utils/hue-colors'
-import { useGridArrowKeys } from '@/hooks/use-grid-arrow-keys'
 
-import { useSelectionWrite } from '../hooks/use-selection-write'
+import { usePlaceProposal } from '../hooks/use-proposal-writes'
 import { useWaitingSlotPlacement } from '../hooks/use-waiting-slot-placement'
-import { afterPlacement } from '../model/selection-edits'
-import {
-  canPlaceOn,
-  categoryHue,
-  isLeadOf,
-  paperInitial,
-  slotLabel,
-} from '../model/selection-state'
-import type { PlacementWrite, Proposal } from '../model/selection-types'
-import { placeProposal } from '../services/selection-service'
-import { slotSquareLook, type SlotSquareState } from './CategoryMarks'
+import { canPlaceOn, slotLabel } from '../model/selection-state'
+import type { Proposal } from '../model/selection-types'
 import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
+import { SlotGrid } from './SlotGrid'
 
 /**
  * Props for the {@link PlaceControl} component.
@@ -39,36 +27,27 @@ type PlaceControlProps = {
 
 /**
  * Puts a problem onto the draft on screen. While a slot waits for a problem, it is one button naming that
- * slot; otherwise it opens the board as a small grid, a row per paper, each slot showing what it holds now. Only the
- * papers the reader leads take the problem, and nothing shows where {@link canPlaceOn} keeps the problem off
- * the board.
+ * slot; otherwise it opens the board as a {@link SlotGrid}, which on a phone opens from the problem's menu of actions
+ * instead. Nothing shows where {@link canPlaceOn} keeps the problem off the board.
  */
 export function PlaceControl({ proposal }: PlaceControlProps) {
   // Placing copy
   const t = useTranslations('problemSelection.place')
 
-  // Copy for the selection's writes
-  const tWrites = useTranslations('problemSelection.writes')
-
   // The slot waiting for a problem, and whether a write changing the slots is still out
   const { waitingSlot, isChangingSlots } = useSelectionWorkspace()
 
-  // The board on screen, every proposal by id, the selection's categories and the reader's lead categories
-  const { activeBoard, proposalsById, categories, leadCategories } = useLoadedSelection()
+  // The board on screen and the reader's lead categories
+  const { activeBoard, leadCategories } = useLoadedSelection()
 
   // Putting the problem into a slot, shown ahead of the server
-  const place = useSelectionWrite<PlacementWrite>({
-    apiFn: placeProposal,
-    edit: afterPlacement,
-    changesSlots: true,
-    errorMessage: tWrites('placeFailed'),
-  })
+  const place = usePlaceProposal()
 
   // The Place button's handle, and the way to put the problem into the waiting slot
-  const { placeButtonRef, putInWaitingSlot } = useWaitingSlotPlacement(place, proposal.id)
-
-  // Arrow keys moving across the grid, a row per paper of the board on screen
-  const gridKeys = useGridArrowKeys(activeBoard?.papers.map((paper) => paper.slots.length) ?? [])
+  const { placeButtonRef, putInWaitingSlot } = useWaitingSlotPlacement({
+    place,
+    proposalId: proposal.id,
+  })
 
   // Only a live problem goes onto a draft, for a reader leading one of its papers and any paper the problem leaves
   if (activeBoard === null || !canPlaceOn(activeBoard, proposal, leadCategories)) return null
@@ -116,101 +95,21 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
             event.preventDefault()
         }}
       >
-        <Button ref={placeButtonRef} size="sm" variant="outline" shape="pill" className="gap-1">
+        <Button
+          ref={placeButtonRef}
+          size="sm"
+          variant="outline"
+          shape="pill"
+          // Off a phone's screen, where the grid opens from the problem's menu of actions
+          className="hidden gap-1 sm:inline-flex"
+        >
           {t('label')}
           <ChevronDown size={14} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="p-3">
-        {/* Each paper as a row named for it, holding its slots laid out the way the board is */}
-        <div className="space-y-1.5">
-          {activeBoard.papers.map((paper, paperIndex) => (
-            <div
-              key={paper.id}
-              role="group"
-              aria-label={paper.name}
-              className="flex items-center gap-1.5"
-            >
-              {/* The paper, by its initial in its category's colour */}
-              <span
-                title={paper.name}
-                className="w-4 shrink-0 text-xs font-semibold"
-                style={hueTextStyle(categoryHue(categories, paper.category))}
-              >
-                {paperInitial(paper)}
-              </span>
-
-              {/* Each slot: its problem's number when filled, its own number when empty */}
-              {paper.slots.map((occupantId, index) => {
-                // The problem in the slot, where one is
-                const occupant = occupantId === null ? undefined : proposalsById.get(occupantId)
-
-                // The slot's short label
-                const slot = slotLabel(paper, index)
-
-                // What the slot is and holds: nothing, or its problem's number and name
-                const label =
-                  occupant === undefined
-                    ? t('slotEmpty', { slot })
-                    : t('slotFilled', { slot, number: occupant.number, title: occupant.title })
-
-                // Whether the slot is the one this problem already fills
-                const isOwnSlot = occupantId === proposal.id
-
-                // How the slot stands: this problem's own, empty, or another problem's
-                const state: SlotSquareState = isOwnSlot
-                  ? 'highlighted'
-                  : occupant === undefined
-                    ? 'empty'
-                    : 'filled'
-
-                // How the slot's square looks for how the slot stands
-                const look = slotSquareLook(state, categoryHue(categories, paper.category))
-
-                // Whether the reader leads the slot's paper
-                const leadsPaper = isLeadOf(leadCategories, paper)
-
-                return (
-                  <DropdownMenuItem
-                    key={index}
-                    ref={gridKeys.itemRef(paperIndex, index)}
-                    title={label}
-                    aria-label={label}
-                    // Typing finds a slot by its name, the one a screen reader reads out
-                    textValue={label}
-                    // Unavailable while a write changing the slots is out, and in a paper the reader does not lead
-                    disabled={isChangingSlots || !leadsPaper}
-                    // The problem's own slot takes nothing, yet stays in reach of the arrow keys, which say where
-                    // the problem stands. The attribute replaces the menu's own, so each unavailable slot sets it
-                    aria-disabled={isOwnSlot || !leadsPaper || isChangingSlots || undefined}
-                    onKeyDown={(event) => gridKeys.moveFocus(event, paperIndex, index)}
-                    onSelect={(event) => {
-                      // The problem's own slot places nothing, so the grid stays open
-                      if (isOwnSlot) return event.preventDefault()
-
-                      // Any other slot takes the problem
-                      place.mutate({
-                        slot: { boardId: activeBoard.id, paperId: paper.id, index },
-                        proposalId: proposal.id,
-                      })
-                    }}
-                    className={cn(
-                      'size-11 justify-center rounded-md p-0 text-xs font-semibold tabular-nums',
-                      // The problem's own slot keeps its colour, focused or held, while a hold dims every other one
-                      isOwnSlot
-                        ? 'cursor-default focus:bg-brand/70 focus:text-brand-foreground data-[disabled]:opacity-100'
-                        : 'focus:bg-foreground/15',
-                      look.className
-                    )}
-                    style={look.style}
-                  >
-                    {occupant === undefined ? index + 1 : `#${occupant.number}`}
-                  </DropdownMenuItem>
-                )
-              })}
-            </div>
-          ))}
-        </div>
+        {/* Every slot of the board, one taking the problem */}
+        <SlotGrid proposal={proposal} board={activeBoard} />
       </DropdownMenuContent>
     </DropdownMenu>
   )

@@ -11,13 +11,13 @@ import { generateContactEmail } from '@/lib/email/notification-emails'
 /**
  * Detects a tripped honeypot, the signal of a likely bot.
  *
- * @param body - The raw request body
+ * @param body - The raw request body, or null when it isn't JSON
  *
  * @returns Whether the submission looks like a bot
  */
-function isLikelyBot(body: Record<string, unknown>): boolean {
+function isLikelyBot(body: Record<string, unknown> | null): boolean {
   // A filled hidden honeypot field means a bot
-  return body.website !== undefined && body.website !== ''
+  return body?.website !== undefined && body.website !== ''
 }
 
 /**
@@ -25,8 +25,8 @@ function isLikelyBot(body: Record<string, unknown>): boolean {
  * Validates the form data, sends an email notification, and returns a response.
  */
 export const POST = withApiHandler(async (request: NextRequest) => {
-  // Parse the request body
-  const body = await request.json()
+  // Parse the request body. One that isn't JSON reads as null, so validation refuses it as a bad request.
+  const body = await request.json().catch(() => null)
 
   // Basic bot detection
   if (isLikelyBot(body)) {

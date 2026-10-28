@@ -40,6 +40,7 @@ import {
   REVIEWER,
   REVISION,
   selectedTab,
+  SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
   SETTLE_TIMEOUT_MS,
@@ -206,6 +207,27 @@ function openedCommentSeen(): ReturnType<typeof rememberedSelection> {
 
   // The memory
   return memory
+}
+
+/**
+ * Lets time run on until the page reads the selection again on its own. The page holds that read back while one of
+ * its own writes is out, such as marking an opened conversation read, and starts the wait over once the write lands.
+ * So the clock keeps jumping until a read goes out.
+ *
+ * @param page - The page.
+ */
+async function untilSelectionReadAgain(page: Page): Promise<void> {
+  // Jumped forward until a read goes out
+  await expect(async () => {
+    // The next read's answer
+    const answered = page.waitForResponse(SELECTION_ENDPOINT, { timeout: LANDING_WINDOW_MS })
+
+    // Long enough for the selection to be read again
+    await page.clock.fastForward('00:31')
+
+    // Once it has landed
+    await answered
+  }).toPass({ timeout: SETTLE_TIMEOUT_MS })
 }
 
 test.describe('what reviewers said about a problem', () => {
@@ -651,8 +673,8 @@ test.describe('what reviewers said about a problem', () => {
     // Dropped by the reviewer who held it
     memory.conversations = memory.conversations.filter((conversation) => conversation !== RECENT)
 
-    // Long enough for the selection to be read again
-    await page.clock.fastForward('00:31')
+    // The selection, read again
+    await untilSelectionReadAgain(page)
 
     // The conversation closed, nothing left in it to read
     await expect(page.getByRole('dialog')).toHaveCount(0, { timeout: SETTLE_TIMEOUT_MS })

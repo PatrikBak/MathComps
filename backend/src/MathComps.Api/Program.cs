@@ -6,6 +6,7 @@ using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
@@ -85,7 +86,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     problemDetailsService,
                     challengeContext.HttpContext,
                     StatusCodes.Status401Unauthorized,
-                    ApiErrorCode.Unauthenticated,
+                    nameof(ApiErrorCode.Unauthenticated),
                     "Authentication is required for this endpoint.");
             },
 
@@ -101,7 +102,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     problemDetailsService,
                     forbiddenContext.HttpContext,
                     StatusCodes.Status403Forbidden,
-                    ApiErrorCode.Forbidden,
+                    nameof(ApiErrorCode.Forbidden),
                     "You do not have permission to perform this action.");
             }
         };
@@ -113,9 +114,26 @@ builder.Services.AddApiAuthorization();
 // Basic observability
 builder.Services.AddLogging();
 
-// Errors reach Better Stack over the Sentry protocol, out of the LogError in GlobalExceptionHandler.
-// That handler answers business failures too, and the SDK's middleware finds every one of them again on
-// IExceptionHandlerFeature once the pipeline unwinds, so a bad slug's 404 would file as an error.
+// The line a request logs when it ends: what was asked, how it was answered and how long it took
+builder.Services.AddHttpLogging(options =>
+{
+    // The method, path, status and duration
+    options.LoggingFields = HttpLoggingFields.RequestMethod
+        | HttpLoggingFields.RequestPath
+        | HttpLoggingFields.ResponseStatusCode
+        | HttpLoggingFields.Duration;
+
+    // The request and its response as one entry
+    options.CombineLogs = true;
+});
+
+// The caller's Clerk id on the request line
+builder.Services.AddHttpLoggingInterceptor<ClerkIdHttpLoggingInterceptor>();
+
+// Errors reach Better Stack over the Sentry protocol, out of the lines logged at Error. GlobalExceptionHandler
+// writes one for an unexpected fault and for a refusal only a bug can cause. It answers the routine refusals too,
+// and the SDK's middleware finds every one of them again on IExceptionHandlerFeature once the pipeline unwinds,
+// so a bad slug's 404 would file as an error.
 builder.WebHost.UseSentry(options =>
 {
     // Send the request body with every event. A defense turn's own words and a Clerk webhook's account
@@ -125,8 +143,9 @@ builder.WebHost.UseSentry(options =>
     // The last pass over an event before it leaves
     options.SetBeforeSend((sentryEvent, _) =>
     {
-        // Drop the middleware's second capture, and with it the business failures. nameof lands on the
-        // right string because Sentry's label for that feature happens to be the type's name.
+        // Drop the middleware's second capture, which would file every refusal the handler answered, routine ones
+        // included. nameof lands on the right string because Sentry's label for that feature happens to be the
+        // type's name.
         if (sentryEvent.SentryExceptions?.Any(
                 entry => entry.Mechanism?.Type == nameof(IExceptionHandlerFeature)) is true)
             return null;
@@ -136,7 +155,7 @@ builder.WebHost.UseSentry(options =>
         sentryEvent.Request.Headers.Remove("X-Real-Ip");
         sentryEvent.Request.Headers.Remove("X-Forwarded-For");
 
-        // What survives is a fault GlobalExceptionHandler logged
+        // What survives is a line logged at Error
         return sentryEvent;
     });
 });
@@ -228,7 +247,12 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 // The app configured
 var app = builder.Build();
 
-// Catch anything that escapes the endpoints and render it as a clean problem response (outermost)
+// Log requests ahead of the middleware below, so a refusal from any of them gets its entry too. A fault's
+// entry is written as it unwinds out of the logging, so inside the exception handler it would carry the 200
+// standing before the handler wrote its 500.
+app.UseHttpLogging();
+
+// Catch anything that escapes the endpoints and render it as a clean problem response
 app.UseExceptionHandler();
 
 // Enable request localization (must be early in the pipeline)

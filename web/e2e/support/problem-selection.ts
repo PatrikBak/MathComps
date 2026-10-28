@@ -52,6 +52,12 @@ export const SETTLE_TIMEOUT_MS = 15_000
 /** How long a read gets to go out before a test is willing to say none did. */
 export const LANDING_WINDOW_MS = 1_000
 
+/**
+ * A phone's screen, narrow enough that the board folds into a bar above the pool, and each card's Mathilda and Place
+ * buttons into its menu.
+ */
+export const PHONE_VIEWPORT = { width: 390, height: 844 }
+
 /** Where the backend answers the read of MathComps' selection. */
 export const SELECTION_ENDPOINT = `${BACKEND_ORIGIN}${SELECTION_API_PATH}`
 

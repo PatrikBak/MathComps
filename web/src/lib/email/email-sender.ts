@@ -95,6 +95,10 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
 
     // Handle errors
     if (error) {
+      // What Resend said, in the server's log
+      console.error(`Email sending error: ${error.name}: ${error.message}`)
+
+      // Return error response
       return {
         success: false,
         error: `Resend error: ${error.message}`,

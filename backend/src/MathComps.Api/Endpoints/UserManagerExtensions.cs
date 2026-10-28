@@ -1,4 +1,5 @@
 using MathComps.Api.Constants;
+using MathComps.Infrastructure.Services;
 using MathComps.Infrastructure.Services.Users;
 
 namespace MathComps.Api.Endpoints;
@@ -28,7 +29,7 @@ internal static class UserManagerExtensions
     /// </summary>
     /// <param name="userManager">Resolves an external provider id to the internal user id.</param>
     /// <param name="context">The HTTP context carrying the caller's claims.</param>
-    /// <returns>The internal user id, or null when the request is anonymous or unresolvable.</returns>
+    /// <returns>The internal user id, or null when the request is anonymous.</returns>
     public static async Task<Guid?> GetUserIdAsync(this IUserManager userManager, HttpContext context)
     {
         // The subject claim identifying the caller, if the request carries one
@@ -45,4 +46,8 @@ internal static class UserManagerExtensions
 /// Thrown when an authenticated request reaches a handler that needs a user but the caller
 /// can't be resolved to one.
 /// </summary>
-public sealed class UserNotResolvedException() : Exception("The authenticated caller could not be resolved to a user");
+public sealed class UserNotResolvedException()
+    : MathCompsException(
+        "The authenticated caller could not be resolved to a user",
+        RefusalKind.Unauthenticated,
+        LogLevel.Error);
