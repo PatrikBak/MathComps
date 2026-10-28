@@ -1,0 +1,121 @@
+# Keeps every container's logs in daily files on the server, and ships them, with the host's disk, memory and CPU,
+# to Better Stack
+
+sources:
+  # Every container's console output but Vector's own
+  containers:
+    type: docker_logs
+
+  # The host's disk, memory and CPU
+  host:
+    type: host_metrics
+    scrape_interval_secs: 30
+    collectors: [cpu, memory, filesystem]
+    filesystem:
+      # Only the root filesystem, which seen from inside the container is the disk holding Docker's data
+      mountpoints:
+        includes: ["/"]
+
+transforms:
+  shaped:
+    type: remap
+    inputs: [containers]
+    source: |
+      # The compose service, which names the container
+      .service = .label."com.docker.compose.service"
+
+      # The rest of Docker's labels, which is bulk
+      del(.label)
+
+      # Vector's own hostname, the source's name and the container's creation time, the same on every line
+      del(.host)
+      del(.source_type)
+      del(.container_created_at)
+
+      # The API writes one JSON object per entry
+      if .service == "api" {
+        # The line, read as that object
+        entry, error = parse_json(.message)
+
+        # A line that isn't one, like a crash the runtime prints, stays as it came
+        if error == null && is_object(entry) {
+          entry = object!(entry)
+
+          # Its level, in the field Better Stack shows
+          .level = downcase(string(del(entry.LogLevel)) ?? "")
+
+          # Better Stack's name for Information
+          if .level == "information" { .level = "info" }
+
+          # Its message, in the field Better Stack shows
+          .message = del(entry.Message)
+
+          # Each scope repeats its own fields as a sentence, so keep the fields, on the entry itself
+          for_each(array(del(entry.Scopes)) ?? []) -> |_index, scope| {
+            # A plain-text scope carries no fields
+            if is_object(scope) {
+              entry = merge(entry, remove!(object!(scope), ["Message"]))
+            }
+          }
+
+          # The rest of the entry, under the service's name
+          .api = entry
+        }
+      }
+
+  # Bots probing for a leaked /<anything>/.env, which would eat the monthly allowance
+  without_env_probes:
+    type: filter
+    inputs: [shaped]
+    condition: '!match(string(.api.RequestPath) ?? "", r''/\.env'')'
+
+  # Better Stack reads an entry's time from dt
+  for_better_stack:
+    type: remap
+    inputs: [without_env_probes]
+    source: |
+      .dt = del(.timestamp)
+
+  # The container's own hostname changes each time compose recreates it, so the metrics name the server instead
+  host_named:
+    type: remap
+    inputs: [host]
+    source: |
+      .tags.host = "mathcomps"
+
+sinks:
+  # One folder a day, one file per container, one JSON object per line
+  daily_files:
+    type: file
+    inputs: [shaped]
+    path: "/var/log/mathcomps/%Y-%m-%d/{{ container_name }}.log"
+    encoding:
+      codec: json
+
+  # While Better Stack is unreachable its lines are dropped, since a full buffer would stall the daily files too
+  better_stack_logs:
+    type: http
+    inputs: [for_better_stack]
+    buffer:
+      when_full: drop_newest
+    method: post
+    uri: "https://${BETTER_STACK_INGESTING_HOST:?set it in .env}/"
+    encoding:
+      codec: json
+    compression: gzip
+    auth:
+      strategy: bearer
+      token: "${BETTER_STACK_SOURCE_TOKEN:?set it in .env}"
+
+  # The host's metrics, to their own endpoint
+  better_stack_metrics:
+    type: http
+    inputs: [host_named]
+    method: post
+    uri: "https://${BETTER_STACK_INGESTING_HOST:?set it in .env}/metrics"
+    encoding:
+      codec: json
+    compression: gzip
+    auth:
+      strategy: bearer
+      token: "${BETTER_STACK_SOURCE_TOKEN:?set it in .env}"
