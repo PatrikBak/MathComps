@@ -70,7 +70,7 @@ NEXT_PUBLIC_CONTACT_EMAIL=contact@yourdomain.com
 
 **Development Mode:** Leave email variables empty for development - the contact form will work without sending actual emails. Form data will be logged to the console instead, and you'll get helpful error messages for configuration issues.
 
-Rate limiting on the form is Cloudflare's, not the app's.
+The form's one bot defense is the hidden `website` honeypot field: a submission that fills it gets a fake success and sends no mail. Nothing rate-limits it, since Cloudflare only serves the DNS and the Vercel project has no firewall rules.
 
 #### File Storage (Cloudflare R2)
 
@@ -88,6 +88,10 @@ NEXT_PUBLIC_R2_URL=https://your-bucket.r2.dev
 These credentials can be obtained from the [Cloudflare Dashboard](https://dash.cloudflare.com/) under R2 Object Storage.
 
 **Development Mode:** Leave R2 variables empty during development – file upload features will be disabled, but the rest of the application will work normally.
+
+#### Error Reporting (Better Stack)
+
+`NEXT_PUBLIC_SENTRY_DSN` sends the site's errors, from the browser and the server, to a Better Stack Errors application over the Sentry protocol, the same way the API's `SENTRY_DSN` does. Unset, the SDK stays off. On Vercel it is set for Production only, and it is baked into the build, so a change takes a redeploy.
 
 **Other available variables (have good defaults):**
 
