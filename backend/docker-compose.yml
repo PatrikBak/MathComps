@@ -60,6 +60,9 @@ services:
     logging: *default-logging
     environment:
       ASPNETCORE_URLS: http://+:8080
+      # One JSON object per log entry, its scopes included
+      Logging__Console__FormatterName: json
+      Logging__Console__FormatterOptions__IncludeScopes: "true"
       ConnectionStrings__DefaultConnection: Host=postgres;Database=mathcomps;Username=mathcomps;Password=${DB_PASSWORD:?set it in .env}
       Authentication__Clerk__Authority: ${CLERK_AUTHORITY:?set it in .env}
       Clerk__SecretKey: ${CLERK_SECRET_KEY:?set it in .env}
@@ -86,6 +89,51 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  # Vector, which keeps every container's logs and the host's metrics, as vector/vector.yaml sets out
+  vector:
+    image: timberio/vector:0.60.0-alpine
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      # Vector fills the variables in vector.yaml only with this on
+      VECTOR_DANGEROUSLY_ALLOW_ENV_VAR_INTERPOLATION: "true"
+
+      # Reloads vector.yaml when it changes
+      VECTOR_WATCH_CONFIG: "true"
+
+      # Where the host's metrics are read from, the host's own /proc and /sys mounted below
+      PROCFS_ROOT: /host/proc
+      SYSFS_ROOT: /host/sys
+
+      BETTER_STACK_SOURCE_TOKEN: ${BETTER_STACK_SOURCE_TOKEN:?set it in .env}
+      BETTER_STACK_INGESTING_HOST: ${BETTER_STACK_INGESTING_HOST:?set it in .env}
+    volumes:
+      # The folder rather than the file, so a deploy's new vector.yaml reaches the running container, which then
+      # reloads it
+      - ./vector:/etc/vector:ro
+
+      # The daily files
+      - /var/log/mathcomps:/var/log/mathcomps
+
+      # Every container's logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+      # The host's own /proc and /sys
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+
+  # Vector never deletes the daily log folders it writes, so this removes those older than 30 days, once a day
+  log-cleanup:
+    image: alpine:3.24
+    restart: unless-stopped
+    logging: *default-logging
+    volumes:
+      - /var/log/mathcomps:/var/log/mathcomps
+    command:
+      - sh
+      - -c
+      - while true; do find /var/log/mathcomps -mindepth 1 -maxdepth 1 -type d -mtime +30 -exec rm -rf {} +; sleep 86400; done
 
 networks:
   internal:

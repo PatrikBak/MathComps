@@ -457,6 +457,20 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
 
 Each request logs one line as it ends: method, path, status, duration, and the caller's Clerk id when they're signed in. `/health` logs none. Beyond that line, code logs only what it can't tell: a call to an outside service, work no request triggers, and a failure. A database write a request makes gets no line of its own. The API's `appsettings.json` says why each category sits at its level.
 
+#### Where logs go
+
+On the server the API writes one JSON object per log entry to the console, a stack trace included.
+
+The `vector` container reads every container's console output, as configured in [vector.yaml](vector/vector.yaml), which it reloads by itself when a deploy changes it. It writes each container's lines to `/var/log/mathcomps/<date>/<container>.log` on the host, one JSON object per line, so the history outlives every deploy. The `log-cleanup` container deletes the days older than 30.
+
+It also ships the same lines to Better Stack, with the host's disk, memory and CPU, minus the requests from bots probing for `/<anything>/.env`. The source's `BETTER_STACK_SOURCE_TOKEN` and `BETTER_STACK_INGESTING_HOST` in `.env` point it there, and a deploy refuses to start without them. Staging runs neither container of its own, since production's already cover the whole box.
+
+To find today's API errors on the server:
+
+```bash
+grep '"level":"error"' "/var/log/mathcomps/$(date -u +%F)/mathcomps-prod-api-1.log"
+```
+
 #### Mail
 
 Every mail the API sends waits in `outgoing_mails` until a background loop sends it, and stays there as the record of it. A failed mail is tried again on the schedule in the `MailOutbox` section of `appsettings.json`. Students and graders are mailed about new messages in grade conversations, one mail per person once a quiet while passes with nothing new for them, and never two in quick succession, timed by the `GradeMessageMail` section. Mail goes out from `Site:ContactAddress` in `appsettings.json`, through Resend wherever `RESEND_API_KEY` is set. On the server only `.env.prod` sets it. Without a key every mail goes to the log, so an API running on a copy of prod data mails nobody. To try Resend for real outside prod, set the key with a redirect, and the API refuses to start outside Production with a key alone:

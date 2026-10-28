@@ -32,6 +32,13 @@ services:
       - "traefik.http.services.mathcomps-staging.loadbalancer.server.port=8080"
       - "traefik.docker.network=traefik-public"
 
+  # Production's Vector already reads every container on the box and the host itself, and its log-cleanup prunes
+  # the same folder, so staging runs neither
+  vector:
+    profiles: [disabled]
+  log-cleanup:
+    profiles: [disabled]
+
 volumes:
   postgres_data_staging:
     external: true
