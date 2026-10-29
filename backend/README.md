@@ -455,7 +455,7 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
 
 #### Logging
 
-Each request logs one line as it ends: method, path, status, duration, and the caller's Clerk id when they're signed in. `/health` logs none. Beyond that line, code logs only what it can't tell: a call to an outside service, work no request triggers, and a failure. A database write a request makes gets no line of its own. The API's `appsettings.json` says why each category sits at its level.
+Each request logs one line as it ends: method, path, status, duration, and the caller's Clerk id when they're signed in. Neither `/health` nor a CORS preflight logs one. Beyond that line, code logs only what it can't tell: a call to an outside service, work no request triggers, and a failure. A database write a request makes gets no line of its own. The API's `appsettings.json` says why each category sits at its level.
 
 #### Where logs go
 

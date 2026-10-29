@@ -101,9 +101,6 @@ public static class ApplicationBuilderExtensions
     {
         // Traefik handles HTTPS redirection
 
-        // We can take requests from the website
-        app.UseCors("default");
-
         // Enable rate limiting middleware
         app.UseRateLimiter();
 
