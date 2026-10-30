@@ -67,7 +67,7 @@ const COPY: Record<Locale, GlobalErrorCopy> = {
  * The page shown when rendering fails anywhere, in place of the whole site. It reports a fault the
  * browser threw, since defining this page stops Next.js from passing such faults on.
  */
-export default function GlobalError({ error, unstable_retry }: ErrorInfo) {
+export default function GlobalError({ error, retry }: ErrorInfo) {
   // The reader's language, from the address, which always starts with one
   const pathSegment = usePathname().split('/')[1]
   const locale = hasLocale(SUPPORTED_LOCALES, pathSegment) ? pathSegment : UNMATCHED_VISITOR_LOCALE
@@ -78,7 +78,7 @@ export default function GlobalError({ error, unstable_retry }: ErrorInfo) {
   // Report the fault the page is showing
   useEffect(() => {
     // A server fault carries the digest Next.js gave it, and was reported where it happened
-    if (!('digest' in error)) {
+    if (!(error instanceof Error && 'digest' in error)) {
       Sentry.captureException(error)
     }
   }, [error])
@@ -105,7 +105,7 @@ export default function GlobalError({ error, unstable_retry }: ErrorInfo) {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 type="button"
-                onClick={unstable_retry}
+                onClick={retry}
                 className={buttonVariants({ variant: 'primary' })}
               >
                 <RotateCcw size={20} aria-hidden />
