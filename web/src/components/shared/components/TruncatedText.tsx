@@ -6,6 +6,13 @@ import { cn } from '../utils/css-utils'
 import { Tooltip } from './Tooltip'
 
 /**
+ * How far past its box the text can measure and still count as fitting. Under page zoom the text's width and its
+ * box's come off different layout paths, and for text that fits they part by up to a few hundred-thousandths of a
+ * pixel.
+ */
+const MEASUREMENT_NOISE_PX = 0.001
+
+/**
  * Component that conditionally adds a tooltip if the text content is visually
  * truncated. The tooltip is *only* triggered by hovering over the far-right
  * part of the text (where the ellipsis would be).
@@ -39,9 +46,11 @@ export function TruncatedText({
       textRange.selectNodeContents(node)
       const textWidth = textRange.getBoundingClientRect().width
 
-      // Truncated once the text runs past its box, compared in fractional px: under page zoom WebKit
-      // rounds the integer scrollWidth and clientWidth apart, so a label that fits reads 1px over
-      const currentlyTruncated = textWidth > node.getBoundingClientRect().width
+      // Truncated once the text runs past its box by more than the noise in measuring them, compared in
+      // fractional px: under page zoom WebKit rounds the integer scrollWidth and clientWidth apart, so a label
+      // that fits reads 1px over
+      const currentlyTruncated =
+        textWidth - node.getBoundingClientRect().width > MEASUREMENT_NOISE_PX
 
       // Set the value only if it changed
       setIsTruncated((previouslyTruncated) => {
@@ -63,9 +72,10 @@ export function TruncatedText({
     return () => resizeObserver.disconnect()
   }, [])
 
-  // The actual text span to be displayed, which will be measured
+  // The actual text span to be displayed, which will be measured. A new text gets a new span and is measured
+  // afresh, since a box its container holds at one width never resizes when its text changes.
   const textElement = (
-    <span ref={measureRef} className={cn('truncate block', className)}>
+    <span key={children} ref={measureRef} className={cn('truncate block', className)}>
       {children}
     </span>
   )
