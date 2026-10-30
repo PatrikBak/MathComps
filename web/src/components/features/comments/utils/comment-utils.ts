@@ -54,17 +54,54 @@ export function countAllComments(comments: CommentWithReplies[]): number {
 }
 
 /**
- * Whether a later copy of a thread says nothing new over an earlier one: the same comments, each saying what it said
- * or deleted since. A comment is the same while it has the same author and was posted at the same moment, since an
- * edit saves it under a new id. The moment is compared to the millisecond, however the server rounds a time it has
- * just written. Who reacted how is left out.
+ * The key a comment keeps across its versions: who posted it and when. An edit saves the comment under a new id but
+ * keeps both. The moment is taken to the millisecond, however the server rounds a time it has just written.
+ *
+ * @param comment - The comment.
+ *
+ * @returns The key.
+ */
+export function commentKeyOf(comment: CommentData): string {
+  // Who posted the comment, and when
+  return lastingKeyOf(comment.authorId, comment.timestamp.getTime())
+}
+
+/**
+ * The {@link commentKeyOf} key of a comment as the API gives it.
+ *
+ * @param comment - The comment.
+ *
+ * @returns The key.
+ */
+export function commentDtoKeyOf(comment: CommentDto): string {
+  // Who posted the comment, and when
+  return lastingKeyOf(comment.author.id, Date.parse(comment.createdAt))
+}
+
+/**
+ * Builds the {@link commentKeyOf} key out of who posted a comment and when.
+ *
+ * @param authorId - Who posted the comment.
+ * @param postedAt - When the comment was first posted, in milliseconds.
+ *
+ * @returns The key.
+ */
+function lastingKeyOf(authorId: string, postedAt: number): string {
+  // Who posted the comment, and when
+  return `${authorId}:${postedAt}`
+}
+
+/**
+ * Whether a later copy of a thread posts nothing new over an earlier one: the same comments, each standing as it
+ * stood or deleted since. A comment is the same while its {@link commentDtoKeyOf} key is, whatever its id. What the
+ * comments say and who reacted how are left out, so an edit and a reaction are no news.
  *
  * @param earlier - The thread's comments as they were, each carrying its replies.
  * @param later - The thread's comments as they are now, each carrying its replies.
  *
- * @returns Whether the later copy says nothing new.
+ * @returns Whether the later copy posts nothing new.
  */
-export function saysNothingNew(
+export function postsNothingNew(
   earlier: readonly CommentDto[],
   later: readonly CommentDto[]
 ): boolean {
@@ -75,13 +112,12 @@ export function saysNothingNew(
       // The comment at the same place in the later copy
       const now = later[index]
 
-      // The same comment, deleted since or saying what it said, with nothing new in its replies
+      // The same comment, deleted since or standing as it stood, with nothing new in its replies
       return (
         now !== undefined &&
-        comment.author.id === now.author.id &&
-        Date.parse(comment.createdAt) === Date.parse(now.createdAt) &&
-        (now.isDeleted || (comment.content === now.content && !comment.isDeleted)) &&
-        saysNothingNew(comment.replies, now.replies)
+        commentDtoKeyOf(comment) === commentDtoKeyOf(now) &&
+        (now.isDeleted || !comment.isDeleted) &&
+        postsNothingNew(comment.replies, now.replies)
       )
     })
   )
@@ -240,23 +276,23 @@ export function updateCommentInTree(
  * Recursively finds a comment in the tree.
  *
  * @param comments - The comments array.
- * @param commentId - The ID of the comment to find.
+ * @param matches - Whether a comment is the one to find.
  *
  * @returns The found comment or undefined if not found.
  */
 export const findCommentInTree = (
   comments: CommentData[],
-  commentId: string
+  matches: (comment: CommentData) => boolean
 ): CommentData | undefined => {
   // Go through each comment
   for (const comment of comments) {
     // If we found the right comment, return it
-    if (comment.id === commentId) return comment
+    if (matches(comment)) return comment
 
     // If the comment has any replies...
     if (comment.replies.length > 0) {
       // Recurse down to find the right parent
-      const found = findCommentInTree(comment.replies, commentId)
+      const found = findCommentInTree(comment.replies, matches)
 
       // If we found it among the replies, return it
       if (found) return found

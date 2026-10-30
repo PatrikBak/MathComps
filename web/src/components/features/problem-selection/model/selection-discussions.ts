@@ -3,8 +3,9 @@ import type {
   CommentTargetType,
 } from '@/components/features/comments/services/comment-api-types'
 import {
+  commentDtoKeyOf,
   newestPostOf,
-  saysNothingNew,
+  postsNothingNew,
   shouldHideComment,
 } from '@/components/features/comments/utils/comment-utils'
 import { assertNever } from '@/components/shared/utils/assert-never'
@@ -105,8 +106,8 @@ export function discussionTargetOf(subject: DiscussedSubject): DiscussionTarget 
 }
 
 /**
- * The key a thread keeps for as long as it stands. An edit saves its top-level comment under a new id, but keeps who
- * posted it and when, to the millisecond however the server rounds a time it has just written.
+ * The key a thread keeps for as long as it stands: its top-level comment's {@link commentDtoKeyOf} key, which an edit
+ * leaves as it was.
  *
  * @template TSubject - What the thread's discussion hangs off.
  *
@@ -115,8 +116,8 @@ export function discussionTargetOf(subject: DiscussedSubject): DiscussionTarget 
  * @returns The key.
  */
 export function threadKeyOf<TSubject>(thread: DiscussionThread<TSubject>): string {
-  // Who posted the top-level comment, and when
-  return `${thread.comment.author.id}:${Date.parse(thread.comment.createdAt)}`
+  // The top-level comment's key
+  return commentDtoKeyOf(thread.comment)
 }
 
 /**
@@ -152,7 +153,7 @@ export function threadsByActivity<TSubject>(
 
 /**
  * Whether a later list of threads shows nothing new over an earlier one: the same threads, in whatever order, none
- * saying anything new, as {@link saysNothingNew} reads a thread.
+ * posting anything new, as {@link postsNothingNew} reads a thread.
  *
  * @template TSubject - What the threads' discussions hang off.
  *
@@ -168,15 +169,15 @@ export function showTheSame<TSubject>(
   // The later list's threads by the key each keeps
   const byKey = new Map(later.map((thread) => [threadKeyOf(thread), thread]))
 
-  // As many threads, each in the later list saying nothing new
+  // As many threads, each in the later list posting nothing new
   return (
     earlier.length === later.length &&
     earlier.every((thread) => {
       // The same thread in the later list, if it is there
       const now = byKey.get(threadKeyOf(thread))
 
-      // There, and saying nothing new
-      return now !== undefined && saysNothingNew([thread.comment], [now.comment])
+      // There, and posting nothing new
+      return now !== undefined && postsNothingNew([thread.comment], [now.comment])
     })
   )
 }

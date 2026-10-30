@@ -34,7 +34,8 @@ export function usePendingCommentReaction({ comments, target }: UsePendingCommen
   // reader's own comment, or when the reader already holds that reaction, which pressing would take back
   useRestorePendingAction<CommentData, CommentReactionPress>({
     storageKey: PENDING_COMMENT_REACTION_STORAGE_KEY,
-    getItem: ({ commentId }) => (comments ? findCommentInTree(comments, commentId) : undefined),
+    getItem: ({ commentId }) =>
+      comments ? findCommentInTree(comments, (comment) => comment.id === commentId) : undefined,
     shouldExecute: (comment, { kind }) =>
       !comment.isDeleted && comment.viewerReaction !== kind && comment.authorId !== userId,
     onExecute: pressReaction,

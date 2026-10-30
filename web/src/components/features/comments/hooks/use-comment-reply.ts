@@ -12,7 +12,7 @@ import { forgetPersistentDraft, usePersistentDraft } from '@/hooks/use-persisten
 import type { CommentData } from '../components/CommentItem'
 import { commentDraftStorageKey } from '../model/comment-drafts'
 import type { CommentTarget } from '../services/comment-api-types'
-import { findCommentInTree } from '../utils/comment-utils'
+import { commentKeyOf, findCommentInTree } from '../utils/comment-utils'
 import { commentMutationKeys } from './comment-query-keys'
 import { type CreateCommentParams, useCreateComment } from './use-create-comment'
 import { useOpenReply } from './use-open-reply'
@@ -32,7 +32,8 @@ export type UseCommentReplyOptions = {
  */
 export type UseCommentReplyResult = {
   /**
-   * The comment being replied to; null while the reader has no reply open, and once that comment is deleted or gone.
+   * The id the comment being replied to has now; null while the reader has no reply open, and once that comment is
+   * deleted or gone.
    */
   commentId: string | null
   /** What the open reply says so far. */
@@ -42,7 +43,7 @@ export type UseCommentReplyResult = {
   /** The editor of the open reply, which takes the cursor as the reply opens. */
   editorRef: RefObject<RichMathEditorRef | null>
   /** Opens a reply under a comment, on whatever was written in it before, the cursor in it. */
-  open: (commentId: string) => void
+  open: (comment: CommentData) => void
   /** Closes the reply and drops its draft. */
   cancel: () => void
   /** Posts the open reply. */
@@ -54,7 +55,8 @@ export type UseCommentReplyResult = {
 /**
  * The reply open in a thread: which comment it answers, its draft, kept for the reader under that comment until it
  * is sent or cancelled, and the way to send it. The reply is the one {@link useOpenReply} keeps across the site. It
- * shows only while the comment it answers stands in the thread, since nothing could take it otherwise.
+ * shows only while the comment it answers stands in the thread, since nothing could take it otherwise. The reply and
+ * its draft follow the comment through its edits, which save it under a new id.
  *
  * @param options - {@link UseCommentReplyOptions}.
  *
@@ -76,17 +78,24 @@ export function useCommentReply({
   // The create behind a reply
   const { mutateAsync: createReply } = useCreateComment()
 
-  // The comment the reply was opened under, while it is the reader's and the comment still stands in this thread
-  const commentId =
-    openedUnder !== null &&
-    openedUnder.readerId === (userId ?? null) &&
-    findCommentInTree(comments, openedUnder.commentId)?.isDeleted === false
-      ? openedUnder.commentId
-      : null
+  // The comment the reply was opened under as this thread holds it now, while the reply is the reader's
+  const answered =
+    openedUnder !== null && openedUnder.readerId === (userId ?? null)
+      ? findCommentInTree(comments, (comment) => commentKeyOf(comment) === openedUnder.commentKey)
+      : undefined
+
+  // The comment the reply answers, while it still stands
+  const repliedTo = answered?.isDeleted === false ? answered : null
+
+  // The id the replied-to comment has now
+  const commentId = repliedTo?.id ?? null
+
+  // The key the replied-to comment keeps through its edits
+  const commentKey = repliedTo === null ? null : commentKeyOf(repliedTo)
 
   // The draft of the open reply, kept for the reader under the comment it answers until it is sent or cancelled
   const [text, setText] = usePersistentDraft(
-    commentId === null ? null : commentDraftStorageKey(userId ?? null, target, commentId),
+    commentKey === null ? null : commentDraftStorageKey(userId ?? null, target, commentKey),
     ''
   )
 
@@ -106,9 +115,11 @@ export function useCommentReply({
 
   // A function which opens a reply under a comment, on whatever was written in it before, the cursor in it
   const open = useCallback(
-    (repliedTo: string) => {
+    (comment: CommentData) => {
       // Open the reply as the reader's, its editor on the page at once
-      flushSync(() => setOpenedUnder({ commentId: repliedTo, readerId: userId ?? null }))
+      flushSync(() =>
+        setOpenedUnder({ commentKey: commentKeyOf(comment), readerId: userId ?? null })
+      )
 
       // Put the cursor in the reply's editor, on opening alone, so an editor coming back onto the page later never
       // takes it
@@ -129,7 +140,7 @@ export function useCommentReply({
   // A function which posts the open reply
   const send = useCallback(async () => {
     // Nothing to send without an open reply holding some text
-    if (!hasValidContent(text) || commentId === null) return
+    if (!hasValidContent(text) || commentId === null || commentKey === null) return
 
     // Post the reply, which comes back as nothing when it never went out or failed, the failure told already
     const created = await createReply({
@@ -142,11 +153,11 @@ export function useCommentReply({
     if (created === undefined) return
 
     // Sent, so the reply closes, unless one was opened under another comment while it was on its way
-    setOpenedUnder((current) => (current?.commentId === commentId ? null : current))
+    setOpenedUnder((current) => (current?.commentKey === commentKey ? null : current))
 
     // The reply's draft goes too, by its own key, whatever reply is open by now
-    forgetPersistentDraft(commentDraftStorageKey(userId ?? null, target, commentId))
-  }, [text, commentId, createReply, setOpenedUnder, userId, target])
+    forgetPersistentDraft(commentDraftStorageKey(userId ?? null, target, commentKey))
+  }, [text, commentId, commentKey, createReply, setOpenedUnder, userId, target])
 
   // The open reply and the ways to change it
   return { commentId, text, setText, editorRef, open, cancel, send, isSending }

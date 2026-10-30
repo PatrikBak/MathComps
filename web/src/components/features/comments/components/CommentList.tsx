@@ -15,7 +15,7 @@ import { usePressCommentReaction } from '../hooks/use-press-comment-reaction'
 import { useUpdateComment } from '../hooks/use-update-comment'
 import { type CommentNewness, countNewComments, isNewComment } from '../model/comment-newness'
 import type { CommentReactionKind, CommentTarget } from '../services/comment-api-types'
-import { countAllComments, shouldHideComment } from '../utils/comment-utils'
+import { commentKeyOf, countAllComments, shouldHideComment } from '../utils/comment-utils'
 import { type CommentData, CommentItem } from './CommentItem'
 
 /**
@@ -133,7 +133,8 @@ export function CommentList({
     // Render the comment
     return (
       <CommentItem
-        key={comment.id}
+        // Kept through the comment's edits, which give it a new id, so an open reply's editor keeps the cursor
+        key={commentKeyOf(comment)}
         variant={variant}
         isNew={isNew}
         author={comment.author}
@@ -145,16 +146,16 @@ export function CommentList({
         viewerReaction={comment.viewerReaction}
         isDeleted={comment.isDeleted}
         showReactions={showReactions}
-        isCollapsed={collapsed.isCollapsed(comment.id)}
+        isCollapsed={collapsed.isCollapsed(comment)}
         replyCount={replyCount}
         hasNewReplies={hasNewReplies}
-        onToggleCollapse={() => collapsed.toggle(comment.id)}
+        onToggleCollapse={() => collapsed.toggle(comment)}
         onReply={
           // Replying is offered on a comment still standing, once there is somebody to sign it: a signed-in
           // user with a name
           comment.isDeleted || !isIdentityLoaded || !userId || !username
             ? undefined
-            : () => reply.open(comment.id)
+            : () => reply.open(comment)
         }
         onReact={
           // Reacting is offered on every comment but the reader's own

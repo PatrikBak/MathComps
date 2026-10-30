@@ -11,7 +11,7 @@ import type {
 } from '@/components/features/comments/services/comment-api-types'
 import {
   convertToCommentData,
-  saysNothingNew,
+  postsNothingNew,
 } from '@/components/features/comments/utils/comment-utils'
 import type { ApiResult } from '@/types/api'
 
@@ -109,27 +109,27 @@ export function parkDiscussions(
 }
 
 /**
- * Parks an answer of the read in the threads it may go into that it changes only in who reacted how and what was
- * deleted, so a reaction or a deletion shows as it comes. A thread the answer says anything new in is left as it is,
- * and so is one nothing holds yet.
+ * Parks an answer of the read in the threads it may go into that it changes only in what was edited, who reacted how
+ * and what was deleted, so an edit, a reaction or a deletion shows as it comes. A thread the answer posts anything new
+ * in is left as it is, and so is one nothing holds yet.
  *
  * @param queryClient - The cache the threads are held in.
  * @param readerId - Who is reading, whose threads they are.
  * @param read - The answer, with what stood as it set off.
  */
-export function parkReactionsAndDeletions(
+export function parkReactionsEditsAndDeletions(
   queryClient: QueryClient,
   readerId: string | null,
   read: DiscussionsRead
 ): void {
-  // Each thread the answer may go into that says nothing new over the held copy, as the answer found it
+  // Each thread the answer may go into that posts nothing new over the held copy, as the answer found it
   parkableThreads(queryClient, readerId, read)
     .filter(({ queryKey, comments }) => {
       // The reader's copy, absent while nothing holds it
       const held = queryClient.getQueryData<CommentDto[]>(queryKey)
 
-      // Held, and the answer saying nothing new over it
-      return held !== undefined && saysNothingNew(held, comments)
+      // Held, and the answer posting nothing new over it
+      return held !== undefined && postsNothingNew(held, comments)
     })
     .forEach(({ queryKey, comments }) => queryClient.setQueryData<CommentDto[]>(queryKey, comments))
 }

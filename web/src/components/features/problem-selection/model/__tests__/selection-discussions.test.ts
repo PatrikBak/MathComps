@@ -139,19 +139,23 @@ describe('threadKeyOf', () => {
 })
 
 describe('showTheSame', () => {
-  it('finds two lists the same when only their order, their times and who reacted how differ', () => {
+  it('finds two lists the same when only their order, their times, what was edited and who reacted how differ', () => {
     // Two threads as one copy holds them
     const asHeld = [
       { subject: PROBLEM, comment: comment('first', 1, [comment('reply', 2)]) },
       { subject: PAPER, comment: comment('second', 3) },
     ]
 
-    // The same two read back the other way round, a time rounded and a thumbs up given
+    // The same two read back the other way round, a time rounded, a thumbs up given, and the paper's comment edited
+    // under a new id
     const asRead = [
       {
         subject: PAPER,
         comment: {
           ...comment('second', 3),
+          id: 'second-edited',
+          content: 'second, reworded',
+          editedAt: new Date(Date.UTC(2026, 9, 4)).toISOString(),
           reactions: [{ userId: 'colleague', name: 'Colleague', kind: 'thumbsUp' as const }],
         },
       },
