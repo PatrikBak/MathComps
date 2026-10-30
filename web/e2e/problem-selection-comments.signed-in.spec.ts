@@ -1308,9 +1308,11 @@ test.describe("what is new in the pool's discussions", () => {
     await expect(countLineOf(page, 6)).toHaveText(lineText(6, 5), { timeout: SETTLE_TIMEOUT_MS })
 
     // Everybody else's comments, the reader's own left plain
-    expect((await newCommentTexts(page)).toSorted()).toEqual(
-      [OPENED_COMMENT.content, FIRST_REMARK, LATE_REPLY, PAPER_REMARK, GEOMETRY_REMARK].toSorted()
-    )
+    await expect
+      .poll(async () => (await newCommentTexts(page)).toSorted())
+      .toEqual(
+        [OPENED_COMMENT.content, FIRST_REMARK, LATE_REPLY, PAPER_REMARK, GEOMETRY_REMARK].toSorted()
+      )
 
     // The backend told once that each discussion the tab shows was seen up to its newest comment by somebody else
     await expect
@@ -1365,7 +1367,7 @@ test.describe("what is new in the pool's discussions", () => {
     await expect(countLineOf(page, 5)).toHaveText(lineText(5, 2), { timeout: SETTLE_TIMEOUT_MS })
 
     // The reply in the first problem's thread and the opened problem's comment, top to bottom
-    expect(await newCommentTexts(page)).toEqual([LATE_REPLY, OPENED_COMMENT.content])
+    await expect.poll(() => newCommentTexts(page)).toEqual([LATE_REPLY, OPENED_COMMENT.content])
   })
 
   test('keeps what was new through the visit, shows what waited behind the button, and drops the rest next visit', async ({
@@ -1406,7 +1408,7 @@ test.describe("what is new in the pool's discussions", () => {
 
     // What was new still new, the reply waiting
     await expect(whatsNew).toBeVisible()
-    expect(await newCommentTexts(page)).toEqual([LATE_REPLY, OPENED_COMMENT.content])
+    await expect.poll(() => newCommentTexts(page)).toEqual([LATE_REPLY, OPENED_COMMENT.content])
 
     // What waited, shown
     await whatsNew.click()
@@ -1424,7 +1426,7 @@ test.describe("what is new in the pool's discussions", () => {
 
     // Only the reply that arrived during the last visit still new
     await expect(countLineOf(page, 6)).toHaveText(lineText(6, 1), { timeout: SETTLE_TIMEOUT_MS })
-    expect(await newCommentTexts(page)).toEqual([COLLEAGUE_REPLY])
+    await expect.poll(() => newCommentTexts(page)).toEqual([COLLEAGUE_REPLY])
   })
 
   test("tells the backend nothing while the tab's own read is out, then marks seen what it brought", async ({
@@ -1482,7 +1484,7 @@ test.describe("what is new in the pool's discussions", () => {
 
     // The reply new for the rest of the visit
     await expect(countLineOf(page, 6)).toHaveText(lineText(6, 1))
-    expect(await newCommentTexts(page)).toEqual([COLLEAGUE_REPLY])
+    await expect.poll(() => newCommentTexts(page)).toEqual([COLLEAGUE_REPLY])
   })
 
   test("opens again on what the last visit marked seen, though the backend hasn't answered yet", async ({
@@ -1645,7 +1647,7 @@ test.describe("what is new in the pool's discussions", () => {
 
     // Zuzana's reply in, and new, though it is older than Martin's
     await expect(countLineOf(page, 7)).toHaveText(lineText(7, 1))
-    expect(await newCommentTexts(page)).toEqual([COLLEAGUE_REPLY])
+    await expect.poll(() => newCommentTexts(page)).toEqual([COLLEAGUE_REPLY])
   })
 
   test("opens a problem from the pool's discussions on the same marks, its own tab offering the eye", async ({
@@ -1686,11 +1688,9 @@ test.describe("what is new in the pool's discussions", () => {
 
     // The problem's thread not new there either
     await expect(countLineOf(page, 5)).toHaveText(lineText(5, 3), { timeout: SETTLE_TIMEOUT_MS })
-    expect(await newCommentTexts(page)).toEqual([
-      OPENED_COMMENT.content,
-      PAPER_REMARK,
-      GEOMETRY_REMARK,
-    ])
+    await expect
+      .poll(() => newCommentTexts(page))
+      .toEqual([OPENED_COMMENT.content, PAPER_REMARK, GEOMETRY_REMARK])
   })
 
   test("says no more that a problem's comments hold news once the pool's visit told the backend, the pool keeping them new", async ({
@@ -1854,11 +1854,9 @@ test.describe("what is new in the pool's discussions", () => {
 
     // The problem read on its page no longer new there
     await expect(countLineOf(page, 5)).toHaveText(lineText(5, 3))
-    expect(await newCommentTexts(page)).toEqual([
-      OPENED_COMMENT.content,
-      PAPER_REMARK,
-      GEOMETRY_REMARK,
-    ])
+    await expect
+      .poll(() => newCommentTexts(page))
+      .toEqual([OPENED_COMMENT.content, PAPER_REMARK, GEOMETRY_REMARK])
   })
 
   test('tells the backend nothing about a discussion opened in a browser tab out of sight, until it comes on screen', async ({
