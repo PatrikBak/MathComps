@@ -1,7 +1,6 @@
 import type { CommentData } from '@/components/features/comments/components/CommentItem'
 import { lastPostedByOthersAt } from '@/components/features/comments/model/comment-newness'
 import type { CommentThreadSeenDto } from '@/components/features/comments/services/comment-api-types'
-import { groupBy } from '@/components/shared/utils/collection-utils'
 
 import type { DiscussionTarget } from './selection-discussions'
 import type { DiscussionsSeenUpTo, SelectionDiscussionsSeen } from './selection-types'
@@ -247,7 +246,7 @@ export function seenWriteOf(
 ): DiscussionsSeenUpTo {
   // Each discussion shown, once, with when the newest comment it shows that can be new was posted, a discussion
   // showing none left out
-  const moments = [...groupBy(shown, ({ target }) => markKeyOf(target)).values()].flatMap(
+  const moments = [...Map.groupBy(shown, ({ target }) => markKeyOf(target)).values()].flatMap(
     (threads) => {
       // When the newest comment that can be new was posted, across every thread of the discussion
       const seenUpTo = lastPostedByOthersAt(

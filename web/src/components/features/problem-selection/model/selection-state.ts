@@ -1,5 +1,4 @@
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
-import { groupBy } from '@/components/shared/utils/collection-utils'
 import { type Locale, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
 import { STEPS_PER_POINT } from './rating-scale'
@@ -63,7 +62,7 @@ export function indexSelection(data: SelectionData): SelectionIndex {
   const proposalsById = new Map(data.proposals.map((proposal) => [proposal.id, proposal]))
 
   // The conversations under the proposal each was about, keeping the read's newest-first order
-  const conversationsByProposal = groupBy(
+  const conversationsByProposal = Map.groupBy(
     data.conversations,
     (conversation) => conversation.proposalId
   )

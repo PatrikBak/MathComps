@@ -1,7 +1,6 @@
 import Image from 'next/image'
 
 import { cn } from '@/components/shared/utils/css-utils'
-import { parseUrl } from '@/components/shared/utils/url-utils'
 
 /**
  * Props for the {@link UserAvatarImage} component.
@@ -41,7 +40,7 @@ const CLERK_IMAGE_HOST = 'img.clerk.com'
  */
 function sizedAvatarUrl(imageUrl: string, size: number): string {
   // The avatar's address, null when it isn't a valid one
-  const url = parseUrl(imageUrl)
+  const url = URL.parse(imageUrl)
 
   // Anything not Clerk's goes out as it came
   if (url?.hostname !== CLERK_IMAGE_HOST) return imageUrl

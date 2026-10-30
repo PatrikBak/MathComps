@@ -9,7 +9,6 @@ import path from 'path'
 import { parse as parseYaml } from 'yaml'
 
 import { validateMarkdown } from '../src/components/shared/components/rich-math-editor/utils/markdown-pipeline'
-import { groupBy } from '../src/components/shared/utils/collection-utils'
 import type { Locale } from '../src/i18n/i18n'
 import { SUPPORTED_LOCALES } from '../src/i18n/i18n'
 import type { MetaResult } from './preflight-draft-meta'
@@ -633,7 +632,7 @@ function collectDuplicateProposalNumbers(
   errors: VerdictError[]
 ): void {
   // The draft's problems grouped by the number their block names, those without a block under null
-  const byNumber = groupBy(problems, (problem) => problem.proposal?.number ?? null)
+  const byNumber = Map.groupBy(problems, (problem) => problem.proposal?.number ?? null)
 
   // Each number more than one problem names, with the problems naming it
   const sharing = Array.from(byNumber).filter(

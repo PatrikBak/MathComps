@@ -1,3 +1,6 @@
+// The built-ins a browser in package.json's browserslist lacks, in place before the app's own code runs
+import 'core-js/stable'
+
 import * as Sentry from '@sentry/nextjs'
 
 import { SENTRY_OPTIONS } from '@/lib/error-reporting/sentry-options'

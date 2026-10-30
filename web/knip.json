@@ -6,6 +6,9 @@
     "eslint-plugin-react",
     "eslint-plugin-react-hooks"
   ],
+  "babel": {
+    "config": [".babelrc"]
+  },
   "eslint": {
     "config": ["eslint.config.{js,mjs,cjs}"]
   },
