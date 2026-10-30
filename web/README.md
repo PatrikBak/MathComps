@@ -91,7 +91,7 @@ These credentials can be obtained from the [Cloudflare Dashboard](https://dash.c
 
 #### Error Reporting (Better Stack)
 
-`NEXT_PUBLIC_SENTRY_DSN` sends the site's errors, from the browser and the server, to a Better Stack Errors application over the Sentry protocol, the same way the API's `SENTRY_DSN` does. Unset, the SDK stays off. On Vercel it is set for Production only, and it is baked into the build, so a change takes a redeploy.
+`NEXT_PUBLIC_SENTRY_DSN` sends the site's errors, from the browser and the server, to a Better Stack Errors application over the Sentry protocol, the same way the API's `SENTRY_DSN` does. A browser error once Clerk has loaded, and one a route handler reports, name a signed-in user by Clerk id alone, the id the API's events carry, so one student's errors match between the website and the API. A page render's or a server action's names nobody. Unset, the SDK stays off. On Vercel it is set for Production only, and it is baked into the build, so a change takes a redeploy.
 
 **Other available variables (have good defaults):**
 

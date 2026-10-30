@@ -10,6 +10,7 @@ import { type ReactNode, Suspense } from 'react'
 
 import KatexSetup from '@/components/math/KatexSetup'
 import { AuthStoreSync } from '@/components/shared/auth/AuthStoreSync'
+import { ErrorTrackingUserSync } from '@/components/shared/auth/ErrorTrackingUserSync'
 import { JsonLd } from '@/components/shared/components/JsonLd'
 import { OfflineIndicator } from '@/components/shared/components/OfflineIndicator'
 import { PressTracker } from '@/components/shared/components/PressTracker'
@@ -138,6 +139,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             </QueryProvider>
             <ToastProvider />
             <AuthStoreSync />
+            <ErrorTrackingUserSync />
           </ClerkProvider>
         </Suspense>
       </body>

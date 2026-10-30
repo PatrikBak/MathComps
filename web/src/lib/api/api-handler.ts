@@ -71,7 +71,7 @@ export function withApiHandler(handler: ApiHandler): ApiHandler {
       if (error instanceof ApiError) {
         // A 5xx is ours to fix, so it is reported
         if (error.statusCode >= 500) {
-          reportError(error)
+          await reportError(error)
         }
 
         // Answer with the failure's own status and code
@@ -86,7 +86,7 @@ export function withApiHandler(handler: ApiHandler): ApiHandler {
       }
 
       // An unexpected failure is a bug, so it is reported
-      reportError(error)
+      await reportError(error)
 
       // Everything else is an unexpected server error
       return NextResponse.json(errorBody('SERVER_ERROR'), { status: 500 })
