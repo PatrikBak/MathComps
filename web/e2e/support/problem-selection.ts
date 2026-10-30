@@ -5,6 +5,7 @@ import type { CommentDto } from '@/components/features/comments/services/comment
 import type { ConversationDetail } from '@/components/features/conversation-review/model/conversation-detail'
 import type { StoredTurn } from '@/components/features/defense/model/defense-types'
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
+import { DETAIL_HEADING_ATTRIBUTE } from '@/components/features/problem-selection/hooks/use-open-detail'
 import type { ProposalTab } from '@/components/features/problem-selection/model/selection-routes'
 import {
   type Board,
@@ -1273,7 +1274,8 @@ export function tabRowOn(card: Locator, tab: ProposalTab, count: number, hasNews
 }
 
 /**
- * A problem's heading, which only its own page shows.
+ * A problem's heading on its own page. The pool laid out as its discussions heads the problem's thread with the same
+ * words, so the page's heading is told apart by its {@link DETAIL_HEADING_ATTRIBUTE}.
  *
  * @param page - The page.
  * @param proposal - The problem.
@@ -1281,8 +1283,10 @@ export function tabRowOn(card: Locator, tab: ProposalTab, count: number, hasNews
  * @returns The heading.
  */
 export function headingOf(page: Page, proposal: Proposal) {
-  // The page's only second-level heading naming the problem
-  return page.getByRole('heading', { level: 2, name: proposal.title })
+  // The second-level heading naming the problem that heads the problem's own page
+  return page
+    .getByRole('heading', { level: 2, name: proposal.title })
+    .and(page.locator(`[${DETAIL_HEADING_ATTRIBUTE.name}="${proposal.id}"]`))
 }
 
 /**
