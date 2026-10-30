@@ -53,7 +53,7 @@ export const POST = withApiHandler(async (request: NextRequest) => {
   } catch (error) {
     // A bad signature is most likely a signing secret changed at Clerk's end, and then nobody gets
     // their code, so it is reported
-    reportError(error)
+    await reportError(error)
 
     // Bad signature / event format
     throw new ApiError(400, 'VALIDATION_FAILED')

@@ -160,6 +160,9 @@ builder.WebHost.UseSentry(options =>
     });
 });
 
+// The caller's Clerk id on each error a request reports
+builder.Services.AddSingleton<ISentryEventProcessor, ClerkIdSentryEventProcessor>();
+
 // The database check makes /health mean the API can serve a request.
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<MathCompsDbContext>();

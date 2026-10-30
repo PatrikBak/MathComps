@@ -1,3 +1,4 @@
+import { auth } from '@clerk/nextjs/server'
 import * as Sentry from '@sentry/nextjs'
 import { NextRequest } from 'next/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -35,9 +36,22 @@ function answerTo(error: unknown) {
   return route(new NextRequest('http://localhost/api/anything'))
 }
 
+/**
+ * Makes Clerk read the request as coming from the given user.
+ *
+ * @param userId - The caller's Clerk id, null for a visitor.
+ */
+function signInAs(userId: string | null) {
+  // Only the id is read, so the rest of Clerk's answer stays out
+  vi.mocked(auth).mockResolvedValue({ userId } as Awaited<ReturnType<typeof auth>>)
+}
+
 beforeEach(() => {
   // Each test reads only its own reports
   vi.mocked(Sentry.captureException).mockClear()
+
+  // A visitor, unless a test signs someone in
+  signInAs(null)
 
   // Keep a report's log line out of the test output
   vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -62,7 +76,7 @@ describe('withApiHandler', () => {
 
     // The status survives, and the failure reaches error tracking
     expect(response.status).toBe(502)
-    expect(Sentry.captureException).toHaveBeenCalledWith(failure)
+    expect(Sentry.captureException).toHaveBeenCalledWith(failure, undefined)
   })
 
   it('reports an unexpected failure and answers 500', async () => {
@@ -74,6 +88,20 @@ describe('withApiHandler', () => {
 
     // It answers as a server error and reaches error tracking
     expect(response.status).toBe(500)
-    expect(Sentry.captureException).toHaveBeenCalledWith(fault)
+    expect(Sentry.captureException).toHaveBeenCalledWith(fault, undefined)
+  })
+
+  it('names a signed-in caller on the report by Clerk id alone', async () => {
+    // A student hitting a fault
+    signInAs('user_student')
+
+    // A fault nobody planned for
+    const fault = new Error('boom')
+
+    // The route runs into the fault
+    await answerTo(fault)
+
+    // The report carries the id and nothing else about the student
+    expect(Sentry.captureException).toHaveBeenCalledWith(fault, { user: { id: 'user_student' } })
   })
 })
