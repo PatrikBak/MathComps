@@ -1,0 +1,10 @@
+{
+  // Next.js compiles everything with SWC, which rewrites syntax but adds no missing built-ins. This pass narrows
+  // an import of core-js/stable to the built-ins a browser in package.json's browserslist lacks, such as
+  // Array.prototype.toSorted for Chrome 109, the last Chrome on Windows 7 and 8.1.
+  "presets": ["next/babel"],
+  "plugins": [
+    // The installed core-js release, since the plugin includes no polyfill newer than it
+    ["polyfill-corejs3", { "method": "entry-global", "version": "3.51" }]
+  ]
+}

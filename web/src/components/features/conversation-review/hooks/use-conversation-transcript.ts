@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 
 import { indexReports } from '@/components/features/defense/model/defense-conversation-model'
 import type { DefenseTurnReport } from '@/components/features/defense/model/defense-types'
-import { groupBy } from '@/components/shared/utils/collection-utils'
 
 import type { ConversationDetail, DefenseTurnAttempt } from '../model/conversation-detail'
 import { resolveTurnDurationsMs } from '../model/turn-durations'
@@ -40,7 +39,7 @@ export function useConversationTranscript(
 
   // The drafts kept per reply
   const attemptsByTurn = useMemo(
-    () => groupBy(conversation.attempts, (attempt) => attempt.turnId),
+    () => Map.groupBy(conversation.attempts, (attempt) => attempt.turnId),
     [conversation.attempts]
   )
 
