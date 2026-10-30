@@ -13,9 +13,9 @@ describe('commentDraftStorageKey', () => {
       'comment-draft:user_2abc:Proposal:proposal-4'
     )
 
-    // A reply in the same thread, kept apart under the comment it answers
-    expect(commentDraftStorageKey('user_2abc', THREAD, 'comment-7')).toBe(
-      'comment-draft:user_2abc:Proposal:proposal-4:reply:comment-7'
+    // A reply in the same thread, kept apart under the key of the comment it answers
+    expect(commentDraftStorageKey('user_2abc', THREAD, 'user_zuzana:1790000000000')).toBe(
+      'comment-draft:user_2abc:Proposal:proposal-4:reply:user_zuzana:1790000000000'
     )
   })
 })

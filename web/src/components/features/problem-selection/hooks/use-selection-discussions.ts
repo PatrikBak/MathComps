@@ -25,7 +25,7 @@ import { getDiscussions } from '../services/selection-service'
 import {
   discussionsQueryKey,
   parkDiscussions,
-  parkReactionsAndDeletions,
+  parkReactionsEditsAndDeletions,
   readDiscussions,
   threadsAfterParking,
 } from './discussion-cache'
@@ -79,11 +79,11 @@ export type UseSelectionDiscussionsResult = {
  *
  * A stay runs from the discussions being asked for until they are let go, time spent hidden included. It opens on
  * what an earlier stay left in the threads, and its first read goes into them as it lands, so the discussions show
- * at once and are shown afresh a moment later. Every later read waits until the reader asks for
- * it, so nothing new anybody else says moves what is on screen. The reader's own writes show at once, and so do
- * others' reactions and deletions, which say nothing new. Once the reader's writes have all settled, the discussions
- * are read again at once: a read out while one was made can't tell what others said in its thread from what the
- * reader did, so what is new waits to be told until that read lands.
+ * at once and are shown afresh a moment later. Anything newly posted that a later read brings waits until the reader
+ * asks for it, so nothing new anybody else posts moves what is on screen. The reader's own writes show at once, and
+ * so do others' edits, reactions and deletions, which post nothing new. Once the reader's writes have all settled,
+ * the discussions are read again at once: a read out while one was made can't tell what others said in its thread
+ * from what the reader did, so what is new waits to be told until that read lands.
  *
  * @param options - {@link UseSelectionDiscussionsOptions}.
  *
@@ -122,8 +122,9 @@ export function useSelectionDiscussions({
         // The showing counted
         setShowings((count) => count + 1)
       } else if (result.success) {
-        // A later read's reactions and deletions shown as it lands, anything new said in it waiting to be asked for
-        parkReactionsAndDeletions(queryClient, readerId, result.data)
+        // A later read's edits, reactions and deletions shown as it lands, anything new posted in it waiting to be
+        // asked for
+        parkReactionsEditsAndDeletions(queryClient, readerId, result.data)
       }
 
       // The read

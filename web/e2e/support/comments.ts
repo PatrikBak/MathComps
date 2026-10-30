@@ -240,10 +240,51 @@ export function stubPageThread(
   fails?: (write: CommentWrite) => boolean
 ): Promise<() => CommentWrite[]> {
   // The fake, seeded with the handout's thread
-  return stubComments(page, new Map([[threadKey('Handout', threadHandout().id), comments]]), {
+  return stubComments(page, new Map([[pageThreadKey(), comments]]), {
     threadTypes: ['Handout'],
     fails,
   })
+}
+
+/**
+ * Changes what the backend keeps for {@link threadPage}'s thread, as somebody else writing into it meanwhile would.
+ *
+ * @param changed - The thread's comments as they read after the change, given them as they read before it.
+ */
+export type ChangePageThread = (changed: (comments: CommentDto[]) => CommentDto[]) => void
+
+/**
+ * Stands in for the backend behind every handout's thread, as {@link stubPageThread} does, for a test in which
+ * somebody else changes {@link threadPage}'s thread while the reader has it open.
+ *
+ * @param page - The page to answer the thread's calls on.
+ * @param comments - The thread's comments, oldest first, replies nested.
+ *
+ * @returns The way to change the thread.
+ */
+export async function stubChangingPageThread(
+  page: Page,
+  comments: CommentDto[]
+): Promise<ChangePageThread> {
+  // Where the backend keeps the thread, and what it keeps
+  const key = pageThreadKey()
+  const threads = new Map([[key, comments]])
+
+  // The fake, seeded with the handout's thread
+  await stubComments(page, threads, { threadTypes: ['Handout'] })
+
+  // A function which changes the thread as somebody else writing meanwhile would
+  return (changed) => threads.set(key, changed(threads.get(key) ?? []))
+}
+
+/**
+ * Where the backend keeps {@link threadPage}'s thread.
+ *
+ * @returns The thread's {@link threadKey}.
+ */
+function pageThreadKey(): string {
+  // The handout's thread
+  return threadKey('Handout', threadHandout().id)
 }
 
 /**

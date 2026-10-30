@@ -17,6 +17,7 @@ import {
   READER_ID,
   READER_NAME,
   sendComment,
+  stubChangingPageThread,
   stubNamedReader,
   stubPageThread,
   threadPage,
@@ -36,6 +37,9 @@ const SETTLE_TIMEOUT_MS = 30_000
 
 /** What a comment by somebody other than the reader says. */
 const THEIR_TEXT = 'The third problem falls to induction.'
+
+/** What the comment saying {@link THEIR_TEXT} says once its author edits it. */
+const THEIR_EDITED_TEXT = 'The third problem falls to a parity argument.'
 
 /** What the reader's own comment says. */
 const OWN_TEXT = 'Strong induction is needed here.'
@@ -90,6 +94,19 @@ function theirComment(): CommentDto {
 function ownComment(): CommentDto {
   // Written by the reader
   return commentFrom(READER_ID, READER_NAME, OWN_TEXT)
+}
+
+/**
+ * A comment as its author's edit leaves it: a new version under an id of its own, posted when the comment was.
+ *
+ * @param edited - The comment.
+ * @param content - What it says now.
+ *
+ * @returns The new version.
+ */
+function rewritten(edited: CommentDto, content: string): CommentDto {
+  // The comment under a new id, saying what it says now, edited just now
+  return { ...edited, id: crypto.randomUUID(), content, editedAt: new Date().toISOString() }
 }
 
 /**
@@ -514,7 +531,88 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     await expect(page.getByPlaceholder(commentsCopy.replyPlaceholder)).toHaveValue(REPLY_TEXT)
   })
 
-  test("unfolds the replies of the reader's own comment once an edit of it is saved", async ({
+  test("keeps a reply open on its text, the cursor in it, under somebody else's comment they edit meanwhile", async ({
+    page,
+  }) => {
+    // The clock under the test's hand, so the next read comes when the test says
+    await page.clock.install()
+
+    // Zuzana's comment, alone in the thread, which she edits midway
+    const changeThread = await stubChangingPageThread(page, [theirComment()])
+
+    // The thread's page, opened
+    await openThread(page, THEIR_TEXT)
+
+    // A reply, opened under Zuzana's comment
+    await commentBy(page, 'Zuzana', THEIR_TEXT)
+      .getByRole('button', { name: commentsCopy.reply })
+      .click()
+
+    // The box the reply is written in
+    const replyBox = page.getByPlaceholder(commentsCopy.replyPlaceholder)
+
+    // Half written
+    await replyBox.fill(REPLY_TEXT)
+
+    // Zuzana's comment edited meanwhile, which gives it a new id
+    changeThread((comments) => comments.map((posted) => rewritten(posted, THEIR_EDITED_TEXT)))
+
+    // Long enough for the open thread to be read again
+    await page.clock.fastForward('00:31')
+
+    // Zuzana's comment as it reads now, marked as edited
+    await expect(commentBy(page, 'Zuzana', THEIR_EDITED_TEXT)).toContainText(commentsCopy.edited)
+
+    // The reply still open on what was written in it, the cursor still in it
+    await expect(replyBox).toHaveValue(REPLY_TEXT)
+    await expect(replyBox).toBeFocused()
+
+    // The page read afresh
+    await page.reload()
+
+    // The reply opened again under Zuzana's comment as it reads now
+    await commentBy(page, 'Zuzana', THEIR_EDITED_TEXT)
+      .getByRole('button', { name: commentsCopy.reply })
+      .click()
+
+    // On the draft kept for the comment
+    await expect(replyBox).toHaveValue(REPLY_TEXT)
+  })
+
+  test("keeps the replies of somebody else's comment folded through their edit of it", async ({
+    page,
+  }) => {
+    // The clock under the test's hand, so the next read comes when the test says
+    await page.clock.install()
+
+    // Zuzana's comment, which Martin answered, and which she edits midway
+    const changeThread = await stubChangingPageThread(page, [
+      { ...theirComment(), replies: [commentFrom('user_martin', 'Martin', MARTIN_TEXT)] },
+    ])
+
+    // The thread's page, opened
+    await openThread(page, THEIR_TEXT)
+
+    // The comment's replies folded away
+    await page.getByRole('button', { name: commentsCopy.hideReplies }).click()
+
+    // Martin's reply out of sight
+    await expect(page.getByText(MARTIN_TEXT)).toBeHidden()
+
+    // Zuzana's comment edited meanwhile, which gives it a new id
+    changeThread((comments) => comments.map((posted) => rewritten(posted, THEIR_EDITED_TEXT)))
+
+    // Long enough for the open thread to be read again
+    await page.clock.fastForward('00:31')
+
+    // Zuzana's comment as it reads now
+    await expect(page.getByText(THEIR_EDITED_TEXT)).toBeVisible()
+
+    // Martin's reply still folded away
+    await expect(page.getByText(MARTIN_TEXT)).toBeHidden()
+  })
+
+  test("keeps the replies of the reader's own comment folded through an edit of it", async ({
     page,
   }) => {
     // The reader's comment, which Zuzana answered
@@ -540,11 +638,20 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // Rewritten
     await box.fill(EDITED_TEXT)
 
-    // And saved from the keyboard
+    // And saved from the keyboard, which gives it a new id
     await box.press('Meta+Enter')
 
-    // The comment's new version showing its replies
-    await expect(page.getByText(THEIR_TEXT)).toBeVisible()
+    // Saying what it says now, marked as edited
+    await expect(commentBy(page, READER_NAME, EDITED_TEXT)).toContainText(commentsCopy.edited)
+
+    // The box gone once the backend took the edit, its new id in the thread by then
+    await expect(box).toHaveCount(0)
+
+    // Long enough for the new id to have reached the screen
+    await page.waitForTimeout(LANDING_WINDOW_MS)
+
+    // Zuzana's reply still folded away
+    await expect(page.getByText(THEIR_TEXT)).toBeHidden()
   })
 
   test('keeps an edit open when saving it fails', async ({ page }) => {

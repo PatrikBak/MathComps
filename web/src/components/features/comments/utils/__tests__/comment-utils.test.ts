@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { CommentDto, CommentReactionDto } from '../../services/comment-api-types'
-import { pressReaction, saysNothingNew, shouldHideComment } from '../comment-utils'
+import { postsNothingNew, pressReaction, shouldHideComment } from '../comment-utils'
 
 /** Another reader's thumbs-up, there before anybody presses anything. */
 const MARTIN_UP: CommentReactionDto = { userId: 'user_martin', name: 'Martin', kind: 'thumbsUp' }
@@ -66,8 +66,8 @@ describe('shouldHideComment', () => {
   })
 })
 
-describe('saysNothingNew', () => {
-  it('treats an edit as news and a deletion after it as none, matching the comment across its new id', () => {
+describe('postsNothingNew', () => {
+  it('treats an edit and a deletion after it as no news, matching the comment across its new id', () => {
     // Zuzana's comment as she edited it, saved under a new id
     const edited = {
       ...POSTED,
@@ -79,11 +79,11 @@ describe('saysNothingNew', () => {
     // Zuzana's comment as she then deleted it
     const deleted = { ...edited, content: '', isDeleted: true }
 
-    // The edited comment is news
-    expect(saysNothingNew([POSTED], [edited])).toBe(false)
+    // The edited comment is no news
+    expect(postsNothingNew([POSTED], [edited])).toBe(true)
 
     // The same comment deleted after its edit is no news
-    expect(saysNothingNew([POSTED], [deleted])).toBe(true)
+    expect(postsNothingNew([POSTED], [deleted])).toBe(true)
   })
 
   it('treats a deleted comment as news when its author or posting time differs from the one it replaces', () => {
@@ -106,9 +106,9 @@ describe('saysNothingNew', () => {
     }
 
     // Martin's deleted comment where Zuzana's stood is news
-    expect(saysNothingNew([POSTED], [martins])).toBe(false)
+    expect(postsNothingNew([POSTED], [martins])).toBe(false)
 
     // Zuzana's later deleted comment where her first stood is news
-    expect(saysNothingNew([POSTED], [hersLater])).toBe(false)
+    expect(postsNothingNew([POSTED], [hersLater])).toBe(false)
   })
 })

@@ -81,6 +81,9 @@ const READER_COMMENT = 'On second thought, it fits the intermediate paper.'
 /** What Martin says in {@link GEOMETRY}'s discussion, its oldest comment. */
 const GEOMETRY_REMARK = 'A lovely configuration.'
 
+/** What Martin's comment in {@link GEOMETRY}'s discussion says once he edits it. */
+const GEOMETRY_REMARK_EDITED = 'A known configuration, sadly.'
+
 /** What Zuzana says in {@link GEOMETRY}'s discussion beside Martin's comment. */
 const SECOND_REMARK = 'The second part could stand alone.'
 
@@ -717,6 +720,53 @@ test.describe("the pool's discussions", () => {
 
     // The geometry problem's thread gone
     await expect(threadHeadings(page)).toHaveCount(3)
+    await expect(page.getByText(GEOMETRY_REMARK)).toHaveCount(0)
+
+    // No button over a read that brought nothing else
+    await expect(page.getByRole('button', { name: selectionCopy.pool.showWhatsNew })).toHaveCount(0)
+  })
+
+  test('takes what others edit at once, with nothing waiting behind a button', async ({ page }) => {
+    // What the backend keeps, which the test changes midway
+    const memory = discussedSelection()
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // Once every thread is drawn
+    await expect(threadHeadings(page)).toHaveCount(4, { timeout: SETTLE_TIMEOUT_MS })
+
+    // Where the backend keeps the geometry problem's discussion
+    const geometryKey = threadKey('Proposal', GEOMETRY.id)
+
+    // Martin's comment on the geometry problem, edited meanwhile, which gives it a new id
+    memory.discussions.set(
+      geometryKey,
+      (memory.discussions.get(geometryKey) ?? []).map((posted) => ({
+        ...posted,
+        id: `${posted.id}-edited`,
+        content: GEOMETRY_REMARK_EDITED,
+        editedAt: '2026-10-03T08:00:00.000Z',
+      }))
+    )
+
+    // The first problem, opened from its thread's heading
+    await threadOf(page, FIRST).getByRole('link').first().click()
+
+    // The first problem's own page
+    await expect(headingOf(page, FIRST)).toBeVisible()
+
+    // Back to the pool, which reads the discussions again
+    await page.goBack()
+
+    // Martin's comment as it reads now, marked as edited
+    await expect(threadOf(page, GEOMETRY)).toContainText(GEOMETRY_REMARK_EDITED)
+    await expect(threadOf(page, GEOMETRY)).toContainText(commentsCopy.edited)
+
+    // What it said before, gone
     await expect(page.getByText(GEOMETRY_REMARK)).toHaveCount(0)
 
     // No button over a read that brought nothing else

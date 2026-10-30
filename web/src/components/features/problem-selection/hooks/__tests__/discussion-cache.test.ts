@@ -1,5 +1,6 @@
 // The discussions' read: which comment threads an answer is parked in, which it leaves to the writes that moved them
-// while it was out, which take only its reactions and deletions, and what each thread would read once it is parked.
+// while it was out, which take only its edits, reactions and deletions, and what each thread would read once it is
+// parked.
 
 import { type MutationKey, QueryClient } from '@tanstack/react-query'
 import { describe, expect, it } from 'vitest'
@@ -17,7 +18,7 @@ import type { SelectionDiscussions } from '../../model/selection-types'
 import {
   type DiscussionsRead,
   parkDiscussions,
-  parkReactionsAndDeletions,
+  parkReactionsEditsAndDeletions,
   readDiscussions,
   threadsAfterParking,
 } from '../discussion-cache'
@@ -271,23 +272,29 @@ describe('parkDiscussions', () => {
   })
 })
 
-describe('parkReactionsAndDeletions', () => {
-  it('parks a thread the answer changes only in who reacted how and what was deleted', async () => {
-    // The reader's copy of the problem's thread, and a read finding a colleague's thumbs up on one comment and the
-    // other deleted
+describe('parkReactionsEditsAndDeletions', () => {
+  it('parks a thread the answer changes only in what was edited, who reacted how and what was deleted', async () => {
+    // The reader's copy of the problem's thread, and a read finding a colleague's thumbs up on one comment, another
+    // deleted, and the last edited under a new id
     const queryClient = new QueryClient()
-    hold(queryClient, PROBLEM, [comment('question'), comment('aside')])
+    hold(queryClient, PROBLEM, [comment('question'), comment('aside'), comment('remark')])
     await aMomentLater()
     const changed = [
       thumbedUp(comment('question')),
       { ...comment('aside'), isDeleted: true, content: '' },
+      {
+        ...comment('remark'),
+        id: 'remark-edited',
+        content: 'remark, reworded',
+        editedAt: '2026-10-17T10:00:00Z',
+      },
     ]
     const read = await readOf(queryClient, discussionsOf(changed))
 
     // Parked
-    parkReactionsAndDeletions(queryClient, READER, read)
+    parkReactionsEditsAndDeletions(queryClient, READER, read)
 
-    // The thumbs up in, the other comment deleted
+    // The thumbs up in, the second comment deleted, the last one as it reads now
     expect(threadIn(queryClient, PROBLEM)).toEqual(changed)
   })
 
@@ -301,7 +308,7 @@ describe('parkReactionsAndDeletions', () => {
     )
 
     // Parked
-    parkReactionsAndDeletions(queryClient, READER, read)
+    parkReactionsEditsAndDeletions(queryClient, READER, read)
 
     // The thumbs up kept
     expect(threadIn(queryClient, PROBLEM)).toEqual([thumbedUp(comment('question'))])
@@ -321,7 +328,7 @@ describe('parkReactionsAndDeletions', () => {
     )
 
     // Parked
-    parkReactionsAndDeletions(queryClient, READER, read)
+    parkReactionsEditsAndDeletions(queryClient, READER, read)
 
     // The problem's thread as the reader had it, the paper's still not held
     expect(threadIn(queryClient, PROBLEM)).toEqual([comment('question')])

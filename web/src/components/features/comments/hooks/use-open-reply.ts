@@ -7,8 +7,8 @@ import { create } from 'zustand'
  * A reply open under a comment.
  */
 type OpenReply = {
-  /** The comment it answers. */
-  commentId: string
+  /** The key of the comment it answers, which the comment keeps through its edits. */
+  commentKey: string
   /** The reader who opened it. */
   readerId: string | null
 }

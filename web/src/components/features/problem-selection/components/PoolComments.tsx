@@ -50,11 +50,11 @@ type PoolCommentsProps = {
 /**
  * The reviewers' discussions of everything the selection holds as one list: every top-level comment with its
  * replies, each under a heading opening its problem or paper on the discussion, every thread {@link usePoolThreads}
- * gives. Anything new anybody else says while the list is open waits behind a button, so it never moves the list
- * under the reader. The reader's own writes show at once, and so do others' reactions and deletions. A problem opened
- * from the list and closed again finds it as it was left. The line over the pool says how many comments the threads
- * hold, that they are on their way, or that they are not to be had. While some comments are new to the reader, it
- * says how many, with the eye marking them seen.
+ * gives. Anything new anybody else posts while the list is open waits behind a button, so it never moves the list
+ * under the reader. The reader's own writes show at once, and so do others' edits, reactions and deletions. A problem
+ * opened from the list and closed again finds it as it was left. The line over the pool says how many comments the
+ * threads hold, that they are on their way, or that they are not to be had. While some comments are new to the
+ * reader, it says how many, with the eye marking them seen.
  */
 export function PoolComments({ countSlot }: PoolCommentsProps) {
   // Pool copy

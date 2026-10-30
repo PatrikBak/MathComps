@@ -4,34 +4,39 @@ import { useCallback, useState } from 'react'
 
 import { toggleSetItem } from '@/components/shared/utils/collection-utils'
 
+import type { CommentData } from '../components/CommentItem'
+import { commentKeyOf } from '../utils/comment-utils'
+
 /**
  * What {@link useCollapsedComments} hands back.
  */
 export type UseCollapsedCommentsResult = {
   /** Whether a comment's replies are folded away. */
-  isCollapsed: (commentId: string) => boolean
+  isCollapsed: (comment: CommentData) => boolean
   /** Folds a comment's replies away, or opens them back up. */
-  toggle: (commentId: string) => void
+  toggle: (comment: CommentData) => void
 }
 
 /**
- * Which comments have their replies folded away, every one open at first.
+ * Which comments have their replies folded away, every one open at first. A comment stays folded through its edits,
+ * which save it under a new id.
  *
  * @returns Whether each comment is folded, and the way to fold or open one.
  */
 export function useCollapsedComments(): UseCollapsedCommentsResult {
-  // The comments whose replies are folded away
-  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set())
+  // The keys of the comments whose replies are folded away
+  const [collapsedKeys, setCollapsedKeys] = useState<Set<string>>(new Set())
 
   // A function which says whether a comment's replies are folded away
   const isCollapsed = useCallback(
-    (commentId: string) => collapsedIds.has(commentId),
-    [collapsedIds]
+    (comment: CommentData) => collapsedKeys.has(commentKeyOf(comment)),
+    [collapsedKeys]
   )
 
   // A function which folds a comment's replies away, or opens them back up
   const toggle = useCallback(
-    (commentId: string) => setCollapsedIds((previous) => toggleSetItem(previous, commentId)),
+    (comment: CommentData) =>
+      setCollapsedKeys((previous) => toggleSetItem(previous, commentKeyOf(comment))),
     []
   )
 
