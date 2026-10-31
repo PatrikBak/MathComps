@@ -65,8 +65,9 @@ function resolveListClassName(className: string | undefined, defaultMarker: stri
   // Use the custom marker class when present, otherwise fall back to the default
   const markerClass = isCustomStyle ? className : defaultMarker
 
-  // Combine the marker class with the shared list layout classes
-  return `${markerClass} list-inside my-2 space-y-1`
+  // Combine the marker class with the shared list layout classes. A list nested in an item gets
+  // its own indent and the same gap as between items.
+  return `${markerClass} list-inside my-2 space-y-1 [li>&]:my-1 [li>&]:pl-[1.25em]`
 }
 
 /**
