@@ -15,10 +15,12 @@ export const SENTRY_OPTIONS: Parameters<typeof init>[0] = {
 
   // A student's IP and cookies stay out of every event. Without user info the SDK drops
   // every header carrying the IP, and Vercel's location headers, which place a visitor almost as well,
-  // are filtered by their shared prefix.
+  // are filtered by their shared prefix. Vercel's cache header is filtered by name, since it
+  // holds a bearer token for the deployment's cache and the SDK masks only headers whose names
+  // look secret.
   dataCollection: {
     userInfo: false,
     cookies: false,
-    httpHeaders: { request: { deny: ['x-vercel-ip-'] } },
+    httpHeaders: { request: { deny: ['x-vercel-ip-', 'x-vercel-sc-headers'] } },
   },
 }
