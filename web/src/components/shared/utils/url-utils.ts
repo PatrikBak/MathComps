@@ -133,7 +133,8 @@ export function pushQuery(query: string): void {
 
 /**
  * The address's query with one writer's parameters set to what it says now, for an address several writers share.
- * Every parameter the writer doesn't own stays as it stands.
+ * Every parameter the writer doesn't own stays as it stands. An address already carrying the writer's parameters as
+ * it says them comes back unchanged, its order included.
  *
  * @param query - What the writer says now, as a query string without its `?`.
  * @param ownedParams - Every parameter the writer owns; one the query leaves out is left out of the result.
@@ -144,11 +145,20 @@ export function mergeOwnedParams(query: string, ownedParams: readonly string[]):
   // The query as it stands
   const merged = new URLSearchParams(window.location.search)
 
+  // What the writer says now
+  const said = new URLSearchParams(query)
+
+  // The writer's parameters as the address carries them, in the address's order
+  const carried = new URLSearchParams([...merged].filter(([param]) => ownedParams.includes(param)))
+
+  // An address already saying what the writer says stays exactly as it stands
+  if (carried.toString() === said.toString()) return merged.toString()
+
   // Without the writer's own parameters
   ownedParams.forEach((param) => merged.delete(param))
 
   // The writer's parameters, as it says them now
-  new URLSearchParams(query).forEach((value, param) => merged.append(param, value))
+  said.forEach((value, param) => merged.append(param, value))
 
   // The query to put on the address
   return merged.toString()
