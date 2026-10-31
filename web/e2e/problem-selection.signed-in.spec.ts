@@ -800,14 +800,14 @@ test.describe("the selection's address and history", () => {
   test("closes a problem's hints when history moves off the pool, however soon it comes back", async ({
     page,
   }) => {
-    // A reviewer on a slow phone
-    await slowDown(page)
-
-    // Whose selection holds a pool of problems
+    // A reviewer whose selection holds a pool of problems
     await stubSelection(page, 'selection')
 
     // A problem opened from the pool
     await openFromPool(page)
+
+    // On a slow phone from here on, through every step in history
+    await slowDown(page)
 
     // And Back, so there is a step to go Forward to
     await page.goBack()
