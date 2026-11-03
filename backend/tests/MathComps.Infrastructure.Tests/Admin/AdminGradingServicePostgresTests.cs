@@ -516,7 +516,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
         // Then a comment on its own
         var grade = await service.UpdateGradeAsync(
-            _graderId, _advancedFirstId, _aliceId, new UpdateGradeRequest(null, null, "Clean second half.", null));
+            _graderId, _advancedFirstId, _aliceId, new UpdateGradeRequest(InternalComment: "Clean second half."));
 
         // Handed back
         Assert.NotNull(grade);
@@ -587,7 +587,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
         // An empty comment where nobody has graded Bob on the second problem
         var nothing = await service.UpdateGradeAsync(
-            _graderId, _advancedSecondId, _bobId, new UpdateGradeRequest(null, null, string.Empty, null));
+            _graderId, _advancedSecondId, _bobId, new UpdateGradeRequest(InternalComment: string.Empty));
 
         // Still no grade to hand back
         Assert.Null(nothing);
@@ -604,7 +604,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Five, three of them from the examiner
         await service.UpdateGradeAsync(
-            _graderId, _advancedFirstId, _aliceId, new UpdateGradeRequest(new GradeMarkChange(5), 3, null, null));
+            _graderId, _advancedFirstId, _aliceId, new UpdateGradeRequest(new GradeMarkChange(5), 3));
 
         // The mark lowered to two
         var grade = await service.UpdateGradeAsync(_graderId, _advancedFirstId, _aliceId, WithMark(2));
@@ -669,21 +669,21 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
         // Help below nothing
         await Assert.ThrowsAsync<HostedGradeValueException>(
-            () => Change(new UpdateGradeRequest(new GradeMarkChange(2), -1, null, null)));
+            () => Change(new UpdateGradeRequest(new GradeMarkChange(2), -1)));
 
         // Help beyond the mark sent with it
         await Assert.ThrowsAsync<HostedGradeValueException>(
-            () => Change(new UpdateGradeRequest(new GradeMarkChange(2), 3, null, null)));
+            () => Change(new UpdateGradeRequest(new GradeMarkChange(2), 3)));
 
         // Help without a mark
-        await Assert.ThrowsAsync<HostedGradeValueException>(() => Change(new UpdateGradeRequest(null, 1, null, null)));
+        await Assert.ThrowsAsync<HostedGradeValueException>(() => Change(new UpdateGradeRequest(Help: 1)));
 
         // Settling no mark
         await Assert.ThrowsAsync<HostedGradeValueException>(
             () => Change(new UpdateGradeRequest(null, null, null, true)));
 
         // Help of nothing without a mark passes, as a change that moves nothing
-        Assert.Null(await Change(new UpdateGradeRequest(null, 0, null, null)));
+        Assert.Null(await Change(new UpdateGradeRequest(Help: 0)));
 
         // None of those changes wrote a version
         Assert.Equal(0, await CountGradeRowsAsync());
@@ -692,7 +692,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         await Change(WithMark(2));
 
         // Help beyond the standing two is refused
-        await Assert.ThrowsAsync<HostedGradeValueException>(() => Change(new UpdateGradeRequest(null, 3, null, null)));
+        await Assert.ThrowsAsync<HostedGradeValueException>(() => Change(new UpdateGradeRequest(Help: 3)));
 
         // The two's version is the only one written
         Assert.Equal(1, await CountGradeRowsAsync());
@@ -881,7 +881,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
             // A comment sent meanwhile, left waiting on the entry
             var waiting = service.UpdateGradeAsync(
-                _graderId, _advancedFirstId, _aliceId, new UpdateGradeRequest(null, null, "Late.", null));
+                _graderId, _advancedFirstId, _aliceId, new UpdateGradeRequest(InternalComment: "Late."));
 
             // Wait until the comment is queued behind the held entry
             await WaitForLockWaiterAsync();
@@ -929,7 +929,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     {
         // A mark and a comment for Alice's first problem
         await service.UpdateGradeAsync(
-            _graderId, _advancedFirstId, _aliceId, new UpdateGradeRequest(new GradeMarkChange(4), 1, "Neat.", null));
+            _graderId, _advancedFirstId, _aliceId, new UpdateGradeRequest(new GradeMarkChange(4), 1, "Neat."));
 
         // A mark for Bob's second
         await service.UpdateGradeAsync(_graderId, _advancedSecondId, _bobId, WithMark(3));
@@ -968,7 +968,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Only a comment for Alice's first problem
         await service.UpdateGradeAsync(
-            _graderId, _advancedFirstId, _aliceId, new UpdateGradeRequest(null, null, "Look again.", null));
+            _graderId, _advancedFirstId, _aliceId, new UpdateGradeRequest(InternalComment: "Look again."));
 
         // The problem made final with her listed
         var unmarked = await service.FinalizeGradesAsync(_graderId, _advancedFirstId, [_aliceId]);
@@ -1253,7 +1253,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     /// </summary>
     /// <param name="mark">The mark, or null to take it back.</param>
     /// <returns>The change.</returns>
-    private static UpdateGradeRequest WithMark(int? mark) => new(new GradeMarkChange(mark), null, null, null);
+    private static UpdateGradeRequest WithMark(int? mark) => new(new GradeMarkChange(mark));
 
     /// <summary>
     /// Counts every version of every grade written so far.

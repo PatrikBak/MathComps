@@ -9,4 +9,8 @@ namespace MathComps.Domain.Contracts.Admin;
 /// </param>
 /// <param name="InternalComment">The new comment for graders, or null when this change does not set it.</param>
 /// <param name="IsFinal">Whether it is now final, or null when this change does not set it.</param>
-public record UpdateGradeRequest(GradeMarkChange? Mark, int? Help, string? InternalComment, bool? IsFinal);
+public record UpdateGradeRequest(
+    GradeMarkChange? Mark = null,
+    int? Help = null,
+    string? InternalComment = null,
+    bool? IsFinal = null);

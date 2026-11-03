@@ -282,7 +282,7 @@ public partial class UserManager(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Write every field, so a value left out of the request is one the student cleared
+        // Write every field, so a null in the request is one the student cleared
         await dbContext.Users
             .Where(user => user.Id == userId)
             .ExecuteUpdateAsync(

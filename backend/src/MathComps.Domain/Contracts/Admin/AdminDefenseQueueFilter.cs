@@ -29,14 +29,14 @@ namespace MathComps.Domain.Contracts.Admin;
 /// each in any of the conversation's drafts, the ones sent back to be rewritten included.
 /// </param>
 public record AdminDefenseQueueFilter(
-    bool Unread,
-    bool? HasNotes,
-    bool StudentReported,
-    bool StudentFeedback,
-    Guid? UserId,
-    string? HandoutContentId,
-    string? EnvironmentId,
-    string? ProblemSlug,
-    int? WithinDays,
-    string? PromptVersion,
-    IReadOnlyList<ExaminerFlaw>? CaughtFlaws);
+    bool Unread = false,
+    bool? HasNotes = null,
+    bool StudentReported = false,
+    bool StudentFeedback = false,
+    Guid? UserId = null,
+    string? HandoutContentId = null,
+    string? EnvironmentId = null,
+    string? ProblemSlug = null,
+    int? WithinDays = null,
+    string? PromptVersion = null,
+    IReadOnlyList<ExaminerFlaw>? CaughtFlaws = null);

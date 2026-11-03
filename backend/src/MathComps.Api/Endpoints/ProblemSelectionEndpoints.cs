@@ -119,7 +119,7 @@ public static class ProblemSelectionEndpoints
             ISelectionDiscussionService discussionService,
             CancellationToken cancellationToken) =>
         {
-            // A body leaving out either kind of discussion is not a request that can be read
+            // A body sending null for either kind of discussion is not a request that can be read
             if (request is not { Proposals: { } proposals, Papers: { } papers })
                 throw new BadHttpRequestException("A mark must name its proposals and its papers.");
 

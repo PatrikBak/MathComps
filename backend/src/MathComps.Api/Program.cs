@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Localization;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using Microsoft.IdentityModel.Tokens;
 using MathComps.Domain.Localization;
 using Sentry.Extensibility;
@@ -176,6 +177,29 @@ builder.Services.Configure<JsonOptions>(options =>
 {
     // Enums travel as camelCase strings, the single shape every client reads them in
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+
+    // A body missing a constructor parameter that has no default is refused as a 400
+    options.SerializerOptions.RespectRequiredConstructorParameters = true;
+
+    // A polymorphic object's kind is read wherever it sits among the object's keys
+    options.SerializerOptions.AllowOutOfOrderMetadataProperties = true;
+
+    // A polymorphic object naming no kind is refused as a 400. Its abstract base has nothing to build, and the
+    // NotSupportedException the serializer throws for that escapes binding as a 500
+    options.SerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver
+    {
+        Modifiers =
+        {
+            typeInfo =>
+            {
+                // Only an abstract polymorphic object, the one with no type of its own to fall back on
+                if (typeInfo is
+                    { Kind: JsonTypeInfoKind.Object, PolymorphismOptions: { } polymorphism, Type.IsAbstract: true })
+                    typeInfo.CreateObject = () => throw new JsonException(
+                        $"A {typeInfo.Type.Name} must carry '{polymorphism.TypeDiscriminatorPropertyName}'.");
+            },
+        },
+    };
 });
 
 // Make sure we have DB
