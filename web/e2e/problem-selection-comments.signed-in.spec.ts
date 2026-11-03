@@ -433,6 +433,24 @@ function poolView(page: Page, name: string): Locator {
 }
 
 /**
+ * Lays the pool out as one of its layouts, returning once the switch has taken it. A switch picked again before the
+ * last pick lands would press the option still checked from before, which changes nothing.
+ *
+ * @param page - The page.
+ * @param name - What the layout is called.
+ */
+async function showPoolAs(page: Page, name: string): Promise<void> {
+  // The layout's option
+  const option = poolView(page, name)
+
+  // Picked
+  await option.click()
+
+  // Taken by the switch
+  await expect(option).toBeChecked()
+}
+
+/**
  * Puts whether the page is on screen in the test's hands, through {@link Window.showPage} and {@link Window.hidePage},
  * as the reader brings a browser tab up or puts it behind another.
  *
@@ -477,7 +495,7 @@ test.describe("the pool's discussions", () => {
     const threadReads = recordThreadReads(page)
 
     // The pool laid out as its discussions
-    await poolView(page, selectionCopy.pool.views.comments).click()
+    await showPoolAs(page, selectionCopy.pool.views.comments)
 
     // Every thread, the one answered last first, the paper's among the problems'
     await expect(threadHeadings(page)).toHaveText([
@@ -575,7 +593,7 @@ test.describe("the pool's discussions", () => {
     await search.fill(READY.title)
 
     // The pool laid out as its discussions
-    await poolView(page, selectionCopy.pool.views.comments).click()
+    await showPoolAs(page, selectionCopy.pool.views.comments)
 
     // Every thread, the set-aside problem's among them
     await expect(threadHeadings(page)).toHaveText([
@@ -596,13 +614,13 @@ test.describe("the pool's discussions", () => {
     await expect(countLineOf(page, 6)).toHaveText(lineText(6, 6))
 
     // The pool laid out as its problems again
-    await poolView(page, selectionCopy.pool.views.problems).click()
+    await showPoolAs(page, selectionCopy.pool.views.problems)
 
     // The search box still holding the problem searched for
     await expect(search).toHaveValue(READY.title)
 
     // The pool laid out as its discussions once more
-    await poolView(page, selectionCopy.pool.views.comments).click()
+    await showPoolAs(page, selectionCopy.pool.views.comments)
 
     // The threads' comments counted again, none new any more, the tab's first visit having marked them seen
     await expect(countLineOf(page, 6)).toHaveText(lineText(6, 0))
@@ -921,13 +939,13 @@ test.describe("the pool's discussions", () => {
     await expect(whatsNew).toBeVisible()
 
     // The pool laid out as its problems
-    await poolView(page, selectionCopy.pool.views.problems).click()
+    await showPoolAs(page, selectionCopy.pool.views.problems)
 
     // The gate, shut
     const release = gate.hold()
 
     // The pool laid out as its discussions again, their read held at the gate
-    await poolView(page, selectionCopy.pool.views.comments).click()
+    await showPoolAs(page, selectionCopy.pool.views.comments)
 
     // The threads as they were left, counted, with no button while the read is still out, the read they were left
     // with being an earlier visit's
@@ -1254,10 +1272,10 @@ test.describe("the pool's discussions", () => {
     await expect(page.getByRole('article').last()).toContainText(READER_REPLY)
 
     // The pool laid out as its problems
-    await poolView(page, selectionCopy.pool.views.problems).click()
+    await showPoolAs(page, selectionCopy.pool.views.problems)
 
     // The pool laid out as its discussions again
-    await poolView(page, selectionCopy.pool.views.comments).click()
+    await showPoolAs(page, selectionCopy.pool.views.comments)
 
     // Ordered afresh: the new comment first, then the replied thread
     await expect(page.getByRole('article').first()).toContainText(READER_COMMENT)
@@ -1370,7 +1388,7 @@ test.describe("what is new in the pool's discussions", () => {
     await expect.poll(() => newCommentTexts(page)).toEqual([LATE_REPLY, OPENED_COMMENT.content])
   })
 
-  test('keeps what was new through the visit, shows what waited behind the button, and drops the rest next visit', async ({
+  test('keeps what was new through the visit, tells the backend what waited behind the button was seen only once it shows, and drops it all next visit', async ({
     page,
   }) => {
     // What the backend keeps
@@ -1410,6 +1428,14 @@ test.describe("what is new in the pool's discussions", () => {
     await expect(whatsNew).toBeVisible()
     await expect.poll(() => newCommentTexts(page)).toEqual([LATE_REPLY, OPENED_COMMENT.content])
 
+    // Long enough for a mark to have gone out
+    await page.waitForTimeout(LANDING_WINDOW_MS)
+
+    // No mark told the backend the waiting reply was seen
+    expect(memory.seen.writes.map((write) => write.proposals[GEOMETRY.id])).not.toContain(
+      '2026-10-02T08:00:00.000Z'
+    )
+
     // What waited, shown
     await whatsNew.click()
 
@@ -1418,15 +1444,25 @@ test.describe("what is new in the pool's discussions", () => {
       .poll(() => newCommentTexts(page))
       .toEqual([COLLEAGUE_REPLY, LATE_REPLY, OPENED_COMMENT.content])
 
+    // The backend told the geometry problem was seen up to the reply, now that it shows
+    await expect
+      .poll(() => memory.seen.writes.at(-1)?.proposals[GEOMETRY.id])
+      .toBe('2026-10-02T08:00:00.000Z')
+
+    // Long enough for the backend's answer to have landed
+    await page.waitForTimeout(LANDING_WINDOW_MS)
+
+    // The three new comments still new, for the rest of the visit
+    await expect(countLineOf(page, 6)).toHaveText(lineText(6, 3))
+
     // The pool laid out as its problems
-    await poolView(page, selectionCopy.pool.views.problems).click()
+    await showPoolAs(page, selectionCopy.pool.views.problems)
 
     // The pool laid out as its discussions again
-    await poolView(page, selectionCopy.pool.views.comments).click()
+    await showPoolAs(page, selectionCopy.pool.views.comments)
 
-    // Only the reply that arrived during the last visit still new
-    await expect(countLineOf(page, 6)).toHaveText(lineText(6, 1), { timeout: SETTLE_TIMEOUT_MS })
-    await expect.poll(() => newCommentTexts(page)).toEqual([COLLEAGUE_REPLY])
+    // Nothing new any more, the reply shown during the last visit included
+    await expect(countLineOf(page, 6)).toHaveText(lineText(6, 0), { timeout: SETTLE_TIMEOUT_MS })
   })
 
   test("tells the backend nothing while the tab's own read is out, then marks seen what it brought", async ({
@@ -1454,7 +1490,7 @@ test.describe("what is new in the pool's discussions", () => {
     await expect.poll(() => memory.seen.writes.length).toBe(1)
 
     // The pool laid out as its problems
-    await poolView(page, selectionCopy.pool.views.problems).click()
+    await showPoolAs(page, selectionCopy.pool.views.problems)
 
     // Zuzana answering the geometry problem's comment meanwhile
     answerGeometry(memory)
@@ -1463,7 +1499,7 @@ test.describe("what is new in the pool's discussions", () => {
     const release = gate.hold()
 
     // The pool laid out as its discussions again, their read held at the gate
-    await poolView(page, selectionCopy.pool.views.comments).click()
+    await showPoolAs(page, selectionCopy.pool.views.comments)
 
     // The threads as the last visit left them
     await expect(countLineOf(page, 5)).toBeVisible()
@@ -1527,10 +1563,10 @@ test.describe("what is new in the pool's discussions", () => {
     await sent
 
     // The pool laid out as its problems, the mark still waiting
-    await poolView(page, selectionCopy.pool.views.problems).click()
+    await showPoolAs(page, selectionCopy.pool.views.problems)
 
     // The pool laid out as its discussions again
-    await poolView(page, selectionCopy.pool.views.comments).click()
+    await showPoolAs(page, selectionCopy.pool.views.comments)
 
     // Nothing new, the mark still on its way counted in
     await expect(countLineOf(page, 5)).toHaveText(lineText(5, 0))
@@ -1557,7 +1593,7 @@ test.describe("what is new in the pool's discussions", () => {
     })
 
     // The pool's discussions
-    await poolView(page, selectionCopy.pool.views.comments).click()
+    await showPoolAs(page, selectionCopy.pool.views.comments)
 
     // Every comment new
     await expect(countLineOf(page, 5)).toHaveText(lineText(5, 5), { timeout: SETTLE_TIMEOUT_MS })
@@ -1586,7 +1622,7 @@ test.describe("what is new in the pool's discussions", () => {
     })
 
     // The pool's problems again
-    await poolView(page, selectionCopy.pool.views.problems).click()
+    await showPoolAs(page, selectionCopy.pool.views.problems)
 
     // The first problem's comment count plain
     await expect(tabRowOn(cardOf(page, FIRST), 'comments', 2)).toBeVisible()
@@ -1926,7 +1962,7 @@ test.describe("what is new in the pool's discussions", () => {
     const held = page.waitForRequest(DISCUSSIONS_ADDRESS, { timeout: SETTLE_TIMEOUT_MS })
 
     // The pool laid out as its discussions
-    await poolView(page, selectionCopy.pool.views.comments).click()
+    await showPoolAs(page, selectionCopy.pool.views.comments)
 
     // The discussions' read out, held at the gate
     await held
