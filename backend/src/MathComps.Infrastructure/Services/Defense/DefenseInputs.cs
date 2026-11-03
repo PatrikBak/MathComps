@@ -35,7 +35,7 @@ internal static class DefenseInputs
     /// <summary>
     /// Throws when what is being defended is missing, or when the target the caller sent cannot address anything.
     /// </summary>
-    /// <param name="target">The target to check, null when the request omitted it entirely.</param>
+    /// <param name="target">The target to check, null when the request sent null.</param>
     public static void EnsureTargetPresent(DefenseTarget? target)
     {
         // Each arm is addressed by different fields, so each has its own way of naming nothing.
@@ -49,7 +49,7 @@ internal static class DefenseInputs
                 EnsureWithinLength(handout.EnvironmentId, HandoutEnvironment.MaxContentIdChars);
                 break;
 
-            // An empty id addresses no problem, and the binder writes one for a field the request left out.
+            // An empty id addresses no problem.
             case ProblemTarget problem when problem.ProblemId == Guid.Empty:
                 throw new DefenseMessageEmptyException();
 
@@ -57,7 +57,7 @@ internal static class DefenseInputs
             case ProblemTarget:
                 break;
 
-            // A request that omits the target, or sends a kind nothing here knows, names nothing to defend.
+            // A request sending a null target, or a kind nothing here knows, names nothing to defend.
             default:
                 throw new DefenseMessageEmptyException();
         }

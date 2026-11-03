@@ -8,11 +8,11 @@ namespace MathComps.Domain.Contracts.Selection;
 /// </summary>
 /// <param name="Proposals">
 /// The moment up to which the caller has seen every comment posted in each proposal's discussion, by the proposal's id;
-/// null when the request omitted them.
+/// null when the request sent null.
 /// </param>
 /// <param name="Papers">
 /// The moment up to which the caller has seen every comment posted in each paper's discussion, by the paper's id; null
-/// when the request omitted them.
+/// when the request sent null.
 /// </param>
 public record MarkDiscussionsSeenRequest(
     ImmutableDictionary<Guid, DateTimeOffset>? Proposals, ImmutableDictionary<Guid, DateTimeOffset>? Papers);

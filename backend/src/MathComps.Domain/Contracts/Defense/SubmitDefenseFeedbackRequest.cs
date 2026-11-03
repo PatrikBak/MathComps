@@ -7,8 +7,8 @@ namespace MathComps.Domain.Contracts.Defense;
 /// before. The session is identified by the URL route, so the body carries only the answer itself.
 /// </summary>
 /// <param name="Outcome">
-/// What the examiner did for them. Nullable so that a body leaving it out arrives as nothing rather than as the
-/// first outcome the contract happens to name, which is what lets it be refused.
+/// What the examiner did for them. Nullable so that a body sending null arrives as nothing and is refused with the
+/// feedback's own error, rather than failing to bind as a malformed body.
 /// </param>
 /// <param name="Comment">
 /// What they say in their own words; absent when they let the outcome stand alone. Required alongside

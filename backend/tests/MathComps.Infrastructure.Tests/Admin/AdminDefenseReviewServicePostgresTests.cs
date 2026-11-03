@@ -50,7 +50,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task Queue_orders_every_conversation_by_recency() => RunTestAsync(async service =>
     {
         // Read the whole queue
-        var queue = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
+        var queue = await service.GetQueueAsync(ReviewerId, new AdminDefenseQueueFilter(), 1, Language.EN);
 
         // All four came back, yesterday's leading and the one from ten days ago last
         Assert.Equal(
@@ -82,10 +82,10 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         async service =>
         {
             // Ask for the first page
-            var first = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
+            var first = await service.GetQueueAsync(ReviewerId, new AdminDefenseQueueFilter(), 1, Language.EN);
 
             // And then for the rest
-            var second = await service.GetQueueAsync(ReviewerId, NewFilter(), 2, Language.EN);
+            var second = await service.GetQueueAsync(ReviewerId, new AdminDefenseQueueFilter(), 2, Language.EN);
 
             // The first page holds the two most recent, in order
             Assert.Equal(
@@ -233,7 +233,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // The unread queue as the reviewer sees it now
         var unread = await service.GetQueueAsync(
-            ReviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
+            ReviewerId, new AdminDefenseQueueFilter(Unread: true), 1, Language.EN);
 
         // Which agrees with the row, so the reviewer who left it there can still find it
         Assert.Contains(NewestSessionId, unread.Items.Select(row => row.Id));
@@ -342,7 +342,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     {
         // Ask for the unread ones with nothing opened yet, so no conversation has a stamp of any kind
         var unread = await service.GetQueueAsync(
-            ReviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
+            ReviewerId, new AdminDefenseQueueFilter(Unread: true), 1, Language.EN);
 
         // All four count as unread
         Assert.Equal(4, unread.TotalCount);
@@ -360,14 +360,14 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // Their own unread queue
         var read = await service.GetQueueAsync(
-            ReviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
+            ReviewerId, new AdminDefenseQueueFilter(Unread: true), 1, Language.EN);
 
         // Which settles the one they read
         Assert.Equal(3, read.TotalCount);
 
         // The other reviewer's, who has read nothing
         var other = await service.GetQueueAsync(
-            OtherReviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
+            OtherReviewerId, new AdminDefenseQueueFilter(Unread: true), 1, Language.EN);
 
         // Where all four still stand
         Assert.Equal(4, other.TotalCount);
@@ -410,7 +410,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // Narrow the queue to the shared version
         var queue = await service.GetQueueAsync(
-            ReviewerId, NewFilter() with { PromptVersion = shared.Version }, 1, Language.EN);
+            ReviewerId, new AdminDefenseQueueFilter(PromptVersion: shared.Version), 1, Language.EN);
 
         // Which leaves exactly the two that ran on it
         Assert.Equal(2, queue.TotalCount);
@@ -576,43 +576,44 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         (string Description, AdminDefenseQueueFilter Filter, int Count, string Left)[] cases =
         [
             ("one student holds three of the four",
-                NewFilter() with { UserId = StudentId }, 3, "newest, competition, oldest"),
+                new AdminDefenseQueueFilter(UserId: StudentId), 3, "newest, competition, oldest"),
             ("every handout conversation is against the seeded handout",
-                NewFilter() with { HandoutContentId = HandoutContentId }, 3, "newest, newer, oldest"),
+                new AdminDefenseQueueFilter(HandoutContentId: HandoutContentId), 3, "newest, newer, oldest"),
             ("a handout nothing was held against leaves nothing",
-                NewFilter() with { HandoutContentId = "no-such-handout" }, 0, ""),
+                new AdminDefenseQueueFilter(HandoutContentId: "no-such-handout"), 0, ""),
             ("two were held against the shared environment",
-                NewFilter() with { EnvironmentId = "problem-one" }, 2, "newer, oldest"),
+                new AdminDefenseQueueFilter(EnvironmentId: "problem-one"), 2, "newer, oldest"),
             ("the archive problem leaves the one held against it",
-                NewFilter() with { ProblemSlug = ArchiveProblemSlug }, 1, "competition"),
+                new AdminDefenseQueueFilter(ProblemSlug: ArchiveProblemSlug), 1, "competition"),
             ("a problem nothing was held against leaves nothing",
-                NewFilter() with { ProblemSlug = "no-such-problem" }, 0, ""),
-            ("one has been written about", NewFilter() with { HasNotes = true }, 1, "newest"),
+                new AdminDefenseQueueFilter(ProblemSlug: "no-such-problem"), 0, ""),
+            ("one has been written about", new AdminDefenseQueueFilter(HasNotes: true), 1, "newest"),
             ("leaving the other three unwritten-about",
-                NewFilter() with { HasNotes = false }, 3, "competition, newer, oldest"),
-            ("one student reported a reply", NewFilter() with { StudentReported = true }, 1, "newest"),
+                new AdminDefenseQueueFilter(HasNotes: false), 3, "competition, newer, oldest"),
+            ("one student reported a reply", new AdminDefenseQueueFilter(StudentReported: true), 1, "newest"),
             ("and a different conversation was answered for",
-                NewFilter() with { StudentFeedback = true }, 1, "oldest"),
+                new AdminDefenseQueueFilter(StudentFeedback: true), 1, "oldest"),
             ("only the one carried on yesterday falls inside three days, however long ago it opened",
-                NewFilter() with { WithinDays = 3 }, 1, "newest"),
+                new AdminDefenseQueueFilter(WithinDays: 3), 1, "newest"),
             ("a period past the ceiling is held to it rather than falling off the calendar",
-                NewFilter() with { WithinDays = int.MaxValue }, 4, "newest, competition, newer, oldest"),
+                new AdminDefenseQueueFilter(WithinDays: int.MaxValue), 4, "newest, competition, newer, oldest"),
             ("and a period of no days is held to one day, which the one carried on just now falls inside",
-                NewFilter() with { WithinDays = 0 }, 1, "newest"),
+                new AdminDefenseQueueFilter(WithinDays: 0), 1, "newest"),
             ("a wrong claim was caught in one, though the reply it was caught behind went out clean",
-                NewFilter() with { CaughtFlaws = [ExaminerFlaw.WrongClaim] }, 1, "newer"),
+                new AdminDefenseQueueFilter(CaughtFlaws: [ExaminerFlaw.WrongClaim]), 1, "newer"),
             ("a leak in two, one of them the seed's own sent-back draft",
-                NewFilter() with { CaughtFlaws = [ExaminerFlaw.Leak] }, 2, "newest, newer"),
+                new AdminDefenseQueueFilter(CaughtFlaws: [ExaminerFlaw.Leak]), 2, "newest, newer"),
             ("a withheld close in one, though another's solution was complete too",
-                NewFilter() with { CaughtFlaws = [ExaminerFlaw.WithheldClose] }, 1, "oldest"),
+                new AdminDefenseQueueFilter(CaughtFlaws: [ExaminerFlaw.WithheldClose]), 1, "oldest"),
             ("a switched language in three",
-                NewFilter() with { CaughtFlaws = [ExaminerFlaw.LanguageSwitch] }, 3, "competition, newer, oldest"),
+                new AdminDefenseQueueFilter(CaughtFlaws: [ExaminerFlaw.LanguageSwitch]), 3,
+                "competition, newer, oldest"),
             ("a gendered address in two",
-                NewFilter() with { CaughtFlaws = [ExaminerFlaw.GenderedAddress] }, 2, "newest, oldest"),
+                new AdminDefenseQueueFilter(CaughtFlaws: [ExaminerFlaw.GenderedAddress]), 2, "newest, oldest"),
             ("and a takeover in two, one only on the reply that went out, which counts as much as one sent back",
-                NewFilter() with { CaughtFlaws = [ExaminerFlaw.Route] }, 2, "newest, competition"),
+                new AdminDefenseQueueFilter(CaughtFlaws: [ExaminerFlaw.Route]), 2, "newest, competition"),
             ("naming two flaws leaves the one both were caught in, though never on the same draft",
-                NewFilter() with { CaughtFlaws = [ExaminerFlaw.Leak, ExaminerFlaw.LanguageSwitch] }, 1, "newer"),
+                new AdminDefenseQueueFilter(CaughtFlaws: [ExaminerFlaw.Leak, ExaminerFlaw.LanguageSwitch]), 1, "newer"),
         ];
 
         // What each filter left, labelled so a mismatch says which clause was wrong
@@ -640,7 +641,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task An_archive_problem_reads_back_named_by_where_it_comes_from() => RunTestAsync(async service =>
     {
         // The whole queue, which holds conversations of both kinds
-        var queue = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
+        var queue = await service.GetQueueAsync(ReviewerId, new AdminDefenseQueueFilter(), 1, Language.EN);
 
         // The competition one, which the queue carries as an archive problem rather than a handout one
         var conversation = Assert.Single(
@@ -668,7 +669,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     {
         // Narrowed to the one problem out of the archive
         var queue = await service.GetQueueAsync(
-            ReviewerId, NewFilter() with { ProblemSlug = ArchiveProblemSlug }, 1, Language.EN);
+            ReviewerId, new AdminDefenseQueueFilter(ProblemSlug: ArchiveProblemSlug), 1, Language.EN);
 
         // Which leaves the one conversation held against it
         Assert.Equal([ArchiveSessionId], queue.Items.Select(conversation => conversation.Id));
@@ -751,7 +752,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task A_conversation_held_against_nothing_stays_out_of_reach() => RunTestAsync(async service =>
     {
         // Read the whole queue, narrowed by nothing
-        var queue = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
+        var queue = await service.GetQueueAsync(ReviewerId, new AdminDefenseQueueFilter(), 1, Language.EN);
 
         // The four that name a problem are all of it, though the targetless one moved more recently than most of them
         Assert.Equal(4, queue.TotalCount);
@@ -803,7 +804,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         });
 
         // Read the whole queue
-        var queue = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
+        var queue = await service.GetQueueAsync(ReviewerId, new AdminDefenseQueueFilter(), 1, Language.EN);
 
         // The row of the conversation about the proposal, which names a proposal rather than a competition problem
         var proposal = Assert.IsType<NamedProposalTarget>(
@@ -820,7 +821,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // Narrow the queue by the proposal's slug
         var narrowed = await service.GetQueueAsync(
-            ReviewerId, NewFilter() with { ProblemSlug = proposal.Slug }, 1, Language.EN);
+            ReviewerId, new AdminDefenseQueueFilter(ProblemSlug: proposal.Slug), 1, Language.EN);
 
         // Which leaves the one conversation held against it
         Assert.Equal([sessionId], narrowed.Items.Select(conversation => conversation.Id));
@@ -881,7 +882,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             async Task<(bool InQueue, bool InOptions, bool InStudents)> ReadAsync()
             {
                 // The queue
-                var queue = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
+                var queue = await service.GetQueueAsync(ReviewerId, new AdminDefenseQueueFilter(), 1, Language.EN);
 
                 // The filters' options
                 var options = await service.GetFilterOptionsAsync(ReviewerId, Language.EN);
@@ -982,7 +983,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             });
 
             // The reviewer's queue
-            var queue = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
+            var queue = await service.GetQueueAsync(ReviewerId, new AdminDefenseQueueFilter(), 1, Language.EN);
 
             // Showing the conversation or not, as the case says
             Assert.Equal(shown, queue.Items.Any(conversation => conversation.Id == sessionId));
@@ -1042,7 +1043,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         IAdminDefenseReviewService service, Guid sessionId)
     {
         // The whole queue, since a row only exists as part of it
-        var queue = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
+        var queue = await service.GetQueueAsync(ReviewerId, new AdminDefenseQueueFilter(), 1, Language.EN);
 
         // The row under that id
         return queue.Items.Single(conversation => conversation.Id == sessionId);
@@ -1056,12 +1057,4 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     /// <returns>The handout environment.</returns>
     private static NamedHandoutTarget Handout(NamedDefenseTarget target) =>
         Assert.IsType<NamedHandoutTarget>(target);
-
-    /// <summary>
-    /// Builds a filter that narrows nothing, so a test naming no filter reads the whole seed. Tests that do want
-    /// one narrow it with a `with` expression, which names the field rather than counting commas to it.
-    /// </summary>
-    /// <returns>The filter.</returns>
-    private static AdminDefenseQueueFilter NewFilter() =>
-        new(false, null, false, false, null, null, null, null, null, null, null);
 }
