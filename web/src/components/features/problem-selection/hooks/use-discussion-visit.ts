@@ -84,7 +84,8 @@ type UseDiscussionVisitOptions = {
  * the tab's own read to land: the one out as it starts, or one it sets off, however many reads that takes. Once that
  * answer has landed and the page is on screen, it tells the server the discussions were seen as the tab then shows
  * them, so that is not new on the next visit. A tab opening on what an earlier read left waits for its own, so a
- * comment that read brings counts as seen only once it shows. What arrives after stays new for the next visit too.
+ * comment that read brings counts as seen only once it shows. What arrives after stays new for the next visit too,
+ * unless the reader asks for it to show.
  *
  * @param options - The tab visited, and where it stands.
  */

@@ -3,7 +3,7 @@
 import { useAuth } from '@clerk/nextjs'
 import { usePrevious } from '@mantine/hooks'
 import { queryOptions, useIsMutating, useQueries, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import {
   commentMutationKeys,
@@ -16,6 +16,7 @@ import { apiQueryOptions, useApiQuery } from '@/hooks/use-api-query'
 import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
+import { useSelectionWorkspace } from '../components/SelectionWorkspaceProvider'
 import {
   type DiscussedSubject,
   type Discussion,
@@ -27,6 +28,7 @@ import {
   parkDiscussions,
   parkReactionsEditsAndDeletions,
   readDiscussions,
+  shownDiscussionsOf,
   threadsAfterParking,
 } from './discussion-cache'
 import { useSelectionOrganization } from './selection-organization'
@@ -68,7 +70,7 @@ export type UseSelectionDiscussionsResult = {
   uiState: QueryUiState
   /** Reads the discussions again after the read gave up. */
   retry: () => void
-  /** Shows the discussions as the latest read found them. */
+  /** Shows the discussions as the latest read found them, telling the server they were seen as they then show. */
   showNews: () => void
 }
 
@@ -83,7 +85,8 @@ export type UseSelectionDiscussionsResult = {
  * asks for it, so nothing new anybody else posts moves what is on screen. The reader's own writes show at once, and
  * so do others' edits, reactions and deletions, which post nothing new. Once the reader's writes have all settled,
  * the discussions are read again at once: a read out while one was made can't tell what others said in its thread
- * from what the reader did, so what is new waits to be told until that read lands.
+ * from what the reader did, so what is new waits to be told until that read lands. Asking for what waited counts as
+ * seeing it, so the server is told it was seen once it shows.
  *
  * @param options - {@link UseSelectionDiscussionsOptions}.
  *
@@ -216,8 +219,13 @@ export function useSelectionDiscussions({
               : subjects.map((subject, index) => ({ subject, comments: after[index] ?? [] })),
         }
 
-  // A function which shows the discussions as the latest read found them
-  const showNews = useCallback(() => {
+  // The ways a visit to a Comments tab keeps the reader's marks and tells the server what it saw, once the marks are
+  // read
+  const { visits } = useSelectionWorkspace().seenMarks
+
+  // A function which shows the discussions as the latest read found them, telling the server they were seen as they
+  // then show
+  const showNews = () => {
     // Nothing read, nothing to show
     if (data === undefined) return
 
@@ -226,7 +234,10 @@ export function useSelectionDiscussions({
 
     // The showing counted
     setShowings((count) => count + 1)
-  }, [data, queryClient, readerId])
+
+    // The server told the discussions were seen as the threads now hold them, so what waited is not new next visit
+    visits?.tellSeen(shownDiscussionsOf(queryClient, readerId, targets))
+  }
 
   // The discussions, what waits to be shown, and the state of the read
   return { shown, uiState, retry, showNews }
