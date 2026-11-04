@@ -146,6 +146,24 @@ test.describe('the competitions list', () => {
     await expect(page.locator(`[id="${tabId}"]`)).toHaveAttribute('aria-selected', 'true')
   })
 
+  test('says a closed round has ended once its results hold nothing still to mark', async ({
+    page,
+  }) => {
+    // The competitions surface, read without a session, whose results have nothing waiting on a mark
+    await installHostedBackend(page, 'first-entry')
+
+    // The round that closed three weeks ago, by the address naming it
+    await page.goto(`${LIST_PATH}?round=past-21`)
+
+    // Its panel says it has ended, which it only says once its results have been read
+    await expect(
+      page
+        .getByRole('tabpanel')
+        .filter({ visible: true })
+        .getByText(areaCopy.closedLabel, { exact: true })
+    ).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+  })
+
   test('says the list failed to load rather than that nothing is scheduled', async ({ page }) => {
     // The competitions surface
     await installHostedBackend(page, 'first-entry')

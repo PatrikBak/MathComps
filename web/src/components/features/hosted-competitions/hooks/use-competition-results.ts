@@ -6,6 +6,8 @@ import { useQueryUiState } from '@/hooks/use-query-ui-state'
 import { cachePolicy, type CachePolicyTier } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
+import type { RoundMarking } from '../model/hosted-competition-state'
+import { roundMarking } from '../model/hosted-competition-state'
 import type { CompetitionResults } from '../model/hosted-competition-types'
 import { fetchCompetitionResults } from '../services/hosted-competition-service'
 import type { HostedCompetitionsReaderKey } from './hosted-competition-cache'
@@ -108,4 +110,34 @@ export function usePreloadCompetitionResults(competitionSlugs: string[]): void {
       competitionResultsOptions(api, readerKey, isReaderKnown, slug, cachePolicy.onDemand)
     ),
   })
+}
+
+/**
+ * How far marking a round has got, off whatever of its competitions' results the cache already holds.
+ *
+ * Never reads them itself, a round's results being a heavy read: they arrive with
+ * {@link usePreloadCompetitionResults} or {@link useCompetitionResults}, and the answer follows them as they
+ * come in.
+ *
+ * @param competitionSlugs - Every competition of the round, each by any of its slugs.
+ *
+ * @returns How far marking has got.
+ */
+export function useRoundMarking(competitionSlugs: string[]): RoundMarking {
+  // Whose reading this is, since each answer is cached as theirs
+  const { readerKey, isReaderKnown } = useEntryReader()
+
+  // The API client the shared read options are built with
+  const api = useApi({ requireAuth: false })
+
+  // Each competition's results as the cache holds them, never read from here
+  const reads = useQueries({
+    queries: competitionSlugs.map((slug) => ({
+      ...competitionResultsOptions(api, readerKey, isReaderKnown, slug, cachePolicy.onDemand),
+      enabled: false,
+    })),
+  })
+
+  // How far marking has got across them
+  return roundMarking(reads.map((read) => read.data))
 }

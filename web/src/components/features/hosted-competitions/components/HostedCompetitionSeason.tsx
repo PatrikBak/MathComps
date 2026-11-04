@@ -71,7 +71,8 @@ export function HostedCompetitionSeason({
   // The school year holding the round showing
   const shownYear = years.find((year) => year.groups.some((group) => group === shownRound))
 
-  // The shown round's results, read early once it has closed, so a press finds the table there
+  // The shown round's results, read early once it has closed, so a press finds the table there and the
+  // round can say whether its marking still goes on
   usePreloadCompetitionResults(
     shownRound !== undefined && derivePhase(shownRound, now) === 'closed'
       ? shownRound.competitions.map((competition) => competition.slug[locale])
