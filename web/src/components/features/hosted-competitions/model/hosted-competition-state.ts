@@ -3,6 +3,7 @@ import { HOUR_MINUTES, MINUTE_MS, SECOND_MS } from '@/components/shared/utils/ti
 import { SUPPORTED_LOCALES } from '@/i18n/i18n'
 
 import type {
+  CompetitionResults,
   HostedCompetition,
   HostedCompetitionEntry,
   HostedCompetitionGroup,
@@ -808,4 +809,29 @@ export function resultTotal(cells: ResultCell[]): number | null {
 export function areResultsComplete(rows: ResultRow[]): boolean {
   // Every cell either marked for good or never written about
   return rows.every((row) => row.cells.every((cell) => cell.kind !== 'pending'))
+}
+
+/**
+ * How far marking a round has got across its competitions: `ongoing` while any of them still waits on a final
+ * mark, `done` once every one is settled, `unknown` while the results read so far cannot tell.
+ */
+export type RoundMarking = 'unknown' | 'ongoing' | 'done'
+
+/**
+ * How far marking a round has got, from whatever of its competitions' results have been read.
+ *
+ * One competition still being marked settles it while the rest are unread, and done needs every one read.
+ *
+ * @param results - Each of its competitions' results, undefined where they have not been read.
+ *
+ * @returns How far marking has got.
+ */
+export function roundMarking(results: (CompetitionResults | undefined)[]): RoundMarking {
+  // One competition still being marked is enough to say so
+  if (results.some((read) => read !== undefined && !areResultsComplete(read.rows))) {
+    return 'ongoing'
+  }
+
+  // Every one read and settled, or some still to read
+  return results.every((read) => read !== undefined) ? 'done' : 'unknown'
 }

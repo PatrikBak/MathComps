@@ -18,15 +18,18 @@ import {
   layOutBoard,
   readAreaRun,
   resultTotal,
+  roundMarking,
   roundToShow,
   toAreaEntry,
   wasHandedInEarly,
 } from '../hosted-competition-state'
 import type {
+  CompetitionResults,
   HostedCompetition,
   HostedCompetitionEntry,
   HostedCompetitionGroup,
   HostedCompetitionsView,
+  ResultCell,
   SatEntry,
 } from '../hosted-competition-types'
 
@@ -646,5 +649,65 @@ describe('resultTotal', () => {
   it('gives no total while nothing is marked, which is not the same as a total of nought', () => {
     // Written about, but nothing marked for good yet
     expect(resultTotal([{ kind: 'pending' }, { kind: 'none' }])).toBeNull()
+  })
+})
+
+describe('roundMarking', () => {
+  /**
+   * Builds a competition's results holding one student.
+   *
+   * @param cells - The student's cells, one per problem.
+   *
+   * @returns The results.
+   */
+  function resultsOf(cells: ResultCell[]): CompetitionResults {
+    // One student's row carrying the cells
+    return {
+      rows: [
+        {
+          place: null,
+          student: {
+            username: 'ada',
+            avatarUrl: null,
+            countryCode: null,
+            grade: { kind: 'pastHighSchool' },
+          },
+          isReader: false,
+          cells,
+        },
+      ],
+    }
+  }
+
+  it('says marking goes on once one competition is still being marked, the rest settled or unread', () => {
+    // One settled, one still waiting on a mark, one not read yet
+    const marking = roundMarking([
+      resultsOf([{ kind: 'scored', score: 6 }]),
+      resultsOf([{ kind: 'pending' }]),
+      undefined,
+    ])
+
+    // The one still being marked settles it
+    expect(marking).toBe('ongoing')
+  })
+
+  it('cannot tell while a competition is unread and every one read is settled', () => {
+    // Two settled, one not read yet
+    const marking = roundMarking([
+      resultsOf([{ kind: 'scored', score: 6 }]),
+      resultsOf([{ kind: 'none' }]),
+      undefined,
+    ])
+
+    // The unread one could still be marking
+    expect(marking).toBe('unknown')
+  })
+
+  it('says marking is done once every competition is read and settled, one nobody sat included', () => {
+    // One settled, one with nobody in it
+    const marking = roundMarking([resultsOf([{ kind: 'scored', score: 6 }]), { rows: [] }])
+
+    // Nothing left waiting on a mark
+    expect(marking).toBe('done')
   })
 })

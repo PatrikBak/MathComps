@@ -25,6 +25,7 @@ import { useIsAdmin } from '@/hooks/use-is-admin'
 import { type Locale, ROUTES } from '@/i18n/i18n'
 
 import { useClockLength } from '../hooks/use-clock-length'
+import { useRoundMarking } from '../hooks/use-competition-results'
 import { useEntryWindowLabel } from '../hooks/use-entry-window-label'
 import { useRemainingLabel } from '../hooks/use-remaining-label'
 import type { GroupPhase, HostedCompetitionStanding } from '../model/hosted-competition-state'
@@ -80,8 +81,8 @@ type HostedCompetitionGroupPanelProps = {
  * inside it.
  *
  * The header carries everything the group's competitions share, the facts on the left and where things stand
- * on the right: the entry window beside how long is left, then the problem count and the clock. Each row under
- * it carries one competition's category, standing and action.
+ * on the right: the entry window beside how long is left, or how marking stands once it is over, then the
+ * problem count and the clock. Each row under it carries one competition's category, standing and action.
  *
  * A group holding a single competition has no rows, and its standing and action close the header, under how
  * long is left.
@@ -118,10 +119,39 @@ export function HostedCompetitionGroupPanel({
   // the header
   const soleCompetition = group.competitions.length === 1 ? group.competitions[0] : undefined
 
+  // How far marking the group has got, off whatever of its results have been read
+  const marking = useRoundMarking(group.competitions.map((competition) => competition.slug[locale]))
+
   /**
-   * Draws how long is left of whatever the group is currently doing.
+   * Draws where a group that is over stands with its marking.
    *
-   * @returns The countdown, or null for a group with no dates.
+   * @returns The label, or null while the results read so far cannot tell.
+   */
+  function renderClosedLabel(): ReactNode {
+    switch (marking) {
+      // Not read far enough to tell, so nothing is said yet
+      case 'unknown':
+        return null
+
+      // Still being marked, so the results can still move
+      case 'ongoing':
+        return <span className="text-muted">{t('resultsPending')}</span>
+
+      // Marked in full, so the results are final
+      case 'done':
+        return <span className="text-muted">{t('closedLabel')}</span>
+
+      // Every marking is handled above
+      default:
+        return assertNever(marking)
+    }
+  }
+
+  /**
+   * Draws how long is left of whatever the group is currently doing, or how its marking stands once it is
+   * over.
+   *
+   * @returns The label, or null for a group with no dates and for one over whose marking cannot be told yet.
    */
   function renderCountdown(): ReactNode {
     switch (phase) {
@@ -145,9 +175,9 @@ export function HostedCompetitionGroupPanel({
           </span>
         )
 
-      // Over, with nothing left to count down to
+      // Over, with nothing left to count down to, so what is left to say is how its marking stands
       case 'closed':
-        return <span className="text-muted">{t('closedLabel')}</span>
+        return renderClosedLabel()
 
       // Every phase is handled above
       default:
@@ -155,14 +185,14 @@ export function HostedCompetitionGroupPanel({
     }
   }
 
-  // How long is left, where the group has anything left to count
+  // How long is left, or how marking stands once it is over, where there is anything to say
   const countdown = renderCountdown()
 
   return (
     <SurfacePanel radius="xl" className={cn('overflow-hidden', PHASE_PANEL_CLASS[phase])}>
       {/* What the group's competitions share */}
       <div className="space-y-2 px-4 py-4 text-sm sm:px-6">
-        {/* When it takes entries, and how long is left of whatever it is doing */}
+        {/* When it takes entries, and where it stands now */}
         <div className="flex items-baseline gap-x-4">
           {entryWindow !== null && (
             <p className="min-w-0 text-base font-semibold tabular-nums text-foreground">
