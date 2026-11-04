@@ -600,8 +600,9 @@ export function layOutBoard(groups: HostedCompetitionGroup[]): BoardLayout {
 
 /**
  * The round a reader most likely came for, out of rounds in the order they run: one where their own clock
- * is running, else the latest one taking entries, else the next to open, so between two rounds it is the one
- * coming. Once nothing is open or announced, the latest to have run.
+ * is running, else the latest one taking entries, else the latest one over, so between two rounds it is the
+ * one just finished, whose marking and results are what there is to see. Before any round has opened, the
+ * first to open.
  *
  * @param groups - The rounds, in the order they run.
  * @param now - The instant their clocks and dates are read against, in epoch milliseconds.
@@ -619,13 +620,13 @@ export function roundToShow(
     )
   )
 
-  // That one, or the latest taking entries, or the next to open, or else every round is over and it is the
-  // last of them
+  // That one, or the latest taking entries, or the latest over, or else none has opened yet and it is the
+  // first to open
   return (
     running ??
     groups.findLast((group) => derivePhase(group, now) === 'open') ??
-    groups.find((group) => derivePhase(group, now) === 'upcoming') ??
-    groups.at(-1)
+    groups.findLast((group) => derivePhase(group, now) === 'closed') ??
+    groups.find((group) => derivePhase(group, now) === 'upcoming')
   )
 }
 

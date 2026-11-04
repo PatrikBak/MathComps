@@ -509,20 +509,20 @@ describe('roundToShow', () => {
     expect(roundToShow(ROUNDS, NOW)?.id).toBe('open')
   })
 
-  it('shows the next round between two rounds, not the one just finished', () => {
-    // The finished one and two still to come, nothing taking entries in between
-    const between = [ROUNDS[0], windowGroup('sooner', 10, 23), ROUNDS[2]]
+  it('shows the round just finished between two rounds, not the next one', () => {
+    // An earlier finished one, the one just finished, and one still to come, nothing taking entries
+    const between = [windowGroup('earlier', -60, -46), ROUNDS[0], ROUNDS[2]]
 
-    // The sooner of the two coming
-    expect(roundToShow(between, NOW)?.id).toBe('sooner')
+    // The later of the finished two
+    expect(roundToShow(between, NOW)?.id).toBe('finished')
   })
 
-  it('shows the latest round once every round is over', () => {
-    // Two finished rounds and nothing announced
-    const over = [windowGroup('earlier', -60, -46), ROUNDS[0]]
+  it('shows the first round to open before any has opened', () => {
+    // Two still to come
+    const ahead = [windowGroup('sooner', 10, 23), ROUNDS[2]]
 
-    // The later of them
-    expect(roundToShow(over, NOW)?.id).toBe('finished')
+    // The sooner of them
+    expect(roundToShow(ahead, NOW)?.id).toBe('sooner')
   })
 
   it('shows a round the reader is sitting over a later one', () => {
