@@ -11,13 +11,13 @@ import {
   LIST_PATH,
   sendTurn,
   transcriptOf,
-  userMenuCopy,
 } from './support/competitions'
 import {
   COMPETITION_SLUG,
   installHostedBackend,
   UPCOMING_COMPETITION_SLUG,
 } from './support/hosted-backend'
+import { userMenuCopy } from './support/interaction'
 import { expect, test } from './support/test'
 import { recordNotices } from './support/watchers'
 

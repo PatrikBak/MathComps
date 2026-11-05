@@ -1,11 +1,10 @@
-import type { Page } from '@playwright/test'
-
 import type { Organization } from '@/components/features/problem-selection/model/selection-types'
 import { ROUTES } from '@/i18n/i18n'
 
 import messages from '../messages/en.json'
-import { BACKEND_ORIGIN } from './support/backend-routes'
-import { selectionPath, userMenuCopy } from './support/competitions'
+import { stubOwnOrganizations } from './support/backend-routes'
+import { selectionPath } from './support/competitions'
+import { openUserMenu } from './support/interaction'
 import { expect, test } from './support/test'
 
 /** How long the page has to settle before a wait is called a failure. */
@@ -23,62 +22,7 @@ const TWO_ORGANIZATIONS: Organization[] = [
   { slug: 'mathcomps', name: 'MathComps' },
 ]
 
-/**
- * Stands in for the endpoint the reader's organizations are read from.
- *
- * @param page - The page to intercept the read on.
- * @param organizations - What it answers with.
- *
- * @returns How many times the organizations have been asked for so far.
- */
-async function stubOwnOrganizations(
-  page: Page,
-  organizations: Organization[]
-): Promise<() => number> {
-  // Every lookup that reached the endpoint
-  let lookups = 0
-
-  // Answered with the organizations given, over the ambient answer of none
-  await page.route(`${BACKEND_ORIGIN}/users/me/organizations`, async (route) => {
-    // The organizations were asked for, whatever becomes of it
-    lookups++
-
-    // Answered with the ones given
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(organizations),
-    })
-  })
-
-  // A reader of the count, so the caller sees it climb
-  return () => lookups
-}
-
-/**
- * Opens the header's user menu once the page is up.
- *
- * @param page - The page it is opened on.
- */
-async function openUserMenu(page: Page): Promise<void> {
-  // The menu's button
-  const userMenu = page.getByRole('button', { name: userMenuCopy.label })
-
-  // Drawn once sign-in has settled
-  await expect(userMenu).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
-
-  // Opened
-  await userMenu.click()
-}
-
 test.describe("the user menu's problem selections", () => {
-  test.beforeEach(async ({ page }) => {
-    // The reader's own conversations, which opening either menu reads ahead: none
-    await page.route(`${BACKEND_ORIGIN}/defense/sessions/mine`, (route) =>
-      route.fulfill({ json: [] })
-    )
-  })
-
   test('offers a member each selection they are on, in the order the organizations come', async ({
     page,
   }) => {

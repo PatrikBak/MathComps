@@ -5,11 +5,11 @@ import { ROUTES } from '@/i18n/i18n'
 
 import messages from '../messages/en.json'
 import { addressOf } from './support/address'
-import { BACKEND_ORIGIN } from './support/backend-routes'
-import { LIST_PATH, showRoundHolding, userMenuCopy } from './support/competitions'
+import { LIST_PATH, showRoundHolding } from './support/competitions'
 import { expectDialogFor, expectOnlyNotCounting } from './support/conversation-review'
 import { GROUP_NAME, installGradingBackend } from './support/grading-backend'
 import { installHostedBackend } from './support/hosted-backend'
+import { userMenuCopy } from './support/interaction'
 import { conversationOf, installQueueBackend } from './support/review-backend'
 import { expect, test } from './support/test'
 import { countDialogs } from './support/watchers'
@@ -370,11 +370,6 @@ test.describe('the grading board', () => {
 
     // A backend serving the test group's board, installed second so the dialog reads the board's conversations
     const backend = await installGradingBackend(page, GROUP_SLUG)
-
-    // The reader's own conversations, which opening the menu reads ahead: none
-    await page.route(`${BACKEND_ORIGIN}/defense/sessions/mine`, (route) =>
-      route.fulfill({ json: [] })
-    )
 
     // What the queue's card says while the conversation is unread
     const newMessage = page.getByText('+1 new', { exact: true })

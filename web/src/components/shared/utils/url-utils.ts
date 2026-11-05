@@ -1,3 +1,4 @@
+import { namesTheSameItemsInOrder } from '@/components/shared/utils/collection-utils'
 import { getRequiredEnv } from '@/components/shared/utils/env-utils'
 
 /**
@@ -162,6 +163,27 @@ export function mergeOwnedParams(query: string, ownedParams: readonly string[]):
 
   // The query to put on the address
   return merged.toString()
+}
+
+/**
+ * Whether the address carries every parameter a query names, each with the values the query gives it, in its order.
+ * Parameters the query leaves out don't count, and neither does the order between different parameters.
+ *
+ * @param query - What a writer says, as a query string without its `?`.
+ *
+ * @returns True when the address already says it.
+ */
+export function addressCarries(query: string): boolean {
+  // The address's query as it stands
+  const carried = new URLSearchParams(window.location.search)
+
+  // What the writer says
+  const said = new URLSearchParams(query)
+
+  // Every parameter said, holding the same values on the address
+  return [...new Set(said.keys())].every((param) =>
+    namesTheSameItemsInOrder(carried.getAll(param), said.getAll(param))
+  )
 }
 
 /**

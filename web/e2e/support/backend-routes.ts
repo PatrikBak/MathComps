@@ -1,7 +1,10 @@
 import type { Page, Request, Route } from '@playwright/test'
 
 import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
-import type { DefenseCopy } from '@/components/features/defense/model/defense-types'
+import type {
+  DefenseCopy,
+  DefenseSessionListItem,
+} from '@/components/features/defense/model/defense-types'
 import type { Organization } from '@/components/features/problem-selection/model/selection-types'
 import type { FilterQuery } from '@/components/features/problems/types/problem-api-types'
 import type { UserListsResponse } from '@/components/features/problems/types/user-list-types'
@@ -282,6 +285,9 @@ const NOTHING_SAID: UserProfile = {
 /** A reader on no organization's list, which is every reader a spec doesn't say otherwise of. */
 const NO_ORGANIZATIONS: Organization[] = []
 
+/** A reader who has held no conversation with the examiner. */
+const NO_CONVERSATIONS: DefenseSessionListItem[] = []
+
 /** The greeting the chat opens on, standing in for whatever the backend currently greets with. */
 export const MATHILDA_OPENER: DefenseCopy = { opener: 'Tell me how you got there.' }
 
@@ -317,6 +323,38 @@ async function stubAmbientRead(page: Page, pattern: string, body: unknown): Prom
 }
 
 /**
+ * Stands in for the endpoint the reader's organizations are read from.
+ *
+ * @param page - The page to intercept the read on.
+ * @param organizations - What it answers with.
+ *
+ * @returns How many times the organizations have been asked for so far.
+ */
+export async function stubOwnOrganizations(
+  page: Page,
+  organizations: Organization[]
+): Promise<() => number> {
+  // Every lookup that reached the endpoint
+  let lookups = 0
+
+  // Answered with the organizations given, over the ambient answer of none
+  await page.route(`${BACKEND_ORIGIN}/users/me/organizations`, async (route) => {
+    // The organizations were asked for, whatever becomes of it
+    lookups++
+
+    // Answered with the ones given
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(organizations),
+    })
+  })
+
+  // A reader of the count, so the caller sees it climb
+  return () => lookups
+}
+
+/**
  * Answers the reads a page makes on its own account, with the emptiest thing that renders.
  *
  * A spec that leaves those to whatever the author has running locally passes on that machine and
@@ -337,6 +375,9 @@ export async function stubAmbientReads(page: Page): Promise<void> {
 
   // The organizations the reader is on, which the header asks for
   await stubAmbientRead(page, `${BACKEND_ORIGIN}/users/me/organizations`, NO_ORGANIZATIONS)
+
+  // The reader's own conversations, which opening the header's menu reads ahead
+  await stubAmbientRead(page, `${BACKEND_ORIGIN}/defense/sessions/mine`, NO_CONVERSATIONS)
 
   // The examiner's greeting, which an opened chat shows before it has anything else
   await stubAmbientRead(page, `${BACKEND_ORIGIN}/defense/copy`, MATHILDA_OPENER)

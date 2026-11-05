@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { mergeOwnedParams } from '../url-utils'
+import { addressCarries, mergeOwnedParams } from '../url-utils'
 
 /** The parameters the writer owns in every case. */
 const OWNED_PARAMS = ['category', 'area']
@@ -44,5 +44,33 @@ describe('mergeOwnedParams', () => {
 
     // The problem still open
     expect(merged.get('problem')).toBe('4')
+  })
+})
+
+describe('addressCarries', () => {
+  it('finds a query on an address holding its parameters in another order, among parameters it leaves out', () => {
+    // A problem opened over the filter, written in another order
+    standOn('?area=algebra&problem=4&category=intermediate&category=advanced')
+
+    // Whether the address holds what the filter says
+    const carried = addressCarries('category=intermediate&category=advanced&area=algebra')
+
+    // Held, parameter for parameter
+    expect(carried).toBe(true)
+  })
+
+  it('misses a query whose parameter the address dropped or holds with other values', () => {
+    // An address narrowed to one paper, a problem opened over it
+    standOn('?category=intermediate&problem=4')
+
+    // Whether it holds the filter narrowed to another paper
+    const withOne = addressCarries('category=advanced')
+
+    // Whether it holds the filter narrowed to both papers
+    const withTwo = addressCarries('category=intermediate&category=advanced')
+
+    // Neither held
+    expect(withOne).toBe(false)
+    expect(withTwo).toBe(false)
   })
 })
