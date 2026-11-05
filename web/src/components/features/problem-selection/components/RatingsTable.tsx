@@ -13,6 +13,7 @@ import { isPlainClick } from '@/components/shared/utils/event-utils'
 import type { TableSort } from '@/components/shared/utils/table-sort'
 import { useFocusHandOff } from '@/hooks/use-focus-hand-off'
 import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
+import type { Locale } from '@/i18n/i18n'
 
 import { RATINGS_STARTS_ASCENDING, type RatingsColumn, sortByRatings } from '../model/ratings-order'
 import { averageScore } from '../model/selection-state'
@@ -24,6 +25,7 @@ import {
 } from '../model/selection-types'
 import { NoScore, RatingBreakdown, Score } from './RatingBreakdown'
 import { ProposalLink } from './SelectionLinks'
+import { StatementPreview } from './StatementPreview'
 
 /**
  * Props for the {@link RatingsTable} component.
@@ -31,6 +33,8 @@ import { ProposalLink } from './SelectionLinks'
 type RatingsTableProps = {
   /** The problems, in the order they run, which the table opens in. */
   proposals: readonly Proposal[]
+  /** The language the problems are read in. */
+  language: Locale
   /** How the rows are ordered. */
   sort: TableSort<RatingsColumn>
   /** Orders the rows as asked. */
@@ -41,11 +45,17 @@ type RatingsTableProps = {
 
 /**
  * The problems' ratings as a table: a row per problem with each aspect's average and how many reviewers rated it,
- * ordered by whichever column the reader picks. A plain press anywhere on a row opens its problem, and an average
- * shows who gave what. The raters' column is headed by an icon of people, its name shown on hover and read to
- * assistive tech.
+ * ordered by whichever column the reader picks. A plain press on a row opens its problem, the icon before its name
+ * previews its statement in the language the problems are read in, and an average shows who gave what. The raters'
+ * column is headed by an icon of people, its name shown on hover and read to assistive tech.
  */
-export function RatingsTable({ proposals, sort, onSort, fallbackRef }: RatingsTableProps) {
+export function RatingsTable({
+  proposals,
+  language,
+  sort,
+  onSort,
+  fallbackRef,
+}: RatingsTableProps) {
   // Rating copy
   const t = useTranslations('problemSelection.ratings')
 
@@ -104,7 +114,12 @@ export function RatingsTable({ proposals, sort, onSort, fallbackRef }: RatingsTa
         {/* A row per problem */}
         <tbody>
           {rows.map((proposal) => (
-            <RatingsRow key={proposal.id} proposal={proposal} fallbackRef={fallbackRef} />
+            <RatingsRow
+              key={proposal.id}
+              proposal={proposal}
+              language={language}
+              fallbackRef={fallbackRef}
+            />
           ))}
         </tbody>
       </table>
@@ -118,15 +133,18 @@ export function RatingsTable({ proposals, sort, onSort, fallbackRef }: RatingsTa
 type RatingsRowProps = {
   /** The problem. */
   proposal: Proposal
+  /** The language the problem is being read in. */
+  language: Locale
   /** What takes the focus when the row leaves holding it with no row in its place. */
   fallbackRef: RefObject<HTMLElement | null>
 }
 
 /**
- * One problem's row: its number, its name opening it, each aspect's average, and how many rated it. A row leaving the
- * table while it holds the focus hands the focus on as {@link useFocusHandOff} does.
+ * One problem's row: its number, the preview of its statement, its name opening it, each aspect's average, and how
+ * many rated it. A press on the preview opens only the preview. A row leaving the table while it holds the focus
+ * hands the focus on as {@link useFocusHandOff} does.
  */
-function RatingsRow({ proposal, fallbackRef }: RatingsRowProps) {
+function RatingsRow({ proposal, language, fallbackRef }: RatingsRowProps) {
   // The focus handed on as the row leaves holding it
   const handOff = useFocusHandOff<HTMLTableRowElement>(fallbackRef)
 
@@ -141,21 +159,25 @@ function RatingsRow({ proposal, fallbackRef }: RatingsRowProps) {
         {proposal.number}
       </td>
 
-      {/* The problem's name, opening it */}
+      {/* The preview of the problem's statement, then its name opening it */}
       <th
         scope="row"
         className="w-full max-w-0 py-1 pl-2 pr-2 text-left font-normal sm:px-3 sm:py-1.5"
       >
-        <ProposalLink
-          proposalId={proposal.id}
-          // Named so the table can come back to it, focus and all, once the problem closes, and so a press on the
-          // row finds it
-          {...OPEN_ID_ATTRIBUTE.stamp(proposal.id)}
-          className="block text-foreground group-hover:text-link"
-          plain
-        >
-          <TruncatedText className="font-medium">{proposal.title}</TruncatedText>
-        </ProposalLink>
+        {/* The preview at the cell's start, the name filling the rest of it, cut short where it runs out of room */}
+        <div className="flex items-center gap-1.5">
+          <StatementPreview proposal={proposal} language={language} />
+          <ProposalLink
+            proposalId={proposal.id}
+            // Named so the table can come back to it, focus and all, once the problem closes, and so a press on the
+            // row finds it
+            {...OPEN_ID_ATTRIBUTE.stamp(proposal.id)}
+            className="block min-w-0 flex-1 text-foreground group-hover:text-link"
+            plain
+          >
+            <TruncatedText className="font-medium">{proposal.title}</TruncatedText>
+          </ProposalLink>
+        </div>
       </th>
 
       {/* Each aspect's average */}

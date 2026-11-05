@@ -44,7 +44,8 @@ const LISTS_PROBLEMS: Record<PoolViewMode, boolean> = {
 
 /**
  * Whether each layout of the pool shows the problems' statements, and so, where they need every language, carries the
- * language they are read in. The ratings table names each problem by its title alone, which has no languages.
+ * language they are read in. The ratings table and the discussions name each problem by its title, which has no
+ * languages, and preview its statement in the language the problems are read in.
  */
 const SHOWS_STATEMENTS: Record<PoolViewMode, boolean> = {
   problems: true,
@@ -367,6 +368,7 @@ function PoolLayout({
       ) : (
         <RatingsTable
           proposals={proposals}
+          language={language}
           sort={ratingsSort}
           onSort={onRatingsSort}
           fallbackRef={countRef}
@@ -375,7 +377,7 @@ function PoolLayout({
 
     // Every discussion of the problems and the papers, newest activity first
     case 'comments':
-      return <PoolComments countSlot={commentCountSlot} />
+      return <PoolComments countSlot={commentCountSlot} language={language} />
 
     // Every layout is handled above
     default:

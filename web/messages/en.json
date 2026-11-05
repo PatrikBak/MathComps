@@ -1413,7 +1413,8 @@
     },
     "text": {
       "fallback": "Not in {missing} yet, showing {shown}.",
-      "none": "No text yet."
+      "none": "No text yet.",
+      "preview": "Show the statement"
     },
     "writes": {
       "authReason": "change the selection",

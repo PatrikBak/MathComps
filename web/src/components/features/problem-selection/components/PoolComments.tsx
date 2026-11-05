@@ -23,6 +23,7 @@ import { focusForReader } from '@/components/shared/utils/focus-utils'
 import { hueTextStyle } from '@/components/shared/utils/hue-colors'
 import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
 import { useShowFromTop } from '@/hooks/use-show-from-top'
+import type { Locale } from '@/i18n/i18n'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import { type DrawnThread, useDrawnThreads } from '../hooks/use-drawn-threads'
@@ -38,6 +39,7 @@ import { PoolSkeleton } from './PoolSkeleton'
 import { ProposalBox } from './ProposalBody'
 import { DetailLink } from './SelectionLinks'
 import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
+import { StatementPreview } from './StatementPreview'
 
 /**
  * Props for the {@link PoolComments} component.
@@ -45,18 +47,21 @@ import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceP
 type PoolCommentsProps = {
   /** Where the line over the pool says how many comments show, once it is on the page. */
   countSlot: HTMLElement | null
+  /** The language the problems are read in. */
+  language: Locale
 }
 
 /**
  * The reviewers' discussions of everything the selection holds as one list: every top-level comment with its
  * replies, each under a heading opening its problem or paper on the discussion, every thread {@link usePoolThreads}
- * gives. Anything new anybody else posts while the list is open waits behind a button, so it never moves the list
- * under the reader. The reader's own writes show at once, and so do others' edits, reactions and deletions. A problem
- * opened from the list and closed again finds it as it was left. The line over the pool says how many comments the
- * threads hold, that they are on their way, or that they are not to be had. While some comments are new to the
- * reader, it says how many, with the eye marking them seen.
+ * gives. A problem's heading previews its statement in the language the problems are read in. Anything new anybody
+ * else posts while the list is open waits behind a button, so it never moves the list under the reader. The reader's
+ * own writes show at once, and so do others' edits, reactions and deletions. A problem opened from the list and
+ * closed again finds it as it was left. The line over the pool says how many comments the threads hold, that they
+ * are on their way, or that they are not to be had. While some comments are new to the reader, it says how many,
+ * with the eye marking them seen.
  */
-export function PoolComments({ countSlot }: PoolCommentsProps) {
+export function PoolComments({ countSlot, language }: PoolCommentsProps) {
   // Pool copy
   const t = useTranslations('problemSelection.pool')
 
@@ -150,7 +155,9 @@ export function PoolComments({ countSlot }: PoolCommentsProps) {
           <WindowVirtualList
             items={drawn}
             keyOf={(item) => threadKeyOf(item.thread)}
-            renderItem={(item) => <PoolThread drawn={item} collapsed={collapsed} />}
+            renderItem={(item) => (
+              <PoolThread drawn={item} collapsed={collapsed} language={language} />
+            )}
             fallbackRef={countRef}
           />
         )}
@@ -277,6 +284,8 @@ type PoolThreadProps = {
   drawn: DrawnThread
   /** Which comments of the tab have their replies folded away. */
   collapsed: UseCollapsedCommentsResult
+  /** The language the problems are read in. */
+  language: Locale
 }
 
 /**
@@ -284,7 +293,7 @@ type PoolThreadProps = {
  * deleted and reacted to in place, the way it is on its problem's or paper's own page, the reply shared with every
  * other thread in the tab, and what in it is new to the reader shows as such.
  */
-function PoolThread({ drawn, collapsed }: PoolThreadProps) {
+function PoolThread({ drawn, collapsed, language }: PoolThreadProps) {
   // The thread, how the comment components draw it, and how far its discussion is seen
   const { thread, comments, newness } = drawn
 
@@ -297,7 +306,7 @@ function PoolThread({ drawn, collapsed }: PoolThreadProps) {
   return (
     <ProposalBox as="article">
       {/* Where the thread was posted */}
-      <ThreadHeading subject={thread.subject} />
+      <ThreadHeading subject={thread.subject} language={language} />
 
       {/* The comment and its replies */}
       <div className="mt-3">
@@ -321,13 +330,15 @@ function PoolThread({ drawn, collapsed }: PoolThreadProps) {
 type ThreadHeadingProps = {
   /** What the thread's discussion hangs off. */
   subject: DiscussedSubject
+  /** The language the problems are read in. */
+  language: Locale
 }
 
 /**
  * A thread's heading: its problem's number and name, or its paper's name in its category's colour with the board's
- * name, opening that page on its discussion.
+ * name, opening that page on its discussion. A problem's heading opens with the preview of its statement.
  */
-function ThreadHeading({ subject }: ThreadHeadingProps) {
+function ThreadHeading({ subject, language }: ThreadHeadingProps) {
   // The selection's categories, in the order they run
   const { categories } = useLoadedSelection()
 
@@ -336,6 +347,7 @@ function ThreadHeading({ subject }: ThreadHeadingProps) {
     case 'proposal':
       return (
         <h2 className="text-foreground hyphens-none">
+          <StatementPreview proposal={subject.proposal} language={language} />{' '}
           <DetailLink
             page={{ kind: 'proposal', id: subject.proposal.id, tab: 'comments' }}
             // Named so the list can come back to it, focus and all, once the problem closes

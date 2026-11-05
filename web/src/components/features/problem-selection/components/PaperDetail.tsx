@@ -31,7 +31,8 @@ import { useLoadedSelection } from './SelectionWorkspaceProvider'
 
 /**
  * Whether each tab of a paper's page shows its problems' statements, and so, where they need every language, carries
- * the language they are read in.
+ * the language they are read in. The ratings table names each problem by its title, which has no languages, and
+ * previews its statement in the language the problems are read in.
  */
 const SHOWS_STATEMENTS: Record<PaperTab, boolean> = {
   problems: true,
@@ -203,6 +204,7 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
             // A row for every problem in the paper
             <RatingsTable
               proposals={proposals}
+              language={language}
               sort={choices.ratingsSort ?? DEFAULT_RATINGS_SORT}
               onSort={(ratingsSort) => onChoice({ ratingsSort })}
               fallbackRef={ratingsPanelRef}
