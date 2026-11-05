@@ -7,6 +7,7 @@ import { type UseEditorTextResult } from '../hooks/use-editor-text'
 import { type UseEditorUploadsResult } from '../hooks/use-editor-uploads'
 import { type ToolbarConfig } from './RichMathEditor'
 import { RichMathEditorInputArea } from './RichMathEditorInputArea'
+import { type NumberReferenceRenderer } from './RichMathEditorRenderer'
 import { RichMathEditorToolbar } from './RichMathEditorToolbar'
 
 /**
@@ -29,6 +30,8 @@ type RichMathEditorPaneProps = {
   onKeyDown: KeyboardEventHandler<HTMLTextAreaElement>
   /** Whether the pane offers a preview in place of its text */
   canPreview: boolean
+  /** What a `#N` in the preview is drawn as */
+  renderNumberReference: NumberReferenceRenderer | undefined
   /** Opens the expanded editor, or null where there is none to open */
   onExpand: (() => void) | null
   /** Classes for the box the text is written in */
@@ -47,6 +50,7 @@ export function RichMathEditorPane({
   autoFocus,
   onKeyDown,
   canPreview,
+  renderNumberReference,
   onExpand,
   textClassName,
 }: RichMathEditorPaneProps) {
@@ -80,6 +84,7 @@ export function RichMathEditorPane({
         placeholder={placeholder}
         autoFocus={autoFocus}
         showsPreview={preview.isShown}
+        renderNumberReference={renderNumberReference}
         containerClassName={cn('flex-1 min-h-0', textClassName)}
         className="h-full"
       />

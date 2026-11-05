@@ -6,6 +6,7 @@ import { cn } from '@/components/shared/utils/css-utils'
 import { type UseEditorTextResult } from '../hooks/use-editor-text'
 import { type UseEditorUploadsResult } from '../hooks/use-editor-uploads'
 import { RichMathEditorPreview } from './RichMathEditorPreview'
+import { type NumberReferenceRenderer } from './RichMathEditorRenderer'
 
 /**
  * Props for the {@link RichMathEditorInputArea} component.
@@ -21,6 +22,8 @@ type RichMathEditorInputAreaProps = {
   placeholder: string
   /** Whether the rendered text stands in place of the textarea. */
   showsPreview: boolean
+  /** What a `#N` in the preview is drawn as. */
+  renderNumberReference: NumberReferenceRenderer | undefined
   /** Classes for the drop target the text stands in. */
   containerClassName: string
 } & Omit<
@@ -40,6 +43,7 @@ export function RichMathEditorInputArea({
   onKeyDown,
   placeholder,
   showsPreview,
+  renderNumberReference,
   containerClassName,
   ...textareaProps
 }: RichMathEditorInputAreaProps) {
@@ -92,6 +96,7 @@ export function RichMathEditorInputArea({
       {showsPreview && (
         <RichMathEditorPreview
           content={text.state.text}
+          renderNumberReference={renderNumberReference}
           className="absolute inset-0 overflow-y-auto cursor-auto"
         />
       )}

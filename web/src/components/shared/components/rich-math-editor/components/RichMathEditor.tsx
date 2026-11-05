@@ -13,6 +13,7 @@ import { RichMathEditorFooter } from './RichMathEditorFooter'
 import { RichMathEditorFrame } from './RichMathEditorFrame'
 import { RichMathEditorExpandedModal } from './RichMathEditorModal'
 import { RichMathEditorPane } from './RichMathEditorPane'
+import { type NumberReferenceRenderer } from './RichMathEditorRenderer'
 
 /**
  * Visual variants for the {@link RichMathEditor}, each a fill, or none, for the frame its parts sit in.
@@ -109,6 +110,8 @@ type RichMathEditorProps = {
   isLoading?: boolean
   /** What the surface using the editor counts of its own */
   footerMeta?: ReactNode
+  /** What a `#N` in the preview is drawn as */
+  renderNumberReference?: NumberReferenceRenderer
   /** Handle onto the editor's imperative controls */
   ref?: React.Ref<RichMathEditorRef>
 }
@@ -136,6 +139,7 @@ export function RichMathEditor({
   expandedOnly = false,
   isLoading = false,
   footerMeta,
+  renderNumberReference,
   ref,
 }: RichMathEditorProps) {
   // The limits the text is held to, the same object until a limit changes
@@ -198,6 +202,7 @@ export function RichMathEditor({
               autoFocus={autoFocus}
               onKeyDown={handleKeyDown}
               canPreview
+              renderNumberReference={renderNumberReference}
               onExpand={expanded.open}
             />
 
@@ -227,6 +232,7 @@ export function RichMathEditor({
         uploads={uploads}
         toolbarConfig={toolbar}
         placeholder={placeholder}
+        renderNumberReference={renderNumberReference}
         onStop={onStop}
         isLoading={isLoading}
         footerMeta={footerMeta}
