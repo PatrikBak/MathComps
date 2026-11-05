@@ -10,6 +10,7 @@ import {
   SELECTION_ENDPOINT,
   selectionText,
   stubSelection,
+  untilSelectionReadAgain,
 } from './support/problem-selection'
 import { expect, test } from './support/test'
 
@@ -23,8 +24,11 @@ const RESORT = selectionText('pool.resort')
  * @param page - The page, its pool drawn.
  */
 async function leaveOrderOutOfDate(page: Page): Promise<void> {
-  // The menu on the geometry problem's card
-  await actionsButton(cardOf(page, GEOMETRY), GEOMETRY).click()
+  // The button opening the geometry problem's menu
+  const menuButton = actionsButton(cardOf(page, GEOMETRY), GEOMETRY)
+
+  // The menu, opened
+  await menuButton.click()
 
   // The answer to the read after the write
   const readAfterWrite = page.waitForResponse(SELECTION_ENDPOINT)
@@ -37,6 +41,9 @@ async function leaveOrderOutOfDate(page: Page): Promise<void> {
 
   // The menu, closed from the keyboard
   await page.keyboard.press('Escape')
+
+  // Closed for good once the focus is back on the menu's button, the last thing the menu does as it closes
+  await expect(menuButton).toBeFocused()
 }
 
 test.describe('the button showing a change a list holds back', () => {
@@ -96,14 +103,8 @@ test.describe('the button showing a change a list holds back', () => {
     // A colleague taking the change back, as the backend holds the selection as it began
     answerSelectionWith('selection')
 
-    // The next read
-    const nextRead = page.waitForResponse(SELECTION_ENDPOINT)
-
-    // Long enough for the selection to be read again
-    await page.clock.fastForward('00:31')
-
-    // Once it has landed
-    await nextRead
+    // The selection, read again once the category's write has stopped holding the read back
+    await untilSelectionReadAgain(page)
 
     // The button gone, nothing waiting
     await expect(button).toHaveCount(0)

@@ -9,6 +9,7 @@ import {
 import digits from '@/content/handouts/digits.en.json'
 
 import { expect, test } from './support/test'
+import { recordScrolls } from './support/watchers'
 
 /** The handout the links point into, a long one, so landing on any anchor in it means scrolling down to it. */
 const HANDOUT_PATH = '/en/handouts/digits'
@@ -116,6 +117,9 @@ test.describe('a hash link into a handout', () => {
     // The reader back up at the top, with the hash still in the address bar
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
 
+    // Whatever moves the reloaded page, recorded as it happens
+    const scrolls = await recordScrolls(page)
+
     // The same address, reloaded
     await page.reload()
 
@@ -147,7 +151,7 @@ test.describe('a hash link into a handout', () => {
       RELOAD_WATCH_MS
     )
 
-    // Never left the top
-    expect(furthestScroll).toBe(0)
+    // Never left the top, and what moved it if it did, which tells the page's own code from the browser
+    expect(furthestScroll, scrolls().join('\n')).toBe(0)
   })
 })

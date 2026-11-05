@@ -19,7 +19,7 @@ import {
 } from './support/competitions'
 import { installHostedBackend, SESSION_LIST_ADDRESS } from './support/hosted-backend'
 import { SCRIPTED_REPLIES } from './support/hosted-backend-content'
-import { selectedTab } from './support/interaction'
+import { isKeptInStorage, selectedTab } from './support/interaction'
 import {
   ARGUED,
   ARGUED_EARLIER,
@@ -40,12 +40,12 @@ import {
   rememberedSelection,
   REVIEWER,
   REVISION,
-  SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
   SETTLE_TIMEOUT_MS,
   stubSelection,
   tabRowOn,
+  untilSelectionReadAgain,
 } from './support/problem-selection'
 import { expect, test } from './support/test'
 import { countDialogs } from './support/watchers'
@@ -112,13 +112,16 @@ function isCommentSend(request: Request): boolean {
 
 /**
  * Sends what a box holds and goes back to the pool before the backend answers, letting the answer through only once
- * the discussion is off screen.
+ * the discussion is off screen, and waits for the page to have taken that answer in.
  *
  * @param page - The page.
  * @param box - The box holding what is sent.
  * @param discussion - The gate in front of every call into the discussion.
  */
 async function sendThenLeave(page: Page, box: Locator, discussion: AnswerGate): Promise<void> {
+  // What is sent, which the page keeps as a draft until the send goes through
+  const draft = await box.inputValue()
+
   // Every answer from the discussion held from here
   const release = discussion.hold()
 
@@ -145,6 +148,9 @@ async function sendThenLeave(page: Page, box: Locator, discussion: AnswerGate): 
 
   // And landed
   await answered
+
+  // Taken in by the page too, which forgets the kept draft once the answer says the send went through
+  await expect.poll(() => isKeptInStorage(page, draft), { timeout: SETTLE_TIMEOUT_MS }).toBe(false)
 }
 
 /**
@@ -208,27 +214,6 @@ function openedCommentSeen(): ReturnType<typeof rememberedSelection> {
 
   // The memory
   return memory
-}
-
-/**
- * Lets time run on until the page reads the selection again on its own. The page holds that read back while one of
- * its own writes is out, such as marking an opened conversation read, and starts the wait over once the write lands.
- * So the clock keeps jumping until a read goes out.
- *
- * @param page - The page.
- */
-async function untilSelectionReadAgain(page: Page): Promise<void> {
-  // Jumped forward until a read goes out
-  await expect(async () => {
-    // The next read's answer
-    const answered = page.waitForResponse(SELECTION_ENDPOINT, { timeout: LANDING_WINDOW_MS })
-
-    // Long enough for the selection to be read again
-    await page.clock.fastForward('00:31')
-
-    // Once it has landed
-    await answered
-  }).toPass({ timeout: SETTLE_TIMEOUT_MS })
 }
 
 test.describe('what reviewers said about a problem', () => {

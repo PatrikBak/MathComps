@@ -155,6 +155,14 @@ export type HostedBackend = {
    * @param lookup - The lookup.
    */
   statementsFrom: (lookup: StatementLookup) => void
+
+  /**
+   * How many turns into a conversation already open have reached the backend so far, each counted once it carries
+   * the instant it arrived.
+   *
+   * @returns The count.
+   */
+  turnsReceived: () => number
 }
 
 /**
@@ -292,6 +300,7 @@ export async function installHostedBackend(
     assessments: new Map(),
     handoutSession: HANDOUT_SESSION,
     minted: 0,
+    turnsReceived: 0,
   }
 
   // Whatever was already said inside an entry the state opens with
@@ -798,6 +807,9 @@ export async function installHostedBackend(
     // after the reply was written would spend the examiner's thinking time out of the student's clock.
     const receivedAt = await pageNow(page)
 
+    // The turn counted as received, its arrival stamped
+    state.turnsReceived++
+
     // Take as long over the turn as every call takes
     await think(page)
 
@@ -832,6 +844,9 @@ export async function installHostedBackend(
     state.statementsOutside = lookup
   }
 
+  // A function which counts the turns into an open conversation that have reached the backend
+  const turnsReceived = () => state.turnsReceived
+
   // The memory, as a spec reads it back and tells it about
-  return { sessionsAbout, statementsFrom }
+  return { sessionsAbout, statementsFrom, turnsReceived }
 }

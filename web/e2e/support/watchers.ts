@@ -8,6 +8,8 @@ declare global {
     isWatchingNotices?: boolean
     /** Tells the test run that a dialog has reached the page. */
     reportDialog: () => void
+    /** Hands the test run one call the page made that can scroll it, or the scroll that took it off the top. */
+    reportScroll: (entry: string) => void
   }
 }
 
@@ -137,4 +139,111 @@ export async function countDialogs(page: Page): Promise<() => number> {
 
   // Hand back the count on each read
   return () => dialogs
+}
+
+/**
+ * Records every call the page's own code makes that can scroll it, and the first scroll that takes it off the top,
+ * in every document from the next one on.
+ *
+ * A page found off the top says only where it ended up, never what moved it. Written down as they happen, the calls
+ * do: a page that moved with none of them recorded was moved by the browser, or by a hash the code set.
+ *
+ * @param page - The page to watch, before the document under test loads.
+ *
+ * @returns Everything recorded so far, oldest first, each with when it happened.
+ */
+export async function recordScrolls(page: Page): Promise<() => string[]> {
+  // Everything recorded, in the order it happened
+  const scrolls: string[] = []
+
+  // The channel the page hands each one back through, each recorded as it arrives
+  await page.exposeFunction('reportScroll', (entry: string) => {
+    scrolls.push(entry)
+  })
+
+  // Every document from the next one on, set up before any of its own scripts run
+  await page.addInitScript(() => {
+    // A function which hands over one call the page's code made, with when and the stack that made it
+    const report = (call: string) =>
+      window.reportScroll(`${call} at ${Math.round(performance.now())}ms\n${new Error().stack}`)
+
+    // A function which has one of an object's methods hand itself over before it runs
+    const watch = (owner: object, method: string, call: string) => {
+      // The method as the browser gives it
+      const original = Reflect.get(owner, method) as (...args: unknown[]) => unknown
+
+      // The same method, handed over first
+      Reflect.set(owner, method, function (this: unknown, ...args: unknown[]) {
+        // The call, handed over
+        report(call)
+
+        // And run as asked
+        return Reflect.apply(original, this, args)
+      })
+    }
+
+    // The window's and the elements' scrolling methods, and the focus, which scrolls to what it lands on
+    watch(window, 'scroll', 'window.scroll')
+    watch(window, 'scrollTo', 'window.scrollTo')
+    watch(window, 'scrollBy', 'window.scrollBy')
+    watch(Element.prototype, 'scroll', 'element.scroll')
+    watch(Element.prototype, 'scrollTo', 'element.scrollTo')
+    watch(Element.prototype, 'scrollBy', 'element.scrollBy')
+    watch(Element.prototype, 'scrollIntoView', 'scrollIntoView')
+    watch(HTMLElement.prototype, 'focus', 'focus')
+
+    // The browser's own scroll offset of an element, read and set
+    const scrollTop = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollTop')!
+
+    // The page's own offset, handed over whenever the page's code sets it
+    Object.defineProperty(Element.prototype, 'scrollTop', {
+      ...scrollTop,
+      set(this: Element, value: number) {
+        // Only the page's own offset moves the page
+        if (this === document.scrollingElement) report(`scrollTop = ${value}`)
+
+        // And set as asked
+        scrollTop.set!.call(this, value)
+      },
+    })
+
+    // A function which hands over the first scroll that takes the page off the top, however it came about
+    const reportLeavingTop = () => {
+      // Still at the top
+      if (window.scrollY === 0) return
+
+      // Only the first one away from it
+      window.removeEventListener('scroll', reportLeavingTop)
+
+      // The element the hash names, as the page holds it at that moment
+      const target = document.getElementById(window.location.hash.slice(1))
+
+      // Where that element stood: nowhere, out of sight in the page's hidden placeholder, or on the page
+      const targetState =
+        target === null
+          ? 'missing'
+          : target.checkVisibility()
+            ? `showing at ${Math.round(target.getBoundingClientRect().top + window.scrollY)}px`
+            : 'hidden'
+
+      // How the document was reached
+      const [navigation] = performance.getEntriesByType(
+        'navigation'
+      ) as PerformanceNavigationTiming[]
+
+      // Where the page went, when, how it stood, and how it was reached
+      window.reportScroll(
+        `off the top to ${window.scrollY}px at ${Math.round(performance.now())}ms, ` +
+          `the page ${document.documentElement.scrollHeight}px tall and ${document.readyState}, ` +
+          `the target ${targetState}, after a ${navigation?.type} with ${window.history.scrollRestoration} ` +
+          'scroll restoration'
+      )
+    }
+
+    // Every scroll the page makes, listened to until one leaves the top
+    window.addEventListener('scroll', reportLeavingTop, { passive: true })
+  })
+
+  // Hand back a snapshot on each read
+  return () => [...scrolls]
 }
