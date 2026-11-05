@@ -5,6 +5,7 @@ import React, { useCallback } from 'react'
 
 import { MAX_CHARACTERS_PER_COMMENT } from '@/components/features/comments/model/comment-limits'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
+import type { NumberReferenceRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { useIsMobile } from '@/hooks/use-breakpoint'
 
 import type { UseCollapsedCommentsResult } from '../hooks/use-collapsed-comments'
@@ -43,6 +44,8 @@ type CommentListProps = {
   collapsed: UseCollapsedCommentsResult
   /** How far the reader has seen the thread. */
   newness: CommentNewness
+  /** What a `#N` in a comment is drawn as. */
+  renderNumberReference?: NumberReferenceRenderer
 }
 
 /**
@@ -58,6 +61,7 @@ export function CommentList({
   reply,
   collapsed,
   newness,
+  renderNumberReference,
 }: CommentListProps) {
   // The reader, the name they sign comments with, and how much of that is known yet
   const { userId, isSignInLoaded, username, isIdentityLoaded } = useCommentReader()
@@ -184,6 +188,7 @@ export function CommentList({
             {replies.map((nested) => renderSingleComment(nested))}
           </>
         }
+        renderNumberReference={renderNumberReference}
       />
     )
   }

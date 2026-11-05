@@ -20,7 +20,10 @@ import {
   RichMathEditor,
   type RichMathEditorVariant,
 } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
-import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
+import {
+  type NumberReferenceRenderer,
+  RichMathEditorRenderer,
+} from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { Tooltip } from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -93,6 +96,8 @@ type CommentItemProps = Omit<CommentData, 'id' | 'authorId' | 'replies'> & {
   replyInputNode?: React.ReactNode
   /** The comment's rendered replies. */
   repliesNode: React.ReactNode
+  /** What a `#N` in the comment is drawn as. */
+  renderNumberReference?: NumberReferenceRenderer
 }
 
 /**
@@ -122,6 +127,7 @@ export function CommentItem({
   onDelete,
   replyInputNode,
   repliesNode,
+  renderNumberReference,
 }: CommentItemProps) {
   // Whether the comment is currently being edited
   const [isEditing, setIsEditing] = useState(false)
@@ -390,7 +396,11 @@ export function CommentItem({
           ) : (
             // The comment's content otherwise
             <div className="text-sm text-muted-foreground leading-relaxed mb-1.5">
-              <RichMathEditorRenderer content={content} imageContext="userUploads" />
+              <RichMathEditorRenderer
+                content={content}
+                imageContext="userUploads"
+                renderNumberReference={renderNumberReference}
+              />
             </div>
           )}
         </div>

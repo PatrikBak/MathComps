@@ -13,6 +13,7 @@ import { type Locale, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
 import { useDetailTab } from '../hooks/use-detail-tab'
 import { usePaperCommentCount } from '../hooks/use-paper-comment-count'
+import { useProposalReference } from '../hooks/use-proposal-reference'
 import { useSubjectDiscussion } from '../hooks/use-subject-discussion'
 import { DEFAULT_RATINGS_SORT, type RatingsColumn } from '../model/ratings-order'
 import { PAPER_TABS, type PaperTab } from '../model/selection-routes'
@@ -143,6 +144,9 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
       ? (SUPPORTED_LOCALES.find((candidate) => !unwritten.includes(candidate)) ?? poolLanguage)
       : poolLanguage)
 
+  // What a `#N` in a comment is drawn as
+  const renderNumberReference = useProposalReference(language)
+
   // How many comments the paper's discussion holds
   const commentCount = usePaperCommentCount(paper.id)
 
@@ -231,6 +235,7 @@ function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: Pape
             showEmptyText={false}
             target={{ targetType: 'SelectionPaper', targetId: paper.id }}
             newness={discussion.newness}
+            renderNumberReference={renderNumberReference}
           />
         </div>
       ),
