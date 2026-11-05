@@ -878,6 +878,42 @@ test.describe('the ratings table', () => {
     ])
   })
 
+  test("previews a problem's statement from the icon before its name, a press on the icon opening nothing", async ({
+    page,
+  }) => {
+    // A selection three of whose problems on offer are rated
+    await stubSelection(page, 'rated')
+
+    // The pool, laid out as ratings by its address
+    await page.goto(`${SELECTION_PATH}?${POOL_VIEW_PARAM}=ratings`)
+
+    // The algebra problem's preview
+    const preview = rowOf(page, ALGEBRA).getByRole('button', {
+      name: selectionText('text.preview'),
+    })
+
+    // Hovered
+    await preview.hover({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The algebra problem's statement
+    await expect(page.getByRole('tooltip')).toContainText(`Part 1 of problem ${ALGEBRA.number}.`)
+
+    // Pressed, which leaves the problem shut
+    await preview.click()
+
+    // The first problem, opened from its name
+    await rowOf(page, FIRST).getByRole('link').click()
+
+    // The first problem's own page
+    await expect(headingOf(page, FIRST)).toBeVisible()
+
+    // Back
+    await page.goBack()
+
+    // The table, one step back, so the press on the preview opened no page between the two
+    await expect(rowHeadings(page)).toHaveText(IN_POOL_ORDER.map((proposal) => proposal.title))
+  })
+
   test("opens in the pool's order, then orders the rows by an aspect from the highest, then turned round, the problems nobody scored last either way", async ({
     page,
   }) => {

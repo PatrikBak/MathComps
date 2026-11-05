@@ -1413,7 +1413,8 @@
     },
     "text": {
       "fallback": "Zatiaľ chýba {missing}, zobrazuje sa {shown}.",
-      "none": "Zatiaľ bez textu."
+      "none": "Zatiaľ bez textu.",
+      "preview": "Zobraziť zadanie"
     },
     "writes": {
       "authReason": "úpravu výberu úloh",
