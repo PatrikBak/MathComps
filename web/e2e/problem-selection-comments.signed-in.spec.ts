@@ -7,12 +7,16 @@ import {
   OPEN_PROPOSAL_PARAM,
   POOL_VIEW_PARAM,
 } from '@/components/features/problem-selection/model/selection-routes'
-import type { Proposal } from '@/components/features/problem-selection/model/selection-types'
+import type {
+  Organization,
+  Proposal,
+} from '@/components/features/problem-selection/model/selection-types'
+import { ROUTES } from '@/i18n/i18n'
 
 import messages from '../messages/en.json'
 import { locationParam } from './support/address'
 import { createAnswerGate, gateReads } from './support/answer-gate'
-import { BACKEND_ORIGIN, refuse } from './support/backend-routes'
+import { BACKEND_ORIGIN, refuse, stubOwnOrganizations } from './support/backend-routes'
 import {
   READER_ID,
   READER_NAME,
@@ -23,7 +27,7 @@ import {
 } from './support/comments'
 import { SELECTION_PATH } from './support/competitions'
 import { stubPageVisibility } from './support/emulation'
-import { selectedTab } from './support/interaction'
+import { openUserMenu, selectedTab } from './support/interaction'
 import {
   ALGEBRA,
   BILINGUAL,
@@ -47,6 +51,7 @@ import {
   stubSelection,
   tabRowOn,
 } from './support/problem-selection'
+import { MATHCOMPS_ORGANIZATION_SLUG } from './support/selection-writes'
 import { expect, test } from './support/test'
 
 /** The copy a thread reads under. */
@@ -57,6 +62,12 @@ const ELEMENTARY = DRAFT_BOARD.papers[0]
 
 /** Where the pool lives, laid out as its discussions. */
 const COMMENTS_ADDRESS = `${SELECTION_PATH}?${POOL_VIEW_PARAM}=comments`
+
+/** A page other than the selection, with nothing on it but the header. */
+const ABOUT_PATH = `/en${ROUTES.ABOUT}`
+
+/** The organization whose selection is on screen, as the user menu lists it. */
+const MATHCOMPS: Organization = { slug: MATHCOMPS_ORGANIZATION_SLUG, name: 'MathComps' }
 
 /** What Zuzana asks in {@link FIRST}'s discussion. */
 const FIRST_REMARK = 'Is this not too easy?'
@@ -652,6 +663,119 @@ test.describe("the pool's discussions", () => {
     await expect(poolView(page, selectionCopy.pool.views.comments)).toBeChecked()
     await expect(threadHeadings(page)).toHaveCount(4)
     expect(await locationParam(page, POOL_VIEW_PARAM)).toBe('comments')
+  })
+
+  test('keeps its layout and search, and names both in the address, once the user menu opens the same selection', async ({
+    page,
+  }) => {
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', discussedSelection())
+
+    // A reader on the selection's organization's list
+    await stubOwnOrganizations(page, [MATHCOMPS])
+
+    // The pool searched down to one problem by a link, the layout left to be picked
+    await page.goto(`${SELECTION_PATH}?${new URLSearchParams({ q: READY.title })}`)
+
+    // The pool's search box
+    const search = page.getByRole('searchbox', { name: selectionCopy.pool.search })
+
+    // Holding the search the link named
+    await expect(search).toHaveValue(READY.title, { timeout: SETTLE_TIMEOUT_MS })
+
+    // The pool laid out as its discussions
+    await showPoolAs(page, selectionCopy.pool.views.comments)
+
+    // The search and the layout named in the address
+    await expect
+      .poll(() => locationParam(page, 'q'), { timeout: SETTLE_TIMEOUT_MS })
+      .toBe(READY.title)
+    await expect.poll(() => locationParam(page, POOL_VIEW_PARAM)).toBe('comments')
+
+    // How many steps history holds before the menu's link is taken
+    const steps = await page.evaluate(() => window.history.length)
+
+    // The user menu open
+    await openUserMenu(page)
+
+    // The same selection picked in it
+    await page.getByRole('menuitem', { name: MATHCOMPS.name }).click()
+
+    // The link taken, a new step in history
+    await expect
+      .poll(() => page.evaluate(() => window.history.length), { timeout: SETTLE_TIMEOUT_MS })
+      .toBe(steps + 1)
+
+    // The search and the layout named in the address again
+    await expect
+      .poll(() => locationParam(page, 'q'), { timeout: SETTLE_TIMEOUT_MS })
+      .toBe(READY.title)
+    await expect.poll(() => locationParam(page, POOL_VIEW_PARAM)).toBe('comments')
+
+    // The pool still laid out as its discussions
+    await expect(poolView(page, selectionCopy.pool.views.comments)).toBeChecked()
+    await expect(threadHeadings(page)).toHaveCount(4)
+
+    // Laid out as its problems again
+    await showPoolAs(page, selectionCopy.pool.views.problems)
+
+    // Still searched down to the one problem
+    await expect(search).toHaveValue(READY.title)
+  })
+
+  test('follows a step back to the layout its step holds, the selection reached from the user menu', async ({
+    page,
+  }) => {
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', discussedSelection())
+
+    // A reader on the selection's organization's list
+    await stubOwnOrganizations(page, [MATHCOMPS])
+
+    // A page other than the selection
+    await page.goto(ABOUT_PATH)
+
+    // The user menu open
+    await openUserMenu(page)
+
+    // The selection picked in it
+    await page.getByRole('menuitem', { name: MATHCOMPS.name }).click()
+
+    // The pool laid out as its discussions
+    await showPoolAs(page, selectionCopy.pool.views.comments)
+
+    // Once every thread is drawn
+    await expect(threadHeadings(page)).toHaveCount(4, { timeout: SETTLE_TIMEOUT_MS })
+
+    // The first problem, opened from its thread's heading
+    await threadOf(page, FIRST).getByRole('link').first().click()
+
+    // The first problem's own page
+    await expect(headingOf(page, FIRST)).toBeVisible()
+
+    // Back to the pool by the link on the problem's page, a new step in history
+    await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
+
+    // The pool laid out as its ratings
+    await showPoolAs(page, selectionCopy.pool.views.ratings)
+
+    // The ratings named in the address
+    await expect.poll(() => locationParam(page, POOL_VIEW_PARAM)).toBe('ratings')
+
+    // A step back, onto the problem opened over the discussions
+    await page.goBack()
+
+    // The first problem's page again
+    await expect(headingOf(page, FIRST)).toBeVisible()
+
+    // The discussions, as that step holds them
+    await expect.poll(() => locationParam(page, POOL_VIEW_PARAM)).toBe('comments')
+
+    // Back to the pool by the link on the problem's page
+    await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
+
+    // Laid out as the discussions
+    await expect(poolView(page, selectionCopy.pool.views.comments)).toBeChecked()
   })
 
   test("shows every discussion whatever the pool's filters, the set-aside problem's among them, with none of the filters over it", async ({

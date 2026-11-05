@@ -1,6 +1,29 @@
 import type { Locator, Page } from '@playwright/test'
 
+import messages from '../../messages/en.json'
 import { expect } from './test'
+
+/** The labels the header's user menu reads under. */
+export const userMenuCopy = messages.ui.userMenu
+
+/** How long sign-in has to settle before the header's user menu is called missing. */
+const SIGN_IN_TIMEOUT_MS = 15_000
+
+/**
+ * Opens the header's user menu once the page is up.
+ *
+ * @param page - The page it is opened on.
+ */
+export async function openUserMenu(page: Page): Promise<void> {
+  // The menu's button
+  const userMenu = page.getByRole('button', { name: userMenuCopy.label })
+
+  // Drawn once sign-in has settled
+  await expect(userMenu).toBeVisible({ timeout: SIGN_IN_TIMEOUT_MS })
+
+  // Opened
+  await userMenu.click()
+}
 
 /**
  * Whether an element shows the ring a browser draws around focus it lets the reader see.
