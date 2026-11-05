@@ -2,7 +2,7 @@
 
 import { ArrowDownUp, Search, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { type ReactNode, type RefObject, useCallback, useState } from 'react'
+import { type ReactNode, type RefObject, useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
@@ -13,6 +13,7 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { focusForReader } from '@/components/shared/utils/focus-utils'
 import type { TableSort } from '@/components/shared/utils/table-sort'
+import { useLastElement } from '@/hooks/use-last-element'
 import { useResortableOrder } from '@/hooks/use-resortable-order'
 import type { Locale } from '@/i18n/i18n'
 
@@ -164,15 +165,9 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
   // How the ratings table orders its rows, kept while nothing matches and while the cards show
   const [ratingsSort, setRatingsSort] = useState(DEFAULT_RATINGS_SORT)
 
-  // Where the discussions say how many comments they show, once it is on the page
-  const [commentCountSlot, setCommentCountSlot] = useState<HTMLSpanElement | null>(null)
-
-  // A function which keeps the comment count's place once it is on the page, as it stays while the pool hides
-  // behind a page
-  const keepCommentCountSlot = useCallback((slot: HTMLSpanElement | null) => {
-    // Kept only as it arrives
-    if (slot !== null) setCommentCountSlot(slot)
-  }, [])
+  // Where the discussions say how many comments they show, once it is on the page, kept while the pool hides behind
+  // a page, and the ref handing it over
+  const [commentCountSlot, keepCommentCountSlot] = useLastElement<HTMLSpanElement>()
 
   // The problems the filters let through, each kept where it stood when their order was last set, whether a change
   // waits, the spot over the list the page comes back to, and the way to set the order again from there
