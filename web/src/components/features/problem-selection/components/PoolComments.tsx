@@ -15,6 +15,7 @@ import { countAllComments } from '@/components/features/comments/utils/comment-u
 import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
+import type { NumberReferenceRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { WaitingChangeButton } from '@/components/shared/components/WaitingChangeButton'
 import { WindowVirtualList } from '@/components/shared/components/WindowVirtualList'
 import { assertNever } from '@/components/shared/utils/assert-never'
@@ -28,6 +29,7 @@ import type { QueryUiState } from '@/lib/query-ui-state'
 
 import { type DrawnThread, useDrawnThreads } from '../hooks/use-drawn-threads'
 import { usePoolThreads } from '../hooks/use-pool-threads'
+import { useProposalReference } from '../hooks/use-proposal-reference'
 import {
   type DiscussedSubject,
   discussionTargetOf,
@@ -115,6 +117,9 @@ export function PoolComments({ countSlot, language }: PoolCommentsProps) {
   // Which comments of the list have their replies folded away
   const collapsed = useCollapsedComments()
 
+  // What a `#N` in a comment is drawn as
+  const renderNumberReference = useProposalReference(language)
+
   // The read still to land, or given up before it did
   if (threads === null) {
     return (
@@ -156,7 +161,12 @@ export function PoolComments({ countSlot, language }: PoolCommentsProps) {
             items={drawn}
             keyOf={(item) => threadKeyOf(item.thread)}
             renderItem={(item) => (
-              <PoolThread drawn={item} collapsed={collapsed} language={language} />
+              <PoolThread
+                drawn={item}
+                collapsed={collapsed}
+                language={language}
+                renderNumberReference={renderNumberReference}
+              />
             )}
             fallbackRef={countRef}
           />
@@ -286,6 +296,8 @@ type PoolThreadProps = {
   collapsed: UseCollapsedCommentsResult
   /** The language the problems are read in. */
   language: Locale
+  /** What a `#N` in a comment is drawn as. */
+  renderNumberReference: NumberReferenceRenderer
 }
 
 /**
@@ -293,7 +305,7 @@ type PoolThreadProps = {
  * deleted and reacted to in place, the way it is on its problem's or paper's own page, the reply shared with every
  * other thread in the tab, and what in it is new to the reader shows as such.
  */
-function PoolThread({ drawn, collapsed, language }: PoolThreadProps) {
+function PoolThread({ drawn, collapsed, language, renderNumberReference }: PoolThreadProps) {
   // The thread, how the comment components draw it, and how far its discussion is seen
   const { thread, comments, newness } = drawn
 
@@ -318,6 +330,7 @@ function PoolThread({ drawn, collapsed, language }: PoolThreadProps) {
           reply={reply}
           collapsed={collapsed}
           newness={newness}
+          renderNumberReference={renderNumberReference}
         />
       </div>
     </ProposalBox>

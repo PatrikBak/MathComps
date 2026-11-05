@@ -15,13 +15,14 @@ import { rehypeMathNowrap } from '../plugins/rehype-math-nowrap'
 import { remarkImageParams } from '../plugins/remark-image-params'
 import { remarkInlineQuote } from '../plugins/remark-inline-quote'
 import { remarkListStyle } from '../plugins/remark-list-style'
+import { NUMBER_REFERENCE_NUMBER, NUMBER_REFERENCE_TAG } from '../plugins/remark-number-references'
 import { remarkSpoiler } from '../plugins/remark-spoiler'
 import { hasUnbalancedDollars } from './math-delimiters'
 import { preprocessDisplayMath } from './preprocessors'
 
 /**
  * Custom sanitization schema extending the default GitHub schema.
- * Allows our `<spoiler>` element and KaTeX MathML output while blocking
+ * Allows our `<spoiler>` and `#N` reference elements and KaTeX MathML output while blocking
  * XSS vectors like `<script>`, event handlers, and CSS defacement via `style`.
  *
  * The sanitizer runs BEFORE KaTeX, so KaTeX-generated styles are unaffected.
@@ -32,6 +33,8 @@ const sanitizeSchema: SanitizeOptions = {
     ...(defaultSchema.tagNames ?? []),
     // Custom element for spoilers
     'spoiler',
+    // Custom element for a `#N` in the text
+    NUMBER_REFERENCE_TAG,
     // MathML tags for accessibility (KaTeX can output these)
     'math',
     'mi',
@@ -44,6 +47,8 @@ const sanitizeSchema: SanitizeOptions = {
     ...defaultSchema.attributes,
     // Allow the "label" attribute on the custom <spoiler> element (carries the spoiler's button text)
     spoiler: ['label'],
+    // Allow the number a `#N` reference names
+    [NUMBER_REFERENCE_TAG]: [NUMBER_REFERENCE_NUMBER],
     // Only allow "language-*" classes (syntax highlighting)
     code: [['className', /^language-/]],
     // Only allow "math-*" classes (remark-math generates "math-inline" and "math-display")

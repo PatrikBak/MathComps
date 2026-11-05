@@ -9,6 +9,7 @@ import { UsernameGate } from '@/components/features/profile/components/UsernameG
 import { LoginButton } from '@/components/login/LoginButton'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
+import type { NumberReferenceRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { hasValidContent } from '@/components/shared/components/rich-math-editor/utils/preprocessors'
 import { cn } from '@/components/shared/utils/css-utils'
 import { usePersistentDraft } from '@/hooks/use-persistent-draft'
@@ -45,6 +46,8 @@ type CommentSectionProps = {
   autoFocus?: boolean
   /** How far the reader has seen the thread. */
   newness?: CommentNewness
+  /** What a `#N` in a comment is drawn as. */
+  renderNumberReference?: NumberReferenceRenderer
 }
 
 /**
@@ -58,6 +61,7 @@ export function CommentSection({
   showEmptyText = true,
   autoFocus = false,
   newness = { kind: 'untracked' },
+  renderNumberReference,
 }: CommentSectionProps) {
   // The reader, the name they sign comments with, and how much of that is known yet
   const { userId, isSignInLoaded, username, isIdentityLoaded } = useCommentReader()
@@ -195,6 +199,7 @@ export function CommentSection({
                 reply={reply}
                 collapsed={collapsed}
                 newness={newness}
+                renderNumberReference={renderNumberReference}
               />
             ) : (
               // The note that there are none, with a sign-in button for a visitor

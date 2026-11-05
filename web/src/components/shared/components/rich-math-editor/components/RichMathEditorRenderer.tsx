@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl'
-import { memo, type ReactNode } from 'react'
-import Markdown, { type Components } from 'react-markdown'
+import { memo, type PropsWithChildren, type ReactNode } from 'react'
+import Markdown, { type Components, type ExtraProps } from 'react-markdown'
 
 import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -10,6 +10,11 @@ import {
   resolveUserUploadMediaUrl,
 } from '@/components/shared/utils/media-utils'
 
+import {
+  NUMBER_REFERENCE_NUMBER,
+  NUMBER_REFERENCE_TAG,
+  remarkNumberReferences,
+} from '../plugins/remark-number-references'
 import { parseImageUrl } from '../utils/image-url-params'
 import {
   rehypePlugins as sharedRehypePlugins,
@@ -17,6 +22,11 @@ import {
 } from '../utils/markdown-pipeline'
 import { preprocessDisplayMath } from '../utils/preprocessors'
 import { RichMathEditorSpoiler } from './RichMathEditorSpoiler'
+
+/**
+ * What a `#N` in rendered content is drawn as, given N; null leaves the `#N` as text.
+ */
+export type NumberReferenceRenderer = (number: number) => ReactNode
 
 /**
  * Props for the {@link RichMathEditorRenderer} component.
@@ -30,6 +40,8 @@ type RichMathEditorRendererProps = {
    * white card. Omit only for content that carries no figures.
    */
   imageContext?: ImageContext
+  /** What a `#N` in the content is drawn as, every `#N` staying text without it. */
+  renderNumberReference?: NumberReferenceRenderer
 }
 
 /**
@@ -48,7 +60,12 @@ const LIGHT_IMAGE_BACKGROUND: Record<ImageContext, boolean> = {
 type CustomComponents = Components & {
   /** Custom component for spoilers */
   spoiler?: ({ children }: { children: ReactNode }) => ReactNode
+  /** Custom component for a `#N` in the text */
+  [NUMBER_REFERENCE_TAG]?: ({ children, node }: PropsWithChildren<ExtraProps>) => ReactNode
 }
+
+/** The shared remark plugins with each `#N` in the text turned into a reference. */
+const remarkPluginsWithNumberReferences = [...sharedRemarkPlugins, remarkNumberReferences]
 
 /**
  * Resolves the className for a list element, honoring custom marker styles
@@ -71,7 +88,8 @@ function resolveListClassName(className: string | undefined, defaultMarker: stri
 }
 
 /**
- * Renders markdown content with LaTeX math support and spoiler support.
+ * Renders markdown content with LaTeX math support and spoiler support, and where asked a `#N` as whatever the caller
+ * draws for N.
  *
  * Wrapped in {@link memo} so a parent re-render with unchanged props is a no-op.
  * Without this guard, every parent re-render rebuilds the inline `components` /
@@ -82,6 +100,7 @@ function resolveListClassName(className: string | undefined, defaultMarker: stri
 export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
   content,
   imageContext,
+  renderNumberReference,
 }: RichMathEditorRendererProps) {
   // Get translations
   const t = useTranslations('ui.editor')
@@ -92,10 +111,15 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
   // Preprocess display math before parsing
   const processedContent = preprocessDisplayMath(content)
 
+  // The remark plugins, turning each `#N` into a reference where the caller draws one
+  const remarkPlugins =
+    renderNumberReference === undefined ? sharedRemarkPlugins : remarkPluginsWithNumberReferences
+
   return (
     <Markdown
-      // Pipeline: GFM -> directive (parses :::) -> spoiler (transforms directive) -> math -> breaks
-      remarkPlugins={[...sharedRemarkPlugins]}
+      // Pipeline: GFM -> directive (parses :::) -> spoiler (transforms directive) -> math -> breaks, then
+      // where asked the `#N` references
+      remarkPlugins={remarkPlugins}
       // Pipeline: rehype-raw parses HTML -> rehype-sanitize removes XSS -> rehype-katex renders math
       rehypePlugins={[...sharedRehypePlugins]}
       // URL sanitization: allow-list safe schemes, explicitly block dangerous ones
@@ -316,6 +340,9 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
               {children}
             </RichMathEditorSpoiler>
           ),
+          [NUMBER_REFERENCE_TAG]: ({ children, node }) =>
+            // What the caller draws for the number, or the `#N` as written where it draws nothing
+            renderNumberReference?.(Number(node?.properties[NUMBER_REFERENCE_NUMBER])) ?? children,
         } as CustomComponents
       }
     >
