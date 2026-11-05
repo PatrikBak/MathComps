@@ -1421,6 +1421,27 @@ export function statusLine(page: Page, board: Board): Locator {
 }
 
 /**
+ * Lets time run on until the page reads the selection again on its own. The page holds that read back while one of
+ * its own writes is out, such as marking an opened conversation read, and starts the wait over once the write lands.
+ * So the clock keeps jumping until a read goes out.
+ *
+ * @param page - The page.
+ */
+export async function untilSelectionReadAgain(page: Page): Promise<void> {
+  // Jumped forward until a read goes out
+  await expect(async () => {
+    // The next read's answer
+    const answered = page.waitForResponse(SELECTION_ENDPOINT, { timeout: LANDING_WINDOW_MS })
+
+    // Long enough for the selection to be read again
+    await page.clock.fastForward('00:31')
+
+    // Once it has landed
+    await answered
+  }).toPass({ timeout: SETTLE_TIMEOUT_MS })
+}
+
+/**
  * Holds every read of the selection from now on until the test lets them through, so what the page shows meanwhile
  * is its own doing rather than a read's.
  *

@@ -13,6 +13,7 @@ import {
   openExistingDefense,
 } from './support/competitions'
 import { COMPETITION_SLUG, installHostedBackend } from './support/hosted-backend'
+import { isKeptInStorage } from './support/interaction'
 import { searchAnswerWith, stubSearchAnswer } from './support/problem-actions'
 import { expect, test } from './support/test'
 
@@ -479,9 +480,9 @@ test.describe('the history of the text', () => {
     await composer.fill('A bound')
 
     // Kept for the reader's return, once the page's storage holds the draft
-    await page.waitForFunction(() =>
-      Object.values(window.localStorage).some((value) => value.includes('A bound'))
-    )
+    await expect
+      .poll(() => isKeptInStorage(page, 'A bound'), { timeout: SETTLE_TIMEOUT_MS })
+      .toBe(true)
 
     // The page opened afresh
     await page.reload()
@@ -495,8 +496,8 @@ test.describe('the history of the text', () => {
     // The cursor put in the composer
     await composer.focus()
 
-    // Written on from the keyboard
-    await page.keyboard.type(' holds')
+    // Written on at the cursor in one stroke, so the history keeps it as one step however slowly the browser runs
+    await page.keyboard.insertText(' holds')
 
     // The writing picks up where the kept draft left off
     await expect(composer).toHaveValue('A bound holds')
