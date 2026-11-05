@@ -70,6 +70,12 @@ const READER_REPLY = 'Too hard for the advanced paper, I think.'
 /** What Martin says in the elementary paper's discussion. */
 const PAPER_REMARK = 'The paper needs an easier opener.'
 
+/**
+ * What Martin says in the elementary paper's discussion, naming two problems by number and a number no problem
+ * carries.
+ */
+const NUMBERED_REMARK = `Open with #${ALGEBRA.number} rather than #${GEOMETRY.number}, and #999 is nobody.`
+
 /** What Zuzana replies in {@link GEOMETRY}'s discussion while the reader has the tab open. */
 const COLLEAGUE_REPLY = 'Surely too hard for the intermediate paper.'
 
@@ -532,6 +538,38 @@ test.describe("the pool's discussions", () => {
 
     // The discussions again, focus on the paper's heading it was opened from rather than on its name on the board
     await expect(paperHeading).toBeFocused()
+  })
+
+  test('previews the statement of a problem a comment names by its number, and leaves a number no problem carries as text', async ({
+    page,
+  }) => {
+    // What the backend keeps
+    const memory = rememberedSelection(null)
+
+    // The elementary paper discussed, its comment naming problems by number
+    memory.discussions.set(threadKey('SelectionPaper', ELEMENTARY.id), [
+      commentOf('c-numbers', 'Martin', NUMBERED_REMARK, '2026-09-25T08:00:00.000Z'),
+    ])
+
+    // A selection whose paper is discussed so
+    await stubSelection(page, 'selection', memory)
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // The paper's thread
+    const thread = page.getByRole('article').filter({ hasText: NUMBERED_REMARK })
+
+    // The algebra problem's number in the comment, hovered
+    await thread
+      .getByRole('button', { name: `#${ALGEBRA.number}`, exact: true })
+      .hover({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The algebra problem's statement
+    await expect(page.getByRole('tooltip')).toContainText(`Part 1 of problem ${ALGEBRA.number}.`)
+
+    // The number no problem carries, left as text
+    await expect(thread.getByRole('button', { name: '#999' })).toHaveCount(0)
   })
 
   test('takes a layout picked straight after another, before the first one has been drawn', async ({

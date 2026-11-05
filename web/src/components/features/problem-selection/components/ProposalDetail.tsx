@@ -8,6 +8,7 @@ import { Tabs } from '@/components/shared/components/Tabs'
 import type { Locale } from '@/i18n/i18n'
 
 import { useDetailTab } from '../hooks/use-detail-tab'
+import { useProposalReference } from '../hooks/use-proposal-reference'
 import { useProposalTabCounts } from '../hooks/use-proposal-tab-counts'
 import { useSubjectDiscussion } from '../hooks/use-subject-discussion'
 import { PROPOSAL_TABS, type ProposalTab } from '../model/selection-routes'
@@ -97,6 +98,9 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
     () => resolveText(proposal, poolLanguage)?.language ?? poolLanguage
   )
 
+  // What a `#N` in a comment is drawn as
+  const renderNumberReference = useProposalReference(language)
+
   // How many conversations and comments the problem carries
   const counts = useProposalTabCounts(proposal.id)
 
@@ -144,6 +148,7 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
             showEmptyText={false}
             target={{ targetType: 'Proposal', targetId: proposal.id }}
             newness={discussion.newness}
+            renderNumberReference={renderNumberReference}
           />
         </div>
       ),
