@@ -12,18 +12,19 @@ import { cachePolicy, dropReadsInFlight } from '@/lib/query-config'
 
 import {
   advanceMarks,
+  type DiscussionPart,
   holdMarks,
   type KeptMarks,
-  markKeyOf,
+  marksAnyShownNew,
   newCountAcross,
   releaseMarks,
   seenUpToOf,
   seenWriteOf,
+  type ServerMarks,
   serverMarksOf,
-  type ShownDiscussion,
   withSeenUpTo,
 } from '../model/seen-marks'
-import type { DiscussionTarget } from '../model/selection-discussions'
+import { discussionKeyOf, type DiscussionTarget, type InView } from '../model/selection-discussions'
 import type { DiscussionsSeenUpTo, SelectionDiscussionsSeen } from '../model/selection-types'
 import { getDiscussionsSeen, markDiscussionsSeen } from '../services/selection-service'
 import { useSelectionOrganization } from './selection-organization'
@@ -38,16 +39,18 @@ type VisitMarks = {
    */
   keep: (visitId: string, targets: readonly DiscussionTarget[]) => void
   /**
-   * Tells the server some discussions were seen as the visit's tab shows them, leaving the kept marks where they are.
+   * Tells the server some discussions were seen as the visit's tab shows them, beside the threads of them it hides,
+   * leaving the kept marks where they are.
    */
-  tellSeen: (shown: readonly ShownDiscussion[]) => void
+  tellSeen: (view: InView<DiscussionPart>) => void
   /** Lets go of the marks a visit kept as it ends. */
   leave: (visitId: string) => void
 }
 
 /**
  * What {@link useSeenMarks} hands back: how far the reader has seen each of the selection's discussions as the page
- * reads it, the ways a visit to a Comments tab keeps its marks, and the way to mark some seen at the reader's asking.
+ * reads it, the ways a visit to a Comments tab keeps its marks, and the way to mark some seen at the reader's asking,
+ * with whether doing so would leave fewer comments new.
  */
 export type UseSeenMarksResult = {
   /**
@@ -68,10 +71,15 @@ export type UseSeenMarksResult = {
   /** The ways a visit keeps its marks and tells what it saw; null until the server's marks are read. */
   visits: VisitMarks | null
   /**
-   * Tells the server some discussions were seen as a view shows them, and moves their kept marks on once the server has
-   * taken the write, so what the view shows stops being new.
+   * Tells the server some discussions were seen as a view shows them, beside the threads of them it hides, and moves
+   * their kept marks on once the server has taken the write, so what the view shows stops being new.
    */
-  markSeen: (shown: readonly ShownDiscussion[]) => void
+  markSeen: (view: InView<DiscussionPart>) => void
+  /**
+   * Whether marking some discussions seen as a view shows them would stop any comment it shows as new from being new;
+   * never before the marks are read.
+   */
+  marksAnyNew: (view: InView<DiscussionPart>) => boolean
 }
 
 /** The key every write telling the server what was seen is filed under. */
@@ -153,13 +161,44 @@ export function useSeenMarks(): UseSeenMarksResult {
     errorMessage: t('markSeenFailed'),
   })
 
+  // A function which reads the marks as the server will hold them once every write still on its way lands, read at
+  // the call so whatever uses it stays the same function as the marks move; nothing while the marks are not read
+  const marksOnceWritten = useCallback((): ServerMarks | null => {
+    // The marks as the cache holds them now
+    const cached = queryClient.getQueryData<SelectionDiscussionsSeen>(
+      seenQueryKey(organization, readerId)
+    )
+
+    // Nothing to read while the marks are not read
+    if (cached === undefined) return null
+
+    // The moments every write still on its way tells, seen by the reader already
+    const pending = queryClient
+      .getMutationCache()
+      .findAll({ mutationKey: SEEN_WRITE_KEY, status: 'pending' })
+      .flatMap(({ state }) =>
+        state.variables === undefined ? [] : [state.variables as DiscussionsSeenUpTo]
+      )
+
+    // The marks as they stand once those writes land
+    return serverMarksOf(pending.reduce((marks, moments) => withSeenUpTo(marks, moments), cached))
+  }, [queryClient, organization, readerId])
+
   // A function which tells the server some discussions were seen as a view shows them, each up to its own moment,
   // resolving to what the server marked, or to nothing where nothing was sent or the write failed, a failure the write
-  // reports itself
+  // reports itself. It stays the same function as the marks move, since a visit handed a new one starts over and keeps
+  // its marks afresh
   const send = useCallback(
-    async (shown: readonly ShownDiscussion[]) => {
-      // Each discussion the view shows, up to the newest comment in it that can be new
-      const moments = seenWriteOf(shown, readerId)
+    async (view: InView<DiscussionPart>) => {
+      // The marks as the server will hold them
+      const marks = marksOnceWritten()
+
+      // Nothing to tell while the marks are not read
+      if (marks === null) return undefined
+
+      // Each discussion the view shows, up to the newest comment in it that can be new, short of what is new in the
+      // threads it hides
+      const moments = seenWriteOf({ view, server: marks, readerId })
 
       // Nothing to tell where the view shows no comment that can be new
       if (Object.keys(moments.proposals).length + Object.keys(moments.papers).length === 0) {
@@ -169,47 +208,37 @@ export function useSeenMarks(): UseSeenMarksResult {
       // Sent, resolving to what the server marked, or to nothing where the write failed
       return mutateAsync(moments).catch(() => undefined)
     },
-    [mutateAsync, readerId]
+    [mutateAsync, marksOnceWritten, readerId]
   )
 
   // The marks the visits keep
   const [kept, setKept] = useState<KeptMarks>(() => new Map())
 
-  // A function which keeps the marks of the discussions a visit shows as the cache holds them, every write still on its
-  // way counted in
+  // A function which keeps the marks of the discussions a visit shows as the server will hold them, so what the reader
+  // saw before the visit started is not new in it
   const keep = useCallback(
     (visitId: string, targets: readonly DiscussionTarget[]) => {
-      // The marks as the cache holds them now
-      const cached = queryClient.getQueryData<SelectionDiscussionsSeen>(
-        seenQueryKey(organization, readerId)
-      )
+      // The marks as the server will hold them
+      const marks = marksOnceWritten()
 
       // Nothing to keep while the marks are not read
-      if (cached === undefined) return
+      if (marks === null) return
 
-      // The moments every write still on its way tells, seen by the reader before the visit started
-      const pending = queryClient
-        .getMutationCache()
-        .findAll({ mutationKey: SEEN_WRITE_KEY, status: 'pending' })
-        .flatMap(({ state }) =>
-          state.variables === undefined ? [] : [state.variables as DiscussionsSeenUpTo]
-        )
-
-      // Kept as they stand once those writes land
+      // The marks of the visit's discussions kept as the server will hold them
       setKept((previous) =>
         holdMarks(
           previous,
           visitId,
-          targets.map((target) => markKeyOf(target)),
-          serverMarksOf(pending.reduce((marks, moments) => withSeenUpTo(marks, moments), cached))
+          targets.map((target) => discussionKeyOf(target)),
+          marks
         )
       )
     },
-    [queryClient, organization, readerId]
+    [marksOnceWritten]
   )
 
   // A function which tells the server some discussions were seen as a visit's tab shows them
-  const tellSeen = useCallback((shown: readonly ShownDiscussion[]) => void send(shown), [send])
+  const tellSeen = useCallback((view: InView<DiscussionPart>) => void send(view), [send])
 
   // A function which lets go of the marks a visit kept
   const leave = useCallback(
@@ -220,8 +249,8 @@ export function useSeenMarks(): UseSeenMarksResult {
   // A function which tells the server some discussions were seen, and moves their kept marks on once the server has
   // taken the write
   const markSeen = useCallback(
-    (shown: readonly ShownDiscussion[]) =>
-      void send(shown).then((marked) => {
+    (view: InView<DiscussionPart>) =>
+      void send(view).then((marked) => {
         // The kept marks moved on to what the server marked, where it took the write
         if (marked !== undefined) setKept((previous) => advanceMarks(previous, marked))
       }),
@@ -235,15 +264,28 @@ export function useSeenMarks(): UseSeenMarksResult {
       server === null
         ? { kind: 'untracked' }
         : // Seen up to the mark a visit keeps, else the server's, or nothing seen where that mark is empty
-          { kind: 'seen', seenUpTo: seenUpToOf(kept, server, markKeyOf(target)) },
+          { kind: 'seen', seenUpTo: seenUpToOf(kept, server, discussionKeyOf(target)) },
     [kept, server]
   )
 
   // A function which tells whether a discussion holds anything new to the reader, as the server holds their mark
   const hasNews = useCallback(
     (target: DiscussionTarget) =>
-      server !== null && (server.get(markKeyOf(target))?.newCount ?? 0) > 0,
+      server !== null && (server.get(discussionKeyOf(target))?.newCount ?? 0) > 0,
     [server]
+  )
+
+  // A function which tells whether marking a view's discussions seen would leave fewer of its comments new, read
+  // against the marks the write would be built on
+  const marksAnyNew = useCallback(
+    (view: InView<DiscussionPart>) => {
+      // The marks as the server will hold them
+      const marks = marksOnceWritten()
+
+      // Whether the write would mark some comment shown as new, never while the marks are not read
+      return marks !== null && marksAnyShownNew({ view, server: marks, readerId }, newnessOf)
+    },
+    [marksOnceWritten, newnessOf, readerId]
   )
 
   // How many comments are new to the reader across the discussions, as the server holds their marks
@@ -260,7 +302,7 @@ export function useSeenMarks(): UseSeenMarksResult {
 
   // The marks and the ways to keep and move them, held steady while none of it moves
   return useMemo(
-    () => ({ newnessOf, hasNews, newCount, visits, markSeen }),
-    [newnessOf, hasNews, newCount, visits, markSeen]
+    () => ({ newnessOf, hasNews, newCount, visits, markSeen, marksAnyNew }),
+    [newnessOf, hasNews, newCount, visits, markSeen, marksAnyNew]
   )
 }

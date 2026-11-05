@@ -17,18 +17,21 @@ import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import { useSelectionWorkspace } from '../components/SelectionWorkspaceProvider'
+import type { DiscussionPart } from '../model/seen-marks'
 import {
   type DiscussedSubject,
   type Discussion,
+  type DiscussionTarget,
   discussionTargetOf,
+  type InView,
 } from '../model/selection-discussions'
 import { getDiscussions } from '../services/selection-service'
 import {
+  cachedDiscussionsOf,
   discussionsQueryKey,
   parkDiscussions,
   parkReactionsEditsAndDeletions,
   readDiscussions,
-  shownDiscussionsOf,
   threadsAfterParking,
 } from './discussion-cache'
 import { useSelectionOrganization } from './selection-organization'
@@ -61,6 +64,24 @@ type ShownDiscussions = {
 }
 
 /**
+ * What showing the latest read takes in, and what the reader then sees of it.
+ */
+type ShowNewsOptions = {
+  /** The discussions the latest read goes into; null for every one it holds. */
+  targets: readonly DiscussionTarget[] | null
+  /**
+   * Reads what the reader sees of the discussions as their threads then hold them, and what is hidden from them, each
+   * thread read for the reader given; null where the server is told what the reader sees some other way.
+   */
+  seen:
+    | ((
+        discussions: Discussion<DiscussedSubject>[],
+        readerId: string | null
+      ) => InView<DiscussionPart>)
+    | null
+}
+
+/**
  * What {@link useSelectionDiscussions} hands back.
  */
 export type UseSelectionDiscussionsResult = {
@@ -70,8 +91,11 @@ export type UseSelectionDiscussionsResult = {
   uiState: QueryUiState
   /** Reads the discussions again after the read gave up. */
   retry: () => void
-  /** Shows the discussions as the latest read found them, telling the server they were seen as they then show. */
-  showNews: () => void
+  /**
+   * Shows the discussions asked for as the latest read found them, telling the server what the reader then sees was
+   * seen where the options read it; nothing until the stay has shown a read of its own.
+   */
+  showNews: (options: ShowNewsOptions) => void
 }
 
 /**
@@ -85,8 +109,9 @@ export type UseSelectionDiscussionsResult = {
  * asks for it, so nothing new anybody else posts moves what is on screen. The reader's own writes show at once, and
  * so do others' edits, reactions and deletions, which post nothing new. Once the reader's writes have all settled,
  * the discussions are read again at once: a read out while one was made can't tell what others said in its thread
- * from what the reader did, so what is new waits to be told until that read lands. Asking for what waited counts as
- * seeing it, so the server is told it was seen once it shows.
+ * from what the reader did, so what is new waits to be told until that read lands. Asking for what waited shows it
+ * in the discussions asked for. Where the asking says how to read what the reader then sees, it also tells the
+ * server that much was seen.
  *
  * @param options - {@link UseSelectionDiscussionsOptions}.
  *
@@ -119,8 +144,8 @@ export function useSelectionDiscussions({
 
       // The stay's first read shown as it lands
       if (result.success && showings === 0) {
-        // The read in the threads
-        parkDiscussions(queryClient, readerId, result.data)
+        // The read in every thread
+        parkDiscussions(queryClient, readerId, result.data, null)
 
         // The showing counted
         setShowings((count) => count + 1)
@@ -223,20 +248,23 @@ export function useSelectionDiscussions({
   // read
   const { visits } = useSelectionWorkspace().seenMarks
 
-  // A function which shows the discussions as the latest read found them, telling the server they were seen as they
-  // then show
-  const showNews = () => {
-    // Nothing read, nothing to show
-    if (data === undefined) return
+  // A function which shows the discussions asked for as the latest read found them, telling the server what the reader
+  // then sees was seen, where the options read it
+  const showNews = ({ targets: shownTargets, seen }: ShowNewsOptions) => {
+    // Nothing read in the stay, nothing to show
+    if (data === undefined || showings === 0) return
 
-    // The latest read in the threads
-    parkDiscussions(queryClient, readerId, data)
+    // The latest read in the threads asked for
+    parkDiscussions(queryClient, readerId, data, shownTargets)
 
     // The showing counted
     setShowings((count) => count + 1)
 
-    // The server told the discussions were seen as the threads now hold them, so what waited is not new next visit
-    visits?.tellSeen(shownDiscussionsOf(queryClient, readerId, targets))
+    // The server told what the reader sees of the threads as they now hold them was seen, where the options read it,
+    // so what waited is not new next visit
+    if (seen !== null) {
+      visits?.tellSeen(seen(cachedDiscussionsOf(queryClient, readerId, subjects), readerId))
+    }
   }
 
   // The discussions, what waits to be shown, and the state of the read

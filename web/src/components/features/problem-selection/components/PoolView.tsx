@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowDownUp, Search, X } from 'lucide-react'
+import { ArrowDownUp, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { type ReactNode, type RefObject, useState } from 'react'
 
@@ -17,7 +17,7 @@ import { useLastElement } from '@/hooks/use-last-element'
 import { useResortableOrder } from '@/hooks/use-resortable-order'
 import type { Locale } from '@/i18n/i18n'
 
-import { countActiveFilters, matchPool } from '../model/pool-filters'
+import { filterForView, isNarrowed, matchPool, poolFilterKey } from '../model/pool-filters'
 import { DEFAULT_RATINGS_SORT, type RatingsColumn } from '../model/ratings-order'
 import { POOL_VIEWS, type PoolViewMode } from '../model/selection-routes'
 import { canPlaceOn } from '../model/selection-state'
@@ -25,21 +25,31 @@ import type { Proposal } from '../model/selection-types'
 import { SlotNumber } from './CategoryMarks'
 import { LanguageSwitch } from './LanguageSwitch'
 import { PoolComments } from './PoolComments'
-import { PoolFilterBar } from './PoolFilterBar'
 import { PoolSkeleton } from './PoolSkeleton'
+import { PoolTools } from './PoolTools'
 import { ProposalCard } from './ProposalCard'
 import { ProposalFiling } from './ProposalFiling'
 import { RatingsTable } from './RatingsTable'
 import { useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /**
- * Whether each layout of the pool lists its problems, and so carries the tools that work on them. The discussions
- * list every thread instead, whatever the filters say.
+ * Whether each layout of the pool lists its problems, and so carries the slot waiting for one and the spot setting
+ * their order again brings the page back to. The discussions list threads instead.
  */
 const LISTS_PROBLEMS: Record<PoolViewMode, boolean> = {
   problems: true,
   ratings: true,
   comments: false,
+}
+
+/**
+ * Whether each layout of the pool draws the search and the filters over itself once the selection has arrived, as the
+ * discussions do, which count the filters' options by their own comments.
+ */
+const DRAWS_OWN_TOOLS: Record<PoolViewMode, boolean> = {
+  problems: false,
+  ratings: false,
+  comments: true,
 }
 
 /**
@@ -64,15 +74,6 @@ const HOLDS_ORDER: Record<PoolViewMode, boolean> = {
 }
 
 /**
- * Whether the line over each layout of the pool carries the eye marking what is new as seen.
- */
-const CARRIES_EYE: Record<PoolViewMode, boolean> = {
-  problems: false,
-  ratings: false,
-  comments: true,
-}
-
-/**
  * Props for the {@link PoolView} component.
  */
 type PoolViewProps = {
@@ -86,7 +87,8 @@ type PoolViewProps = {
  * The pool: every problem no round has taken, live or set aside, filtered and read statement by statement, or laid
  * out as a table of their ratings. Where the problems need every language, its language switch keeps each of them in
  * reach, since a {@link PoolCard} lacking the one picked shows another the problem has; where any one text will do,
- * the pool has no switch. The pool also lists every discussion of what the selection holds.
+ * the pool has no switch. The pool also lists the threads of every discussion of what the selection holds. One search
+ * and one row of filters narrow every layout, standing in the same spot in each.
  */
 export function PoolView({ language, onLanguageChange }: PoolViewProps) {
   // Pool copy
@@ -106,20 +108,23 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
     waitingSlot,
   } = useSelectionWorkspace()
 
+  // What the pool is narrowed to, as the layout on screen reads it
+  const viewFilter = filterForView(filters.filter, mode)
+
   // What the filter lets through, against the board on screen, while the pool lists its problems; null until the
-  // selection arrives, and over the discussions, which no filter narrows
+  // selection arrives, and over the discussions, which run the filter through themselves
   const matches =
     selection !== null && LISTS_PROBLEMS[mode]
       ? matchPool(
           [...selection.proposalsById.values()],
-          filters.filter,
+          viewFilter,
           selection.activeBoard,
           selection.categories
         )
       : null
 
-  // Whether a search, a facet or leaving out what the board holds narrows the view on screen, set aside or live
-  const isNarrowed = countActiveFilters({ ...filters.filter, isShowingSetAside: false }) > 0
+  // Whether a search or a facet narrows the view on screen, set aside or live
+  const isViewNarrowed = isNarrowed(viewFilter)
 
   // That the pool is loading, or how many made it through, counted as the set-aside problems when the list is
   // all of them; the discussions count their comments themselves
@@ -128,7 +133,7 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
       ? t('loading')
       : matches === null
         ? null
-        : filters.filter.isShowingSetAside && !isNarrowed
+        : viewFilter.isShowingSetAside && !isViewNarrowed
           ? t('setAsideCount', { count: matches.shown.length })
           : tPlurals('problems', { count: matches.shown.length })
 
@@ -158,9 +163,9 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
   }
 
   // Why nothing shows: the filters hiding problems, or no problem there to hide, in the view on screen
-  const emptyLine = filters.filter.isShowingSetAside
-    ? t(isNarrowed ? 'emptySetAsideFiltered' : 'emptySetAside')
-    : t(isNarrowed ? 'empty' : 'emptyPool')
+  const emptyLine = viewFilter.isShowingSetAside
+    ? t(isViewNarrowed ? 'emptySetAsideFiltered' : 'emptySetAside')
+    : t(isViewNarrowed ? 'empty' : 'emptyPool')
 
   // How the ratings table orders its rows, kept while nothing matches and while the cards show
   const [ratingsSort, setRatingsSort] = useState(DEFAULT_RATINGS_SORT)
@@ -169,16 +174,18 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
   // a page, and the ref handing it over
   const [commentCountSlot, keepCommentCountSlot] = useLastElement<HTMLSpanElement>()
 
+  // Where a layout drawing its own search and filters puts them, once it is on the page, kept while the pool hides
+  // behind a page, and the ref handing it over
+  const [toolsSlot, keepToolsSlot] = useLastElement<HTMLDivElement>()
+
   // The problems the filters let through, each kept where it stood when their order was last set, whether a change
   // waits, the spot over the list the page comes back to, and the way to set the order again from there
   const { shown, isChangeWaiting, listRef, resortFromTop } = useResortableOrder({
     items: matches?.shown ?? [],
     keyOf: (proposal) => proposal.id,
-    // The order set again as the filter changes, its search as the pool reads it, and as another board goes on screen
-    resetKey: JSON.stringify([
-      { ...filters.filter, query: filters.filter.query.trim() },
-      selection?.activeBoard?.id ?? null,
-    ]),
+    // The order set again as the filter the layout reads changes, its search as the pool reads it, and as another
+    // board goes on screen
+    resetKey: poolFilterKey(viewFilter, selection?.activeBoard ?? null),
     // A problem the filters let through after the order was set goes where the order it comes in puts it
     newcomerPlace: 'inPlace',
     // The focus on the line over the pool as the order is set again
@@ -204,34 +211,20 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
         )}
       </div>
 
-      {/* The tools over a list of problems, which the discussions go without */}
+      {/* The search and the filters, drawn here unless the layout draws its own in the spot below, out of reach while
+          they wait for a layout's own to take their place, so no focus is lost as it does */}
+      {(selection === null || !DRAWS_OWN_TOOLS[mode]) && (
+        <div inert={DRAWS_OWN_TOOLS[mode]}>
+          <PoolTools mode={mode} filters={filters} counts={matches} />
+        </div>
+      )}
+
+      {/* Where a layout drawing its own search and filters puts them */}
+      <div ref={keepToolsSlot} />
+
+      {/* What works on a list of problems */}
       {LISTS_PROBLEMS[mode] && (
         <>
-          {/* Search */}
-          <label className="relative mt-4 block">
-            <span className="sr-only">{t('search')}</span>
-            <Search
-              size={15}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
-            />
-            <input
-              type="search"
-              value={filters.filter.query}
-              onChange={(event) => filters.setField('query', event.target.value)}
-              placeholder={t('searchPlaceholder')}
-              // Drawn as light and as tall as the facet pills below, since it sits on the page itself
-              className={cn(
-                'form-input border-foreground/10 bg-foreground/[0.03] py-1.5 pl-9 placeholder:text-muted',
-                'hover:border-foreground/25 hover:bg-foreground/[0.07] focus-visible:border-focus/70'
-              )}
-            />
-          </label>
-
-          {/* Narrowing the pool down */}
-          <div className="mt-3">
-            <PoolFilterBar filters={filters} matches={matches} />
-          </div>
-
           {/* The spot setting the order again brings the page back to, over the waiting slot and the count */}
           <div ref={listRef} />
 
@@ -246,11 +239,7 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
         // Takes the focus when whatever held it goes with nothing in its place, so a reader's next Tab goes on from
         // here
         tabIndex={-1}
-        className={cn(
-          'mt-4 mb-3 text-sm text-muted focus:outline-none',
-          // As tall from the start as the eye it carries, which appears on it later
-          CARRIES_EYE[mode] && 'flex min-h-9 flex-wrap items-center'
-        )}
+        className="mt-4 mb-3 text-sm text-muted focus:outline-none"
       >
         {countLine}
         <span
@@ -285,6 +274,7 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
             language={language}
             countRef={countRef}
             commentCountSlot={commentCountSlot}
+            toolsSlot={toolsSlot}
             emptyLine={emptyLine}
             ratingsSort={ratingsSort}
             onRatingsSort={setRatingsSort}
@@ -309,6 +299,8 @@ type PoolLayoutProps = {
   countRef: RefObject<HTMLParagraphElement | null>
   /** Where the discussions say how many comments they show, once it is on the page. */
   commentCountSlot: HTMLElement | null
+  /** Where the discussions draw their search and filters, once it is on the page. */
+  toolsSlot: HTMLElement | null
   /** Why no problem shows, when none does. */
   emptyLine: string
   /** How the ratings table orders its rows. */
@@ -318,9 +310,10 @@ type PoolLayoutProps = {
 }
 
 /**
- * The layout asked for: the problems the filters let through, as a card each or as a table of their ratings, or every
- * discussion of what the selection holds. A layout of problems says when none shows. The discussions say for
- * themselves when there are none, since the papers' discussions can show with no problem in the pool.
+ * The layout asked for: the problems the filters let through, as a card each or as a table of their ratings, or the
+ * threads of the discussions of what the selection holds, which the discussions run through the filters themselves. A
+ * layout of problems says when none shows. The discussions say for themselves when none shows, since the papers'
+ * threads can show with no problem in the pool.
  */
 function PoolLayout({
   mode,
@@ -328,6 +321,7 @@ function PoolLayout({
   language,
   countRef,
   commentCountSlot,
+  toolsSlot,
   emptyLine,
   ratingsSort,
   onRatingsSort,
@@ -368,9 +362,9 @@ function PoolLayout({
         />
       )
 
-    // Every discussion of the problems and the papers, newest activity first
+    // The threads of the problems' and the papers' discussions the filters let through
     case 'comments':
-      return <PoolComments countSlot={commentCountSlot} language={language} />
+      return <PoolComments countSlot={commentCountSlot} toolsSlot={toolsSlot} language={language} />
 
     // Every layout is handled above
     default:

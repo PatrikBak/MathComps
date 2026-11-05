@@ -106,6 +106,45 @@ export function discussionTargetOf(subject: DiscussedSubject): DiscussionTarget 
 }
 
 /**
+ * The key a discussion goes by.
+ *
+ * @param target - The comment target the discussion is held under.
+ *
+ * @returns The key.
+ */
+export function discussionKeyOf(target: DiscussionTarget): string {
+  // The kind of discussion and its subject's id
+  return `${target.targetType}:${target.targetId}`
+}
+
+/**
+ * Puts each of some things hanging off the selection's subjects under the subject of the same discussion from a list,
+ * leaving one the list has no subject for under its own.
+ *
+ * @template TItem - What hangs off the subjects.
+ *
+ * @param items - The things, each under the subject it was read with.
+ * @param subjects - The subjects to put them under.
+ *
+ * @returns Each thing, under the list's subject of its discussion where the list has one.
+ */
+export function underSubjectsOf<TItem extends Pick<Discussion<DiscussedSubject>, 'subject'>>(
+  items: readonly TItem[],
+  subjects: readonly DiscussedSubject[]
+): TItem[] {
+  // The subjects by the key of their discussion
+  const byKey = new Map(
+    subjects.map((subject) => [discussionKeyOf(discussionTargetOf(subject)), subject])
+  )
+
+  // Each thing under the subject of its discussion, where the list has one
+  return items.map((item) => ({
+    ...item,
+    subject: byKey.get(discussionKeyOf(discussionTargetOf(item.subject))) ?? item.subject,
+  }))
+}
+
+/**
  * The key a thread keeps for as long as it stands: its top-level comment's {@link commentDtoKeyOf} key, which an edit
  * leaves as it was.
  *
@@ -152,6 +191,72 @@ export function threadsByActivity<TSubject>(
 }
 
 /**
+ * What a view shows of some discussions, and what of them it hides.
+ *
+ * @template TPart - The part of a discussion the view shows or hides as one.
+ */
+export type InView<TPart> = {
+  /** What the view shows. */
+  shown: readonly TPart[]
+  /** What the view hides. */
+  hidden: readonly TPart[]
+}
+
+/**
+ * The threads of a later list that show something an earlier one didn't: those the earlier list lacks, and those
+ * posting anything new over it, as {@link postsNothingNew} reads a thread.
+ *
+ * @template TSubject - What the threads' discussions hang off.
+ *
+ * @param earlier - The list as it was.
+ * @param later - The list as it is now.
+ *
+ * @returns Those threads of the later list, in its order.
+ */
+export function postingNewIn<TSubject>(
+  earlier: readonly DiscussionThread<TSubject>[],
+  later: readonly DiscussionThread<TSubject>[]
+): DiscussionThread<TSubject>[] {
+  // The earlier list's threads by the key each keeps
+  const byKey = new Map(earlier.map((thread) => [threadKeyOf(thread), thread]))
+
+  // Each later thread the earlier list lacks or that posts something new over it
+  return later.filter((thread) => {
+    // The same thread in the earlier list, if it was there
+    const before = byKey.get(threadKeyOf(thread))
+
+    // Not there, or posting something new since
+    return before === undefined || !postsNothingNew([before.comment], [thread.comment])
+  })
+}
+
+/**
+ * The threads a view shows afresh over an earlier list, a discussion at a time: every thread the view shows of each
+ * discussion where one of them is new to the earlier list or posts something new over it, as {@link postingNewIn}
+ * reads a thread. A discussion counts whole, since one seen mark covers all of it, so a thread shown before counts
+ * again once the thread that held the discussion's mark back shows too.
+ *
+ * @param earlier - The threads the list showed.
+ * @param later - The threads the view shows now.
+ *
+ * @returns Those threads of the later list, in its order.
+ */
+export function revealedIn(
+  earlier: readonly DiscussionThread<DiscussedSubject>[],
+  later: readonly DiscussionThread<DiscussedSubject>[]
+): DiscussionThread<DiscussedSubject>[] {
+  // A function which reads the key of the discussion a thread was posted in
+  const keyOfThreadDiscussion = ({ subject }: DiscussionThread<DiscussedSubject>) =>
+    discussionKeyOf(discussionTargetOf(subject))
+
+  // The discussions holding a thread that shows something the earlier list didn't
+  const revealing = new Set(postingNewIn(earlier, later).map(keyOfThreadDiscussion))
+
+  // Every thread of those discussions
+  return later.filter((thread) => revealing.has(keyOfThreadDiscussion(thread)))
+}
+
+/**
  * Whether a later list of threads shows nothing new over an earlier one: the same threads, in whatever order, none
  * posting anything new, as {@link postsNothingNew} reads a thread.
  *
@@ -166,18 +271,6 @@ export function showTheSame<TSubject>(
   earlier: readonly DiscussionThread<TSubject>[],
   later: readonly DiscussionThread<TSubject>[]
 ): boolean {
-  // The later list's threads by the key each keeps
-  const byKey = new Map(later.map((thread) => [threadKeyOf(thread), thread]))
-
-  // As many threads, each in the later list posting nothing new
-  return (
-    earlier.length === later.length &&
-    earlier.every((thread) => {
-      // The same thread in the later list, if it is there
-      const now = byKey.get(threadKeyOf(thread))
-
-      // There, and posting nothing new
-      return now !== undefined && postsNothingNew([thread.comment], [now.comment])
-    })
-  )
+  // As many threads, none of the later ones showing anything the earlier list didn't
+  return earlier.length === later.length && postingNewIn(earlier, later).length === 0
 }

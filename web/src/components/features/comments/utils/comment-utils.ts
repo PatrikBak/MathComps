@@ -54,6 +54,18 @@ export function countAllComments(comments: CommentWithReplies[]): number {
 }
 
 /**
+ * A comment and the replies under it.
+ *
+ * @param comment - The comment.
+ *
+ * @returns The comment first, then its replies at any depth.
+ */
+export function commentsIn(comment: CommentDto): CommentDto[] {
+  // The comment, then its replies with theirs
+  return [comment, ...comment.replies.flatMap(commentsIn)]
+}
+
+/**
  * The key a comment keeps across its versions: who posted it and when. An edit saves the comment under a new id but
  * keeps both. The moment is taken to the millisecond, however the server rounds a time it has just written.
  *

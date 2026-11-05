@@ -73,8 +73,8 @@ export function useSubjectDiscussion({
   // Whether somebody else posted in the discussion after what the reader has seen
   const hasNews = hasNewsOf(target)
 
-  // A function which marks the discussion as seen as last read
-  const markSeen = () => markSeenOf([{ target, comments: shown }])
+  // A function which marks the discussion as seen as last read, the page hiding none of it
+  const markSeen = () => markSeenOf({ shown: [{ target, comments: shown }], hidden: [] })
 
   // What in the discussion is new to the reader, and the way to mark it seen
   return { newness, hasNews, showsNew, markSeen }

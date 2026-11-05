@@ -18,6 +18,7 @@ import { parseMember } from '@/components/shared/utils/collection-utils'
 import handoutIndex from '@/content/handouts.json'
 import { ROUTES } from '@/i18n/i18n'
 
+import messages from '../../messages/en.json'
 import { answerJson, BACKEND_ORIGIN, refuse } from './backend-routes'
 import { expect } from './test'
 
@@ -221,6 +222,33 @@ export function commentFrom(
     isDeleted: false,
     reactions: [],
     replies: [],
+  }
+}
+
+/**
+ * A comment by somebody other than the reader, posted at the moment given, its author's id made from their name.
+ *
+ * @param id - The comment's id.
+ * @param author - Its author's username.
+ * @param content - What it says.
+ * @param postedAt - When it was posted.
+ * @param replies - Its replies.
+ *
+ * @returns The comment.
+ */
+export function postedComment(
+  id: string,
+  author: string,
+  content: string,
+  postedAt: string,
+  replies: CommentDto[] = []
+): CommentDto {
+  // The comment, never edited and with nothing reacted to it
+  return {
+    ...commentFrom(`user_${author.toLowerCase()}`, author, content),
+    id,
+    createdAt: postedAt,
+    replies,
   }
 }
 
@@ -706,4 +734,54 @@ export async function stubComments<TThread extends CommentTargetType>(
 
   // A snapshot of the writes on each read, so a list cannot grow underneath an assertion
   return () => [...writes]
+}
+
+/**
+ * The comments drawn as new to the reader, by what they say, in the order they read.
+ *
+ * @param scope - Where to look: the page, or one part of it.
+ * @param texts - Every text a comment that may be marked says.
+ *
+ * @returns What each says, among the texts given; empty for one saying none of them.
+ */
+export function newCommentTexts(
+  scope: Page | Locator,
+  texts: readonly string[]
+): Promise<string[]> {
+  // Each mark of a new comment, read back to what the comment carrying it says
+  return scope.getByText(messages.comments.newMark, { exact: true }).evaluateAll((marks, said) => {
+    // A function which reads the comment text an element holds, if it holds one
+    const textIn = (element: Element) =>
+      said.find((text) => element.textContent?.includes(text) === true)
+
+    // A function which reads the text of the nearest element around the mark holding one, the mark's own comment's
+    const textAround = (element: Element | null): string =>
+      element === null ? '' : (textIn(element) ?? textAround(element.parentElement))
+
+    // What each mark's comment says
+    return marks.map(textAround)
+  }, texts)
+}
+
+/**
+ * Keeps every read of a single thread the page sends from here on.
+ *
+ * @param page - The page.
+ *
+ * @returns The reads, by their addresses, oldest first.
+ */
+export function recordThreadReads(page: Page): string[] {
+  // The reads so far
+  const reads: string[] = []
+
+  // Each call the page makes, watched as it leaves
+  page.on('request', (request) => {
+    // Kept when it reads one thread
+    if (request.method() === 'GET' && new URL(request.url()).pathname === THREADS_PATH) {
+      reads.push(request.url())
+    }
+  })
+
+  // The reads
+  return reads
 }
