@@ -47,7 +47,6 @@ jobs:
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
       CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
       E2E_CLERK_USER_EMAIL: ${{ secrets.E2E_CLERK_USER_EMAIL }}
-      E2E_CLERK_USER_PASSWORD: ${{ secrets.E2E_CLERK_USER_PASSWORD }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
@@ -78,12 +77,17 @@ jobs:
 
       - run: npm run e2e
 
-      # The trace and the page snapshot behind a failure, which the log alone does not carry
-      - if: failure()
+      # What a failed attempt leaves behind (its page snapshot, and its trace when it was the first
+      # attempt), which the log alone does not carry. A flake that passed its retry leaves that on a
+      # green run too. A clean run leaves only Playwright's hidden .last-run.json, which the upload
+      # skips. An upload that fails leaves the job's verdict to the tests.
+      - if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
+        continue-on-error: true
         with:
           name: playwright-report
           path: web/test-results
+          if-no-files-found: ignore
           retention-days: 7
 
   backend:
