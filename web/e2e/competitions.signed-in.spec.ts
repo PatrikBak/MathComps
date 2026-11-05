@@ -1,6 +1,7 @@
 import messages from '../messages/en.json'
 import { stubProblemSearch } from './support/backend-routes'
-import { areaCopy, areaPath, holdClock, LIST_PATH, showRoundHolding } from './support/competitions'
+import { areaCopy, areaPath, LIST_PATH, showRoundHolding } from './support/competitions'
+import { holdClock } from './support/emulation'
 import { COMPETITION_SLUG, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
 import { expect, test } from './support/test'
 

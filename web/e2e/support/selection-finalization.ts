@@ -1,11 +1,10 @@
 import type { Locale } from '@/i18n/i18n'
 
+import { GUID, isGuid } from './backend-routes'
 import {
   draftBoard,
   emptiedOnDrafts,
-  GUID,
   type HeldSelection,
-  isGuid,
   readFields,
   refuseWith,
   SELECTION_API_PATH,

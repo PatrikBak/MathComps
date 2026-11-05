@@ -10,6 +10,7 @@ import {
 import type { Proposal } from '@/components/features/problem-selection/model/selection-types'
 
 import messages from '../messages/en.json'
+import { locationParam } from './support/address'
 import { createAnswerGate, gateReads } from './support/answer-gate'
 import { BACKEND_ORIGIN, refuse } from './support/backend-routes'
 import {
@@ -21,8 +22,9 @@ import {
   THREADS_PATH,
 } from './support/comments'
 import { SELECTION_PATH } from './support/competitions'
+import { stubPageVisibility } from './support/emulation'
+import { selectedTab } from './support/interaction'
 import {
-  addressedParam,
   ALGEBRA,
   BILINGUAL,
   cardOf,
@@ -37,7 +39,6 @@ import {
   pluralText,
   READY,
   rememberedSelection,
-  selectedTab,
   SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
@@ -132,10 +133,6 @@ declare global {
   interface Window {
     /** Hands the test run what the notice that something waits says, each time it changes. */
     reportWhatsNewNotice: (text: string) => void
-    /** Brings on screen a page the test put out of sight. */
-    showPage: () => void
-    /** Puts out of sight a page the test keeps on screen, as the reader does switching to another browser tab. */
-    hidePage: () => void
   }
 }
 
@@ -455,37 +452,6 @@ async function showPoolAs(page: Page, name: string): Promise<void> {
   await expect(option).toBeChecked()
 }
 
-/**
- * Puts whether the page is on screen in the test's hands, through {@link Window.showPage} and {@link Window.hidePage},
- * as the reader brings a browser tab up or puts it behind another.
- *
- * @param page - The page.
- * @param initially - Whether the page opens on screen or out of sight.
- */
-async function stubPageVisibility(page: Page, initially: DocumentVisibilityState): Promise<void> {
-  // The page's visibility, as the test sets it
-  await page.addInitScript((startsAs: DocumentVisibilityState) => {
-    // Whether the page is on screen
-    let visibility = startsAs
-
-    // What the page says about being on screen
-    Object.defineProperty(document, 'visibilityState', { get: () => visibility })
-
-    // A function which brings the page on screen or puts it out of sight, saying so up to the window as a browser does
-    const turnTo = (next: DocumentVisibilityState) => {
-      // On screen or out of sight
-      visibility = next
-
-      // Said so
-      document.dispatchEvent(new Event('visibilitychange', { bubbles: true }))
-    }
-
-    // The ways to bring the page on screen and to put it out of sight
-    window.showPage = () => turnTo('visible')
-    window.hidePage = () => turnTo('hidden')
-  }, initially)
-}
-
 test.describe("the pool's discussions", () => {
   test('lays the pool out as its threads, newest activity first, kept in the address so Back from a problem lands on it', async ({
     page,
@@ -520,7 +486,7 @@ test.describe("the pool's discussions", () => {
     await expect(threadOf(page, FIRST)).toContainText(LATE_REPLY)
 
     // The layout, named in the address
-    await expect.poll(() => addressedParam(page, POOL_VIEW_PARAM)).toBe('comments')
+    await expect.poll(() => locationParam(page, POOL_VIEW_PARAM)).toBe('comments')
 
     // The first problem, opened from its thread's heading
     await threadOf(page, FIRST).getByRole('link').first().click()
@@ -546,7 +512,7 @@ test.describe("the pool's discussions", () => {
     await paperHeading.click()
 
     // The paper on its own page, on the discussion
-    expect(await addressedParam(page, OPEN_PAPER_PARAM)).toBe(ELEMENTARY.id)
+    expect(await locationParam(page, OPEN_PAPER_PARAM)).toBe(ELEMENTARY.id)
     await expect(selectedTab(page, selectionCopy.paper.tabsLabel)).toContainText(
       selectionCopy.paper.commentsTab
     )
@@ -635,7 +601,7 @@ test.describe("the pool's discussions", () => {
 
     // The discussions, the last layout picked, named in the address
     await expect
-      .poll(() => addressedParam(page, POOL_VIEW_PARAM), { timeout: SETTLE_TIMEOUT_MS })
+      .poll(() => locationParam(page, POOL_VIEW_PARAM), { timeout: SETTLE_TIMEOUT_MS })
       .toBe('comments')
 
     // And laid out as the discussions
@@ -685,7 +651,7 @@ test.describe("the pool's discussions", () => {
     // The discussions, as the address holds them
     await expect(poolView(page, selectionCopy.pool.views.comments)).toBeChecked()
     await expect(threadHeadings(page)).toHaveCount(4)
-    expect(await addressedParam(page, POOL_VIEW_PARAM)).toBe('comments')
+    expect(await locationParam(page, POOL_VIEW_PARAM)).toBe('comments')
   })
 
   test("shows every discussion whatever the pool's filters, the set-aside problem's among them, with none of the filters over it", async ({
@@ -1375,7 +1341,7 @@ test.describe("the pool's discussions", () => {
     await threadOf(page, GEOMETRY).getByRole('link').first().click()
 
     // The geometry problem's page, its discussion holding the reply
-    expect(await addressedParam(page, OPEN_PROPOSAL_PARAM)).toBe(GEOMETRY.id)
+    expect(await locationParam(page, OPEN_PROPOSAL_PARAM)).toBe(GEOMETRY.id)
     await expect(page.getByRole('tabpanel')).toContainText(READER_REPLY)
 
     // A new comment, sent on the problem's own page

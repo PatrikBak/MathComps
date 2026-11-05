@@ -6,9 +6,9 @@ import {
   failEveryBackendCall,
   PROBLEMS_PATH,
   refuseEveryBackendCall,
-  returnToTab,
   SEARCH_PATH,
 } from './support/backend-routes'
+import { goOffline, returnToTab } from './support/emulation'
 import {
   searchAnswerWith,
   searchAnswerWithMoreToCome,
@@ -31,23 +31,6 @@ const { problems: problemsCopy, ui: uiCopy } = messages
 
 /** A word no problem carries, which is how a search is made to come back with nothing. */
 const NOTHING_MATCHES = 'qwertyuiopasdfgh'
-
-/**
- * Cuts the browser's own offline signal, which is what tells React Query to hold requests back.
- *
- * Taking the network itself away would also take the page's own server with it, and a filter change
- * navigates: a navigation that cannot be fetched leaves the browser on its error page with no app
- * left to assert against.
- *
- * @param page - The page to take offline.
- */
-async function goOffline(page: Page): Promise<void> {
-  // Both React Query and the app-wide banner read the property and listen for the event on window
-  await page.evaluate(() => {
-    Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
-    window.dispatchEvent(new Event('offline'))
-  })
-}
 
 /**
  * Stands in for the archive, answering searches until the test takes it away.

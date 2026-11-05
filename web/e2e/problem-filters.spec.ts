@@ -1,14 +1,10 @@
-import {
-  errorsCopy,
-  filtersCopy,
-  filtersInUrl,
-  KEPT_FILTER,
-  signInCopy,
-} from './support/archive-filters'
+import { addressParams } from './support/address'
+import { errorsCopy, filtersCopy, KEPT_FILTER, signInCopy } from './support/archive-filters'
 import type { SearchCall } from './support/backend-routes'
-import { PROBLEMS_PATH, recordNotices, stubProblemSearch } from './support/backend-routes'
+import { PROBLEMS_PATH, stubProblemSearch } from './support/backend-routes'
 import { endSessionInPlace, loginPromptFor, signInTestUser } from './support/session'
 import { expect, test } from './support/test'
+import { recordNotices } from './support/watchers'
 
 /**
  * How long the library needs to settle: read the URL, weigh whoever is reading, and send at most one
@@ -84,12 +80,12 @@ test.describe('problem library filters across a sign-in change', () => {
 
     // The list is no longer theirs to read, so it comes out of the URL
     await expect
-      .poll(() => filtersInUrl(page).get('list'), { timeout: SETTLE_TIMEOUT_MS })
+      .poll(() => addressParams(page).get('list'), { timeout: SETTLE_TIMEOUT_MS })
       .toBeNull()
 
     // The heart of it: their own search outlives the list. Losing a filter they may no longer have
     // is no reason to lose the ones they may.
-    expect(filtersInUrl(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
+    expect(addressParams(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
 
     // And they are still reading, rather than sent somewhere they never asked to go
     await expect(page).toHaveURL(/\/en\/problems/)
@@ -110,7 +106,7 @@ test.describe('problem library filters across a sign-in change', () => {
     await expect(page).toHaveURL(/\/en\/sign-in\?/)
 
     // Carrying the list they were reading, so signing back in puts them where they left off
-    expect(new URL(page.url()).searchParams.get('returnUrl')).toContain(`list=${PRIVATE_LIST_ID}`)
+    expect(addressParams(page).get('returnUrl')).toContain(`list=${PRIVATE_LIST_ID}`)
   })
 
   test('opens a shared list for a reader who is not signed in', async ({ page }) => {
@@ -175,11 +171,11 @@ test.describe('problem library filters across a sign-in change', () => {
 
     // The dead filter comes out of the URL rather than sitting there failing
     await expect
-      .poll(() => filtersInUrl(page).get('list'), { timeout: SETTLE_TIMEOUT_MS })
+      .poll(() => addressParams(page).get('list'), { timeout: SETTLE_TIMEOUT_MS })
       .toBeNull()
 
     // And nothing else goes with it
-    expect(filtersInUrl(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
+    expect(addressParams(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
 
     // Let anything else that moment raised reach the screen
     await page.waitForTimeout(QUIET_MS)
@@ -204,11 +200,11 @@ test.describe('problem library filters across a sign-in change', () => {
 
     // The filter nobody can have comes out of the URL rather than sitting there unapplied
     await expect
-      .poll(() => filtersInUrl(page).get('favoritesOnly'), { timeout: SETTLE_TIMEOUT_MS })
+      .poll(() => addressParams(page).get('favoritesOnly'), { timeout: SETTLE_TIMEOUT_MS })
       .toBeNull()
 
     // The one anybody may have stays
-    expect(filtersInUrl(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
+    expect(addressParams(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
 
     // And the reader is left reading, rather than thrown onto a page they never asked for
     await expect(page).toHaveURL(/\/en\/problems/)
@@ -228,7 +224,7 @@ test.describe('problem library filters across a sign-in change', () => {
     await expect(page).toHaveURL(/\/en\/sign-in\?/)
 
     // Carrying the filter they asked for, so signing in lands them on it
-    expect(new URL(page.url()).searchParams.get('returnUrl')).toContain('favoritesOnly=true')
+    expect(addressParams(page).get('returnUrl')).toContain('favoritesOnly=true')
   })
 
   test('asks for no account over a favorites filter the URL already threw away', async ({
@@ -296,11 +292,11 @@ test.describe('problem library filters across a sign-in change', () => {
 
     // Favorites stop being anybody's, so they come out of the URL
     await expect
-      .poll(() => filtersInUrl(page).get('favoritesOnly'), { timeout: SETTLE_TIMEOUT_MS })
+      .poll(() => addressParams(page).get('favoritesOnly'), { timeout: SETTLE_TIMEOUT_MS })
       .toBeNull()
 
     // Their own search outlives them
-    expect(filtersInUrl(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
+    expect(addressParams(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
 
     // And the reader is left reading rather than sent off mid-page
     await expect(page).toHaveURL(/\/en\/problems/)
@@ -351,7 +347,7 @@ test.describe('problem library filters across a sign-in change', () => {
     await expect(page).toHaveURL(/\/en\/sign-in\?/)
 
     // Carrying the filter they were reaching for, so signing in lands them on it
-    expect(new URL(page.url()).searchParams.get('returnUrl')).toContain('favoritesOnly=true')
+    expect(addressParams(page).get('returnUrl')).toContain('favoritesOnly=true')
   })
 
   test('offers the account a URL asking for marks needs, without moving the reader', async ({
@@ -372,11 +368,11 @@ test.describe('problem library filters across a sign-in change', () => {
 
     // The filter nobody can have comes out of the URL rather than sitting there claiming to be on
     await expect
-      .poll(() => filtersInUrl(page).get('markStatus'), { timeout: SETTLE_TIMEOUT_MS })
+      .poll(() => addressParams(page).get('markStatus'), { timeout: SETTLE_TIMEOUT_MS })
       .toBeNull()
 
     // The one anybody may have stays
-    expect(filtersInUrl(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
+    expect(addressParams(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
 
     // And the reader is left reading, rather than thrown onto a page they never asked for
     await expect(page).toHaveURL(/\/en\/problems/)
@@ -429,11 +425,11 @@ test.describe('problem library filters across a sign-in change', () => {
 
     // Marks stop being anybody's, so they come out of the URL
     await expect
-      .poll(() => filtersInUrl(page).get('markStatus'), { timeout: SETTLE_TIMEOUT_MS })
+      .poll(() => addressParams(page).get('markStatus'), { timeout: SETTLE_TIMEOUT_MS })
       .toBeNull()
 
     // Their own search outlives them
-    expect(filtersInUrl(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
+    expect(addressParams(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
 
     // And the reader is left reading, rather than sent off to sign in for what they just lost
     await expect(page).toHaveURL(/\/en\/problems/)
@@ -491,6 +487,6 @@ test.describe('problem library filters across a sign-in change', () => {
     await expect(page).toHaveURL(/\/en\/sign-in\?/)
 
     // Carrying the filter they were reaching for, so signing in lands them on it
-    expect(new URL(page.url()).searchParams.get('returnUrl')).toContain('markStatus=marked')
+    expect(addressParams(page).get('returnUrl')).toContain('markStatus=marked')
   })
 })

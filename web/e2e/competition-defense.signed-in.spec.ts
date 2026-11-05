@@ -6,12 +6,12 @@ import {
   areaPath,
   chatCopy,
   closeChat,
-  holdClock,
   LIST_PATH,
   openExistingDefense,
   sendTurn,
   transcriptOf,
 } from './support/competitions'
+import { holdClock } from './support/emulation'
 import {
   COMPETITION_SLUG,
   installHostedBackend,

@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { FACET_ROW_ATTRIBUTE } from '@/components/shared/components/facets/hooks/use-facet-row-navigation'
 
-import { facetsCopy, filtersInUrl } from './archive-filters'
+import { facetsCopy } from './archive-filters'
 import { expect } from './test'
 
 /** How many times Tab is pressed walking through a panel at most, which is more stops than any panel holds. */
@@ -149,17 +149,4 @@ export async function rowTabStops(page: Page, panel: Locator): Promise<string[]>
 
   // Still inside after more presses than the panel has stops for, so something in it takes Tab without end
   throw new Error(`Tab never left the panel, stopping among the rows at ${stops.join(', ')}`)
-}
-
-/**
- * A function reading one filter off the address.
- *
- * @param page - The page.
- * @param key - The filter's parameter.
- *
- * @returns A function reading it, null where the address carries none.
- */
-export function urlParam(page: Page, key: string): () => string | null {
-  // Read afresh every call, so a poll sees the address move
-  return () => filtersInUrl(page).get(key)
 }

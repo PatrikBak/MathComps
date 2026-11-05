@@ -10,7 +10,7 @@ import { PENDING_COMMENT_REACTION_STORAGE_KEY } from '@/constants/local-storage-
 
 import messages from '../messages/en.json'
 import { gateReads } from './support/answer-gate'
-import { BACKEND_ORIGIN, returnToTab } from './support/backend-routes'
+import { BACKEND_ORIGIN } from './support/backend-routes'
 import {
   commentBy,
   commentFrom,
@@ -24,6 +24,7 @@ import {
   THREADS_PATH,
 } from './support/comments'
 import { editorCopy } from './support/competitions'
+import { returnToTab } from './support/emulation'
 import { expect, test } from './support/test'
 
 /** The copy a thread reads under. */

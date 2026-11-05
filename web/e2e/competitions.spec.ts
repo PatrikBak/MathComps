@@ -1,3 +1,4 @@
+import { addressParams } from './support/address'
 import { BACKEND_ORIGIN } from './support/backend-routes'
 import { areaCopy, areaPath, authCopy, LIST_PATH, showRoundHolding } from './support/competitions'
 import { installHostedBackend, PROBLEM_COUNT, problemIdOf } from './support/hosted-backend'
@@ -112,7 +113,7 @@ test.describe('the competitions list', () => {
 
     // Which comes back to the link, thread and all
     await expect
-      .poll(() => new URL(page.url()).searchParams.get('returnUrl'), { timeout: SETTLE_TIMEOUT_MS })
+      .poll(() => addressParams(page).get('returnUrl'), { timeout: SETTLE_TIMEOUT_MS })
       .toBe(link)
   })
 

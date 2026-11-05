@@ -7,10 +7,11 @@ import {
 import type { Paper } from '@/components/features/problem-selection/model/selection-types'
 import { MATHILDA_NAME } from '@/constants/mathilda'
 
+import { locationParam } from './support/address'
 import { sendComment, stubNamedReader } from './support/comments'
 import { SELECTION_PATH } from './support/competitions'
+import { selectedTab } from './support/interaction'
 import {
-  addressedParam,
   boardPanel,
   cardOf,
   DRAFT_BOARD,
@@ -20,7 +21,6 @@ import {
   PHONE_VIEWPORT,
   problemCount,
   READY,
-  selectedTab,
   selectionCopy,
   SETTLE_TIMEOUT_MS,
   stubSelection,
@@ -102,7 +102,7 @@ test.describe("a paper's page", () => {
     )
 
     // The address naming the paper
-    expect(await addressedParam(page, OPEN_PAPER_PARAM)).toBe(ELEMENTARY.id)
+    expect(await locationParam(page, OPEN_PAPER_PARAM)).toBe(ELEMENTARY.id)
 
     // Every slot of the paper, in order
     const slots = page.getByRole('tabpanel').locator('ol').first().locator(':scope > li')
@@ -136,7 +136,7 @@ test.describe("a paper's page", () => {
     await expect(problemCount(page, ON_OFFER_COUNT)).toBeVisible()
 
     // The address naming no paper
-    expect(await addressedParam(page, OPEN_PAPER_PARAM)).toBeNull()
+    expect(await locationParam(page, OPEN_PAPER_PARAM)).toBeNull()
 
     // Focus back on the paper's name
     await expect(elementaryLink(page)).toBeFocused()

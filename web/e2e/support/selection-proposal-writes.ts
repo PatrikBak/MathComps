@@ -6,10 +6,10 @@ import {
 } from '@/components/features/problem-selection/model/selection-types'
 import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 
+import { GUID } from './backend-routes'
 import { READER_NAME } from './comments'
 import {
   emptiedOnDrafts,
-  GUID,
   type HeldSelection,
   liveProposal,
   readFields,

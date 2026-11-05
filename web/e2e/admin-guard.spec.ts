@@ -1,6 +1,7 @@
 import { RETURN_URL_PARAM } from '@/constants/auth-constants'
 import { ROUTES } from '@/i18n/i18n'
 
+import { addressParams } from './support/address'
 import { expect, test } from './support/test'
 
 /** How long the redirect has to land before a wait is called a failure. */
@@ -21,10 +22,7 @@ test.describe('an admin page opened by a visitor', () => {
     await expect(page).toHaveURL(/\/en\/sign-in\?/, { timeout: SETTLE_TIMEOUT_MS })
 
     // The address the login page will return to
-    const returnUrl = new URL(
-      new URL(page.url()).searchParams.get(RETURN_URL_PARAM) ?? '',
-      page.url()
-    )
+    const returnUrl = new URL(addressParams(page).get(RETURN_URL_PARAM) ?? '', page.url())
 
     // The board itself
     expect(returnUrl.pathname).toBe(BOARD_PATH)

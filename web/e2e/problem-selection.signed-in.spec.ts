@@ -1,13 +1,25 @@
-import type { Locator, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
 import { OPEN_PROPOSAL_PARAM } from '@/components/features/problem-selection/model/selection-routes'
 
-import { BACKEND_ORIGIN, returnToTab } from './support/backend-routes'
+import { locationParam } from './support/address'
+import { BACKEND_ORIGIN } from './support/backend-routes'
 import { stubNamedReader } from './support/comments'
 import { actionsCopy, areaCopy, editorCopy, SELECTION_PATH } from './support/competitions'
+import { returnToTab, slowDown } from './support/emulation'
+import {
+  clickInPlace,
+  clickTwiceAtOnce,
+  furthestScroll,
+  scrollWindowTo,
+  selectedTab,
+  showsFocusRing,
+  topInView,
+  twoFramesLater,
+  windowScroll,
+} from './support/interaction'
 import {
   actionsButton,
-  addressedParam,
   BILINGUAL,
   boardPanel,
   cardOf,
@@ -27,13 +39,11 @@ import {
   problemCount,
   rememberedSelection,
   REVISION,
-  selectedTab,
   SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
   SET_ASIDE,
   SETTLE_TIMEOUT_MS,
-  showsFocusRing,
   slotOf,
   SLOVAK_ALONE,
   SLOVAK_ALONE_STATEMENT,
@@ -67,83 +77,6 @@ declare global {
     /** Hands the test run what the pool's last card says, each time the page changes. */
     reportLastCard: (text: string) => void
   }
-}
-
-/**
- * How far down the window is scrolled.
- *
- * @param page - The page.
- *
- * @returns The scroll, in pixels from the top.
- */
-function windowScroll(page: Page): Promise<number> {
-  // Read off the window itself
-  return page.evaluate(() => window.scrollY)
-}
-
-/**
- * How far down the window could be scrolled at most, which is how much taller the page is than the window.
- *
- * @param page - The page.
- *
- * @returns The furthest scroll, in pixels from the top.
- */
-function furthestScroll(page: Page): Promise<number> {
-  // The page's height past the window's
-  return page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)
-}
-
-/**
- * How far below the view's top an element stands.
- *
- * @param element - The element.
- *
- * @returns The distance, in pixels, negative for an element starting above the view.
- */
-function topInView(element: Locator): Promise<number> {
-  // Read off the element itself
-  return element.evaluate((node) => node.getBoundingClientRect().top)
-}
-
-/**
- * Scrolls the window to a spot, handing back once the scroll has been dispatched, as a reader's own scroll
- * always is before their next click.
- *
- * @param page - The page.
- * @param top - The spot, in pixels from the top.
- */
-async function scrollWindowTo(page: Page, top: number): Promise<void> {
-  // Scrolled there, and waited on until the page has heard it
-  await page.evaluate(
-    (spot) =>
-      new Promise<void>((resolve) => {
-        // Handed back once the scroll is heard
-        window.addEventListener('scroll', () => resolve(), { once: true })
-
-        // Jumped there, since the site otherwise scrolls smoothly
-        window.scrollTo({ top: spot, behavior: 'instant' })
-      }),
-    top
-  )
-
-  // There, which a page too short for the spot would have cut short
-  expect(await windowScroll(page)).toBe(top)
-}
-
-/**
- * Waits until the page is two frames on, by which time it has painted whatever the last step set off.
- *
- * @param page - The page.
- */
-async function twoFramesLater(page: Page): Promise<void> {
-  // Waited out inside the page
-  await page.evaluate(
-    () =>
-      new Promise<void>((resolve) => {
-        // The next frame, and the one after it
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-      })
-  )
 }
 
 /**
@@ -186,48 +119,6 @@ async function recordLastCard(page: Page): Promise<() => string[]> {
 
   // A function reading the record so far
   return () => changes
-}
-
-/**
- * Slows the page's processor down as a slow phone runs it, so the work the page puts off for what is out of
- * sight is still pending when the reader's next step comes.
- *
- * @param page - The page.
- */
-async function slowDown(page: Page): Promise<void> {
-  // A line to the browser itself
-  const session = await page.context().newCDPSession(page)
-
-  // The page's processor slowed, for the rest of the test
-  await session.send('Emulation.setCPUThrottlingRate', { rate: 6 })
-}
-
-/**
- * Clicks a link where it sits. Playwright's own click scrolls its target into view first, which would move the
- * very spot a test is measuring.
- *
- * @param page - The page.
- * @param name - The link's accessible name, or a part of it.
- */
-export async function clickInPlace(page: Page, name: string): Promise<void> {
-  // A plain click, fired on the link itself
-  await page.getByRole('link', { name }).evaluate((element: HTMLElement) => element.click())
-}
-
-/**
- * Clicks a link twice where it sits, the second click landing before the page has answered the first.
- *
- * @param link - The link.
- */
-async function clickTwiceAtOnce(link: Locator): Promise<void> {
-  // Both clicks, fired on the link itself in one go
-  await link.evaluate((element: HTMLElement) => {
-    // The first click
-    element.click()
-
-    // And the second, before anything has rendered
-    element.click()
-  })
 }
 
 /**
@@ -545,7 +436,7 @@ test.describe("the selection's address and history", () => {
     await editor.press('ArrowLeft')
 
     // The problem still open
-    expect(await addressedParam(page, OPEN_PROPOSAL_PARAM)).toBe(OPENED.id)
+    expect(await locationParam(page, OPEN_PROPOSAL_PARAM)).toBe(OPENED.id)
 
     // The editor's button opening its emoji picker
     const emojiButton = page
@@ -562,7 +453,7 @@ test.describe("the selection's address and history", () => {
     await emoji.press('ArrowLeft', { timeout: SETTLE_TIMEOUT_MS })
 
     // The problem still open
-    expect(await addressedParam(page, OPEN_PROPOSAL_PARAM)).toBe(OPENED.id)
+    expect(await locationParam(page, OPEN_PROPOSAL_PARAM)).toBe(OPENED.id)
 
     // The picker, put away by its button
     await emojiButton.click()
@@ -579,7 +470,7 @@ test.describe("the selection's address and history", () => {
     )
 
     // The problem still open
-    expect(await addressedParam(page, OPEN_PROPOSAL_PARAM)).toBe(OPENED.id)
+    expect(await locationParam(page, OPEN_PROPOSAL_PARAM)).toBe(OPENED.id)
 
     // The problem's menu, opened
     await page
@@ -601,7 +492,7 @@ test.describe("the selection's address and history", () => {
     await page.keyboard.press('ArrowLeft')
 
     // The problem still open
-    expect(await addressedParam(page, OPEN_PROPOSAL_PARAM)).toBe(OPENED.id)
+    expect(await locationParam(page, OPEN_PROPOSAL_PARAM)).toBe(OPENED.id)
 
     // And the question with it
     await expect(question).toHaveCount(1)
@@ -806,8 +697,9 @@ test.describe("the selection's address and history", () => {
     // A problem opened from the pool
     await openFromPool(page)
 
-    // On a slow phone from here on, through every step in history
-    await slowDown(page)
+    // On a slow phone from here on, through every step in history, so the work the page puts off for what is
+    // out of sight is still pending when the next step comes
+    await slowDown(page, 6)
 
     // And Back, so there is a step to go Forward to
     await page.goBack()

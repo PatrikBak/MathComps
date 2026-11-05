@@ -121,21 +121,6 @@ export const MATHCOMPS_ORGANIZATION_SLUG = 'mathcomps'
 /** The path MathComps' selection hangs off on the backend, which every read and write of it goes under. */
 export const SELECTION_API_PATH = `/problem-selection/${MATHCOMPS_ORGANIZATION_SLUG}`
 
-/** The shape of an id the backend's routes take, any other answering as a path it does not serve. */
-export const GUID = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
-
-/**
- * Whether a value read off a request body is an id the backend can bind.
- *
- * @param value - The value.
- *
- * @returns True for a string shaped like an id.
- */
-export function isGuid(value: unknown): value is string {
-  // A string, and nothing but an id
-  return typeof value === 'string' && new RegExp(`^${GUID}$`).test(value)
-}
-
 /**
  * Refuses the write.
  *

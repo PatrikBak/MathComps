@@ -3,6 +3,7 @@ import type { Locator } from '@playwright/test'
 import { URL_PARAMS } from '@/components/features/problems/utils/search-url-serialization'
 import { FACET_ROW_ATTRIBUTE } from '@/components/shared/components/facets/hooks/use-facet-row-navigation'
 
+import { addressParams } from './support/address'
 import { facetsCopy, filtersCopy, SHORT_WINDOW, TALL_WINDOW } from './support/archive-filters'
 import { PROBLEMS_PATH, stubProblemSearch } from './support/backend-routes'
 import {
@@ -12,8 +13,8 @@ import {
   panelResetOf,
   QUIET_MS,
   rowTabStops,
-  urlParam,
 } from './support/facets'
+import { LONG_PRESS_MS } from './support/interaction'
 import { expect, test } from './support/test'
 
 /** The title of the facet listing competitions, a tree whose every branch starts open. */
@@ -21,9 +22,6 @@ const COMPETITION = filtersCopy.facets.competition
 
 /** How long the library needs to read the URL and send the one search off the back of it. */
 const SETTLE_TIMEOUT_MS = 15_000
-
-/** How long the pointer is held down for a long press, with room to spare over what counts as one. */
-const LONG_PRESS_MS = 800
 
 /** The competition the fixture's one problem comes from. */
 const FOUND_COMPETITION = 'tst-d3'
@@ -111,7 +109,7 @@ test.describe('opening and closing a branch of a tree facet', () => {
     await page.waitForTimeout(QUIET_MS)
 
     // And nothing was picked along the way
-    expect(urlParam(page, URL_PARAMS.COMPETITIONS)()).toBeNull()
+    expect(addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBeNull()
     await expect(memo).toHaveAttribute('aria-checked', 'false')
   })
 
@@ -221,7 +219,7 @@ test.describe('picking in a tree facet', () => {
     await rowOf(panel, 'csmo-a-i').click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBe('csmo-a-i')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBe('csmo-a-i')
 
     // The round itself picked
     await expect(rowOf(panel, 'csmo-a-i')).toHaveAttribute('aria-checked', 'true')
@@ -243,7 +241,7 @@ test.describe('picking in a tree facet', () => {
     await rowOf(panel, 'csmo-a-i').click()
 
     // Out of the address
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBeNull()
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBeNull()
 
     // And category A drawn picked by nothing any more
     await expect(rowOf(panel, 'csmo-a')).toHaveAttribute('aria-checked', 'false')
@@ -272,7 +270,7 @@ test.describe('picking in a tree facet', () => {
     await memo.click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBe('memo')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBe('memo')
 
     // Picked, and still closed, every row where it was
     await expect(memo).toHaveAttribute('aria-checked', 'true')
@@ -289,7 +287,7 @@ test.describe('picking in a tree facet', () => {
     await memo.click({ modifiers: ['ControlOrMeta'] })
 
     // Standing alone in the address, TST dropped from it
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBe('memo')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBe('memo')
     await expect(rowOf(panel, 'tst')).toHaveAttribute('aria-checked', 'false')
 
     // And still closed
@@ -332,7 +330,7 @@ test.describe('picking in a tree facet', () => {
     await page.mouse.up()
 
     // A function reading the competitions picked off the address
-    const picked = urlParam(page, URL_PARAMS.COMPETITIONS)
+    const picked = () => addressParams(page).get(URL_PARAMS.COMPETITIONS)
 
     // The facet narrowed to the competition
     await expect.poll(picked, { timeout: SETTLE_TIMEOUT_MS }).toBe(FOUND_COMPETITION)
@@ -359,7 +357,7 @@ test.describe('reopening a tree facet', () => {
     await rowOf(panel, lastId).click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBe(lastId)
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBe(lastId)
 
     // The facet, closed
     await page.keyboard.press('Escape')
@@ -413,7 +411,7 @@ test.describe('searching a tree facet', () => {
     await rowOf(panel, 'tst-d1').click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBe('tst-d1')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBe('tst-d1')
 
     // A search reaching another of its days
     await panel.getByRole('textbox').fill(FOUND_COMPETITION_SEARCH)
@@ -573,7 +571,7 @@ test.describe('searching a tree facet', () => {
     await categoryA.click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBe('csmo-a')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBe('csmo-a')
 
     // The search, emptied
     await search.fill('')
@@ -609,7 +607,9 @@ test.describe('searching a tree facet', () => {
     await rowOf(panel, FOUND_COMPETITION).click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBe(FOUND_COMPETITION)
+    await expect
+      .poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS))
+      .toBe(FOUND_COMPETITION)
 
     // The search, emptied
     await search.fill('')
@@ -632,7 +632,7 @@ test.describe('searching a tree facet', () => {
     await rowOf(panel, 'tst-d1').click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBe('tst-d1')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBe('tst-d1')
 
     // The rest of the search typed straight on
     await page.keyboard.type(' 3')
@@ -688,7 +688,7 @@ test.describe('a tree facet from the keyboard', () => {
     await rowOf(panel, 'memo').click()
 
     // A function reading the competitions picked off the address
-    const picked = urlParam(page, URL_PARAMS.COMPETITIONS)
+    const picked = () => addressParams(page).get(URL_PARAMS.COMPETITIONS)
 
     // MEMO picked
     await expect.poll(picked).toBe('memo')
@@ -716,7 +716,7 @@ test.describe('a tree facet from the keyboard', () => {
     await page.keyboard.press('Space')
 
     // A function reading the competitions picked off the address
-    const picked = urlParam(page, URL_PARAMS.COMPETITIONS)
+    const picked = () => addressParams(page).get(URL_PARAMS.COMPETITIONS)
 
     // Picks it
     await expect.poll(picked).toBe('memo-i')
@@ -749,7 +749,7 @@ test.describe('a tree facet from the keyboard', () => {
     await rowOf(panel, 'memo-i').click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBe('memo-i')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBe('memo-i')
 
     // Down twice, from the search box past CSMO onto its first category
     await page.keyboard.press('ArrowDown')
@@ -789,7 +789,7 @@ test.describe('a tree facet from the keyboard', () => {
     await page.waitForTimeout(QUIET_MS)
 
     // Which holds the round
-    expect(urlParam(page, URL_PARAMS.COMPETITIONS)()).toBe('memo-i')
+    expect(addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBe('memo-i')
   })
 
   test('keeps its one stop on the row the arrows reached, so Tab and Shift+Tab leave from there', async ({
@@ -815,7 +815,7 @@ test.describe('a tree facet from the keyboard', () => {
     await rowOf(panel, 'memo-i').click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBe('memo-i')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBe('memo-i')
 
     // Down, onto the top of the tree
     await page.keyboard.press('ArrowDown')
@@ -835,7 +835,7 @@ test.describe('a tree facet from the keyboard', () => {
     await rowOf(panel, 'memo-i').click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBe('memo-i')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBe('memo-i')
 
     // Its competition, closed over it
     await chevronOf(panel, 'memo').click()
@@ -872,7 +872,7 @@ test.describe('a tree facet from the keyboard', () => {
     await rowOf(panel, 'memo-i').click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBe('memo-i')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBe('memo-i')
 
     // The facet, closed
     await page.keyboard.press('Escape')
@@ -899,7 +899,7 @@ test.describe('the header of a tree facet', () => {
     await rowOf(panel, 'memo-i').click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBe('memo-i')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBe('memo-i')
 
     // The panel carries the reset, the heading's being covered
     await expect(panelResetOf(panel)).toBeVisible()
@@ -938,13 +938,15 @@ test.describe('the header of a tree facet', () => {
     await rowOf(panel, FOUND_COMPETITION).click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBe(FOUND_COMPETITION)
+    await expect
+      .poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS))
+      .toBe(FOUND_COMPETITION)
 
     // The panel's reset, pressed
     await panelResetOf(panel).click()
 
     // Nothing left picked
-    await expect.poll(urlParam(page, URL_PARAMS.COMPETITIONS)).toBeNull()
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.COMPETITIONS)).toBeNull()
 
     // The search box emptied, the caret back in it
     await expect(search).toHaveValue('')
