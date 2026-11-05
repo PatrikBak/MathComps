@@ -1,50 +1,17 @@
-import type { Page } from '@playwright/test'
-
-import { areaCopy } from './support/competitions'
 import {
-  actionsButton,
   cardOf,
   FIRST,
   GEOMETRY,
   openPool,
-  SELECTION_ENDPOINT,
   selectionText,
   stubSelection,
+  switchElementaryOn,
   untilSelectionReadAgain,
 } from './support/problem-selection'
 import { expect, test } from './support/test'
 
 /** What the button over the selection's pool says, and what a screen reader hears while it shows. */
 const RESORT = selectionText('pool.resort')
-
-/**
- * Leaves the pool's order out of date: switches the elementary category on for the geometry problem, which stands
- * last, so the board's elementary paper would now run it near the top.
- *
- * @param page - The page, its pool drawn.
- */
-async function leaveOrderOutOfDate(page: Page): Promise<void> {
-  // The button opening the geometry problem's menu
-  const menuButton = actionsButton(cardOf(page, GEOMETRY), GEOMETRY)
-
-  // The menu, opened
-  await menuButton.click()
-
-  // The answer to the read after the write
-  const readAfterWrite = page.waitForResponse(SELECTION_ENDPOINT)
-
-  // The elementary category, switched on
-  await page.getByRole('menuitemcheckbox', { name: areaCopy.categories.elementary }).click()
-
-  // Once the read has landed
-  await readAfterWrite
-
-  // The menu, closed from the keyboard
-  await page.keyboard.press('Escape')
-
-  // Closed for good once the focus is back on the menu's button, the last thing the menu does as it closes
-  await expect(menuButton).toBeFocused()
-}
 
 test.describe('the button showing a change a list holds back', () => {
   test('shows while a change waits, said to a screen reader too, and neither once the change is shown', async ({
@@ -64,8 +31,9 @@ test.describe('the button showing a change a list holds back', () => {
     await expect(button).toHaveCount(0)
     await expect(said).toHaveCount(0)
 
-    // A change waiting
-    await leaveOrderOutOfDate(page)
+    // A change waiting: the elementary category switched on for the geometry problem, which stands last, so the
+    // board's elementary paper would now run it near the top
+    await switchElementaryOn(page, cardOf(page, GEOMETRY), GEOMETRY)
 
     // The button shown, and said to a screen reader
     await expect(button).toBeVisible()
@@ -91,8 +59,9 @@ test.describe('the button showing a change a list holds back', () => {
     // The pool
     await openPool(page)
 
-    // A change waiting
-    await leaveOrderOutOfDate(page)
+    // A change waiting: the elementary category switched on for the geometry problem, which stands last, so the
+    // board's elementary paper would now run it near the top
+    await switchElementaryOn(page, cardOf(page, GEOMETRY), GEOMETRY)
 
     // The button
     const button = page.getByRole('button', { name: RESORT })

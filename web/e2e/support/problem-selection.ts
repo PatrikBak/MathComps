@@ -23,9 +23,10 @@ import messages from '../../messages/en.json'
 import { gateReads } from './answer-gate'
 import { answerJson, BACKEND_ORIGIN, refuse } from './backend-routes'
 import { threadKey } from './comments'
-import { SELECTION_PATH } from './competitions'
+import { areaCopy, SELECTION_PATH } from './competitions'
 import { installConversationBackend } from './conversation-backend'
 import type { HostedBackend } from './hosted-backend'
+import { closeMenuFromKeyboard } from './interaction'
 import {
   type AnswerSelectionRead,
   type SeenMemory,
@@ -1247,6 +1248,38 @@ export function actionsButton(scope: Locator | Page, proposal: Proposal): Locato
   return scope.getByRole('button', {
     name: selectionText('actions.moreFor', { number: proposal.number }),
   })
+}
+
+/**
+ * Switches the elementary category on for a problem through its menu, waits for the read the write sets off, and
+ * closes the menu again.
+ *
+ * @param page - The page.
+ * @param scope - Where the problem's menu stands: its card in the pool, or the problem's own page.
+ * @param proposal - The problem.
+ */
+export async function switchElementaryOn(
+  page: Page,
+  scope: Locator | Page,
+  proposal: Proposal
+): Promise<void> {
+  // The button opening the problem's menu
+  const menuButton = actionsButton(scope, proposal)
+
+  // The menu, opened
+  await menuButton.click()
+
+  // The answer to the read after the write
+  const readAfterWrite = page.waitForResponse(SELECTION_ENDPOINT)
+
+  // The elementary category, switched on
+  await page.getByRole('menuitemcheckbox', { name: areaCopy.categories.elementary }).click()
+
+  // Once the read has landed
+  await readAfterWrite
+
+  // And the menu closed again
+  await closeMenuFromKeyboard(menuButton)
 }
 
 /**
