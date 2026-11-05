@@ -146,7 +146,7 @@ Every backend call the specs make is answered by a stub, so the suite needs no A
 
 `npm run e2e:session` produces a browser session for driving the app manually against local dev. It is not a test suite: it signs the E2E account in through Clerk's API (the sign-up form's Turnstile check deadlocks an automated browser) and writes `playwright/.clerk/user.json` plus a snippet at the repo root's `.playwright-mcp/inject-session.mjs` that replays the session into a Playwright MCP browser. Both are git-ignored and hold live auth cookies.
 
-Needs `E2E_CLERK_USER_EMAIL` and `E2E_CLERK_USER_PASSWORD` in `.env.local`, a dev server on port 3000, and `npx playwright install chromium` once per machine.
+Needs `E2E_CLERK_USER_EMAIL` and `CLERK_SECRET_KEY` in `.env.local`, a dev server on port 3000, and `npx playwright install chromium` once per machine.
 
 The same session is what the `signed-in` specs start from, minted fresh each run. A spec that needs to end a session mid-test signs in on its own instead, since ending one invalidates it for good and every spec sharing it would start out dead.
 
