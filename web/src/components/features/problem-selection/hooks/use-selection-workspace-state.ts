@@ -14,6 +14,7 @@ import { useSelectionOrganization } from './selection-organization'
 import { useBoardPicking, type UseBoardPickingResult } from './use-board-picking'
 import { useOpenDetail, type UseOpenDetailResult } from './use-open-detail'
 import { usePoolFilters, type UsePoolFiltersResult } from './use-pool-filters'
+import { usePoolViewMode, type UsePoolViewModeResult } from './use-pool-view-mode'
 import { useSeenMarks, type UseSeenMarksResult } from './use-seen-marks'
 import { useIsChangingSlots } from './use-selection-write'
 
@@ -27,8 +28,8 @@ export type LoadedSelection = SelectionIndex & {
 
 /**
  * What every part of the selection shares: the read, whether a write changing its slots is out, the page open in
- * full, what the pool is narrowed to, the slot waiting for a problem with the ways to move it, and how far the reader
- * has seen the discussions.
+ * full, what the pool is narrowed to and how it is laid out, the slot waiting for a problem with the ways to move it,
+ * and how far the reader has seen the discussions.
  */
 export type SelectionWorkspace = UseOpenDetailResult &
   Omit<UseBoardPickingResult, 'activeBoard'> & {
@@ -42,6 +43,8 @@ export type SelectionWorkspace = UseOpenDetailResult &
     selection: LoadedSelection | null
     /** What the pool is narrowed to, and the ways of changing it. */
     poolFilters: UsePoolFiltersResult
+    /** How the pool is laid out, and the way of changing it. */
+    poolView: UsePoolViewModeResult
     /** How far the reader has seen each discussion, and the way to mark some seen. */
     seenMarks: UseSeenMarksResult
   }
@@ -79,6 +82,9 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
   // What the pool is narrowed to, and the ways of changing it
   const poolFilters = usePoolFilters(index?.categories ?? null)
 
+  // How the pool is laid out, and the way of changing it
+  const poolView = usePoolViewMode()
+
   // The board being filled, the slot on it waiting for a problem, and the ways to change both
   const { activeBoard, waitingSlot, selectBoard, toggleWaiting, stopWaiting } = useBoardPicking({
     boards: index?.boards ?? [],
@@ -111,6 +117,7 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
       leaveDetail,
       poolCountRef,
       poolFilters,
+      poolView,
       waitingSlot,
       selectBoard,
       toggleWaiting,
@@ -129,6 +136,7 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
       leaveDetail,
       poolCountRef,
       poolFilters,
+      poolView,
       waitingSlot,
       selectBoard,
       toggleWaiting,
