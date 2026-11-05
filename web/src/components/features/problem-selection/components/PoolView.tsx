@@ -16,7 +16,6 @@ import type { TableSort } from '@/components/shared/utils/table-sort'
 import { useResortableOrder } from '@/hooks/use-resortable-order'
 import type { Locale } from '@/i18n/i18n'
 
-import { usePoolViewMode } from '../hooks/use-pool-view-mode'
 import { countActiveFilters, matchPool } from '../model/pool-filters'
 import { DEFAULT_RATINGS_SORT, type RatingsColumn } from '../model/ratings-order'
 import { POOL_VIEWS, type PoolViewMode } from '../model/selection-routes'
@@ -95,17 +94,16 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
   // Counted nouns, which decline with the number in front of them
   const tPlurals = useTranslations('plurals')
 
-  // The selection if its read has landed, what the pool is narrowed to with the ways of changing it, the line saying
-  // how many problems or comments show, and the slot waiting for a problem
+  // The selection if its read has landed, what the pool is narrowed to with the ways of changing it, which layout it
+  // shows with the way to change that, the line saying how many problems or comments show, and the slot waiting for
+  // a problem
   const {
     selection,
     poolFilters: filters,
+    poolView: { mode, showMode },
     poolCountRef: countRef,
     waitingSlot,
   } = useSelectionWorkspace()
-
-  // Which layout the pool shows, and the way to change it
-  const { mode, showMode } = usePoolViewMode()
 
   // What the filter lets through, against the board on screen, while the pool lists its problems; null until the
   // selection arrives, and over the discussions, which no filter narrows

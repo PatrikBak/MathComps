@@ -433,8 +433,7 @@ function poolView(page: Page, name: string): Locator {
 }
 
 /**
- * Lays the pool out as one of its layouts, returning once the switch has taken it. A switch picked again before the
- * last pick lands would press the option still checked from before, which changes nothing.
+ * Lays the pool out as one of its layouts, returning once the switch has taken it.
  *
  * @param page - The page.
  * @param name - What the layout is called.
@@ -567,6 +566,88 @@ test.describe("the pool's discussions", () => {
 
     // The discussions again, focus on the paper's heading it was opened from rather than on its name on the board
     await expect(paperHeading).toBeFocused()
+  })
+
+  test('takes a layout picked straight after another, before the first one has been drawn', async ({
+    page,
+  }) => {
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', discussedSelection())
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // Once every thread is drawn
+    await expect(threadHeadings(page)).toHaveCount(4, { timeout: SETTLE_TIMEOUT_MS })
+
+    // The discussions' option, as the page holds it
+    const commentsOption = await poolView(page, selectionCopy.pool.views.comments).elementHandle()
+
+    // The problems picked, and the discussions straight after, quicker than any hand could press
+    await poolView(page, selectionCopy.pool.views.problems).evaluate(
+      (problemsOption, laterOption) => {
+        // The problems picked
+        problemsOption.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+
+        // The discussions picked the moment the first press has run its course
+        queueMicrotask(() => laterOption.dispatchEvent(new MouseEvent('click', { bubbles: true })))
+      },
+      commentsOption
+    )
+
+    // The discussions, the last layout picked, named in the address
+    await expect
+      .poll(() => addressedParam(page, POOL_VIEW_PARAM), { timeout: SETTLE_TIMEOUT_MS })
+      .toBe('comments')
+
+    // And laid out as the discussions
+    await expect(poolView(page, selectionCopy.pool.views.comments)).toBeChecked()
+    await expect(threadHeadings(page)).toHaveCount(4)
+  })
+
+  test('follows a jump through history to the layout its step holds, a problem open over the pool all the way', async ({
+    page,
+  }) => {
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', discussedSelection())
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // Once every thread is drawn
+    await expect(threadHeadings(page)).toHaveCount(4, { timeout: SETTLE_TIMEOUT_MS })
+
+    // The first problem, opened from its thread's heading
+    await threadOf(page, FIRST).getByRole('link').first().click()
+
+    // The first problem's own page
+    await expect(headingOf(page, FIRST)).toBeVisible()
+
+    // Back to the pool by the link on the problem's page, a new step in history
+    await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
+
+    // The pool laid out as its problems
+    await showPoolAs(page, selectionCopy.pool.views.problems)
+
+    // The geometry problem, opened from its card
+    await cardOf(page, GEOMETRY).getByRole('link', { name: GEOMETRY.title }).click()
+
+    // The geometry problem's own page
+    await expect(headingOf(page, GEOMETRY)).toBeVisible()
+
+    // Two steps back in one go, from one problem straight to the other, whose step holds the discussions
+    await page.evaluate(() => window.history.go(-2))
+
+    // The first problem's page again
+    await expect(headingOf(page, FIRST)).toBeVisible()
+
+    // Back to the pool by the link on the problem's page
+    await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
+
+    // The discussions, as the address holds them
+    await expect(poolView(page, selectionCopy.pool.views.comments)).toBeChecked()
+    await expect(threadHeadings(page)).toHaveCount(4)
+    expect(await addressedParam(page, POOL_VIEW_PARAM)).toBe('comments')
   })
 
   test("shows every discussion whatever the pool's filters, the set-aside problem's among them, with none of the filters over it", async ({

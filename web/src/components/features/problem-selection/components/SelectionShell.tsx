@@ -16,7 +16,6 @@ import { errorCodeOf } from '@/lib/api/api-error'
 
 import { useDiscussionVisit } from '../hooks/use-discussion-visit'
 import { PINNED_ATTRIBUTE } from '../hooks/use-open-detail'
-import { usePoolViewMode } from '../hooks/use-pool-view-mode'
 import type { OpenDetail, PoolViewMode } from '../model/selection-routes'
 import { PROPOSAL_AUTHORING_LANGUAGE } from '../model/selection-types'
 import { BoardPanel } from './BoardPanel'
@@ -197,11 +196,12 @@ function SelectionNotice({ children }: SelectionNoticeProps) {
  * opens, so the visit is held here, outside the pool.
  */
 function SelectionContent() {
-  // The page open in full, if any, and the selection, if its read has landed
-  const { detail, selection } = useSelectionWorkspace()
-
-  // Which layout the pool shows
-  const { mode: poolMode } = usePoolViewMode()
+  // The page open in full, if any, the selection, if its read has landed, and which layout the pool shows
+  const {
+    detail,
+    selection,
+    poolView: { mode: poolMode },
+  } = useSelectionWorkspace()
 
   // Where the pool's Comments tab stands
   const poolCommentsPresence =
