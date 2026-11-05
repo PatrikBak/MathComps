@@ -4,13 +4,15 @@ import { MINUTE_MS } from '@/components/shared/utils/time-units'
 import { ROUTES } from '@/i18n/i18n'
 
 import messages from '../messages/en.json'
-import { BACKEND_ORIGIN, countDialogs } from './support/backend-routes'
+import { addressOf } from './support/address'
+import { BACKEND_ORIGIN } from './support/backend-routes'
 import { LIST_PATH, showRoundHolding, userMenuCopy } from './support/competitions'
 import { expectDialogFor, expectOnlyNotCounting } from './support/conversation-review'
 import { GROUP_NAME, installGradingBackend } from './support/grading-backend'
 import { installHostedBackend } from './support/hosted-backend'
 import { conversationOf, installQueueBackend } from './support/review-backend'
 import { expect, test } from './support/test'
+import { countDialogs } from './support/watchers'
 
 /** The group whose board each test opens, except the one following the way in from a round's panel. */
 const GROUP_SLUG = 'mc-test'
@@ -107,21 +109,6 @@ async function openQueueFromMenu(page: Page): Promise<void> {
 
   // The queue, which the menu offers by its title
   await page.getByRole('menuitem', { name: messages.admin.defenseReview.title }).click()
-}
-
-/**
- * Reads where the page's address stands, its path and query without the origin.
- *
- * @param page - The page.
- *
- * @returns The path and the query, the query with its question mark.
- */
-function addressOf(page: Page): string {
-  // The address as the page holds it
-  const address = new URL(page.url())
-
-  // Everything past the origin
-  return `${address.pathname}${address.search}`
 }
 
 test.describe('the way into grading', () => {
@@ -671,6 +658,25 @@ test.describe("the board's address", () => {
       'aria-pressed',
       'true'
     )
+  })
+
+  test('opens one dialog for a link naming a grade the board walks', async ({ page }) => {
+    // Every dialog the page puts up, from the first document on
+    const dialogs = await countDialogs(page)
+
+    // A backend serving the test group's board
+    await installGradingBackend(page, GROUP_SLUG)
+
+    // A link to Ada's first problem
+    await page.goto(`${BOARD_PATH}?student=ada&problem=p1`)
+
+    // Which opens her grade
+    await expect(page.getByRole('dialog').getByText('Answer 1 by ada on p1.')).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // And one dialog, put up once
+    expect(dialogs()).toBe(1)
   })
 
   // Links naming a grade the board on screen doesn't walk, and the address each leaves once the board says so

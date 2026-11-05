@@ -3,12 +3,13 @@ import type { Page } from '@playwright/test'
 import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import messages from '../messages/en.json'
-import { BACKEND_ORIGIN, PROBLEMS_PATH, recordNotices } from './support/backend-routes'
+import { BACKEND_ORIGIN, PROBLEMS_PATH } from './support/backend-routes'
 import { apiErrorsCopy, chatCopy, LIST_PATH, userMenuCopy } from './support/competitions'
 import { installHostedBackend } from './support/hosted-backend'
 import { searchAnswerWith, stubProblemActions, stubSearchAnswer } from './support/problem-actions'
 import { dropSessionWithoutNotifying } from './support/session'
 import { expect, test } from './support/test'
+import { recordNotices } from './support/watchers'
 
 /** How long a surface gets to boot Clerk, work out who is reading, and settle on what to show. */
 const SETTLE_TIMEOUT_MS = 15_000

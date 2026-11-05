@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { addressParams } from './support/address'
 import { facetsCopy } from './support/archive-filters'
 import { areaCopy, SELECTION_PATH } from './support/competitions'
 import {
@@ -50,18 +51,6 @@ const MISSING_LANGUAGES_NOTE = new RegExp(
 function pillOf(page: Page, name: string): Locator {
   // The only button saying it
   return page.getByRole('button', { name, exact: true })
-}
-
-/**
- * The address's query parameters as they stand.
- *
- * @param page - The page.
- *
- * @returns The parameters.
- */
-function addressParams(page: Page): URLSearchParams {
-  // Read off the address the page is on
-  return new URL(page.url()).searchParams
 }
 
 /**

@@ -62,21 +62,6 @@ export const KEPT_FILTER = {
 }
 
 /**
- * The filters a page is currently carrying.
- *
- * Read as parameters rather than matched as a whole URL, since what matters is which filters are
- * there and which are gone, never the order a rewrite happens to put them in.
- *
- * @param page - The page whose URL to read.
- *
- * @returns The URL's query parameters.
- */
-export function filtersInUrl(page: Page): URLSearchParams {
-  // The query half of wherever the reader currently is
-  return new URL(page.url()).searchParams
-}
-
-/**
  * Waits for the archive's answer to one search the page sends. Start it before whatever sends the search, since an
  * answer that arrives first is never seen.
  *

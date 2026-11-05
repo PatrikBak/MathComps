@@ -2,7 +2,6 @@ import type { Page } from '@playwright/test'
 
 import { MATHILDA_NAME } from '@/constants/mathilda'
 
-import { recordNotices } from './support/backend-routes'
 import {
   actionsCopy,
   apiErrorsCopy,
@@ -20,6 +19,7 @@ import {
   UPCOMING_COMPETITION_SLUG,
 } from './support/hosted-backend'
 import { expect, test } from './support/test'
+import { recordNotices } from './support/watchers'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
 const SETTLE_TIMEOUT_MS = 15_000

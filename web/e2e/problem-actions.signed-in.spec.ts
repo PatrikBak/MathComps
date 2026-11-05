@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import messages from '../messages/en.json'
 import { filtersCopy } from './support/archive-filters'
-import { PROBLEMS_PATH, recordNotices, stubUserLists } from './support/backend-routes'
+import { PROBLEMS_PATH, stubUserLists } from './support/backend-routes'
 import {
   ACTION_DELAY_MS,
   recordListReadings,
@@ -12,6 +12,7 @@ import {
   stubSearchRule,
 } from './support/problem-actions'
 import { expect, test } from './support/test'
+import { recordNotices } from './support/watchers'
 
 /** The copy the problem cards and their toasts read under, taken from the app's own messages. */
 const problemsCopy = messages.problems

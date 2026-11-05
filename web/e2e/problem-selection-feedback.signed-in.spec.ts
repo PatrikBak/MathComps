@@ -7,7 +7,7 @@ import { STEP_KEYS } from '@/hooks/use-step-hotkeys'
 
 import messages from '../messages/en.json'
 import { type AnswerGate, gateReads } from './support/answer-gate'
-import { BACKEND_ORIGIN, countDialogs } from './support/backend-routes'
+import { BACKEND_ORIGIN } from './support/backend-routes'
 import { sendComment, stubNamedReader, threadKey } from './support/comments'
 import {
   actionsCopy,
@@ -19,6 +19,7 @@ import {
 } from './support/competitions'
 import { installHostedBackend, SESSION_LIST_ADDRESS } from './support/hosted-backend'
 import { SCRIPTED_REPLIES } from './support/hosted-backend-content'
+import { selectedTab } from './support/interaction'
 import {
   ARGUED,
   ARGUED_EARLIER,
@@ -39,7 +40,6 @@ import {
   rememberedSelection,
   REVIEWER,
   REVISION,
-  selectedTab,
   SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
@@ -48,6 +48,7 @@ import {
   tabRowOn,
 } from './support/problem-selection'
 import { expect, test } from './support/test'
+import { countDialogs } from './support/watchers'
 
 /** What a reviewer writes into {@link OPENED}'s discussion while a test watches. */
 const NEW_COMMENT = 'Too long for the elementary paper as it stands.'

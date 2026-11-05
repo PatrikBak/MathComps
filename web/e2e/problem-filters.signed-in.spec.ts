@@ -1,7 +1,9 @@
-import { errorsCopy, filtersCopy, filtersInUrl, KEPT_FILTER } from './support/archive-filters'
-import { PROBLEMS_PATH, recordNotices, stubProblemSearch } from './support/backend-routes'
+import { addressParams } from './support/address'
+import { errorsCopy, filtersCopy, KEPT_FILTER } from './support/archive-filters'
+import { PROBLEMS_PATH, stubProblemSearch } from './support/backend-routes'
 import { loginPromptFor } from './support/session'
 import { expect, test } from './support/test'
+import { recordNotices } from './support/watchers'
 
 /**
  * How long the library needs to settle: boot Clerk, resolve who is reading, and send its first
@@ -38,11 +40,11 @@ test.describe('problem library filters for a reader who is already signed in', (
 
     // The filter they cannot use comes out of the URL
     await expect
-      .poll(() => filtersInUrl(page).get('list'), { timeout: SETTLE_TIMEOUT_MS })
+      .poll(() => addressParams(page).get('list'), { timeout: SETTLE_TIMEOUT_MS })
       .toBeNull()
 
     // And nothing else goes with it
-    expect(filtersInUrl(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
+    expect(addressParams(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
 
     // Let anything else that moment raised reach the screen
     await page.waitForTimeout(QUIET_MS)
@@ -97,11 +99,11 @@ test.describe('problem library filters for a reader who is already signed in', (
 
     // The filter the archive will not serve comes out of the URL
     await expect
-      .poll(() => filtersInUrl(page).get('favoritesOnly'), { timeout: SETTLE_TIMEOUT_MS })
+      .poll(() => addressParams(page).get('favoritesOnly'), { timeout: SETTLE_TIMEOUT_MS })
       .toBeNull()
 
     // Their own search outlives it
-    expect(filtersInUrl(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
+    expect(addressParams(page).get(KEPT_FILTER.key)).toBe(KEPT_FILTER.value)
 
     // And the reader is left reading rather than sent off mid-page
     await expect(page).toHaveURL(/\/en\/problems/)

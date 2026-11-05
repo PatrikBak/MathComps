@@ -1,9 +1,10 @@
-import type { Locator, Page } from '@playwright/test'
+import type { Locator } from '@playwright/test'
 
 import { URL_PARAMS } from '@/components/features/problems/utils/search-url-serialization'
 import { FACET_ROW_ATTRIBUTE } from '@/components/shared/components/facets/hooks/use-facet-row-navigation'
 import { headingRowId } from '@/components/shared/components/facets/model/facet-logic'
 
+import { addressParams } from './support/address'
 import {
   facetsCopy,
   filtersCopy,
@@ -20,8 +21,8 @@ import {
   QUIET_MS,
   rowTabStops,
   triggerOf,
-  urlParam,
 } from './support/facets'
+import { longPressByTouch } from './support/interaction'
 import { expect, test } from './support/test'
 
 /** The facet listing problem numbers, too short to offer a search box. */
@@ -35,9 +36,6 @@ const TAGS = filtersCopy.facets.tags
 
 /** Every option's checkbox in an open facet, which names the option it stands for. */
 const OPTION_CHECKBOX = `input${FACET_ROW_ATTRIBUTE.anySelector}`
-
-/** How long a finger is held down for a long press, with room to spare over what counts as one. */
-const LONG_PRESS_MS = 800
 
 /** A phone's screen, narrow enough that the filters move into a panel of their own. */
 const PHONE_VIEWPORT = { width: 390, height: 844 }
@@ -163,35 +161,6 @@ async function pickInTurn(panel: Locator, ids: string[]): Promise<void> {
   }
 }
 
-/**
- * Holds a finger on an element long enough to count as a long press, then lifts it.
- *
- * @param page - The page.
- * @param target - What the finger lands on.
- */
-async function longPress(page: Page, target: Locator): Promise<void> {
-  // Scrolled into view, since the finger has to land on it
-  await target.scrollIntoViewIfNeeded()
-
-  // Where the element sits
-  const box = (await target.boundingBox())!
-
-  // The browser's own touch input, the only way to hold a finger down rather than tap
-  const touch = await page.context().newCDPSession(page)
-
-  // A finger put down on its middle
-  await touch.send('Input.dispatchTouchEvent', {
-    type: 'touchStart',
-    touchPoints: [{ x: box.x + box.width / 2, y: box.y + box.height / 2 }],
-  })
-
-  // Held there
-  await page.waitForTimeout(LONG_PRESS_MS)
-
-  // And lifted
-  await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-}
-
 test.beforeEach(async ({ page }) => {
   // Every search answered with one and the same page of the archive, which offers every facet its options
   await stubProblemSearch(page, () => null)
@@ -210,8 +179,8 @@ test.describe('picking in a multi-select facet', () => {
     // The first option, picked by its checkbox
     await optionOf(panel, '1').click()
 
-    // The problem numbers picked
-    const picked = urlParam(page, URL_PARAMS.PROBLEM_NUMBERS)
+    // A function reading the problem numbers picked off the address
+    const picked = () => addressParams(page).get(URL_PARAMS.PROBLEM_NUMBERS)
 
     // In the address
     await expect.poll(picked).toBe('1')
@@ -250,8 +219,8 @@ test.describe('picking in a multi-select facet', () => {
     // The first two picked the ordinary way
     await pickInTurn(panel, [first, second])
 
-    // The problem numbers picked
-    const picked = urlParam(page, URL_PARAMS.PROBLEM_NUMBERS)
+    // A function reading the problem numbers picked off the address
+    const picked = () => addressParams(page).get(URL_PARAMS.PROBLEM_NUMBERS)
 
     // Standing together
     await expect.poll(picked).toBe(`${first},${second}`)
@@ -286,8 +255,8 @@ test.describe('picking in a multi-select facet', () => {
     // Three options picked the ordinary way
     await pickInTurn(panel, ['1', '2', '3'])
 
-    // The problem numbers picked
-    const picked = urlParam(page, URL_PARAMS.PROBLEM_NUMBERS)
+    // A function reading the problem numbers picked off the address
+    const picked = () => addressParams(page).get(URL_PARAMS.PROBLEM_NUMBERS)
 
     // Standing together
     await expect.poll(picked).toBe('1,2,3')
@@ -310,8 +279,8 @@ test.describe('picking in a multi-select facet', () => {
     // Two options picked the ordinary way
     await pickInTurn(panel, ['1', '2'])
 
-    // The problem numbers picked
-    const picked = urlParam(page, URL_PARAMS.PROBLEM_NUMBERS)
+    // A function reading the problem numbers picked off the address
+    const picked = () => addressParams(page).get(URL_PARAMS.PROBLEM_NUMBERS)
 
     // Standing together
     await expect.poll(picked).toBe('1,2')
@@ -340,8 +309,8 @@ test.describe('picking in a multi-select facet', () => {
     // The last of them, picked
     await optionOf(panel, incoming.at(-1)!).click()
 
-    // The problem numbers picked
-    const picked = urlParam(page, URL_PARAMS.PROBLEM_NUMBERS)
+    // A function reading the problem numbers picked off the address
+    const picked = () => addressParams(page).get(URL_PARAMS.PROBLEM_NUMBERS)
 
     // In the address
     await expect.poll(picked).toBe(incoming.at(-1))
@@ -408,8 +377,8 @@ test.describe('picking in a multi-select facet', () => {
     // Two options picked
     await pickInTurn(panel, ['1', '2'])
 
-    // The problem numbers picked
-    const picked = urlParam(page, URL_PARAMS.PROBLEM_NUMBERS)
+    // A function reading the problem numbers picked off the address
+    const picked = () => addressParams(page).get(URL_PARAMS.PROBLEM_NUMBERS)
 
     // Standing together
     await expect.poll(picked).toBe('1,2')
@@ -488,8 +457,8 @@ test.describe('a multi-select facet from the keyboard', () => {
     // Space picks the option focus is on
     await page.keyboard.press('Space')
 
-    // The problem numbers picked
-    const picked = urlParam(page, URL_PARAMS.PROBLEM_NUMBERS)
+    // A function reading the problem numbers picked off the address
+    const picked = () => addressParams(page).get(URL_PARAMS.PROBLEM_NUMBERS)
 
     // That option alone
     await expect.poll(picked).toBe(ids[0])
@@ -513,8 +482,8 @@ test.describe('a multi-select facet from the keyboard', () => {
     // The third option, clicked by its name
     await rowOf(panel, ids[2]).click()
 
-    // The problem numbers picked
-    const picked = urlParam(page, URL_PARAMS.PROBLEM_NUMBERS)
+    // A function reading the problem numbers picked off the address
+    const picked = () => addressParams(page).get(URL_PARAMS.PROBLEM_NUMBERS)
 
     // That option
     await expect.poll(picked).toBe(ids[2])
@@ -537,7 +506,7 @@ test.describe('a multi-select facet from the keyboard', () => {
     await optionOf(panel, 'prove-existence').click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.TAGS)).toBe('prove-existence')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.TAGS)).toBe('prove-existence')
 
     // The facet, closed
     await page.keyboard.press('Escape')
@@ -577,7 +546,7 @@ test.describe('a multi-select facet from the keyboard', () => {
     await optionOf(panel, 'prove-existence').click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.TAGS)).toBe('prove-existence')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.TAGS)).toBe('prove-existence')
 
     // The facet, closed
     await page.keyboard.press('Escape')
@@ -603,7 +572,7 @@ test.describe('a multi-select facet from the keyboard', () => {
     await optionOf(panel, 'prove-existence').click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.TAGS)).toBe('prove-existence')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.TAGS)).toBe('prove-existence')
 
     // Its section, rolled up over it
     await headingOf(panel, 'goal').click()
@@ -634,7 +603,7 @@ test.describe('a multi-select facet from the keyboard', () => {
     await optionOf(panel, 'prove-existence').click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.TAGS)).toBe('prove-existence')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.TAGS)).toBe('prove-existence')
 
     // Down twice, past the heading to the first option under it
     await page.keyboard.press('ArrowDown')
@@ -720,7 +689,7 @@ test.describe('searching a multi-select facet', () => {
       .click({ position: { x: 4, y: 4 } })
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.TAGS)).toBe('geometry')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.TAGS)).toBe('geometry')
 
     // The heading of the section holding it
     const area = headingOf(panel, 'area')
@@ -838,8 +807,8 @@ test.describe('searching a multi-select facet', () => {
     // The third of them, picked
     await optionOf(panel, matches[2]).click()
 
-    // The years picked
-    const picked = urlParam(page, URL_PARAMS.SEASONS)
+    // A function reading the years picked off the address
+    const picked = () => addressParams(page).get(URL_PARAMS.SEASONS)
 
     // In the address
     await expect.poll(picked).toBe(matches[2])
@@ -1061,7 +1030,7 @@ test.describe('a multi-select facet split into sections', () => {
     await optionOf(panel, 'number-theory').click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.TAGS)).toBe('number-theory')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.TAGS)).toBe('number-theory')
 
     // Answered
     await answered
@@ -1089,8 +1058,8 @@ test.describe('a multi-select facet split into sections', () => {
     // All of them asked for
     await panel.getByRole('radio', { name: filtersCopy.facets.logic.and, exact: true }).click()
 
-    // The logic the keywords are matched under
-    const logic = urlParam(page, URL_PARAMS.TAG_LOGIC)
+    // A function reading off the address the logic the keywords are matched under
+    const logic = () => addressParams(page).get(URL_PARAMS.TAG_LOGIC)
 
     // In the address
     await expect.poll(logic).toBe('and')
@@ -1134,7 +1103,7 @@ test.describe('the header of a multi-select facet', () => {
     await optionOf(panel, '1').click()
 
     // In the address
-    await expect.poll(urlParam(page, URL_PARAMS.PROBLEM_NUMBERS)).toBe('1')
+    await expect.poll(() => addressParams(page).get(URL_PARAMS.PROBLEM_NUMBERS)).toBe('1')
 
     // The panel carries the reset, the heading's being covered
     await expect(panelResetOf(panel)).toBeVisible()
@@ -1168,10 +1137,10 @@ test.describe('a multi-select facet on a touchscreen', () => {
     await pickInTurn(panel, ['1', '2'])
 
     // A long press on the third option's name
-    await longPress(page, rowOf(panel, '3'))
+    await longPressByTouch(page, rowOf(panel, '3'))
 
-    // The problem numbers picked
-    const picked = urlParam(page, URL_PARAMS.PROBLEM_NUMBERS)
+    // A function reading the problem numbers picked off the address
+    const picked = () => addressParams(page).get(URL_PARAMS.PROBLEM_NUMBERS)
 
     // The facet narrowed to it
     await expect.poll(picked).toBe('3')
@@ -1184,7 +1153,7 @@ test.describe('a multi-select facet on a touchscreen', () => {
     expect(await checkedIds(panel)).toEqual(['3'])
 
     // A long press on the fourth option's checkbox itself
-    await longPress(page, optionOf(panel, '4'))
+    await longPressByTouch(page, optionOf(panel, '4'))
 
     // The facet narrowed to that one instead
     await expect.poll(picked).toBe('4')
@@ -1217,8 +1186,8 @@ test.describe('a multi-select facet in the filters panel of a phone', () => {
     // Two options picked
     await pickInTurn(panel, ['1', '2'])
 
-    // The problem numbers picked
-    const picked = urlParam(page, URL_PARAMS.PROBLEM_NUMBERS)
+    // A function reading the problem numbers picked off the address
+    const picked = () => addressParams(page).get(URL_PARAMS.PROBLEM_NUMBERS)
 
     // Standing together
     await expect.poll(picked).toBe('1,2')

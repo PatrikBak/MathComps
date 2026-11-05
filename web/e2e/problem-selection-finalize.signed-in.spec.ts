@@ -9,7 +9,7 @@ import type {
 
 import messages from '../messages/en.json'
 import { createAnswerGate } from './support/answer-gate'
-import { recordNotices } from './support/backend-routes'
+import { recordWrites } from './support/backend-routes'
 import { SELECTION_PATH } from './support/competitions'
 import {
   actionsButton,
@@ -35,7 +35,6 @@ import {
   pluralText,
   problemCount,
   READY,
-  recordWrites,
   rememberedSelection,
   SELECTION_ENDPOINT,
   selectionCopy,
@@ -48,6 +47,7 @@ import {
   WINTER,
 } from './support/problem-selection'
 import { expect, test } from './support/test'
+import { recordNotices } from './support/watchers'
 
 /** What the page says about a write the backend refused, by the code it refused it with. */
 const refusalCopy = messages.apiErrors

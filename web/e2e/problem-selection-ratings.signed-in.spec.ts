@@ -7,12 +7,14 @@ import {
 } from '@/components/features/problem-selection/model/selection-routes'
 import type { Proposal } from '@/components/features/problem-selection/model/selection-types'
 
-import { refuse } from './support/backend-routes'
+import { locationParam } from './support/address'
+import { recordWrites, refuse } from './support/backend-routes'
 import { READER_NAME } from './support/comments'
-import { areaCopy, holdClock, SELECTION_PATH } from './support/competitions'
+import { areaCopy, SELECTION_PATH } from './support/competitions'
+import { holdClock } from './support/emulation'
+import { selectedTab } from './support/interaction'
 import {
   actionsButton,
-  addressedParam,
   ALGEBRA,
   BILINGUAL,
   cardOf,
@@ -26,8 +28,6 @@ import {
   openPool,
   OTHER_RATER,
   READY,
-  recordWrites,
-  selectedTab,
   SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
@@ -760,7 +760,7 @@ test.describe('the ratings table', () => {
     await expect(page.getByRole('article')).toHaveCount(0)
 
     // Named in the address
-    await expect.poll(() => addressedParam(page, POOL_VIEW_PARAM)).toBe('ratings')
+    await expect.poll(() => locationParam(page, POOL_VIEW_PARAM)).toBe('ratings')
 
     // The pool searched for the algebra problem
     await page.getByRole('searchbox', { name: selectionCopy.pool.search }).fill(ALGEBRA.title)
@@ -975,7 +975,7 @@ test.describe('the ratings table', () => {
     await tabs.nth(1).click()
 
     // Named in the address
-    await expect.poll(() => addressedParam(page, DETAIL_TAB_PARAM)).toBe('ratings')
+    await expect.poll(() => locationParam(page, DETAIL_TAB_PARAM)).toBe('ratings')
 
     // The paper's one problem, with its number, its beauty, its difficulty and how many rated it
     await expect(rowHeadings(page)).toHaveText([GEOMETRY.title])

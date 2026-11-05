@@ -5,11 +5,10 @@ import type {
   SlotDirection,
 } from '@/components/features/problem-selection/model/selection-types'
 
+import { GUID, isGuid } from './backend-routes'
 import {
   draftBoard,
-  GUID,
   type HeldSelection,
-  isGuid,
   liveProposal,
   readFields,
   refuseWith,

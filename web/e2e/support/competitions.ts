@@ -186,26 +186,6 @@ export async function closeChat(page: Page): Promise<void> {
 }
 
 /**
- * How far ahead of the page's own clock a pause is set, so the instant it names is still ahead when the pause
- * arrives: one already gone by is refused outright.
- */
-const PAUSE_CUSHION_MS = 500
-
-/**
- * Pauses the page's clock a moment ahead of where it stands, so anything timed on it from then on waits until the
- * spec walks it forward.
- *
- * @param page - The page whose clock to hold.
- */
-export async function holdClock(page: Page): Promise<void> {
-  // Where the page's own clock currently is
-  const at = await page.evaluate(() => Date.now())
-
-  // Held a cushion ahead of the page's clock
-  await page.clock.pauseAt(at + PAUSE_CUSHION_MS)
-}
-
-/**
  * Writes one turn and sends it.
  *
  * @param page - The page the chat is open on.

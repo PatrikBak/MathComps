@@ -5,9 +5,10 @@ import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import messages from '../messages/en.json'
 import { createAnswerGate } from './support/answer-gate'
-import { recordNotices } from './support/backend-routes'
+import { recordWrites } from './support/backend-routes'
 import { SELECTION_PATH, transcriptOf } from './support/competitions'
 import { installHostedBackend } from './support/hosted-backend'
+import { showsFocusRing } from './support/interaction'
 import {
   actionsButton,
   ALGEBRA,
@@ -34,20 +35,19 @@ import {
   placementOf,
   problemCount,
   READY,
-  recordWrites,
   rememberedSelection,
   SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
   SET_ASIDE,
   SETTLE_TIMEOUT_MS,
-  showsFocusRing,
   slotOf,
   statusLine,
   stubSelection,
   USED,
 } from './support/problem-selection'
 import { expect, test } from './support/test'
+import { recordNotices } from './support/watchers'
 
 /** What the page says about a write the backend refused, by the code it refused it with. */
 const refusalCopy = messages.apiErrors

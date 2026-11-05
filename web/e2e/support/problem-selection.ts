@@ -1,4 +1,4 @@
-import type { Locator, Page, Request, Route } from '@playwright/test'
+import type { Locator, Page, Route } from '@playwright/test'
 import { createTranslator } from 'next-intl'
 
 import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
@@ -1290,45 +1290,6 @@ export function headingOf(page: Page, proposal: Proposal) {
 }
 
 /**
- * Whether an element shows the ring a browser draws around focus it lets the reader see.
- *
- * @param element - The element.
- *
- * @returns Whether it does.
- */
-export function showsFocusRing(element: Locator): Promise<boolean> {
-  // Read off the element itself
-  return element.evaluate((node) => node.matches(':focus-visible'))
-}
-
-/**
- * The selected tab of a page open over the pool.
- *
- * @param page - The page.
- * @param tabsLabel - What the page's strip of tabs is called.
- *
- * @returns The tab.
- */
-export function selectedTab(page: Page, tabsLabel: string) {
-  // The selected tab of the page's tabs
-  return page.getByRole('tablist', { name: tabsLabel }).getByRole('tab', { selected: true })
-}
-
-/**
- * One query parameter of the address this instant, read off the page itself, since a step the page pushes onto
- * history reaches Playwright's own copy of the address only later.
- *
- * @param page - The page.
- * @param param - The parameter.
- *
- * @returns Its value, or null while the address has none.
- */
-export function addressedParam(page: Page, param: string): Promise<string | null> {
-  // Read off the page's own address
-  return page.evaluate((name) => new URLSearchParams(window.location.search).get(name), param)
-}
-
-/**
  * The board panel beside the pool.
  *
  * @param page - The page.
@@ -1457,28 +1418,6 @@ export function statusLine(page: Page, board: Board): Locator {
   return boardPanel(page).getByText(
     selectionText('board.status', { cycle: board.finalization!.cycleName, date })
   )
-}
-
-/**
- * Records every write of one kind the page sends to the selection's backend.
- *
- * @param page - The page.
- * @param isWrite - Whether an address is one the writes recorded go to.
- *
- * @returns The writes sent so far, oldest first.
- */
-export function recordWrites(page: Page, isWrite: (url: URL) => boolean): () => Request[] {
-  // Every write that went out, in order
-  const writes: Request[] = []
-
-  // Each request the page sends
-  page.on('request', (request) => {
-    // One of the writes recorded
-    if (isWrite(new URL(request.url()))) writes.push(request)
-  })
-
-  // A snapshot on each read
-  return () => [...writes]
 }
 
 /**
