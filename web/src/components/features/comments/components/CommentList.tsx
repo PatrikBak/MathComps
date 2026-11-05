@@ -179,7 +179,12 @@ export function CommentList({
           // The inline reply editor under the comment being replied to, on desktop; a phone gets the
           // editor over the whole screen
           reply.commentId === comment.id && !isMobile ? (
-            <ReplyEditor reply={reply} variant={variant} placement="inline" />
+            <ReplyEditor
+              reply={reply}
+              variant={variant}
+              placement="inline"
+              renderNumberReference={renderNumberReference}
+            />
           ) : undefined
         }
         repliesNode={
@@ -200,7 +205,12 @@ export function CommentList({
 
       {/* The open reply's editor on a phone, over the whole screen */}
       {isMobile && reply.commentId !== null && (
-        <ReplyEditor reply={reply} variant={variant} placement="fullScreen" />
+        <ReplyEditor
+          reply={reply}
+          variant={variant}
+          placement="fullScreen"
+          renderNumberReference={renderNumberReference}
+        />
       )}
     </>
   )
@@ -221,13 +231,15 @@ type ReplyEditorProps = {
   variant: CommentListVariant
   /** Where the editor sits. */
   placement: ReplyEditorPlacement
+  /** What a `#N` in the reply's preview is drawn as. */
+  renderNumberReference: NumberReferenceRenderer | undefined
 }
 
 /**
  * The editor of the reply open in a thread. Under its comment it takes the cursor as the reply opens; on a phone it
  * opens over the whole screen.
  */
-function ReplyEditor({ reply, variant, placement }: ReplyEditorProps) {
+function ReplyEditor({ reply, variant, placement, renderNumberReference }: ReplyEditorProps) {
   // Comment copy
   const tComments = useTranslations('comments')
 
@@ -243,6 +255,7 @@ function ReplyEditor({ reply, variant, placement }: ReplyEditorProps) {
       isLoading={reply.isSending}
       // Over the whole screen on a phone, open from the start
       expandedOnly={placement === 'fullScreen'}
+      renderNumberReference={renderNumberReference}
       // The reply's handle onto its editor
       ref={reply.editorRef}
     />

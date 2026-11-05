@@ -388,6 +388,7 @@ export function CommentItem({
                 onSend={handleEditSubmit}
                 onCancel={handleEditCancel}
                 isLoading={isSaving}
+                renderNumberReference={renderNumberReference}
               />
             </div>
           ) : isDeleted ? (

@@ -25,7 +25,7 @@ import {
   threadKey,
   THREADS_PATH,
 } from './support/comments'
-import { SELECTION_PATH } from './support/competitions'
+import { editorCopy, SELECTION_PATH } from './support/competitions'
 import { stubPageVisibility } from './support/emulation'
 import { openUserMenu, selectedTab } from './support/interaction'
 import {
@@ -77,6 +77,9 @@ const LATE_REPLY = 'Then it should go into the intermediate paper.'
 
 /** What the reader replies in {@link GEOMETRY}'s discussion. */
 const READER_REPLY = 'Too hard for the advanced paper, I think.'
+
+/** What the reader starts to reply in {@link GEOMETRY}'s discussion, naming {@link ALGEBRA} by number. */
+const NUMBERED_REPLY = `What about #${ALGEBRA.number} instead?`
 
 /** What Martin says in the elementary paper's discussion. */
 const PAPER_REMARK = 'The paper needs an easier opener.'
@@ -581,6 +584,39 @@ test.describe("the pool's discussions", () => {
 
     // The number no problem carries, left as text
     await expect(thread.getByRole('button', { name: '#999' })).toHaveCount(0)
+  })
+
+  test('previews the statement of a problem a reply names by its number while the reply is still being written', async ({
+    page,
+  }) => {
+    // A reader with a username, which a reply is signed with
+    await stubNamedReader(page)
+
+    // Whose selection's problems and paper are discussed
+    await stubSelection(page, 'selection', discussedSelection())
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // The geometry problem's thread
+    const thread = threadOf(page, GEOMETRY)
+
+    // A reply, opened under the geometry problem's comment
+    await thread
+      .getByRole('button', { name: commentsCopy.reply })
+      .click({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The reply, naming the algebra problem by number
+    await page.getByPlaceholder(commentsCopy.replyPlaceholder).fill(NUMBERED_REPLY)
+
+    // The reply's preview, up in place of its text
+    await thread.getByRole('button', { name: editorCopy.preview, exact: true }).click()
+
+    // The algebra problem's number in the preview, hovered
+    await thread.getByRole('button', { name: `#${ALGEBRA.number}`, exact: true }).hover()
+
+    // The algebra problem's statement
+    await expect(page.getByRole('tooltip')).toContainText(`Part 1 of problem ${ALGEBRA.number}.`)
   })
 
   test('takes a layout picked straight after another, before the first one has been drawn', async ({
