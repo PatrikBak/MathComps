@@ -3,6 +3,7 @@ import type { Locator, Page } from '@playwright/test'
 import { addressParams } from './support/address'
 import { facetsCopy } from './support/archive-filters'
 import { areaCopy, SELECTION_PATH } from './support/competitions'
+import { pickPillAnswer, pickPillOption } from './support/facets'
 import {
   ALGEBRA,
   BILINGUAL,
@@ -20,11 +21,11 @@ import {
   openPool,
   PHONE_VIEWPORT,
   pickBoard,
-  pickState,
   placementOf,
   problemCount,
   READY,
   REVISION,
+  searchBox,
   selectionCopy,
   selectionText,
   SET_ASIDE,
@@ -51,24 +52,6 @@ const MISSING_LANGUAGES_NOTE = new RegExp(
 function pillOf(page: Page, name: string): Locator {
   // The only button saying it
   return page.getByRole('button', { name, exact: true })
-}
-
-/**
- * Picks one option of one of the pool's facets, and closes the facet again.
- *
- * @param page - The page.
- * @param facet - What the facet's pill says while nothing in it is picked.
- * @param option - The option's name, with the count it carries.
- */
-async function pickFacetOption(page: Page, facet: string, option: string): Promise<void> {
-  // The facet, opened
-  await page.getByRole('button', { name: facet, exact: true }).click()
-
-  // The option, picked
-  await page.getByRole('checkbox', { name: option, exact: true }).check()
-
-  // The facet, closed again
-  await page.keyboard.press('Escape')
 }
 
 test.describe('the board being filled', () => {
@@ -329,7 +312,7 @@ test.describe('narrowing the pool', () => {
     await openPool(page)
 
     // The search
-    const search = page.getByRole('searchbox', { name: selectionCopy.pool.search })
+    const search = searchBox(page)
 
     // A word of the bilingual problem's Slovak statement, typed without its accent
     await search.fill('zotieraju')
@@ -394,7 +377,7 @@ test.describe('narrowing the pool', () => {
     await page.keyboard.press('Escape')
 
     // The intermediate paper, picked
-    await pickFacetOption(
+    await pickPillOption(
       page,
       selectionCopy.filters.category,
       `${areaCopy.categories.intermediate} (6)`
@@ -437,7 +420,7 @@ test.describe('narrowing the pool', () => {
     await openPool(page)
 
     // Only the problems the board on screen does not hold
-    await pickState(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
+    await pickPillAnswer(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
 
     // Without the two the first draft holds
     await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT - 2)
@@ -458,7 +441,7 @@ test.describe('narrowing the pool', () => {
     await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT - 2)
 
     // Turned round to what the later draft holds
-    await pickState(page, selectionCopy.filters.notSelected, selectionCopy.filters.selected)
+    await pickPillAnswer(page, selectionCopy.filters.notSelected, selectionCopy.filters.selected)
 
     // Its two problems alone
     await expect(page.getByRole('article')).toHaveCount(2)
@@ -494,7 +477,7 @@ test.describe('narrowing the pool', () => {
     ).toBeVisible()
 
     // A search none of them answers to
-    await page.getByRole('searchbox', { name: selectionCopy.pool.search }).fill('tessellation')
+    await searchBox(page).fill('tessellation')
 
     // Said to be the search's doing, among the set-aside problems
     await expect(
@@ -523,10 +506,10 @@ test.describe('the filter in the address', () => {
     await openPool(page)
 
     // Searched
-    await page.getByRole('searchbox', { name: selectionCopy.pool.search }).fill('game')
+    await searchBox(page).fill('game')
 
     // Narrowed to the intermediate paper
-    await pickFacetOption(
+    await pickPillOption(
       page,
       selectionCopy.filters.category,
       `${areaCopy.categories.intermediate} (6)`
@@ -545,9 +528,7 @@ test.describe('the filter in the address', () => {
     await expect(page.getByRole('article')).toHaveCount(6, { timeout: SETTLE_TIMEOUT_MS })
 
     // And the search as it was typed
-    await expect(page.getByRole('searchbox', { name: selectionCopy.pool.search })).toHaveValue(
-      'game'
-    )
+    await expect(searchBox(page)).toHaveValue('game')
   })
 
   test('leaves "Not selected" out of the address, keeping it through a step back but not a reload', async ({
@@ -560,7 +541,7 @@ test.describe('the filter in the address', () => {
     await openPool(page)
 
     // Narrowed to what the board on screen does not hold
-    await pickState(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
+    await pickPillAnswer(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
 
     // A problem, opened
     await cardOf(page, OPENED).getByRole('link', { name: OPENED.title }).click()
@@ -640,7 +621,7 @@ test.describe('the filter in the address', () => {
     await openPool(page)
 
     // Narrowed to the intermediate paper
-    await pickFacetOption(
+    await pickPillOption(
       page,
       selectionCopy.filters.category,
       `${areaCopy.categories.intermediate} (6)`

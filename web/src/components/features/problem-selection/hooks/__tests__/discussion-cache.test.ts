@@ -187,23 +187,47 @@ function startWrite(queryClient: QueryClient, mutationKey: MutationKey): () => P
 
 describe('parkDiscussions', () => {
   it("parks each discussion in the reader's copy of its thread, over what that copy held", async () => {
-    // A cache holding an old copy of the problem's thread, and a read of both discussions a while later
+    // A cache holding an old copy of the problem's thread
     const queryClient = new QueryClient()
     hold(queryClient, PROBLEM, [comment('old')])
+
+    // A read of both discussions a while later
     await aMomentLater()
     const read = await readOf(queryClient, discussionsOf([comment('problem')], [comment('paper')]))
 
     // Parked
-    parkDiscussions(queryClient, READER, read)
+    parkDiscussions(queryClient, READER, read, null)
 
     // Each thread as the read found it
     expect(threadIn(queryClient, PROBLEM)).toEqual([comment('problem')])
     expect(threadIn(queryClient, PAPER)).toEqual([comment('paper')])
   })
 
-  it('leaves a thread written while the read was out, parking the rest', async () => {
-    // A new comment landing in the problem's thread while the read is out
+  it('parks only the discussions asked for, leaving the rest as they were held', async () => {
+    // A cache holding old copies of both threads
     const queryClient = new QueryClient()
+    hold(queryClient, PROBLEM, [comment('old problem')])
+    hold(queryClient, PAPER, [comment('old paper')])
+
+    // A read of both discussions a while later
+    await aMomentLater()
+    const read = await readOf(queryClient, discussionsOf([comment('problem')], [comment('paper')]))
+
+    // Parked in the paper's thread alone
+    parkDiscussions(queryClient, READER, read, [PAPER])
+
+    // The paper's thread as the read found it
+    expect(threadIn(queryClient, PAPER)).toEqual([comment('paper')])
+
+    // The problem's thread as it was held
+    expect(threadIn(queryClient, PROBLEM)).toEqual([comment('old problem')])
+  })
+
+  it('leaves a thread written while the read was out, parking the rest', async () => {
+    // An empty cache
+    const queryClient = new QueryClient()
+
+    // A read with a new comment landing in the problem's thread while it is out
     const read = await readOf(
       queryClient,
       discussionsOf([comment('stale')], [comment('paper')]),
@@ -211,19 +235,24 @@ describe('parkDiscussions', () => {
     )
 
     // Parked
-    parkDiscussions(queryClient, READER, read)
+    parkDiscussions(queryClient, READER, read, null)
 
-    // The new comment kept, the paper's thread parked
+    // The new comment kept
     expect(threadIn(queryClient, PROBLEM)).toEqual([comment('fresh')])
+
+    // The paper's thread parked
     expect(threadIn(queryClient, PAPER)).toEqual([comment('paper')])
   })
 
   it('parks over no held thread where a write to a comment was out as the read set off, though it settled before the answer came, filling the threads nothing holds', async () => {
-    // A cache holding an old copy of the problem's thread, with a write to a comment out as the read sets off that
-    // settles while it is out
+    // A cache holding an old copy of the problem's thread
     const queryClient = new QueryClient()
     hold(queryClient, PROBLEM, [comment('old')])
+
+    // A write to a comment out as the read sets off
     const settle = startWrite(queryClient, commentMutationKeys.all)
+
+    // A read of both discussions a while later, the write settling while it is out
     await aMomentLater()
     const read = await readOf(
       queryClient,
@@ -232,17 +261,21 @@ describe('parkDiscussions', () => {
     )
 
     // Parked
-    parkDiscussions(queryClient, READER, read)
+    parkDiscussions(queryClient, READER, read, null)
 
-    // The held thread kept, the paper's filled
+    // The held thread kept
     expect(threadIn(queryClient, PROBLEM)).toEqual([comment('old')])
+
+    // The paper's thread filled
     expect(threadIn(queryClient, PAPER)).toEqual([comment('paper')])
   })
 
   it('parks over no held thread while a write to a comment is out as the answer is parked', async () => {
-    // A cache holding an old copy of the problem's thread, and a read of it a while later
+    // A cache holding an old copy of the problem's thread
     const queryClient = new QueryClient()
     hold(queryClient, PROBLEM, [comment('old')])
+
+    // A read of the problem's discussion a while later
     await aMomentLater()
     const read = await readOf(queryClient, discussionsOf([comment('problem')]))
 
@@ -250,22 +283,26 @@ describe('parkDiscussions', () => {
     startWrite(queryClient, commentMutationKeys.reactions(PROBLEM))
 
     // Parked
-    parkDiscussions(queryClient, READER, read)
+    parkDiscussions(queryClient, READER, read, null)
 
     // The held thread kept
     expect(threadIn(queryClient, PROBLEM)).toEqual([comment('old')])
   })
 
   it('parks over a held thread while only a write to something else is out', async () => {
-    // A cache holding an old copy of the problem's thread, with a write to something else out the whole time
+    // A cache holding an old copy of the problem's thread
     const queryClient = new QueryClient()
     hold(queryClient, PROBLEM, [comment('old')])
+
+    // A write to something else, out the whole time
     startWrite(queryClient, ['selection'])
+
+    // A read of the problem's discussion a while later
     await aMomentLater()
     const read = await readOf(queryClient, discussionsOf([comment('problem')]))
 
     // Parked
-    parkDiscussions(queryClient, READER, read)
+    parkDiscussions(queryClient, READER, read, null)
 
     // The thread as the read found it
     expect(threadIn(queryClient, PROBLEM)).toEqual([comment('problem')])
@@ -274,11 +311,12 @@ describe('parkDiscussions', () => {
 
 describe('parkReactionsEditsAndDeletions', () => {
   it('parks a thread the answer changes only in what was edited, who reacted how and what was deleted', async () => {
-    // The reader's copy of the problem's thread, and a read finding a colleague's thumbs up on one comment, another
-    // deleted, and the last edited under a new id
+    // The reader's copy of the problem's thread
     const queryClient = new QueryClient()
     hold(queryClient, PROBLEM, [comment('question'), comment('aside'), comment('remark')])
-    await aMomentLater()
+
+    // The thread as a colleague left it: a thumbs up on one comment, another deleted, and the last edited under a
+    // new id
     const changed = [
       thumbedUp(comment('question')),
       { ...comment('aside'), isDeleted: true, content: '' },
@@ -289,6 +327,9 @@ describe('parkReactionsEditsAndDeletions', () => {
         editedAt: '2026-10-17T10:00:00Z',
       },
     ]
+
+    // A read a while later finding the thread as the colleague left it
+    await aMomentLater()
     const read = await readOf(queryClient, discussionsOf(changed))
 
     // Parked
@@ -299,9 +340,11 @@ describe('parkReactionsEditsAndDeletions', () => {
   })
 
   it("leaves a thread written while the read was out, though the answer differs from the reader's copy only in who reacted how", async () => {
-    // A thumbs up landing on the problem's comment while the read is out, which the answer predates
+    // The reader's copy of the problem's thread
     const queryClient = new QueryClient()
     hold(queryClient, PROBLEM, [comment('question')])
+
+    // A read a while later, a thumbs up landing on the problem's comment while it is out, which the answer predates
     await aMomentLater()
     const read = await readOf(queryClient, discussionsOf([comment('question')]), () =>
       hold(queryClient, PROBLEM, [thumbedUp(comment('question'))])
@@ -315,9 +358,11 @@ describe('parkReactionsEditsAndDeletions', () => {
   })
 
   it('leaves a thread the answer says something new in, and one nothing holds', async () => {
-    // The reader's copy of the problem's thread, and a read finding a reaction and a reply in it and the paper discussed
+    // The reader's copy of the problem's thread
     const queryClient = new QueryClient()
     hold(queryClient, PROBLEM, [comment('question')])
+
+    // A read a while later finding a reaction and a reply in it, and the paper discussed
     await aMomentLater()
     const read = await readOf(
       queryClient,
@@ -330,19 +375,25 @@ describe('parkReactionsEditsAndDeletions', () => {
     // Parked
     parkReactionsEditsAndDeletions(queryClient, READER, read)
 
-    // The problem's thread as the reader had it, the paper's still not held
+    // The problem's thread as the reader had it
     expect(threadIn(queryClient, PROBLEM)).toEqual([comment('question')])
+
+    // The paper's thread still not held
     expect(threadIn(queryClient, PAPER)).toBeUndefined()
   })
 })
 
 describe('threadsAfterParking', () => {
   it("gives the answer's copy of a thread parking would write, and of one nothing holds yet", async () => {
-    // The reader's copy of the problem's thread, and a read finding a reply in it and the paper discussed
+    // The reader's copy of the problem's thread
     const queryClient = new QueryClient()
     hold(queryClient, PROBLEM, [comment('question')])
-    await aMomentLater()
+
+    // The problem's comment answered
     const answered = { ...comment('question'), replies: [comment('answer')] }
+
+    // A read a while later finding the problem's comment answered, and the paper discussed
+    await aMomentLater()
     const read = await readOf(queryClient, discussionsOf([answered], [comment('paper')]))
 
     // What parking would leave
@@ -353,9 +404,13 @@ describe('threadsAfterParking', () => {
   })
 
   it("gives the reader's own copy of a thread written since the read set off", async () => {
-    // The reader's reply landing in the problem's thread while the read is out
+    // An empty cache
     const queryClient = new QueryClient()
+
+    // The problem's comment with the reader's reply
     const mine = { ...comment('question'), replies: [comment('mine')] }
+
+    // A read with the reader's reply landing in the problem's thread while it is out
     const read = await readOf(queryClient, discussionsOf([comment('question')]), () =>
       hold(queryClient, PROBLEM, [mine])
     )

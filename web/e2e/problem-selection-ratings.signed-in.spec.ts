@@ -28,6 +28,7 @@ import {
   openPool,
   OTHER_RATER,
   READY,
+  searchBox,
   SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
@@ -764,7 +765,7 @@ test.describe('the ratings table', () => {
     await expect.poll(() => locationParam(page, POOL_VIEW_PARAM)).toBe('ratings')
 
     // The pool searched for the algebra problem
-    await page.getByRole('searchbox', { name: selectionCopy.pool.search }).fill(ALGEBRA.title)
+    await searchBox(page).fill(ALGEBRA.title)
 
     // The table narrowed to the algebra problem
     await expect(rowHeadings(page)).toHaveText([ALGEBRA.title])

@@ -40,6 +40,25 @@ function canBeNew(comment: CommentData, readerId: string | null): boolean {
 }
 
 /**
+ * When each comment of a thread passing a test was posted, replies at any depth included.
+ *
+ * @param comments - The thread's top-level comments, each carrying its replies.
+ * @param passes - Whether a comment's moment is wanted.
+ *
+ * @returns The moments, in milliseconds, each comment's ahead of its replies'.
+ */
+function postedAtOf(
+  comments: readonly CommentData[],
+  passes: (comment: CommentData) => boolean
+): number[] {
+  // Each comment's own moment where it passes, followed by those of the replies under it
+  return comments.flatMap((comment) => [
+    ...(passes(comment) ? [comment.timestamp.getTime()] : []),
+    ...postedAtOf(comment.replies, passes),
+  ])
+}
+
+/**
  * When the newest comment of a thread that can be new to its reader was posted, replies at any depth included. Seeing
  * the thread up to that moment sees every comment in it that can be new.
  *
@@ -53,13 +72,7 @@ export function lastPostedByOthersAt(
   readerId: string | null
 ): number | null {
   // When each comment that can be new was posted, replies included
-  const postedAt = comments.flatMap(function postedIn(comment): number[] {
-    // The comment, where it can be new
-    const itself = canBeNew(comment, readerId) ? [comment.timestamp.getTime()] : []
-
-    // The comment's own moment, followed by those of the replies under it
-    return [...itself, ...comment.replies.flatMap(postedIn)]
-  })
+  const postedAt = postedAtOf(comments, (comment) => canBeNew(comment, readerId))
 
   // The newest of those moments, null where there is none
   return postedAt.length === 0 ? null : Math.max(...postedAt)
@@ -97,6 +110,28 @@ export function isNewComment(
     default:
       return assertNever(newness)
   }
+}
+
+/**
+ * When the oldest comment of a thread that is new to its reader was posted, replies at any depth included. Seeing the
+ * thread up to just before that moment sees none of what is new in it.
+ *
+ * @param comments - The thread's top-level comments, each carrying its replies.
+ * @param newness - How far the reader has seen the thread.
+ * @param readerId - The reader's id with the sign-in provider, or null when nobody is signed in.
+ *
+ * @returns The moment, in milliseconds; null where nothing in the thread is new to the reader.
+ */
+export function firstNewPostedAt(
+  comments: readonly CommentData[],
+  newness: CommentNewness,
+  readerId: string | null
+): number | null {
+  // When each comment that is new was posted, replies included
+  const postedAt = postedAtOf(comments, (comment) => isNewComment(comment, newness, readerId))
+
+  // The oldest of those moments, null where there is none
+  return postedAt.length === 0 ? null : Math.min(...postedAt)
 }
 
 /**

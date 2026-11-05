@@ -10,16 +10,58 @@ declare global {
     reportDialog: () => void
     /** Hands the test run one call the page made that can scroll it, or the scroll that took it off the top. */
     reportScroll: (entry: string) => void
+    /** Hands the test run each text a status region on the page announces. */
+    reportAnnouncement: (text: string) => void
+    /** Whether this document's status regions are already being watched. */
+    isWatchingAnnouncements?: boolean
   }
 }
 
 /**
- * Watches a document for notices and hands each one over as it becomes readable.
+ * A function on the page's window that a watcher hands each text back to the test run through.
+ */
+type TextChannel = 'reportNotice' | 'reportAnnouncement'
+
+/**
+ * Records every text a watcher run in the page hands back, for as long as the test runs.
  *
- * Written to be installed twice over a page's life, once into the document that is already open and
- * once ahead of every document after it, so it refuses to watch a document it is already watching:
- * two watchers would hand the same notice over twice, and a test counting them would read that as
- * the app having said it twice.
+ * The watcher goes in twice over a page's life, once into the document that is already open and once ahead of every
+ * document after it, so it has to refuse a document it already watches: two watchers would hand the same text over
+ * twice, and a test counting them would read that as the page having said it twice. Recording nothing in the document
+ * already open would let every "nothing was said" assertion pass unchecked.
+ *
+ * @param page - The page to watch.
+ * @param channel - The function the watcher hands each text back through.
+ * @param watch - The watcher, run in each document.
+ *
+ * @returns Every text handed back so far, oldest first, repeats included.
+ */
+async function recordHandedBack(
+  page: Page,
+  channel: TextChannel,
+  watch: () => void
+): Promise<() => string[]> {
+  // Every text handed back, in the order it arrived
+  const texts: string[] = []
+
+  // The channel the page hands each text back through, each recorded as it arrives
+  await page.exposeFunction(channel, (text: string) => {
+    texts.push(text)
+  })
+
+  // Every document from the next one on
+  await page.addInitScript(watch)
+
+  // And the document already open, so a call after a page has loaded still records that page
+  await page.evaluate(watch)
+
+  // A snapshot on each read, so a list cannot grow underneath an assertion mid-check
+  return () => [...texts]
+}
+
+/**
+ * Watches a document for notices and hands each one over as it becomes readable, once per document, as
+ * {@link recordHandedBack} installs it.
  */
 function watchForNotices(): void {
   // This document is already accounted for
@@ -75,23 +117,7 @@ function watchForNotices(): void {
  */
 export async function recordNotices(page: Page): Promise<() => string[]> {
   // Every notice that reached the screen, in the order it got there
-  const notices: string[] = []
-
-  // The channel the page hands each notice back through, each one recorded as it arrives
-  await page.exposeFunction('reportNotice', (text: string) => {
-    notices.push(text)
-  })
-
-  // Every document from the next one on, since the first notice of a page can be up and gone before
-  // the first assertion of a test is reached
-  await page.addInitScript(watchForNotices)
-
-  // And the document already open, so a call after a page has loaded still records that page.
-  // Recording nothing there would let every "nothing was said" assertion pass unchecked
-  await page.evaluate(watchForNotices)
-
-  // Hand back a snapshot on each read, so a list cannot grow underneath an assertion mid-check
-  return () => [...notices]
+  return recordHandedBack(page, 'reportNotice', watchForNotices)
 }
 
 /**
@@ -246,4 +272,61 @@ export async function recordScrolls(page: Page): Promise<() => string[]> {
 
   // Hand back a snapshot on each read
   return () => [...scrolls]
+}
+
+/**
+ * Watches every status region of the document and hands over each text it says, once per document, as
+ * {@link recordHandedBack} installs it.
+ */
+function watchForAnnouncements(): void {
+  // This document is already accounted for
+  if (window.isWatchingAnnouncements) return
+
+  // This document is watched from here on
+  window.isWatchingAnnouncements = true
+
+  // What each status region said when last looked at
+  const lastSaid = new WeakMap<Element, string>()
+
+  // A function which hands over what each status region says, wherever it says something new
+  const reportNewAnnouncements = () => {
+    document.querySelectorAll('[role="status"]').forEach((region) => {
+      // What the region says now
+      const text = region.textContent?.trim() ?? ''
+
+      // Nothing new said there
+      if (lastSaid.get(region) === text) return
+
+      // Remembered, so the same words are handed over once each time they arrive
+      lastSaid.set(region, text)
+
+      // Handed to the test run, where the region says anything
+      if (text !== '') window.reportAnnouncement(text)
+    })
+  }
+
+  // Whatever the regions already say
+  reportNewAnnouncements()
+
+  // And everything the regions say from here on, text arriving counting as much as a node arriving. The document
+  // itself is what there is to watch: installed ahead of a page, this runs before that page has been parsed
+  new MutationObserver(reportNewAnnouncements).observe(document, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  })
+}
+
+/**
+ * Records every text the page's status regions announce, for as long as the test runs. A region says a thing and falls
+ * silent again, so looking at it at a chosen moment cannot tell one that never spoke from one that already stopped;
+ * watching it as it speaks answers whether it ever did.
+ *
+ * @param page - The page to watch.
+ *
+ * @returns Every text announced so far, oldest first, repeats included.
+ */
+export async function recordStatusAnnouncements(page: Page): Promise<() => string[]> {
+  // Every text announced, in the order it was said
+  return recordHandedBack(page, 'reportAnnouncement', watchForAnnouncements)
 }

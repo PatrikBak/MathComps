@@ -30,6 +30,7 @@ import type { QueryUiState } from '@/lib/query-ui-state'
 import { type DrawnThread, useDrawnThreads } from '../hooks/use-drawn-threads'
 import { usePoolThreads } from '../hooks/use-pool-threads'
 import { useProposalReference } from '../hooks/use-proposal-reference'
+import { isNarrowed } from '../model/pool-filters'
 import {
   type DiscussedSubject,
   discussionTargetOf,
@@ -38,6 +39,7 @@ import {
 import { categoryHue } from '../model/selection-state'
 import { MarkSeenButton } from './MarkSeenButton'
 import { PoolSkeleton } from './PoolSkeleton'
+import { PoolTools } from './PoolTools'
 import { ProposalBox } from './ProposalBody'
 import { DetailLink } from './SelectionLinks'
 import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
@@ -51,27 +53,33 @@ type PoolCommentsProps = {
   countSlot: HTMLElement | null
   /** The language the problems are read in. */
   language: Locale
+  /** Where the pool's search and filters stand, once it is on the page. */
+  toolsSlot: HTMLElement | null
 }
 
 /**
  * The reviewers' discussions of everything the selection holds as one list: every top-level comment with its
  * replies, each under a heading opening its problem or paper on the discussion, every thread {@link usePoolThreads}
- * gives. A problem's heading previews its statement in the language the problems are read in. Anything new anybody
- * else posts while the list is open waits behind a button, so it never moves the list under the reader. The reader's
- * own writes show at once, and so do others' edits, reactions and deletions. A problem opened from the list and
- * closed again finds it as it was left. The line over the pool says how many comments the threads hold, that they
- * are on their way, or that they are not to be had. While some comments are new to the reader, it says how many,
- * with the eye marking them seen.
+ * lets through. The pool's search and filters stand over it, their options counting comments, and each change to them
+ * lays the list out afresh. A problem's heading previews its statement in the language the problems are read in.
+ * Anything new anybody else posts, and any change of theirs to the selection, waits behind a button where it would
+ * change the threads the filters let through, so it never moves the list under the reader. The reader's own writes
+ * show at once, and so do others' edits, reactions and deletions. A problem opened from the list and closed again
+ * finds it as it was left. The line over the pool says how many comments the threads shown hold, that they are on
+ * their way, or that they are not to be had. While some comments shown are new to the reader, it says how many, with
+ * the eye marking them seen where that stops some comment shown from being new.
  */
-export function PoolComments({ countSlot, language }: PoolCommentsProps) {
+export function PoolComments({ countSlot, toolsSlot, language }: PoolCommentsProps) {
   // Pool copy
   const t = useTranslations('problemSelection.pool')
 
   // Counted nouns, which decline with the number in front of them
   const tPlurals = useTranslations('plurals')
 
-  // Every thread, what waits to be shown, and how far the read has got
-  const { threads, uiState, retry, hasNews, showNews } = usePoolThreads()
+  // The threads the filters let through and those they keep out, the counts beside the filters' options, what waits
+  // to be shown, the filters, the key the list is drawn afresh under, and how far the read has got
+  const { threads, hidden, counts, uiState, retry, hasNews, showNews, filters, listKey } =
+    usePoolThreads()
 
   // The line over the pool, which takes the focus when whatever held it goes
   const { poolCountRef: countRef } = useSelectionWorkspace()
@@ -98,7 +106,13 @@ export function PoolComments({ countSlot, language }: PoolCommentsProps) {
       : t(waitingLineKey(uiState))
 
   // Each thread as the list draws it, how many comments in them are new to the reader, and the way to mark them seen
-  const { drawn, newCount, markShownSeen } = useDrawnThreads({ threads })
+  const { drawn, newCount, markShownSeen } = useDrawnThreads({ threads, hidden })
+
+  // The search and the filters, in their spot over the pool
+  const tools =
+    toolsSlot === null
+      ? null
+      : createPortal(<PoolTools mode="comments" filters={filters} counts={counts} />, toolsSlot)
 
   // The comment count or the waiting line, with what is new, drawn in the line over the pool
   const count =
@@ -123,19 +137,26 @@ export function PoolComments({ countSlot, language }: PoolCommentsProps) {
   // The read still to land, or given up before it did
   if (threads === null) {
     return (
-      <>
+      // The same element the threads come in, so the search and the filters keep the focus as the threads land
+      <div>
+        {/* The search and the filters over the pool */}
+        {tools}
+
         {/* That the threads are on their way or not to be had, in the line over the pool */}
         {count}
 
         {/* How far the read has got */}
         <ThreadsPlaceholder uiState={uiState} onRetry={retryRead} />
-      </>
+      </div>
     )
   }
 
   return (
     // The threads, and what waits over them
     <div>
+      {/* The search and the filters over the pool */}
+      {tools}
+
       {/* How many comments show and how many of them are new, in the line over the pool */}
       {count}
 
@@ -148,16 +169,20 @@ export function PoolComments({ countSlot, language }: PoolCommentsProps) {
         fallbackRef={countRef}
       />
 
-      {/* Every thread under its heading, or why there are none */}
+      {/* Every thread let through under its heading, or why there are none */}
       <div ref={listRef}>
         {threads.length === 0 ? (
-          // Nothing said about anything the selection holds
+          // Nothing said the search and the facets let through, or nothing said in the view on screen
           <div className={COMPACT_PANEL_CLASS}>
-            <p className="text-sm text-muted">{t('emptyComments')}</p>
+            <p className="text-sm text-muted">
+              {t(isNarrowed(filters.filter) ? 'emptyCommentsFiltered' : 'emptyComments')}
+            </p>
           </div>
         ) : (
-          // The threads, only those in or near the window drawn
+          // The threads, only those in or near the window drawn, drawn afresh under each pick of the filters short
+          // of the search, and under each board they follow
           <WindowVirtualList
+            key={listKey}
             items={drawn}
             keyOf={(item) => threadKeyOf(item.thread)}
             renderItem={(item) => (
@@ -261,27 +286,31 @@ function ThreadsPlaceholder({ uiState, onRetry }: ThreadsPlaceholderProps) {
 type NewCommentToolsProps = {
   /** How many comments of the list are new to the reader. */
   count: number
-  /** Marks what the list shows as seen. */
-  onMarkSeen: () => void
+  /** Marks what the list shows as seen; null where that would stop no comment shown from being new. */
+  onMarkSeen: (() => void) | null
   /** The line over the pool. */
   countRef: RefObject<HTMLParagraphElement | null>
 }
 
 /**
  * The part of the line over the pool about new comments: how many are new to the reader, and the eye marking them all
- * seen.
+ * seen, offered only where that stops some comment shown from being new.
  */
 function NewCommentTools({ count, onMarkSeen, countRef }: NewCommentToolsProps) {
   // Pool copy
   const t = useTranslations('problemSelection.pool')
 
   return (
-    <span className="inline-flex items-center gap-0.5">
+    <span
+      // As tall as the line it sits on, the eye standing out over the line's margins, so the line keeps one height
+      // in every layout of the pool, with the eye or without it
+      className="-my-2 inline-flex items-center gap-0.5"
+    >
       {/* How many are new */}
       <span className="mr-1 font-medium text-brand-light">{`, ${t('newCount', { count })}`}</span>
 
       {/* The eye marking the new comments seen */}
-      <MarkSeenButton onPress={onMarkSeen} fallbackRef={countRef} />
+      {onMarkSeen !== null && <MarkSeenButton onPress={onMarkSeen} fallbackRef={countRef} />}
     </span>
   )
 }

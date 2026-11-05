@@ -150,3 +150,40 @@ export async function rowTabStops(page: Page, panel: Locator): Promise<string[]>
   // Still inside after more presses than the panel has stops for, so something in it takes Tab without end
   throw new Error(`Tab never left the panel, stopping among the rows at ${stops.join(', ')}`)
 }
+
+/**
+ * Picks one option of a facet drawn as a pill, and closes it again.
+ *
+ * @param page - The page.
+ * @param pill - What the pill reads now: its own name, or what is picked in it.
+ * @param option - The option's name, with the count it carries.
+ */
+export async function pickPillOption(page: Page, pill: string, option: string): Promise<void> {
+  // The pill, opened
+  await page.getByRole('button', { name: pill, exact: true }).click()
+
+  // The option, picked
+  await page.getByRole('checkbox', { name: option, exact: true }).check()
+
+  // The pill, closed again
+  await page.keyboard.press('Escape')
+}
+
+/**
+ * Picks the one answer of a facet drawn as a pill that takes one at a time, whatever count it carries, and closes it
+ * again.
+ *
+ * @param page - The page.
+ * @param pill - What the pill reads now: its own name, or the answer picked.
+ * @param answer - The answer's name, without its count.
+ */
+export async function pickPillAnswer(page: Page, pill: string, answer: string): Promise<void> {
+  // The pill, opened
+  await page.getByRole('button', { name: pill, exact: true }).click()
+
+  // The answer, picked whatever count it carries
+  await page.getByRole('radio', { name: new RegExp(`^${answer} \\(`) }).check()
+
+  // The pill, closed again
+  await page.keyboard.press('Escape')
+}

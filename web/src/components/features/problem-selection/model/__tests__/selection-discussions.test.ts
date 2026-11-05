@@ -1,48 +1,24 @@
 import { describe, expect, it } from 'vitest'
 
-import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
+import { commentDto } from '@/components/features/comments/model/__tests__/support/comment-fixtures'
 
 import {
+  type DiscussedSubject,
   type DiscussionThread,
+  postingNewIn,
+  revealedIn,
   showTheSame,
   threadKeyOf,
   threadsByActivity,
+  underSubjectsOf,
 } from '../selection-discussions'
+import type { Proposal } from '../selection-types'
 
 /** A problem standing in for a discussion's subject. */
 const PROBLEM = 'problem'
 
 /** A paper standing in for a discussion's subject. */
 const PAPER = 'paper'
-
-/**
- * A comment posted on a given day of October 2026, with the replies given.
- *
- * @param id - The comment's id.
- * @param day - The day it was posted.
- * @param replies - Its replies.
- * @param isDeleted - Whether it was deleted since.
- *
- * @returns The comment, never edited.
- */
-function comment(
-  id: string,
-  day: number,
-  replies: CommentDto[] = [],
-  isDeleted = false
-): CommentDto {
-  // The comment, as posted
-  return {
-    id,
-    author: { id: 'author', name: 'Author', avatarUrl: null },
-    content: isDeleted ? '' : id,
-    createdAt: new Date(Date.UTC(2026, 9, day)).toISOString(),
-    editedAt: null,
-    isDeleted,
-    reactions: [],
-    replies,
-  }
-}
 
 /**
  * The ids of the threads' top-level comments, in the order given.
@@ -62,9 +38,9 @@ describe('threadsByActivity', () => {
     const threads = threadsByActivity([
       {
         subject: PROBLEM,
-        comments: [comment('old', 1, [comment('late-reply', 9)]), comment('newer', 5)],
+        comments: [commentDto('old', 1, [commentDto('late-reply', 9)]), commentDto('newer', 5)],
       },
-      { subject: PAPER, comments: [comment('paper', 7)] },
+      { subject: PAPER, comments: [commentDto('paper', 7)] },
     ])
 
     // The answered one first, by its reply, then the paper's, then the unanswered one
@@ -80,8 +56,8 @@ describe('threadsByActivity', () => {
       {
         subject: PROBLEM,
         comments: [
-          comment('deep', 1, [comment('child', 2, [comment('grandchild', 8)])]),
-          comment('deleted-reply', 4, [comment('gone', 9, [], true)]),
+          commentDto('deep', 1, [commentDto('child', 2, [commentDto('grandchild', 8)])]),
+          commentDto('deleted-reply', 4, [{ ...commentDto('gone', 9, [], ''), isDeleted: true }]),
         ],
       },
     ])
@@ -96,8 +72,8 @@ describe('threadsByActivity', () => {
       {
         subject: PROBLEM,
         comments: [
-          comment('answered', 1, [comment('answer', 3)], true),
-          comment('empty', 6, [], true),
+          { ...commentDto('answered', 1, [commentDto('answer', 3)], ''), isDeleted: true },
+          { ...commentDto('empty', 6, [], ''), isDeleted: true },
         ],
       },
     ])
@@ -112,8 +88,8 @@ describe('threadsByActivity', () => {
       {
         subject: PROBLEM,
         comments: [
-          { ...comment('edited', 1), editedAt: new Date(Date.UTC(2026, 9, 20)).toISOString() },
-          comment('newer', 5),
+          { ...commentDto('edited', 1), editedAt: new Date(Date.UTC(2026, 9, 20)).toISOString() },
+          commentDto('newer', 5),
         ],
       },
     ])
@@ -126,7 +102,7 @@ describe('threadsByActivity', () => {
 describe('threadKeyOf', () => {
   it("keeps a thread's key across an edit, and across its posting time read back rounded", () => {
     // A top-level comment as its poster's write gave it back
-    const posted = { ...comment('first', 1), createdAt: '2026-10-16T10:00:00.1234567Z' }
+    const posted = { ...commentDto('first', 1), createdAt: '2026-10-16T10:00:00.1234567Z' }
 
     // The same comment edited, under a new id, its time read back to the microsecond
     const edited = { ...posted, id: 'second', createdAt: '2026-10-16T10:00:00.123456Z' }
@@ -142,8 +118,8 @@ describe('showTheSame', () => {
   it('finds two lists the same when only their order, their times, what was edited and who reacted how differ', () => {
     // Two threads as one copy holds them
     const asHeld = [
-      { subject: PROBLEM, comment: comment('first', 1, [comment('reply', 2)]) },
-      { subject: PAPER, comment: comment('second', 3) },
+      { subject: PROBLEM, comment: commentDto('first', 1, [commentDto('reply', 2)]) },
+      { subject: PAPER, comment: commentDto('second', 3) },
     ]
 
     // The same two read back the other way round, a time rounded, a thumbs up given, and the paper's comment edited
@@ -152,7 +128,7 @@ describe('showTheSame', () => {
       {
         subject: PAPER,
         comment: {
-          ...comment('second', 3),
+          ...commentDto('second', 3),
           id: 'second-edited',
           content: 'second, reworded',
           editedAt: new Date(Date.UTC(2026, 9, 4)).toISOString(),
@@ -161,8 +137,8 @@ describe('showTheSame', () => {
       },
       {
         subject: PROBLEM,
-        comment: comment('first', 1, [
-          { ...comment('reply', 2), createdAt: '2026-10-02T00:00:00.0000001Z' },
+        comment: commentDto('first', 1, [
+          { ...commentDto('reply', 2), createdAt: '2026-10-02T00:00:00.0000001Z' },
         ]),
       },
     ]
@@ -173,13 +149,15 @@ describe('showTheSame', () => {
 
   it('finds two lists different when a reply is missing from one, or a thread is gone or new', () => {
     // A thread as one copy holds it
-    const asHeld = [{ subject: PROBLEM, comment: comment('first', 1) }]
+    const asHeld = [{ subject: PROBLEM, comment: commentDto('first', 1) }]
 
     // The thread with a reply
-    const answered = [{ subject: PROBLEM, comment: comment('first', 1, [comment('reply', 2)]) }]
+    const answered = [
+      { subject: PROBLEM, comment: commentDto('first', 1, [commentDto('reply', 2)]) },
+    ]
 
     // The thread beside one started since
-    const started = [...asHeld, { subject: PAPER, comment: comment('second', 3) }]
+    const started = [...asHeld, { subject: PAPER, comment: commentDto('second', 3) }]
 
     // A reply more is something new
     expect(showTheSame(asHeld, answered)).toBe(false)
@@ -189,5 +167,126 @@ describe('showTheSame', () => {
 
     // A thread started since is something new
     expect(showTheSame(asHeld, started)).toBe(false)
+  })
+})
+
+describe('postingNewIn', () => {
+  it('picks out the threads the earlier list lacks and those answered since, never one only edited or left behind', () => {
+    // Three threads as the list showed them: one to be answered, one to be edited, one to leave
+    const earlier = [
+      { subject: PROBLEM, comment: commentDto('answered', 1) },
+      { subject: PROBLEM, comment: commentDto('edited', 2) },
+      { subject: PAPER, comment: commentDto('left', 3) },
+    ]
+
+    // The list as it is now: a thread new to it, the first answered, the second edited under a new id, the third gone
+    const later = [
+      { subject: PAPER, comment: commentDto('new', 4) },
+      { subject: PROBLEM, comment: commentDto('answered', 1, [commentDto('answer', 5)]) },
+      {
+        subject: PROBLEM,
+        comment: {
+          ...commentDto('edited', 2),
+          id: 'edited-again',
+          editedAt: new Date(Date.UTC(2026, 9, 6)).toISOString(),
+        },
+      },
+    ]
+
+    // The threads that show something the earlier list didn't
+    const posting = postingNewIn(earlier, later)
+
+    // The new thread and the answered one, in the later list's order
+    expect(idsOf(posting)).toEqual(['new', 'answered'])
+  })
+})
+
+/**
+ * A problem, as a thread's discussion hangs off it.
+ *
+ * @param id - The problem's id.
+ * @param changes - What sets it apart from a live algebra problem recommended for nothing.
+ *
+ * @returns The problem as a discussed subject.
+ */
+function discussedProblem(id: string, changes: Partial<Proposal> = {}): DiscussedSubject {
+  // An algebra problem recommended for nothing, live, and whatever the changes lay on top
+  return {
+    kind: 'proposal',
+    proposal: {
+      id,
+      number: 1,
+      title: id,
+      area: 'algebra',
+      recommended: [],
+      texts: {},
+      originalLanguage: null,
+      isSetAside: false,
+      isUsed: false,
+      ratings: [],
+      ...changes,
+    },
+  }
+}
+
+describe('revealedIn', () => {
+  it('tells every thread shown of a discussion one of whose threads shows something new, and none of one showing nothing new', () => {
+    // The threads the list showed before: the first problem's second thread, its first thread hidden and holding the
+    // mark back, and the second problem's thread
+    const earlier = [
+      { subject: discussedProblem('first'), comment: commentDto('second thread', 3) },
+      { subject: discussedProblem('second'), comment: commentDto('other', 1) },
+    ]
+
+    // Every thread showing now, the first problem's first thread among them
+    const later = [
+      { subject: discussedProblem('first'), comment: commentDto('second thread', 3) },
+      { subject: discussedProblem('first'), comment: commentDto('first thread', 2) },
+      { subject: discussedProblem('second'), comment: commentDto('other', 1) },
+    ]
+
+    // What the view shows afresh
+    const revealed = revealedIn(earlier, later)
+
+    // Both of the first problem's threads, the second problem's left out
+    expect(revealed.map((thread) => thread.comment.id)).toEqual(['second thread', 'first thread'])
+
+    // Every thread showing now, the second problem's thread answered since
+    const answered = [
+      ...later.slice(0, 2),
+      {
+        subject: discussedProblem('second'),
+        comment: commentDto('other', 1, [commentDto('answer', 4)]),
+      },
+    ]
+
+    // What the view shows afresh once the second problem's thread is answered
+    const revealedOnceAnswered = revealedIn(earlier, answered)
+
+    // Both of the first problem's threads, and the second problem's answered one
+    expect(revealedOnceAnswered.map((thread) => thread.comment.id)).toEqual([
+      'second thread',
+      'first thread',
+      'other',
+    ])
+  })
+})
+
+describe('underSubjectsOf', () => {
+  it("puts each thread under the list's subject of the same discussion, and one the list lacks under its own", () => {
+    // The first problem as the selection now holds it, set aside since its thread was read
+    const setAside = discussedProblem('first', { isSetAside: true })
+
+    // A thread on each of two problems, put under a list holding the first problem alone
+    const placed = underSubjectsOf(
+      [
+        { subject: discussedProblem('first'), comment: commentDto('first', 1) },
+        { subject: discussedProblem('second'), comment: commentDto('second', 2) },
+      ],
+      [setAside]
+    )
+
+    // The first problem's thread under the set-aside problem, the second's under its own problem
+    expect(placed.map(({ subject }) => subject)).toEqual([setAside, discussedProblem('second')])
   })
 })

@@ -7,6 +7,7 @@ import { BACKEND_ORIGIN } from './support/backend-routes'
 import { stubNamedReader } from './support/comments'
 import { actionsCopy, areaCopy, editorCopy, SELECTION_PATH } from './support/competitions'
 import { returnToTab, slowDown } from './support/emulation'
+import { pickPillAnswer } from './support/facets'
 import {
   clickInPlace,
   clickTwiceAtOnce,
@@ -34,7 +35,6 @@ import {
   OPENED_ADDRESS,
   openPool,
   pickBoard,
-  pickState,
   problemCount,
   rememberedSelection,
   REVISION,
@@ -875,7 +875,7 @@ test.describe("the pool's order", () => {
     expect(lastCards().filter((text) => !text.includes(GEOMETRY.title))).toEqual([])
 
     // The pool narrowed to what the board doesn't hold
-    await pickState(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
+    await pickPillAnswer(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
 
     // The card among the elementary problems, after the algebra one, the elementary paper's own slot left out
     await expect(cards.nth(1)).toContainText(GEOMETRY.title)

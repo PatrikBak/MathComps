@@ -7,6 +7,7 @@ import messages from '../messages/en.json'
 import { createAnswerGate } from './support/answer-gate'
 import { recordWrites } from './support/backend-routes'
 import { SELECTION_PATH, transcriptOf } from './support/competitions'
+import { pickPillAnswer } from './support/facets'
 import { installHostedBackend } from './support/hosted-backend'
 import { showsFocusRing } from './support/interaction'
 import {
@@ -31,11 +32,11 @@ import {
   openPool,
   PHONE_VIEWPORT,
   pickBoard,
-  pickState,
   placementOf,
   problemCount,
   READY,
   rememberedSelection,
+  searchBox,
   SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
@@ -342,7 +343,7 @@ test.describe('placing a problem from the pool', () => {
     await openPool(page)
 
     // Showing only the problems the board on screen does not hold
-    await pickState(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
+    await pickPillAnswer(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
 
     // A problem put through the grid on its card into a slot holding the next problem by number
     await placeThroughGrid(cardOf(page, OPENED), 'I2')
@@ -402,7 +403,7 @@ test.describe('placing a problem from the pool', () => {
     await openPool(page)
 
     // Showing only the problems the board on screen does not hold
-    await pickState(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
+    await pickPillAnswer(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
 
     // A problem opened from its card
     await cardOf(page, OPENED).getByRole('link', { name: OPENED.title }).click()
@@ -1014,7 +1015,7 @@ test.describe("moving and emptying a draft's slots", () => {
     await expect(slotOf(page, 'E2').getByRole('link', { name: FIRST.title })).toBeVisible()
 
     // The search
-    const search = page.getByRole('searchbox', { name: selectionCopy.pool.search })
+    const search = searchBox(page)
 
     // Where the reader goes meanwhile
     await search.focus()
@@ -1177,7 +1178,7 @@ test.describe('a finalized board', () => {
     await openPool(page)
 
     // The search
-    const search = page.getByRole('searchbox', { name: selectionCopy.pool.search })
+    const search = searchBox(page)
 
     // Focused, the reader about to type
     await search.focus()

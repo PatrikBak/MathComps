@@ -1333,7 +1333,8 @@
       "notSelected": "Nevybrané",
       "selected": "Vybrané",
       "setAside": "Odložené {count}",
-      "state": "Stav"
+      "state": "Stav",
+      "wholePaper": "K celé sadě"
     },
     "finalize": {
       "confirm": "Uzavřít",
@@ -1376,6 +1377,7 @@
       "commentsUnavailable": "Komentáře nejsou dostupné",
       "empty": "Těmto filtrům neodpovídá žádná úloha.",
       "emptyComments": "Zatím tu nejsou žádné komentáře.",
+      "emptyCommentsFiltered": "Těmto filtrům neodpovídá žádný komentář.",
       "emptyPool": "Zatím tu nejsou žádné úlohy.",
       "emptySetAside": "Nic není odložené.",
       "emptySetAsideFiltered": "Těmto filtrům neodpovídá žádná odložená úloha.",
@@ -1383,7 +1385,7 @@
       "loadingComments": "Načítám komentáře",
       "newCount": "{count, plural, =1 {# nový} =2 {# nové} =3 {# nové} =4 {# nové} other {# nových}}",
       "resort": "Znovu seřadit",
-      "search": "Hledat úlohy",
+      "search": "Hledat v zásobníku",
       "searchPlaceholder": "Číslo, název nebo text",
       "setAsideCount": "{count, plural, one {# odložená úloha} few {# odložené úlohy} other {# odložených úloh}}",
       "showWhatsNew": "Zobrazit, co je nového",

@@ -1323,6 +1323,18 @@ export function headingOf(page: Page, proposal: Proposal) {
 }
 
 /**
+ * The pool's search box.
+ *
+ * @param page - The page.
+ *
+ * @returns The box.
+ */
+export function searchBox(page: Page): Locator {
+  // The only search box named so
+  return page.getByRole('searchbox', { name: selectionCopy.pool.search })
+}
+
+/**
  * The board panel beside the pool.
  *
  * @param page - The page.
@@ -1410,25 +1422,6 @@ export async function pickBoard(page: Page, from: Board, to: Board): Promise<voi
 
   // On screen
   await expect(boardPanel(page).getByRole('button', { name: to.name })).toBeVisible()
-}
-
-/**
- * Narrows the pool to the problems the board on screen holds, or to those it doesn't, through the State pill, and
- * closes it again.
- *
- * @param page - The page.
- * @param from - What the pill reads now: its own name, or the option picked.
- * @param to - The option to pick.
- */
-export async function pickState(page: Page, from: string, to: string): Promise<void> {
-  // The State pill, opened
-  await page.getByRole('button', { name: from, exact: true }).click()
-
-  // The option, picked whatever count it carries
-  await page.getByRole('radio', { name: new RegExp(`^${to} \\(`) }).check()
-
-  // The pill, closed again
-  await page.keyboard.press('Escape')
 }
 
 /**
