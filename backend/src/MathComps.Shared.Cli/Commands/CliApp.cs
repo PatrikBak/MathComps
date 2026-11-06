@@ -2,6 +2,8 @@ using System.Reflection;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
@@ -9,10 +11,10 @@ using Spectre.Console.Cli.Extensions.DependencyInjection;
 namespace MathComps.Shared.Cli.Commands;
 
 /// <summary>
-/// Fluent bootstrap shared by every CLI tool: it builds configuration from the JSON config files the
-/// tool declares plus its user secrets and environment variables, wires up dependency injection, and
-/// hands the resulting command app to <see cref="CliRunner"/>. Tools supply the config files they
-/// require, their own service registrations, and their command list.
+/// Fluent bootstrap shared by every CLI tool: it builds configuration from the shared logging defaults, the JSON
+/// config files the tool declares, and its user secrets and environment variables, wires up dependency injection and
+/// console logging, and hands the resulting command app to <see cref="CliRunner"/>. Tools supply the config files
+/// they require, their own service registrations, and their command list.
 /// </summary>
 public sealed class CliApp
 {
@@ -95,7 +97,7 @@ public sealed class CliApp
     {
         // Build the DI registrar through the shared bootstrap. Awaiting before the using disposes it keeps the
         // service provider (and its singletons, e.g. the HttpClient meter factory) alive until the async command
-        // actually finishes.
+        // actually finishes, and disposing it writes out the log lines the console logger still holds.
         using var registrar = BuildRegistrar();
 
         // Run a command app whose default command is the supplied type.
@@ -103,8 +105,8 @@ public sealed class CliApp
     }
 
     /// <summary>
-    /// Runs the shared bootstrap — console setup, configuration, and service registration —
-    /// and returns the registrar the command app resolves dependencies from.
+    /// Runs the shared bootstrap (console setup, configuration, logging, and service registration) and returns the
+    /// registrar the command app resolves dependencies from.
     /// </summary>
     /// <returns>The dependency-injection registrar wrapping the configured service collection.</returns>
     private DependencyInjectionRegistrar BuildRegistrar()
@@ -122,6 +124,9 @@ public sealed class CliApp
         var configurationBuilder = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory);
 
+        // Load the logging defaults every tool shares first, so every source loaded after them can override them.
+        configurationBuilder.AddJsonFile("appsettings.logging.json", optional: false);
+
         // Load each declared config file, required and in call order.
         foreach (var configFile in _requiredConfigFiles)
             configurationBuilder.AddJsonFile(configFile, optional: false);
@@ -137,6 +142,15 @@ public sealed class CliApp
 
         // Expose configuration to DI.
         services.AddSingleton<IConfiguration>(configuration);
+
+        // Redirected output gets one line per log entry, which a reader parses line by line, and a terminal gets the
+        // two-line form. Registered ahead of the logging setup, so the Logging section can still override it.
+        services.Configure<SimpleConsoleFormatterOptions>(options => options.SingleLine = Console.IsOutputRedirected);
+
+        // Log to the console at the levels and in the format the Logging section sets.
+        services.AddLogging(logging => logging
+            .AddConfiguration(configuration.GetSection("Logging"))
+            .AddConsole());
 
         // Apply each tool-specific registration against the built configuration.
         foreach (var configureServices in _serviceConfigurators)

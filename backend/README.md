@@ -238,6 +238,12 @@ dotnet format
 
 Each tool has its own README.
 
+Every tool logs to the console with the defaults in `src/MathComps.Shared.Cli/appsettings.logging.json`: our own code from Information, everything else from Warning. Redirected output gets one line per entry. A tool's own config files, its user secrets or an environment variable override any of it. A category name holds dots, which the shell won't assign directly, so a one-off run goes through `env`:
+
+```bash
+env 'Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command=Information' dotnet run --project src/MathComps.Cli.BulkImport -- ./my-draft --dry-run
+```
+
 ### Data Pipeline Tools
 
 - **[Bulk Import](src/MathComps.Cli.BulkImport/README.md)** – Imports problem-draft folders into the database, or dry-runs them
