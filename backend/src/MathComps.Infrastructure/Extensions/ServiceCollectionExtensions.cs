@@ -288,10 +288,11 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the R2 object-storage uploader and reader with their shared settings. Settings are validated
-    /// lazily so config is only required when storage is actually reached for.
+    /// Registers R2 object storage: the uploader into the public bucket, and the private bucket as the store files go
+    /// into and the reader of what it holds. Everything is built lazily, so a host only needs settings for the buckets
+    /// it reaches for.
     /// </summary>
-    /// <param name="services">The service collection to add the uploader to.</param>
+    /// <param name="services">The service collection to add storage to.</param>
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddStorage(this IServiceCollection services)
     {
@@ -300,11 +301,15 @@ public static class ServiceCollectionExtensions
             .BindConfiguration(R2Settings.SectionName)
             .ValidateDataAnnotations();
 
-        // R2 uploader backing image uploads
-        services.TryAddSingleton<IFileUploader, R2Uploader>();
+        // The public bucket's uploader
+        services.TryAddSingleton<IFileUploader, R2PublicUploader>();
 
-        // R2 reader backing the content the API serves itself from
-        services.TryAddSingleton<IObjectReader, R2ObjectReader>();
+        // The private bucket
+        services.TryAddSingleton<R2PrivateStore>();
+
+        // Exposed as the store files go into and as the reader of what it holds, one instance behind both
+        services.TryAddSingleton<IPrivateObjectStore>(provider => provider.GetRequiredService<R2PrivateStore>());
+        services.TryAddSingleton<IObjectReader>(provider => provider.GetRequiredService<R2PrivateStore>());
 
         // Builder pattern
         return services;

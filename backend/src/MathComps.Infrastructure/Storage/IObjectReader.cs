@@ -1,8 +1,8 @@
 namespace MathComps.Infrastructure.Storage;
 
 /// <summary>
-/// Reads text objects back out of remote storage, the counterpart to <see cref="IFileUploader"/> for content the
-/// application publishes and then serves itself from.
+/// Reads text objects back out of the <see cref="IPrivateObjectStore"/>, for content the application publishes there
+/// and then serves itself from.
 /// </summary>
 public interface IObjectReader
 {
