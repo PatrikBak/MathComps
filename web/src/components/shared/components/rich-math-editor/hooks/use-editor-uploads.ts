@@ -189,8 +189,16 @@ export function useEditorUploads({
       // The file goes to the store
       const key = await editorUpload.store(file)
 
-      // The file's markdown goes into the text
-      writeUploaded(editorUpload.toMarkdown(name, key), position, editorUpload.cursorFromEnd)
+      // The stored file's markdown, for the screen it is uploaded from
+      const markdown = await editorUpload.toMarkdown({
+        file,
+        name,
+        key,
+        screenDensity: window.devicePixelRatio,
+      })
+
+      // The markdown goes into the text
+      writeUploaded(markdown, position, editorUpload.cursorFromEnd)
     } catch (error) {
       // Show the upload error's localized copy
       toastUploadError(error, tApiErrors)

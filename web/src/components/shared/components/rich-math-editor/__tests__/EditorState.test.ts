@@ -83,12 +83,22 @@ describe('EditorState', () => {
       expect(stateWithAttachment.metrics.attachmentCount).toBe(1)
     })
 
-    it('should count an uploaded file once when its name holds a bracketed word', () => {
+    it('should count an uploaded file once when its name holds a bracketed word', async () => {
       // An image whose name holds a bracketed word
-      const image = EDITOR_UPLOADS.image.toMarkdown('plot [v2]', 'key-1')
+      const image = await EDITOR_UPLOADS.image.toMarkdown({
+        file: new File([], 'plot [v2].png', { type: 'image/png' }),
+        name: 'plot [v2]',
+        key: 'key-1',
+        screenDensity: 1,
+      })
 
       // And an attachment whose name holds another
-      const attachment = EDITOR_UPLOADS.attachment.toMarkdown('HW [solutions].pdf', 'key-2')
+      const attachment = await EDITOR_UPLOADS.attachment.toMarkdown({
+        file: new File([], 'HW [solutions].pdf', { type: 'application/pdf' }),
+        name: 'HW [solutions].pdf',
+        key: 'key-2',
+        screenDensity: 1,
+      })
 
       // Both in one text
       const state = new EditorState(`${image} and ${attachment}`, TEST_CONFIG)
