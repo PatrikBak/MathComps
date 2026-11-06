@@ -13,24 +13,25 @@ namespace MathComps.Infrastructure.Storage;
 /// take part — a generator rewrites its output every run, so any mtime comparison would push the whole set every
 /// time — and it also keeps a fresh checkout, whose files all carry a current mtime, from re-pushing everything.
 /// It dedupes within a run too, so a key sent once isn't sent again even when two sources resolve to it (e.g.
-/// handout language variants sharing an asset). Register it over the base uploader with Scrutor's <c>Decorate</c>;
-/// the ledger path comes from <see cref="UploadLedgerOptions"/>.
+/// handout language variants sharing an asset). Register it over the base uploader with Scrutor's <c>Decorate</c>.
+/// It keeps one ledger per store, in the directory <see cref="UploadLedgerOptions"/> names, so what one store
+/// received never vouches for another.
 /// </summary>
 /// <param name="inner">The uploader the bytes actually go through.</param>
-/// <param name="options">Carries the ledger path read from and written back to.</param>
+/// <param name="options">Carries the directory the ledger is read from and written back to.</param>
 public sealed class TrackedFileUploader(IFileUploader inner, IOptions<UploadLedgerOptions> options)
     : ITrackedFileUploader, IDisposable
 {
-    /// <inheritdoc cref="UploadLedgerOptions.LedgerPath"/>
-    private readonly string _ledgerPath = options.Value.LedgerPath;
+    /// <summary>
+    /// The ledger file of the store the inner uploader writes to.
+    /// </summary>
+    private readonly string _ledgerPath = LedgerPath(options.Value, inner);
 
     /// <summary>
     /// Maps each storage key to the hash of the bytes last pushed under it. Missing entry ⇒ never uploaded ⇒ must
     /// push. Loaded from the ledger file, empty when it doesn't exist yet.
     /// </summary>
-    private readonly Dictionary<string, string> _ledger = File.Exists(options.Value.LedgerPath)
-        ? ReadLedger(options.Value.LedgerPath)
-        : [];
+    private readonly Dictionary<string, string> _ledger = ReadLedger(LedgerPath(options.Value, inner));
 
     /// <summary>
     /// Keys already pushed in this run — guards against re-sending the same key when more than one source maps to
@@ -43,6 +44,9 @@ public sealed class TrackedFileUploader(IFileUploader inner, IOptions<UploadLedg
     /// <see cref="IFileUploader"/> and <see cref="ITrackedFileUploader"/> registrations.
     /// </summary>
     private bool _disposed;
+
+    /// <inheritdoc/>
+    public string StoreName => inner.StoreName;
 
     /// <inheritdoc/>
     /// <remarks>Forwards to <see cref="UploadIfChangedAsync"/> and discards the upload-or-skip signal.</remarks>
@@ -69,13 +73,28 @@ public sealed class TrackedFileUploader(IFileUploader inner, IOptions<UploadLedg
     }
 
     /// <summary>
-    /// Reads the ledger, treating one written in an older format as an empty one. A ledger that can't be understood
-    /// is only ever a lost optimisation: the run re-pushes everything once and writes the current format back.
+    /// The ledger file of one store: a JSON file named for it in the ledger directory.
     /// </summary>
-    /// <param name="ledgerPath"><inheritdoc cref="UploadLedgerOptions.LedgerPath" path="/summary"/></param>
+    /// <param name="options">The options naming the ledger directory.</param>
+    /// <param name="uploader">The uploader whose store the ledger records.</param>
+    /// <returns>The ledger file's path.</returns>
+    private static string LedgerPath(UploadLedgerOptions options, IFileUploader uploader) =>
+        // One file per store, named for it
+        Path.Combine(options.LedgerDirectory, $"{uploader.StoreName}.json");
+
+    /// <summary>
+    /// Reads the ledger, treating a missing one, or one written in an older format, as an empty one. A ledger that
+    /// can't be understood is only ever a lost optimisation: the run re-pushes everything once and writes the current
+    /// format back.
+    /// </summary>
+    /// <param name="ledgerPath">The ledger file's path.</param>
     /// <returns>The recorded hash per storage key.</returns>
     private static Dictionary<string, string> ReadLedger(string ledgerPath)
     {
+        // A store with no ledger yet has nothing recorded
+        if (!File.Exists(ledgerPath))
+            return [];
+
         try
         {
             // The recorded hashes

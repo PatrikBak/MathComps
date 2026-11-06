@@ -11,9 +11,9 @@ return await CliApp.Create<Program>()
     .ConfigureServices((services, _) =>
     {
         // The R2 uploader, wrapped in the tracker that skips unchanged assets across runs;
-        // the ledger lives alongside the handout sources.
-        var handoutsLedgerPath = RepoPaths.Resolve("data/handouts", ".r2-uploads.json");
-        services.AddStorage().AddTrackedFileUploader(handoutsLedgerPath);
+        // the ledgers, one per bucket, live alongside the handout sources.
+        var handoutsLedgerDirectory = RepoPaths.Resolve("data/handouts", ".r2-uploads");
+        services.AddStorage().AddTrackedFileUploader(handoutsLedgerDirectory);
 
         // Register the lazy service provider so that Lazy<T> can be injected
         services.AddTransient(typeof(Lazy<>), typeof(LazyService<>));

@@ -40,11 +40,11 @@ public class DraftImportServicePostgresTests(PostgresContainerFixture fixture)
     private readonly RecordingFileUploader _uploader = new();
 
     /// <summary>
-    /// A throwaway upload-ledger path, unique per test instance so the tracker one test fills can't leak into
+    /// A throwaway upload-ledger directory, unique per test instance so the tracker one test fills can't leak into
     /// another (xUnit builds a fresh instance per <c>[Fact]</c>).
     /// </summary>
-    private readonly string _ledgerPath =
-        Path.Combine(Path.GetTempPath(), $"bulkimport-ledger-{Guid.NewGuid():N}.json");
+    private readonly string _ledgerDirectory =
+        Path.Combine(Path.GetTempPath(), $"bulkimport-ledgers-{Guid.NewGuid():N}");
 
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
@@ -53,7 +53,7 @@ public class DraftImportServicePostgresTests(PostgresContainerFixture fixture)
         // ledger), and the import depends on the tracker — registered here because the bulk-import host owns it,
         // not shared infrastructure.
         services.AddSingleton<ITrackedFileUploader>(_ => new TrackedFileUploader(
-            _uploader, Create(new UploadLedgerOptions { LedgerPath = _ledgerPath })));
+            _uploader, Create(new UploadLedgerOptions { LedgerDirectory = _ledgerDirectory })));
 
         // The tested service
         services.AddBulkImport();
@@ -1600,7 +1600,7 @@ public class DraftImportServicePostgresTests(PostgresContainerFixture fixture)
             (await context.Problems.CountAsync(), await context.Competitions.CountAsync()));
         Assert.Equal((0, 0), kept);
     }, overrides: services => services.AddSingleton<ITrackedFileUploader>(_ => new TrackedFileUploader(
-        new UnreachableStorage(), Create(new UploadLedgerOptions { LedgerPath = _ledgerPath }))));
+        new UnreachableStorage(), Create(new UploadLedgerOptions { LedgerDirectory = _ledgerDirectory }))));
 
     /// <summary>
     /// A pick written in English alone goes into the pool. Its problem lands with the English text as the original.
@@ -2002,6 +2002,9 @@ public class DraftImportServicePostgresTests(PostgresContainerFixture fixture)
     /// </summary>
     private sealed class UnreachableStorage : IFileUploader
     {
+        /// <inheritdoc/>
+        public string StoreName => "unreachable";
+
         /// <inheritdoc/>
         public Task UploadAsync(string localFilePath, string key) =>
             // Nothing gets through

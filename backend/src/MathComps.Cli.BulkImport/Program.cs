@@ -17,9 +17,9 @@ return await CliApp.Create<Program>()
         services.AddLocalization();
 
         // The R2 uploader, wrapped in the tracker that skips images already on R2 across re-imports;
-        // the ledger lives beside the draft sources.
-        var uploadLedgerPath = RepoPaths.Resolve("data/problems", ".r2-uploads.json");
-        services.AddStorage().AddTrackedFileUploader(uploadLedgerPath);
+        // the ledgers, one per bucket, live beside the draft sources.
+        var uploadLedgerDirectory = RepoPaths.Resolve("data/problems", ".r2-uploads");
+        services.AddStorage().AddTrackedFileUploader(uploadLedgerDirectory);
 
         // Lazy<T> injection, so a dry run never builds the uploader.
         services.AddTransient(typeof(Lazy<>), typeof(LazyService<>));

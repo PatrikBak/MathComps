@@ -63,6 +63,13 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
         public bool SkipUpload { get; set; }
 
         /// <summary>
+        /// Whether the uploads go to prod's bucket rather than the dev one.
+        /// </summary>
+        [CommandOption("--publish")]
+        [Description("Upload to prod's bucket. Needs the prod R2 keys, which publish-handouts.sh loads")]
+        public bool Publish { get; set; }
+
+        /// <summary>
         /// Whether to skip the Asymptote staleness check and recompilation.
         /// Useful when the author is confident images are up to date and wants
         /// to shave the per-handout dependency scan / or in CI where no Asymptote
@@ -100,6 +107,14 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
         [Description("Path to error log file for compiler failures (default: errors.log)")]
         [DefaultValue("errors.log")]
         public required string ErrorLog { get; set; }
+
+        /// <inheritdoc/>
+        /// <remarks>Refuses a run whose R2 keys disagree with <see cref="Publish"/>.</remarks>
+        public override ValidationResult Validate() =>
+            // Stop before anything is built when the keys would send the uploads to the other bucket
+            PublishKeys.Mismatch(Publish) is { } mismatch
+                ? ValidationResult.Error(mismatch)
+                : ValidationResult.Success();
     }
 
     /// <summary>
