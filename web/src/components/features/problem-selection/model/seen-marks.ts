@@ -1,9 +1,28 @@
 import type { CommentData } from '@/components/features/comments/components/CommentItem'
-import { lastPostedByOthersAt } from '@/components/features/comments/model/comment-newness'
+import {
+  type CommentNewness,
+  firstNewPostedAt,
+  lastPostedByOthersAt,
+} from '@/components/features/comments/model/comment-newness'
 import type { CommentThreadSeenDto } from '@/components/features/comments/services/comment-api-types'
+import { convertToCommentData } from '@/components/features/comments/utils/comment-utils'
 
-import type { DiscussionTarget } from './selection-discussions'
-import type { DiscussionsSeenUpTo, SelectionDiscussionsSeen } from './selection-types'
+import { matchDiscussions, type PoolFilter } from './pool-filters'
+import {
+  type DiscussedSubject,
+  type Discussion,
+  discussionKeyOf,
+  type DiscussionTarget,
+  discussionTargetOf,
+  type DiscussionThread,
+  type InView,
+} from './selection-discussions'
+import type {
+  Board,
+  DiscussionsSeenUpTo,
+  SelectionCategory,
+  SelectionDiscussionsSeen,
+} from './selection-types'
 
 /**
  * How far the reader has seen one discussion, as the server holds it, beside how many comments somebody else posted in
@@ -44,25 +63,13 @@ type ByDiscussionKind<TValue> = {
 }
 
 /**
- * One discussion, or one thread of it, as a view shows it to the reader.
+ * One discussion, or one thread of it, as a view shows it to the reader or hides it.
  */
-export type ShownDiscussion = {
+export type DiscussionPart = {
   /** The comment target the discussion is held under. */
   target: DiscussionTarget
-  /** The comments the view shows of it, each carrying its replies. */
+  /** The comments the view shows or hides of it, each carrying its replies. */
   comments: readonly CommentData[]
-}
-
-/**
- * The key a discussion goes by among the marks.
- *
- * @param target - The comment target the discussion is held under.
- *
- * @returns The key.
- */
-export function markKeyOf(target: DiscussionTarget): string {
-  // The kind of thread and its id
-  return `${target.targetType}:${target.targetId}`
 }
 
 /**
@@ -73,14 +80,14 @@ export function markKeyOf(target: DiscussionTarget): string {
  *
  * @returns What was read for each proposal's discussion, then each paper's, under the discussion's key.
  */
-function entriesByMarkKey<TValue, TRead>(
+function entriesByDiscussionKey<TValue, TRead>(
   byKind: ByDiscussionKind<TValue>,
   read: (value: TValue) => TRead
 ): [string, TRead][] {
   // A function which reads one kind's discussions, each under its key
   const entriesOf = (targetType: DiscussionTarget['targetType'], values: Record<string, TValue>) =>
     Object.entries(values).map(([targetId, value]): [string, TRead] => [
-      markKeyOf({ targetType, targetId }),
+      discussionKeyOf({ targetType, targetId }),
       read(value),
     ])
 
@@ -103,7 +110,7 @@ export function serverMarksOf(seen: SelectionDiscussionsSeen): ServerMarks {
   })
 
   // Each proposal's discussion and each paper's, by its key
-  return new Map(entriesByMarkKey(seen, markOf))
+  return new Map(entriesByDiscussionKey(seen, markOf))
 }
 
 /**
@@ -176,7 +183,7 @@ export function releaseMarks(kept: KeptMarks, holderId: string): KeptMarks {
  */
 export function advanceMarks(kept: KeptMarks, marked: DiscussionsSeenUpTo): KeptMarks {
   // Each marked discussion's moment, by its key, in milliseconds
-  const moments = new Map(entriesByMarkKey(marked, (seenUpTo) => Date.parse(seenUpTo)))
+  const moments = new Map(entriesByDiscussionKey(marked, (seenUpTo) => Date.parse(seenUpTo)))
 
   // Each kept mark of a discussion seen moved on to the later of where it stands and its moment, the rest as they were
   return new Map(
@@ -230,34 +237,136 @@ export function newCountAcross(server: ServerMarks): number {
 }
 
 /**
- * The write telling the server some discussions were seen as a view shows them, each up to the newest comment it shows
- * that can be new to the reader, so a comment still waiting to be shown in it stays new. A discussion shown as several
- * threads is named once, up to the newest comment across them, and one showing no comment that can be new is left out,
- * since nothing new in it has been seen.
+ * Each thread a view shows or hides as the seen marks read it: the discussion it was posted in, and its top-level
+ * comment with its replies, read for the reader.
  *
- * @param shown - The discussions as the view shows them, a discussion shown as several threads once per thread.
+ * @param threads - The threads the view shows and those it hides.
  * @param readerId - The reader's id with the sign-in provider, or null when nobody is signed in.
  *
- * @returns The write, the proposals' moments apart from the papers'.
+ * @returns The view's discussions, one per thread.
  */
-export function seenWriteOf(
-  shown: readonly ShownDiscussion[],
+export function discussionPartsIn(
+  threads: InView<DiscussionThread<DiscussedSubject>>,
   readerId: string | null
-): DiscussionsSeenUpTo {
-  // Each discussion shown, once, with when the newest comment it shows that can be new was posted, a discussion
-  // showing none left out
-  const moments = [...Map.groupBy(shown, ({ target }) => markKeyOf(target)).values()].flatMap(
-    (threads) => {
-      // When the newest comment that can be new was posted, across every thread of the discussion
-      const seenUpTo = lastPostedByOthersAt(
+): InView<DiscussionPart> {
+  // A function which reads one thread for the reader, under its discussion's target
+  const readOf = ({ subject, comment }: DiscussionThread<DiscussedSubject>): DiscussionPart => ({
+    target: discussionTargetOf(subject),
+    comments: [convertToCommentData(comment, readerId)],
+  })
+
+  // The threads shown and those hidden, each read
+  return { shown: threads.shown.map(readOf), hidden: threads.hidden.map(readOf) }
+}
+
+/**
+ * What the pool's Comments tab shows of some discussions and what it hides, as the seen marks read it: the threads
+ * laid out afresh against the board on screen, each found by what it says now, as {@link matchDiscussions} runs them
+ * through the filter.
+ *
+ * @param discussions - The discussions, each with its top-level comments.
+ * @param filter - What the pool is narrowed to.
+ * @param activeBoard - The board on screen; null when there is none.
+ * @param categories - The selection's categories, in the order they run.
+ * @param readerId - The reader's id with the sign-in provider, or null when nobody is signed in.
+ *
+ * @returns The view's discussions, one per thread.
+ */
+export function poolDiscussionPartsOf(
+  discussions: readonly Discussion<DiscussedSubject>[],
+  filter: PoolFilter,
+  activeBoard: Board | null,
+  categories: readonly SelectionCategory[],
+  readerId: string | null
+): InView<DiscussionPart> {
+  // The threads the filter lets through and those it keeps out, laid out afresh, each read for the reader
+  return discussionPartsIn(
+    matchDiscussions(discussions, filter, activeBoard, categories, []),
+    readerId
+  )
+}
+
+/**
+ * A view of some discussions, with how far the reader has seen each and who the reader is.
+ */
+type SeenMarking = {
+  /**
+   * The discussions as the view shows them and the threads of them it hides, a discussion shown as several threads
+   * once per thread.
+   */
+  view: InView<DiscussionPart>
+  /** How far the reader has seen each discussion, as the server holds it. */
+  server: ServerMarks
+  /** The reader's id with the sign-in provider, or null when nobody is signed in. */
+  readerId: string | null
+}
+
+/**
+ * One discussion a view marks seen, with the moment it marks it seen up to.
+ */
+type SeenMoment = {
+  /** The comment target the discussion is held under. */
+  target: DiscussionTarget
+  /** The moment the discussion is seen up to, in milliseconds. */
+  seenUpTo: number
+}
+
+/**
+ * The moment marking some discussions seen as a view shows them marks each up to: the newest comment it shows that can
+ * be new to the reader, so a comment still waiting to be shown in it stays new. A discussion shown as several threads
+ * is named once, up to the newest comment across them, and one showing no comment that can be new is left out, since
+ * nothing new in it has been seen. Where the view hides some of a discussion's threads, the discussion is seen no
+ * further than just before the oldest comment new to the reader in them, as the server holds the reader's mark, so
+ * that comment stays new until its thread shows.
+ *
+ * @param marking - The view, the marks it is read against, and the reader.
+ *
+ * @returns Each discussion marked, once, with its moment.
+ */
+function seenMomentsOf({ view, server, readerId }: SeenMarking): SeenMoment[] {
+  // The threads the view hides, by the key of their discussion
+  const hiddenByKey = Map.groupBy(view.hidden, ({ target }) => discussionKeyOf(target))
+
+  // Each discussion shown, once, with the moment it was seen up to, a discussion showing no comment that can be new
+  // left out
+  return [...Map.groupBy(view.shown, ({ target }) => discussionKeyOf(target))].flatMap(
+    ([key, threads]) => {
+      // When the newest comment that can be new was posted, across every thread of the discussion shown
+      const newestShown = lastPostedByOthersAt(
         threads.flatMap(({ comments }) => comments),
         readerId
       )
 
-      // The discussion with its moment, where it shows such a comment
-      return seenUpTo === null ? [] : [{ target: threads[0].target, seenUpTo }]
+      // Nothing that can be new shown, nothing seen
+      if (newestShown === null) return []
+
+      // When the oldest comment new to the reader was posted across the discussion's hidden threads, if any is
+      const firstHidden = firstNewPostedAt(
+        (hiddenByKey.get(key) ?? []).flatMap(({ comments }) => comments),
+        { kind: 'seen', seenUpTo: server.get(key)?.seenUpTo ?? null },
+        readerId
+      )
+
+      // Seen up to the newest comment shown, stopping short of what is new in the hidden threads
+      const seenUpTo = firstHidden === null ? newestShown : Math.min(newestShown, firstHidden - 1)
+
+      // The discussion with its moment
+      return [{ target: threads[0].target, seenUpTo }]
     }
   )
+}
+
+/**
+ * The write telling the server some discussions were seen as a view shows them, each up to the moment
+ * {@link seenMomentsOf} reads for it.
+ *
+ * @param marking - The view, the marks it is read against, and the reader.
+ *
+ * @returns The write, the proposals' moments apart from the papers'.
+ */
+export function seenWriteOf(marking: SeenMarking): DiscussionsSeenUpTo {
+  // Each discussion marked, with its moment
+  const moments = seenMomentsOf(marking)
 
   // A function which reads the moments of the discussions of one kind, by the subject's id
   const momentsOf = (targetType: DiscussionTarget['targetType']) =>
@@ -269,6 +378,38 @@ export function seenWriteOf(
 
   // Each kind's moments
   return { proposals: momentsOf('Proposal'), papers: momentsOf('SelectionPaper') }
+}
+
+/**
+ * Whether marking some discussions seen as a view shows them, up to the moments {@link seenMomentsOf} reads, would stop
+ * any comment the view shows as new from being new. It wouldn't where every new comment shown came after a comment new
+ * in a thread of the same discussion the view hides.
+ *
+ * @param marking - The view, the marks it is read against, and the reader.
+ * @param newnessOf - How far the reader has seen a discussion, as the view tells its new comments.
+ *
+ * @returns True where some comment the view shows as new was posted by the moment its discussion would be seen up to.
+ */
+export function marksAnyShownNew(
+  marking: SeenMarking,
+  newnessOf: (target: DiscussionTarget) => CommentNewness
+): boolean {
+  // The moment each discussion would be seen up to, by its key
+  const moments = new Map(
+    seenMomentsOf(marking).map(({ target, seenUpTo }) => [discussionKeyOf(target), seenUpTo])
+  )
+
+  // Some thread shown whose oldest new comment the moment of its discussion reaches
+  return marking.view.shown.some(({ target, comments }) => {
+    // The moment the thread's discussion would be seen up to
+    const moment = moments.get(discussionKeyOf(target))
+
+    // When the thread's oldest new comment was posted
+    const firstNew = firstNewPostedAt(comments, newnessOf(target), marking.readerId)
+
+    // The discussion marked, and the thread's oldest new comment posted by the moment it is marked up to
+    return moment !== undefined && firstNew !== null && firstNew <= moment
+  })
 }
 
 /**

@@ -63,6 +63,37 @@ export function windowScroll(page: Page): Promise<number> {
 }
 
 /**
+ * Closes the open menu from the keyboard and waits until it has finished closing, which is when it hands the focus
+ * back to the button that opened it. That hand-back scrolls the page to the button, so a step taken before it can find
+ * the page moved under it.
+ *
+ * @param menuButton - The button that opened the menu.
+ */
+export async function closeMenuFromKeyboard(menuButton: Locator): Promise<void> {
+  // The menu, closed from the keyboard
+  await menuButton.page().keyboard.press('Escape')
+
+  // Closed for good once the focus is back on its button
+  await expect(menuButton).toBeFocused()
+}
+
+/**
+ * Whether any value the page's storage keeps holds a text, as a draft kept for the reader's return does.
+ *
+ * @param page - The page.
+ * @param text - The text.
+ *
+ * @returns Whether it is kept.
+ */
+export function isKeptInStorage(page: Page, text: string): Promise<boolean> {
+  // Read off every value the page's storage keeps
+  return page.evaluate(
+    (sought) => Object.values(window.localStorage).some((value) => value.includes(sought)),
+    text
+  )
+}
+
+/**
  * How far down the window could be scrolled at most, which is how much taller the page is than the window.
  *
  * @param page - The page.

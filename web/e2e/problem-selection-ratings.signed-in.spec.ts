@@ -10,7 +10,7 @@ import type { Proposal } from '@/components/features/problem-selection/model/sel
 import { locationParam } from './support/address'
 import { recordWrites, refuse } from './support/backend-routes'
 import { READER_NAME } from './support/comments'
-import { areaCopy, SELECTION_PATH } from './support/competitions'
+import { SELECTION_PATH } from './support/competitions'
 import { holdClock } from './support/emulation'
 import { selectedTab } from './support/interaction'
 import {
@@ -28,11 +28,13 @@ import {
   openPool,
   OTHER_RATER,
   READY,
+  searchBox,
   SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
   SETTLE_TIMEOUT_MS,
   stubSelection,
+  switchElementaryOn,
   UNWRITTEN,
 } from './support/problem-selection'
 import { expect, test } from './support/test'
@@ -763,7 +765,7 @@ test.describe('the ratings table', () => {
     await expect.poll(() => locationParam(page, POOL_VIEW_PARAM)).toBe('ratings')
 
     // The pool searched for the algebra problem
-    await page.getByRole('searchbox', { name: selectionCopy.pool.search }).fill(ALGEBRA.title)
+    await searchBox(page).fill(ALGEBRA.title)
 
     // The table narrowed to the algebra problem
     await expect(rowHeadings(page)).toHaveText([ALGEBRA.title])
@@ -820,20 +822,8 @@ test.describe('the ratings table', () => {
     // The geometry problem's own page
     await expect(headingOf(page, GEOMETRY)).toBeVisible()
 
-    // The menu on the problem's page
-    await actionsButton(page, GEOMETRY).click()
-
-    // The answer to the read after the write
-    const readAfterWrite = page.waitForResponse(SELECTION_ENDPOINT)
-
-    // The elementary category, switched on, which the board's elementary paper runs first
-    await page.getByRole('menuitemcheckbox', { name: areaCopy.categories.elementary }).click()
-
-    // Once the read has landed
-    await readAfterWrite
-
-    // The menu, closed from the keyboard
-    await page.keyboard.press('Escape')
+    // The elementary category, which the board's elementary paper runs first, switched on through its page's menu
+    await switchElementaryOn(page, page, GEOMETRY)
 
     // Back to the table
     await page.goBack()

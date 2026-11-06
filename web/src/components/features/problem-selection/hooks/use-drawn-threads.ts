@@ -10,6 +10,7 @@ import {
 import { convertToCommentData } from '@/components/features/comments/utils/comment-utils'
 
 import { useSelectionWorkspace } from '../components/SelectionWorkspaceProvider'
+import { discussionPartsIn } from '../model/seen-marks'
 import {
   type DiscussedSubject,
   discussionTargetOf,
@@ -34,6 +35,8 @@ export type DrawnThread = {
 type UseDrawnThreadsOptions = {
   /** The threads, in the order the list holds them; null until the first read has landed. */
   threads: readonly DiscussionThread<DiscussedSubject>[] | null
+  /** The threads the list leaves out. */
+  hidden: readonly DiscussionThread<DiscussedSubject>[]
 }
 
 /**
@@ -44,8 +47,11 @@ type UseDrawnThreadsResult = {
   drawn: DrawnThread[]
   /** How many comments of the list are new to the reader. */
   newCount: number
-  /** Marks the discussion of every thread the list shows as seen, as the list shows them. */
-  markShownSeen: () => void
+  /**
+   * Marks the discussion of every thread the list shows as seen, as the list shows them, short of what is new in the
+   * threads it leaves out; null where that would stop no comment the list shows as new from being new.
+   */
+  markShownSeen: (() => void) | null
 }
 
 /**
@@ -56,12 +62,16 @@ type UseDrawnThreadsResult = {
  *
  * @returns The drawn threads, how many comments in them are new, and the way to mark them seen.
  */
-export function useDrawnThreads({ threads }: UseDrawnThreadsOptions): UseDrawnThreadsResult {
+export function useDrawnThreads({
+  threads,
+  hidden,
+}: UseDrawnThreadsOptions): UseDrawnThreadsResult {
   // The reader
   const { userId } = useAuth()
 
-  // How far the reader has seen each discussion, and the way to mark some seen
-  const { newnessOf, markSeen } = useSelectionWorkspace().seenMarks
+  // How far the reader has seen each discussion, the way to mark some seen, and whether doing so leaves fewer
+  // comments new
+  const { newnessOf, markSeen, marksAnyNew } = useSelectionWorkspace().seenMarks
 
   // Each thread as the list draws it, with how far the reader has seen its discussion
   const drawn = (threads ?? []).map(
@@ -78,14 +88,12 @@ export function useDrawnThreads({ threads }: UseDrawnThreadsOptions): UseDrawnTh
     0
   )
 
-  // A function which marks the discussion of every thread the list shows as seen, as the list shows them
-  const markShownSeen = () =>
-    markSeen(
-      drawn.map(({ thread, comments }) => ({
-        target: discussionTargetOf(thread.subject),
-        comments,
-      }))
-    )
+  // The discussions as the list shows them, beside the threads of them it leaves out
+  const view = discussionPartsIn({ shown: threads ?? [], hidden }, userId ?? null)
+
+  // A function which marks the discussion of every thread the list shows as seen, as the list shows them, short of
+  // what is new in the threads it leaves out, where that stops some comment shown from being new
+  const markShownSeen = marksAnyNew(view) ? () => markSeen(view) : null
 
   // The drawn threads, how many comments in them are new, and the way to mark them seen
   return { drawn, newCount, markShownSeen }

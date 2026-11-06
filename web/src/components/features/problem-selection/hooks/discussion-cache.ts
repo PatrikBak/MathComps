@@ -15,8 +15,13 @@ import {
 } from '@/components/features/comments/utils/comment-utils'
 import type { ApiResult } from '@/types/api'
 
-import type { ShownDiscussion } from '../model/seen-marks'
-import type { DiscussionTarget } from '../model/selection-discussions'
+import type { DiscussionPart } from '../model/seen-marks'
+import {
+  type DiscussedSubject,
+  type Discussion,
+  type DiscussionTarget,
+  discussionTargetOf,
+} from '../model/selection-discussions'
 import type { SelectionDiscussions } from '../model/selection-types'
 
 /**
@@ -91,21 +96,29 @@ export async function readDiscussions(
 }
 
 /**
- * Parks an answer of the read in the comment threads it may go into.
+ * Parks an answer of the read in the comment threads it may go into, of those asked for.
  *
  * @param queryClient - The cache the threads are held in.
  * @param readerId - Who is reading, whose threads they are.
  * @param read - The answer, with what stood as it set off.
+ * @param targets - The threads the answer goes into where it may; null for every thread it holds.
  */
 export function parkDiscussions(
   queryClient: QueryClient,
   readerId: string | null,
-  read: DiscussionsRead
+  read: DiscussionsRead,
+  targets: readonly CommentTarget[] | null
 ): void {
-  // Each thread the answer may go into, as the answer found it
-  parkableThreads(queryClient, readerId, read).forEach(({ queryKey, comments }) =>
-    queryClient.setQueryData<CommentDto[]>(queryKey, comments)
-  )
+  // Where each thread asked for is cached; null while every thread is asked for
+  const asked =
+    targets === null
+      ? null
+      : new Set(targets.map((target) => hashKey(commentQueryKeys.target(target, readerId))))
+
+  // Each thread asked for that the answer may go into, as the answer found it
+  parkableThreads(queryClient, readerId, read)
+    .filter(({ queryKey }) => asked === null || asked.has(hashKey(queryKey)))
+    .forEach(({ queryKey, comments }) => queryClient.setQueryData<CommentDto[]>(queryKey, comments))
 }
 
 /**
@@ -183,13 +196,38 @@ export function shownDiscussionsOf(
   queryClient: QueryClient,
   readerId: string | null,
   targets: readonly DiscussionTarget[]
-): ShownDiscussion[] {
+): DiscussionPart[] {
   // Each discussion with the reader's copy of its thread
   return targets.map((target) => ({
     target,
     comments: (
       queryClient.getQueryData<CommentDto[]>(commentQueryKeys.target(target, readerId)) ?? []
     ).map((comment) => convertToCommentData(comment, readerId)),
+  }))
+}
+
+/**
+ * Each subject's discussion as the reader's copy of its thread holds it, and no comments where nothing holds the
+ * thread.
+ *
+ * @param queryClient - The cache the threads are held in.
+ * @param readerId - Who is reading, whose threads they are.
+ * @param subjects - The subjects asked about.
+ *
+ * @returns Each subject's discussion, in the subjects' order.
+ */
+export function cachedDiscussionsOf(
+  queryClient: QueryClient,
+  readerId: string | null,
+  subjects: readonly DiscussedSubject[]
+): Discussion<DiscussedSubject>[] {
+  // Each subject with the reader's copy of its thread
+  return subjects.map((subject) => ({
+    subject,
+    comments:
+      queryClient.getQueryData<CommentDto[]>(
+        commentQueryKeys.target(discussionTargetOf(subject), readerId)
+      ) ?? [],
   }))
 }
 

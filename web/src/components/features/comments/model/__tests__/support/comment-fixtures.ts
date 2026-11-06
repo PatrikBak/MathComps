@@ -1,4 +1,5 @@
 import type { CommentData } from '../../../components/CommentItem'
+import type { CommentDto } from '../../../services/comment-api-types'
 
 /**
  * A comment as the comment components draw it.
@@ -28,6 +29,35 @@ export function comment(
     reactions: [],
     viewerReaction: null,
     isDeleted: false,
+    replies,
+  }
+}
+
+/**
+ * A comment Zuzana posted on a given day of October 2026, as the server sends it.
+ *
+ * @param id - The comment's id, which is also what it says unless told otherwise.
+ * @param day - The day it was posted.
+ * @param replies - Its replies.
+ * @param content - What it says.
+ *
+ * @returns The comment, standing and unedited, with no reactions.
+ */
+export function commentDto(
+  id: string,
+  day: number,
+  replies: CommentDto[] = [],
+  content = id
+): CommentDto {
+  // The comment, as posted
+  return {
+    id,
+    author: { id: 'user_zuzana', name: 'Zuzana', avatarUrl: null },
+    content,
+    createdAt: new Date(Date.UTC(2026, 9, day)).toISOString(),
+    editedAt: null,
+    isDeleted: false,
+    reactions: [],
     replies,
   }
 }

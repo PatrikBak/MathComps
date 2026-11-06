@@ -5,7 +5,7 @@ import { defineConfig, devices } from '@playwright/test'
 /** Where a developer's own secrets sit, which is a file only their machine has. */
 const LOCAL_ENV_FILE = '.env.local'
 
-// The Clerk keys and the test account's credentials sit with the app's other local secrets, and the
+// The Clerk keys and the test account's email sit with the app's other local secrets, and the
 // backend's address with the app's shared configuration. Loading the local file first is what gives
 // it precedence, since an already-set variable is never overwritten by a later load.
 if (existsSync(LOCAL_ENV_FILE)) {
@@ -48,25 +48,24 @@ export default defineConfig({
   forbidOnly: isCi,
   // Clerk's testing token, minted once into the environment every worker is forked from.
   globalSetup: './e2e/support/global-setup.ts',
-  // A retry keeps the trace of the attempt that failed, which is the whole of what a run nobody was
-  // watching leaves behind.
-  //
-  // The browser names itself Chrome rather than HeadlessChrome, because Clerk reads the name off the
-  // User-Agent and drops the Secure attribute from the handshake cookies for the headless one. Chromium
-  // refuses a SameSite=None cookie that is not Secure, so the dev-browser cookie never lands and every
-  // navigation handshakes again. Clerk breaks that loop with a counter cookie living two seconds, which
-  // a handshake slower than that outlives, and the page then redirects until the browser gives up.
-  // Playwright's own descriptor is the version it ships, so this tracks the browser rather than pinning
-  // a version of its own.
-  //
-  // The browser names itself Chrome rather than HeadlessChrome, because Clerk reads the name off the
-  // User-Agent and drops the Secure attribute from the handshake cookies for the headless one. Chromium
-  // refuses a SameSite=None cookie that is not Secure, so the dev-browser cookie never lands and every
-  // navigation handshakes again. Clerk breaks that loop with a counter cookie living two seconds, which
-  // a handshake slower than that outlives, and the page then redirects until the browser gives up.
-  // Playwright's own descriptor is the version it ships, so this tracks the browser rather than pinning
-  // a version of its own.
-  use: { baseURL, trace: 'on-first-retry', userAgent: devices['Desktop Chrome'].userAgent },
+  // Only a failed attempt keeps its output folder, so what CI uploads holds nothing a passing test wrote
+  preserveOutput: 'failures-only',
+  use: {
+    baseURL,
+    // Every first attempt is traced, and one that fails keeps its trace even when the retry passes, so
+    // a flake leaves its evidence behind on a run nobody was watching. The retry goes untraced, since a
+    // break it repeats is already in the first attempt's trace. The trace holds the page as it stood at
+    // every step and leaves out the screencast between steps, the costliest part to record.
+    trace: { mode: 'retain-on-first-failure', screenshots: false },
+    // The browser names itself Chrome rather than HeadlessChrome, because Clerk reads the name off the
+    // User-Agent and drops the Secure attribute from the handshake cookies for the headless one. Chromium
+    // refuses a SameSite=None cookie that is not Secure, so the dev-browser cookie never lands and every
+    // navigation handshakes again. Clerk breaks that loop with a counter cookie living two seconds, which
+    // a handshake slower than that outlives, and the page then redirects until the browser gives up.
+    // Playwright's own descriptor is the version it ships, so this tracks the browser rather than pinning
+    // a version of its own.
+    userAgent: devices['Desktop Chrome'].userAgent,
+  },
   projects: [
     // Not a test: this run exists to produce a signed-in browser state.
     { name: 'session', testMatch: /.*\.setup\.ts/ },

@@ -32,6 +32,6 @@ export function useKeyedState<TValue>(
     setValue(initialValue)
   }
 
-  // The value and the way to change it
-  return [value, setValue]
+  // The value, already back at the start in the render that swapped the key, and the way to change it
+  return [keyOfValue === key ? value : initialValue, setValue]
 }

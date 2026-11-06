@@ -7,6 +7,7 @@ import { BACKEND_ORIGIN } from './support/backend-routes'
 import { stubNamedReader } from './support/comments'
 import { actionsCopy, areaCopy, editorCopy, SELECTION_PATH } from './support/competitions'
 import { returnToTab, slowDown } from './support/emulation'
+import { pickPillAnswer } from './support/facets'
 import {
   clickInPlace,
   clickTwiceAtOnce,
@@ -19,7 +20,6 @@ import {
   windowScroll,
 } from './support/interaction'
 import {
-  actionsButton,
   BILINGUAL,
   boardPanel,
   cardOf,
@@ -35,7 +35,6 @@ import {
   OPENED_ADDRESS,
   openPool,
   pickBoard,
-  pickState,
   problemCount,
   rememberedSelection,
   REVISION,
@@ -49,6 +48,7 @@ import {
   SLOVAK_ALONE_STATEMENT,
   SLOVAK_STATEMENT,
   stubSelection,
+  switchElementaryOn,
   UNWRITTEN,
   USED,
 } from './support/problem-selection'
@@ -862,20 +862,8 @@ test.describe("the pool's order", () => {
     // What the last card says, written down from here on
     const lastCards = await recordLastCard(page)
 
-    // The menu on that card
-    await actionsButton(cardOf(page, GEOMETRY), GEOMETRY).click()
-
-    // The answer to the read after the write
-    const readAfterWrite = page.waitForResponse(SELECTION_ENDPOINT)
-
-    // The elementary category, switched on, which the board's elementary paper runs first
-    await page.getByRole('menuitemcheckbox', { name: areaCopy.categories.elementary }).click()
-
-    // Once the read has landed
-    await readAfterWrite
-
-    // The menu, closed from the keyboard
-    await page.keyboard.press('Escape')
+    // The elementary category, which the board's elementary paper runs first, switched on through the card's menu
+    await switchElementaryOn(page, cardOf(page, GEOMETRY), GEOMETRY)
 
     // The card still last
     await expect(cards.last()).toContainText(GEOMETRY.title)
@@ -887,7 +875,7 @@ test.describe("the pool's order", () => {
     expect(lastCards().filter((text) => !text.includes(GEOMETRY.title))).toEqual([])
 
     // The pool narrowed to what the board doesn't hold
-    await pickState(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
+    await pickPillAnswer(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
 
     // The card among the elementary problems, after the algebra one, the elementary paper's own slot left out
     await expect(cards.nth(1)).toContainText(GEOMETRY.title)
@@ -911,20 +899,8 @@ test.describe("the pool's order", () => {
     // Not offered while the order is up to date
     await expect(resort).toHaveCount(0)
 
-    // The menu on the geometry problem's card
-    await actionsButton(cardOf(page, GEOMETRY), GEOMETRY).click()
-
-    // The answer to the read after the write
-    const readAfterWrite = page.waitForResponse(SELECTION_ENDPOINT)
-
-    // The elementary category, switched on, which the board's elementary paper runs first
-    await page.getByRole('menuitemcheckbox', { name: areaCopy.categories.elementary }).click()
-
-    // Once the read has landed
-    await readAfterWrite
-
-    // The menu, closed from the keyboard
-    await page.keyboard.press('Escape')
+    // The elementary category, which the board's elementary paper runs first, switched on through the card's menu
+    await switchElementaryOn(page, cardOf(page, GEOMETRY), GEOMETRY)
 
     // The card still last, the button offered
     await expect(cards.last()).toContainText(GEOMETRY.title)
@@ -959,20 +935,8 @@ test.describe("the pool's order", () => {
     // Its page
     await expect(headingOf(page, GEOMETRY)).toBeVisible()
 
-    // The menu on its page
-    await actionsButton(page, GEOMETRY).click()
-
-    // The answer to the read after the write
-    const readAfterWrite = page.waitForResponse(SELECTION_ENDPOINT)
-
-    // The elementary category, switched on, which the board's elementary paper runs first
-    await page.getByRole('menuitemcheckbox', { name: areaCopy.categories.elementary }).click()
-
-    // Once the read has landed
-    await readAfterWrite
-
-    // The menu, closed from the keyboard
-    await page.keyboard.press('Escape')
+    // The elementary category, which the board's elementary paper runs first, switched on through its page's menu
+    await switchElementaryOn(page, page, GEOMETRY)
 
     // Back to the pool
     await page.goBack()

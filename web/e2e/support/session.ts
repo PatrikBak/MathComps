@@ -4,7 +4,7 @@ import type { Page } from '@playwright/test'
 import messages from '../../messages/en.json'
 
 /**
- * Reads a credential a sign-in cannot proceed without.
+ * Reads a value the environment must hold for a sign-in to proceed.
  *
  * @param name - The environment variable's name.
  *
@@ -14,13 +14,14 @@ function requireEnv(name: string): string {
   // Whatever the local environment holds under that name
   const value = process.env[name]
 
-  // Left absent or blank, this surfaces much later as an opaque Clerk rejection. A bare `KEY=` line is
-  // the likelier of the two, so an empty value counts as missing rather than being handed over.
+  // Left absent or blank, the value reaches Clerk as it is, and whatever goes wrong shows up there, far
+  // from the variable behind it. A bare `KEY=` line is the likelier of the two, so an empty value counts
+  // as missing rather than being handed over.
   if (value === undefined || value.trim() === '') {
     throw new Error(`Missing ${name}. Add it to web/.env.local.`)
   }
 
-  // Hand back the credential
+  // Hand back the value
   return value
 }
 
@@ -58,8 +59,10 @@ async function waitForClerk(page: Page): Promise<void> {
  * Signs the test account in, once Clerk's client on the page is up to sign it in with.
  *
  * The account is signed in through Clerk's own API rather than the form, since Turnstile deadlocks
- * an automated browser. The session this mints belongs to the page it was minted on, which is what
- * lets a test end it without taking any other test's session down with it.
+ * an automated browser. It goes in on a one-time ticket Clerk's backend API mints with the secret key,
+ * so no password passes through the page, where the trace of a failed test would record it and CI would
+ * publish it. The session this mints belongs to the page it was minted on, which is what lets a test
+ * end it without taking any other test's session down with it.
  *
  * @param page - The page to sign in on, sitting on a page of the app so that Clerk boots.
  */
@@ -68,14 +71,7 @@ export async function signInTestUser(page: Page): Promise<void> {
   await waitForClerk(page)
 
   // The account the suite runs as
-  await clerk.signIn({
-    page,
-    signInParams: {
-      strategy: 'password',
-      identifier: requireEnv('E2E_CLERK_USER_EMAIL'),
-      password: requireEnv('E2E_CLERK_USER_PASSWORD'),
-    },
-  })
+  await clerk.signIn({ page, emailAddress: requireEnv('E2E_CLERK_USER_EMAIL') })
 }
 
 /**

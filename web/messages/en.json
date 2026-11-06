@@ -1334,7 +1334,8 @@
       "notSelected": "Not selected",
       "selected": "Selected",
       "setAside": "Set aside {count}",
-      "state": "State"
+      "state": "State",
+      "wholePaper": "Whole paper"
     },
     "finalize": {
       "confirm": "Finalize",
@@ -1377,6 +1378,7 @@
       "commentsUnavailable": "Comments unavailable",
       "empty": "No problem matches these filters.",
       "emptyComments": "No comments here yet.",
+      "emptyCommentsFiltered": "No comment matches these filters.",
       "emptyPool": "No problems here yet.",
       "emptySetAside": "Nothing is set aside.",
       "emptySetAsideFiltered": "No set-aside problem matches these filters.",

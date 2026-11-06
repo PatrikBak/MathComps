@@ -1334,7 +1334,8 @@
       "notSelected": "Nevybrané",
       "selected": "Vybrané",
       "setAside": "Odložené {count}",
-      "state": "Stav"
+      "state": "Stav",
+      "wholePaper": "K celej sade"
     },
     "finalize": {
       "confirm": "Uzavrieť",
@@ -1377,6 +1378,7 @@
       "commentsUnavailable": "Komentáre nie sú dostupné",
       "empty": "Týmto filtrom nezodpovedá žiadna úloha.",
       "emptyComments": "Zatiaľ tu nie sú žiadne komentáre.",
+      "emptyCommentsFiltered": "Týmto filtrom nezodpovedá žiadny komentár.",
       "emptyPool": "Zatiaľ tu nie sú žiadne úlohy.",
       "emptySetAside": "Nič nie je odložené.",
       "emptySetAsideFiltered": "Týmto filtrom nezodpovedá žiadna odložená úloha.",
@@ -1384,7 +1386,7 @@
       "loadingComments": "Načítavam komentáre",
       "newCount": "{count, plural, =1 {# nový} =2 {# nové} =3 {# nové} =4 {# nové} other {# nových}}",
       "resort": "Znova zoradiť",
-      "search": "Hľadať úlohy",
+      "search": "Hľadať v zásobníku",
       "searchPlaceholder": "Číslo, názov alebo text",
       "setAsideCount": "{count, plural, one {# odložená úloha} few {# odložené úlohy} other {# odložených úloh}}",
       "showWhatsNew": "Zobraziť, čo je nové",

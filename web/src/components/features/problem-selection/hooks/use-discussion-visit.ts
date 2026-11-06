@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from '@clerk/nextjs'
-import { type QueryKey, useQueryClient } from '@tanstack/react-query'
+import { type QueryClient, type QueryKey, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useEffectEvent, useId } from 'react'
 
 import {
@@ -13,17 +13,20 @@ import { useKeyedState } from '@/hooks/use-keyed-state'
 import { onceAnswerLands, oncePageShows } from '@/lib/query-config'
 
 import { useSelectionWorkspace } from '../components/SelectionWorkspaceProvider'
+import type { PoolFilter } from '../model/pool-filters'
+import { type DiscussionPart, poolDiscussionPartsOf } from '../model/seen-marks'
 import {
   discussedSubjectsOf,
   type DiscussionTarget,
   discussionTargetOf,
+  type InView,
 } from '../model/selection-discussions'
-import { discussionsQueryKey, shownDiscussionsOf } from './discussion-cache'
+import { cachedDiscussionsOf, discussionsQueryKey, shownDiscussionsOf } from './discussion-cache'
 import { useSelectionOrganization } from './selection-organization'
 import type { LoadedSelection } from './use-selection-workspace-state'
 
 /**
- * The pool's Comments tab, showing every discussion the selection holds.
+ * The pool's Comments tab, showing the threads of the selection's discussions that the pool's filters let through.
  */
 type PoolCommentsTab = {
   /** That it is the pool's. */
@@ -56,10 +59,10 @@ const IS_SHOWN: Record<TabPresence, boolean> = { closed: false, behind: false, s
 const COMMENT_WRITES = { mutationKey: commentMutationKeys.all }
 
 /**
- * What a Comments tab shows, and the read bringing it.
+ * What a Comments tab can show, and the read bringing it.
  */
 type TabRead = {
-  /** The discussions the tab shows. */
+  /** The discussions the tab can show. */
   targets: DiscussionTarget[]
   /** Where the read bringing the tab what it shows is cached. */
   queryKey: QueryKey
@@ -80,20 +83,22 @@ type UseDiscussionVisitOptions = {
  * spent hidden behind a page opened from the tab counts as part of the visit, and a tab opened hidden starts none until
  * it shows.
  *
- * As the visit starts it keeps the marks of the discussions the tab shows as they stand. It then waits for an answer of
- * the tab's own read to land: the one out as it starts, or one it sets off, however many reads that takes. Once that
- * answer has landed and the page is on screen, it tells the server the discussions were seen as the tab then shows
- * them, so that is not new on the next visit. A tab opening on what an earlier read left waits for its own, so a
- * comment that read brings counts as seen only once it shows. What arrives after stays new for the next visit too,
- * unless the reader asks for it to show.
+ * As the visit starts it keeps the marks of every discussion the tab can show as they stand, so a thread a later filter
+ * lets through still reads as it did. It then waits for an answer of the tab's own read to land: the one out as it
+ * starts, or one it sets off, however many reads that takes. Once that answer has landed and the page is on screen, it
+ * tells the server the discussions were seen as the tab then shows them, so that is not new on the next visit, and
+ * what is new in the threads the pool's filters keep out stays new. A tab opening on what an earlier read left waits
+ * for its own, so a comment that read brings counts as seen only once it shows. What arrives after stays new for the
+ * next visit too, unless the reader asks for it to show.
  *
  * @param options - The tab visited, and where it stands.
  */
 export function useDiscussionVisit({ tab, presence }: UseDiscussionVisitOptions): void {
-  // The selection once it has arrived, and the ways a visit keeps the reader's marks and tells the server what it saw,
-  // once the marks are read
+  // The selection once it has arrived, what the pool is narrowed to, and the ways a visit keeps the reader's marks and
+  // tells the server what it saw, once the marks are read
   const {
     selection,
+    poolFilters: { filter: poolFilter },
     seenMarks: { visits },
   } = useSelectionWorkspace()
 
@@ -115,7 +120,7 @@ export function useDiscussionVisit({ tab, presence }: UseDiscussionVisitOptions)
   // The reader, nobody until sign-in has settled or while nobody is signed in
   const readerId = isSignInLoaded ? (userId ?? null) : null
 
-  // A function which reads what the tab shows, and where the read bringing it is cached
+  // A function which reads what the tab can show, and where the read bringing it is cached
   const tabRead = useEffectEvent(() => tabReadOf(tab, selection, organization, readerId))
 
   // The cache the tab's discussions are held in
@@ -124,7 +129,7 @@ export function useDiscussionVisit({ tab, presence }: UseDiscussionVisitOptions)
   // A function which tells the server the discussions the tab shows were seen as it shows them, which is as the
   // reader's copies of their threads hold them
   const see = useEffectEvent(() =>
-    visits?.tellSeen(shownDiscussionsOf(queryClient, readerId, tabRead().targets))
+    visits?.tellSeen(tabViewOf(tab, selection, poolFilter, queryClient, readerId))
   )
 
   // The visit, from its start with the marks read until the tab closes
@@ -162,7 +167,7 @@ export function useDiscussionVisit({ tab, presence }: UseDiscussionVisitOptions)
 }
 
 /**
- * What a Comments tab shows, and the read bringing it: every discussion the selection holds and the read of them all
+ * What a Comments tab can show, and the read bringing it: every discussion the selection holds and the read of them all
  * for the pool's tab, one discussion and its thread's read for a problem's or a paper's.
  *
  * @param tab - The tab.
@@ -187,6 +192,51 @@ function tabReadOf(
       }
     case 'subject':
       return { targets: [tab.target], queryKey: commentQueryKeys.target(tab.target, readerId) }
+
+    // Every kind is handled above
+    default:
+      return assertNever(tab)
+  }
+}
+
+/**
+ * What a Comments tab shows the reader of its discussions, as the reader's copies of their threads hold them: the
+ * threads the pool's filters let through and those they keep out for the pool's tab, the whole discussion for a
+ * problem's or a paper's.
+ *
+ * @param tab - The tab.
+ * @param selection - The selection, null until it has arrived.
+ * @param poolFilter - What the pool is narrowed to.
+ * @param queryClient - The cache the threads are held in.
+ * @param readerId - Who is reading; null until sign-in has settled, and while nobody is signed in.
+ *
+ * @returns The discussions the tab shows, and the threads of them it hides.
+ */
+function tabViewOf(
+  tab: CommentsTab,
+  selection: LoadedSelection | null,
+  poolFilter: PoolFilter,
+  queryClient: QueryClient,
+  readerId: string | null
+): InView<DiscussionPart> {
+  // By whose tab it is
+  switch (tab.kind) {
+    // Nothing before the selection has arrived, else the threads the pool's filters let through and those they keep
+    // out, laid out afresh
+    case 'pool':
+      return selection === null
+        ? { shown: [], hidden: [] }
+        : poolDiscussionPartsOf(
+            cachedDiscussionsOf(queryClient, readerId, discussedSubjectsOf(selection)),
+            poolFilter,
+            selection.activeBoard,
+            selection.categories,
+            readerId
+          )
+
+    // The whole discussion, the tab hiding none of it
+    case 'subject':
+      return { shown: shownDiscussionsOf(queryClient, readerId, [tab.target]), hidden: [] }
 
     // Every kind is handled above
     default:

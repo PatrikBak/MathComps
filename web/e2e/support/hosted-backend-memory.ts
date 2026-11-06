@@ -77,6 +77,8 @@ export type FakeState = {
   handoutSession: DefenseSessionListItem | null
   /** How many ids have been minted, so nothing collides with anything minted before it. */
   minted: number
+  /** How many turns into a conversation already open have reached the backend. */
+  turnsReceived: number
 }
 
 /**

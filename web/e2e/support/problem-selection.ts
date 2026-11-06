@@ -23,9 +23,10 @@ import messages from '../../messages/en.json'
 import { gateReads } from './answer-gate'
 import { answerJson, BACKEND_ORIGIN, refuse } from './backend-routes'
 import { threadKey } from './comments'
-import { SELECTION_PATH } from './competitions'
+import { areaCopy, SELECTION_PATH } from './competitions'
 import { installConversationBackend } from './conversation-backend'
 import type { HostedBackend } from './hosted-backend'
+import { closeMenuFromKeyboard } from './interaction'
 import {
   type AnswerSelectionRead,
   type SeenMemory,
@@ -1250,6 +1251,38 @@ export function actionsButton(scope: Locator | Page, proposal: Proposal): Locato
 }
 
 /**
+ * Switches the elementary category on for a problem through its menu, waits for the read the write sets off, and
+ * closes the menu again.
+ *
+ * @param page - The page.
+ * @param scope - Where the problem's menu stands: its card in the pool, or the problem's own page.
+ * @param proposal - The problem.
+ */
+export async function switchElementaryOn(
+  page: Page,
+  scope: Locator | Page,
+  proposal: Proposal
+): Promise<void> {
+  // The button opening the problem's menu
+  const menuButton = actionsButton(scope, proposal)
+
+  // The menu, opened
+  await menuButton.click()
+
+  // The answer to the read after the write
+  const readAfterWrite = page.waitForResponse(SELECTION_ENDPOINT)
+
+  // The elementary category, switched on
+  await page.getByRole('menuitemcheckbox', { name: areaCopy.categories.elementary }).click()
+
+  // Once the read has landed
+  await readAfterWrite
+
+  // And the menu closed again
+  await closeMenuFromKeyboard(menuButton)
+}
+
+/**
  * The row on a problem's card opening one tab of the problem's page, named after the tab and how much it holds.
  *
  * @param card - The card.
@@ -1287,6 +1320,18 @@ export function headingOf(page: Page, proposal: Proposal) {
   return page
     .getByRole('heading', { level: 2, name: proposal.title })
     .and(page.locator(`[${DETAIL_HEADING_ATTRIBUTE.name}="${proposal.id}"]`))
+}
+
+/**
+ * The pool's search box.
+ *
+ * @param page - The page.
+ *
+ * @returns The box.
+ */
+export function searchBox(page: Page): Locator {
+  // The only search box named so
+  return page.getByRole('searchbox', { name: selectionCopy.pool.search })
 }
 
 /**
@@ -1380,25 +1425,6 @@ export async function pickBoard(page: Page, from: Board, to: Board): Promise<voi
 }
 
 /**
- * Narrows the pool to the problems the board on screen holds, or to those it doesn't, through the State pill, and
- * closes it again.
- *
- * @param page - The page.
- * @param from - What the pill reads now: its own name, or the option picked.
- * @param to - The option to pick.
- */
-export async function pickState(page: Page, from: string, to: string): Promise<void> {
-  // The State pill, opened
-  await page.getByRole('button', { name: from, exact: true }).click()
-
-  // The option, picked whatever count it carries
-  await page.getByRole('radio', { name: new RegExp(`^${to} \\(`) }).check()
-
-  // The pill, closed again
-  await page.keyboard.press('Escape')
-}
-
-/**
  * The line naming the rounds a finalized board went into, and the day they open.
  *
  * @param page - The page.
@@ -1418,6 +1444,27 @@ export function statusLine(page: Page, board: Board): Locator {
   return boardPanel(page).getByText(
     selectionText('board.status', { cycle: board.finalization!.cycleName, date })
   )
+}
+
+/**
+ * Lets time run on until the page reads the selection again on its own. The page holds that read back while one of
+ * its own writes is out, such as marking an opened conversation read, and starts the wait over once the write lands.
+ * So the clock keeps jumping until a read goes out.
+ *
+ * @param page - The page.
+ */
+export async function untilSelectionReadAgain(page: Page): Promise<void> {
+  // Jumped forward until a read goes out
+  await expect(async () => {
+    // The next read's answer
+    const answered = page.waitForResponse(SELECTION_ENDPOINT, { timeout: LANDING_WINDOW_MS })
+
+    // Long enough for the selection to be read again
+    await page.clock.fastForward('00:31')
+
+    // Once it has landed
+    await answered
+  }).toPass({ timeout: SETTLE_TIMEOUT_MS })
 }
 
 /**

@@ -14,6 +14,7 @@ import { RichMathEditorFooter } from './RichMathEditorFooter'
 import { RichMathEditorFrame } from './RichMathEditorFrame'
 import { RichMathEditorPane } from './RichMathEditorPane'
 import { RichMathEditorPreview } from './RichMathEditorPreview'
+import { type NumberReferenceRenderer } from './RichMathEditorRenderer'
 
 /**
  * Props for the {@link RichMathEditorExpandedModal} component.
@@ -31,6 +32,8 @@ type RichMathEditorExpandedModalProps = {
   toolbarConfig: ToolbarConfig | undefined
   /** Placeholder text shown when the editor is empty */
   placeholder: string
+  /** What a `#N` in the preview is drawn as */
+  renderNumberReference: NumberReferenceRenderer | undefined
   /** Callback that stops the in-flight submit */
   onStop: (() => void) | undefined
   /** Whether a submit is in flight */
@@ -50,6 +53,7 @@ export function RichMathEditorExpandedModal({
   uploads,
   toolbarConfig,
   placeholder,
+  renderNumberReference,
   onStop,
   isLoading,
   footerMeta,
@@ -93,6 +97,7 @@ export function RichMathEditorExpandedModal({
                 autoFocus
                 onKeyDown={expanded.handleKeyDown}
                 canPreview={isMobile}
+                renderNumberReference={renderNumberReference}
                 onExpand={null}
                 // The text under a rule where the preview stands beside it, level with the preview's own
                 textClassName={cn(
@@ -114,6 +119,7 @@ export function RichMathEditorExpandedModal({
                 {/* What the text renders as */}
                 <RichMathEditorPreview
                   content={text.state.text}
+                  renderNumberReference={renderNumberReference}
                   className="mt-1 min-h-[200px] flex-1 overflow-y-auto border-t border-foreground/10"
                 />
               </div>

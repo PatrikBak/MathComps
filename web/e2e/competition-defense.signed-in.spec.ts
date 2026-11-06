@@ -364,8 +364,8 @@ test.describe('the conversation inside a competition', () => {
     // its reply coming back
     await page.clock.install()
 
-    // An entry with a minute and a half left on it
-    await installHostedBackend(page, 'expiring')
+    // The backend, holding an entry with a minute and a half left on it
+    const backend = await installHostedBackend(page, 'expiring')
 
     // Open its area
     await page.goto(areaPath(COMPETITION_SLUG))
@@ -384,6 +384,9 @@ test.describe('the conversation inside a competition', () => {
 
     // Written and sent
     await sendTurn(page, turn)
+
+    // Held until the backend has the turn: a clock walked forward before it arrives stamps it after the buzzer
+    await expect.poll(backend.turnsReceived, { timeout: SETTLE_TIMEOUT_MS }).toBe(1)
 
     // And the buzzer going while the examiner is still writing
     await page.clock.fastForward('05:00')

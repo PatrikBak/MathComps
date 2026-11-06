@@ -249,6 +249,7 @@ export function CommentSection({
                 placeholder={newCommentPlaceholder ?? tComments('writePlaceholder')}
                 autoFocus={autoFocus}
                 isLoading={isCreatingRootComment}
+                renderNumberReference={renderNumberReference}
               />
             )}
           </div>
