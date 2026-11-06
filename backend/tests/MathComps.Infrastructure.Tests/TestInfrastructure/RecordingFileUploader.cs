@@ -14,6 +14,9 @@ public sealed class RecordingFileUploader : IFileUploader
     public ImmutableList<(string LocalPath, string Key)> Uploads { get; private set; } = [];
 
     /// <inheritdoc/>
+    public string StoreName { get; init; } = "recording";
+
+    /// <inheritdoc/>
     public Task UploadAsync(string localFilePath, string key)
     {
         // Record the call.

@@ -14,7 +14,7 @@ The tools these run live under [`backend/src/MathComps.Cli.*`](../README.md#cli-
 
 2. Edit `.env` with your actual values. `SSH_HOST` should be a host alias from `~/.ssh/config` (which supplies the user, hostname and key), so no key path is needed here.
 
-3. Optionally, create `.env.prod` / `.env.staging` only to override a secret that differs between environments (e.g. a different DB password for staging):
+3. Create `.env.prod` for the R2 publish keys, the `CloudflareR2__*` lines listed in `.env.prod.example`. `.env.prod` / `.env.staging` also override any other secret that differs between environments (e.g. a different DB password for staging):
 
    ```bash
    cp .env.prod.example .env.prod
@@ -43,6 +43,8 @@ The tools these run live under [`backend/src/MathComps.Cli.*`](../README.md#cli-
 ./invoke-tool.sh -e staging bulk-import 'data/problems/skmo-*' --dry-run  # a whole batch
 ./invoke-tool.sh -e prod bulk-import ./my-draft                           # the real import
 ```
+
+On prod, `bulk-import` gets `--publish`, so its figures go to prod's R2 bucket with the keys in `.env.prod`.
 
 Relative paths (like `./my-draft`) resolve against your current directory, not the tool's project directory.
 
@@ -76,3 +78,4 @@ The scripts load environment variables in this order (later files override earli
 - **`open-db-tunnel.sh`** – Opens an SSH tunnel to the database and holds it open.
 - **`invoke-tool.sh`** – Runs a CLI tool against the tunneled database (auto-manages its own tunnel).
 - **`lib-env.sh`**, **`lib-tunnel.sh`** – Shared helpers the scripts source: `lib-env.sh` loads the environment, `lib-tunnel.sh` opens the tunnel or reuses an open one.
+- **`publish-handouts.sh`** – Publishes the handouts to prod's R2 bucket once their PR has merged. It refuses unless the checkout is at `origin/main` with nothing uncommitted.

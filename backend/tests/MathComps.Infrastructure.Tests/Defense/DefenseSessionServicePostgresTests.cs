@@ -22,8 +22,9 @@ namespace MathComps.Infrastructure.Tests.Defense;
 /// (no live LLM): the conversation flow (start, continue, list, delete), that what the student has said about a
 /// conversation comes back with it, that each turn writes an independent spend row that outlives the session, that a
 /// turn records every draft it went through and drops them when the turn is rewound past, ownership isolation, the
-/// guardrails (message length, the student's message cap, per-user spend ceiling), and that a turn the client
-/// cancels still records the cost its calls billed so aborting can't dodge the ceiling.
+/// guardrails (message length, the student's message cap, per-user spend ceiling), that a turn the client cancels
+/// still records the cost its calls billed so aborting can't dodge the ceiling, and that a turn the client aborts once
+/// the examiner has answered is saved whole.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture)
@@ -2086,6 +2087,82 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     }
 
     /// <summary>
+    /// A start the client aborts just as the examiner answers still saves the conversation, what it defends, and the
+    /// turn's spend row.
+    /// </summary>
+    [Fact]
+    public Task Start_aborted_as_the_examiner_answers_still_saves_the_turn()
+    {
+        // The suite's own examiner, with the client aborting the moment its answer is in.
+        _examiner = new AbortingAfterReplyExaminer(_examiner, () => _abort?.Cancel());
+
+        // Start the turn and assert everything it wrote landed.
+        return RunTestAsync(async service =>
+        {
+            // A token the examiner cancels as it answers, as a client closing the tab would.
+            _abort = new CancellationTokenSource();
+
+            // Starting runs the examiner, which answers and then sees the abort.
+            await service.StartAsync(_ownerId, Request("prob-1", "my defense"), _abort.Token);
+
+            // The token fired before the writes, so they ran past a real abort.
+            Assert.True(_abort.IsCancellationRequested);
+
+            // The conversation, its target, and its spend row were all written.
+            await QueryAsync(async context =>
+            {
+                // The opener, the student's message, and the examiner's reply.
+                Assert.Equal(3, await context.DefenseTurns.CountAsync());
+
+                // The row saying what the session defends.
+                Assert.Equal(1, await context.HandoutEnvironmentDefenses.CountAsync());
+
+                // The turn's one spend row, at what the examiner charged.
+                var spend = Assert.Single(
+                    await context.DefenseSpends.Where(row => row.UserId == _ownerId).ToListAsync());
+                Assert.Equal(TurnCost, spend.Cost);
+            });
+        });
+    }
+
+    /// <summary>
+    /// A continue the client aborts just as the examiner answers still saves the student's message, the reply, and
+    /// the turn's spend row.
+    /// </summary>
+    [Fact]
+    public Task Continue_aborted_as_the_examiner_answers_still_saves_the_turn()
+    {
+        // The suite's own examiner, with the client aborting the moment its answer is in.
+        _examiner = new AbortingAfterReplyExaminer(_examiner, () => _abort?.Cancel());
+
+        // Start a session, continue it, and assert the continued turn landed.
+        return RunTestAsync(async service =>
+        {
+            // Open a session while there is no token for the examiner to cancel.
+            var started = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+            // A token the examiner cancels as it answers the next message.
+            _abort = new CancellationTokenSource();
+
+            // Continuing runs the examiner, which answers and then sees the abort.
+            await service.ContinueAsync(_ownerId, started.Id, "my next point", _abort.Token);
+
+            // The token fired before the write, so it ran past a real abort.
+            Assert.True(_abort.IsCancellationRequested);
+
+            // Both new turns and their spend row were written.
+            await QueryAsync(async context =>
+            {
+                // The start's three turns, then the student's message and the reply to it.
+                Assert.Equal(5, await context.DefenseTurns.CountAsync());
+
+                // One spend row for the start and one for the continue.
+                Assert.Equal(2, await context.DefenseSpends.CountAsync(row => row.UserId == _ownerId));
+            });
+        });
+    }
+
+    /// <summary>
     /// An examiner that runs up the standard cancel cost, cancels the request mid-turn, then throws the
     /// cancellation — the shape a client abort takes once its calls have run.
     /// </summary>
@@ -2422,6 +2499,35 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
             // Then fail before returning a reply, as a cancelled or erroring turn would.
             throw failure();
+        }
+
+        /// <inheritdoc/>
+        public Task<ExaminerAttempt> CheckReplyAsync(
+            ExaminerInput input, string reply, ModelUsageAccumulator checkUsage, CancellationToken cancellationToken) =>
+            // The session service only ever asks for a turn, so judging a lone reply is never reached
+            throw new NotSupportedException();
+    }
+
+    /// <summary>
+    /// An examiner that answers in full and then sees the client abort before the answer is handed back, standing in
+    /// for a tab closed between the examiner's answer and the turn's save.
+    /// </summary>
+    /// <param name="inner">The examiner whose answer is handed back.</param>
+    /// <param name="abort">Cancels the request token once the answer is in.</param>
+    private sealed class AbortingAfterReplyExaminer(IExaminer inner, Action abort) : IExaminer
+    {
+        /// <inheritdoc/>
+        public async Task<ExaminerTurnOutcome> NextReplyAsync(
+            ExaminerInput input, ModelUsageAccumulator turnUsage, CancellationToken cancellationToken)
+        {
+            // The full answer, its cost included.
+            var outcome = await inner.NextReplyAsync(input, turnUsage, cancellationToken);
+
+            // The client aborts the moment the answer is in.
+            abort();
+
+            // The answer goes back all the same, as it does from an engine whose last call has finished.
+            return outcome;
         }
 
         /// <inheritdoc/>

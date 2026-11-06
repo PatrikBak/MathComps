@@ -210,6 +210,7 @@ needs these settings. Everything else works without them.
 # From the API directory
 cd backend/src/MathComps.Api
 
+# The dev bucket's keys. Prod's live in scripts/.env.prod (see scripts/README.md)
 dotnet user-secrets set "CloudflareR2:AccountId" "..."
 dotnet user-secrets set "CloudflareR2:BucketName" "..."
 dotnet user-secrets set "CloudflareR2:AccessKeyId" "..."
@@ -457,7 +458,7 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
 
 #### Error tracking
 
-`Sentry.AspNetCore` ships every `LogError` to Better Stack, which is the route an unhandled exception takes out of [GlobalExceptionHandler](src/MathComps.Api/Extensions/GlobalExceptionHandler.cs). That handler logs each business failure at the level its exception states, so only the ones a bug causes go out. [Program.cs](src/MathComps.Api/Program.cs) drops the SDK middleware's second capture of each. An error names a signed-in caller by Clerk id alone, the id the website's events carry too, and a signed-out one by the SDK's own per-container id. `SENTRY_DSN` in `.env` turns it on, and an empty one leaves the SDK disabled.
+`Sentry.AspNetCore` ships every `LogError` to Better Stack, which is the route an unhandled exception takes out of [GlobalExceptionHandler](src/MathComps.Api/Extensions/GlobalExceptionHandler.cs). That handler logs each business failure at the level its exception states, so only the ones a bug causes go out. [Program.cs](src/MathComps.Api/Program.cs) drops the SDK middleware's second capture of each. An error names a signed-in caller by Clerk id alone, the id the website's events carry too, and a signed-out one by the SDK's own per-container id. It carries the request body too, when that is under 10,000 bytes. `SENTRY_DSN` in `.env` turns it on, and an empty one leaves the SDK disabled.
 
 #### Logging
 

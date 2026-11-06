@@ -112,7 +112,14 @@ set +e
 case "$tool_command" in
     embeddings)   run_tool "MathComps.Cli.Embeddings" ;;
     sync-users)   run_tool "MathComps.Cli.UserSync" ;;
-    bulk-import)  run_tool "MathComps.Cli.BulkImport" ;;
+    bulk-import)
+        # Prod's database takes its figures in prod's bucket, whose keys load_env loaded above.
+        if [ "$environment" = "prod" ]; then
+            rest+=(--publish)
+        fi
+
+        # Run the import.
+        run_tool "MathComps.Cli.BulkImport" ;;
     competitions) run_tool "MathComps.Cli.Competitions" ;;
     *) echo "Unknown command: $tool_command" >&2; usage; exit 1 ;;
 esac

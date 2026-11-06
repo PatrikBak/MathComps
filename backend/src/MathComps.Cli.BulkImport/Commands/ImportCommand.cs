@@ -5,7 +5,9 @@ using MathComps.Cli.BulkImport.Preflight;
 using MathComps.Cli.BulkImport.Validation;
 using MathComps.Infrastructure.Services.BulkImport;
 using MathComps.Infrastructure.Services.Localization;
+using MathComps.Infrastructure.Storage;
 using Microsoft.Extensions.Logging;
+using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace MathComps.Cli.BulkImport.Commands;
@@ -43,6 +45,21 @@ public class ImportCommand(
         [CommandOption("--dry-run")]
         [Description("Run every check and report what the import would do. Keeps nothing.")]
         public bool DryRun { get; set; }
+
+        /// <summary>
+        /// Whether the figures go to prod's bucket rather than the dev one.
+        /// </summary>
+        [CommandOption("--publish")]
+        [Description("Upload the figures to prod's bucket. Needs the prod R2 keys, which the prod scripts load.")]
+        public bool Publish { get; set; }
+
+        /// <inheritdoc/>
+        /// <remarks>Refuses a run whose R2 keys disagree with <see cref="Publish"/>.</remarks>
+        public override ValidationResult Validate() =>
+            // Stop before any folder is read when the keys would send the figures to the other bucket.
+            PublishKeys.Mismatch(Publish) is { } mismatch
+                ? ValidationResult.Error(mismatch)
+                : ValidationResult.Success();
     }
 
     /// <inheritdoc/>

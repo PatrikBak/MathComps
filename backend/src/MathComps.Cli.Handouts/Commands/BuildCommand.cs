@@ -4,6 +4,7 @@ using MathComps.TexParser.Images;
 using MathComps.TexParser.TexCleaner;
 using MathComps.TexParser.Types;
 using Microsoft.Extensions.Logging;
+using Spectre.Console;
 using Spectre.Console.Cli;
 using System.Collections.Immutable;
 using System.ComponentModel;
@@ -65,6 +66,13 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader, ILogger<Bu
         public bool SkipUpload { get; set; }
 
         /// <summary>
+        /// Whether the uploads go to prod's bucket rather than the dev one.
+        /// </summary>
+        [CommandOption("--publish")]
+        [Description("Upload to prod's bucket. Needs the prod R2 keys, which publish-handouts.sh loads")]
+        public bool Publish { get; set; }
+
+        /// <summary>
         /// Whether to skip the Asymptote staleness check and recompilation. Useful when the author is confident the
         /// images are up to date and wants to skip the per-handout dependency scan, or in CI, which has no Asymptote
         /// installed.
@@ -98,6 +106,14 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader, ILogger<Bu
         [Description("Path to error log file for compiler failures")]
         [DefaultValue("errors.log")]
         public required string ErrorLog { get; set; }
+
+        /// <inheritdoc/>
+        /// <remarks>Refuses a run whose R2 keys disagree with <see cref="Publish"/>.</remarks>
+        public override ValidationResult Validate() =>
+            // Stop before anything is built when the keys would send the uploads to the other bucket
+            PublishKeys.Mismatch(Publish) is { } mismatch
+                ? ValidationResult.Error(mismatch)
+                : ValidationResult.Success();
     }
 
     /// <summary>

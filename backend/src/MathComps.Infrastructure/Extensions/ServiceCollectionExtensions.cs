@@ -312,20 +312,20 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Wraps the registered <see cref="IFileUploader"/> in the deduping <see cref="TrackedFileUploader"/> and exposes
-    /// that one instance as <see cref="ITrackedFileUploader"/>. The tracker keeps a ledger at
-    /// <paramref name="ledgerPath"/> so a re-run skips assets whose bytes are already on R2. Call after
+    /// that one instance as <see cref="ITrackedFileUploader"/>. The tracker keeps its ledgers in
+    /// <paramref name="ledgerDirectory"/> so a re-run skips assets whose bytes are already on R2. Call after
     /// <see cref="AddStorage"/>, which registers the uploader being decorated.
     /// </summary>
     /// <param name="services">The service collection to add the tracking uploader to.</param>
-    /// <param name="ledgerPath">
-    /// Path of the upload ledger, kept across runs beside the tool's sources (gitignored).</param>
+    /// <param name="ledgerDirectory">
+    /// The directory of the upload ledgers, kept across runs beside the tool's sources (gitignored).</param>
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddTrackedFileUploader(
-        this IServiceCollection services, string ledgerPath)
+        this IServiceCollection services, string ledgerDirectory)
     {
-        // Where the dedupe ledger lives
+        // Where the dedupe ledgers live
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(
-            new UploadLedgerOptions { LedgerPath = ledgerPath }));
+            new UploadLedgerOptions { LedgerDirectory = ledgerDirectory }));
 
         // Decorate wraps the registered uploader in the tracker
         services.Decorate<IFileUploader, TrackedFileUploader>();

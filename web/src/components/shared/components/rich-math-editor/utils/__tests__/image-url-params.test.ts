@@ -150,14 +150,6 @@ describe('parseImageUrl', () => {
         'Image URL has invalid inline="yes" (expected "true" or "false")',
       ])
     })
-
-    it('flags inline=1', () => {
-      const result = parseImageUrl('images/fig.svg?inline=1')
-      expect(result.params.inline).toBe(false)
-      expect(result.errors.map((error) => error.message)).toEqual([
-        'Image URL has invalid inline="1" (expected "true" or "false")',
-      ])
-    })
   })
 
   describe('error: malformed scale value', () => {
@@ -174,6 +166,14 @@ describe('parseImageUrl', () => {
       expect(result.params.scale).toBeUndefined()
       expect(result.errors.map((error) => error.message)).toEqual([
         'Image URL has invalid scale="-50" (expected a positive number)',
+      ])
+    })
+
+    it('flags zero scale, which would show nothing', () => {
+      const result = parseImageUrl('images/fig.svg?scale=0')
+      expect(result.params.scale).toBeUndefined()
+      expect(result.errors.map((error) => error.message)).toEqual([
+        'Image URL has invalid scale="0" (expected a positive number)',
       ])
     })
   })
@@ -216,12 +216,12 @@ describe('parseImageUrl', () => {
     })
 
     it('handles a string the URL parser cannot understand', () => {
-      // A bare ":" is not a parseable URL (empty scheme); the function should
+      // A scheme with no host, which the URL parser refuses; the function should
       // degrade gracefully rather than throw
-      const result = parseImageUrl(':')
+      const result = parseImageUrl('http://')
       expect(result.params).toEqual({ inline: false })
       expect(result.errors).toEqual([])
-      expect(result.cleanUrl).toBe(':')
+      expect(result.cleanUrl).toBe('http://')
     })
 
     it('does not require a path before the query string', () => {

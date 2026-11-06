@@ -45,7 +45,7 @@ describe('resolveUserUploadMediaUrl', () => {
       )
     })
 
-    // The editor appends `?scale=100` to image uploads; downstream consumers
+    // The editor appends a `?scale=` to image uploads; downstream consumers
     // read it off the resolved URL, so the resolver must not strip it
     it('preserves a trailing query string', () => {
       expect(resolveUserUploadMediaUrl('media:user-id-1/images/photo.png?scale=100')).toBe(
@@ -90,7 +90,7 @@ describe('resolveMarkdownImageUrl', () => {
     })
   })
 
-  describe('"comments" context — delegates to resolveUserUploadMediaUrl', () => {
+  describe('"userUploads" context — delegates to resolveUserUploadMediaUrl', () => {
     // Parity assertion against the lower-level helper keeps the delegation
     // contract explicit; resolveUserUploadMediaUrl's own tests cover the
     // concrete URL shape so we don't duplicate the string here

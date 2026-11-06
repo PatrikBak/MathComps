@@ -6,6 +6,11 @@ namespace MathComps.Infrastructure.Storage;
 public interface IFileUploader
 {
     /// <summary>
+    /// The name of the remote store the files go to, such as a bucket.
+    /// </summary>
+    string StoreName { get; }
+
+    /// <summary>
     /// Uploads a local file to remote storage at the specified key.
     /// </summary>
     /// <param name="localFilePath">Absolute path to the local file to upload.</param>

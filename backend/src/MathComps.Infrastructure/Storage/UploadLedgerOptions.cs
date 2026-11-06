@@ -6,7 +6,8 @@ namespace MathComps.Infrastructure.Storage;
 public class UploadLedgerOptions
 {
     /// <summary>
-    /// Path to the JSON ledger that records, per storage key, the hash of the bytes last pushed under it.
+    /// The directory of the JSON ledgers, one per remote store, each recording per storage key the hash of the bytes
+    /// last pushed under it.
     /// </summary>
-    public required string LedgerPath { get; init; }
+    public required string LedgerDirectory { get; init; }
 }
