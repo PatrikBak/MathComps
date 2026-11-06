@@ -1,29 +1,30 @@
-using Spectre.Console;
+using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 
 namespace MathComps.Shared.Cli.Commands;
 
 /// <summary>
-/// Provides a unified entry point for running Spectre.Console.Cli applications
-/// with consistent exception handling across all CLI tools.
+/// The entry point every CLI tool runs its <see cref="ICommandApp"/> through, logging an unhandled exception as an
+/// error.
 /// </summary>
 public static class CliRunner
 {
     /// <summary>
-    /// Runs the CLI application with <c>PropagateExceptions</c>
-    /// enabled and a top-level catch that formats unhandled exceptions via
-    /// <see cref="AnsiConsole.WriteException(Exception, ExceptionFormats)"/>.
+    /// Runs the CLI application with <see cref="ConfiguratorExtensions.PropagateExceptions(IConfigurator)"/> enabled
+    /// and a top-level catch that logs an unhandled exception, stack trace included, as an error.
     /// </summary>
     /// <param name="app">The Spectre.Console command app to run.</param>
-    /// <param name="args">Command-line arguments forwarded from <c>Program.cs</c>.</param>
+    /// <param name="args">The tool's command-line arguments.</param>
+    /// <param name="logger">The logger an unhandled exception is reported through.</param>
     /// <param name="configure">
     /// Optional configuration callback for registering commands and other settings.
-    /// <c>PropagateExceptions</c> is always appended automatically.
+    /// <see cref="ConfiguratorExtensions.PropagateExceptions(IConfigurator)"/> is always appended automatically.
     /// </param>
-    /// <returns>The process exit code: 0 on success, 1 on unhandled exception.</returns>
+    /// <returns>The process exit code: the command's own, or 1 on an unhandled exception.</returns>
     public static async Task<int> RunAsync(
         ICommandApp app,
         string[] args,
+        ILogger logger,
         Action<IConfigurator>? configure = null)
     {
         // Merge caller-provided configuration with the mandatory PropagateExceptions setting
@@ -32,7 +33,7 @@ public static class CliRunner
             // Apply any caller-provided command registrations or settings
             configure?.Invoke(config);
 
-            // Ensure exceptions bubble up so we can format them cleanly below
+            // Ensure exceptions bubble up so we can report them below
             config.PropagateExceptions();
         });
 
@@ -43,8 +44,8 @@ public static class CliRunner
         }
         catch (Exception exception)
         {
-            // Format the exception with shortened paths for readability
-            AnsiConsole.WriteException(exception, ExceptionFormats.ShortenEverything);
+            // Log the exception with its stack trace
+            logger.LogError(exception, "The tool stopped on an unhandled exception");
 
             // Signal failure to the calling process
             return 1;

@@ -4,7 +4,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Defense.Engine;
-using Spectre.Console;
+using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 
 namespace MathComps.Cli.Examiner.Commands;
@@ -14,12 +14,13 @@ namespace MathComps.Cli.Examiner.Commands;
 /// verdict and what the checks cost. The fixture is left as it is.
 /// </summary>
 /// <param name="examiner">The engine whose guards judge the reply.</param>
+/// <param name="logger">The logger the report and refusals go through.</param>
 [Description("""
     Judge the last examiner reply in a fixture folder's transcript.md with every check, generating nothing. The
     transcript must end on a '## Candidate' turn followed by a non-empty '## Examiner' turn: that last turn is the
     reply judged, and the turns before it are the conversation it answers. The fixture is left unchanged.
 """)]
-public class ExaminerCheckCommand(IExaminer examiner)
+public class ExaminerCheckCommand(IExaminer examiner, ILogger<ExaminerCheckCommand> logger)
     : AsyncCommand<ExaminerCheckCommand.Settings>
 {
     /// <summary>
@@ -44,11 +45,14 @@ public class ExaminerCheckCommand(IExaminer examiner)
         // Bail early when the folder isn't there.
         if (!Directory.Exists(folder))
         {
-            AnsiConsole.MarkupLineInterpolated($"[red]Fixture folder not found:[/] {folder}");
+            // Name the missing folder.
+            logger.LogError("Fixture folder not found: {Folder}", folder);
+
+            // Nothing was judged.
             return 1;
         }
 
-        // Load the fixture — problem, reference, transcript.
+        // Load the fixture: problem, reference, transcript.
         var fixture = await Fixture.LoadAsync(folder);
 
         // The reply judged closes the transcript and answers the candidate turn before it, so anything else has
@@ -57,8 +61,11 @@ public class ExaminerCheckCommand(IExaminer examiner)
                 [.., { Role: TranscriptRole.Candidate }, { Role: TranscriptRole.Examiner, Text: var reply }]
             || string.IsNullOrWhiteSpace(reply))
         {
-            AnsiConsole.MarkupLine(
-                "[red]The transcript must end on a '## Candidate' turn and then the '## Examiner' reply to judge.[/]");
+            // Say what shape the transcript needs.
+            logger.LogError(
+                "The transcript must end on a '## Candidate' turn and then the '## Examiner' reply to judge.");
+
+            // Nothing was judged.
             return 1;
         }
 
@@ -72,26 +79,26 @@ public class ExaminerCheckCommand(IExaminer examiner)
         var attempt = await examiner.CheckReplyAsync(beforeReply, reply, usage);
 
         // Header for the checks' calls.
-        AnsiConsole.MarkupLine("[bold]Checks[/]");
+        logger.LogInformation("Checks");
 
         // What each check's call cost and how long it took.
-        AttemptReport.RenderCalls(attempt);
+        AttemptReport.RenderCalls(logger, attempt);
 
         // Header for the reply.
-        AnsiConsole.MarkupLine("\n[bold]Examiner reply[/]");
+        logger.LogInformation("Examiner reply");
 
-        // The reply itself — printed plainly since it's arbitrary model text, not markup.
-        AnsiConsole.WriteLine(attempt.Reply);
+        // The reply itself, its lines kept whole in one entry.
+        logger.LogInformation("{Reply}", attempt.Reply);
 
         // Every guard's verdict on the reply.
-        AttemptReport.RenderVerdicts(attempt);
+        AttemptReport.RenderVerdicts(logger, attempt);
 
         // How long the checks took.
-        AnsiConsole.MarkupLineInterpolated(
-            $"[grey]Checks took {TimeSpan.FromMilliseconds(attempt.DurationMs).TotalSeconds:0.0}s.[/]");
+        logger.LogInformation("Checks took {Seconds:0.0}s.",
+            TimeSpan.FromMilliseconds(attempt.DurationMs).TotalSeconds);
 
         // Price the checks from their own tally; one credit is one US dollar.
-        AnsiConsole.MarkupLine($"[green]These checks cost ${usage.Accrued.Cost:0.0000}.[/]");
+        logger.LogInformation("These checks cost ${Cost:0.0000}.", usage.Accrued.Cost);
 
         // Done.
         return 0;

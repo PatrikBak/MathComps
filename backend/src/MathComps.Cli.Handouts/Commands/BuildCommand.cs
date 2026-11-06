@@ -3,6 +3,7 @@ using MathComps.TexParser;
 using MathComps.TexParser.Images;
 using MathComps.TexParser.TexCleaner;
 using MathComps.TexParser.Types;
+using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.Collections.Immutable;
@@ -18,16 +19,18 @@ using MathComps.Shared.Cli;
 namespace MathComps.Cli.Handouts.Commands;
 
 /// <summary>
-/// The main orchestration command for the handout pipeline.
-/// Generates skeletons, compiles TeX to PDF, parses TeX to JSON,
-/// and uploads images, linked documents, and PDFs to Cloudflare R2.
+/// The main orchestration command for the handout pipeline. It recompiles stale Asymptote figures, generates
+/// skeletons, compiles TeX to PDF, parses TeX to JSON, regenerates the artefacts derived from that JSON, and
+/// uploads what the site serves to Cloudflare R2.
 /// </summary>
 /// <param name="publicUploader">A lazily-resolved deduping uploader for pushing assets to the public bucket,
-/// skipping ones unchanged since their last run.</param>
+/// skipping ones unchanged since their last upload.</param>
 /// <param name="privateStore">A lazily-resolved private store for the examiner's problem content, which only the API
 /// reads.</param>
-[Description("Builds handouts: generates skeletons, compiles TeX, parses JSON, and copies assets.")]
-public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPrivateObjectStore> privateStore)
+/// <param name="logger">The logger the build's progress and failures go through.</param>
+[Description("Builds handouts: generates skeletons, compiles TeX, parses it to JSON, and uploads assets.")]
+public class BuildCommand(
+    Lazy<ITrackedFileUploader> publicUploader, Lazy<IPrivateObjectStore> privateStore, ILogger<BuildCommand> logger)
     : AsyncCommand<BuildCommand.Settings>
 {
     /// <summary>
@@ -46,7 +49,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         /// The TeX compiler command to use for compiling .tex files into PDFs.
         /// </summary>
         [CommandOption("--compiler")]
-        [Description("TeX compiler command with flags (default: pdfcsplain -interaction=nonstopmode -halt-on-error)")]
+        [Description("TeX compiler command with flags")]
         [DefaultValue("pdfcsplain -interaction=nonstopmode -halt-on-error")]
         public required string Compiler { get; set; }
 
@@ -55,7 +58,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         /// when you only want to re-parse existing files without recompiling.
         /// </summary>
         [CommandOption("--skip-compile")]
-        [Description("Skip TeX compilation, only parse and copy existing PDFs")]
+        [Description("Skip TeX compilation and skeleton generation, only parse")]
         public bool SkipCompile { get; set; }
 
         /// <summary>
@@ -63,7 +66,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         /// development when you only need the JSON output without R2 credentials.
         /// </summary>
         [CommandOption("--skip-upload")]
-        [Description("Skip uploading PDFs, images, and linked documents to R2")]
+        [Description("Skip uploading PDFs, images, linked documents and defense content to R2")]
         public bool SkipUpload { get; set; }
 
         /// <summary>
@@ -74,31 +77,27 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         public bool Publish { get; set; }
 
         /// <summary>
-        /// Whether to skip the Asymptote staleness check and recompilation.
-        /// Useful when the author is confident images are up to date and wants
-        /// to shave the per-handout dependency scan / or in CI where no Asymptote
+        /// Whether to skip the Asymptote staleness check and recompilation. Useful when the author is confident the
+        /// images are up to date and wants to skip the per-handout dependency scan, or in CI, which has no Asymptote
+        /// installed.
         /// </summary>
         [CommandOption("--skip-asy")]
         [Description("Skip Asymptote staleness check and recompilation")]
         public bool SkipAsy { get; set; }
 
         /// <summary>
-        /// Whether to unconditionally recompile every Asymptote-backed image, bypassing
-        /// the staleness check. Use after a change to <c>_common.asy</c> that alters
-        /// rendering of existing figures (e.g. palette tweak, modified helper function) —
-        /// such edits are intentionally NOT tracked by the dep graph since most
-        /// <c>_common.asy</c> edits are additive and harmless.
+        /// Whether to recompile every Asymptote-backed image, bypassing the staleness check. It's for a change to
+        /// <c>_common.asy</c> that alters existing figures (a palette tweak, a modified helper), which the staleness
+        /// check never sees (see <see cref="GlobalAsyDepFileName"/>).
         /// </summary>
         [CommandOption("--force-asy")]
         [Description("Recompile every Asymptote-backed image regardless of staleness")]
         public bool ForceAsy { get; set; }
 
         /// <summary>
-        /// Whether to skip regenerating the artefacts derived from the content JSONs: the committed
-        /// environment-id index and the examiner's defense-content blobs. Both are built by the frontend's own
-        /// generator scripts, so this is really "skip the steps needing <c>web/</c>'s dependencies" — which is
-        /// what CI wants, that job never installing them. The frontend job's <c>handouts:validate</c> check
-        /// covers both artefacts independently.
+        /// Whether to skip regenerating the artefacts derived from the content JSONs: the committed environment-id
+        /// index and the examiner's defense-content blobs. The frontend's own generator scripts build them, so this
+        /// skips every step that needs <c>web/</c>'s dependencies installed.
         /// </summary>
         [CommandOption("--skip-derived")]
         [Description("Skip regenerating handout-env-index.json and the defense content (needs web/ dependencies)")]
@@ -108,7 +107,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         /// Path to the error log file for compiler output on failure.
         /// </summary>
         [CommandOption("--error-log")]
-        [Description("Path to error log file for compiler failures (default: errors.log)")]
+        [Description("Path to error log file for compiler failures")]
         [DefaultValue("errors.log")]
         public required string ErrorLog { get; set; }
 
@@ -143,13 +142,11 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
     private const string DocumentsR2Prefix = "documents";
 
     /// <summary>
-    /// File name of the global Asymptote helper module imported by every figure.
-    /// Deliberately excluded from the dep graph used by staleness checks: edits to
-    /// <c>_common.asy</c> are almost always additive helpers that cannot affect
-    /// existing figures, so cascading invalidation across all ~30 figures every time
-    /// a helper is added is pure waste. When a change to <c>_common.asy</c> DOES
-    /// alter rendering of existing figures (palette tweak, modified function), the
-    /// author opts in via <c>--force-asy</c> to recompile everything.
+    /// File name of the global Asymptote helper module imported by every figure. It stays out of the dependency graph
+    /// the staleness check walks: an edit to <c>_common.asy</c> almost always adds a helper that cannot affect existing
+    /// figures, so invalidating every figure each time one is added is pure waste. When a change DOES alter existing
+    /// figures (a palette tweak, a modified function), the author opts in with <see cref="Settings.ForceAsy"/> to
+    /// recompile everything.
     /// </summary>
     private const string GlobalAsyDepFileName = "_common.asy";
 
@@ -201,24 +198,29 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
             ? settings.ErrorLog
             : Path.Combine(inputDirectory.FullName, settings.ErrorLog);
 
-        // The public bucket's uploader, unless uploads are skipped. Resolving it loads the upload ledger, so a skipped
-        // run touches neither R2 config nor the ledger file.
+        // The public bucket's uploader...We don't need it if we're skipping uploads
         ITrackedFileUploader? uploader = null;
 
         // The store the defense content goes to, resolved with the uploader so missing R2 config fails the run
         // before any TeX compiles
         IPrivateObjectStore? defenseContentStore = null;
 
-        // Resolve both unless uploads are skipped
+        // Resolve both only for an uploading run, since resolving loads the upload ledger and reads the R2 config
         if (!settings.SkipUpload)
         {
+            // Build the uploader, loading its ledger
             uploader = publicUploader.Value;
+
+            // Build the store
             defenseContentStore = privateStore.Value;
-            AnsiConsole.MarkupLine("[green]✓ R2 uploader initialized[/]");
+
+            // Say they're ready
+            logger.LogInformation("R2 storage initialized");
         }
         else
         {
-            AnsiConsole.MarkupLine("[yellow]⚠ Uploads skipped (--skip-upload)[/]");
+            // Say so, since nothing this run builds goes up to R2
+            logger.LogWarning("Uploads skipped (--skip-upload)");
         }
 
         // Collect all files matching any of the provided patterns, excluding skeleton files.
@@ -228,37 +230,39 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
                 .Where(file => !file.Name.Contains("-skeleton"))
         ];
 
-        // Check if any files were found.
+        // Nothing matched the patterns.
         if (inputFiles.Count == 0)
         {
-            AnsiConsole.MarkupLine("[yellow]Warning:[/] No files found matching pattern(s) in the input directory.");
+            // Warn about it.
+            logger.LogWarning("No files found matching pattern(s) in the input directory.");
+
+            // An empty run is no failure.
             return 0;
         }
 
-        // Display what we're processing.
-        AnsiConsole.MarkupLine($"[aqua]Found {inputFiles.Count} handout file(s)[/]");
-        AnsiConsole.WriteLine();
+        // Log how many handouts the run builds.
+        logger.LogInformation("Found {Count} handout file(s)", inputFiles.Count);
 
         // The TeX cleaning rules, per language, read the first time a handout in that language comes up.
         var rulesByLocale = new Dictionary<string, TeXCleanerRules>();
 
-        // Track unknown commands across all files for a final report.
+        // The unknown commands each file turned up, keyed by file name.
         var allUnknownCommands = new Dictionary<string, IReadOnlyCollection<string>>();
 
-        // Track which files failed for the final report.
+        // The files that failed to build.
         var failedFiles = new List<string>();
 
-        // .asy filenames already recompiled by an earlier handout in this run — language
-        // variants of the same handout reference the same figures, so without this every
-        // variant would re-run the same asy compile pipeline.
+        // The .asy filenames an earlier handout in this run already recompiled. Language variants of one handout
+        // reference the same figures, so without this every variant would re-run the same asy compile pipeline.
         var asyAlreadyRecompiled = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         // Process each discovered handout file.
         foreach (var inputFile in inputFiles)
         {
-            // Log file
-            AnsiConsole.MarkupLine($"[aqua]━━━ {Markup.Escape(inputFile.Name)} ━━━[/]");
+            // Head the file's log lines with its name
+            logger.LogInformation("━━━ {File} ━━━", inputFile.Name);
 
+            // Build the file, and on a failure log it and carry on with the next one
             try
             {
                 // Read the entire content of the .tex file into a string.
@@ -267,25 +271,26 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
                 // The language this handout is written in, which decides how its captions are cleaned.
                 var locale = ToHandoutLocale(inputFile.Name);
 
-                // Its rules, loaded once per language and reused by every handout written in it.
+                // The language's cleaning rules, loaded once per language and reused by every handout in it.
                 if (!rulesByLocale.TryGetValue(locale, out var rules))
                     rulesByLocale[locale] = rules = TeXCleanerRules.LoadRules(locale);
 
                 // Parse the TeX content into the structured Document object model.
                 var (document, unknownCommands) = TexStringParser.ParseDocument(texContent, rules);
 
-                // Ensure every .asy-backed image is fresh on disk before anything downstream
-                // reads the compiled PDF or SVG. --force-asy bypasses the staleness check and
-                // recompiles every figure unconditionally.
+                // Make every .asy-backed image fresh on disk before anything downstream reads its compiled PDF or SVG
                 if (!settings.SkipAsy)
-                    await EnsureAsyImagesFreshAsync(document, imagesDirectory, settings.ForceAsy, asyAlreadyRecompiled);
+                    await EnsureAsyImagesFreshAsync(
+                        document, imagesDirectory, settings.ForceAsy, asyAlreadyRecompiled);
+
+                // A run skipping it says so, since the figures on disk may then be stale
                 else
-                    AnsiConsole.MarkupLine("  [yellow]⚠ Asy compile skipped (--skip-asy)[/]");
+                    logger.LogWarning("  Asy compile skipped (--skip-asy)");
 
                 // Prepare the skeleton file info, should we generate it
                 FileInfo? skeletonFile = null;
 
-                // If we're actuallly compiling
+                // If we're actually compiling
                 if (!settings.SkipCompile)
                 {
                     // Generate the skeleton .tex
@@ -304,15 +309,17 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
                         skeletonFile, inputDirectory, settings.Compiler, errorLogPath, sourceEdited);
                 }
 
-                // Process images and prepare uploads (images + linked documents share this queue)
+                // The upload queue the handout's images and linked documents share
                 var pendingUploads = new List<PendingUpload>();
 
                 // Process images in the document content and collect their metadata
-                var imageResult = ProcessHandoutImages(document, inputFile.Name, settings.SkipUpload ? null : pendingUploads);
+                var imageResult = ProcessHandoutImages(
+                    document, inputFile.Name, settings.SkipUpload ? null : pendingUploads);
 
                 // Queue any handout-referenced documents (\Link[file.pdf]{...}) for upload alongside images
                 if (!settings.SkipUpload)
-                    CollectDocumentUploads(document, inputDirectory, handoutSlug: ToHandoutSlug(inputFile.Name), pendingUploads);
+                    CollectDocumentUploads(
+                        document, inputDirectory, handoutSlug: ToHandoutSlug(inputFile.Name), pendingUploads);
 
                 // Serialize the handout data (document + images) to an indented JSON string
                 var jsonString = new
@@ -322,7 +329,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
                 }
                 .ToJson();
 
-                // Normalize line endings to LF (Unix-style) for Git compatibility
+                // Normalize line endings to LF (Unix-style) and end with a newline, for Git compatibility
                 var normalizedContent = jsonString.Replace("\r\n", "\n") + "\n";
 
                 // Generate the output filename by replacing .tex extension with .json.
@@ -333,7 +340,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
                 File.WriteAllText(outputFilePath, normalizedContent);
 
                 // Report success
-                AnsiConsole.MarkupLine($"  [green]✓ Parsed:[/] {Markup.Escape(outputFileName)}");
+                logger.LogInformation("  Parsed: {File}", outputFileName);
 
                 // If unknown commands were found, add them to our report dictionary.
                 if (!unknownCommands.IsEmpty)
@@ -342,23 +349,30 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
                 // Upload the queued assets (handout images + linked documents) and the PDFs to R2 (unless skipped)
                 if (uploader is not null)
                 {
+                    // How many of the file's queued assets actually went up
+                    var uploadedThisFile = 0;
+
                     // Push each queued asset, letting the tracker skip ones whose bytes are already on R2
                     // (unchanged since their last push, or covered by a sibling language variant this run).
-                    var uploadedThisFile = 0;
                     foreach (var upload in pendingUploads)
                     {
-                        // Upload only if changed; log the ones that actually went out (images and linked documents).
+                        // Upload it only if its bytes changed
                         if (await uploader.UploadIfChangedAsync(upload.SourcePath, upload.R2Key))
                         {
+                            // Count it as sent
                             uploadedThisFile++;
-                            AnsiConsole.MarkupLine($"  [green]✓ Uploaded:[/] {Markup.Escape(Path.GetFileName(upload.SourcePath))}");
+
+                            // Name it in the log
+                            logger.LogInformation("  Uploaded: {File}", Path.GetFileName(upload.SourcePath));
                         }
                     }
 
-                    // Summary line so the publish run shows that unchanged assets were intentionally skipped.
+                    // The queued assets the tracker left alone as unchanged
                     var skippedUploadCount = pendingUploads.Count - uploadedThisFile;
+
+                    // Say how many, so the publish run shows unchanged assets were skipped on purpose
                     if (skippedUploadCount > 0)
-                        AnsiConsole.MarkupLine($"  [dim]· {skippedUploadCount} asset(s) unchanged, skipped upload[/]");
+                        logger.LogInformation("  {Count} asset(s) unchanged, skipped upload", skippedUploadCount);
 
                     // PDFs only when we actually compiled them; otherwise the on-disk copies are
                     // from an earlier run and we'd risk publishing binaries that don't match the source.
@@ -374,17 +388,17 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
             }
             catch (Exception exception)
             {
-                // Log the failure and continue to the next file
+                // Note the file as failed
                 failedFiles.Add(inputFile.Name);
-                AnsiConsole.WriteException(exception, ExceptionFormats.ShortenEverything);
-            }
 
-            AnsiConsole.WriteLine();
+                // Log why it failed
+                logger.LogError(exception, "{File} failed", inputFile.Name);
+            }
         }
 
         // All handout files processed. The upload ledger persists itself when the uploader is disposed at exit.
 
-        // Whether either generator below failed, which the run's exit code answers for
+        // Whether regenerating any derived artefact failed, which the run's exit code answers for
         var derivedRegenerationFailed = false;
 
         // Rebuild what the content JSONs derive: the environment-id index the site ships, and the defense-content
@@ -392,50 +406,38 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         // cheap and a scoped update would leave some other handout's numbers or problem text stale.
         if (!settings.SkipDerived)
         {
-            // The index the site labels a saved conversation from
+            // Rebuild the environment-id index
             derivedRegenerationFailed =
                 !await RegenerateDerivedArtefactAsync("handouts:index", "handout-env-index.json");
 
-            // Separate the two artefact sections in the output
-            AnsiConsole.WriteLine();
-
-            // The blobs, worth rebuilding even after the index failed, since neither generator reads the other
+            // Rebuild the defense-content blobs, even after the index failed, since their generator never reads it
             var defenseContentRegenerated =
                 await RegenerateDerivedArtefactAsync("handouts:defense-content", "defense content");
+
+            // Count a failed rebuild against the run
             derivedRegenerationFailed |= !defenseContentRegenerated;
 
-            // Push them once rebuilt, so the examiner sees an edited problem without a backend deploy. A failed
+            // Push the blobs once rebuilt, so the examiner sees an edited problem without a backend deploy. A failed
             // rebuild leaves an earlier run's blobs on disk, which may come from another branch
             if (defenseContentStore is not null && defenseContentRegenerated)
                 await UploadDefenseContentAsync(defenseContentStore);
         }
         else
         {
-            // Say so, since a skipped rebuild leaves both artefacts describing whatever the last full run wrote
-            AnsiConsole.MarkupLine("[yellow]⚠ Derived artefact regeneration skipped (--skip-derived)[/]");
+            // Say so, since a skipped rebuild leaves every derived artefact describing whatever the last full run wrote
+            logger.LogWarning("Derived artefact regeneration skipped (--skip-derived)");
         }
 
         // Report unknown commands if any were found.
         if (allUnknownCommands.Count != 0)
         {
-            // Create a table to display the unknown commands in a tidy report.
-            var table = new Table()
-                .Title("Commands NOT covered by 'leave' rules", new Style(Color.Grey))
-                .Border(TableBorder.Rounded)
-                .AddColumn(new TableColumn("[yellow]Source File[/]").Centered())
-                .AddColumn(new TableColumn("[red]Unknown Command[/]").Centered());
-
-            // Add each unknown command to the table.
+            // One line per unknown command, naming the file it turned up in.
             foreach (var (fileName, commands) in allUnknownCommands)
                 foreach (var command in commands)
-                    table.AddRow(fileName, @$"\{command}");
-
-            // Render the table to the console.
-            AnsiConsole.WriteLine();
-            AnsiConsole.Write(table);
+                    logger.LogError("{File}: \\{Command} is not covered by a 'leave' rule", fileName, command);
 
             // Suggest next steps to the user.
-            AnsiConsole.MarkupLine("\n[red]Please review the above unknown commands.[/]");
+            logger.LogError("Please review the above unknown commands.");
         }
 
         // Determine if there were any failures
@@ -443,7 +445,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
 
         // Final success message if no errors or unknown commands were found.
         if (!hasErrors)
-            AnsiConsole.MarkupLine("[bold green]\nAll files built successfully.[/]");
+            logger.LogInformation("All files built successfully.");
 
         // Return the exit code indicating if there were any errors.
         return hasErrors ? 1 : 0;
@@ -451,21 +453,24 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
 
     /// <summary>
     /// Generates a skeleton .tex file from a handout source file.
-    /// Skeletons contain only statement blocks (exercises, problems, examples) with solutions removed.
+    /// Skeletons contain only statement blocks (exercises, problems, examples), stripped of solutions, hints and
+    /// answers.
     /// </summary>
     /// <param name="inputFile">The source .tex file.</param>
     /// <param name="outputDirectory">The directory to write the skeleton file to.</param>
     /// <param name="rules">The <see cref="TeXCleanerRules"/> for normalizing TeX content.</param>
     /// <param name="locale">The two-letter code of the language the source is written in.</param>
     /// <returns>The generated skeleton file.</returns>
-    private static FileInfo GenerateSkeleton(
+    private FileInfo GenerateSkeleton(
         FileInfo inputFile,
         DirectoryInfo outputDirectory,
         TeXCleanerRules rules,
         string locale)
     {
-        // Read and parse the source TeX
+        // Read the source TeX
         var texContent = File.ReadAllText(inputFile.FullName);
+
+        // Parse the source into its document model
         var (document, _) = TexStringParser.ParseDocument(texContent, rules);
 
         // Extract preamble lines that need to be preserved.
@@ -473,7 +478,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         var authorLine = texContent.ExtractMatch(@"\\Author\{[^}]+\}");
         var mathcompsLinkLine = texContent.ExtractMatch(@"\\MathcompsLink\{[^}]+\}");
 
-        // Flatten all sections and filter to keep only exercises, examples, and problems.
+        // Every exercise, example and problem across the sections, stripped of its solution, hints and answer.
         var allStatements = document.Sections
             .SelectMany(section => section.Text.Content)
             .Where(block => block is Exercise or Problem or Example)
@@ -486,7 +491,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
             })
             .ToImmutableList();
 
-        // Build the complete skeleton TeX.
+        // The skeleton's TeX, built up below.
         var builder = new StringBuilder();
 
         // Preamble: \input _template
@@ -535,13 +540,15 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         // Postamble: \bye
         builder.AppendLine(@"\bye");
 
-        // Write the skeleton file
+        // The skeleton's name and its path beside the source
         var skeletonName = Path.GetFileNameWithoutExtension(inputFile.Name) + "-skeleton.tex";
         var skeletonPath = Path.Combine(outputDirectory.FullName, skeletonName);
+
+        // Write the skeleton file
         File.WriteAllText(skeletonPath, builder.ToString());
 
         // Success message
-        AnsiConsole.MarkupLine($"  [green]✓ Skeleton:[/] {Markup.Escape(skeletonName)} ({allStatements.Count} statements)");
+        logger.LogInformation("  Skeleton: {File} ({Count} statements)", skeletonName, allStatements.Count);
 
         // Return the generated skeleton file
         return new FileInfo(skeletonPath);
@@ -562,7 +569,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
     /// upload ledger recognises it: pdfTeX otherwise writes the current time into <c>/CreationDate</c>,
     /// <c>/ModDate</c> and the file <c>/ID</c> on every compile, and every handout PDF goes back up to R2. TeX's own
     /// <c>\year</c> and <c>\today</c> still read the real clock.</remarks>
-    private static async Task CompileTexFileAsync(
+    private async Task CompileTexFileAsync(
         FileInfo texFile,
         DirectoryInfo workingDirectory,
         string compiler,
@@ -579,7 +586,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         for (var pass = 1; pass <= 2; pass++)
         {
             // Status message
-            AnsiConsole.MarkupLine($"  [dim]Compiling {Markup.Escape(texFile.Name)} (pass {pass}/2)...[/]");
+            logger.LogInformation("  Compiling {File} (pass {Pass}/2)...", texFile.Name, pass);
 
             // Split the configured compiler string into executable + flags (whitespace-separated, no quoted args)
             var compilerParts = compiler.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -591,7 +598,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
             // the publish form (where hints and solutions are not below statements but at the end)
             string[] arguments = [.. compilerParts.Skip(1), $@"\def\PUBLISH{{}}\input {texFile.Name}"];
 
-            // Run the compiler; ProcessRunner drains stdout/stderr and reports the exit code
+            // Run the compiler, capturing its output and exit code
             var result = await ProcessRunner.RunAsync(
                 compilerExecutable, arguments, workingDirectory.FullName, sourceDateEnvironment);
 
@@ -599,58 +606,64 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
             if (result.ExitCode != 0)
             {
                 // Append the full compiler output to the error log for debugging
-                File.AppendAllText(errorLog, $"=== {texFile.Name} (pass {pass}) ===\n{result.Stdout}\n{result.Stderr}\n");
+                File.AppendAllText(
+                    errorLog, $"=== {texFile.Name} (pass {pass}) ===\n{result.Stdout}\n{result.Stderr}\n");
 
                 // Throw with context about which file and pass failed
                 throw new InvalidOperationException(
-                    $"Compilation of '{texFile.Name}' failed on pass {pass} (exit code {result.ExitCode}). See errors.log for details.");
+                    $"Compilation of '{texFile.Name}' failed on pass {pass} (exit code {result.ExitCode}). "
+                    + "See errors.log for details.");
             }
         }
 
         // Success message
-        AnsiConsole.MarkupLine($"  [green]✓ Compiled:[/] {Markup.Escape(Path.ChangeExtension(texFile.Name, ".pdf"))}");
+        logger.LogInformation("  Compiled: {File}", Path.ChangeExtension(texFile.Name, ".pdf"));
     }
 
     /// <summary>
     /// Regenerates one of the artefacts derived from the handout content JSONs by running the frontend's own
-    /// generator script. Shelling out (rather than reimplementing the walk in C#) keeps each derived value defined in
-    /// exactly one place: the environment's display number in <c>listDocumentEnvironments</c> and the examiner's view
-    /// of a problem in <c>toDefenseContent</c>, both the same TypeScript the page itself uses, so neither artefact can
-    /// drift from what the page shows.
+    /// generator script. Shelling out (rather than reimplementing the walk in C#) keeps each derived value defined
+    /// once, in the same TypeScript the page itself uses, so an artefact can't drift from what the page shows.
     /// </summary>
     /// <param name="npmScript">The npm script that regenerates the artefact.</param>
     /// <param name="artefactName">What the artefact is called in the run's output.</param>
     /// <returns>True when the artefact was regenerated; false when the script failed, in which case its output has
-    /// already been printed.</returns>
-    private static async Task<bool> RegenerateDerivedArtefactAsync(string npmScript, string artefactName)
+    /// already been logged.</returns>
+    private async Task<bool> RegenerateDerivedArtefactAsync(string npmScript, string artefactName)
     {
         // Status message
-        AnsiConsole.MarkupLine($"[aqua]━━━ {Markup.Escape(artefactName)} ━━━[/]");
+        logger.LogInformation("━━━ {Artefact} ━━━", artefactName);
 
         // Run the frontend's generator from its own project directory
         var webDirectory = RepoPaths.Resolve("web");
         var result = await ProcessRunner.RunAsync("npm", ["run", npmScript], webDirectory);
 
-        // A non-zero exit means the generator itself failed; surface its output for debugging
+        // A non-zero exit means the generator itself failed
         if (result.ExitCode != 0)
         {
-            AnsiConsole.MarkupLine($"[red]✗ Failed to regenerate {Markup.Escape(artefactName)} (exit {result.ExitCode}).[/]");
-            AnsiConsole.WriteLine($"{result.Stdout}\n{result.Stderr}");
+            // Say which artefact failed
+            logger.LogError("Failed to regenerate {Artefact} (exit {ExitCode}).", artefactName, result.ExitCode);
+
+            // Log the generator's output for debugging
+            logger.LogError("{Stdout}\n{Stderr}", result.Stdout, result.Stderr);
+
+            // The artefact stays stale
             return false;
         }
 
         // Success message
-        AnsiConsole.MarkupLine($"[green]✓ Regenerated {Markup.Escape(artefactName)}[/]");
+        logger.LogInformation("Regenerated {Artefact}", artefactName);
+
+        // The artefact is fresh
         return true;
     }
 
     /// <summary>
-    /// Pushes the generated defense-content blobs to the private store, where the API reads a problem's statement and
-    /// reference from rather than taking a caller's word for them. Every blob goes up in one pass after the run's
-    /// handouts are parsed, since a blob is built from the whole site's content rather than from one .tex.
+    /// Pushes the generated defense-content blobs to the private store. They go up in one pass after the run's
+    /// handouts are parsed, since the generator writes the blobs of the whole site rather than of one .tex.
     /// </summary>
     /// <param name="store">The store the blobs go to.</param>
-    private static async Task UploadDefenseContentAsync(IPrivateObjectStore store)
+    private async Task UploadDefenseContentAsync(IPrivateObjectStore store)
     {
         // The generator's output directory, gitignored build output like the compiled PDFs beside it
         var defenseDirectory = new DirectoryInfo(RepoPaths.Resolve("data/handouts/defense"));
@@ -659,7 +672,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         if (!defenseDirectory.Exists)
         {
             // Say why nothing went out, so a silent step doesn't read as a successful push
-            AnsiConsole.MarkupLine("  [yellow]⚠ No defense content generated, nothing to upload[/]");
+            logger.LogWarning("  No defense content generated, nothing to upload");
 
             // There is nothing to push
             return;
@@ -686,18 +699,21 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         }
 
         // Report how many went up
-        AnsiConsole.MarkupLine($"  [green]✓ {blobs.Count} defense blob(s) uploaded[/]");
+        logger.LogInformation("  {Uploaded} defense blob(s) uploaded", blobs.Count);
     }
 
     /// <summary>
-    /// Uploads a compiled handout PDF (main or skeleton) to remote storage under
-    /// the flat <c>handouts/pdfs/</c> folder shared by every handout.
+    /// Uploads a compiled handout PDF (main or skeleton) to remote storage, under the key
+    /// <see cref="HandoutStorage.PdfKey"/> gives it.
     /// </summary>
     /// <param name="texFile">The .tex file whose corresponding PDF should be uploaded.</param>
     /// <param name="sourceDirectory">The directory containing the compiled PDFs.</param>
-    /// <param name="fileUploader">The file uploader instance.</param>
+    /// <param name="fileUploader">The uploader the PDF goes through.</param>
     /// <returns>A task representing the asynchronous upload operation.</returns>
-    private static async Task UploadHandoutPdfAsync(FileInfo texFile, DirectoryInfo sourceDirectory, IFileUploader fileUploader)
+    private async Task UploadHandoutPdfAsync(
+        FileInfo texFile,
+        DirectoryInfo sourceDirectory,
+        IFileUploader fileUploader)
     {
         // Determine the PDF filename from the TeX filename
         var pdfFileName = Path.ChangeExtension(texFile.Name, ".pdf");
@@ -706,29 +722,36 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         // Check if the compiled PDF exists
         if (!File.Exists(sourcePdfPath))
         {
-            AnsiConsole.MarkupLine($"  [yellow]⚠ PDF not found:[/] {Markup.Escape(pdfFileName)}");
+            // Warn about it
+            logger.LogWarning("  PDF not found: {File}", pdfFileName);
+
+            // Skip the upload
             return;
         }
 
-        // All handout PDFs share the flat handouts/pdfs/ folder
+        // The PDF's storage key
         var r2Key = HandoutStorage.PdfKey(pdfFileName);
 
-        // Do the upload
+        // Hand the PDF to the uploader
         await fileUploader.UploadAsync(sourcePdfPath, r2Key);
 
         // Log success
-        AnsiConsole.MarkupLine($"  [green]✓ PDF uploaded:[/] {Markup.Escape(pdfFileName)}");
+        logger.LogInformation("  PDF uploaded: {File}", pdfFileName);
     }
 
     /// <summary>
     /// Processes images in a handout document by walking through all sections and their content.
-    /// Discovered images are queued for async upload after processing completes.
+    /// Each discovered image joins the upload queue, which goes up once the handout is processed.
     /// </summary>
     /// <param name="document">The parsed <see cref="Document"/>.</param>
     /// <param name="sourceFileName">The source .tex file name (e.g., "factorization.cs.tex").</param>
-    /// <param name="pendingUploads">List to collect image uploads for async execution. Null when uploads are skipped.</param>
-    /// <returns>An <see cref="HandoutImageResult"/> containing the processed document and discovered images.</returns>
-    private static HandoutImageResult ProcessHandoutImages(Document document, string sourceFileName, List<PendingUpload>? pendingUploads)
+    /// <param name="pendingUploads">The upload queue the handout's images join, or null when the run skips
+    /// uploads.</param>
+    /// <returns>A <see cref="HandoutImageResult"/> containing the processed document and discovered images.</returns>
+    private HandoutImageResult ProcessHandoutImages(
+        Document document,
+        string sourceFileName,
+        List<PendingUpload>? pendingUploads)
     {
         // Language-stripped handout slug shared by every language variant of this handout.
         var handoutSlug = ToHandoutSlug(sourceFileName);
@@ -736,21 +759,19 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         // Source directory for handout images
         var handoutsDirectory = RepoPaths.Resolve("data/handouts/Images");
 
-        // In .tex sources images are referenced as "<name>.pdf" because pdfcsplain embeds
-        // PDFs. The web frontend wants SVGs, which sit alongside the PDFs on disk
-        // This swaps the extension so callers can read it as "the SVG counterpart of <pdfId>".
+        // A function naming an image's SVG. The .tex sources reference images as "<name>.pdf", since pdfcsplain
+        // embeds PDFs, and the web wants the SVG that sits beside each PDF on disk.
         static string ToSvgName(string pdfImageId) => $"{pdfImageId.RemoveEnd(".pdf")}.svg";
 
         // Configure the image processor for this handout
         var config = new ImageProcessingConfig(
             ImageSourceResolver: imageId => Path.Combine(handoutsDirectory, ToSvgName(imageId)),
             OutputFileName: (imageId, _) => $"{handoutSlug}/{ToSvgName(imageId)}",
+            // Queue the image for upload, when the run uploads
             PersistImage: (sourcePath, contentId) =>
-            {
-                // Queue the image upload for async execution after processing completes
-                pendingUploads?.Add(new PendingUpload(sourcePath, HandoutStorage.AssetKey(contentId)));
-            },
-            OnMissingImage: imageId => AnsiConsole.MarkupLine($"[yellow]Warning:[/] Handout [yellow]{handoutSlug}[/] has a missing image: {imageId}")
+                pendingUploads?.Add(new PendingUpload(sourcePath, HandoutStorage.AssetKey(contentId))),
+            OnMissingImage: imageId =>
+                logger.LogWarning("Handout {Handout} has a missing image: {ImageId}", handoutSlug, imageId)
         );
 
         // Collect all discovered images from all sections
@@ -759,8 +780,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         // Start with initial state for shared counter and deduplication
         var state = ImageProcessingState.Initial;
 
-        // Process each section's content because we need to
-        // change image ids to svg ids + upload images to R2
+        // Process each section's content, swapping image ids for SVG names and queueing each image for upload
         var processedSections = document.Sections.Select(section =>
         {
             // Process the section's text, chaining state between sections
@@ -784,10 +804,9 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
     }
 
     /// <summary>
-    /// Walks the parsed <see cref="Document"/> and returns the set of distinct
-    /// image identifiers it references. For handouts these are <c>&lt;name&gt;.pdf</c>
-    /// strings — the same ids that <see cref="ProcessHandoutImages"/> would later
-    /// resolve to SVGs.
+    /// Walks the parsed <see cref="Document"/> and returns the set of distinct image identifiers it references. For
+    /// handouts these are <c>&lt;name&gt;.pdf</c> strings, the same ids <see cref="ProcessHandoutImages"/> later
+    /// resolves to SVGs.
     /// </summary>
     /// <param name="document">The parsed document to scan.</param>
     /// <returns>The distinct image ids referenced anywhere in the document.</returns>
@@ -796,11 +815,11 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         // Accumulator for image ids discovered during the traversal
         var idsBuilder = ImmutableHashSet.CreateBuilder<string>();
 
-        // Walk every section's content tree; the side-effecting closure captures image ids
+        // Walk every section's content tree, collecting each image id in it
         foreach (var section in document.Sections)
         {
             // ContentTree.Map recurses into every nested container (paragraphs, exercises,
-            // problem hints, theorem proofs, list items, etc.) — same coverage as the image processor
+            // problem hints, theorem proofs, list items, etc.), the same coverage as the image processor
             ContentTree.Map(section.Text.Content, node =>
             {
                 // Image nodes are the only nodes we care about; everything else passes through
@@ -812,24 +831,24 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
             });
         }
 
-        // Frozen result for staleness lookups
+        // Freeze the collected ids
         return idsBuilder.ToImmutable();
     }
 
     /// <summary>
     /// Scans the parsed <see cref="Document"/> for handout-referenced documents and queues
     /// each one for upload to R2. These come from <c>\Link[file.pdf]{...}</c> macros, which
-    /// the parser emits as <see cref="Link"/> nodes; a link whose URL is a bare filename
-    /// (not an absolute <c>http(s)</c> URL) is a downloadable document that lives under
-    /// <c>data/handouts/Documents</c> and is served from the <see cref="DocumentsR2Prefix"/>
-    /// folder on R2. External (<c>http(s)</c>) links are left untouched. Mirrors
+    /// the parser emits as <see cref="Link"/> nodes; a link whose URL is a bare filename is a downloadable document
+    /// that lives under <c>data/handouts/Documents</c> and is served from the <see cref="DocumentsR2Prefix"/> folder
+    /// on R2. External (<c>http(s)</c>) links are left untouched. Mirrors
     /// <see cref="CollectImageIds"/>'s traversal so every nested container is covered.
     /// </summary>
     /// <param name="document">The parsed handout document to scan.</param>
-    /// <param name="inputDirectory">The <c>data/handouts</c> directory; documents sit in its <c>Documents</c> subfolder.</param>
-    /// <param name="handoutSlug">The language-stripped handout slug, used only for warning messages.</param>
+    /// <param name="inputDirectory">The <c>data/handouts</c> directory; documents sit in its <c>Documents</c>
+    /// subfolder.</param>
+    /// <param name="handoutSlug">The language-stripped handout slug.</param>
     /// <param name="pendingUploads">The shared upload queue document uploads are appended to.</param>
-    private static void CollectDocumentUploads(
+    private void CollectDocumentUploads(
         Document document,
         DirectoryInfo inputDirectory,
         string handoutSlug,
@@ -841,10 +860,10 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         // Distinct local document filenames referenced anywhere in the document
         var documentFileNames = ImmutableHashSet.CreateBuilder<string>(StringComparer.Ordinal);
 
-        // Walk every section's content tree; the side-effecting closure captures link targets
+        // Walk every section's content tree, collecting each local link target in it
         foreach (var section in document.Sections)
         {
-            // Same recursive coverage as CollectImageIds — links can live inside any container
+            // Recurse into every nested container, since a link can live inside any of them
             ContentTree.Map(section.Text.Content, node =>
             {
                 // Only Link nodes matter, and only those pointing at a local file (not an external URL)
@@ -862,14 +881,17 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
             // Documents are referenced by bare filename and live directly under data/handouts/Documents
             var sourcePath = Path.Combine(documentsDirectory, fileName);
 
-            // A referenced-but-missing document is an authoring error — surface it, don't queue it
+            // A referenced-but-missing document is an authoring error, so surface it and leave it out of the queue
             if (!File.Exists(sourcePath))
             {
-                AnsiConsole.MarkupLine($"[yellow]Warning:[/] Handout [yellow]{handoutSlug}[/] links a missing document: {Markup.Escape(fileName)}");
+                // Warn about it
+                logger.LogWarning("Handout {Handout} links a missing document: {File}", handoutSlug, fileName);
+
+                // Move on to the next document
                 continue;
             }
 
-            // Flat documents/<file> key — the per-type layout shared by problems, handouts, and user uploads
+            // Queue it under its flat key in the documents folder
             pendingUploads.Add(new PendingUpload(sourcePath, $"{DocumentsR2Prefix}/{fileName}"));
         }
     }
@@ -882,14 +904,16 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
     /// </summary>
     /// <param name="asyPath">Absolute path to the <c>.asy</c> file to scan.</param>
     /// <param name="imagesDir">Directory containing handout figure sources.</param>
-    /// <param name="memo">Shared cache across the batch so shared files (<c>_common.asy</c>, family-shared files) are scanned once.</param>
-    /// <returns>The <c>.asy</c> file itself plus every transitively resolved dependency.</returns>
+    /// <param name="memo">Scans already done for this handout's figures, keyed by path, so a file several figures
+    /// share is scanned once.</param>
+    /// <returns>The <c>.asy</c> file itself plus every transitively resolved dependency, except
+    /// <see cref="GlobalAsyDepFileName"/>.</returns>
     private static ImmutableHashSet<string> ResolveAsyDeps(
         string asyPath,
         DirectoryInfo imagesDir,
         Dictionary<string, ImmutableHashSet<string>> memo)
     {
-        // Memo hit — shared file already scanned by a sibling figure
+        // A file a sibling figure already pulled in comes straight from the memo
         if (memo.TryGetValue(asyPath, out var cached))
             return cached;
 
@@ -900,11 +924,11 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         // Read once for both import and include scans
         var content = File.ReadAllText(asyPath);
 
-        // Resolve a candidate dependency: relative to imagesDir and only if the file exists.
-        // Unresolved candidates (built-in asy modules like `three`) are silently dropped.
+        // A function adding a candidate dependency, and its own dependencies, when it names a real .asy in the
+        // figures directory other than the global helper module
         void TryAddDep(string fileName)
         {
-            // Exclude the global helper module from the dep graph (see GlobalAsyDepFileName remarks)
+            // Keep the global helper module out of the dependency graph (see GlobalAsyDepFileName)
             if (string.Equals(fileName, GlobalAsyDepFileName, StringComparison.OrdinalIgnoreCase))
                 return;
 
@@ -920,26 +944,34 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
                 depsBuilder.Add(dep);
         }
 
-        // `import <name>;` — bare module name, treat as `<name>.asy` in the figures dir
-        foreach (Match match in Regex.Matches(content, @"^\s*import\s+([A-Za-z_][A-Za-z0-9_]*)\s*;", RegexOptions.Multiline))
+        // `import <name>;`, a bare module name, read as `<name>.asy` in the figures dir
+        foreach (Match match in Regex.Matches(
+                     content, @"^\s*import\s+([A-Za-z_][A-Za-z0-9_]*)\s*;", RegexOptions.Multiline))
             TryAddDep(match.Groups[1].Value + ".asy");
 
-        // `include "<path>";` — quoted file path; the extension is optional in Asymptote so normalise it
+        // `include "<path>";`, a quoted file path whose extension Asymptote makes optional, so normalise it
         foreach (Match match in Regex.Matches(content, @"^\s*include\s+""([^""]+)""\s*;", RegexOptions.Multiline))
         {
-            // Preserve caller-supplied extension; otherwise normalise to .asy
+            // The included file's name, with .asy appended when the include leaves it off
             var raw = match.Groups[1].Value;
             var fileName = raw.EndsWith(".asy", StringComparison.OrdinalIgnoreCase) ? raw : raw + ".asy";
+
+            // Add it to the graph
             TryAddDep(fileName);
         }
 
-        // `include <name>;` — unquoted module form, same resolution as the bare `import`
-        foreach (Match match in Regex.Matches(content, @"^\s*include\s+([A-Za-z_][A-Za-z0-9_]*)\s*;", RegexOptions.Multiline))
+        // `include <name>;`, the unquoted module form, resolved like the bare `import`
+        foreach (Match match in Regex.Matches(
+                     content, @"^\s*include\s+([A-Za-z_][A-Za-z0-9_]*)\s*;", RegexOptions.Multiline))
             TryAddDep(match.Groups[1].Value + ".asy");
 
-        // Freeze and memoize for future lookups
+        // Freeze the set
         var result = depsBuilder.ToImmutable();
+
+        // Memoize it for the next figure that shares the file
         memo[asyPath] = result;
+
+        // Hand back the file and its dependencies
         return result;
     }
 
@@ -948,7 +980,8 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
     /// A figure is stale when either output (PDF or SVG) is missing, or when any source
     /// in <paramref name="sources"/> has a newer mtime than the OLDER of the two outputs.
     /// </summary>
-    /// <param name="sources">The source files that contribute to the compiled outputs (the .asy plus its transitive includes/imports).</param>
+    /// <param name="sources">The source files that contribute to the compiled outputs (the .asy plus its transitive
+    /// includes/imports).</param>
     /// <param name="pdfPath">Absolute path to the figure's compiled PDF.</param>
     /// <param name="svgPath">Absolute path to the figure's compiled SVG.</param>
     /// <returns><c>true</c> if a recompile is required; <c>false</c> if both outputs are up to date.</returns>
@@ -958,7 +991,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         if (!File.Exists(pdfPath) || !File.Exists(svgPath))
             return true;
 
-        // Compare against the OLDER output — if either is behind the source, we need to rebuild
+        // Compare against the OLDER output, since either one lagging the source means a rebuild
         var pdfMtime = File.GetLastWriteTimeUtc(pdfPath);
         var svgMtime = File.GetLastWriteTimeUtc(svgPath);
         var oldestOutput = pdfMtime < svgMtime ? pdfMtime : svgMtime;
@@ -972,7 +1005,8 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
     /// files. The script renders each figure twice: once with <c>asy -f pdf</c> for the
     /// TeX-consumed PDF and once with <c>asy -f svg</c> for the web-consumed SVG.
     /// </summary>
-    /// <param name="staleAsyFileNames">Filenames (not absolute paths) of stale <c>.asy</c> files inside <paramref name="imagesDir"/>.</param>
+    /// <param name="staleAsyFileNames">Filenames (not absolute paths) of stale <c>.asy</c> files inside
+    /// <paramref name="imagesDir"/>.</param>
     /// <param name="imagesDir">Directory containing the <c>.asy</c> files and the export script.</param>
     /// <returns>A task representing the asynchronous export run.</returns>
     private static async Task RunAsyExportScriptAsync(IReadOnlyList<string> staleAsyFileNames, DirectoryInfo imagesDir)
@@ -986,26 +1020,28 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         // Run the export script under bash
         var result = await ProcessRunner.RunAsync("bash", arguments, imagesDir.FullName);
 
-        // Non-zero exit means at least one .asy failed — surface everything for debugging
+        // A non-zero exit means at least one .asy failed, so surface everything for debugging
         if (result.ExitCode != 0)
             throw new InvalidOperationException(
-                $"Asymptote export script failed (exit {result.ExitCode}).\n--- stdout ---\n{result.Stdout}\n--- stderr ---\n{result.Stderr}");
+                $"Asymptote export script failed (exit {result.ExitCode}).\n"
+                + $"--- stdout ---\n{result.Stdout}\n--- stderr ---\n{result.Stderr}");
     }
 
     /// <summary>
-    /// Checks every <c>.asy</c>-backed image referenced by the document for staleness
-    /// (against its own source plus its transitive <c>include</c>/<c>import</c> deps,
-    /// excluding the global <c>_common.asy</c>) and batch-recompiles only the stale
-    /// ones via <c>export-asy.sh</c>. Images that have no sibling <c>.asy</c> (raster
-    /// or externally-authored PDFs) are silently skipped — those are not produced by
-    /// the asy pipeline.
+    /// Checks every <c>.asy</c>-backed image referenced by the document for staleness (against its own source plus
+    /// its transitive <c>include</c>/<c>import</c> dependencies, excluding the global <c>_common.asy</c>) and
+    /// batch-recompiles only the stale ones via <c>export-asy.sh</c>. Images with no sibling <c>.asy</c> (raster or
+    /// externally-authored PDFs) are skipped, since the asy pipeline doesn't produce them.
     /// </summary>
     /// <param name="document">The parsed handout document whose images should be ensured fresh.</param>
-    /// <param name="imagesDir">Directory containing the <c>.asy</c> sources, compiled PDFs/SVGs, and the export script.</param>
-    /// <param name="forceRecompile">When true, every <c>.asy</c>-backed image is recompiled regardless of staleness — used after a semantic <c>_common.asy</c> edit.</param>
-    /// <param name="alreadyRecompiled">Cross-handout set of <c>.asy</c> filenames already recompiled in this CLI run; entries here are treated as fresh and not requeued. Updated with each batch.</param>
+    /// <param name="imagesDir">Directory containing the <c>.asy</c> sources, compiled PDFs/SVGs, and the export
+    /// script.</param>
+    /// <param name="forceRecompile">When true, every <c>.asy</c>-backed image is recompiled regardless of
+    /// staleness.</param>
+    /// <param name="alreadyRecompiled">Cross-handout set of <c>.asy</c> filenames already recompiled in this CLI run;
+    /// entries here are treated as fresh and not requeued. Updated with each batch.</param>
     /// <returns>A task representing the asynchronous freshness check and any recompiles it triggers.</returns>
-    private static async Task EnsureAsyImagesFreshAsync(
+    private async Task EnsureAsyImagesFreshAsync(
         Document document,
         DirectoryInfo imagesDir,
         bool forceRecompile,
@@ -1014,13 +1050,13 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         // Collect the set of image ids referenced anywhere in the document
         var imageIds = CollectImageIds(document);
 
-        // Shared dep memo across this handout — family-shared files are scanned once even if every figure in the family imports them
+        // Dependency scans shared across this handout's figures, so a file a whole family imports is scanned once
         var depMemo = new Dictionary<string, ImmutableHashSet<string>>();
 
         // Stale .asy filenames to batch-compile; populated as we walk the image set
         var staleFileNames = new List<string>();
 
-        // Count of asy-backed images that turned out to already be fresh — purely for the summary line
+        // How many asy-backed images are already fresh
         var freshCount = 0;
 
         // Walk every distinct image id; partition into asy-backed-fresh, asy-backed-stale, or non-asy (skipped)
@@ -1030,14 +1066,17 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
             var asyFileName = Path.ChangeExtension(imageId, ".asy");
             var asyPath = Path.Combine(imagesDir.FullName, asyFileName);
 
-            // No sibling .asy means this image is externally authored (raster, hand-drawn PDF, etc.) — leave it alone
+            // No sibling .asy means the image is externally authored (raster, hand-drawn PDF, etc.), so leave it alone
             if (!File.Exists(asyPath))
                 continue;
 
-            // An earlier handout in this run already recompiled this figure — count it as fresh, don't requeue
+            // An earlier handout in this run already recompiled this figure
             if (alreadyRecompiled.Contains(asyFileName))
             {
+                // Count it as fresh
                 freshCount++;
+
+                // Leave it out of this handout's batch
                 continue;
             }
 
@@ -1048,25 +1087,30 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
             // Is this stale?
             bool stale;
 
-            // Force flag short-circuits the dep walk entirely; 
+            // The force flag marks the figure stale without walking its dependencies
             if (forceRecompile)
             {
                 stale = true;
             }
             else
             {
-                // Otherwise compare source mtimes against output mtimes for the file and its deps
+                // Otherwise resolve the files the figure is built from
                 var deps = ResolveAsyDeps(asyPath, imagesDir, depMemo);
+
+                // ..And compare their mtimes against the outputs'
                 stale = IsImageStale(deps, pdfPath, svgPath);
             }
 
-            // Stale ⇒ queue for batch compile; 
+            // Stale ⇒ queue for batch compile
             if (stale)
             {
-                AnsiConsole.MarkupLine($"  [yellow]↻ Asy:[/] recompiling {Markup.Escape(asyFileName)}");
+                // Say it's being recompiled
+                logger.LogInformation("  Asy: recompiling {File}", asyFileName);
+
+                // Add it to the batch
                 staleFileNames.Add(asyFileName);
             }
-            // fresh ⇒ bump the count for the summary
+            // Fresh ⇒ count it
             else
             {
                 freshCount++;
@@ -1078,14 +1122,17 @@ public class BuildCommand(Lazy<ITrackedFileUploader> publicUploader, Lazy<IPriva
         {
             // Emit a summary if any asy-backed images were inspected
             if (freshCount > 0)
-                AnsiConsole.MarkupLine($"  [green]✓ Asy:[/] all {freshCount} image(s) fresh");
+                logger.LogInformation("  Asy: all {Count} image(s) fresh", freshCount);
 
+            // Nothing left to do for this handout
             return;
         }
 
-        // One bash invocation for the whole batch — export-asy.sh iterates internally
+        // Recompile the whole batch in one run of export-asy.sh
         await RunAsyExportScriptAsync(staleFileNames, imagesDir);
-        AnsiConsole.MarkupLine($"  [green]✓ Asy:[/] {staleFileNames.Count} image(s) recompiled");
+
+        // Say how many went through
+        logger.LogInformation("  Asy: {Count} image(s) recompiled", staleFileNames.Count);
 
         // Record what we just compiled so later handouts in this run don't redo the same work
         foreach (var fileName in staleFileNames)
