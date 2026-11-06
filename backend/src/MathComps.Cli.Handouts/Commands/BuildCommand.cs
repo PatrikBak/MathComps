@@ -8,6 +8,7 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System.Collections.Immutable;
 using System.ComponentModel;
+using System.Net.Mime;
 using System.Text;
 using System.Text.RegularExpressions;
 using MathComps.Shared.Serialization;
@@ -22,11 +23,14 @@ namespace MathComps.Cli.Handouts.Commands;
 /// skeletons, compiles TeX to PDF, parses TeX to JSON, regenerates the artefacts derived from that JSON, and
 /// uploads what the site serves to Cloudflare R2.
 /// </summary>
-/// <param name="trackedUploader">A lazily-resolved deduping uploader for pushing assets to remote storage,
+/// <param name="publicUploader">A lazily-resolved deduping uploader for pushing assets to the public bucket,
 /// skipping ones unchanged since their last upload.</param>
+/// <param name="privateStore">A lazily-resolved private store for the examiner's problem content, which only the API
+/// reads.</param>
 /// <param name="logger">The logger the build's progress and failures go through.</param>
 [Description("Builds handouts: generates skeletons, compiles TeX, parses it to JSON, and uploads assets.")]
-public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader, ILogger<BuildCommand> logger)
+public class BuildCommand(
+    Lazy<ITrackedFileUploader> publicUploader, Lazy<IPrivateObjectStore> privateStore, ILogger<BuildCommand> logger)
     : AsyncCommand<BuildCommand.Settings>
 {
     /// <summary>
@@ -194,17 +198,24 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader, ILogger<Bu
             ? settings.ErrorLog
             : Path.Combine(inputDirectory.FullName, settings.ErrorLog);
 
-        // The uploader...We don't need it if we're skipping uploads
+        // The public bucket's uploader...We don't need it if we're skipping uploads
         ITrackedFileUploader? uploader = null;
 
-        // Resolve it only for an uploading run, since resolving loads the upload ledger and reads the R2 config
+        // The store the defense content goes to, resolved with the uploader so missing R2 config fails the run
+        // before any TeX compiles
+        IPrivateObjectStore? defenseContentStore = null;
+
+        // Resolve both only for an uploading run, since resolving loads the upload ledger and reads the R2 config
         if (!settings.SkipUpload)
         {
             // Build the uploader, loading its ledger
-            uploader = trackedUploader.Value;
+            uploader = publicUploader.Value;
 
-            // Say it's ready
-            logger.LogInformation("R2 uploader initialized");
+            // Build the store
+            defenseContentStore = privateStore.Value;
+
+            // Say they're ready
+            logger.LogInformation("R2 storage initialized");
         }
         else
         {
@@ -400,12 +411,16 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader, ILogger<Bu
                 !await RegenerateDerivedArtefactAsync("handouts:index", "handout-env-index.json");
 
             // Rebuild the defense-content blobs, even after the index failed, since their generator never reads it
-            derivedRegenerationFailed |=
-                !await RegenerateDerivedArtefactAsync("handouts:defense-content", "defense content");
+            var defenseContentRegenerated =
+                await RegenerateDerivedArtefactAsync("handouts:defense-content", "defense content");
 
-            // Push the blobs, so the examiner sees an edited problem without a backend deploy
-            if (uploader is not null)
-                await UploadDefenseContentAsync(uploader);
+            // Count a failed rebuild against the run
+            derivedRegenerationFailed |= !defenseContentRegenerated;
+
+            // Push the blobs once rebuilt, so the examiner sees an edited problem without a backend deploy. A failed
+            // rebuild leaves an earlier run's blobs on disk, which may come from another branch
+            if (defenseContentStore is not null && defenseContentRegenerated)
+                await UploadDefenseContentAsync(defenseContentStore);
         }
         else
         {
@@ -644,11 +659,11 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader, ILogger<Bu
     }
 
     /// <summary>
-    /// Pushes the generated defense-content blobs to R2. They go up in one pass after the run's handouts are parsed,
-    /// since the generator writes the blobs of the whole site rather than of one .tex.
+    /// Pushes the generated defense-content blobs to the private store. They go up in one pass after the run's
+    /// handouts are parsed, since the generator writes the blobs of the whole site rather than of one .tex.
     /// </summary>
-    /// <param name="uploader">The uploader the blobs go through.</param>
-    private async Task UploadDefenseContentAsync(ITrackedFileUploader uploader)
+    /// <param name="store">The store the blobs go to.</param>
+    private async Task UploadDefenseContentAsync(IPrivateObjectStore store)
     {
         // The generator's output directory, gitignored build output like the compiled PDFs beside it
         var defenseDirectory = new DirectoryInfo(RepoPaths.Resolve("data/handouts/defense"));
@@ -669,24 +684,22 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader, ILogger<Bu
             .OrderBy(file => file.Name, StringComparer.Ordinal)
             .ToList();
 
-        // How many actually left the machine, as opposed to being recognised by the ledger
-        var uploadedCount = 0;
-
-        // Offer each to the tracker, which pushes only the ones whose bytes R2 doesn't already have
+        // Store each one under the key the API reads it from
         foreach (var blob in blobs)
         {
-            // Upload the blob if its bytes changed, counting it when it went up
-            if (await uploader.UploadIfChangedAsync(
-                    blob.FullName, HandoutStorage.DefenseContentKeyForFile(blob.Name)))
-                uploadedCount++;
+            // The blob's bytes
+            var content = await File.ReadAllBytesAsync(blob.FullName);
+
+            // Replace whatever the store held for it
+            await store.PutAsync(
+                HandoutStorage.DefenseContentKeyForFile(blob.Name),
+                content,
+                MediaTypeNames.Application.Json,
+                CancellationToken.None);
         }
 
-        // What stayed put, which is the whole set on a run that changed no handout
-        var skippedCount = blobs.Count - uploadedCount;
-
-        // Report both, so an unchanged run reads as deliberate rather than as a step that did nothing
-        logger.LogInformation("  {Uploaded} defense blob(s) uploaded, {Skipped} unchanged",
-            uploadedCount, skippedCount);
+        // Report how many went up
+        logger.LogInformation("  {Uploaded} defense blob(s) uploaded", blobs.Count);
     }
 
     /// <summary>

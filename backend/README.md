@@ -202,9 +202,9 @@ testing webhooks locally, see the [API README](src/MathComps.Api/README.md#webho
 
 ### 6. Configure Cloudflare R2
 
-The API reads the AI examiner's problem content from R2, the per-handout blobs the
-[Handouts CLI](src/MathComps.Cli.Handouts/README.md) publishes, so a defense against a handout problem
-needs these settings. Everything else works without them.
+The API reads the AI examiner's problem content from R2's private bucket, the per-handout blobs the
+[Handouts CLI](src/MathComps.Cli.Handouts/README.md) publishes, so the defense endpoints need these
+settings, whatever problem a defense is about. Everything else works without them.
 
 ```bash
 # From the API directory
@@ -212,14 +212,17 @@ cd backend/src/MathComps.Api
 
 # The dev bucket's keys. Prod's live in scripts/.env.prod (see scripts/README.md)
 dotnet user-secrets set "CloudflareR2:AccountId" "..."
-dotnet user-secrets set "CloudflareR2:BucketName" "..."
+dotnet user-secrets set "CloudflareR2:PublicBucketName" "..."
+dotnet user-secrets set "CloudflareR2:PrivateBucketName" "..."
 dotnet user-secrets set "CloudflareR2:AccessKeyId" "..."
 dotnet user-secrets set "CloudflareR2:SecretAccessKey" "..."
 ```
 
 Every project shares one user-secrets store, so setting these once also covers the Handouts and Bulk
-Import CLIs; they all talk to the same bucket. Deployments pass the same values as the `R2_*`
-variables in `.env` (see [Setting up a new server](#setting-up-a-new-server)).
+Import CLIs, with one key reaching both buckets. The CLIs write handout files and figures to the public
+bucket and the examiner's content to the private one; the API reads only the private one. Deployments
+pass the API's values as `R2_ACCOUNT_ID` and the `R2_PRIVATE_*` variables in `.env` (see
+[Setting up a new server](#setting-up-a-new-server)).
 
 ### 7. Run the API
 
