@@ -1,4 +1,8 @@
 import { readErrorCode } from '@/lib/api/api-error-codes'
+import {
+  reportForeignRefusal,
+  reportUnansweredRequest,
+} from '@/lib/error-reporting/report-request-failure'
 import type { ApiResult } from '@/types/api'
 
 /**
@@ -7,8 +11,12 @@ import type { ApiResult } from '@/types/api'
  * status and whatever machine-readable code the body held. It never rejects, so a caller branches on
  * `success` (or hands the result to `unwrap`), never a try/catch.
  *
- * This is the one place a response becomes a result, for the C# backend and the app's own Next.js
- * routes alike. Who is asking is the caller's business, carried in as headers.
+ * Failures no server of ours records also reach error tracking. A request that gets no answer at
+ * all goes to {@link reportUnansweredRequest}, unless its caller cancelled it. Every refusal goes to
+ * {@link reportForeignRefusal}, which files only those from a server that isn't ours.
+ *
+ * This is the one place a response becomes a result, whichever server answers. Who is asking is the
+ * caller's business, carried in as headers.
  *
  * @template T - What the endpoint answers with.
  *
@@ -23,7 +31,7 @@ export async function fetchApiResult<T>(
 ): Promise<ApiResult<T>> {
   // Everything from here to the answer, since a failure at any step of it settles the same way
   try {
-    // A JSON body is what every endpoint here speaks, with the call site's own headers on top
+    // A JSON body unless the call site says otherwise, its own headers going on top
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -33,10 +41,21 @@ export async function fetchApiResult<T>(
     const response = await fetch(url, {
       ...options,
       headers,
+    }).catch((error: unknown) => {
+      // A request that got no answer is reported, unless its caller cancelled it
+      if (!options.signal?.aborted) {
+        reportUnansweredRequest(url, error)
+      }
+
+      // The failure still settles like any other
+      throw error
     })
 
     // The server refused it
     if (!response.ok) {
+      // Hand the refusal to its reporter, which files only a foreign server's
+      reportForeignRefusal(url, response.status)
+
       // Best-effort read of the problem body for the machine-readable failure code
       const errorCode = await readErrorCode(response)
 
@@ -80,7 +99,7 @@ export async function fetchApiResult<T>(
       },
     }
   } catch (error) {
-    // The connection dropped, or the body would not parse
+    // The request got no answer, or its body would not parse
     return {
       success: false,
       error: {

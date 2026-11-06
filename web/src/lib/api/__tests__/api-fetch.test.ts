@@ -1,6 +1,19 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import {
+  reportForeignRefusal,
+  reportUnansweredRequest,
+} from '@/lib/error-reporting/report-request-failure'
+
 import { fetchApiResult } from '../api-fetch'
+
+/**
+ * Stand in for the reporters, so a test can read which failures reached them.
+ */
+vi.mock('@/lib/error-reporting/report-request-failure', () => ({
+  reportForeignRefusal: vi.fn(),
+  reportUnansweredRequest: vi.fn(),
+}))
 
 /**
  * Parks a response for the next call to answer with.
@@ -16,12 +29,31 @@ function answerWith(body: string, init: ResponseInit) {
   )
 }
 
+/**
+ * Parks a failure for the next call to fail with.
+ *
+ * @param error - What the call fails with.
+ */
+function failWith(error: unknown) {
+  // The one failure every call gets until the next test parks its own
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => {
+      throw error
+    })
+  )
+}
+
 /** The headers a JSON answer comes with. */
 const JSON_HEADERS = { 'Content-Type': 'application/json' }
 
 afterEach(() => {
   // Hand the real fetch back, so a test that parks nothing cannot inherit the last one's answer
   vi.unstubAllGlobals()
+
+  // Forget the failures reported so far
+  vi.mocked(reportUnansweredRequest).mockClear()
+  vi.mocked(reportForeignRefusal).mockClear()
 })
 
 describe('fetchApiResult', () => {
@@ -115,18 +147,44 @@ describe('fetchApiResult', () => {
 
   it('settles a dropped connection instead of rejecting', async () => {
     // The fetch itself failing, which is what being offline looks like
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => {
-        throw new TypeError('Failed to fetch')
-      })
-    )
+    failWith(new TypeError('Failed to fetch'))
 
     // The call, settled
     const result = await fetchApiResult('/api/anything')
 
     // No status, since nothing reached a server, and no code, since the client had no name for it
     expect(result).toEqual({ success: false, error: { message: 'Failed to fetch' } })
+  })
+
+  it('hands a refusal to the refusal reporter, which decides whose server it was', async () => {
+    // A refusal from the file store
+    answerWith('<Error><Code>AccessDenied</Code></Error>', { status: 403 })
+
+    // The call, settled
+    await fetchApiResult('https://store.example.test/user-uploads/a.png')
+
+    // The refusal reaches the reporter with its status
+    expect(reportForeignRefusal).toHaveBeenCalledWith(
+      'https://store.example.test/user-uploads/a.png',
+      403
+    )
+  })
+
+  it('never reports a request that got an answer as unanswered', async () => {
+    // A refusal, which a server sent
+    answerWith('{}', { status: 500, statusText: 'Internal Server Error', headers: JSON_HEADERS })
+
+    // Its call, settled
+    await fetchApiResult('/api/anything')
+
+    // A body that will not parse, which a server still sent
+    answerWith('not json at all', { status: 200, headers: JSON_HEADERS })
+
+    // Its call, settled
+    await fetchApiResult('/api/anything')
+
+    // Neither request went unanswered
+    expect(reportUnansweredRequest).not.toHaveBeenCalled()
   })
 
   it('settles a body that will not parse instead of rejecting', async () => {
@@ -157,5 +215,37 @@ describe('fetchApiResult', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept-Language': 'sk' },
     })
+  })
+
+  it('reports a request that got no answer', async () => {
+    // What a request that got no answer fails with
+    const failure = new TypeError('Failed to fetch')
+
+    // The fetch itself failing with it
+    failWith(failure)
+
+    // The call, settled
+    await fetchApiResult('/api/anything')
+
+    // No server of ours saw the request, so the browser reports it, naming where it went
+    expect(reportUnansweredRequest).toHaveBeenCalledWith('/api/anything', failure)
+  })
+
+  it('leaves a request its caller cancelled unreported', async () => {
+    // A caller that has cancelled its request
+    const controller = new AbortController()
+    controller.abort()
+
+    // The fetch failing the way a cancelled one does
+    failWith(new DOMException('The operation was aborted.', 'AbortError'))
+
+    // The call, settled
+    const result = await fetchApiResult('/api/anything', { signal: controller.signal })
+
+    // A cancelled request still settles as a failure
+    expect(result.success).toBe(false)
+
+    // Yet a cancellation is nothing to report
+    expect(reportUnansweredRequest).not.toHaveBeenCalled()
   })
 })

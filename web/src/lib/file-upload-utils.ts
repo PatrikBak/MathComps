@@ -43,9 +43,10 @@ export function validateFile(file: File, type: FileType = 'image'): void {
  *
  * @param file The file to upload
  * @param type 'image' or 'attachment'
- * @returns The public URL of the uploaded file
+ * @returns The key the file is stored under
  *
- * @throws {@link BackendApiError} with a coded failure if validation or upload fails.
+ * @throws {@link BackendApiError} if validation fails, the upload link can't be had, or R2 refuses
+ * or never answers the upload.
  */
 async function uploadFile(file: File, type: FileType = 'image'): Promise<string> {
   // Validate before uploading
@@ -76,9 +77,8 @@ async function uploadFile(file: File, type: FileType = 'image'): Promise<string>
   // Extract upload URL and key from response
   const { uploadUrl, key } = result.data
 
-  // Upload directly to R2. A third-party store answers with no `errorCode` of its own, so the shared
-  // caller has nothing to add over the status this leg's own check reads
-  const uploadResponse = await fetch(uploadUrl, {
+  // Upload directly to R2, the file's own type in place of the JSON default
+  const upload = await fetchApiResult(uploadUrl, {
     method: 'PUT',
     headers: {
       'Content-Type': file.type,
@@ -86,10 +86,9 @@ async function uploadFile(file: File, type: FileType = 'image'): Promise<string>
     body: file,
   })
 
-  // Handle bad upload response
-  if (!uploadResponse.ok) {
-    throw new BackendApiError({ errorCode: 'SERVER_ERROR', statusCode: uploadResponse.status })
-  }
+  // Handle bad upload response, which the request reported on its way if R2 refused it or never
+  // answered
+  if (!upload.success) throw new BackendApiError(upload.error)
 
   // Return the key (public URL can be derived from the key)
   return key
@@ -100,7 +99,7 @@ async function uploadFile(file: File, type: FileType = 'image'): Promise<string>
  *
  * @param file The image file to upload
  *
- * @returns The public URL of the uploaded image
+ * @returns The key the image is stored under
  */
 export async function uploadImage(file: File): Promise<string> {
   return uploadFile(file, 'image')
@@ -111,7 +110,7 @@ export async function uploadImage(file: File): Promise<string> {
  *
  * @param file The attachment file to upload
  *
- * @returns The public URL of the uploaded attachment
+ * @returns The key the attachment is stored under
  */
 export async function uploadAttachment(file: File): Promise<string> {
   return uploadFile(file, 'attachment')
