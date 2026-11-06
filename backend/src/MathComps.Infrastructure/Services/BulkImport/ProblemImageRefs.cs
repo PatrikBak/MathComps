@@ -1,3 +1,4 @@
+using MathComps.Infrastructure.Imaging;
 using MathComps.Shared.Io;
 
 namespace MathComps.Infrastructure.Services.BulkImport;

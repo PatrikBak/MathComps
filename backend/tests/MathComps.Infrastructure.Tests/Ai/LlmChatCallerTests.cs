@@ -1,20 +1,15 @@
-using System.ClientModel;
-using System.ClientModel.Primitives;
-using System.Net;
-using System.Text;
+using System.Net.Mime;
 using System.Text.Json;
-using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.Ai;
-using Microsoft.Extensions.Logging.Abstractions;
-using OpenAI;
-using MsOptions = Microsoft.Extensions.Options.Options;
+using MathComps.Infrastructure.Tests.TestInfrastructure;
 
 namespace MathComps.Infrastructure.Tests.Ai;
 
 /// <summary>
-/// Tests the parts of <see cref="LlmChatCaller"/> that fail silently when dropped or misnamed: the request fields the
-/// endpoint reads (the reasoning level and the fallback chain), and the model read back off the reply. A fake HTTP
-/// transport stands in for the endpoint, so the body is inspected as sent and the reply is canned.
+/// Tests the parts of <see cref="LlmChatCaller"/> that fail silently when dropped or misnamed: the messages and request
+/// fields the endpoint reads (the instructions, an image's part, the reasoning level and the fallback chain), and the
+/// model read back off the reply. A fake HTTP transport stands in for the endpoint, so the body is inspected as sent
+/// and the reply is canned.
 /// </summary>
 public class LlmChatCallerTests
 {
@@ -55,12 +50,12 @@ public class LlmChatCallerTests
         var (body, _) = await SendAsync(request);
 
         // The chain rode along as a top-level array, in order.
-        var fallbacks = body.RootElement.GetProperty("fallbacks")
+        var fallbacks = body.GetProperty("fallbacks")
             .EnumerateArray().Select(entry => entry.GetString()).ToList();
         Assert.Equal(["openai/gpt-5-mini", "anthropic/claude-haiku-4-5"], fallbacks);
 
         // The reasoning level rode along with it, under the name the endpoint reads.
-        Assert.Equal("high", body.RootElement.GetProperty("reasoning_effort").GetString());
+        Assert.Equal("high", body.GetProperty("reasoning_effort").GetString());
     }
 
     /// <summary>
@@ -77,10 +72,10 @@ public class LlmChatCallerTests
         var (body, _) = await SendAsync(request);
 
         // Nothing about fallbacks reached the body.
-        Assert.False(body.RootElement.TryGetProperty("fallbacks", out _));
+        Assert.False(body.TryGetProperty("fallbacks", out _));
 
         // The reasoning level still reached the body.
-        Assert.Equal("low", body.RootElement.GetProperty("reasoning_effort").GetString());
+        Assert.Equal("low", body.GetProperty("reasoning_effort").GetString());
     }
 
     /// <summary>
@@ -107,83 +102,91 @@ public class LlmChatCallerTests
     }
 
     /// <summary>
-    /// Builds a plain-text call routed to a fixed primary with the given chain behind it.
+    /// A call's instructions go out as the system message, ahead of the user message. A call that
+    /// loses them still gets a fluent reply, written without the instructions it was given.
+    /// </summary>
+    [Fact]
+    public async Task The_instructions_go_out_as_the_system_message_first()
+    {
+        // A call carrying instructions and an input.
+        var request = Request([], reasoningEffort: "low");
+
+        // Send it through the fake transport.
+        var (body, _) = await SendAsync(request);
+
+        // The system message went first, then the user's.
+        var messages = body.GetProperty("messages").EnumerateArray().ToList();
+        Assert.Equal(["system", "user"], messages.Select(message => message.GetProperty("role").GetString()));
+
+        // The system message carries the instructions.
+        Assert.Equal("instructions", messages[0].GetProperty("content").GetString());
+    }
+
+    /// <summary>
+    /// A call with no system prompt and an image sends one user message holding the text and then the image, as a
+    /// base64 data URL in an <c>image_url</c> part. That part's shape is the one the endpoint reads an image from, and
+    /// a call that loses it still gets a fluent reply about an image the model never saw.
+    /// </summary>
+    [Fact]
+    public async Task An_image_rides_in_the_user_message_after_its_text()
+    {
+        // A few bytes standing in for a photo.
+        byte[] photo = [0xFF, 0xD8, 0xFF, 0xE0, 0x01, 0x02];
+
+        // A call whose instructions ride in the user message, with the photo shown after them.
+        var request = Request([], reasoningEffort: "low") with
+        {
+            SystemPrompt = null,
+            UserPrompt = "Read this page.",
+            Images = [new ChatImage(photo, MediaTypeNames.Image.Jpeg)],
+        };
+
+        // Send it through the fake transport.
+        var (body, _) = await SendAsync(request);
+
+        // The one message sent is the user's.
+        var message = Assert.Single(body.GetProperty("messages").EnumerateArray());
+        Assert.Equal("user", message.GetProperty("role").GetString());
+
+        // The message's content is the text part, then the image part.
+        var parts = message.GetProperty("content").EnumerateArray().ToList();
+        Assert.Equal(["text", "image_url"], parts.Select(part => part.GetProperty("type").GetString()));
+
+        // The text part carries the instructions as written.
+        Assert.Equal("Read this page.", parts[0].GetProperty("text").GetString());
+
+        // The image part carries the photo's bytes as a data URL of its media type.
+        Assert.Equal(
+            $"data:image/jpeg;base64,{Convert.ToBase64String(photo)}",
+            parts[1].GetProperty("image_url").GetProperty("url").GetString());
+    }
+
+    /// <summary>
+    /// Builds a text-only call with instructions as its system prompt, routed to a fixed primary with the given
+    /// chain behind it.
     /// </summary>
     /// <param name="fallbackModels">The backup models to configure behind the primary.</param>
     /// <param name="reasoningEffort">The reasoning-effort level to send.</param>
     /// <returns>The request, ready to send.</returns>
     private static ChatCallRequest Request(IReadOnlyList<string> fallbackModels, string reasoningEffort) =>
-        new("test-step", "instructions", "the input", "google/gemini-3.6-flash", fallbackModels, reasoningEffort,
-            MaxOutputTokens: 2048);
+        new("test-step", "instructions", "the input", Images: [], "google/gemini-3.6-flash", fallbackModels,
+            reasoningEffort, MaxOutputTokens: 2048);
 
     /// <summary>
-    /// Runs one plain-text call against a caller wired to a fake transport, handing back both sides of the exchange.
-    /// Retries are off, so exactly one request is captured.
+    /// Runs one call, its reply read as text, through the real caller against an endpoint answering with the canned
+    /// reply, handing back both sides of the exchange.
     /// </summary>
     /// <param name="request">The call to send.</param>
     /// <returns>The request body as it went out, and the result the caller read back.</returns>
-    private static async Task<(JsonDocument Body, ChatCallResult<string> Result)> SendAsync(ChatCallRequest request)
+    private static async Task<(JsonElement Body, ChatCallResult<string> Result)> SendAsync(ChatCallRequest request)
     {
-        // The endpoint stand-in: it records what it was sent and always answers with the canned reply.
-        var handler = new CapturingHandler(CompletionJson);
-
-        // An OpenAI client whose transport is that stand-in, so no socket is opened.
-        using var httpClient = new HttpClient(handler);
-        var openAIClient = new OpenAIClient(
-            new ApiKeyCredential("test-key"),
-            new OpenAIClientOptions
-            {
-                Endpoint = new Uri("https://endpoint.test/v3"),
-                Transport = new HttpClientPipelineTransport(httpClient),
-            });
-
-        // Connection settings with retries off, so one call means one captured request.
-        var settings = new LlmSettings
-        {
-            BaseUrl = "https://endpoint.test/v3",
-            ApiKey = "test-key",
-            MaxRetries = 0,
-            RetryDelay = TimeSpan.Zero,
-            RequestTimeout = TimeSpan.FromSeconds(30),
-        };
-
-        // The real caller over that client.
-        var caller = new LlmChatCaller(
-            openAIClient, new LlmSpendTracker(), NullLogger<LlmChatCaller>.Instance, MsOptions.Create(settings));
+        // The endpoint stand-in, answering with the canned reply.
+        using var endpoint = new FakeChatEndpoint(CompletionJson);
 
         // Make the call.
-        var result = await caller.CompleteTextAsync(request);
+        var result = await endpoint.Caller.CompleteTextAsync(request);
 
-        // Hand back the body as it went out alongside what the caller made of the reply.
-        return (JsonDocument.Parse(handler.CapturedBody), result);
-    }
-
-    /// <summary>
-    /// An HTTP handler standing in for the endpoint: it keeps the body of the request it was handed and answers every
-    /// one with the same canned reply.
-    /// </summary>
-    /// <param name="responseJson">The reply body to answer with.</param>
-    private sealed class CapturingHandler(string responseJson) : HttpMessageHandler
-    {
-        /// <summary>
-        /// The body of the last request this handler was given.
-        /// </summary>
-        public string CapturedBody { get; private set; } = "";
-
-        /// <inheritdoc/>
-        protected override async Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            // Keep the outgoing body, which is the thing under test.
-            CapturedBody = request.Content is null
-                ? ""
-                : await request.Content.ReadAsStringAsync(cancellationToken);
-
-            // Answer with the canned reply.
-            return new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(responseJson, Encoding.UTF8, "application/json"),
-            };
-        }
+        // Hand back the one body that went out alongside what the caller made of the reply.
+        return (Assert.Single(endpoint.Requests), result);
     }
 }

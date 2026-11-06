@@ -37,7 +37,7 @@
         </Content>
     </ItemGroup>
 
-    <!-- Link the shared real image fixtures for the raster-dimension and apply tests -->
+    <!-- Link the shared real image fixtures -->
     <ItemGroup>
         <Content Include="..\Fixtures\Images\**\*">
             <Link>Fixtures\Images\%(RecursiveDir)%(Filename)%(Extension)</Link>

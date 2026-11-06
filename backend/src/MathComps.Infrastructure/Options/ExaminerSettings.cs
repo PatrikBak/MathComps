@@ -4,9 +4,7 @@ namespace MathComps.Infrastructure.Options;
 
 /// <summary>
 /// Settings for the examiner loop: the model configuration for each of its steps, the notes its prompts are filled
-/// with, plus the revision cap. The
-/// annotations make a missing <c>Examiner</c> section fail validation at startup rather than leaving a step null and
-/// faulting on the first turn.
+/// with, plus the revision cap. The annotations make a missing <c>Examiner</c> section fail validation.
 /// </summary>
 public class ExaminerSettings
 {

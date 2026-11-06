@@ -55,11 +55,14 @@ public class AiTaggingServiceTests
         var promptPath = Path.GetTempFileName();
         await File.WriteAllTextAsync(promptPath, "INSTRUCTIONS T:{candidate_tags}");
 
+        // Run the pass against the prompt file, deleting the file however the test ends.
         try
         {
-            // Capture the prompts the service sends, answering with one known tag so the call completes.
-            var capturedSystem = string.Empty;
+            // The prompts the service sends, filled in as it sends them.
+            string? capturedSystem = null;
             var capturedUser = string.Empty;
+
+            // A caller capturing each prompt and answering with one known tag so the call completes.
             var chatCaller = new Mock<ILlmChatCaller>();
             chatCaller
                 .Setup(caller => caller.CompleteAsync<GeneratePassResponse>(
@@ -70,8 +73,10 @@ public class AiTaggingServiceTests
                     new GeneratePassResponse([new TagFitnessEntry("Algebra", 0.9f, "clearly algebra")]),
                     "test-model", ModelUsage.Zero));
 
-            // Run the generate pass.
+            // The service over the capturing caller.
             var service = new AiTaggingService(chatCaller.Object);
+
+            // Run the generate pass.
             await service.SuggestTagsAsync(
                 "the statement", "the solution", _candidates,
                 new ChatStepSettings { Prompt = promptPath, Model = "test-model" });

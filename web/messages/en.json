@@ -189,6 +189,7 @@
     "SERVER_ERROR": "Server error",
     "Unauthenticated": "Please sign in to continue.",
     "UNAUTHORIZED": "You must be logged in for this action",
+    "UnreadablePhoto": "This photo can't be read. Send it as a JPEG, PNG or WebP picture.",
     "UPLOAD_URL_FAILED": "Failed to get upload URL",
     "UsernameAlreadySet": "Your username is already set and cannot be changed.",
     "UsernameRejected": "That username cannot be used.",
