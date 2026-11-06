@@ -158,6 +158,10 @@ A block image with \`?scale=50\` — the wrapper and the rendered image both shr
 
 ![Block scaled](/dev-placeholders/block.svg?width=800&height=400&scale=50)
 
+A block image with only \`?scale=50\`: sized from the source at runtime, then halved, and still capped at the column:
+
+![Fluid scaled](/dev-placeholders/block.svg?scale=50)
+
 An inline image with \`?scale=150\` — flows inside this sentence ![scaled inline](/dev-placeholders/inline-1.svg?inline=true&width=24&height=24&scale=150) at 1.5× the declared 24×24.
 
 ## Compositions

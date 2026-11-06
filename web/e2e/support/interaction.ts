@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test'
+import type { JSHandle, Locator, Page } from '@playwright/test'
 
 import messages from '../../messages/en.json'
 import { expect } from './test'
@@ -118,6 +118,30 @@ export function topInView(element: Locator): Promise<number> {
 }
 
 /**
+ * Where the cursor stands in a textarea.
+ *
+ * @param textarea - The textarea.
+ *
+ * @returns How many characters precede the cursor.
+ */
+export function cursorIn(textarea: Locator): Promise<number> {
+  // Read off the textarea itself
+  return textarea.evaluate((node: HTMLTextAreaElement) => node.selectionStart)
+}
+
+/**
+ * How many pixels wide an image's file is, which is none until it has loaded.
+ *
+ * @param image - The image.
+ *
+ * @returns The file's width in pixels.
+ */
+export function naturalWidthOf(image: Locator): Promise<number> {
+  // Read off the image itself
+  return image.evaluate((node: HTMLImageElement) => node.naturalWidth)
+}
+
+/**
  * Scrolls the window to a spot, handing back once the scroll has been dispatched, as a reader's own scroll
  * always is before their next click.
  *
@@ -222,4 +246,124 @@ export async function longPressByTouch(page: Page, target: Locator): Promise<voi
 
   // And lifted
   await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+}
+
+/**
+ * Has the page draw a blank PNG one pixel high, which every browser decodes.
+ *
+ * @param page - The page drawing the image.
+ * @param width - How many pixels wide the image is.
+ *
+ * @returns The image's bytes.
+ */
+export async function blankPng(page: Page, width: number): Promise<Buffer> {
+  // The image as a data URL, drawn on a canvas that wide
+  const dataUrl = await page.evaluate((canvasWidth) => {
+    // A canvas that wide and one pixel high
+    const canvas = document.createElement('canvas')
+    canvas.width = canvasWidth
+    canvas.height = 1
+
+    // Its blank pixels, encoded as a PNG
+    return canvas.toDataURL('image/png')
+  }, width)
+
+  // The bytes the data URL carries after its header
+  return Buffer.from(dataUrl.slice(dataUrl.indexOf(',') + 1), 'base64')
+}
+
+/**
+ * A file a test hands the page through a picker, a paste or a drop, in the shape Playwright's own file inputs
+ * take one.
+ */
+export type CarriedFile = {
+  /** The file's name */
+  name: string
+  /** The file's media type */
+  mimeType: string
+  /** The file's bytes */
+  buffer: Buffer
+}
+
+/**
+ * Presses a control that opens the file picker, and hands the picker a file.
+ *
+ * @param control - The control.
+ * @param file - The file the picker is handed.
+ */
+export async function pickFile(control: Locator, file: CarriedFile): Promise<void> {
+  // The file picker the control is about to open
+  const picker = control.page().waitForEvent('filechooser')
+
+  // The control, pressed
+  await control.click()
+
+  // The picker handed the file
+  await (await picker).setFiles(file)
+}
+
+/**
+ * Builds, in the page, the data a paste or a drag carries: the file and nothing else.
+ *
+ * @param page - The page the data is built in.
+ * @param file - The file it carries.
+ *
+ * @returns A handle on the data.
+ */
+function transferOf(page: Page, file: CarriedFile): Promise<JSHandle<DataTransfer>> {
+  // The data, holding the file
+  return page.evaluateHandle(
+    ({ name, mimeType, bytes }) => {
+      // An empty transfer
+      const transfer = new DataTransfer()
+
+      // The file added to it
+      transfer.items.add(new File([new Uint8Array(bytes)], name, { type: mimeType }))
+
+      // The transfer, carrying the file
+      return transfer
+    },
+    { name: file.name, mimeType: file.mimeType, bytes: [...file.buffer] }
+  )
+}
+
+/**
+ * Pastes a file onto an element the way the browser hands a paste to the page, the clipboard holding the file
+ * alone, as it holds a screenshot.
+ *
+ * @param target - The element the paste lands on.
+ * @param file - The file the clipboard holds.
+ */
+export async function pasteFile(target: Locator, file: CarriedFile): Promise<void> {
+  // The clipboard, holding the file
+  const clipboard = await transferOf(target.page(), file)
+
+  // The paste, landing on the element, whose handlers have all run by the time this hands back
+  await target.evaluate(
+    (element, clipboardData) =>
+      element.dispatchEvent(
+        new ClipboardEvent('paste', { clipboardData, bubbles: true, cancelable: true })
+      ),
+    clipboard
+  )
+}
+
+/**
+ * Drags a file in from outside the page and lets go of it over an element.
+ *
+ * @param target - The element the file is dropped on.
+ * @param file - The file dragged in.
+ */
+export async function dropFile(target: Locator, file: CarriedFile): Promise<void> {
+  // What the drag carries
+  const dataTransfer = await transferOf(target.page(), file)
+
+  // The drag coming in over the element
+  await target.dispatchEvent('dragenter', { dataTransfer })
+
+  // And moving across it
+  await target.dispatchEvent('dragover', { dataTransfer })
+
+  // And the file let go on it
+  await target.dispatchEvent('drop', { dataTransfer })
 }
