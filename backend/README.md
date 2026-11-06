@@ -242,12 +242,12 @@ Each tool has its own README.
 Every line a command writes is a log line, its report and its crash's stack trace included. Only Spectre's `--help` goes straight to the console. The defaults in `src/MathComps.Shared.Cli/appsettings.logging.json` log our own code from Information and everything else from Warning. Each line reads `12:04:31 info ImportCommand: …`, a multi-line entry repeats that prefix on every line, and a terminal colours the level. A tool's own config files, its user secrets or an environment variable override any of it. A category name holds dots, which the shell won't assign directly, so a one-off run goes through `env`:
 
 ```bash
-env 'Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command=Information' dotnet run --project src/MathComps.Cli.BulkImport -- ./my-draft --dry-run
+env 'Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command=Information' dotnet run --project src/MathComps.Cli.BulkImport -- ./my-draft
 ```
 
 ### Data Pipeline Tools
 
-- **[Bulk Import](src/MathComps.Cli.BulkImport/README.md)** – Imports problem-draft folders into the database, or dry-runs them
+- **[Bulk Import](src/MathComps.Cli.BulkImport/README.md)** – Dry-runs problem-draft folders against the database, or imports them with `--write`
 - **[Competitions](src/MathComps.Cli.Competitions/README.md)** – Declares a hosted group from its manifest: raises the rounds it runs and sets the terms
 - **[User Sync](src/MathComps.Cli.UserSync/README.md)** – Syncs every Clerk user into the database
 

@@ -10,10 +10,10 @@ So a month goes on the site the day its dates are decided, months before anybody
 
 ```bash
 dotnet run --project backend/src/MathComps.Cli.Competitions -- ./data/problems/mc-2026-1.group.json
-dotnet run --project backend/src/MathComps.Cli.Competitions -- ./data/problems/mc-2026-1.group.json --dry-run
+dotnet run --project backend/src/MathComps.Cli.Competitions -- ./data/problems/mc-2026-1.group.json --write
 ```
 
-`--dry-run` runs every check and reports what would happen, writing nothing. There's no separate `validate` command: every refusal fires before the run commits either way, so the dry run is the whole check.
+A plain run makes every check and reports what would happen, writing nothing. `--write` declares the group. There's no separate `validate` command: every refusal fires before the run commits either way, so the dry run is the whole check.
 
 Exits `0` when the group is declared (or would be), `1` on anything else: a refused manifest, a manifest that will not parse, or no file at the path given.
 
@@ -81,4 +81,4 @@ And the group as it already stands:
 
 ## Setup
 
-**Database** — set the connection string in user secrets (see the [main backend README](../../README.md)). Every check reads what has actually landed, so a reachable DB is required even for `--dry-run`.
+**Database** — set the connection string in user secrets (see the [main backend README](../../README.md)). Every check reads what has actually landed, so a reachable DB is required even for a dry run.
