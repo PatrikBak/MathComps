@@ -207,7 +207,7 @@ public class ProblemSimilarityService(
                 var finalSimilarity = CalculateWeightedSimilarityScore(settings.Value.SimilarityWeights, components);
 
                 // We're happy
-                return new SimilarityResult(candidateData.Id, candidateData.Slug, finalSimilarity, components);
+                return new SimilarityResult(candidateData.Id, finalSimilarity, components);
             })
             // In the end, the results should be ordered from the most similar
             .OrderByDescending(result => result.SimilarityScore),];

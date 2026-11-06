@@ -5,13 +5,12 @@ namespace MathComps.Infrastructure.Services.Problems;
 
 /// <summary>
 /// Service for looking up problem information from the database.
-/// Provides common problem lookup operations needed across multiple CLI tools and services.
 /// </summary>
 /// <remarks>
 /// Reading a problem and resolving its slug deliberately disagree about a problem the archive does not serve.
 /// Reading is an archive read, so <see cref="GetProblemLookupDataAsync"/> refuses one. Resolving a slug to an id is not: it
-/// serves the like, mark and list-membership writes, and the offline tools, all of which are entitled to address
-/// one. So <see cref="GetProblemIdBySlugAsync"/> answers for every problem.
+/// serves the like, mark and list-membership writes, all of which are entitled to address one. So
+/// <see cref="GetProblemIdBySlugAsync"/> answers for every problem.
 /// </remarks>
 public interface IProblemLookupService
 {
