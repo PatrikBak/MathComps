@@ -1,6 +1,6 @@
 ---
 name: handout-finalize
-description: Use this skill to finalize a handout — add a completed one to the site index and build it. Appends its entry to web/src/content/handouts.json, runs the Handouts CLI to build the content JSONs and PDFs, and validates. Trigger words — "finalize", "publish", "release", "ship" a handout. Do NOT use for writing or editing .tex content — use the `handout-editor` skill for that. The R2 upload is user-gated; this skill builds with --skip-upload until told otherwise.
+description: Use this skill to finalize a handout — add a completed one to the site index and build it. Appends its entry to web/src/content/handouts.json, runs the Handouts CLI to build the content JSONs and PDFs, and validates. Trigger words — "finalize", "publish", "release", "ship" a handout. Do NOT use for writing or editing .tex content — use the `handout-editor` skill for that. The build uploads to the dev R2 bucket, and prod gets the files from publish-handouts.sh, which the user runs after the PR merges.
 ---
 
 # Handout Finalizer
@@ -72,7 +72,7 @@ From the repo root:
 dotnet run --project backend/src/MathComps.Cli.Handouts -- <base>.*.tex
 ```
 
-Scope the glob to this handout. If `_common.asy` changed in a way that alters existing figures (a palette shade, a modified primitive), add `--force-asy` — the CLI keeps that file out of its staleness graph and otherwise reports every figure fresh. **Pass `--skip-upload` for the build/validate loop** — R2 assets go live immediately with no deploy, so the upload is the user's call. Re-run without the flag only once they say to publish, and never set up the R2 credentials yourself. Exit code 0 = success.
+Scope the glob to this handout. If `_common.asy` changed in a way that alters existing figures (a palette shade, a modified primitive), add `--force-asy` — the CLI keeps that file out of its staleness graph and otherwise reports every figure fresh. The build uploads to the dev R2 bucket, which the local site reads, so the handout's figures show locally. Prod gets them only from `backend/scripts/publish-handouts.sh`, which the user runs once the PR has merged: never pass `--publish` yourself, and never set up the R2 credentials. Exit code 0 = success.
 
 ### 5. Handle CLI failures
 

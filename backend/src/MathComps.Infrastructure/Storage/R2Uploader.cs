@@ -14,10 +14,8 @@ public sealed class R2Uploader : IFileUploader, IDisposable
     /// </summary>
     private readonly AmazonS3Client _client;
 
-    /// <summary>
-    /// The R2 bucket name to upload files to.
-    /// </summary>
-    private readonly string _bucketName;
+    /// <inheritdoc/>
+    public string StoreName { get; }
 
     /// <summary>
     /// Creates a new R2 uploader from the provided settings.
@@ -29,7 +27,7 @@ public sealed class R2Uploader : IFileUploader, IDisposable
         var settings = options.Value;
 
         // Store the bucket name
-        _bucketName = settings.BucketName;
+        StoreName = settings.BucketName;
 
         // The client every R2 call goes through
         _client = R2ClientFactory.Create(settings);
@@ -46,7 +44,7 @@ public sealed class R2Uploader : IFileUploader, IDisposable
         // Build the upload request
         var request = new PutObjectRequest
         {
-            BucketName = _bucketName,
+            BucketName = StoreName,
             Key = key,
             FilePath = localFilePath,
             // R2 does not support streaming SigV4 payload signing

@@ -8,8 +8,8 @@ namespace MathComps.Infrastructure.Tests.Storage;
 /// <summary>
 /// Unit tests for <see cref="TrackedFileUploader"/>: the change detection that skips files unchanged since their
 /// last upload, the in-run dedup, and the ledger persistence (on dispose) that lets a later run skip files already
-/// on remote storage. The inner uploader is faked and real temp files supply real bytes to hash, so no network or
-/// database is involved.
+/// on remote storage, one ledger per store. The inner uploader is faked and real temp files supply real bytes to
+/// hash, so no network or database is involved.
 /// </summary>
 public sealed class TrackedFileUploaderTests : IDisposable
 {
@@ -20,7 +20,7 @@ public sealed class TrackedFileUploaderTests : IDisposable
         Path.Combine(Path.GetTempPath(), $"tracked-uploader-{Guid.NewGuid():N}");
 
     /// <summary>
-    /// The ledger path under the scratch directory.
+    /// The ledger of the recording uploader's store, under the scratch directory.
     /// </summary>
     private readonly string _ledgerPath;
 
@@ -31,7 +31,7 @@ public sealed class TrackedFileUploaderTests : IDisposable
     {
         // The scratch directory the source files and ledger live in.
         Directory.CreateDirectory(_workDir);
-        _ledgerPath = Path.Combine(_workDir, "ledger.json");
+        _ledgerPath = Path.Combine(_workDir, "recording.json");
     }
 
     /// <inheritdoc/>
@@ -199,12 +199,36 @@ public sealed class TrackedFileUploaderTests : IDisposable
     }
 
     /// <summary>
-    /// Builds a tracker over the given uploader pointed at this test's scratch ledger.
+    /// A file one store already holds is still uploaded to another, since each store keeps a ledger of its own.
+    /// </summary>
+    [Fact]
+    public async Task A_file_one_store_holds_is_still_uploaded_to_another()
+    {
+        // One file, pushed to the dev bucket by a first run.
+        var source = WriteSource("fig.svg", "<svg/>");
+        var devRun = Tracker(new RecordingFileUploader { StoreName = "mathcomps-public-dev" });
+        await devRun.UploadIfChangedAsync(source, "problems/fig");
+        devRun.Dispose();
+
+        // A second run against the dev bucket skips it, so that bucket's ledger was kept.
+        var devRerun = Tracker(new RecordingFileUploader { StoreName = "mathcomps-public-dev" });
+        var uploadedToDevAgain = await devRerun.UploadIfChangedAsync(source, "problems/fig");
+        Assert.False(uploadedToDevAgain);
+
+        // A run against the prod bucket pushes the same bytes again.
+        var prod = new RecordingFileUploader { StoreName = "mathcomps-uploads" };
+        var uploadedToProd = await Tracker(prod).UploadIfChangedAsync(source, "problems/fig");
+        Assert.True(uploadedToProd);
+        Assert.Single(prod.Uploads);
+    }
+
+    /// <summary>
+    /// Builds a tracker over the given uploader, keeping its ledgers in this test's scratch directory.
     /// </summary>
     /// <param name="inner">The uploader to wrap.</param>
     /// <returns>The tracker.</returns>
     private TrackedFileUploader Tracker(IFileUploader inner) =>
-        new(inner, Create(new UploadLedgerOptions { LedgerPath = _ledgerPath }));
+        new(inner, Create(new UploadLedgerOptions { LedgerDirectory = _workDir }));
 
     /// <summary>
     /// Writes a source file under the scratch directory and returns its path.

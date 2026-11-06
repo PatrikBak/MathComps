@@ -210,6 +210,7 @@ needs these settings. Everything else works without them.
 # From the API directory
 cd backend/src/MathComps.Api
 
+# The dev bucket's keys. Prod's live in scripts/.env.prod (see scripts/README.md)
 dotnet user-secrets set "CloudflareR2:AccountId" "..."
 dotnet user-secrets set "CloudflareR2:BucketName" "..."
 dotnet user-secrets set "CloudflareR2:AccessKeyId" "..."

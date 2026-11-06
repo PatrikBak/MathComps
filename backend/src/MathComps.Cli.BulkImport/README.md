@@ -19,7 +19,9 @@ On the way the import collects every reason the database refuses the draft: a ga
 
 A dry run is the same import, rolled back before it commits and before any figure uploads, so a clean dry run of a folder is a clean import of it into the database as it stands. A real run uploads the figures to R2 once the import is known to land, then commits. The import rewrites each figure ref to the `media:` key the site resolves, stamped with the figure's size and a hash of its bytes. So a redrawn figure gets a new URL, and its re-import rewrites every text showing it.
 
-Image uploads are deduplicated against a gitignored ledger (`data/problems/.r2-uploads.json`) mapping each storage key to a hash of the bytes last pushed under it. The report's `Images` line counts what was uploaded and skipped; delete the ledger to force a fresh upload of everything.
+Image uploads are deduplicated against a gitignored ledger per bucket (`data/problems/.r2-uploads/<bucket>.json`) mapping each storage key to a hash of the bytes last pushed under it. The report's `Images` line counts what was uploaded and skipped; delete a bucket's ledger to force a fresh upload of everything to it.
+
+The figures go to the dev bucket the user secrets name. `--publish` sends them to prod's and needs prod's keys in the environment, which the scripts writing prod load (`invoke-tool.sh -e prod bulk-import` passes the flag itself). A run whose flag and keys disagree refuses to start.
 
 Tag the draft before the dry run, so the [Tagging CLI](../MathComps.Cli.Tagging/README.md)'s slugs get checked.
 
