@@ -17,4 +17,13 @@ Sentry.init({
   // or a crawler cut it off. The failure's message holds the file's address on Clerk's CDN, script and
   // chunks alike, and Clerk failing for every visitor shows on the uptime monitor on Clerk's script.
   ignoreErrors: ['/npm/@clerk/'],
+
+  // Reports post to the site's own relay route, which forwards them to Better Stack, since content
+  // blockers refuse Better Stack's domain. The path holds no word a block list matches, such as
+  // sentry or telemetry.
+  tunnel: '/api/relay',
+
+  // The SDK's counts of what it dropped stay unsent. With every span sampled out, each page a
+  // visitor leaves would send one, and Better Stack has no screen for them.
+  sendClientReports: false,
 })
