@@ -137,9 +137,10 @@ builder.Services.AddHttpLoggingInterceptor<ClerkIdHttpLoggingInterceptor>();
 // so a bad slug's 404 would file as an error.
 builder.WebHost.UseSentry(options =>
 {
-    // Send the request body with every event. A defense turn's own words and a Clerk webhook's account
-    // data go with it, deliberately.
-    options.MaxRequestBodySize = RequestSize.Always;
+    // Send the request body with every event when it is under 10,000 bytes. A defense turn's own words and a Clerk
+    // webhook's account data go with it, deliberately. A turn written up to its length cap can pass that size. A photo
+    // is far bigger and stays behind, since the SDK would send its bytes as one long garbled string.
+    options.MaxRequestBodySize = RequestSize.Medium;
 
     // The last pass over an event before it leaves
     options.SetBeforeSend((sentryEvent, _) =>
