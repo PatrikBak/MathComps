@@ -21,7 +21,9 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// message waiting while the examiner answers another of their conversations, and a hosted competition counts what
 /// they wrote by when they wrote it. Under the gate it weighs the message and spend caps, runs the engine (no DB work
 /// while it runs), and persists the turns and one <see cref="DefenseSpend"/> row from the turn's cost — the gate held
-/// throughout so a user's concurrent turns can't each clear the spend check against the same pre-write total.
+/// throughout so a user's concurrent turns can't each clear the spend check against the same pre-write total. Once
+/// the engine has answered, those writes run to the end whatever the client does: its calls are paid for by then, so
+/// an abort must not lose the turn.
 /// </summary>
 /// <param name="targetGuard">Says whether a student may argue what the target names.</param>
 /// <param name="contentResolver">Looks up what a new session's examiner is told about the problem.</param>
@@ -129,11 +131,11 @@ public class DefenseSessionService(
         // Track the new session.
         dbContext.DefenseSessions.Add(session);
 
-        // And the row saying what it defends, which is one row of one table either way.
-        await DefenseTargets.AddRowAsync(dbContext, session.Id, start.Request.Target, cancellationToken);
+        // And the row saying what it defends, which is one row of one table either way, past any client abort.
+        await DefenseTargets.AddRowAsync(dbContext, session.Id, start.Request.Target, CancellationToken.None);
 
-        // Persist the session, its turns, its target, and the spend row in one write.
-        await dbContext.SaveChangesAsync(cancellationToken);
+        // Persist the session, its turns, its target, and the spend row in one write, past any client abort.
+        await dbContext.SaveChangesAsync(CancellationToken.None);
 
         // Hand back the full conversation, argued against the statement the problem has this instant.
         return ToSessionDto(session, start.Request.Target, hasOlderStatement: false, gradedEntry);
@@ -226,8 +228,8 @@ public class DefenseSessionService(
         await RunExaminerAndStageAsync(
             dbContext, session, userId, !loaded.HoldsHostedEntry, cancellationToken);
 
-        // Persist the appended turns and the spend row in one write.
-        await dbContext.SaveChangesAsync(cancellationToken);
+        // Persist the appended turns and the spend row in one write, past any client abort.
+        await dbContext.SaveChangesAsync(CancellationToken.None);
 
         // Hand back the grown conversation, flagged when no language still has its statement.
         return ToSessionDto(
