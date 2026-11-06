@@ -1,17 +1,15 @@
-using Spectre.Console;
+using Microsoft.Extensions.Logging;
 
 namespace MathComps.Shared.Cli.Progress;
 
 /// <summary>
-/// Helper class for executing operations with progress tracking using Spectre.Console.
-/// Supports both parallel and sequential processing, serializing each item's result handling
-/// and progress updates through a semaphore so concurrent work can't corrupt the display.
+/// Helpers for working through a list of items one at a time, logging a progress line after each item and an error
+/// for each one that throws.
 /// </summary>
 public static class ProgressHelper
 {
     /// <summary>
-    /// Creates a concise description of a batch by showing the first and last items.
-    /// Useful for displaying batch ranges like "item-1 to item-100" in progress indicators.
+    /// Creates a concise description of a batch from its first and last items, like "item-1 - item-100".
     /// </summary>
     /// <typeparam name="T">The type of items in the batch.</typeparam>
     /// <param name="batch">The list of items to describe.</param>
@@ -22,145 +20,39 @@ public static class ProgressHelper
         => $"{itemDescription(batch.First())}{(batch.Count == 1 ? "" : $" - {itemDescription(batch.Last())}")}";
 
     /// <summary>
-    /// Executes a simple operation on a collection of items with progress tracking.
-    /// Best for sequential operations where each item is processed independently without needing to return results.
+    /// Processes each item in order, logging <c>{description} {done}/{total}: {item}</c> once it is done. An item
+    /// that throws is logged as an error with its exception and counts as done, and the run moves on to the next.
     /// </summary>
     /// <typeparam name="TItem">The type of items to process.</typeparam>
+    /// <param name="logger">The logger the progress and failure lines go through.</param>
     /// <param name="items">The collection of items to process.</param>
-    /// <param name="progressDescription">The description to display above the progress bar.</param>
+    /// <param name="progressDescription">The work being done, opening every progress line.</param>
+    /// <param name="getItemDescription">Describes an item in its progress and failure lines.</param>
     /// <param name="processItem">The async function to process each item.</param>
-    /// <param name="getItemDescription">Function to get a description of the item for progress display.</param>
     public static async Task ExecuteWithProgressAsync<TItem>(
+        ILogger logger,
         IReadOnlyList<TItem> items,
         string progressDescription,
-        Func<TItem, string?> getItemDescription,
-        Func<TItem, int, CancellationToken, Task> processItem)
+        Func<TItem, string> getItemDescription,
+        Func<TItem, Task> processItem)
     {
-        // Use the universal helper
-        await ExecuteWithProgressCoreAsync(
-            items,
-            progressDescription,
-            getItemDescription,
-            parallelOptions: new ParallelOptions { MaxDegreeOfParallelism = 1 },
-            processItemAsync: async (item, index, ct) =>
+        // Work through the items one at a time, in order
+        foreach (var (index, item) in items.Index())
+        {
+            try
             {
-                // Here we just call the function, we don't need a result
-                await processItem(item, index, ct);
-                return (object?)null;
-            },
-            handleResultAsync: null);
-    }
-
-    /// <summary>
-    /// Core progress loop: processes each item under the given parallelism, then handles its result in a
-    /// semaphore-synchronized section.
-    /// </summary>
-    /// <typeparam name="TItem">The type of items to process.</typeparam>
-    /// <typeparam name="TResult">The type of result returned by the processing function.</typeparam>
-    /// <param name="items">The collection of items to process.</param>
-    /// <param name="progressDescription">The description to display above the progress bar.</param>
-    /// <param name="getItemDescription">Function to get a description of the item for progress display.</param>
-    /// <param name="parallelOptions">Options controlling the degree of parallelism.</param>
-    /// <param name="processItemAsync">The async function to process each item.</param>
-    /// <param name="handleResultAsync">Optional async function to handle the result in a synchronized section.</param>
-    private static async Task ExecuteWithProgressCoreAsync<TItem, TResult>(
-        IReadOnlyList<TItem> items,
-        string progressDescription,
-        Func<TItem, string?> getItemDescription,
-        ParallelOptions parallelOptions,
-        Func<TItem, int, CancellationToken, Task<TResult>> processItemAsync,
-        Func<TResult, TItem, int, CancellationToken, Task>? handleResultAsync)
-    {
-        // Print the description
-        AnsiConsole.MarkupLine($"\n[green]{progressDescription}[/]");
-
-        // Spectre's progress is dope
-        await AnsiConsole.Progress()
-            // We can't let Spectre do UI operations because we'd lose synchronization
-            .AutoRefresh(enabled: false)
-            // Fancy things to display
-            .Columns(
-                new SpinnerColumn(),
-                new ProgressBarColumn(),
-                new PercentageColumn(),
-                new RemainingTimeColumn(),
-                new TaskDescriptionColumn())
-            .StartAsync(async progressContext =>
+                // Process the item
+                await processItem(item);
+            }
+            catch (Exception exception)
             {
-                // Create progress task
-                var processingTask = progressContext.AddTask(progressDescription, maxValue: items.Count);
-                processingTask.StartTask();
+                // Report the failed item, which still counts as done
+                logger.LogError(exception, "{Item} failed", getItemDescription(item));
+            }
 
-                // Paint the empty bar now — auto-refresh is off, so without this it wouldn't show until the first item lands
-                progressContext.Refresh();
-
-                // Semaphore to ensure thread-safe result handling and progress updates
-                SemaphoreSlim semaphore = new(1, 1);
-
-                // Process items with configured parallelism
-                await Parallel.ForAsync(0, items.Count, parallelOptions,
-                    async (itemIndex, token) =>
-                    {
-                        // Get the current item to process
-                        var item = items[itemIndex];
-
-                        // Prepare the processing results
-                        TResult? result = default;
-                        Exception? exception = null;
-
-                        try
-                        {
-                            // Process the item (parallel section)
-                            result = await processItemAsync(item, itemIndex, token);
-                        }
-                        catch (Exception innerException)
-                        {
-                            // Capture exception to handle in synchronized section
-                            exception = innerException;
-                        }
-
-                        // Use semaphore to ensure thread-safe result handling and progress updates
-                        await semaphore.WaitAsync(token);
-
-                        try
-                        {
-                            // Handle exception if one occurred
-                            if (exception != null)
-                            {
-                                // Write it nicely
-                                AnsiConsole.Write(new Panel(exception.GetRenderable(ExceptionFormats.ShortenEverything))
-                                    .Header($"[red]{getItemDescription(item)}[/]")
-                                    .BorderColor(Color.Red)
-                                    .Collapse());
-                            }
-
-                            // Handle the result if found and the handler provided
-                            if (result != null && handleResultAsync != null)
-                                await handleResultAsync(result, item, itemIndex, token);
-
-                            // Update progress
-                            processingTask.Increment(1);
-
-                            // Get the item's descriptor
-                            var itemDescription = getItemDescription(item);
-
-                            // A nice description of the current task
-                            processingTask.Description =
-                                $"{processingTask.Value}/{items.Count} " +
-                                (itemDescription is null ? "" : $"[dim]({itemDescription})[/]");
-
-                            // Refresh the progress
-                            progressContext.Refresh();
-                        }
-                        finally
-                        {
-                            // Release the semaphore for other threads
-                            semaphore.Release();
-                        }
-                    });
-
-                // Mark processing phase as complete
-                processingTask.StopTask();
-            });
+            // Report how far the work has got
+            logger.LogInformation("{Description} {Done}/{Total}: {Item}",
+                progressDescription, index + 1, items.Count, getItemDescription(item));
+        }
     }
 }

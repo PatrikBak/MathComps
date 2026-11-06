@@ -2,7 +2,7 @@ using MathComps.Cli.Embeddings.Dtos;
 using MathComps.Cli.Embeddings.Services;
 using MathComps.Domain.Constants;
 using MathComps.Domain.EfCoreEntities;
-using Spectre.Console;
+using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 using System.ComponentModel;
 using MathComps.Shared.Extensions;
@@ -11,16 +11,20 @@ using MathComps.Shared.Cli.Progress;
 namespace MathComps.Cli.Embeddings.Commands;
 
 /// <summary>
-/// Generates vector embeddings for problem statements and solutions using the Gemini API.
-/// Creates multiple embedding types (semantic and retrieval) for both statement-only and
-/// solution-only to support different search scenarios.
+/// Generates vector embeddings for problem statements and solutions using the Gemini API. Each problem gets a semantic
+/// and a retrieval embedding of its statement, and of its solution when it has one.
 /// </summary>
 /// <param name="geminiService">The service responsible for making calls to the Gemini embedding API.</param>
-/// <param name="databaseService">The database service for accessing and storing problem embeddings.</param>
-[Description("Generate vector embeddings for problems using Gemini API. Supports batch processing and force regeneration.")]
+/// <param name="databaseService">
+/// The service that reads the problems needing embeddings and saves their embeddings.
+/// </param>
+/// <param name="logger">The logger the run's progress and failures go through.</param>
+[Description("Generate vector embeddings for problems using Gemini API. " +
+    "Supports batch processing and force regeneration.")]
 public class GenerateEmbeddingsCommand(
     IGeminiEmbeddingService geminiService,
-    IEmbeddingDatabaseService databaseService) : AsyncCommand<GenerateEmbeddingsCommand.Settings>
+    IEmbeddingDatabaseService databaseService,
+    ILogger<GenerateEmbeddingsCommand> logger) : AsyncCommand<GenerateEmbeddingsCommand.Settings>
 {
     /// <summary>
     /// The command arguments
@@ -28,7 +32,7 @@ public class GenerateEmbeddingsCommand(
     public class Settings : CommandSettings
     {
         /// <summary>
-        /// Batch size limit to control API costs and processing time.
+        /// How many problems to embed in this run.
         /// </summary>
         [Description("Number of problems to process")]
         [CommandOption("-n|--count", isRequired: true)]
@@ -44,7 +48,6 @@ public class GenerateEmbeddingsCommand(
 
         /// <summary>
         /// The Gemini embedding model identifier to use for generating embeddings.
-        /// Different models may have different vector dimensions and quality characteristics.
         /// </summary>
         [Description("Gemini embedding model to use")]
         [CommandOption("--model")]
@@ -52,8 +55,7 @@ public class GenerateEmbeddingsCommand(
         public string Model { get; set; } = null!;
 
         /// <summary>
-        /// Number of problems to process in a single batch API call.
-        /// Larger batches improve throughput but may fail together if one problem has issues.
+        /// How many problems share each Gemini request. A batch that fails is retried one problem at a time.
         /// </summary>
         [Description("Batch size for Gemini requests")]
         [CommandOption("-b|--batch-size")]
@@ -65,11 +67,11 @@ public class GenerateEmbeddingsCommand(
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         // Log start
-        AnsiConsole.MarkupLine("[bold cyan]Starting embedding generation...[/]");
+        logger.LogInformation("Starting embedding generation");
 
         #region Load problems that need embeddings
 
-        // Retrieve problems that need embeddings based on user settings
+        // The problems needing embeddings, up to the requested count (already-embedded ones too when forcing)
         var problems = await databaseService.GetProblemsNeedingEmbeddingsAsync(
             settings.Count,
             settings.Force);
@@ -77,59 +79,66 @@ public class GenerateEmbeddingsCommand(
         // If no problems found to process
         if (problems.Count == 0)
         {
-            // Make aware
-            AnsiConsole.MarkupLine("[green]No problems need embeddings![/]");
+            // Say there's nothing to embed
+            logger.LogInformation("No problems need embeddings");
 
             // Exit successfully
             return 0;
         }
 
-        // Display count of problems to be processed
-        AnsiConsole.MarkupLine($"Found [yellow]{problems.Count}[/] problems to process.");
+        // Report how many problems will be processed
+        logger.LogInformation("Found {Count} problems to process", problems.Count);
 
         #endregion
 
         #region Process problems with embedding generation
 
-        // Track successfully processed problems for final summary
+        // How many problems got their embeddings
         var processedCount = 0;
 
         // Create batches from the problems list
         var batches = problems.Batch(settings.BatchSize).ToList();
 
-        // Use the progress helper to process batches sequentially
+        // Embed the batches one at a time, logging a progress line after each
         await ProgressHelper.ExecuteWithProgressAsync(
+            logger,
             batches,
-            "Generating embeddings in batchees...",
-            getItemDescription: batch => ProgressHelper.NiceBatchDescription(batch, problem => problem.Slug.ToUpperInvariant()),
-            processItem: async (batch, _, _) =>
+            "Generating embeddings",
+            getItemDescription: batch =>
+                ProgressHelper.NiceBatchDescription(batch, problem => problem.Slug.ToUpperInvariant()),
+            processItem: async batch =>
             {
+                // Embed the whole batch, falling back to one problem at a time when it fails
                 try
                 {
-                    // Optimistically process the entire batch via the shared Gemini call
+                    // Embed the whole batch
                     await ProcessBatchAsync(batch, settings.Model);
+
+                    // Count every problem in it as done
                     processedCount += batch.Count;
                 }
                 catch (Exception batchException)
                 {
-                    // Log the batch-level failure with enough detail for investigation
-                    AnsiConsole.MarkupLine($"[red]Error processing batch starting with problem {batch.First().Id}: {batchException.Message}[/]");
-                    AnsiConsole.WriteException(batchException);
+                    // Warn that the batch failed
+                    logger.LogWarning(batchException, "Error processing batch starting with problem {ProblemId}",
+                        batch.First().Id);
 
                     // Fall back to individual processing to salvage what we can
                     foreach (var problem in batch)
                     {
+                        // Embed this problem on its own
                         try
                         {
-                            // Process single problem with same logic as batch
+                            // Embed the problem
                             await ProcessProblemAsync(problem, settings.Model);
+
+                            // Count it as done
                             processedCount++;
                         }
                         catch (Exception problemException)
                         {
-                            // Capture the specific problem failure for later retries
-                            AnsiConsole.MarkupLine($"[red]Error processing problem {problem.Id}: {problemException.Message}[/]");
-                            AnsiConsole.WriteException(problemException);
+                            // Log the problem's failure; a re-run picks it up again
+                            logger.LogError(problemException, "Error processing problem {ProblemId}", problem.Id);
                         }
                     }
                 }
@@ -138,19 +147,21 @@ public class GenerateEmbeddingsCommand(
 
         #endregion
 
-        #region Display completion summary
+        #region Completion summary
 
-        // Confirm successful completion with summary statistics
-        AnsiConsole.MarkupLine($"[green]Successfully processed {processedCount} problems![/]");
+        // Report how many problems got their embeddings, as a warning when some did not
+        logger.Log(processedCount == problems.Count ? LogLevel.Information : LogLevel.Warning,
+            "Processed {Processed} of {Total} problems", processedCount, problems.Count);
 
         #endregion
 
+        // Done, even when some problems failed; the summary already warned
         return 0;
     }
 
     /// <summary>
-    /// Generates embeddings for a batch of problems using the configured <see cref="IGeminiEmbeddingService"/>.
-    /// Optimizes API calls by batching multiple problems together in single requests.
+    /// Generates and saves the embeddings of a batch of problems, every problem's texts sharing each
+    /// <see cref="IGeminiEmbeddingService"/> request.
     /// </summary>
     /// <param name="batch">The problems to process.</param>
     /// <param name="modelName">The Gemini model to use for embedding creation.</param>
@@ -170,15 +181,14 @@ public class GenerateEmbeddingsCommand(
     }
 
     /// <summary>
-    /// Generates embeddings for a single problem, including its solution when present.
-    /// Falls back to this method when batch processing fails for error recovery.
+    /// Generates and saves the embeddings of a single problem, its solution's included when it has one.
     /// </summary>
     /// <param name="problem">The problem to process.</param>
     /// <param name="modelName">The Gemini model to use for embedding creation.</param>
     /// <returns>A task that completes when the embeddings are generated and persisted.</returns>
     private async Task ProcessProblemAsync(ProblemForEmbeddingDto problem, string modelName)
     {
-        // Reuse the same logic as batch processing for a single problem
+        // The problem's embeddings, generated as a batch of one
         var embeddingsByProblem = await GenerateEmbeddingsForProblemsAsync([problem], modelName);
         var embeddings = embeddingsByProblem[0];
 
@@ -187,12 +197,10 @@ public class GenerateEmbeddingsCommand(
     }
 
     /// <summary>
-    /// Core embedding generation logic shared by both batch and single-problem processing.
-    /// Generates four types of embeddings for each problem:
-    /// - Statement semantic (RetrievalQuery): for similarity search on problem statements
-    /// - Statement retrieval (RetrievalDocument): for document retrieval on problem statements
-    /// - Solution semantic (RetrievalQuery): for similarity search on solutions (if solution exists)
-    /// - Solution retrieval (RetrievalDocument): for document retrieval on solutions (if solution exists)
+    /// Generates the embeddings of each problem: a semantic
+    /// (<see cref="EmbeddingConstants.Types.RetrievalQuery"/>) and a retrieval
+    /// (<see cref="EmbeddingConstants.Types.RetrievalDocument"/>) embedding of its statement, and of its solution when
+    /// it has one.
     /// </summary>
     /// <param name="problems">The problems to generate embeddings for.</param>
     /// <param name="modelName">The Gemini model to use for embedding creation.</param>
@@ -204,32 +212,34 @@ public class GenerateEmbeddingsCommand(
         // Timestamp for all embeddings in this batch
         var timestamp = DateTime.UtcNow;
 
-        // Decompose the batch into the texts that will be embedded together
+        // Every problem's statement
         var statementTexts = problems.Select(problem => problem.Statement).ToArray();
 
-        // Single Gemini call for all statements improves throughput (semantic search)
+        // Semantic embeddings of every statement
         var statementSemanticEmbeddings = await geminiService.GenerateEmbeddingsAsync(
             modelName,
             statementTexts,
             EmbeddingConstants.Types.RetrievalQuery,
             EmbeddingConstants.VectorDimensions);
 
-        // Fetch retrieval embeddings in the same batch window to keep shapes aligned
+        // Retrieval embeddings of every statement
         var statementRetrievalEmbeddings = await geminiService.GenerateEmbeddingsAsync(
             modelName,
             statementTexts,
             EmbeddingConstants.Types.RetrievalDocument,
             EmbeddingConstants.VectorDimensions);
 
-        // Track problems that include solutions to prepare solution embeddings
+        // The problems that have a solution
         var problemsWithSolutions = problems
             .Select((problem, index) => (problem, index))
             .Where(tuple => !string.IsNullOrEmpty(tuple.problem.Solution))
             .ToArray();
 
-        // Initialize empty arrays for solution embeddings
+        // The solution embeddings, empty when no problem has a solution
         var solutionSemanticEmbeddings = Array.Empty<float[]>();
         var solutionRetrievalEmbeddings = Array.Empty<float[]>();
+
+        // Each solved problem's id mapped to its position among the solution embeddings
         var solutionIndexLookup = new Dictionary<Guid, int>();
 
         // Generate solution embeddings only if there are problems with solutions
@@ -240,14 +250,14 @@ public class GenerateEmbeddingsCommand(
                 .Select(tuple => tuple.problem.Solution!)
                 .ToArray();
 
-            // Generate embeddings for solution semantics (semantic search)
+            // Semantic embeddings of every solution
             solutionSemanticEmbeddings = await geminiService.GenerateEmbeddingsAsync(
                 modelName,
                 solutionTexts,
                 EmbeddingConstants.Types.RetrievalQuery,
                 EmbeddingConstants.VectorDimensions);
 
-            // Generate embeddings tailored for retrieval scenarios as well
+            // Retrieval embeddings of every solution
             solutionRetrievalEmbeddings = await geminiService.GenerateEmbeddingsAsync(
                 modelName,
                 solutionTexts,
@@ -259,13 +269,14 @@ public class GenerateEmbeddingsCommand(
                 solutionIndexLookup[problemsWithSolutions[problemIndex].problem.Id] = problemIndex;
         }
 
-        // Build the embedding collections for each problem
+        // One embedding list per problem, in input order
         var result = new List<List<ProblemEmbeddingUpsertDto>>();
 
-        // Go through all the problems
-        foreach (var (problem, semantic, retrival) in problems.Zip(statementSemanticEmbeddings, statementRetrievalEmbeddings))
+        // Build each problem's embeddings
+        foreach (var (problem, semantic, retrieval) in
+                 problems.Zip(statementSemanticEmbeddings, statementRetrievalEmbeddings))
         {
-            // Start with the two baseline embeddings that every problem receives
+            // Start with the statement's embeddings, which every problem gets
             var embeddings = new List<ProblemEmbeddingUpsertDto>
             {
                 // Semantic
@@ -281,11 +292,11 @@ public class GenerateEmbeddingsCommand(
                     DocumentType.Statement,
                     EmbeddingConstants.Types.RetrievalDocument,
                     modelName,
-                    retrival,
+                    retrieval,
                     timestamp)
             };
 
-            // Augment the embedding set with standalone solution vectors when available
+            // Add the solution's embeddings when the problem has one
             if (solutionIndexLookup.TryGetValue(problem.Id, out var solutionIndex))
             {
                 // Semantic

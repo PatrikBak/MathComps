@@ -1,7 +1,7 @@
 using Clerk.BackendAPI;
 using MathComps.Infrastructure.Services.Clerk;
 using MathComps.Infrastructure.Services.Users;
-using Spectre.Console;
+using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 
 namespace MathComps.Cli.UserSync.Commands;
@@ -9,65 +9,51 @@ namespace MathComps.Cli.UserSync.Commands;
 /// <summary>
 /// Command to sync all users from Clerk to the database.
 /// </summary>
-/// <param name="clerkClient">The official Clerk client for fetching users</param>
-/// <param name="userManager">The user manager for upserting users</param>
+/// <param name="clerkClient">The official Clerk client</param>
+/// <param name="userManager">The user manager users are synced through</param>
+/// <param name="logger">The logger the sync's progress goes through</param>
 public class SyncAllUsersCommand(
     ClerkBackendApi clerkClient,
-    IUserManager userManager
+    IUserManager userManager,
+    ILogger<SyncAllUsersCommand> logger
 ) : AsyncCommand
 {
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context)
     {
         // Log start
-        AnsiConsole.MarkupLine("[blue]Fetching users from Clerk...[/]");
+        logger.LogInformation("Fetching users from Clerk");
 
         // Fetch all users from Clerk
         var users = (await clerkClient.Users.ListAsync()).UserList?.ToList() ?? [];
 
         // Log number of users
-        AnsiConsole.MarkupLine($"[green]Found {users.Count} users. Syncing...[/]");
+        logger.LogInformation("Found {Count} users. Syncing", users.Count);
 
-        // Progress bar for syncing
-        await AnsiConsole.Progress()
-            .AutoClear(false)
-            .Columns(
-                new TaskDescriptionColumn(),
-                new ProgressBarColumn(),
-                new PercentageColumn(),
-                new SpinnerColumn()
-            )
-            .StartAsync(async ctx =>
-            {
-                // Add task
-                var task = ctx.AddTask("[cyan]Syncing users[/]", maxValue: users.Count);
+        // Sync each user into the database, logging progress after each
+        foreach (var (index, user) in users.Index())
+        {
+            // Extract email from first email address
+            var email = user.EmailAddresses.FirstOrDefault()?.EmailAddressValue;
 
-                // For each user
-                foreach (var user in users)
-                {
-                    // Extract email from first email address
-                    var email = user.EmailAddresses.FirstOrDefault()?.EmailAddressValue;
+            // The user's fields the database keeps
+            var dto = new UserSyncDto(
+                user.Id,
+                email,
+                user.ImageUrl
+            );
 
-                    // Create sync DTO
-                    var dto = new UserSyncDto(
-                        user.Id,
-                        email,
-                        user.ImageUrl
-                    );
+            // Sync user to database
+            await userManager.SyncUserAsync(dto);
 
-                    // Sync user to database
-                    await userManager.SyncUserAsync(dto);
-
-                    // Log success
-                    AnsiConsole.MarkupLine($"[dim]Synced: {user.Id}[/]");
-
-                    // Advance the progress bar
-                    task.Increment(1);
-                }
-            });
+            // Log the user and how far the sync has got
+            logger.LogInformation("Synced {Done}/{Total}: {UserId}", index + 1, users.Count, user.Id);
+        }
 
         // Log success
-        AnsiConsole.MarkupLine("[green]✓ All users synced successfully![/]");
+        logger.LogInformation("All users synced successfully");
+
+        // Done
         return 0;
     }
 }

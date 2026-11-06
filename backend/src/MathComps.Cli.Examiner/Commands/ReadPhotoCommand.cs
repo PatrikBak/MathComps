@@ -2,9 +2,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Photos;
-using MathComps.Shared.Cli;
 using MathComps.Shared.Extensions;
-using Spectre.Console;
+using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 
 namespace MathComps.Cli.Examiner.Commands;
@@ -15,12 +14,16 @@ namespace MathComps.Cli.Examiner.Commands;
 /// </summary>
 /// <param name="photoReader">The reader each photo goes through.</param>
 /// <param name="spendTracker">The tally of what the run spent.</param>
+/// <param name="logger">The logger each reading, each failure and the run's total go through.</param>
 [Description("""
     Read photos of handwritten pages. Each photo's reading goes to a folder beside it, <name>-reading, holding the
     text as text.md, the page the model read as page.jpg, and each drawing as a JPEG named after its marker in the
     text ([[Figure 2]] is figure-2.jpg), replacing what an earlier run wrote there. Takes JPEG, PNG and WebP.
 """)]
-public class ReadPhotoCommand(IPhotoReader photoReader, ILlmSpendTracker spendTracker)
+public class ReadPhotoCommand(
+    IPhotoReader photoReader,
+    ILlmSpendTracker spendTracker,
+    ILogger<ReadPhotoCommand> logger)
     : AsyncCommand<ReadPhotoCommand.Settings>
 {
     /// <summary>
@@ -50,7 +53,10 @@ public class ReadPhotoCommand(IPhotoReader photoReader, ILlmSpendTracker spendTr
         // At least one photo has to be read at a time.
         if (commandSettings.Parallel < 1)
         {
-            AnsiConsole.MarkupLine("[red]--parallel must be at least 1.[/]");
+            // Name the bad option.
+            logger.LogError("--parallel must be at least 1.");
+
+            // Nothing was read.
             return 1;
         }
 
@@ -62,7 +68,7 @@ public class ReadPhotoCommand(IPhotoReader photoReader, ILlmSpendTracker spendTr
         {
             // Name each missing photo.
             foreach (var path in missing)
-                AnsiConsole.MarkupLineInterpolated($"[red]Photo not found:[/] {path}");
+                logger.LogError("Photo not found: {Path}", path);
 
             // Nothing was read.
             return 1;
@@ -77,7 +83,7 @@ public class ReadPhotoCommand(IPhotoReader photoReader, ILlmSpendTracker spendTr
             new ParallelOptions { MaxDegreeOfParallelism = commandSettings.Parallel },
             async (path, cancellationToken) =>
             {
-                // Count a photo that fails.
+                // Read the photo, counting it when it fails.
                 if (!await ReadOneAsync(path, cancellationToken))
                     Interlocked.Increment(ref failed);
             });
@@ -85,9 +91,10 @@ public class ReadPhotoCommand(IPhotoReader photoReader, ILlmSpendTracker spendTr
         // How many photos were read.
         var read = commandSettings.Photos.Length - failed;
 
-        // Report how many photos were read and what the run spent.
-        AnsiConsole.MarkupLineInterpolated(
-            $"[green]Read {read} of {commandSettings.Photos.Length} photo(s) for ${spendTracker.Total:0.0000}.[/]");
+        // Report how many photos were read and what the run spent, as a warning when any failed.
+        logger.Log(failed == 0 ? LogLevel.Information : LogLevel.Warning,
+            "Read {Read} of {Count} photo(s) for ${Cost:0.0000}.",
+            read, commandSettings.Photos.Length, spendTracker.Total);
 
         // A run where any photo failed exits as a failure.
         return failed == 0 ? 0 : 1;
@@ -102,7 +109,7 @@ public class ReadPhotoCommand(IPhotoReader photoReader, ILlmSpendTracker spendTr
     private async Task<bool> ReadOneAsync(string path, CancellationToken cancellationToken)
     {
         // The photo's file name.
-        var name = Markup.Escape(Path.GetFileName(path));
+        var name = Path.GetFileName(path);
 
         // Time the reading.
         var stopwatch = Stopwatch.StartNew();
@@ -125,12 +132,9 @@ public class ReadPhotoCommand(IPhotoReader photoReader, ILlmSpendTracker spendTr
             // How many drawings the reading cut out.
             var figures = result.Value.Crops.Count;
 
-            // The model that answered.
-            var model = Markup.Escape(result.ServedModel);
-
             // Report the reading: its drawings, the model that answered, what it cost and how long it took.
-            CliLog.Line($"{name}: {figures} figure(s), {model}, ${result.Usage.Cost:0.0000}, " +
-                $"{stopwatch.Elapsed.TotalSeconds:0.0}s");
+            logger.LogInformation("{Photo}: {Figures} figure(s), {Model}, ${Cost:0.0000}, {Seconds:0.0}s",
+                name, figures, result.ServedModel, result.Usage.Cost, stopwatch.Elapsed.TotalSeconds);
 
             // The photo was read and written.
             return true;
@@ -139,7 +143,7 @@ public class ReadPhotoCommand(IPhotoReader photoReader, ILlmSpendTracker spendTr
         catch (Exception exception)
         {
             // Name the photo and why it failed.
-            CliLog.Line($"[red]{name}:[/] {Markup.Escape(exception.Message)}");
+            logger.LogError(exception, "{Photo} failed", name);
 
             // This photo failed.
             return false;

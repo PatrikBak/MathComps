@@ -6,6 +6,7 @@ using MathComps.Cli.BulkImport.Validation;
 using MathComps.Infrastructure.Services.BulkImport;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Storage;
+using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -18,8 +19,12 @@ namespace MathComps.Cli.BulkImport.Commands;
 /// </summary>
 /// <param name="metadata">The metadata service backing the registry-link check.</param>
 /// <param name="import">The import itself, dry runs included.</param>
+/// <param name="logger">The logger the run's lines go through, every folder's report included.</param>
 [Description("Import draft folders: write the rows and upload the figures.")]
-public class ImportCommand(IMetadataLocalizationService metadata, IDraftImportService import)
+public class ImportCommand(
+    IMetadataLocalizationService metadata,
+    IDraftImportService import,
+    ILogger<ImportCommand> logger)
     : AsyncCommand<ImportCommand.Settings>
 {
     /// <summary>
@@ -61,11 +66,11 @@ public class ImportCommand(IMetadataLocalizationService metadata, IDraftImportSe
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings) =>
         // Import every matched folder; the runner owns the glob expansion, per-folder header and tally.
         await MultiFolderRunner.RunAsync(
-            settings.Folders, okLabel: settings.DryRun ? "passed" : "imported",
+            logger, settings.Folders, okLabel: settings.DryRun ? "passed" : "imported",
             folder => ImportFolderAsync(folder, settings.DryRun));
 
     /// <summary>
-    /// Checks then imports a single draft folder, rendering its report. Every issue is collected rather than stopping
+    /// Checks then imports a single draft folder, logging its report. Every issue is collected rather than stopping
     /// at the first, and the database is consulted only for a draft clean on its own terms.
     /// </summary>
     /// <param name="folder">The draft-folder path to import.</param>
@@ -73,7 +78,7 @@ public class ImportCommand(IMetadataLocalizationService metadata, IDraftImportSe
     /// <returns>Whether the folder passed, and so was imported unless this was a dry run.</returns>
     private async Task<bool> ImportFolderAsync(string folder, bool dryRun)
     {
-        // One Node subprocess does the whole draft-format read; we consume its manifest.
+        // The draft's manifest, as the preflight reads it.
         var manifest = await PreflightRunner.RunAsync(folder);
 
         // The draft folder's absolute path.
@@ -86,8 +91,8 @@ public class ImportCommand(IMetadataLocalizationService metadata, IDraftImportSe
         var result = await ImportResult.CheckThenImportAsync(
             draftIssues, () => ImportAsync(manifest, folderPath, dryRun));
 
-        // Render the report.
-        ImportReport.Render(manifest.Meta, result, dryRun);
+        // Log the folder's report.
+        ImportReport.Render(logger, manifest.Meta, result, dryRun);
 
         // The folder passes when nothing blocked it.
         return result.Ok;
@@ -111,7 +116,7 @@ public class ImportCommand(IMetadataLocalizationService metadata, IDraftImportSe
         // Each problem's full content, in the shape the import writes.
         var problems = manifest.Problems.Select(problem => problem.Content).ToList();
 
-        // Run the import.
+        // What the import did with the draft, or would have done on a dry run.
         return await import.ImportAsync(
             new DraftTarget(meta.CompetitionPath, meta.Season.Year, meta.Organization), date, meta.VisibleSinceUtc,
             problems, folderPath, dryRun);
@@ -133,7 +138,7 @@ public class ImportCommand(IMetadataLocalizationService metadata, IDraftImportSe
         // Every referenced image must size cleanly, the exact read the import performs.
         issues.AddRange(ImageRefValidator.Check(manifest.Problems, folderPath));
 
-        // Tag slugs must resolve to the approved vocabulary.
+        // Tag slugs must resolve to the approved vocabulary, each listed once.
         issues.AddRange(TagSlugValidator.Check(manifest.Problems));
 
         // An unusable meta has already reported its own error, which the registry check would only bury under

@@ -239,7 +239,7 @@ dotnet format
 
 Each tool has its own README.
 
-Every tool logs to the console with the defaults in `src/MathComps.Shared.Cli/appsettings.logging.json`: our own code from Information, everything else from Warning. Redirected output gets one line per entry. A tool's own config files, its user secrets or an environment variable override any of it. A category name holds dots, which the shell won't assign directly, so a one-off run goes through `env`:
+Every line a command writes is a log line, its report and its crash's stack trace included. Only Spectre's `--help` goes straight to the console. The defaults in `src/MathComps.Shared.Cli/appsettings.logging.json` log our own code from Information and everything else from Warning. Each line reads `12:04:31 info ImportCommand: …`, a multi-line entry repeats that prefix on every line, and a terminal colours the level. A tool's own config files, its user secrets or an environment variable override any of it. A category name holds dots, which the shell won't assign directly, so a one-off run goes through `env`:
 
 ```bash
 env 'Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command=Information' dotnet run --project src/MathComps.Cli.BulkImport -- ./my-draft --dry-run

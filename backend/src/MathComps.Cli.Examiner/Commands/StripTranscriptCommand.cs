@@ -1,6 +1,6 @@
 using System.ComponentModel;
 using MathComps.Infrastructure.Services.Defense;
-using Spectre.Console;
+using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 
 namespace MathComps.Cli.Examiner.Commands;
@@ -8,14 +8,16 @@ namespace MathComps.Cli.Examiner.Commands;
 /// <summary>
 /// Rewinds a fixture's transcript deterministically: keeps the conversation through the N-th <c>## Candidate</c> turn
 /// and drops everything after it, so the examiner can re-reply from that point. The default keeps only the opening
-/// candidate seed — the reset a re-run starts from after a prompt change.
+/// candidate seed, the reset a re-run starts from after a prompt change.
 /// </summary>
+/// <param name="logger">The logger the outcome and refusals go through.</param>
 [Description("""
     Rewind a fixture's transcript.md: keep the conversation through the N-th '## Candidate' turn and drop everything
     after it, leaving the transcript awaiting the examiner's reply at that point. The default --keep 1 strips back to
     the opening candidate seed.
 """)]
-public class StripTranscriptCommand : AsyncCommand<StripTranscriptCommand.Settings>
+public class StripTranscriptCommand(ILogger<StripTranscriptCommand> logger)
+    : AsyncCommand<StripTranscriptCommand.Settings>
 {
     /// <summary>
     /// The command arguments.
@@ -33,7 +35,8 @@ public class StripTranscriptCommand : AsyncCommand<StripTranscriptCommand.Settin
         /// How many candidate turns to keep; the last of them closes the rewound transcript.
         /// </summary>
         [CommandOption("--keep <COUNT>")]
-        [Description("How many '## Candidate' turns to keep; the transcript ends with that turn. Defaults to 1 — the opening seed.")]
+        [Description("How many '## Candidate' turns to keep; the transcript ends with that turn, " +
+            "and 1 keeps only the opening seed.")]
         [DefaultValue(1)]
         public int Keep { get; set; }
     }
@@ -44,43 +47,56 @@ public class StripTranscriptCommand : AsyncCommand<StripTranscriptCommand.Settin
         // At least one candidate turn has to remain for the examiner to reply to.
         if (commandSettings.Keep < 1)
         {
-            AnsiConsole.MarkupLine("[red]--keep must be at least 1.[/]");
+            // Name the bad option.
+            logger.LogError("--keep must be at least 1.");
+
+            // The transcript is untouched.
             return 1;
         }
 
         // The transcript file within the fixture folder.
         var path = Path.Combine(commandSettings.Fixture, "transcript.md");
 
-        // Bail early when it isn't there.
+        // Bail early when the transcript isn't there.
         if (!File.Exists(path))
         {
-            AnsiConsole.MarkupLineInterpolated($"[red]Transcript not found:[/] {path}");
+            // Name the missing transcript.
+            logger.LogError("Transcript not found: {Path}", path);
+
+            // Nothing was rewound.
             return 1;
         }
 
         // Parse the conversation.
         var transcript = Transcript.Parse(await File.ReadAllTextAsync(path));
 
-        // Truncate to the requested candidate turn, surfacing a too-short transcript as a clean CLI error.
+        // The rewound transcript.
         Transcript truncated;
+
+        // Truncate to the requested candidate turn.
         try
         {
             truncated = transcript.TruncateAfterCandidate(commandSettings.Keep);
         }
-        // A too-short transcript is a user error, not a crash — report it plainly and bail.
+        // A too-short transcript is a user error, not a crash.
         catch (InvalidOperationException exception)
         {
-            AnsiConsole.MarkupLineInterpolated($"[red]{exception.Message}[/]");
+            // Say why the transcript can't be rewound that far.
+            logger.LogError("{Refusal}", exception.Message);
+
+            // The transcript is untouched.
             return 1;
         }
 
         // Write the rewound transcript back, keeping a trailing newline on the file.
         await File.WriteAllTextAsync(path, truncated.ToMarkdown() + "\n");
 
-        // Report what remained and what was dropped.
+        // How many turns the rewind dropped.
         var dropped = transcript.Turns.Length - truncated.Turns.Length;
-        AnsiConsole.MarkupLineInterpolated(
-            $"Kept {truncated.Turns.Length} turn(s) through candidate turn {commandSettings.Keep}; dropped {dropped}.");
+
+        // Report what remained and what was dropped.
+        logger.LogInformation("Kept {Kept} turn(s) through candidate turn {Keep}; dropped {Dropped}.",
+            truncated.Turns.Length, commandSettings.Keep, dropped);
 
         // Done.
         return 0;

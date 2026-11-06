@@ -3,7 +3,7 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.Logging.Configuration;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
@@ -24,8 +24,7 @@ public sealed class CliApp
     private readonly Assembly _userSecretsAssembly;
 
     /// <summary>
-    /// Tool-specific registrations, each handed the built configuration so it can bind options and
-    /// resolve connection strings.
+    /// Tool-specific registrations, each taking the built configuration.
     /// </summary>
     private readonly List<Action<IServiceCollection, IConfiguration>> _serviceConfigurators = [];
 
@@ -51,6 +50,7 @@ public sealed class CliApp
     /// <typeparam name="TProgram">The tool's <c>Program</c> type, used to locate its entry assembly.</typeparam>
     /// <returns>The bootstrap, for fluent chaining.</returns>
     public static CliApp Create<TProgram>() =>
+        // A bootstrap anchored to the tool's own assembly.
         new(typeof(TProgram).Assembly);
 
     /// <summary>
@@ -69,7 +69,7 @@ public sealed class CliApp
     }
 
     /// <summary>
-    /// Declares a JSON config file the tool requires. Each must be present — a missing one fails at startup rather
+    /// Declares a JSON config file the tool requires. Each must be present: a missing one fails at startup rather
     /// than surfacing later as an opaque binding error. May be called more than once; files load in call order, so a
     /// later one overrides an earlier, and user secrets and env vars override them all.
     /// </summary>
@@ -89,37 +89,48 @@ public sealed class CliApp
     /// optionally registering extra commands through <paramref name="configure"/>.
     /// </summary>
     /// <typeparam name="TDefaultCommand">The command run when no command name is given.</typeparam>
-    /// <param name="args">Command-line arguments forwarded from <c>Program.cs</c>.</param>
+    /// <param name="args">The tool's command-line arguments.</param>
     /// <param name="configure">Optionally registers additional commands on the Spectre configurator.</param>
-    /// <returns>The process exit code: 0 on success, 1 on an unhandled exception.</returns>
+    /// <returns>The process exit code: the command's own, or 1 on an unhandled exception.</returns>
     public async Task<int> RunAsync<TDefaultCommand>(string[] args, Action<IConfigurator>? configure = null)
         where TDefaultCommand : class, ICommand
-    {
-        // Build the DI registrar through the shared bootstrap. Awaiting before the using disposes it keeps the
-        // service provider (and its singletons, e.g. the HttpClient meter factory) alive until the async command
-        // actually finishes, and disposing it writes out the log lines the console logger still holds.
-        using var registrar = BuildRegistrar();
-
-        // Run a command app whose default command is the supplied type.
-        return await CliRunner.RunAsync(new CommandApp<TDefaultCommand>(registrar), args, configure);
-    }
-
-    /// <summary>
-    /// Runs the shared bootstrap (console setup, configuration, logging, and service registration) and returns the
-    /// registrar the command app resolves dependencies from.
-    /// </summary>
-    /// <returns>The dependency-injection registrar wrapping the configured service collection.</returns>
-    private DependencyInjectionRegistrar BuildRegistrar()
     {
         // Force UTF-8 so diacritics (e.g. Slovak) render even where the default console code page can't.
         Console.InputEncoding = Encoding.UTF8;
         Console.OutputEncoding = Encoding.UTF8;
 
-        // Redirected output is a file something else reads back, and Spectre wraps it to 80 columns, which splits
-        // every long line into continuation lines the reader has no way to rejoin. A terminal keeps its own width.
-        if (Console.IsOutputRedirected)
-            AnsiConsole.Profile.Width = 10_000;
+        // A width no help line reaches.
+        const int unwrappedWidth = 10_000;
 
+        // Spectre writes the help and nothing else, and it wraps redirected output to 80 columns, which splits a long
+        // help line into continuation lines the reader has no way to rejoin. A terminal keeps its own width.
+        if (Console.IsOutputRedirected)
+            AnsiConsole.Profile.Width = unwrappedWidth;
+
+        // Read every configuration layer, the shared logging defaults first.
+        var configuration = BuildConfiguration();
+
+        // The one logger factory every line goes through, the crash report included.
+        using var loggerFactory = CreateLoggerFactory(configuration);
+
+        // Build the DI registrar. Awaiting before the using disposes it keeps the service provider (and its
+        // singletons, e.g. the HttpClient meter factory) alive until the async command actually finishes.
+        using var registrar = BuildRegistrar(configuration, loggerFactory);
+
+        // The logger an unhandled exception is reported through.
+        var crashLogger = loggerFactory.CreateLogger(typeof(CliRunner));
+
+        // Run a command app whose default command is the supplied type.
+        return await CliRunner.RunAsync(new CommandApp<TDefaultCommand>(registrar), args, crashLogger, configure);
+    }
+
+    /// <summary>
+    /// Builds the configuration from the shared logging defaults, the tool's declared config files, its user secrets
+    /// and its environment variables, each layer overriding the ones before it.
+    /// </summary>
+    /// <returns>The built configuration.</returns>
+    private IConfiguration BuildConfiguration()
+    {
         // Start from the tool's base directory so configuration is independent of the working directory.
         var configurationBuilder = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory);
@@ -132,25 +143,54 @@ public sealed class CliApp
             configurationBuilder.AddJsonFile(configFile, optional: false);
 
         // Layer the tool's user secrets and env vars on top.
-        var configuration = configurationBuilder
+        return configurationBuilder
             .AddUserSecrets(_userSecretsAssembly, optional: true)
             .AddEnvironmentVariables()
             .Build();
+    }
 
+    /// <summary>
+    /// Creates the logger factory that writes to the console through <see cref="CliConsoleLoggerProvider"/>, at the
+    /// levels and in the format the Logging section sets.
+    /// </summary>
+    /// <param name="configuration">The built configuration, whose Logging section configures the factory.</param>
+    /// <returns>The logger factory, owned and disposed by the caller.</returns>
+    private static ILoggerFactory CreateLoggerFactory(IConfiguration configuration) =>
+        // A factory whose one provider is our console logger.
+        LoggerFactory.Create(logging =>
+        {
+            // Log at the levels the Logging section sets.
+            logging.AddConfiguration(configuration.GetSection("Logging"));
+
+            // Write every entry to the console through our own logger.
+            logging.Services.AddSingleton<ILoggerProvider, CliConsoleLoggerProvider>();
+
+            // Bind the console logger's settings to the Logging section's Console part, which the provider's alias
+            // names.
+            LoggerProviderOptions.RegisterProviderOptions<CliConsoleLoggerSettings, CliConsoleLoggerProvider>(
+                logging.Services);
+        });
+
+    /// <summary>
+    /// Registers the shared services and the tool's own, and returns the registrar the command app resolves
+    /// dependencies from.
+    /// </summary>
+    /// <param name="configuration">The built configuration, exposed to DI and handed to each tool registration.</param>
+    /// <param name="loggerFactory">The logger factory every resolved logger comes from.</param>
+    /// <returns>The dependency-injection registrar wrapping the configured service collection.</returns>
+    private DependencyInjectionRegistrar BuildRegistrar(IConfiguration configuration, ILoggerFactory loggerFactory)
+    {
         // Stand up the service collection.
         var services = new ServiceCollection();
 
         // Expose configuration to DI.
-        services.AddSingleton<IConfiguration>(configuration);
+        services.AddSingleton(configuration);
 
-        // Redirected output gets one line per log entry, which a reader parses line by line, and a terminal gets the
-        // two-line form. Registered ahead of the logging setup, so the Logging section can still override it.
-        services.Configure<SimpleConsoleFormatterOptions>(options => options.SingleLine = Console.IsOutputRedirected);
+        // Hand every logger out of the one factory.
+        services.AddSingleton(loggerFactory);
 
-        // Log to the console at the levels and in the format the Logging section sets.
-        services.AddLogging(logging => logging
-            .AddConfiguration(configuration.GetSection("Logging"))
-            .AddConsole());
+        // Add the typed loggers. Logging's own registration only fills what is still missing, so the factory stays.
+        services.AddLogging();
 
         // Apply each tool-specific registration against the built configuration.
         foreach (var configureServices in _serviceConfigurators)
