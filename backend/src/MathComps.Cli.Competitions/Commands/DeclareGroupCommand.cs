@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Shared.Serialization;
-using Spectre.Console;
+using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 
 namespace MathComps.Cli.Competitions.Commands;
@@ -12,8 +12,10 @@ namespace MathComps.Cli.Competitions.Commands;
 /// dates are decided and the problems land on its rounds later.
 /// </summary>
 /// <param name="declare">The service that carries the manifest out.</param>
+/// <param name="logger">The logger the outcome and refusals go through.</param>
 [Description("Declare a hosted group from its manifest: link its rounds and set the terms they run on.")]
-public class DeclareGroupCommand(IHostedGroupService declare) : AsyncCommand<DeclareGroupCommand.Settings>
+public class DeclareGroupCommand(IHostedGroupService declare, ILogger<DeclareGroupCommand> logger)
+    : AsyncCommand<DeclareGroupCommand.Settings>
 {
     /// <summary>
     /// The command arguments.
@@ -42,7 +44,7 @@ public class DeclareGroupCommand(IHostedGroupService declare) : AsyncCommand<Dec
         if (!File.Exists(settings.Manifest))
         {
             // Say which path came up empty.
-            AnsiConsole.MarkupLineInterpolated($"[red]No manifest at {settings.Manifest}[/]");
+            logger.LogError("No manifest at {Manifest}", settings.Manifest);
 
             // Nothing was declared, and the path is the caller's to fix.
             return 1;
@@ -57,22 +59,19 @@ public class DeclareGroupCommand(IHostedGroupService declare) : AsyncCommand<Dec
             // Upsert the group and give it exactly the rounds the manifest names, or work out what that would do.
             var outcome = await declare.DeclareAsync(manifest, settings.DryRun);
 
-            // What a real run put there, or what a dry run says it would.
+            // The verb for what happened to the group: created or updated, or would be on a dry run.
             var verb = settings.DryRun
                 ? outcome.Created ? "Would create" : "Would update"
                 : outcome.Created ? "Created" : "Updated";
 
-            // The group's size, in rounds and the problems each of them announces.
-            var size = $"{outcome.RoundsLinked} round(s) of {outcome.ProblemCount} problem(s) each";
-
-            // What it did, in one line.
-            AnsiConsole.MarkupLineInterpolated($"[green]{verb}[/] group [bold]{manifest.Slug}[/]: {size}.");
+            // What the run did, in one line, with the group's size in rounds and the problems each round announces.
+            logger.LogInformation("{Verb} group {Slug}: {Rounds} round(s) of {Problems} problem(s) each",
+                verb, manifest.Slug, outcome.RoundsLinked, outcome.ProblemCount);
 
             // A group may stand before its problems are picked, so say how much of it is still to come. Without
             // it the line above reads as a full group over rounds holding nothing.
             if (outcome.RoundsAwaitingProblems > 0)
-                AnsiConsole.MarkupLineInterpolated(
-                    $"[yellow]{outcome.RoundsAwaitingProblems} round(s) still waiting on their problems.[/]");
+                logger.LogWarning("{Rounds} round(s) still waiting on their problems", outcome.RoundsAwaitingProblems);
 
             // The group stands as the manifest describes it, or a dry run says it would.
             return 0;
@@ -81,9 +80,9 @@ public class DeclareGroupCommand(IHostedGroupService declare) : AsyncCommand<Dec
         catch (HostedGroupManifestException exception)
         {
             // Say what is wrong with it, in the words the refusal used.
-            AnsiConsole.MarkupLineInterpolated($"[red]{exception.Message}[/]");
+            logger.LogError("{Refusal}", exception.Message);
 
-            // Nothing was written, here or on the run that refused it.
+            // The refusal left nothing behind, so the run fails.
             return 1;
         }
     }

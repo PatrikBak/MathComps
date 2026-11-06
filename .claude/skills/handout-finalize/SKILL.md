@@ -80,9 +80,9 @@ The CLI exits 1 on compile failures, unknown commands, or a failed regeneration 
 
 **Compile failures:** stop and surface the failing file(s) to the user. Do not try to fix `.tex` content here and do not quote the TeX log — it's noise.
 
-**Unknown commands:** the CLI prints a `Source File` → `\command` table.
+**Unknown commands:** the CLI logs one error line per command, `<file>: \command is not covered by a 'leave' rule`.
 
-`backend/src/MathComps.TexParser/TexCleaner/tex_cleaner_rules.txt` decides how each command crosses from the `pdfcsplain` source world into KaTeX. Apply your judgment per row (do not ask), then report one line per decision:
+`backend/src/MathComps.TexParser/TexCleaner/tex_cleaner_rules.txt` decides how each command crosses from the `pdfcsplain` source world into KaTeX. Apply your judgment per command (do not ask), then report one line per decision:
 
 | Situation | Action |
 | --- | --- |
