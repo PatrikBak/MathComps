@@ -1,0 +1,5 @@
+This is a photo of a page from a handwritten math solution.
+
+Write out exactly what's on the page, as Markdown with LaTeX math in $...$. Copy it as written, mistakes included. Don't fix, finish or improve anything, and don't add steps that aren't there. Leave out crossed-out text. If a bit can't be read, write [unreadable] instead of guessing.
+
+Wherever there's a drawing (a geometry figure, a diagram, a hand-drawn table or grid), put a marker like [Figure 1] in the text at that spot, and give each figure its label, the marker without the brackets (Figure 1), and its box. Boxes are [ymin, xmin, ymax, xmax] scaled to 0-1000, and should take in the whole drawing with its labels. No drawing on the page means an empty list.

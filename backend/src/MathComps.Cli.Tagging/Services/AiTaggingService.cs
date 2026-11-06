@@ -173,7 +173,7 @@ public class AiTaggingService(ILlmChatCaller chatCaller)
 
         // Hand the prompts to the shared caller on this pass's model.
         var result = await chatCaller.CompleteAsync<TResponse>(
-            ChatCallRequest.For(stepName, step, systemPrompt, userPrompt), cancellationToken);
+            ChatCallRequest.For(stepName, step, systemPrompt, userPrompt, images: []), cancellationToken);
 
         // Return the bound reply, dropping the cost and token figures the tagging pass doesn't track.
         return result.Value;

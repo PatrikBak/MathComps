@@ -1,10 +1,11 @@
 namespace MathComps.Infrastructure.Services.Ai;
 
 /// <summary>
-/// Runs a single chat completion against the configured OpenAI-compatible endpoint: a system message plus a user
-/// message in, the reply out (paired with what the call billed), with transient failures retried. Each call names the
-/// model it routes to; the reasoning level is optional per call. A reply comes back either bound to a structured
-/// shape or as plain text, and the choice matters for content — see <see cref="CompleteTextAsync"/>.
+/// Runs a single chat completion against the configured chat endpoint. An optional system message and a user
+/// message, which can carry images, go in. The reply comes out paired with what the call billed, with transient
+/// failures retried. Each call names the model it routes to; the reasoning level is optional per call.
+/// A reply comes back either bound to a structured shape or as plain text, and the choice matters for content — see
+/// <see cref="CompleteTextAsync"/>.
 /// </summary>
 public interface ILlmChatCaller
 {
@@ -14,7 +15,7 @@ public interface ILlmChatCaller
     /// comes back paired with the call's billed cost and token usage.
     /// </summary>
     /// <typeparam name="TResponse">The structured shape the reply is bound into.</typeparam>
-    /// <param name="request">The call's two messages, the model it routes to, and its limits.</param>
+    /// <param name="request">The call's messages, the model it routes to, and its limits.</param>
     /// <param name="cancellationToken">A token to cancel the call.</param>
     /// <returns>The bound reply together with the call's billed cost and token usage.</returns>
     Task<ChatCallResult<TResponse>> CompleteAsync<TResponse>(
@@ -31,7 +32,7 @@ public interface ILlmChatCaller
     /// anywhere. Plain text has no second escape layer, so what the model wrote is what the caller gets.
     /// </para>
     /// </summary>
-    /// <param name="request">The call's two messages, the model it routes to, and its limits.</param>
+    /// <param name="request">The call's messages, the model it routes to, and its limits.</param>
     /// <param name="cancellationToken">A token to cancel the call.</param>
     /// <returns>The reply's text together with the call's billed cost and token usage.</returns>
     Task<ChatCallResult<string>> CompleteTextAsync(

@@ -1,6 +1,6 @@
 # Examiner CLI
 
-Runs Mathilda, the AI examiner who probes a student's defense of an olympiad solution. Given a fixture folder holding the conversation so far, it writes the next examiner reply and appends it to the transcript.
+Runs Mathilda, the AI examiner who probes a student's defense of an olympiad solution. Given a fixture folder holding the conversation so far, it writes the next examiner reply and appends it to the transcript. Its `read-photo` command reads photos of handwritten pages.
 
 The engine lives in `MathComps.Infrastructure` (`Services/Defense`). Two drivers share it: this CLI, which reads fixture files, and the API, which persists real defense conversations. The model is reached through an OpenAI-compatible provider via `Microsoft.Extensions.AI`. This CLI works entirely from files on disk and spends whatever you ask it to, since the `DefenseLimits` caps apply to the API alone.
 
@@ -46,6 +46,9 @@ dotnet run --project backend/src/MathComps.Cli.Examiner -- strip data/defense-fi
 
 # Rewind to the third candidate turn instead.
 dotnet run --project backend/src/MathComps.Cli.Examiner -- strip data/defense-fixtures/example --keep 3
+
+# Read photos of handwritten pages into their text and figure crops.
+dotnet run --project backend/src/MathComps.Cli.Examiner -- read-photo ~/photos/*.jpg
 ```
 
 The transcript's last turn must be a `## Candidate` turn, since the examiner replies to the candidate.
@@ -57,6 +60,17 @@ The transcript's last turn must be a `## Candidate` turn, since the examiner rep
 - `--keep <COUNT>`: how many `## Candidate` turns to keep; the transcript ends with that turn (default: 1)
 
 A mid-conversation rewind keeps the examiner turns written before any prompt change. That is what you want for "the conversation was fine through turn N, regenerate from there", and it is not a clean comparison of new prompts.
+
+`read-photo` runs the photo reader (`Services/Photos`) on local files. Each photo's reading goes to a `<name>-reading` folder beside it: the text as `text.md`, the page the model read as `page.jpg`, and each drawing as a JPEG named after its marker (`[Figure 2]` is `figure-2.jpg`), replacing what an earlier run wrote. It prints each photo's figure count, the model that answered, the cost and the time, then what the run spent. The prompt is [`Prompts/read-photo.txt`](../MathComps.Infrastructure/Prompts/read-photo.txt), sent as the user message beside the page. To try another model or prompt, override the config from the environment:
+
+```bash
+PhotoReader__Reading__Model=google/gemini-3.8-flash PhotoReader__Reading__Prompt=/abs/path/prompt.txt \
+  dotnet run --project backend/src/MathComps.Cli.Examiner -- read-photo ~/photos/*.jpg
+```
+
+**`read-photo` options:**
+
+- `--parallel <COUNT>`: how many photos are read at once (default: 3)
 
 ## Fixtures
 
@@ -92,11 +106,11 @@ dotnet user-secrets set "Llm:ApiKey" "your-api-key-here"
 
 Every backend project shares one user-secrets store (see the [main backend README](../../README.md)).
 
-Both config files are required at startup: [`appsettings.examiner.json`](../MathComps.Infrastructure/appsettings.examiner.json) for the steps, [`appsettings.llm.json`](../MathComps.Infrastructure/appsettings.llm.json) for the endpoint.
+The config files are required at startup: [`appsettings.examiner.json`](../MathComps.Infrastructure/appsettings.examiner.json) for the examiner's steps, [`appsettings.photo-reader.json`](../MathComps.Infrastructure/appsettings.photo-reader.json) for the photo reader, [`appsettings.llm.json`](../MathComps.Infrastructure/appsettings.llm.json) for the endpoint.
 
 ## Prompts
 
-One template per step in [`Prompts/`](../MathComps.Infrastructure/Prompts): `generate.txt`, `math-check.txt`, `leak-check.txt`, `language-check.txt` and `route-check.txt`. Each is that step's system message.
+The examiner has one template per step in [`Prompts/`](../MathComps.Infrastructure/Prompts): `generate.txt`, `math-check.txt`, `leak-check.txt`, `language-check.txt` and `route-check.txt`. Each is that step's system message.
 
 The user message is the conversation so far. The math-, leak- and route-checks get the proposed reply appended to it. The language check gets the candidate's latest turn and the proposed reply, and nothing else.
 

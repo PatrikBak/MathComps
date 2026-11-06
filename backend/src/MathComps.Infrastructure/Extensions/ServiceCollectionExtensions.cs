@@ -23,6 +23,7 @@ using MathComps.Infrastructure.Services.GradeMessages;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Mail;
 using MathComps.Infrastructure.Services.Organizations;
+using MathComps.Infrastructure.Services.Photos;
 using MathComps.Infrastructure.Services.Problems;
 using MathComps.Infrastructure.Services.Selection;
 using MathComps.Infrastructure.Services.Users;
@@ -452,6 +453,28 @@ public static class ServiceCollectionExtensions
             services.TryAddScoped<IExaminer>(_ => new FakeExaminer());
         else
             services.TryAddScoped<IExaminer, Examiner>();
+
+        // Builder pattern
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the photo reader: its model call and page settings, and the reader that writes out a photographed
+    /// page and cuts out its drawings. Assumes the chat stack is registered (see <see cref="AddLlmChat"/>).
+    /// </summary>
+    /// <param name="services">The service collection to add the photo reader to.</param>
+    /// <param name="configuration">The application configuration carrying the <c>PhotoReader</c> section.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddPhotoReader(this IServiceCollection services, IConfiguration configuration)
+    {
+        // The reading call and the page settings, validated at startup so a broken section fails before any photo.
+        services.AddOptions<PhotoReaderSettings>()
+            .Bind(configuration.GetSection(PhotoReaderSettings.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // The reader, which keeps no state of its own between photos.
+        services.TryAddSingleton<IPhotoReader, PhotoReader>();
 
         // Builder pattern
         return services;

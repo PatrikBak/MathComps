@@ -14,11 +14,9 @@
     <None Update="appsettings.*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <!-- Examiner prompt templates: Content (not None) so they flow to referencing projects' output (API + CLI). -->
-    <None Remove="Prompts\**\*.txt" />
-    <Content Include="Prompts\**\*.txt">
+    <None Update="Prompts\**\*.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

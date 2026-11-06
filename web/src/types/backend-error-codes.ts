@@ -62,6 +62,7 @@ export const BACKEND_ERROR_CODES = [
   'SelectionProposalUsed',
   'SelectionTargetNotFound',
   'Unauthenticated',
+  'UnreadablePhoto',
   'UsernameAlreadySet',
   'UsernameRejected',
   'UsernameTaken',

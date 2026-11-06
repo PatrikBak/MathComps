@@ -189,6 +189,7 @@
     "SERVER_ERROR": "Chyba serveru",
     "Unauthenticated": "Pro pokračování se přihlas.",
     "UNAUTHORIZED": "K této akci se musíš přihlásit",
+    "UnreadablePhoto": "Tuhle fotku nejde přečíst. Pošli ji jako obrázek JPEG, PNG nebo WebP.",
     "UPLOAD_URL_FAILED": "Nepodařilo se získat URL pro nahrávání",
     "UsernameAlreadySet": "Přezdívku už máš nastavenou a nedá se změnit.",
     "UsernameRejected": "Tuto přezdívku nelze použít.",

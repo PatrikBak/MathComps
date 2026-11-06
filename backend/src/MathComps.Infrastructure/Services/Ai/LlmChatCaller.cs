@@ -96,11 +96,11 @@ public class LlmChatCaller(
 
     /// <summary>
     /// Runs one completion through the retry pipeline, whatever shape the reply is read in: derives the model-bound
-    /// client, builds the per-call options and the two messages, and on every attempt folds the billing in before
+    /// client, builds the per-call options and the messages, and on every attempt folds the billing in before
     /// judging the reply, so a rejected attempt still counts.
     /// </summary>
     /// <typeparam name="TResult">The shape the reply is read into.</typeparam>
-    /// <param name="request">The call's two messages, the model it routes to, and its limits.</param>
+    /// <param name="request">The call's messages, the model it routes to, and its limits.</param>
     /// <param name="send">Issues the request against the model-bound client.</param>
     /// <param name="read">Pulls the result out of the reply, throwing when the reply is unusable.</param>
     /// <param name="cancellationToken">A token to cancel the call.</param>
@@ -129,12 +129,18 @@ public class LlmChatCaller(
                 RawRepresentationFactory = needsRawRepresentation ? _ => BuildRawRepresentation(request) : null,
             };
 
-        // The two messages: instructions as system, the input the model acts on as user.
-        ChatMessage[] messages =
-        [
-            new(ChatRole.System, request.SystemPrompt),
-            new(ChatRole.User, request.UserPrompt),
-        ];
+        // The user message: the input the model acts on, its text followed by any images it shows.
+        var userMessage = new ChatMessage(
+            ChatRole.User,
+            [
+                new TextContent(request.UserPrompt),
+                .. request.Images.Select(image => new DataContent(image.Data, image.MediaType)),
+            ]);
+
+        // The messages sent: the instructions as system when the call carries any, then the user message.
+        ChatMessage[] messages = request.SystemPrompt is null
+            ? [userMessage]
+            : [new ChatMessage(ChatRole.System, request.SystemPrompt), userMessage];
 
         // Every attempt's billing, summed across retries: a rejected attempt still billed, so the returned
         // usage must count it too.
