@@ -13,9 +13,6 @@ return await CliApp.Create<Program>()
         // Make sure DI can resolve DbContext
         services.AddMathCompsDbContext(configuration);
 
-        // The interactive manager reads through the problem lookup service
-        services.AddProblemServices();
-
         // Bind similarity calculation settings
         services.AddOptions<SimilarityCalculationSettings>()
             .Bind(configuration.GetSection(SimilarityCalculationSettings.SectionName))
@@ -32,7 +29,6 @@ return await CliApp.Create<Program>()
     })
     .RunAsync<CalculateSimilaritiesCommand>(args, config =>
     {
-        // The default batch calculation and its interactive REPL sibling.
+        // The batch calculation, also the default when no command is given
         config.AddCommand<CalculateSimilaritiesCommand>("calculate-similarities");
-        config.AddCommand<InteractiveSimilarityManagerCommand>("interactive");
     });
