@@ -7,8 +7,6 @@ namespace MathComps.Infrastructure.Services.Problems;
 
 /// <summary>
 /// Implements problem lookup operations using Entity Framework Core.
-/// Provides efficient database queries for common problem identification and retrieval needs
-/// across CLI tools and other services that need to resolve problem slugs to database entities.
 /// </summary>
 /// <param name="dbContextFactory">Entity Framework context factory for creating database connections.</param>
 public class ProblemLookupService(IDbContextFactory<MathCompsDbContext> dbContextFactory) : IProblemLookupService

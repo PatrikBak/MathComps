@@ -27,16 +27,6 @@ dotnet run --project backend/src/MathComps.Cli.Similarity -- calculate-similarit
 - `--count` or `-n`: Number of problems to process.
 - `--skip-processed`: Skip problems that already have similarities calculated.
 
-### **interactive**
-
-Starts an interactive session to manually manage similarity relationships.
-
-```bash
-dotnet run --project backend/src/MathComps.Cli.Similarity -- interactive
-```
-
-- **Commands**: List, remove, or clear similarity relationships.
-
 ## Setup
 
 Database connection: see the [main backend README](../../README.md).

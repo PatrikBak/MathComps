@@ -9,11 +9,6 @@
       "commandName": "Project",
       "workingDirectory": ".",
       "commandLineArgs": "calculate-similarities --count 10 --embeddings-only"
-    },
-    "Interactive": {
-      "commandName": "Project",
-      "workingDirectory": ".",
-      "commandLineArgs": "interactive"
     }
   }
 }

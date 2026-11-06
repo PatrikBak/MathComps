@@ -49,34 +49,4 @@ public class SimilarityDatabaseService(IDbContextFactory<MathCompsDbContext> dbC
         return await databaseContext.ProblemSimilarities.AnyAsync(similarity => similarity.SourceProblemId == problemId, cancellationToken);
     }
 
-    /// <inheritdoc/>
-    public async Task<IReadOnlyList<SimilarityResult>> GetExistingSimilaritiesAsync(
-        Guid problemId,
-        CancellationToken cancellationToken = default)
-    {
-        // Gain DB acess
-        await using var databaseContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-
-        // Load the similarity relationships from database with automatic JSON deserialization.
-        // EF Core automatically handles Components deserialization from JSON.
-        return [.. (await databaseContext.ProblemSimilarities
-            .AsNoTracking()
-            .Where(similarity => similarity.SourceProblemId == problemId)
-            .Select(similarity => new
-            {
-                similarity.SimilarProblemId,
-                similarity.SimilarProblem.Slug,
-                similarity.SimilarityScore,
-                similarity.Components,
-            })
-            .ToListAsync(cancellationToken))
-            // Convert to DTOs with validation
-            .Select(data => new SimilarityResult(
-                data.SimilarProblemId,
-                data.Slug,
-                data.SimilarityScore,
-                data.Components ?? throw new InvalidOperationException($"Problem {problemId} doesn't have similarity components for similar problem {data.SimilarProblemId}")
-            )),];
-    }
-
 }
