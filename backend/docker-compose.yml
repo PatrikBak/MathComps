@@ -70,11 +70,12 @@ services:
       Llm__ApiKey: ${LLM_API_KEY:?set it in .env}
       Sentry__Dsn: ${SENTRY_DSN:-}
       Mail__ResendApiKey: ${RESEND_API_KEY:-}
-      # Read-only access to the bucket the handouts CLI publishes the examiner's problem content to.
+      # The private bucket the handouts CLI publishes the examiner's problem content to, with a key scoped to that
+      # bucket alone.
       CloudflareR2__AccountId: ${R2_ACCOUNT_ID:?set it in .env}
-      CloudflareR2__BucketName: ${R2_BUCKET_NAME:?set it in .env}
-      CloudflareR2__AccessKeyId: ${R2_ACCESS_KEY_ID:?set it in .env}
-      CloudflareR2__SecretAccessKey: ${R2_SECRET_ACCESS_KEY:?set it in .env}
+      CloudflareR2__PrivateBucketName: ${R2_PRIVATE_BUCKET_NAME:?set it in .env}
+      CloudflareR2__AccessKeyId: ${R2_PRIVATE_ACCESS_KEY_ID:?set it in .env}
+      CloudflareR2__SecretAccessKey: ${R2_PRIVATE_SECRET_ACCESS_KEY:?set it in .env}
     depends_on:
       postgres:
         condition: service_healthy
