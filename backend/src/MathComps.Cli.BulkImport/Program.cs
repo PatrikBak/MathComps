@@ -5,7 +5,7 @@ using MathComps.Shared.Cli.Commands;
 using MathComps.Shared.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
-// Bootstrap the tool and run its sole command — import draft folders, or dry-run them.
+// Bootstrap the tool and run its sole command — dry-run draft folders, or import them with --write.
 return await CliApp.Create<Program>()
     .RequireConfigFile("appsettings.json")
     .ConfigureServices((services, configuration) =>

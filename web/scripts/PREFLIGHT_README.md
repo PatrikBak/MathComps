@@ -79,7 +79,7 @@ The preflight here is **DB-blind** — it checks the draft's _format_ (file shap
 - **New-problem metadata** — a problem the import would **create** must carry a `pN.yaml` sidecar (`missing-problem-meta`). A re-import onto an existing problem may omit it: with no `pN.yaml`, `authors`/`tags`/`solutionLink` default to "leave the stored values untouched", so a draft can hold exactly the problems being corrected and nothing else.
 - **Original existence** — a no-original (translation-only) drop is rejected unless its problem already exists (`no-original-new-problem`), and an original in a language other than the stored one is rejected as a second original (`original-conflict`).
 
-Because all of this is DB-aware, the import **requires a reachable database**, its `--dry-run` included.
+Because all of this is DB-aware, the import **requires a reachable database**, its dry run included.
 
 ## Problem metadata — `pN.yaml`
 

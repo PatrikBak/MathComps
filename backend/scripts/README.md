@@ -38,10 +38,10 @@ The tools these run live under [`backend/src/MathComps.Cli.*`](../README.md#cli-
 # Use a specific launch profile
 ./invoke-tool.sh embeddings -p "Regenerate"
 
-# Import problem drafts into the database (one or more folders; globs allowed)
-./invoke-tool.sh -e staging bulk-import ./my-draft --dry-run              # every check, keeps nothing
-./invoke-tool.sh -e staging bulk-import 'data/problems/skmo-*' --dry-run  # a whole batch
-./invoke-tool.sh -e prod bulk-import ./my-draft                           # the real import
+# Check problem drafts against the database, or import them with --write (one or more folders; globs allowed)
+./invoke-tool.sh -e staging bulk-import ./my-draft # every check, keeps nothing
+./invoke-tool.sh -e staging bulk-import 'data/problems/skmo-*' # a whole batch
+./invoke-tool.sh -e prod bulk-import ./my-draft --write # the real import
 ```
 
 On prod, `bulk-import` gets `--publish`, so its figures go to prod's R2 bucket with the keys in `.env.prod`.
