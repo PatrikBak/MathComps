@@ -7,7 +7,7 @@ description: Use this skill when editing one olympiad math handout file — fill
 
 ## Scope
 
-**Edit `.tex` files only.** The generated JSON is `web/src/content/handouts/*.json` and `handout-env-index.json`: never read, edit, or reference those. `web/src/content/handouts.json` is the opposite, a hand-maintained manifest that no CLI writes; it is owned by `handout-finalize` (and read by `handout-translate` for slugs), so leave it alone here rather than treating it as off-limits generated output.
+**Edit `.tex` files only.** The generated JSON is `web/src/content/handouts/*.json` and `handout-env-index.json`: never read, edit, or reference those. `web/src/content/handouts.json` is the opposite, a hand-maintained manifest that no CLI writes; it is owned by `handout-finalize` (and read by `handout-translate` for slugs), so leave it alone here rather than treating it as off-limits generated output. `*-skeleton.tex` sits beside the sources but is generated: the Handouts CLI rewrites it from the main file on every build that compiles (not under `--skip-compile`), so an edit there is discarded.
 
 ## Workflow
 
@@ -23,7 +23,7 @@ description: Use this skill when editing one olympiad math handout file — fill
 Default to a parallel fan-out, one agent per problem. Do not wait to be told the task is parallel.
 
 1. **Triage every problem yourself, up front, in one pass.** Work each solution out from its hints. This is the one place derivation belongs, and it doubles as the agent brief — never grind it again later. Sort into *(a) the hints lead to the intended solution* and *(b) a hint is wrong, ambiguous, or doesn't get there*.
-2. **Batch every (b) into a single message and ask.** A hint a competent solver can't follow is a broken hint and the author needs to know — guiding to the solution is the entire point of a hint. Raise mistakes you find in a statement or a stated answer the same way. Never one problem per turn.
+2. **Batch every (b) into a single message and ask.** A hint a competent solver can't follow is a broken hint and the author needs to know. Raise mistakes you find in a statement or a stated answer the same way. Never one problem per turn.
 3. **Fan out.** Give each agent the `\Problem` block verbatim, your verified route, the prose rules, and the register you established for this handout (see *Calibrate to the handout's own reader* — pick the voice reference to match it; `factorization.sk.tex` is the beginner end of the range, not the default). Agents write prose and TeX; they do not discover.
 4. **Bind each agent to the hints, in its prompt.** Same substitutions, same key lemma, same order of discovery: no slicker route, no skipping a step because "it follows anyway". An agent that can't get there stops, reports BLOCKED with the precise sticking point, and writes nothing — that goes back to the author as a hint-quality finding. A plausible off-hint proof is the failure mode.
 5. **Verify every returned solution before it lands.** Read each one against its hint chain step by step, and against the math. Nothing enters the `.tex` on an agent's say-so.
@@ -35,7 +35,8 @@ When adding new problems, or writing solutions for problems that have no hints:
 
 1. **Know the solution first.** Solve it, or ask — the user often has the official solution to hand, which is cheaper and safer than grinding one out. If you can't solve it and it isn't supplied, say so rather than bluffing a proof.
 2. **Write per the prose rules** — discovery-arc (motivate where the key idea comes from), self-contained, mirror the author's voice.
-3. **Verify at the end** via `handout-review`, same as always.
+3. **Reach for the standard fact before a configuration argument.** `|\angle BIC| = 90^\circ + \alpha/2`, equal tangent lengths, an inscribed angle: one such fact replaces sentences of half-planes and ray order, and a proof that keeps those sentences is complicated for nothing.
+4. **Verify at the end** via `handout-review`, same as always.
 
 **Never write the hints.** Hints are the author's to write — do not compose or rewrite them yourself. If a new problem needs hints, leave the slots empty for the author; at most flag that they're missing.
 
@@ -43,7 +44,7 @@ When adding new problems, or writing solutions for problems that have no hints:
 
 ## Proposing statement or hint fixes
 
-Sometimes the flaw is in the problem, not the solution — the statement admits a degenerate edge case, the question or a hint claims more than the solution proves, or it states the wrong answer. Flag it and propose the fix as a question; prefer fixing the statement (e.g. ruling out the edge case by hypothesis) over a mid-proof caveat that works around it. Correcting such a factual error in an existing statement or hint — with the author's sign-off — is fine, and is narrower than composing new hints, which you don't do.
+Sometimes the flaw is in the problem, not the solution — the statement admits a degenerate edge case, the question or a hint claims more than the solution proves, it leaves a construction's position vague ("outside the triangle", where the reader needs which half-plane of which line), or it states the wrong answer. Flag it and propose the fix as a question; prefer fixing the statement (e.g. ruling out the edge case by hypothesis) over a mid-proof caveat that works around it. Correcting such a factual error in an existing statement or hint — with the author's sign-off — is fine, and is narrower than composing new hints, which you don't do.
 
 ## When the changes introduce new figures
 
@@ -51,9 +52,7 @@ If the edit adds brand-new `\Image{...}` references to figures that don't yet ex
 
 1. Write the new `.asy` files in `data/handouts/Images/` and render them via `export-asy.sh` (produces `.pdf` + `.svg`) — the `handout-figure` skill is the appropriate context for this step.
 2. Edit the `.tex` to add the `\Image{...}` lines and any surrounding prose.
-3. Compile `pdfcsplain` once as the final verification step.
-
-**Why:** editing the `.tex` first means the intermediate compile fails with "cannot find image file …" — a noisy, distracting failure that signals nothing useful. Doing figures first means the only compile run is real end-to-end verification, and a non-zero exit is then a real problem worth investigating.
+3. Compile `pdfcsplain` once as the final verification step. A `.tex`-first compile fails on "cannot find image file", which signals nothing.
 
 If figures already exist (only `.tex` is changing), the order doesn't matter and compile-as-you-go is fine.
 
@@ -65,7 +64,7 @@ pdfcsplain -interaction=nonstopmode -halt-on-error "filename.tex"
 ```
 To audit a file against the display-width rule, don't read widths off `Overfull` warnings — they point at a closing brace, not the wide display. Measure them: [tex-diagnostics.md](tex-diagnostics.md).
 
-Ignore all warnings — do not investigate, fix, or mention them — with one exception: **`Overfull \hbox` warnings must be fixed**. Find the offending line from the snippet TeX prints below the warning (the reported line number usually points at the enclosing macro's closing brace, not the prose). Prefer relaxing a `~` (→ space) on that line, but never one tying a one-letter word (CS/SK `a, i, k, o, s, u, v, z`; EN `a, I`) — that strands the letter at line end. If no safe `~` exists or relaxation doesn't shift TeX's break, do a small prose rewrite (drop a particle, tighten a phrase). Recompile after each attempt.
+Ignore all warnings — do not investigate, fix, or mention them — with one exception: **`Overfull \hbox` warnings must be fixed**. Find the offending line from the snippet TeX prints below the warning (the reported line number usually points at the enclosing macro's closing brace, not the prose). Prefer relaxing a `~` (→ space) on that line, but never one tying a one-letter word (CS/SK `a, i, k, o, s, u, v, z`; EN `a, I`) — that strands the letter at line end. If no safe `~` exists or relaxation doesn't shift TeX's break, do a small prose rewrite (drop a particle, tighten a phrase). Recompile after each attempt. **Shortening is not always the fix.** A line ending in an unbreakable math run has that whole run crammed onto it, and *lengthening* the lead-in is what tips TeX into breaking before it; character counts don't predict the break, so try both directions. And never buy the fit by cutting a meaning-bearing word: trimming `takové body` to `takové` cleared 1.45pt and deleted the only place five points were declared to be points.
 
 ---
 
@@ -79,16 +78,18 @@ Ignore all warnings — do not investigate, fix, or mention them — with one ex
 \Problem{#1 stars}{#2 source}{#3 statement}{#4 hint1}{#5 hint2}...{#n solution}
 ```
 
+**`\Example` vs `\Theorem` decides the printed worksheet.** The generated skeleton carries only `\Exercise`, `\Problem` and `\Example`, so a `\Theorem` never reaches it. A named result with nothing asked of the reader is a `\Theorem` (Ptolemy, Simson and Sharky-Devil were moved there in `spiral-similarity`).
+
 **`\EnvId{<nanoid>-<name>}`** — a marker on the line directly above one of the five environment macros above, carrying two things at once. Every environment must have one, and the build fails with a list of those that don't.
 
 - The first 21 characters are the **id**: an opaque nanoid, drawn from `[A-Za-z0-9_-]`, exactly as a handout's own content id looks. It is permanent identity — a saved AI-examiner defense conversation is keyed on it, and it is the same in every language variant. **Never invent, drop, or rewrite an existing id.** When adding a brand-new environment, mint a fresh one with `npx nanoid` — never type one by hand.
 - Everything after the 21st character's following hyphen is the **name**: a readable lowercase slug (`[a-z0-9-]`, ASCII, no diacritics, 2-5 words) that lands in the page URL as `#env-<name>` and must be unique within its file. Each language variant writes its own, in its own language.
 
-Write the name from **what the statement visibly says** — the objects involved and what is asked. Never name the competition source, the solution technique, the identity or theorem that cracks it, the key modulus, or the answer, even when you know them: a reader sees the name in the URL before they have solved anything. A title the environment already displays is fair game, since the reader sees that too. Renaming later is free and needs no database change; the id is what must never move.
+Write the name from **what the statement visibly says** — the objects involved and what is asked. Never name the competition source, the solution technique, the identity or theorem that cracks it, the key modulus, or the answer, even when you know them: a reader sees the name in the URL before they have solved anything. A title the environment already displays is fair game, since the reader sees that too. Renaming later is free and needs no database change.
 
 **`\Problem` stars argument** must be a non-negative integer (`0`, `1`, `2`, …). Never leave it empty (`{}`). Use `{0}` when the difficulty is unspecified — `{0}` renders no stars, so a handout that conveys difficulty purely by problem ordering carries `{0}` throughout.
 
-**`\Problem` source argument** names the competition by **year**, never by ročník ordinal: `MEMO 2015 T2`, `IMO 2008 P4`, `ISL 2017, A6`, `Moskva 2011`. Give the problem number whenever it's known; if you're unsure which problem it was, leave the source bare rather than guessing a number into it. Czech/Slovak domestic MO rounds are written `Czech-Slovak <year>` with no round/category code — convert the ročník with **year = ročník + 1951** (75 → 2026), that being the year the round was held. This is a forward rule: some existing files still carry the ordinal forms (`MO 64-A-I-5`, `74-CSMO-A-II-1`, `70-CPSJ-I-4`, `74. ročník MO, krajské B`), so expect a counterexample in the very file you are editing and don't mirror it.
+**`\Problem` source argument** names the competition by **year**, never by ročník ordinal: `MEMO 2015 T2`, `IMO 2008 P4`, `ISL 2017, A6`, `Moskva 2011`. Give the problem number whenever it's known; if you're unsure which problem it was, leave the source bare rather than guessing a number into it. Czech/Slovak domestic MO rounds are written `Czech-Slovak <year>` with no round/category code, and SK/CS files write that in their own language as `Česko-slovenská olympiáda <year>` — convert the ročník with **year = ročník + 1951** (75 → 2026), that being the year the round was held. Existing files still carry older forms (`MO 64-A-I-5`, `74. ročník MO, krajské B`, and `Czech-Slovak <year>` in SK/CS files); expect one in the very file you are editing and don't mirror it.
 
 **`\Answer{result}`** — an optional final answer (a number, expression, yes/no) for a `\Problem`, `\Exercise`, or `\Example`. Place it at the START of the solution argument, with the worked solution on the next line; it renders as an italic `Výsledok:` / `Výsledek:` / `Answer:` line above the solution and feeds a separate collapsible answer on the web. Omit it for proof-style problems with no short result — never write `\Answer{}`. Example:
 ```tex
@@ -99,6 +100,8 @@ Write the name from **what the statement visibly says** — the objects involved
 ```
 
 **`\NamedProof{caption}`** — `\Theorem` auto-prepends an italic `Dôkaz.` (or `Důkaz.` / `Proof.`) caption to its proof argument. `\NamedProof` at the START of the proof body REPLACES that caption with `caption` italicized. Use ONLY when `caption` already plays the role of "Dôkaz." — i.e. it contains/replaces the word, as in `\NamedProof{Dôkaz 1 (matematická indukcia).}` to label one of several alternative proofs. Do NOT use it for sub-case markers like `(⇒)`, `(⇐)`, `Priama implikácia.`, `Obrátená implikácia.` — those are case headers WITHIN one proof, and the default `Dôkaz.` must remain. For those, write plain `\textit{($\Rightarrow$)}` at the start of the case; the rendered output is `Dôkaz. (⇒) ...`, which is the intended look.
+
+**`\MathcompsLink{<slug>}`** goes right below `\Title`, after a blank line, and prints the handout's link to its own page on the site. Every handout needs one and nothing enforces it: a file missing it compiles clean and simply prints no link, so check for it whenever a handout is new or half-written. The argument is that language's own slug, and must match `slug.<locale>` in `web/src/content/handouts.json` once the handout is registered there.
 
 When the user asks to **reformat or transcribe** (e.g. "convert this old format", "add these problems"), copy content faithfully — do not invent, improve, or fill in solutions. Leave solution arguments as `{}` if no solution is provided.
 
@@ -117,6 +120,10 @@ When the user asks to **reformat or transcribe** (e.g. "convert this old format"
 
 A problem with no hint and no solution looks like `\Problem{0}{}{Statement.}{}`.
 
+**A whitespace-only argument is not empty.** `{ }`, `{` newline `}`, and a `%` note on its own line inside the braces all leave a space token, so the template's `\emptybody` check misses it. A local compile then fails with `Forbidden control sequence found while scanning use of \solutionDispatch` pointing at `\bye`, which looks like an unbalanced brace anywhere in the document; the CLI's published build passes and prints an empty solution. Write `{}`, or start the note right after the brace: `{% note`.
+
+**Every `\Problem` argument starts on the line where the previous one ends.** A newline before `{` silently ends the argument scan. So `}` newline `{}` makes the last hint the solution, which renders under `Riešenie.` with a green compile and no warning, and a non-empty group on its own line prints as stray text under the statement. Write `}{`, or end the line with `}%` (a `% note` after it is fine).
+
 ---
 
 ## TeX / format rules
@@ -129,11 +136,11 @@ A problem with no hint and no solution looks like `\Problem{0}{}{Statement.}{}`.
    $$
    ```
 3. **Lists:** Use `\begitems ... \enditems` with `\i` only for genuine casework or classification.
-4. **Typography:** `\textbf{}`, `\textit{}` only. No `\em`, `{\bf ...}`, etc.
+4. **Typography:** `\textbf{}`, `\textit{}` only. No `\em`, `{\bf ...}`, etc. A `\Definition` body names its term in `\textit{}` and defines it in one sentence, `\textit{Špirálna podobnosť} je zobrazenie, ktoré…`, never a headless `Geometrické zobrazenie, ktoré…`.
 5. **Scope:** Do not touch preamble, fonts, or layout. Keep UTF-8 accents. No new packages or macros.
 6. **No section labels in solutions:** Do not start solutions with `\textbf{Řešení.}`, `\textbf{Riešenie.}`, etc.
 7. **Dashes:** Never write an em dash at all — not the UTF-8 `—` and not TeX's `---`. Recast per sentence: a colon where it introduced an explanation, a full stop where what follows is an independent clause, a comma for a tight aside, parentheses for an appositive that already contains a comma. For an en dash write TeX's `--`, never the UTF-8 `–`; the en dash is the normal SK/CS aside dash and is fine throughout, so grep `---` only. This is the one place the ban applies to **the author's** prose as well as yours (it overrides the general "don't rewrite existing prose" rule, which the author waived here), so fix the author's `---` on sight rather than flagging them. An existing `---` is not precedent; as with ties, the rule wins.
-8. **Ties (`~`) go after one-letter words ONLY.** CS/SK `a, i, k, o, s, u, v, z` (and their capitals), EN `a, I`. Everywhere else write a plain space: `pomocou $y$`, not `pomocou~$y$`. Stranding a one-letter preposition at a line end is the actual typographic sin; tying `máme~`/`každé~`/`resp.~`/`,~` is just noise, and on a phone a stray non-breaking space wraps badly. Grep a finished file with `grep -oE '[A-Za-zÀ-ž.,]+~' file.tex | sort | uniq -c` — anything with two or more letters before the `~` is wrong.
+8. **Ties (`~`) go after one-letter words ONLY.** CS/SK `a, i, k, o, s, u, v, z` (and their capitals), EN `a, I`. Everywhere else write a plain space: `pomocou $y$`, not `pomocou~$y$`. Tying `máme~`/`každé~`/`resp.~`/`,~` is noise, and on a phone a stray non-breaking space wraps badly. Grep a finished file with `grep -oE '[A-Za-zÀ-ž.,]+~' file.tex | sort | uniq -c` — anything with two or more letters before the `~` is wrong.
 
    Two consequences. First, **vocalized prepositions are two letters and so take a plain space in both languages**: SK `ku `, `so `, `zo `, `vo ` and CS `ke `, `se `, `ze `, `ve `, never `ku~` or `ke~`. Some files still contradict this; the rule wins, and don't let an agent cite them as precedent. Second, **`k` vs `ke` is decided by how the *following token is read aloud*, not by its first character**: `ke kružnici` (before `k`) but `k~$\omega$`, because `$\omega$` reads "ómega" and starts with a vowel. Same for `$\Omega$` and for circle names like `$(ABC)$`.
 9. **An `\eqno` is for pointing back from a distance.** Number an equation only when the text cites it from further away than the paragraph directly below; when the single reference sits in the next sentence, write "táto rovnica" / "posledný vzťah" and leave the display untagged. Renumber a block's survivors to run from `(1)`, and keep both numbers where one sentence cites two equations.
@@ -146,15 +153,16 @@ A problem with no hint and no solution looks like `\Problem{0}{}{Statement.}{}`.
 - **Mirror the author's style strictly.** Before writing, read existing solutions/exercises in the same file. Match the author's voice — sentence length, level of formality, how explicitly steps are spelled out, idiomatic word choices and short phrases. Your additions should be indistinguishable from the existing content. Do not inflate with synonyms or impose your own voice.
 - **Self-contained.** Solutions must stand alone — every named object, auxiliary point (`$B'$`, `$M$`, `$O$`, …), or construction used by the reasoning must be (re)introduced inside the solution body, even if it also appears in a hint. The reader may skip hints entirely.
 - **Elegant and elementary.** Prefer the prettiest elementary route that aligns with the provided hints. Never contradict or bypass them.
-- **No bashing.** Do not reach for trigonometry, coordinates, vectors-as-algebra, or complex numbers when a synthetic argument exists. These are teaching handouts about beautiful ideas, not about grinding, and a computational route teaches the reader nothing even when it is correct. The temptation is real precisely because bashing is the reliable way to close a problem you can already see the end of — that is the reflex to suppress. If a bash is the only route you can find, treat it as a signal you have not found the intended one: reread the hints, and report BLOCKED rather than submitting the grind.
+- **No bashing.** Do not reach for trigonometry, coordinates, vectors-as-algebra, or complex numbers when a synthetic argument exists. A computational route teaches the reader nothing even when it is correct. If a bash is the only route you can find, treat it as a signal you have not found the intended one: reread the hints, and report BLOCKED rather than submitting the grind.
   - *Escape hatch:* when the handout is itself about the technique (a trigonometry, coordinates, or complex-numbers handout, or a section explicitly billed as bashing), the technique is the point and this rule does not apply. Judge from the `\sec Úvod` and the surrounding solutions, not from the problem.
   - *Smaller version of the same thing:* a lone $\sin$, $\cos$ or $\tan$ smuggled into an otherwise synthetic proof to finish a length or angle comparison. Look for the congruence, the similar triangles, or the equal-tangent argument that replaces it; there almost always is one. (The law of sines/cosines used once as a genuine named tool in an otherwise synthetic chain is fine; a computation dressed as a proof is not.)
 - **Retrace the discovery; don't assert-then-verify.** When the hints scaffold *how to find* a key claim, invariant, or magic constant — small cases that expose a pattern, a substitution the structure suggests, a backward analysis that pins down the answer — the solution must arrive at it the same way, motivating where it comes from in a sentence or two, not state it from nowhere and merely check it works. A correct solution that pulls its key object out of a hat bypasses the hints even though it never contradicts them.
 - **Calibrate to the handout's own reader, and work out who that is first.** There is no house register: `factorization.sk.tex` is deliberately wordy because it is for kids, and writing an advanced handout in that voice gets the solutions thrown back. The `\sec Úvod` usually names the audience outright, and the problem sources settle the rest. Either way: name the strategic move (auxiliary point, substitution, which criterion/identity), execute the rest in math, and skip prose on trivial sub-steps (shared sides, restating the previous line, naming an angle right after computing $180^\circ-\alpha$).
   - *Beginner handout* — one-line nudges between display blocks are fine; paragraph-length recaps aren't.
   - *Olympiad-level* — cut further: no discovery narration beyond a single motivating sentence where the idea is genuinely surprising, no restating the statement, no closing flourish, no bonus remark, one clause (not a paragraph) for a load-bearing betweenness or sign check, and a half-sentence on an angle chain only for the step that isn't immediate.
-- **`\Image` placement.** In multi-paragraph solutions/proofs, place `\Image{...}` between paragraphs — not as the opening line and not as the closing line. Drop it right after the paragraph that constructs/names what the figure shows. Single-paragraph solutions are exempt.
-- **`\Image` scale.** Default to no scale argument — write `\Image{<file>.pdf}`, not `\Image{<file>.pdf}{0.8}`. 
+- **Every geometry proof or solution you write gets its own figure, designed after the proof from its steps.** The statement figure shows the hypothesis; the proof figure draws what the argument uses so each step is readable from it. `handout-figure` (*Designing a figure from the argument*) owns how.
+- **`\Image` placement.** Never as the opening or closing line. For a short solution, right after the **first** paragraph; for a long one (roughly six or more paragraphs), after the paragraph that introduces the objects it draws, closer to the middle than the top — a figure stranded above six unillustrated paragraphs stops helping ("if there are sooo many paragraphs, we need the image in the middle"). Only a genuine second frame sits later, after the paragraph whose step it shows. Single-paragraph solutions are exempt.
+- **`\Image` scale.** Never pass one: `\Image{<file>.pdf}`, not `\Image{<file>.pdf}{0.8}`. The figure is authored at its target size; `handout-figure` owns the why.
 - **End a "find all" solution with the skúška.** Every derivation that only shows what a solution *must* look like is one-directional, so the check back into the original equation is part of the proof, not decoration. Match the file's one-sentence form: `Skúškou overíme, že táto funkcia vyhovuje: ľavá strana je …, a~pravá …`. Exempt only when nothing is being solved for — e.g. "find the roots of $f(f(x))=0$ given a hypothesis on $f$" has nothing to substitute back.
 
 ## Language-specific phrasing
