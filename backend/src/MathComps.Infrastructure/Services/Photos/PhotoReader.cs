@@ -54,8 +54,7 @@ public class PhotoReader(
             StepName,
             _settings.Reading,
             systemPrompt: null,
-            prompt,
-            [new ChatImage(pageJpeg, MediaTypeNames.Image.Jpeg)]);
+            new ChatUserMessage([new ChatText(prompt), new ChatImage(pageJpeg, MediaTypeNames.Image.Jpeg)]));
 
         // Read the page. The boxes need the schema, so the text rides in the same structured reply.
         var reply = await chatCaller.CompleteAsync<PhotoReadingReply>(request, cancellationToken);

@@ -1089,13 +1089,19 @@ public class ExaminerTests
         // The reply comes back in dollars.
         Assert.Equal("Why is $p^2+1$ odd?", attempt.Reply);
 
-        // The math-check read it in dollars, after the whole conversation.
-        Assert.Contains("an earlier question", mathRequests[0].UserPrompt);
-        Assert.EndsWith("Why is $p^2+1$ odd?", mathRequests[0].UserPrompt);
+        // The math-check's user message, one text.
+        var mathText = Assert.IsType<ChatText>(Assert.Single(mathRequests[0].UserMessage.Parts)).Text;
 
-        // The language check read it beside the candidate's latest turn, and nothing before that turn.
-        Assert.Contains("my answer", languageRequests[0].UserPrompt);
-        Assert.DoesNotContain("an earlier question", languageRequests[0].UserPrompt);
+        // The math-check read the reply in dollars, after the whole conversation.
+        Assert.Contains("an earlier question", mathText);
+        Assert.EndsWith("Why is $p^2+1$ odd?", mathText);
+
+        // The language check's user message, one text.
+        var languageText = Assert.IsType<ChatText>(Assert.Single(languageRequests[0].UserMessage.Parts)).Text;
+
+        // The language check read the reply beside the candidate's latest turn, and nothing before that turn.
+        Assert.Contains("my answer", languageText);
+        Assert.DoesNotContain("an earlier question", languageText);
 
         // Every guard's step, in the order the guards start.
         ExaminerStep[] steps =

@@ -58,9 +58,9 @@ public class AiTaggingServiceTests
         // Run the pass against the prompt file, deleting the file however the test ends.
         try
         {
-            // The prompts the service sends, filled in as it sends them.
+            // The system prompt and the user message the service sends, filled in as it sends them.
             string? capturedSystem = null;
-            var capturedUser = string.Empty;
+            ChatUserMessage? capturedUser = null;
 
             // A caller capturing each prompt and answering with one known tag so the call completes.
             var chatCaller = new Mock<ILlmChatCaller>();
@@ -68,7 +68,7 @@ public class AiTaggingServiceTests
                 .Setup(caller => caller.CompleteAsync<GeneratePassResponse>(
                     It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
                 .Callback<ChatCallRequest, CancellationToken>(
-                    (request, _) => (capturedSystem, capturedUser) = (request.SystemPrompt, request.UserPrompt))
+                    (request, _) => (capturedSystem, capturedUser) = (request.SystemPrompt, request.UserMessage))
                 .ReturnsAsync(new ChatCallResult<GeneratePassResponse>(
                     new GeneratePassResponse([new TagFitnessEntry("Algebra", 0.9f, "clearly algebra")]),
                     "test-model", ModelUsage.Zero));
@@ -85,10 +85,13 @@ public class AiTaggingServiceTests
             Assert.Contains("INSTRUCTIONS", capturedSystem);
             Assert.Contains("Algebra", capturedSystem);
 
-            // The user message carries just the problem — statement and solution, no candidates.
-            Assert.Contains("PROBLEM: the statement", capturedUser);
-            Assert.Contains("SOLUTION: the solution", capturedUser);
-            Assert.DoesNotContain("Algebra", capturedUser);
+            // The user message is one text.
+            var userText = Assert.IsType<ChatText>(Assert.Single(capturedUser!.Parts)).Text;
+
+            // That text carries just the problem: the statement and the solution, no candidates.
+            Assert.Contains("PROBLEM: the statement", userText);
+            Assert.Contains("SOLUTION: the solution", userText);
+            Assert.DoesNotContain("Algebra", userText);
         }
         finally
         {

@@ -7,9 +7,9 @@ namespace MathComps.Infrastructure.Tests.Ai;
 
 /// <summary>
 /// Tests the parts of <see cref="LlmChatCaller"/> that fail silently when dropped or misnamed: the messages and request
-/// fields the endpoint reads (the instructions, an image's part, the reasoning level and the fallback chain), and the
-/// model read back off the reply. A fake HTTP transport stands in for the endpoint, so the body is inspected as sent
-/// and the reply is canned.
+/// fields the endpoint reads (the instructions, an image's part, the order of the user message's parts, the reasoning
+/// level and the fallback chain), and the model read back off the reply. A fake HTTP transport stands in for the
+/// endpoint, so the body is inspected as sent and the reply is canned.
 /// </summary>
 public class LlmChatCallerTests
 {
@@ -137,8 +137,8 @@ public class LlmChatCallerTests
         var request = Request([], reasoningEffort: "low") with
         {
             SystemPrompt = null,
-            UserPrompt = "Read this page.",
-            Images = [new ChatImage(photo, MediaTypeNames.Image.Jpeg)],
+            UserMessage = new ChatUserMessage(
+                [new ChatText("Read this page."), new ChatImage(photo, MediaTypeNames.Image.Jpeg)]),
         };
 
         // Send it through the fake transport.
@@ -162,6 +162,44 @@ public class LlmChatCallerTests
     }
 
     /// <summary>
+    /// A user message's parts reach the wire in the order the message lists them, so an image sits between the texts
+    /// around it. Sent with every text first and every image after, the call still gets a fluent reply, from a model
+    /// that can no longer tell which words a drawing came with.
+    /// </summary>
+    [Fact]
+    public async Task The_user_message_parts_keep_their_order()
+    {
+        // A few bytes standing in for a drawing.
+        byte[] drawing = [0xFF, 0xD8, 0xFF, 0xE0, 0x03, 0x04];
+
+        // A call whose user message holds a text, the drawing it came with, then a second text.
+        var request = Request([], reasoningEffort: "low") with
+        {
+            UserMessage = new ChatUserMessage(
+            [
+                new ChatText("Their message."),
+                new ChatImage(drawing, MediaTypeNames.Image.Jpeg),
+                new ChatText("The reply to judge."),
+            ]),
+        };
+
+        // Send it through the fake transport.
+        var (body, _) = await SendAsync(request);
+
+        // The user message is the one after the instructions.
+        var message = body.GetProperty("messages").EnumerateArray().Last();
+        Assert.Equal("user", message.GetProperty("role").GetString());
+
+        // Its content is the text, the image, then the second text.
+        var parts = message.GetProperty("content").EnumerateArray().ToList();
+        Assert.Equal(["text", "image_url", "text"], parts.Select(part => part.GetProperty("type").GetString()));
+
+        // Each text part carries its own text.
+        Assert.Equal("Their message.", parts[0].GetProperty("text").GetString());
+        Assert.Equal("The reply to judge.", parts[2].GetProperty("text").GetString());
+    }
+
+    /// <summary>
     /// Builds a text-only call with instructions as its system prompt, routed to a fixed primary with the given
     /// chain behind it.
     /// </summary>
@@ -169,7 +207,7 @@ public class LlmChatCallerTests
     /// <param name="reasoningEffort">The reasoning-effort level to send.</param>
     /// <returns>The request, ready to send.</returns>
     private static ChatCallRequest Request(IReadOnlyList<string> fallbackModels, string reasoningEffort) =>
-        new("test-step", "instructions", "the input", Images: [], "google/gemini-3.6-flash", fallbackModels,
+        new("test-step", "instructions", new ChatUserMessage("the input"), "google/gemini-3.6-flash", fallbackModels,
             reasoningEffort, MaxOutputTokens: 2048);
 
     /// <summary>

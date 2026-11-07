@@ -9,9 +9,7 @@ namespace MathComps.Infrastructure.Services.Ai;
 /// <param name="StepName">The name of the step the call serves.</param>
 /// <param name="SystemPrompt">The system message: instructions and any grounding; null to send none, leaving the
 /// instructions to the user message.</param>
-/// <param name="UserPrompt">The user message: the input the model acts on.</param>
-/// <param name="Images">The images the user message shows the model after its text, in order; empty for a text-only
-/// call.</param>
+/// <param name="UserMessage"><inheritdoc cref="ChatUserMessage" path="/summary"/></param>
 /// <param name="Model">The model to route this call to, in <c>vendor/model</c> form.</param>
 /// <param name="FallbackModels">Backup models to try in order, each in <c>vendor/model</c> form, when
 /// <paramref name="Model"/> fails on the provider's side; empty to send no fallback field.</param>
@@ -21,8 +19,7 @@ namespace MathComps.Infrastructure.Services.Ai;
 public record ChatCallRequest(
     string StepName,
     string? SystemPrompt,
-    string UserPrompt,
-    IReadOnlyList<ChatImage> Images,
+    ChatUserMessage UserMessage,
     string Model,
     IReadOnlyList<string> FallbackModels,
     string? ReasoningEffort,
@@ -35,20 +32,17 @@ public record ChatCallRequest(
     /// <param name="stepName"><inheritdoc cref="ChatCallRequest" path="/param[@name='StepName']"/></param>
     /// <param name="step">The routing and limits the step runs under.</param>
     /// <param name="systemPrompt">The system message: instructions and any grounding; null to send none.</param>
-    /// <param name="userPrompt"><inheritdoc cref="ChatCallRequest" path="/param[@name='UserPrompt']"/></param>
-    /// <param name="images"><inheritdoc cref="ChatCallRequest" path="/param[@name='Images']"/></param>
+    /// <param name="userMessage"><inheritdoc cref="ChatUserMessage" path="/summary"/></param>
     /// <returns>The request, ready to send.</returns>
     public static ChatCallRequest For(
         string stepName,
         ChatStepSettings step,
         string? systemPrompt,
-        string userPrompt,
-        IReadOnlyList<ChatImage> images) =>
+        ChatUserMessage userMessage) =>
         new(
             stepName,
             systemPrompt,
-            userPrompt,
-            images,
+            userMessage,
             step.Model,
             step.FallbackModels,
             step.ReasoningEffort,
