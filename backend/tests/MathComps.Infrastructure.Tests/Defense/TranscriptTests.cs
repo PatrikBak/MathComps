@@ -1,11 +1,15 @@
+using System.Net.Mime;
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Defense;
+using MathComps.Infrastructure.Services.Photos;
 
 namespace MathComps.Infrastructure.Tests.Defense;
 
 /// <summary>
 /// Tests the transcript model: parsing the <c>## Candidate</c> / <c>## Examiner</c> markdown into ordered turns,
-/// round-tripping back to markdown, appending a turn, and the guard that the examiner only replies to a candidate.
+/// round-tripping back to markdown, rendering the user message with each drawing in place, appending a turn, and the
+/// guard that the examiner only replies to a candidate.
 /// </summary>
 public class TranscriptTests
 {
@@ -24,8 +28,8 @@ public class TranscriptTests
         // The turns come back in order, each keyed to its role with the body trimmed.
         TranscriptTurn[] expected =
         [
-            new(TranscriptRole.Candidate, "My solution splits the triangle."),
-            new(TranscriptRole.Examiner, "Why strictly less than 1/2?"),
+            new(TranscriptRole.Candidate, "My solution splits the triangle.", Crops: []),
+            new(TranscriptRole.Examiner, "Why strictly less than 1/2?", Crops: []),
         ];
         Assert.Equal(expected, transcript.Turns.ToArray());
     }
@@ -83,6 +87,45 @@ public class TranscriptTests
     }
 
     /// <summary>
+    /// A drawing sits right after the text of the turn it came with, under a caption naming its marker, and the
+    /// conversation carries on after it. A drawing sliding to the end of the message would read as sent with the
+    /// candidate's latest turn.
+    /// </summary>
+    [Fact]
+    public void ToPrompt_puts_each_drawing_after_its_own_turn()
+    {
+        // Two drawings standing in for the crops of one photo.
+        byte[] first = [0xFF, 0xD8, 0xFF, 0x01];
+        byte[] second = [0xFF, 0xD8, 0xFF, 0x02];
+
+        // An opening turn sent with both drawings, then an exchange without any.
+        var transcript = new Transcript(
+        [
+            new TranscriptTurn(
+                TranscriptRole.Candidate, "see [Figure 1] and [Figure 2]",
+                [new PhotoCrop("Figure 1", first), new PhotoCrop("Figure 2", second)]),
+            new TranscriptTurn(TranscriptRole.Examiner, "why?", Crops: []),
+            new TranscriptTurn(TranscriptRole.Candidate, "because", Crops: []),
+        ]);
+
+        // Render the conversation as a model's user message.
+        var message = transcript.ToPrompt();
+
+        // The opening turn, each drawing after its caption, then the rest of the conversation.
+        ChatPart[] expected =
+        [
+            new ChatText("## Candidate\n\nsee [Figure 1] and [Figure 2]\n\nTheir drawing [Figure 1]:"),
+            new ChatImage(first, MediaTypeNames.Image.Jpeg),
+            new ChatText("\n\nTheir drawing [Figure 2]:"),
+            new ChatImage(second, MediaTypeNames.Image.Jpeg),
+            new ChatText("\n\n## Examiner\n\nwhy?\n\n## Candidate\n\nbecause"),
+        ];
+
+        // The message holds exactly those parts.
+        Assert.Equal(expected, message.Parts);
+    }
+
+    /// <summary>
     /// Appending adds the new turn at the end and leaves the original transcript unchanged.
     /// </summary>
     [Fact]
@@ -97,7 +140,7 @@ public class TranscriptTests
         // The original is untouched; the new transcript carries the appended, trimmed turn last.
         Assert.Single(original.Turns);
         Assert.Equal(
-            new TranscriptTurn(TranscriptRole.Examiner, "a probing question"),
+            new TranscriptTurn(TranscriptRole.Examiner, "a probing question", Crops: []),
             extended.Turns[^1]);
     }
 
@@ -118,9 +161,9 @@ public class TranscriptTests
         // The first exchange survives intact, the second candidate turn closes the transcript, and the rest is gone.
         TranscriptTurn[] expected =
         [
-            new(TranscriptRole.Candidate, "c1"),
-            new(TranscriptRole.Examiner, "e1"),
-            new(TranscriptRole.Candidate, "c2"),
+            new(TranscriptRole.Candidate, "c1", Crops: []),
+            new(TranscriptRole.Examiner, "e1", Crops: []),
+            new(TranscriptRole.Candidate, "c2", Crops: []),
         ];
         Assert.Equal(expected, truncated.Turns.ToArray());
     }
@@ -140,7 +183,7 @@ public class TranscriptTests
 
         // Only the opening candidate turn remains.
         var turn = Assert.Single(truncated.Turns);
-        Assert.Equal(new TranscriptTurn(TranscriptRole.Candidate, "opener"), turn);
+        Assert.Equal(new TranscriptTurn(TranscriptRole.Candidate, "opener", Crops: []), turn);
     }
 
     /// <summary>

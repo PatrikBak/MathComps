@@ -60,8 +60,9 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // The examiner replies to the candidate — refuse a transcript that isn't waiting on us.
         transcript.EnsureAwaitingExaminer();
 
-        // The conversation so far, the user message the generator and the reference guards read.
-        var conversation = transcript.ToMarkdown();
+        // The conversation so far with the candidate's drawings, the user message the generator and the reference
+        // guards read.
+        var conversation = transcript.ToPrompt();
 
         // The candidate's latest turn, which the precondition above has just established is the last one. The
         // language check sees this and nothing else: the language to answer in is theirs to change mid-exam, so
@@ -130,7 +131,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
 
         // Judge the reply with every guard, reading it in the conversation it answers.
         var guards = await RunGuardsAsync(
-            problem, reference, transcript.ToMarkdown(), transcript.Turns[^1].Text, normalizedReply, usage,
+            problem, reference, transcript.ToPrompt(), transcript.Turns[^1].Text, normalizedReply, usage,
             cancellationToken);
 
         // Stop the clock now that the reply is judged.
@@ -166,7 +167,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="cancellationToken">A token to cancel the calls.</param>
     /// <returns>The judged attempt.</returns>
     private async Task<ExaminerAttempt> GenerateAndVerifyAsync(
-        string problem, string reference, string conversation, string candidateTurn, string hintsNote,
+        string problem, string reference, ChatUserMessage conversation, string candidateTurn, string hintsNote,
         string revisionNote, string retryNote, ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
         // Time the whole attempt: writing the draft, then judging it.
@@ -207,7 +208,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="cancellationToken">A token to cancel the calls.</param>
     /// <returns>Every guard's verdict, each paired with the call that produced it.</returns>
     private async Task<GuardRuns> RunGuardsAsync(
-        string problem, string reference, string conversation, string candidateTurn, string reply,
+        string problem, string reference, ChatUserMessage conversation, string candidateTurn, string reply,
         ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
         // Start the math-check, letting the checker find the reply's claims itself.
@@ -350,7 +351,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="cancellationToken">A token to cancel the call.</param>
     /// <returns>The generated reply, and the call that wrote it.</returns>
     private async Task<(string Reply, ExaminerStepCall Call)> GenerateAsync(
-        string problem, string reference, string conversation, string hintsNote, string retryNote,
+        string problem, string reference, ChatUserMessage conversation, string hintsNote, string retryNote,
         ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
         // Fill the persona prompt with the problem, the reference, the hints guidance, and the retry note (empty
@@ -370,8 +371,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // The conversation so far is what the examiner responds to; the reply comes back as plain text, the one shape
         // that carries the LaTeX the examiner writes through unaltered.
         var result = await chatCaller.CompleteTextAsync(
-            ChatCallRequest.For(
-                nameof(ExaminerStep.Generate), _settings.Generate, systemPrompt, new ChatUserMessage(conversation)),
+            ChatCallRequest.For(nameof(ExaminerStep.Generate), _settings.Generate, systemPrompt, conversation),
             cancellationToken);
 
         // Stop the clock before the bookkeeping below.
@@ -402,7 +402,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="cancellationToken">A token to cancel the call.</param>
     /// <returns>The guard's verdict and the call that produced it.</returns>
     private async Task<GuardRun<TResult>> RunGuardAsync<TResult>(
-        ExaminerStep stepKind, ChatStepSettings step, string problem, string reference, string conversation,
+        ExaminerStep stepKind, ChatStepSettings step, string problem, string reference, ChatUserMessage conversation,
         string reply, ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
         // The guard judges against the problem and its reference solution.
@@ -414,16 +414,16 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
             });
 
         // The whole conversation followed by the proposed reply under scrutiny.
-        var userPrompt = $"{conversation}\n\n{ProposedReplyHeading}\n\n{reply}";
+        var userMessage = conversation.Append($"\n\n{ProposedReplyHeading}\n\n{reply}");
 
         // Make the call and hand back the run.
-        return await CallGuardAsync<TResult>(stepKind, step, systemPrompt, userPrompt, usage, cancellationToken);
+        return await CallGuardAsync<TResult>(stepKind, step, systemPrompt, userMessage, usage, cancellationToken);
     }
 
     /// <summary>
     /// Runs the language check over the proposed reply. Its prompt takes no placeholders and its user message is just
-    /// the candidate's latest turn beside the reply: the question is which language two pieces of prose are in, and
-    /// the problem, the reference and the rest of the conversation say nothing about that.
+    /// the text of the candidate's latest turn beside the reply: the question is which language two pieces of prose
+    /// are in, and the problem, the reference, the drawings and the rest of the conversation say nothing about that.
     /// </summary>
     /// <param name="candidateTurn">The candidate's latest turn, the language the reply has to match.</param>
     /// <param name="reply">The proposed examiner reply under scrutiny.</param>
@@ -437,11 +437,11 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         var systemPrompt = await ReadPromptAsync(_settings.LanguageCheck.Prompt, cancellationToken);
 
         // The candidate's latest turn followed by the proposed reply under scrutiny.
-        var userPrompt = $"## Candidate\n\n{candidateTurn}\n\n{ProposedReplyHeading}\n\n{reply}";
+        var userMessage = new ChatUserMessage($"## Candidate\n\n{candidateTurn}\n\n{ProposedReplyHeading}\n\n{reply}");
 
         // Make the call and hand back the run.
         return await CallGuardAsync<LanguageCheckResult>(
-            ExaminerStep.LanguageCheck, _settings.LanguageCheck, systemPrompt, userPrompt, usage, cancellationToken);
+            ExaminerStep.LanguageCheck, _settings.LanguageCheck, systemPrompt, userMessage, usage, cancellationToken);
     }
 
     /// <summary>
@@ -452,12 +452,12 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="stepKind">Which step this guard is, for the record of what the attempt called.</param>
     /// <param name="step">The guard step's model and reasoning configuration.</param>
     /// <param name="systemPrompt">The guard's instructions.</param>
-    /// <param name="userPrompt">What the guard reads the reply in.</param>
+    /// <param name="userMessage">What the guard reads the reply in.</param>
     /// <param name="usage">The running spend this guard call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the call.</param>
     /// <returns>The guard's verdict and the call that produced it.</returns>
     private async Task<GuardRun<TResult>> CallGuardAsync<TResult>(
-        ExaminerStep stepKind, ChatStepSettings step, string systemPrompt, string userPrompt,
+        ExaminerStep stepKind, ChatStepSettings step, string systemPrompt, ChatUserMessage userMessage,
         ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
         // Time the call. The guards run concurrently, so this is what says which of them a slow attempt was
@@ -466,8 +466,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
 
         // Call the model for its structured verdict.
         var result = await chatCaller.CompleteAsync<TResult>(
-            ChatCallRequest.For(stepKind.ToString(), step, systemPrompt, new ChatUserMessage(userPrompt)),
-            cancellationToken);
+            ChatCallRequest.For(stepKind.ToString(), step, systemPrompt, userMessage), cancellationToken);
 
         // Stop the clock before the bookkeeping below.
         stopwatch.Stop();
