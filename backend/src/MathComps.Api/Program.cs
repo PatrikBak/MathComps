@@ -37,7 +37,7 @@ builder.Configuration
     .AddEnvironmentVariables();
 
 // Basic security stuff
-builder.Services.AddRateLimiting();
+builder.Services.AddRateLimiting(builder.Configuration);
 builder.Services.AddCorsConfiguration(builder.Configuration);
 
 // JWT authentication for Clerk
