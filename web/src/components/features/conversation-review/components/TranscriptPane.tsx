@@ -79,6 +79,10 @@ export function TranscriptPane({
   const { reports, draftCounts, turnDurationsMs, openDrafts, readDrafts, closeDrafts } =
     useConversationTranscript(conversation)
 
+  // Whether the conversation's examiner checked how a reply addresses its author. The check came with its own
+  // note, so settings holding no gendered-address note ran without it
+  const isAddressChecked = conversation.examinerConfig.notes?.genderedAddress !== undefined
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {/* Whatever stands above the problem */}
@@ -127,7 +131,11 @@ export function TranscriptPane({
       />
 
       {/* Whichever reply's drafts are being read, over whatever layout is underneath */}
-      <TurnAttemptsModal attempts={openDrafts} onClose={closeDrafts} />
+      <TurnAttemptsModal
+        attempts={openDrafts}
+        isAddressChecked={isAddressChecked}
+        onClose={closeDrafts}
+      />
     </div>
   )
 }

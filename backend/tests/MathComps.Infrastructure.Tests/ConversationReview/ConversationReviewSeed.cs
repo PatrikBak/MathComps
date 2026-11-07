@@ -127,6 +127,12 @@ public static class ConversationReviewSeed
     public const int CallDurationMs = 900;
 
     /// <summary>
+    /// How many of every seeded model call's prompt tokens the provider's cache served. Distinct from each of the
+    /// call's other counts, so a projection carrying one count into another's place would show.
+    /// </summary>
+    public const int CallCachedPromptTokens = 60;
+
+    /// <summary>
     /// When the seed was written, which every seeded time is measured back from.
     /// </summary>
     public static readonly DateTimeOffset Now = DateTimeOffset.UtcNow;
@@ -219,14 +225,15 @@ public static class ConversationReviewSeed
             NewTurn(TargetlessSessionId, TranscriptRole.Examiner, "the opener", 0, Now.AddDays(-2)),
             NewTurn(TargetlessSessionId, TranscriptRole.Candidate, "my untargeted defense", 1, Now.AddDays(-2)));
 
-        // The drafts behind the newest conversation's last reply: one the leak-check sent back, and the one that
-        // went out. They hang off that reply alone, so the conversations held before the drafts were kept have
-        // somewhere to read back empty from. Written in the reverse of the order they were drafted, so a read that
-        // takes the database's own order for the run's order has something to get wrong.
+        // The drafts behind the newest conversation's last reply: one the leak-check sent back, which also ended the
+        // examination with a step still owed, and the one that went out. They hang off that reply alone, so the
+        // conversations held before the drafts were kept have somewhere to read back empty from. Written in the
+        // reverse of the order they were drafted, so a read that takes the database's own order for the run's order
+        // has something to get wrong.
         context.DefenseTurnAttempts.AddRange(
             NewAttempt(NewestSessionId, NewestReplyId, attemptIndex: 1, "her reply", AttemptDurationsMs[1]),
             NewAttempt(NewestSessionId, NewestReplyId, attemptIndex: 0, "her leaky draft", AttemptDurationsMs[0],
-                leaks: true));
+                leaks: true, closesEarly: true));
 
         // Which handout problem each of those conversations was held against, the targetless one deliberately
         // naming nothing.
@@ -347,11 +354,12 @@ public static class ConversationReviewSeed
     /// <param name="takesOver"><inheritdoc cref="DefenseTurnAttempt.TakesOver" path="/summary"/></param>
     /// <param name="closesComplete">Whether the draft ended the examination on a solution that was already
     /// complete.</param>
+    /// <param name="closesEarly">Whether the draft ended the examination while a step was still owed.</param>
     /// <returns>The draft, ready to add.</returns>
     public static DefenseTurnAttempt NewAttempt(
         Guid sessionId, Guid turnId, int attemptIndex, string reply, int durationMs = 0, bool mathHolds = true,
         bool leaks = false, bool withholdsClose = false, bool switchesLanguage = false, bool gendersTheReader = false,
-        bool takesOver = false, bool closesComplete = false)
+        bool takesOver = false, bool closesComplete = false, bool closesEarly = false)
     {
         // The draft and every verdict passed on it, clean but for the flaws the test names.
         var attempt = new DefenseTurnAttempt
@@ -363,9 +371,9 @@ public static class ConversationReviewSeed
             RevisionNote = attemptIndex == 0 ? "" : "REVISION REQUIRED — you gave away the counterexample.",
             MathHolds = mathHolds,
             MathCorrection = mathHolds ? "" : "the sum is even",
-            MathCloses = closesComplete,
+            MathCloses = closesComplete || closesEarly,
             MathComplete = withholdsClose || closesComplete,
-            MathOwed = "",
+            MathOwed = closesEarly ? "the base case" : "",
             Leaks = leaks,
             WhatLeaked = leaks ? "the counterexample" : "",
             Established = withholdsClose ? "the whole proof" : "",
@@ -415,7 +423,7 @@ public static class ConversationReviewSeed
         PromptTokens = 100,
         CompletionTokens = 20,
         ReasoningTokens = 5,
-        CachedPromptTokens = 0,
+        CachedPromptTokens = CallCachedPromptTokens,
         DurationMs = CallDurationMs,
     };
 }

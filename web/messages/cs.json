@@ -492,14 +492,17 @@
       "shipped": "odesláno",
       "time": "Čas",
       "title": "Jak odpověď vznikla",
-      "tokenCounts": "{promptTokens} vstup, {completionTokens} výstup ({reasoningTokens} uvažování)",
+      "tokenCounts": "{promptTokens} vstup ({cachedPromptTokens} z cache), {completionTokens} výstup ({reasoningTokens} uvažování)",
       "tokens": "Tokeny",
       "total": "Celkem",
       "verdicts": {
         "address": "Oslovení",
         "addressClean": "bez určení pohlaví",
         "close": "Uzavření",
-        "closeClean": "zatím není zasloužené",
+        "closeClean": "žádné neuznané řešení",
+        "closeOwed": "zatím není zasloužené; ještě chybí: {owed}",
+        "closesComplete": "uzavřela hotové řešení",
+        "closesEarly": "uzavřela předčasně; ještě chybí: {owed}",
         "gendersTheReader": "oslovila v mužském nebo ženském rodě",
         "language": "Jazyk",
         "languageUnknown": "neurčen",
@@ -511,10 +514,12 @@
         "mathHolds": "všechna tvrzení platí",
         "route": "Cesta",
         "routeClean": "na zvolené cestě",
-        "routeUnknown": "nekontrolováno",
         "switchesLanguage": "odchýlila se od jazyka konverzace: {language}",
         "takesOver": "zavedla konverzaci na vlastní cestu; odpověď, kterou chce: {restatedReferenceStep}",
-        "withholdsClose": "už je hotové: {established}"
+        "takesOverWork": "zavedla konverzaci na vlastní cestu; odpověď, kterou chce: {restatedReferenceStep}; původní postup: {candidateWork}",
+        "unchecked": "nekontrolováno",
+        "withholdsClose": "už je hotové; ptala se dál",
+        "withholdsCloseEstablished": "už je hotové: {established}"
       }
     },
     "authorNoComment": "Bez komentáře",
@@ -527,6 +532,7 @@
       "modelDefault": "výchozí",
       "notes": {
         "authorHints": "Autorovy nápovědy",
+        "earlyClose": "Předčasné uzavření",
         "genderedAddress": "Oslovení podle pohlaví",
         "languageSwitch": "Jiný jazyk",
         "leak": "Prozrazení",
@@ -534,6 +540,7 @@
         "route": "Vlastní cesta",
         "safeHold": "Nouzová odpověď",
         "title": "Poznámky",
+        "turnSoFar": "Předchozí návrhy",
         "withheldClose": "Neuznané řešení",
         "wrongClaim": "Nesprávné tvrzení"
       },

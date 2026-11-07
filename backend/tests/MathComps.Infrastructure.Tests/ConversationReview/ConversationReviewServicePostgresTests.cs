@@ -70,6 +70,11 @@ public class ConversationReviewServicePostgresTests(PostgresContainerFixture fix
         Assert.True(detail.Attempts[0].Leaks);
         Assert.Equal("the counterexample", detail.Attempts[0].WhatLeaked);
 
+        // The rejected one also carries the math-check's completeness verdict: it ended with a step still owed
+        Assert.True(detail.Attempts[0].MathCloses);
+        Assert.False(detail.Attempts[0].MathComplete);
+        Assert.Equal("the base case", detail.Attempts[0].MathOwed);
+
         // And each carries the calls it made, which the turn's single figure can't break down
         Assert.All(
             detail.Attempts,
@@ -82,6 +87,11 @@ public class ConversationReviewServicePostgresTests(PostgresContainerFixture fix
         Assert.All(
             detail.Attempts.SelectMany(attempt => attempt.Calls),
             call => Assert.Equal(CallDurationMs, call.DurationMs));
+
+        // And how much of each call's prompt the provider's cache served, which its cost turns on
+        Assert.All(
+            detail.Attempts.SelectMany(attempt => attempt.Calls),
+            call => Assert.Equal(CallCachedPromptTokens, call.CachedPromptTokens));
     });
 
     /// <summary>

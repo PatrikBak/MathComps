@@ -50,11 +50,21 @@ type ExaminerNoteSnapshot = {
 export type ExaminerNotesSnapshot = {
   /** The wrapper every revision instruction was written into. */
   revision?: ExaminerNoteSnapshot
+  /**
+   * What a retry read ahead of its revision instruction: every earlier draft of the turn, each with every check's
+   * verdict on it.
+   */
+  turnSoFar?: ExaminerNoteSnapshot
   /** The instruction for a reply the math check found a wrong claim in. */
   wrongClaim?: ExaminerNoteSnapshot
   /** The instruction for a reply the leak check found hands away earned progress. */
   leak?: ExaminerNoteSnapshot
-  /** The instruction for a reply that keeps pressing a completed solution. */
+  /** The instruction for a reply that ends the examination while a step of the solution is still owed. */
+  earlyClose?: ExaminerNoteSnapshot
+  /**
+   * The instruction for a reply that keeps pressing a completed solution. Only a conversation recorded before the
+   * early-close note holds it.
+   */
   withheldClose?: ExaminerNoteSnapshot
   /** The instruction for a reply that drifted out of the conversation author's language. */
   languageSwitch?: ExaminerNoteSnapshot

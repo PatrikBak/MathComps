@@ -492,14 +492,17 @@
       "shipped": "sent",
       "time": "Time",
       "title": "How the reply was arrived at",
-      "tokenCounts": "{promptTokens} in, {completionTokens} out ({reasoningTokens} reasoning)",
+      "tokenCounts": "{promptTokens} in ({cachedPromptTokens} cached), {completionTokens} out ({reasoningTokens} reasoning)",
       "tokens": "Tokens",
       "total": "In total",
       "verdicts": {
         "address": "Address",
         "addressClean": "leaves them ungendered",
         "close": "Close",
-        "closeClean": "not yet earned",
+        "closeClean": "no missed close",
+        "closeOwed": "not yet earned; still owed: {owed}",
+        "closesComplete": "closed on a complete solution",
+        "closesEarly": "closed early; still owed: {owed}",
         "gendersTheReader": "took them for a man or a woman",
         "language": "Language",
         "languageUnknown": "not named",
@@ -511,10 +514,12 @@
         "mathHolds": "every claim holds",
         "route": "Route",
         "routeClean": "on their own route",
-        "routeUnknown": "not checked",
         "switchesLanguage": "drifted; they wrote in {language}",
         "takesOver": "walked them onto her own route; the answer she wants: {restatedReferenceStep}",
-        "withholdsClose": "already complete: {established}"
+        "takesOverWork": "walked them onto her own route; the answer she wants: {restatedReferenceStep}; their own work: {candidateWork}",
+        "unchecked": "not checked",
+        "withholdsClose": "already complete; she asked on",
+        "withholdsCloseEstablished": "already complete: {established}"
       }
     },
     "authorNoComment": "No comment",
@@ -527,6 +532,7 @@
       "modelDefault": "default",
       "notes": {
         "authorHints": "Author's hints",
+        "earlyClose": "Early close",
         "genderedAddress": "Gendered address",
         "languageSwitch": "Wrong language",
         "leak": "Leak",
@@ -534,6 +540,7 @@
         "route": "Own route",
         "safeHold": "Fallback reply",
         "title": "Notes",
+        "turnSoFar": "Earlier drafts",
         "withheldClose": "Missed close",
         "wrongClaim": "Wrong claim"
       },
