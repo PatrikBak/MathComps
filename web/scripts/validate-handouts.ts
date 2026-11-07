@@ -2,6 +2,7 @@
  * Validates handout content structure:
  * - Every handout in handouts.json has matching .{locale}.json content files
  *   for its declared languages (or all locales when languages is absent)
+ * - Every declared language's TeX source prints `\MathCompsLink` exactly once, with that language's slug
  * - All localized fields have values for all declared languages
  * - Every environment in a content file has a non-empty, unique-within-its-handout id, and every
  *   language variant of a handout carries the same ids, in the same order
@@ -47,6 +48,12 @@ const CONTENT_DIR = path.join(process.cwd(), 'src/content/handouts')
 
 /** Path to handouts.json */
 const INDEX_PATH = path.join(CONTENT_DIR, '../handouts.json')
+
+/** Directory containing the handouts' TeX sources */
+const TEX_DIR = path.join(process.cwd(), '../data/handouts')
+
+/** A `\MathCompsLink{<slug>}` call in a TeX source, capturing the slug */
+const MATHCOMPS_LINK_PATTERN = /\\MathCompsLink\{([^}]*)\}/g
 
 /** The shape of an environment's permanent id: the same 21-character nanoid a handout itself is identified by. */
 const ENVIRONMENT_ID_PATTERN = /^[A-Za-z0-9_-]{21}$/
@@ -126,6 +133,59 @@ function* validateDifficulty(difficulty: unknown, context: string): Generator<st
   if (!HANDOUT_DIFFICULTY_LEVELS.includes(difficulty as HandoutDifficulty)) {
     const allowed = HANDOUT_DIFFICULTY_LEVELS.join(', ')
     yield `❌ Invalid difficulty "${difficulty}" for ${context} (expected one of: ${allowed})`
+  }
+}
+
+/**
+ * Validates that each language variant's TeX source prints the link to its own page on the site. A source
+ * missing it compiles clean, and its PDF simply carries no link.
+ *
+ * @param handout - The handout whose sources to read.
+ * @param locales - The language variants the handout declares.
+ * @param context - The handout label for error messages.
+ *
+ * @yields An error per variant whose source is missing, or whose link is absent, repeated or carries another slug.
+ */
+function* validateMathCompsLinks(
+  handout: HandoutMetadata,
+  locales: readonly Locale[],
+  context: string
+): Generator<string> {
+  // The source filename stem shared across locales
+  const fileSlug = getContentFileBasename(handout)
+
+  // Check each declared variant's source
+  for (const locale of locales) {
+    // The source's name for this locale
+    const texFile = `${fileSlug}.${locale}.tex`
+
+    // The source's absolute path on disk
+    const texPath = path.join(TEX_DIR, texFile)
+
+    // Flag a variant with no source to read
+    if (!fs.existsSync(texPath)) {
+      // Record the missing source
+      yield `❌ Missing TeX source: ${texFile} for ${context}`
+
+      // Nothing else to check for this variant
+      continue
+    }
+
+    // The slug of every link the source prints
+    const linkSlugs = Array.from(
+      fs.readFileSync(texPath, 'utf-8').matchAll(MATHCOMPS_LINK_PATTERN),
+      (match) => match[1]
+    )
+
+    // The variant's own slug, which its link must carry
+    const expectedSlug = handout.slug[locale]
+
+    // The source must print exactly one link, to this variant's own page
+    if (linkSlugs.length !== 1 || linkSlugs[0] !== expectedSlug) {
+      // Record what the source prints instead
+      yield `❌ ${texFile} should carry exactly one \\MathCompsLink{${expectedSlug}}, ` +
+        `found [${linkSlugs.join(', ')}] for ${context}`
+    }
   }
 }
 
@@ -616,6 +676,9 @@ function validate(): string[] {
           errors.push(`❌ Missing content file: ${contentFile} for ${handoutContext}`)
         }
       }
+
+      // Every variant's PDF links back to its own page on the site
+      errors.push(...validateMathCompsLinks(handout, requiredLocales, handoutContext))
 
       // Every environment has an id, no id repeats within this handout, and every variant agrees on the
       // sequence — the invariant every consumer of environment ids relies on staying stable

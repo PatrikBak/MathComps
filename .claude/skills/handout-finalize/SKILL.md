@@ -24,7 +24,7 @@ Read `web/src/content/handouts.json` and list `data/handouts/<base>.*.tex`. From
 
 - **locale** ← `\setlanguage{SK|CS|EN}` → lowercase (cross-check against filename)
 - **title[locale]** ← `\Title{...}`
-- **slug[locale]** ← `\MathcompsLink{...}`
+- **slug[locale]** ← `\MathCompsLink{...}`
 - **authors** ← `\Author{...}` (must agree across locales)
 
 Then derive the rest:
@@ -110,7 +110,7 @@ Re-run the CLI on the same scoped glob until exit 0. **Never add `--no-build` to
 cd web && npm run handouts:validate
 ```
 
-Must exit 0. Typical failures: missing content file (CLI didn't run for that locale), duplicate slug, orphan file, missing field for a declared language, a missing/duplicate `\EnvId`, or a stale `handout-env-index.json`.
+Must exit 0. Typical failures: missing content file (CLI didn't run for that locale), duplicate slug, orphan file, missing field for a declared language, a missing/duplicate `\EnvId`, a missing `\MathCompsLink` or one whose slug differs from `handouts.json`, or a stale `handout-env-index.json`.
 
 ### 7. Report
 

@@ -114,7 +114,7 @@ Note: `TexEmitter` (used only for skeleton generation) does not carry `\EnvId`s 
 
 ## Validation
 
-The frontend includes a validation script to ensure all ready handouts have content files for all locales, every environment has an id unique within its handout, every language variant agrees on the id sequence, and every variant names each environment uniquely within itself:
+The frontend includes a validation script to ensure all ready handouts have content files for all locales, every environment has an id unique within its handout, every language variant agrees on the id sequence, every variant names each environment uniquely within itself, and every variant's `.tex` prints exactly one `\MathCompsLink` with that language's slug:
 
 ```bash
 cd web && npm run handouts:validate
