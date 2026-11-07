@@ -1,24 +1,22 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
-import { CalendarDays, GraduationCap, Mail, MapPin } from 'lucide-react'
+import { CalendarDays, GraduationCap, Loader2, Mail, MapPin } from 'lucide-react'
 import { useFormatter, useLocale, useTranslations } from 'next-intl'
-import { useEffect, useMemo, useRef } from 'react'
-import { toast } from 'sonner'
+import { useEffect, useMemo } from 'react'
 
-import { useInvalidateUserComments } from '@/components/features/comments/hooks/use-invalidate-user-comments'
 import { UserAvatarImage } from '@/components/layout/UserAvatarImage'
 import { HelpTooltip } from '@/components/shared/components/HelpTooltip'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { SearchableSelect } from '@/components/shared/components/select/SearchableSelect'
 import { Select } from '@/components/shared/components/select/Select'
-import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useLoginRedirect } from '@/hooks/use-login-redirect'
 
 import { UsernameForm } from './components/UsernameForm'
 import { getCountryOptions } from './countries'
 import { EARLIEST_GRADUATION_YEAR, getGraduationYears, PAST_SCHOOL_VALUE } from './graduation-year'
+import { useAvatarPicker } from './hooks/use-avatar-picker'
 import { useSetUsername } from './hooks/use-set-username'
 import { useUpdateProfile } from './hooks/use-update-profile'
 import { useUserProfile } from './hooks/use-user-profile'
@@ -90,8 +88,6 @@ function ProfileSection({ title, note, children }: ProfileSectionProps) {
 export default function ProfilePageContent() {
   // Translations for profile page
   const tProfile = useTranslations('profile')
-  // Translations for Clerk auth errors
-  const tClerkErrors = useTranslations('clerkErrors')
 
   // Date formatter (uses current locale automatically)
   const format = useFormatter()
@@ -139,11 +135,8 @@ export default function ProfilePageContent() {
   // Every country, named and sorted in the reader's own language, theirs on top
   const countryOptions = useMemo(() => getCountryOptions(locale), [locale])
 
-  // Ref for the file input
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  // Hook for invalidating user comments
-  const { invalidateUserComments } = useInvalidateUserComments()
+  // The picker for a new avatar
+  const avatarPicker = useAvatarPicker()
 
   // If no user is logged in, redirect to the login page
   useEffect(() => {
@@ -162,30 +155,6 @@ export default function ProfilePageContent() {
   // useEffect above will redirect us to the login page
   if (!user) {
     return null
-  }
-
-  /**
-   * Handles the file selection for avatar update
-   */
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    // Get the file from the input
-    const file = event.target.files?.[0]
-
-    // Ensure we have both the file and the user
-    if (!file || !user) return
-
-    try {
-      // Use Clerk's API to update the user's profile image
-      await user.setProfileImage({ file })
-
-      // Invalidate comments to refresh avatars
-      await invalidateUserComments()
-
-      // This worked out fine
-      toast.success(tProfile('avatarUpdated'))
-    } catch (error) {
-      toast.error(getClerkErrorMessage(error, tClerkErrors))
-    }
   }
 
   /** The class for the font of the text inside the data fields */
@@ -214,20 +183,8 @@ export default function ProfilePageContent() {
 
           {/* Avatar container */}
           <div className="absolute left-1/2 -translate-x-1/2 -bottom-12 sm:-bottom-14 md:-bottom-16 z-10 flex flex-col items-center">
-            {/* Avatar file input */}
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              onChange={handleFileChange}
-              accept="image/*"
-            />
-
             {/* Clickable avatar container */}
-            <div
-              className="relative group cursor-pointer"
-              onClick={() => fileInputRef.current?.click()}
-            >
+            <div className="relative group cursor-pointer" onClick={avatarPicker.open}>
               {/* Avatar gradient */}
               <div
                 className={cn(
@@ -238,12 +195,20 @@ export default function ProfilePageContent() {
 
               {/* Avatar image */}
               <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full ring-4 ring-background overflow-hidden bg-surface">
+                {/* The picture itself */}
                 <UserAvatarImage
                   imageUrl={user.imageUrl}
                   altText={username ?? tProfile('defaultUser')}
                   size={128}
                   className="w-full h-full"
                 />
+
+                {/* Spinner over the image while the picker comes up and the new picture saves */}
+                {avatarPicker.isBusy && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/60">
+                    <Loader2 className="size-8 animate-spin text-foreground" aria-hidden="true" />
+                  </div>
+                )}
               </div>
             </div>
           </div>

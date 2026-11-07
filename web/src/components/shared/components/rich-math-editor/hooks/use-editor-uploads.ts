@@ -1,9 +1,10 @@
-import { useCallbackRef, useFileDialog } from '@mantine/hooks'
+import { useCallbackRef } from '@mantine/hooks'
 import { useTranslations } from 'next-intl'
 import type { ClipboardEventHandler } from 'react'
 import { toast } from 'sonner'
 
 import { assertNever } from '@/components/shared/utils/assert-never'
+import { useFilePicker, type UseFilePickerResult } from '@/hooks/use-file-picker'
 import { type FileType, validateFile } from '@/lib/file-upload-utils'
 
 import { EDITOR_UPLOADS, editorFileTypeOf, toastUploadError } from '../utils/attachment-utils'
@@ -28,10 +29,13 @@ type UseEditorUploadsOptions = {
 export type UseEditorUploadsResult = {
   /** Whether the editor takes a dropped file of any kind. */
   takesDrops: boolean
-  /** Opens the image picker, or says the image limit is already reached. */
-  openImagePicker: () => void
-  /** Opens the attachment picker, or says the attachment limit is already reached. */
-  openAttachmentPicker: () => void
+  /** The image picker, which says the image limit is reached instead of opening on a text already at it. */
+  imagePicker: UseFilePickerResult
+  /**
+   * The attachment picker, which says the attachment limit is reached instead of opening on a text already
+   * at it.
+   */
+  attachmentPicker: UseFilePickerResult
   /**
    * Handles a paste into the text: an image uploads where the editor takes images, and a URL over a
    * selection becomes a link.
@@ -209,25 +213,20 @@ export function useEditorUploads({
   }
 
   /**
-   * A function which uploads the file a picker handed over. The picker keeps hold of the callback it
-   * opened with, so this is one that always runs the latest upload.
+   * A function which uploads the file a picker handed over.
    *
-   * @param files - The files the picker was closed with.
+   * @param files - The files picked, the first of which is uploaded.
    */
-  const uploadPicked = useCallbackRef((files: FileList | null) => {
-    // The one file a picker takes
-    const file = files?.[0]
-    if (!file) return
-
+  const uploadPicked = (files: File[]) => {
     // The file goes on its way into the text
-    void upload(file)
-  })
+    void upload(files[0])
+  }
 
-  // The image picker
-  const imagePicker = useFileDialog({ multiple: false, accept: 'image/*', onChange: uploadPicked })
+  // The system's picker for an image
+  const imageDialog = useFilePicker({ accept: 'image/*', multiple: false, onPick: uploadPicked })
 
-  // The attachment picker
-  const attachmentPicker = useFileDialog({ multiple: false, onChange: uploadPicked })
+  // The system's picker for an attachment
+  const attachmentDialog = useFilePicker({ multiple: false, onPick: uploadPicked })
 
   /**
    * A function which opens the image picker, where the text has room for another image.
@@ -237,7 +236,7 @@ export function useEditorUploads({
     if (!ensureRoomFor('image')) return
 
     // The picker opens on the reader's files
-    imagePicker.open()
+    imageDialog.open()
   }
 
   /**
@@ -248,7 +247,19 @@ export function useEditorUploads({
     if (!ensureRoomFor('attachment')) return
 
     // The picker opens on the reader's files
-    attachmentPicker.open()
+    attachmentDialog.open()
+  }
+
+  // The image picker, opening only where the text has room
+  const imagePicker: UseFilePickerResult = {
+    open: openImagePicker,
+    isOpening: imageDialog.isOpening,
+  }
+
+  // The attachment picker, opening only where the text has room
+  const attachmentPicker: UseFilePickerResult = {
+    open: openAttachmentPicker,
+    isOpening: attachmentDialog.isOpening,
   }
 
   /**
@@ -325,5 +336,5 @@ export function useEditorUploads({
   const takesDrops = Object.values(takesDropOf).some(Boolean)
 
   // Whether a drop is taken, the pickers, and the handlers for each way in
-  return { takesDrops, openImagePicker, openAttachmentPicker, handlePaste, handleDrop }
+  return { takesDrops, imagePicker, attachmentPicker, handlePaste, handleDrop }
 }

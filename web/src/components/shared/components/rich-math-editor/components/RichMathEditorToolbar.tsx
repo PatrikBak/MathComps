@@ -8,6 +8,7 @@ import {
   Link,
   List,
   ListOrdered,
+  Loader2,
   MessageSquareQuote,
   Paperclip,
   Plus,
@@ -18,6 +19,7 @@ import { Fragment, type ReactNode } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
+import { type UseFilePickerResult } from '@/hooks/use-file-picker'
 import { useRowOverflow } from '@/hooks/use-row-overflow'
 
 import { type UseEditorPreviewResult } from '../hooks/use-editor-preview'
@@ -57,10 +59,10 @@ type RichMathEditorToolbarProps = {
   onEdit: (transform: (context: EditContext) => EditResult) => void
   /** Writes text at the cursor, over any selection */
   onInsert: (text: string) => void
-  /** Opens the picker for an image to upload */
-  onImageClick: () => void
-  /** Opens the picker for an attachment to upload */
-  onAttachmentClick: () => void
+  /** The picker for an image to upload */
+  imagePicker: UseFilePickerResult
+  /** The picker for an attachment to upload */
+  attachmentPicker: UseFilePickerResult
 }
 
 /**
@@ -124,8 +126,8 @@ export function RichMathEditorToolbar({
   onExpand,
   onEdit,
   onInsert,
-  onImageClick,
-  onAttachmentClick,
+  imagePicker,
+  attachmentPicker,
 }: RichMathEditorToolbarProps) {
   // Editor translations
   const tEditor = useTranslations('ui.editor')
@@ -142,6 +144,9 @@ export function RichMathEditorToolbar({
     spoilerPlaceholder: tEditor('hiddenContentPlaceholder'),
     headingPlaceholder: tEditor('headingPlaceholder'),
   }
+
+  // The mark of a tool whose file picker is on its way, which can take the browser a moment
+  const pickerSpinner = <Loader2 className="animate-spin" aria-hidden="true" />
 
   // Every tool there is, in the order they stand, which is also the order a narrowing toolbar holds on to
   // them in
@@ -167,7 +172,12 @@ export function RichMathEditorToolbar({
         />
       ),
     },
-    pressTool('image', <ImageIcon />, tEditor('image'), onImageClick),
+    pressTool(
+      'image',
+      imagePicker.isOpening ? pickerSpinner : <ImageIcon />,
+      tEditor('image'),
+      imagePicker.open
+    ),
     {
       item: 'emoji',
       render: (closeOverflow) => (
@@ -195,7 +205,12 @@ export function RichMathEditorToolbar({
     pressTool('spoiler', <SquareSlash />, tEditor('spoiler'), () =>
       onEdit((context) => insertSpoiler(context, transformLabels))
     ),
-    pressTool('attachment', <Paperclip />, tEditor('attachment'), onAttachmentClick),
+    pressTool(
+      'attachment',
+      attachmentPicker.isOpening ? pickerSpinner : <Paperclip />,
+      tEditor('attachment'),
+      attachmentPicker.open
+    ),
   ]
 
   // The tools this editor shows
