@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.Ai;
@@ -5,6 +6,7 @@ using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Dtos;
 using MathComps.Infrastructure.Services.Defense.Engine;
+using MathComps.Infrastructure.Services.Photos;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Moq;
 using MsOptions = Microsoft.Extensions.Options.Options;
@@ -19,7 +21,8 @@ namespace MathComps.Infrastructure.Tests.Defense;
 /// on every reply, a flagged guard triggers regeneration — re-verified each time and capped, so a persistent flaw ships
 /// after the cap — a revision carries the specific correction back to the generator behind the turn so far, a language
 /// switch and a guessed gender are sent back for a rewrite but never cost the reply its content, the turn sums the cost
-/// and tokens of every call it made, and a reply already written is judged the way a drafted one is.
+/// and tokens of every call it made, a reply already written is judged the way a drafted one is, and every step but
+/// the language check reads the candidate's drawings beside the text they came with.
 /// </summary>
 public class ExaminerTests
 {
@@ -1110,6 +1113,159 @@ public class ExaminerTests
         // The attempt records a call for each guard and no generate call.
         Assert.Equal(steps, attempt.Calls.Select(call => call.Step));
     }
+
+    /// <summary>
+    /// A conversation without drawings reaches every step as one text, pinned byte for byte. The expected texts are
+    /// written out rather than rendered from the transcript, so a change to the rendering can't move both sides of the
+    /// comparison.
+    /// </summary>
+    [Fact]
+    public async Task A_conversation_without_drawings_reaches_every_step_as_its_text()
+    {
+        // A conversation with an earlier exchange before the candidate's latest turn.
+        var transcript = Transcript.Parse(
+            "## Candidate\n\nmy defense\n\n## Examiner\n\nan earlier question\n\n## Candidate\n\nmy answer");
+
+        // Run a turn, keeping each step's user message.
+        var messages = await RunCapturingUserMessagesAsync(transcript, DraftTurnAsync);
+
+        // The whole conversation, the text generate replies to.
+        const string conversation =
+            "## Candidate\n\nmy defense\n\n## Examiner\n\nan earlier question\n\n## Candidate\n\nmy answer";
+
+        // Generate reads the conversation as one text.
+        Assert.Equal<ChatPart>([new ChatText(conversation)], messages[nameof(ExaminerStep.Generate)]);
+
+        // The same conversation with the proposed reply under its heading, the text a reference guard judges.
+        const string judged = conversation + "\n\n## Examiner (proposed)\n\na reply.";
+
+        // Every reference guard reads the conversation and the reply as one text.
+        Assert.Equal<ChatPart>([new ChatText(judged)], messages[nameof(ExaminerStep.MathCheck)]);
+        Assert.Equal<ChatPart>([new ChatText(judged)], messages[nameof(ExaminerStep.LeakCheck)]);
+        Assert.Equal<ChatPart>([new ChatText(judged)], messages[nameof(ExaminerStep.RouteCheck)]);
+
+        // The language check reads the candidate's latest turn and the reply, as one text.
+        Assert.Equal<ChatPart>(
+            [new ChatText("## Candidate\n\nmy answer\n\n## Examiner (proposed)\n\na reply.")],
+            messages[nameof(ExaminerStep.LanguageCheck)]);
+    }
+
+    /// <summary>
+    /// A drawing the candidate sent reaches generate and every reference guard right after the text it came with, and
+    /// a guard reads the proposed reply after it. The language check reads text alone: it compares two pieces of
+    /// prose, and a drawing holds none.
+    /// </summary>
+    [Fact]
+    public async Task A_drawing_reaches_every_step_but_the_language_check()
+    {
+        // A few bytes standing in for a drawing.
+        byte[] drawing = [0xFF, 0xD8, 0xFF, 0xE0, 0x01, 0x02];
+
+        // A candidate turn sent with that drawing.
+        var transcript = new Transcript(
+            [new TranscriptTurn(TranscriptRole.Candidate, "see [Figure 1]", [new PhotoCrop("Figure 1", drawing)])]);
+
+        // Run a turn, keeping each step's user message.
+        var messages = await RunCapturingUserMessagesAsync(transcript, DraftTurnAsync);
+
+        // The candidate's text through the drawing's caption, then the drawing.
+        ChatPart[] conversation =
+        [
+            new ChatText("## Candidate\n\nsee [Figure 1]\n\nTheir drawing [Figure 1]:"),
+            new ChatImage(drawing, MediaTypeNames.Image.Jpeg),
+        ];
+
+        // Generate reads exactly those parts.
+        Assert.Equal(conversation, messages[nameof(ExaminerStep.Generate)]);
+
+        // The same parts with the proposed reply after the drawing.
+        ChatPart[] judged = [.. conversation, new ChatText("\n\n## Examiner (proposed)\n\na reply.")];
+
+        // Every reference guard reads exactly those parts.
+        Assert.Equal(judged, messages[nameof(ExaminerStep.MathCheck)]);
+        Assert.Equal(judged, messages[nameof(ExaminerStep.LeakCheck)]);
+        Assert.Equal(judged, messages[nameof(ExaminerStep.RouteCheck)]);
+
+        // The language check reads the candidate's text and the reply, without the drawing.
+        Assert.Equal<ChatPart>(
+            [new ChatText("## Candidate\n\nsee [Figure 1]\n\n## Examiner (proposed)\n\na reply.")],
+            messages[nameof(ExaminerStep.LanguageCheck)]);
+    }
+
+    /// <summary>
+    /// A reply already written is judged with the candidate's drawing in place too: a reference guard reads the
+    /// drawing between the candidate's text and the reply.
+    /// </summary>
+    [Fact]
+    public async Task A_checked_reply_is_judged_with_the_drawing()
+    {
+        // A few bytes standing in for a drawing.
+        byte[] drawing = [0xFF, 0xD8, 0xFF, 0xE0, 0x01, 0x02];
+
+        // A candidate turn sent with that drawing.
+        var transcript = new Transcript(
+            [new TranscriptTurn(TranscriptRole.Candidate, "see [Figure 1]", [new PhotoCrop("Figure 1", drawing)])]);
+
+        // Check a written reply, keeping each check's user message.
+        var messages = await RunCapturingUserMessagesAsync(transcript,
+            (examiner, input) => examiner.CheckReplyAsync(input, "a reply.", new ModelUsageAccumulator()));
+
+        // The candidate's text through the drawing's caption, the drawing, then the reply under judgement.
+        ChatPart[] judged =
+        [
+            new ChatText("## Candidate\n\nsee [Figure 1]\n\nTheir drawing [Figure 1]:"),
+            new ChatImage(drawing, MediaTypeNames.Image.Jpeg),
+            new ChatText("\n\n## Examiner (proposed)\n\na reply."),
+        ];
+
+        // The math check reads exactly those parts.
+        Assert.Equal(judged, messages[nameof(ExaminerStep.MathCheck)]);
+    }
+
+    /// <summary>
+    /// Runs the examiner over a conversation with every check clearing the reply, and hands back the user message each
+    /// step was sent.
+    /// </summary>
+    /// <param name="transcript">The conversation the reply answers.</param>
+    /// <param name="run">The examiner call to make: drafting a turn, or checking a written reply.</param>
+    /// <returns>Each step's user message parts, keyed by the step's name.</returns>
+    private static async Task<IReadOnlyDictionary<string, IReadOnlyList<ChatPart>>> RunCapturingUserMessagesAsync(
+        Transcript transcript, Func<IExaminer, ExaminerInput, Task> run)
+    {
+        // A reply every check clears, so each step is called once.
+        var caller = new Mock<ILlmChatCaller>();
+        SetupTextStep(caller, "a reply.");
+        SetupStep(caller, CleanMath());
+        SetupStep(caller, CleanLeak());
+        SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
+
+        // Make the call under throwaway prompt templates.
+        await WithTempSettingsAsync(async settings =>
+        {
+            // Run the call over the conversation.
+            await run(
+                new ExaminerEngine(caller.Object, MsOptions.Create(settings)),
+                new ExaminerInput("problem", "reference", transcript));
+
+            // The bool is ignored; the requests are the point.
+            return true;
+        });
+
+        // Every request the call sent, each step's user message under its name.
+        return caller.Invocations
+            .Select(invocation => (ChatCallRequest)invocation.Arguments[0])
+            .ToDictionary(request => request.StepName, request => request.UserMessage.Parts);
+    }
+
+    /// <summary>
+    /// Drafts the examiner's next turn: a reply, then every check over it.
+    /// </summary>
+    /// <param name="examiner">The examiner to draft with.</param>
+    /// <param name="input">The problem, its reference and the conversation.</param>
+    /// <returns>A task that completes once the turn is drafted and checked.</returns>
+    private static Task DraftTurnAsync(IExaminer examiner, ExaminerInput input) =>
+        examiner.NextReplyAsync(input, new ModelUsageAccumulator());
 
     /// <summary>
     /// Runs one turn of the loop against the fake caller over a minimal conversation awaiting the examiner, wiring the

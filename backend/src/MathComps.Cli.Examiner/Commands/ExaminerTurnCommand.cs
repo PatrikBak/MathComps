@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using MathComps.Cli.Examiner.Fixtures;
-using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Defense.Engine;
 using Microsoft.Extensions.Logging;
@@ -66,11 +65,8 @@ public class ExaminerTurnCommand(IExaminer examiner, ILogger<ExaminerTurnCommand
         // Stop the clock before the follow-up I/O.
         stopwatch.Stop();
 
-        // Append the reply so the next candidate turn builds on it.
-        var updated = fixture.Transcript.Append(TranscriptRole.Examiner, outcome.Shipped.Reply);
-
-        // Write the transcript back, keeping a trailing newline on the file.
-        await File.WriteAllTextAsync(Path.Combine(folder, "transcript.md"), updated.ToMarkdown() + "\n");
+        // Append the reply to the transcript file so the next candidate turn builds on it.
+        await Fixture.AppendReplyAsync(folder, outcome.Shipped.Reply);
 
         // Report what the loop did.
         Render(outcome, stopwatch.Elapsed);

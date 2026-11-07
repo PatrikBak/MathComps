@@ -1,18 +1,55 @@
+using System.Net.Mime;
 using SkiaSharp;
+using static SkiaSharp.SKEncodedImageFormat;
 
 namespace MathComps.Infrastructure.Imaging;
 
 /// <summary>
-/// Decodes a raster image file into an upright bitmap ready to show or cut up, and cuts JPEGs out of a bitmap. Built
-/// on SkiaSharp.
+/// Reads which format a raster image file is, decodes one into an upright bitmap ready to show or cut up, and cuts
+/// JPEGs out of a bitmap. Built on SkiaSharp.
 /// </summary>
 public static class RasterImages
 {
     /// <summary>
     /// The encoded formats <see cref="DecodeUpright"/> reads.
     /// </summary>
-    private static readonly HashSet<SKEncodedImageFormat> _readableFormats =
-        [SKEncodedImageFormat.Jpeg, SKEncodedImageFormat.Png, SKEncodedImageFormat.Webp];
+    private static readonly HashSet<SKEncodedImageFormat> _readableFormats = [Jpeg, Png, Webp];
+
+    /// <summary>
+    /// The media type of a raster image file, read off its header whatever the file is named or claims to be. No
+    /// pixels are decoded.
+    /// </summary>
+    /// <param name="data">The file's bytes.</param>
+    /// <returns>The file's media type, or null when the bytes are no image the decoder reads, or an image of a format
+    /// .NET names no media type for.</returns>
+    public static string? MediaTypeOf(ReadOnlySpan<byte> data)
+    {
+        // Parse the file's header, which yields nothing for bytes that are no image at all.
+        using var encoded = SKData.CreateCopy(data);
+        using var codec = SKCodec.Create(encoded);
+
+        // The format the header names, as a media type.
+        return codec?.EncodedFormat switch
+        {
+            // Known formats
+            Avif => MediaTypeNames.Image.Avif,
+            Bmp => MediaTypeNames.Image.Bmp,
+            Gif => MediaTypeNames.Image.Gif,
+            Ico => MediaTypeNames.Image.Icon,
+            Jpeg => MediaTypeNames.Image.Jpeg,
+            Png => MediaTypeNames.Image.Png,
+            Webp => MediaTypeNames.Image.Webp,
+
+            // A format .NET names no media type for
+            Wbmp or Pkm or Ktx or Astc or Dng or Heif or Jpegxl => null,
+
+            // Bytes that are no image
+            null => null,
+
+            // Any other format
+            var format => throw new ArgumentOutOfRangeException(nameof(data), format, "Unknown image format"),
+        };
+    }
 
     /// <summary>
     /// Decodes a JPEG, PNG or WebP image the way it is meant to be seen: turned by its EXIF orientation, which a phone
@@ -119,7 +156,7 @@ public static class RasterImages
             throw new ArgumentOutOfRangeException(nameof(area), area, "The area holds none of the bitmap.");
 
         // Encode the cut as a JPEG.
-        using var jpeg = cut.Encode(SKEncodedImageFormat.Jpeg, quality);
+        using var jpeg = cut.Encode(Jpeg, quality);
 
         // Hand back the JPEG's bytes.
         return jpeg.ToArray();

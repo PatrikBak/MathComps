@@ -652,7 +652,7 @@ public class DefenseSessionService(
     /// <param name="turns">The session's turns.</param>
     /// <returns>The conversation as the engine reads it.</returns>
     private static Transcript BuildTranscript(IEnumerable<DefenseTurn> turns) =>
-        new([.. turns.OrderBy(turn => turn.Sequence).Select(turn => new TranscriptTurn(turn.Role, turn.Content))]);
+        new([.. turns.OrderBy(turn => turn.Sequence).Select(turn => new TranscriptTurn(turn.Role, turn.Content, []))]);
 
     /// <summary>
     /// Maps a turn's engine attempts onto rows against the turn they were drafted for. The fallback flag belongs to

@@ -1,6 +1,9 @@
 using System.Collections.Immutable;
+using System.Net.Mime;
 using System.Text;
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Infrastructure.Services.Ai;
+using MathComps.Infrastructure.Services.Photos;
 using MathComps.Shared.Extensions;
 
 namespace MathComps.Infrastructure.Services.Defense;
@@ -10,11 +13,14 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// </summary>
 /// <param name="Role">Who authored the turn.</param>
 /// <param name="Text">The turn's text.</param>
-public record TranscriptTurn(TranscriptRole Role, string Text);
+/// <param name="Crops">The drawings cut from the photos the turn was sent with, in order; empty for a turn sent as
+/// text alone.</param>
+public record TranscriptTurn(TranscriptRole Role, string Text, ImmutableArray<PhotoCrop> Crops);
 
 /// <summary>
 /// A defense conversation in its markdown form: alternating <c>## Candidate</c> / <c>## Examiner</c> blocks. Parses
-/// that markdown into turns, renders back to it, and knows that the examiner only ever replies to a candidate's turn.
+/// that markdown into turns, renders back to it or to the user message a model reads, and knows that the examiner
+/// only ever replies to a candidate's turn.
 /// </summary>
 /// <param name="Turns">The turns in order.</param>
 public record Transcript(ImmutableArray<TranscriptTurn> Turns)
@@ -40,7 +46,7 @@ public record Transcript(ImmutableArray<TranscriptTurn> Turns)
         {
             // Only once we've seen a heading is there a block to emit.
             if (currentRole is { } role)
-                turns.Add(new TranscriptTurn(role, currentBody.ToString().Trim()));
+                turns.Add(new TranscriptTurn(role, currentBody.ToString().Trim(), Crops: []));
 
             // Reset for the next block.
             currentBody.Clear();
@@ -78,11 +84,43 @@ public record Transcript(ImmutableArray<TranscriptTurn> Turns)
 
     /// <summary>
     /// Renders the conversation back to its markdown form — one <c>## Role</c> heading per turn, bodies separated by
-    /// blank lines.
+    /// blank lines. The turns' drawings are left out.
     /// </summary>
     /// <returns>The transcript markdown, without a trailing newline.</returns>
     public string ToMarkdown() =>
         Turns.Select(turn => $"## {turn.Role}\n\n{turn.Text}").ToJoinedString("\n\n");
+
+    /// <summary>
+    /// Renders the conversation as the user message a model reads: the markdown form, with each drawing right after
+    /// the text of the turn it came with, under a caption naming its marker. A conversation without drawings is one
+    /// text, equal to <see cref="ToMarkdown"/>.
+    /// </summary>
+    /// <returns>The conversation as text and images, in order.</returns>
+    public ChatUserMessage ToPrompt()
+    {
+        // The message, built up turn by turn.
+        var message = new ChatUserMessage([]);
+
+        // Walk the turns in order.
+        foreach (var (index, turn) in Turns.Index())
+        {
+            // Every turn after the first is set off by a blank line, as in the markdown form.
+            var separator = index == 0 ? "" : "\n\n";
+
+            // The turn's heading and text.
+            message = message.Append($"{separator}## {turn.Role}\n\n{turn.Text}");
+
+            // Each drawing follows the turn's text, under a caption naming the marker the text points at it by. A crop
+            // is always a JPEG.
+            foreach (var crop in turn.Crops)
+                message = message
+                    .Append($"\n\nTheir drawing [{crop.Label}]:")
+                    .Append(new ChatImage(crop.Image, MediaTypeNames.Image.Jpeg));
+        }
+
+        // Hand back the message.
+        return message;
+    }
 
     /// <summary>
     /// Returns a new transcript with one turn appended.
@@ -91,7 +129,7 @@ public record Transcript(ImmutableArray<TranscriptTurn> Turns)
     /// <param name="text">The turn's text.</param>
     /// <returns>The extended transcript.</returns>
     public Transcript Append(TranscriptRole role, string text) =>
-        new(Turns.Add(new TranscriptTurn(role, text.Trim())));
+        new(Turns.Add(new TranscriptTurn(role, text.Trim(), Crops: [])));
 
     /// <summary>
     /// Returns a new transcript truncated to end with its <paramref name="candidateCount"/>-th candidate turn,

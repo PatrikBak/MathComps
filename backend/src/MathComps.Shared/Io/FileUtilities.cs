@@ -51,16 +51,21 @@ public static class FileUtilities
     /// <param name="cancellationToken">A token to cancel the read.</param>
     /// <returns>The file's contents.</returns>
     public static async Task<string> ReadRequiredAsync(
-        string folder, string fileName, CancellationToken cancellationToken = default)
-    {
-        // The file has to be there — a missing one gets a clear error naming it, not an opaque I/O exception.
-        var path = Path.Combine(folder, fileName);
-        if (!File.Exists(path))
-            throw new FileNotFoundException($"Required file '{fileName}' not found in '{folder}'.", path);
-
+        string folder, string fileName, CancellationToken cancellationToken = default) =>
         // Read the whole file back.
-        return await File.ReadAllTextAsync(path, cancellationToken);
-    }
+        await File.ReadAllTextAsync(RequiredPath(folder, fileName), cancellationToken);
+
+    /// <summary>
+    /// Reads all the bytes of a required file within a folder, naming the file in the error when it isn't there.
+    /// </summary>
+    /// <param name="folder">The folder the file must be in.</param>
+    /// <param name="relativePath">The required file's path within the folder.</param>
+    /// <param name="cancellationToken">A token to cancel the read.</param>
+    /// <returns>The file's bytes.</returns>
+    public static async Task<byte[]> ReadRequiredBytesAsync(
+        string folder, string relativePath, CancellationToken cancellationToken = default) =>
+        // Read the whole file back.
+        await File.ReadAllBytesAsync(RequiredPath(folder, relativePath), cancellationToken);
 
     /// <summary>
     /// Hashes a file's bytes. SHA-256 hex, chosen for being the boring default rather than for any property of the
@@ -75,5 +80,25 @@ public static class FileUtilities
 
         // The digest, lowercased so a hash recorded on any platform compares equal
         return Convert.ToHexStringLower(SHA256.HashData(stream));
+    }
+
+    /// <summary>
+    /// Resolves a required file within a folder, naming the file in the error when it isn't there.
+    /// </summary>
+    /// <param name="folder">The folder the file must be in.</param>
+    /// <param name="relativePath">The required file's path within the folder.</param>
+    /// <returns>The file's path.</returns>
+    /// <exception cref="FileNotFoundException">The file isn't there.</exception>
+    private static string RequiredPath(string folder, string relativePath)
+    {
+        // The file within the folder.
+        var path = Path.Combine(folder, relativePath);
+
+        // A missing file, or one whose folder is missing, is refused with an error naming it.
+        if (!File.Exists(path))
+            throw new FileNotFoundException($"Required file '{relativePath}' not found in '{folder}'.", path);
+
+        // Hand back the path to read.
+        return path;
     }
 }
