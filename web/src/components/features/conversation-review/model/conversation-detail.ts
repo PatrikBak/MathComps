@@ -91,6 +91,8 @@ export type DefenseAttemptCall = {
   completionTokens: number
   /** The reasoning portion of the completion tokens. */
   reasoningTokens: number
+  /** The portion of the prompt tokens the provider's cache served. */
+  cachedPromptTokens: number
   /** How long the call took, in milliseconds; 0 on one made before the timings were kept. */
   durationMs: number
 }
@@ -113,13 +115,29 @@ export type DefenseTurnAttempt = {
   mathHolds: boolean
   /** Which claim was wrong and the correct statement; empty when they all held. */
   mathCorrection: string
+  /**
+   * Whether the reply ended the examination: it had nothing more to ask, or left the rest to the conversation's
+   * author. False on a draft made before the math check judged completeness.
+   */
+  mathCloses: boolean
+  /**
+   * Whether the conversation author's own turns already made a complete solution when the reply was checked. On a
+   * draft made before the math check judged completeness, true only where the close was withheld.
+   */
+  mathComplete: boolean
+  /**
+   * What a complete solution still needed that no turn of the conversation's author argued; empty when nothing was
+   * owed, and on a draft made before the math check judged completeness.
+   */
+  mathOwed: string
   /** Whether the reply handed over unearned progress. */
   leaks: boolean
   /** The step or idea given away; empty when nothing was. */
   whatLeaked: string
-  /** Whether the reply pressed on although the solution was already complete. */
-  withholdsClose: boolean
-  /** What the conversation's author had assembled, when the close was withheld; empty otherwise. */
+  /**
+   * What the conversation's author had assembled, on a draft made before the math check judged completeness whose
+   * close was withheld; empty otherwise.
+   */
   established: string
   /** Whether the reply drifted out of the conversation author's language. */
   switchesLanguage: boolean

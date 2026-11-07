@@ -75,9 +75,11 @@ public class ConversationReviewService(
                         attempt.RevisionNote,
                         attempt.MathHolds,
                         attempt.MathCorrection,
+                        attempt.MathCloses,
+                        attempt.MathComplete,
+                        attempt.MathOwed,
                         attempt.Leaks,
                         attempt.WhatLeaked,
-                        attempt.MathComplete && !attempt.MathCloses,
                         attempt.Established,
                         attempt.SwitchesLanguage,
                         attempt.CandidateLanguage,
@@ -95,6 +97,7 @@ public class ConversationReviewService(
                                 call.PromptTokens,
                                 call.CompletionTokens,
                                 call.ReasoningTokens,
+                                call.CachedPromptTokens,
                                 call.DurationMs))
                             .ToList(),
                         attempt.DurationMs))
