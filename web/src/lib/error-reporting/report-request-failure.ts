@@ -1,7 +1,5 @@
 import * as Sentry from '@sentry/nextjs'
 
-import { getOptionalEnv } from '@/components/shared/utils/env-utils'
-
 /** The reports this page has filed, each by its fingerprint. */
 const filedReports = new Set<string>()
 
@@ -40,40 +38,12 @@ export function reportUnansweredRequest(url: string, error: unknown): void {
   // An offline browser lost its own network, which says nothing about the host
   if (!navigator.onLine) return
 
-  // The host alone, since a path can name a user's data and a signed address carries its signature
+  // The host alone, since a path can name a user's data
   const { host } = new URL(url, window.location.href)
 
   // One report per host, with the browser's own error as its cause
   reportOncePerPage(
     ['unanswered-request', host],
     new Error(`A request to ${host} got no answer`, { cause: error })
-  )
-}
-
-/**
- * Reports a refusal from a server that isn't ours, such as the file store, since no server of ours
- * records it. Each host and status is reported once per page load. The site's own routes and the API
- * are left to their own reporting.
- *
- * @param url - The address the request went to.
- * @param status - The status the server refused with.
- */
-export function reportForeignRefusal(url: string, status: number): void {
-  // A relative address is one of the site's own routes
-  if (url.startsWith('/')) return
-
-  // The host alone, since a path can name a user's data and a signed address carries its signature
-  const { host } = new URL(url)
-
-  // The API's address, where there is one
-  const apiUrl = getOptionalEnv('NEXT_PUBLIC_API_URL')
-
-  // A refusal from the API
-  if (apiUrl !== undefined && host === new URL(apiUrl).host) return
-
-  // One report per host and status
-  reportOncePerPage(
-    ['foreign-refusal', host, String(status)],
-    new Error(`A request to ${host} was refused with ${status}`)
   )
 }

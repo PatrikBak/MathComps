@@ -130,4 +130,13 @@ test.describe('sending a contact message', () => {
     // is for: a refusal carries one, a call that never arrived does not
     await expect(page.getByText(copy.failedRetry)).toBeVisible()
   })
+
+  test('reaches its route past the locale routing every page takes', async ({ request }) => {
+    // A message with nothing in it, sent to the route itself
+    const response = await request.post('/api/contact', { data: {} })
+
+    // Turned away by the route's own validation, which only a request that got to it can be
+    expect(response.status()).toBe(400)
+    expect(await response.json()).toEqual({ errorCode: 'VALIDATION_FAILED' })
+  })
 })

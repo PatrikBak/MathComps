@@ -10,7 +10,7 @@ import { PENDING_COMMENT_REACTION_STORAGE_KEY } from '@/constants/local-storage-
 
 import messages from '../messages/en.json'
 import { gateReads } from './support/answer-gate'
-import { BACKEND_ORIGIN } from './support/backend-routes'
+import { BACKEND_ORIGIN, fileLinkTo } from './support/backend-routes'
 import {
   commentBy,
   commentFrom,
@@ -50,6 +50,15 @@ const EDITED_TEXT = 'Plain induction is enough.'
 
 /** What the reader replies. */
 const REPLY_TEXT = 'Which induction, though?'
+
+/** The upload key of the image a comment by somebody other than the reader shows. */
+const THEIR_IMAGE_KEY = 'zuzana1/images/1-diagram.png'
+
+/** The upload key of the PDF a comment by somebody other than the reader attaches. */
+const THEIR_PDF_KEY = 'zuzana1/attachments/1-notes.pdf'
+
+/** The upload key of the image the reader's edit adds to their comment. */
+const OWN_IMAGE_KEY = 'reader/images/1-diagram.png'
 
 /** What Martin's reply says. */
 const MARTIN_TEXT = 'A parity argument is shorter.'
@@ -481,6 +490,63 @@ test.describe('a comment thread, read by a signed-in reader', () => {
 
     // No reply opened by the save
     await expect(page.getByPlaceholder(commentsCopy.replyPlaceholder)).toHaveCount(0)
+  })
+
+  test("shows a comment's uploaded files through the links its thread carries", async ({
+    page,
+  }) => {
+    // Somebody else's comment, showing an image and attaching a PDF under what it says
+    const shared = commentFrom(
+      'user_zuzana',
+      'Zuzana',
+      `${THEIR_TEXT}\n\n![diagram](media:${THEIR_IMAGE_KEY}?scale=50)\n\n[📎 notes.pdf](media:${THEIR_PDF_KEY})`
+    )
+
+    // The thread
+    await stubPageThread(page, [shared])
+
+    // The thread's page, opened
+    await openThread(page, THEIR_TEXT)
+
+    // The comment
+    const comment = commentBy(page, 'Zuzana', THEIR_TEXT)
+
+    // Its image, loading from the link the thread carried
+    await expect(comment.locator('img')).toHaveAttribute('src', fileLinkTo(THEIR_IMAGE_KEY))
+
+    // Its attachment, a link to the file
+    await expect(comment.getByRole('link', { name: '📎 notes.pdf' })).toHaveAttribute(
+      'href',
+      fileLinkTo(THEIR_PDF_KEY)
+    )
+  })
+
+  test('shows a file an edit adds, the thread read again for its link', async ({ page }) => {
+    // The reader's comment, alone in the thread
+    await stubPageThread(page, [ownComment()])
+
+    // The thread's page, opened
+    await openThread(page, OWN_TEXT)
+
+    // The comment, opened for editing
+    await commentBy(page, READER_NAME, OWN_TEXT)
+      .getByRole('button', { name: commentsCopy.edit })
+      .click()
+
+    // The box it is edited in
+    const box = page.getByPlaceholder(commentsCopy.editPlaceholder)
+
+    // Rewritten to show an image the reader uploaded
+    await box.fill(`${EDITED_TEXT}\n\n![diagram](media:${OWN_IMAGE_KEY}?scale=50)`)
+
+    // And saved from the keyboard
+    await box.press('Meta+Enter')
+
+    // The image, loading from the link the thread carries once read again
+    await expect(commentBy(page, READER_NAME, EDITED_TEXT).locator('img')).toHaveAttribute(
+      'src',
+      fileLinkTo(OWN_IMAGE_KEY)
+    )
   })
 
   test("keeps a reply open on its text under the reader's own comment through an edit of the comment", async ({

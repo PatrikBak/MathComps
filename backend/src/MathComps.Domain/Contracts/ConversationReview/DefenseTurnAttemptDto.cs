@@ -12,6 +12,9 @@ namespace MathComps.Domain.Contracts.ConversationReview;
 /// <param name="PromptTokens"><inheritdoc cref="DefenseAttemptCall.PromptTokens" path="/summary"/></param>
 /// <param name="CompletionTokens"><inheritdoc cref="DefenseAttemptCall.CompletionTokens" path="/summary"/></param>
 /// <param name="ReasoningTokens"><inheritdoc cref="DefenseAttemptCall.ReasoningTokens" path="/summary"/></param>
+/// <param name="CachedPromptTokens">
+/// <inheritdoc cref="DefenseAttemptCall.CachedPromptTokens" path="/summary"/>
+/// </param>
 /// <param name="DurationMs"><inheritdoc cref="DefenseAttemptCall.DurationMs" path="/summary"/></param>
 public record DefenseAttemptCallDto(
     ExaminerStep Step,
@@ -21,6 +24,7 @@ public record DefenseAttemptCallDto(
     int PromptTokens,
     int CompletionTokens,
     int ReasoningTokens,
+    int CachedPromptTokens,
     int DurationMs);
 
 /// <summary>
@@ -38,10 +42,11 @@ public record DefenseAttemptCallDto(
 /// <param name="RevisionNote"><inheritdoc cref="DefenseTurnAttempt.RevisionNote" path="/summary"/></param>
 /// <param name="MathHolds"><inheritdoc cref="DefenseTurnAttempt.MathHolds" path="/summary"/></param>
 /// <param name="MathCorrection"><inheritdoc cref="DefenseTurnAttempt.MathCorrection" path="/summary"/></param>
+/// <param name="MathCloses"><inheritdoc cref="DefenseTurnAttempt.MathCloses" path="/summary"/></param>
+/// <param name="MathComplete"><inheritdoc cref="DefenseTurnAttempt.MathComplete" path="/summary"/></param>
+/// <param name="MathOwed"><inheritdoc cref="DefenseTurnAttempt.MathOwed" path="/summary"/></param>
 /// <param name="Leaks"><inheritdoc cref="DefenseTurnAttempt.Leaks" path="/summary"/></param>
 /// <param name="WhatLeaked"><inheritdoc cref="DefenseTurnAttempt.WhatLeaked" path="/summary"/></param>
-/// <param name="WithholdsClose">Whether the reply kept demanding more although the candidate's solution was already
-/// complete.</param>
 /// <param name="Established"><inheritdoc cref="DefenseTurnAttempt.Established" path="/summary"/></param>
 /// <param name="SwitchesLanguage"><inheritdoc cref="DefenseTurnAttempt.SwitchesLanguage" path="/summary"/></param>
 /// <param name="CandidateLanguage"><inheritdoc cref="DefenseTurnAttempt.CandidateLanguage" path="/summary"/></param>
@@ -61,9 +66,11 @@ public record DefenseTurnAttemptDto(
     string RevisionNote,
     bool MathHolds,
     string MathCorrection,
+    bool MathCloses,
+    bool MathComplete,
+    string MathOwed,
     bool Leaks,
     string WhatLeaked,
-    bool WithholdsClose,
     string Established,
     bool SwitchesLanguage,
     string CandidateLanguage,

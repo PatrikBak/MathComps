@@ -120,6 +120,7 @@ export type DefenseReviewFilterOptions = {
 export const EXAMINER_FLAWS = [
   'wrongClaim',
   'leak',
+  'earlyClose',
   'withheldClose',
   'languageSwitch',
   'genderedAddress',

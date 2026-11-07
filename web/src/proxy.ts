@@ -19,7 +19,7 @@ const intlMiddleware = createMiddleware({
 /** Matches any locale-prefixed path under /dev/ (e.g. /en/dev/renderer-preview). */
 const DEV_ROUTE_PATTERN = /^\/(?:sk|cs|en)\/dev(?:\/|$)/
 
-/** Matches the app's own API routes (e.g. /api/files/upload-url). */
+/** Matches the app's own API routes (e.g. /api/contact). */
 const API_ROUTE_PATTERN = /^\/api(?:\/|$)/
 
 /**

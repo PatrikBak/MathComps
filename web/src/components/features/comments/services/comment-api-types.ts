@@ -1,3 +1,5 @@
+import type { FileLinks } from '@/components/shared/utils/media-utils'
+
 /**
  * The kind of target a comment thread belongs to.
  */
@@ -62,6 +64,8 @@ export type CommentDto = {
   author: CommentAuthorDto
   /** The comment's markdown, empty once it is deleted. */
   content: string
+  /** Links to the uploaded files the content names. */
+  fileLinks: FileLinks
   /** When the comment was created (ISO 8601 string). */
   createdAt: string
   /** When the comment was last edited (ISO 8601 string), or null if never. */

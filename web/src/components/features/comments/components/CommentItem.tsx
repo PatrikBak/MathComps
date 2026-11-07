@@ -26,6 +26,7 @@ import {
 } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { Tooltip } from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
+import type { FileLinks } from '@/components/shared/utils/media-utils'
 
 import type { CommentReactionDto, CommentReactionKind } from '../services/comment-api-types'
 
@@ -52,6 +53,8 @@ export type CommentData = {
   avatarUrl: string | null
   /** The markdown-formatted text content of the comment. */
   content: string
+  /** Links to the uploaded files the content names. */
+  fileLinks: FileLinks
   /** The date and time when the comment was originally posted. */
   timestamp: Date
   /** The date and time when the comment was last edited, or null when it never was. */
@@ -111,6 +114,7 @@ export function CommentItem({
   author,
   avatarUrl,
   content,
+  fileLinks,
   timestamp,
   editedAt,
   reactions,
@@ -400,6 +404,7 @@ export function CommentItem({
               <RichMathEditorRenderer
                 content={content}
                 imageContext="userUploads"
+                fileLinks={fileLinks}
                 renderNumberReference={renderNumberReference}
               />
             </div>

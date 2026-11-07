@@ -1,10 +1,16 @@
-import type { FileChooser, Locator, Page } from '@playwright/test'
+import type { FileChooser, Locator, Page, Request } from '@playwright/test'
 
 import type { UserProfile } from '@/components/features/profile/model/profile-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 
 import messages from '../messages/en.json'
-import { BACKEND_ORIGIN, PROBLEMS_PATH } from './support/backend-routes'
+import {
+  answerJson,
+  BACKEND_ORIGIN,
+  fileLinkTo,
+  PROBLEMS_PATH,
+  refuse,
+} from './support/backend-routes'
 import {
   apiErrorsCopy,
   areaPath,
@@ -25,6 +31,7 @@ import {
 } from './support/interaction'
 import { searchAnswerWith, stubSearchAnswer } from './support/problem-actions'
 import { expect, test } from './support/test'
+import { countRemovals } from './support/watchers'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
 const SETTLE_TIMEOUT_MS = 15_000
@@ -218,6 +225,35 @@ test.describe('the editor expanded to its modal', () => {
 
     // The inline composer, emptied by the send
     await expect(composer).toHaveValue('')
+  })
+
+  test('keeps the images it previews while the text after them changes', async ({ page }) => {
+    // The composer, open
+    const composer = await openComposer(page)
+
+    // A draft holding two images, with a line of text after them
+    await composer.fill('![one](/og-image.en.png)\n\n![two](/og-image.sk.png)\n\nA bound')
+
+    // Taken to the expanded view, the cursor at the end of the draft
+    const expanded = await expandComposer(page)
+
+    // Both images drawn in its preview
+    await expect(expanded.locator('img')).toHaveCount(2)
+
+    // Every image leaving the page from here on, counted as it goes
+    const imagesRemoved = await countRemovals(page, 'img')
+
+    // A new line started at the end of the text
+    await page.keyboard.press('Enter')
+
+    // And a word written on it
+    await page.keyboard.type('holds')
+
+    // The preview showing the new word
+    await expect(expanded.locator('p').filter({ hasText: 'holds' })).toHaveCount(1)
+
+    // Drawn around the same two images, neither of them taken out and put back
+    expect(await imagesRemoved()).toBe(0)
   })
 })
 
@@ -732,14 +768,17 @@ test.describe('the frame dragged by its bottom edge', () => {
   })
 })
 
-/** Where the app's own route mints a presigned upload URL. */
-const UPLOAD_URL_PATH = '**/api/files/upload-url'
+/** Where the API takes the files readers upload. */
+const UPLOAD_URL = `${BACKEND_ORIGIN}/files`
 
-/** The presigned URL the route hands back, which the browser then PUTs the file to. */
-const PRESIGNED_URL = 'https://r2.example.com/presigned/abc'
+/** Where the API hands out links to the files the reader uploaded themselves. */
+const OWN_LINKS_URL = `${BACKEND_ORIGIN}/files/links`
 
-/** Where the store serves the files readers upload. */
-const UPLOADED_FILES = '**/user-uploads/**'
+/** The key the API keeps the image the tests upload under. */
+const DIAGRAM_KEY = 'reader123/images/diagram.png'
+
+/** The signed link to the stored image. */
+const DIAGRAM_LINK = fileLinkTo(DIAGRAM_KEY)
 
 /** The notice that stands while the image the tests attach is on its way. */
 const UPLOADING_NOTICE = editorCopy.uploading.replace('{filename}', 'diagram')
@@ -755,7 +794,7 @@ const DIAGRAM: CarriedFile = {
 }
 
 /** The markdown {@link DIAGRAM} is written as once stored, on a screen of one pixel per CSS pixel. */
-const DIAGRAM_MARKDOWN = '![diagram](media:images/diagram.png?scale=100)'
+const DIAGRAM_MARKDOWN = `![diagram](media:${DIAGRAM_KEY}?scale=100)`
 
 /** The problem whose discussion the upload tests write in. */
 const DISCUSSED_PROBLEM = 'tst-2020-1'
@@ -770,32 +809,28 @@ const NAMED_READER: UserProfile = {
 }
 
 /**
- * Stands in for the route that mints an upload URL, answering with the presigned one.
+ * Stands in for the API storing every file the page uploads, answering with the key it keeps the file under.
  *
- * @param page - The page whose requests are answered.
- */
-async function mintUploadUrl(page: Page) {
-  // The route, handing back a URL and the key the file is kept under
-  await page.route(UPLOAD_URL_PATH, (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ uploadUrl: PRESIGNED_URL, key: 'images/diagram.png' }),
-    })
-  )
-}
-
-/**
- * Stands in for the route that mints an upload URL and for the store taking the file at that URL.
+ * @param page - The page whose uploads are answered.
+ * @param key - The key the API answers with.
  *
- * @param page - The page whose requests are answered.
+ * @returns Every upload the API has taken, as it takes them.
  */
-async function acceptUploads(page: Page): Promise<void> {
-  // The route minting a URL
-  await mintUploadUrl(page)
+async function acceptUploads(page: Page, key: string = DIAGRAM_KEY): Promise<Request[]> {
+  // The uploads taken so far
+  const uploads: Request[] = []
 
-  // The store taking the file at the URL
-  await page.route(PRESIGNED_URL, (route) => route.fulfill({ status: 200, body: '' }))
+  // The API, taking each upload
+  await page.route(UPLOAD_URL, (route) => {
+    // The upload, kept
+    uploads.push(route.request())
+
+    // The key the file is kept under
+    return answerJson(route, 200, { key })
+  })
+
+  // The uploads, filling as the page makes them
+  return uploads
 }
 
 /**
@@ -860,9 +895,11 @@ async function attachImage(page: Page, image: Buffer = PNG_SIGNATURE): Promise<L
 }
 
 test.describe('an image the editor uploads', () => {
-  test('writes the markdown once the file is on the store', async ({ page }) => {
-    // The route minting a URL, and the store taking the file at it
-    await acceptUploads(page)
+  test('writes the markdown once the API has stored the file, sent by the reader', async ({
+    page,
+  }) => {
+    // The API storing the file
+    const uploads = await acceptUploads(page)
 
     // An image handed to the editor
     const composer = await attachImage(page)
@@ -872,10 +909,16 @@ test.describe('an image the editor uploads', () => {
 
     // And the uploading notice taken down, which nothing else would ever do
     await expect(page.getByText(UPLOADING_NOTICE)).toHaveCount(0)
+
+    // The image sent under its own media type, which picks the API's image limits
+    expect(uploads.map((upload) => upload.headers()['content-type'])).toEqual(['image/png'])
+
+    // The upload sent as the signed-in reader
+    expect(uploads[0]?.headers().authorization).toMatch(/^Bearer /)
   })
 
   test('scales a wide image down to the width an image starts at', async ({ page }) => {
-    // The route minting a URL, and the store taking the file at it
+    // The API storing the file
     await acceptUploads(page)
 
     // An image as wide as a Full HD screen
@@ -885,7 +928,7 @@ test.describe('an image the editor uploads', () => {
     const composer = await attachImage(page, image)
 
     // Written at a quarter of its pixels, which is 480 CSS pixels wide
-    await expect(composer).toHaveValue('![diagram](media:images/diagram.png?scale=25)')
+    await expect(composer).toHaveValue(`![diagram](media:${DIAGRAM_KEY}?scale=25)`)
   })
 
   test.describe('on a Retina screen', () => {
@@ -893,21 +936,21 @@ test.describe('an image the editor uploads', () => {
     test.use({ deviceScaleFactor: 2 })
 
     test('writes a picked image at the size its pixels have on the screen', async ({ page }) => {
-      // The route minting a URL, and the store taking the file at it
+      // The API storing the file
       await acceptUploads(page)
 
       // An image handed to the editor through its picker
       const composer = await attachImage(page)
 
       // Written at half its pixels, one of them to each pixel of the screen
-      await expect(composer).toHaveValue('![diagram](media:images/diagram.png?scale=50)')
+      await expect(composer).toHaveValue(`![diagram](media:${DIAGRAM_KEY}?scale=50)`)
     })
   })
 
   test('writes the image where the cursor stood, the cursor left after its scale', async ({
     page,
   }) => {
-    // The route minting a URL, and the store taking the file at it
+    // The API storing the file
     await acceptUploads(page)
 
     // The discussion, open
@@ -961,7 +1004,7 @@ test.describe('an image the editor uploads', () => {
   })
 
   test('writes a pasted image under a name of its own', async ({ page }) => {
-    // The route minting a URL, and the store taking the file at it
+    // The API storing the file
     await acceptUploads(page)
 
     // The discussion's composer
@@ -972,12 +1015,12 @@ test.describe('an image the editor uploads', () => {
 
     // Written under the editor's own name for a pasted image
     await expect(composer).toHaveValue(
-      `![${editorCopy.pastedImage}](media:images/diagram.png?scale=100)`
+      `![${editorCopy.pastedImage}](media:${DIAGRAM_KEY}?scale=100)`
     )
   })
 
   test('writes an image dropped onto the composer', async ({ page }) => {
-    // The route minting a URL, and the store taking the file at it
+    // The API storing the file
     await acceptUploads(page)
 
     // The discussion's composer
@@ -990,25 +1033,9 @@ test.describe('an image the editor uploads', () => {
     await expect(composer).toHaveValue(DIAGRAM_MARKDOWN)
   })
 
-  test('writes an attachment as a link, asking for an attachment’s upload', async ({ page }) => {
-    // The kinds of file the route is asked to mint a URL for
-    const askedKinds: string[] = []
-
-    // The route minting a URL for an attachment
-    await page.route(UPLOAD_URL_PATH, (route) => {
-      // The kind the request names
-      askedKinds.push(route.request().postDataJSON().type)
-
-      // The URL, and the key the file is kept under
-      return route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ uploadUrl: PRESIGNED_URL, key: 'attachments/notes.pdf' }),
-      })
-    })
-
-    // The store taking the file at the URL
-    await page.route(PRESIGNED_URL, (route) => route.fulfill({ status: 200, body: '' }))
+  test('writes an attachment as a link, sent under its own type', async ({ page }) => {
+    // The API storing the file as an attachment
+    const uploads = await acceptUploads(page, 'reader123/attachments/notes.pdf')
 
     // The discussion, open
     const discussion = await openDiscussion(page)
@@ -1021,7 +1048,7 @@ test.describe('an image the editor uploads', () => {
     })
 
     // The attachment's link, under the file's whole name
-    const link = '[📎 notes.pdf](media:attachments/notes.pdf)'
+    const link = '[📎 notes.pdf](media:reader123/attachments/notes.pdf)'
 
     // The discussion's composer
     const composer = discussion.locator('textarea')
@@ -1032,8 +1059,8 @@ test.describe('an image the editor uploads', () => {
     // With the cursor after the whole link
     expect(await cursorIn(composer)).toBe(link.length)
 
-    // The URL asked for as an attachment's, which the route keeps to the attachment limits
-    expect(askedKinds).toEqual(['attachment'])
+    // The file sent as a PDF, which picks the API's attachment limits
+    expect(uploads.map((upload) => upload.headers()['content-type'])).toEqual(['application/pdf'])
   })
 
   test('opens no picker once the comment holds as many images as it takes', async ({ page }) => {
@@ -1062,46 +1089,61 @@ test.describe('an image the editor uploads', () => {
     expect(pickers).toEqual([])
   })
 
-  test('shows an uploaded image at the width its scale gives', async ({ page }) => {
-    // The route minting a URL, and the store taking the file at it
+  test('shows an uploaded image through its link, at the width its scale gives', async ({
+    page,
+  }) => {
+    // The API storing the file
     await acceptUploads(page)
 
     // An image as wide as a Full HD screen
     const image = await blankPng(page, 1920)
 
-    // The store handing the image back at its public address
-    await page.route(UPLOADED_FILES, (route) =>
-      route.fulfill({ status: 200, contentType: 'image/png', body: image })
+    // The upload keys each request for the reader's own links asks for
+    const askedKeys: string[][] = []
+
+    // The API handing out the link to the reader's own image
+    await page.route(OWN_LINKS_URL, (route) => {
+      // The keys this request asks for, kept
+      askedKeys.push(route.request().postDataJSON().keys)
+
+      // The link to the image
+      return answerJson(route, 200, { [DIAGRAM_KEY]: DIAGRAM_LINK })
+    })
+
+    // The store handing the image back at its link
+    await page.route(
+      (url) => url.href === DIAGRAM_LINK,
+      (route) => route.fulfill({ status: 200, contentType: 'image/png', body: image })
     )
 
     // The image handed to the editor
     const composer = await attachImage(page, image)
 
     // Written at a quarter of its pixels
-    await expect(composer).toHaveValue('![diagram](media:images/diagram.png?scale=25)')
+    await expect(composer).toHaveValue(`![diagram](media:${DIAGRAM_KEY}?scale=25)`)
 
     // The draft shown as it will read
     await page.getByRole('button', { name: editorCopy.preview, exact: true }).click()
 
     // The image the preview shows
-    const shown = page.getByRole('dialog').locator('img[src*="/user-uploads/"]')
+    const shown = page.getByRole('dialog').getByRole('img', { name: 'diagram' })
 
-    // Loaded from its address
+    // Loaded from its link
     await expect.poll(() => naturalWidthOf(shown)).toBe(1920)
 
-    // With the scale read off that address
-    await expect(shown).not.toHaveAttribute('src', /scale=/)
+    // The link as the API handed it out, the scale read off the markdown and nothing added to it
+    await expect(shown).toHaveAttribute('src', DIAGRAM_LINK)
 
     // Drawn 480 CSS pixels wide, a quarter of its pixels
     expect((await shown.boundingBox())?.width).toBeCloseTo(480, 0)
+
+    // The link asked for by the image's key alone
+    expect(askedKeys).toEqual([[DIAGRAM_KEY]])
   })
 
-  test('writes nothing when the store turns the file away', async ({ page }) => {
-    // The route minting a URL
-    await mintUploadUrl(page)
-
-    // The store refusing the file sent to the URL
-    await page.route(PRESIGNED_URL, (route) => route.fulfill({ status: 403, body: '' }))
+  test('writes nothing when the API turns the file away', async ({ page }) => {
+    // The API refusing the file with nothing to say why
+    await page.route(UPLOAD_URL, (route) => answerJson(route, 500, {}))
 
     // An image handed to the editor
     const composer = await attachImage(page)
@@ -1116,63 +1158,15 @@ test.describe('an image the editor uploads', () => {
     await expect(composer).toHaveValue('')
   })
 
-  test('shows the coded copy when the route names what it refused on', async ({ page }) => {
-    // The route refusing with a code of its own
-    await page.route(UPLOAD_URL_PATH, (route) =>
-      route.fulfill({
-        status: 429,
-        contentType: 'application/json',
-        body: JSON.stringify({ errorCode: 'RateLimited' }),
-      })
-    )
+  test('shows the coded copy when the API names what it refused on', async ({ page }) => {
+    // The API refusing with a code of its own
+    await page.route(UPLOAD_URL, (route) => refuse(route, 400, 'UploadTypeNotAllowed'))
 
     // An image handed to the editor
     await attachImage(page)
 
     // The code's own central copy, which only reaches the reader if the code survived the call
-    await expect(page.getByText(apiErrorsCopy.RateLimited)).toBeVisible()
-  })
-
-  test('falls back to the upload-url failure when a refusal carries no code', async ({ page }) => {
-    // A refusal with nothing in it to name
-    await page.route(UPLOAD_URL_PATH, (route) =>
-      route.fulfill({ status: 500, contentType: 'application/json', body: '{}' })
-    )
-
-    // An image handed to the editor
-    await attachImage(page)
-
-    // The upload's own fallback, since the server answered and had no code to give
-    await expect(page.getByText(apiErrorsCopy.UPLOAD_URL_FAILED)).toBeVisible()
-  })
-
-  test('leaves a request that never reached the server uncoded', async ({ page }) => {
-    // The route dropped, which is what being offline looks like from the browser
-    await page.route(UPLOAD_URL_PATH, (route) => route.abort('connectionrefused'))
-
-    // An image handed to the editor
-    await attachImage(page)
-
-    // The generic server error: nothing came back to say the request itself was bad, so the upload-url
-    // fallback has no claim on it
-    await expect(page.getByText(apiErrorsCopy.SERVER_ERROR)).toBeVisible()
-  })
-
-  test('asks a route that can tell who is asking', async ({ playwright, baseURL }) => {
-    // A caller with no session at all, set aside from the signed-in one every test here starts with
-    const anonymous = await playwright.request.newContext({
-      baseURL,
-      storageState: { cookies: [], origins: [] },
-    })
-
-    // Asking the real route for an upload URL
-    const response = await anonymous.post('/api/files/upload-url', { data: {} })
-
-    // Turned away as signed out, which takes a route the session handling reaches
-    expect(response.status()).toBe(401)
-
-    // Done with the caller
-    await anonymous.dispose()
+    await expect(page.getByText(apiErrorsCopy.UploadTypeNotAllowed)).toBeVisible()
   })
 })
 

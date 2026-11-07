@@ -644,6 +644,7 @@ export const OPENED_COMMENT: CommentDto = {
   id: '00000000-0000-4000-8000-d00000000001',
   author: { id: 'user_zuzana', name: REVIEWER, avatarUrl: null },
   content: 'Fits the intermediate paper, with a hint for the last part.',
+  fileLinks: {},
   createdAt: '2026-09-29T08:00:00.000Z',
   editedAt: null,
   isDeleted: false,
