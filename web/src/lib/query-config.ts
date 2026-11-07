@@ -66,8 +66,16 @@ function hasFailedForGood(state: QueryState): boolean {
   return state.status === 'error' && !isTransientFailure(state.error)
 }
 
-/** How often a {@link cachePolicy.live} read on screen is made again. */
-const LIVE_REFRESH_MS = 30 * SECOND_MS
+/**
+ * Whether the page runs under `next dev`, outside a browser a test drives. That browser sets `navigator.webdriver`
+ * and keeps the deployed cadence, since the e2e specs assume no live read lands between their own steps.
+ */
+const isDeveloperWatching =
+  process.env.NODE_ENV === 'development' &&
+  !(typeof navigator !== 'undefined' && navigator.webdriver)
+
+/** How often a {@link cachePolicy.live} read on screen is made again, sooner while a developer watches. */
+const LIVE_REFRESH_MS = (isDeveloperWatching ? 5 : 30) * SECOND_MS
 
 /** A read's query, as much of it as a tier decides on. */
 type TieredQuery = Pick<Query, 'state'>
