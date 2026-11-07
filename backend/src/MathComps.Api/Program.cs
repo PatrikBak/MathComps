@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -139,9 +140,8 @@ builder.Services.AddHttpLoggingInterceptor<ClerkIdHttpLoggingInterceptor>();
 // so a bad slug's 404 would file as an error.
 builder.WebHost.UseSentry(options =>
 {
-    // Send the request body with every event when it is under 10,000 bytes. A defense turn's own words and a Clerk
-    // webhook's account data go with it, deliberately. A turn written up to its length cap can pass that size. A photo
-    // is far bigger and stays behind, since the SDK would send its bytes as one long garbled string.
+    // Send a JSON request body with every event when it is under 10,000 bytes. A defense turn's own words and a Clerk
+    // webhook's account data go with it, deliberately. A turn written up to its length cap can pass that size.
     options.MaxRequestBodySize = RequestSize.Medium;
 
     // The last pass over an event before it leaves
@@ -166,6 +166,12 @@ builder.WebHost.UseSentry(options =>
 
 // The caller's Clerk id on each error a request reports
 builder.Services.AddSingleton<ISentryEventProcessor, ClerkIdSentryEventProcessor>();
+
+// Drop the body readers UseSentry registered above, one of which reads any body as text, a small uploaded file included
+builder.Services.RemoveAll<IRequestPayloadExtractor>();
+
+// Read a JSON body alone into an error
+builder.Services.AddSingleton<IRequestPayloadExtractor, JsonRequestPayloadExtractor>();
 
 // The database check makes /health mean the API can serve a request.
 builder.Services.AddHealthChecks()
