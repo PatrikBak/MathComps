@@ -344,22 +344,6 @@ async function parseProblem(
   // The images the problem references are the union across its bodies (shared across languages)
   const images = [...new Set(parsedBodies.flatMap((entry) => entry.images))]
 
-  // Two images sharing a stem would collide on one media key ({slug}-{stem}); reject so neither silently overwrites
-  // the other. Case-insensitive, since the key derives from the stem.
-  const stems = images.map((name) => path.parse(name).name.toLowerCase())
-  const collidingStems = [...new Set(stems.filter((stem, index) => stems.indexOf(stem) !== index))]
-  collidingStems.forEach((stem) => {
-    const names = images.filter((name) => path.parse(name).name.toLowerCase() === stem)
-    errors.push(
-      problemIssue(
-        `p${group.order}.yaml`,
-        null,
-        'image-stem-collision',
-        `images ${names.map((name) => `"${name}"`).join(' and ')} share a name and would collide on one media key; rename one`
-      )
-    )
-  })
-
   // Assemble this problem's manifest entry; hasSidecar records whether a pN.yaml is present
   return {
     order: group.order,

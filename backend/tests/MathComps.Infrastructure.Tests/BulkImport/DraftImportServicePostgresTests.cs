@@ -615,8 +615,8 @@ public class DraftImportServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A problem's image is uploaded under the slug-based key and its relative ref is rewritten into the stored
-    /// markdown, dimensions and version carried in the query string.
+    /// A problem's image is uploaded under its slug and content hash, and its relative ref is rewritten into the stored
+    /// markdown under the same name, dimensions carried in the query string.
     /// </summary>
     [Fact]
     public Task An_image_is_uploaded_and_its_ref_rewritten() => RunTestAsync(async service =>
@@ -633,19 +633,18 @@ public class DraftImportServicePostgresTests(PostgresContainerFixture fixture)
             1, true, ["Author"], null, null, Proposal: null, [Original(Language.SK, statement)], ["incircle.svg"]);
         var result = await ImportOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
 
-        // One image was uploaded, under the slug-based problems/ key.
+        // One image was uploaded, under the problems/ key its slug and bytes name.
         Assert.Equal(1, result.Uploads?.Uploaded);
         Assert.Equal(0, result.Uploads?.Skipped);
         var (_, key) = Assert.Single(_uploader.Uploads);
-        Assert.Equal($"problems/{ProblemSlug}-incircle", key);
+        Assert.Equal($"problems/{ProblemSlug}-bb746d85bbec85e7", key);
 
-        // The stored markdown points at the resolved media ref, carrying the SVG's dimensions and version — no
-        // relative ref left.
+        // The stored markdown points at the same name, carrying the SVG's dimensions, with no relative ref left.
         await QueryAsync(async context =>
         {
             var stored = await context.ProblemTexts.SingleAsync(text => text.DocumentType == DocumentType.Statement);
             Assert.Equal(
-                $"see ![fig](media:{ProblemSlug}-incircle?width=100&height=80&v=bb746d85)", stored.MarkdownText);
+                $"see ![fig](media:{ProblemSlug}-bb746d85bbec85e7?width=100&height=80)", stored.MarkdownText);
         });
     });
 

@@ -121,7 +121,7 @@ Put assets in `images/` and reference them with a **bare** ref:
 ![equals](images/eq.svg?inline=true) # the one legal query param — flows inline with the text
 ```
 
-A ref is bare except for an optional `?inline=true` (inline display). The import auto-derives `width`/`height` from the figure's own intrinsic dimensions and stamps them on import — so to resize a figure, change the figure itself (an SVG's root `width`/`height` keeping its `viewBox`, or a raster's pixels), never the ref. Writing `width`/`height`/`scale`/any other query param on a ref is a preflight **error** (`image-ref-param`): hand-written dimensions are meaningless (the import overrides them) and `scale` has no role on a problem image. Supported formats are **SVG, PNG, JPEG, and WebP**, each under **2 MB** (figures serve unoptimized, so they ship at full weight). Every referenced image must exist on disk; files in `images/` that nothing references produce a warning (not an error). Two images in one problem can't share a name (e.g. `fig.svg` and `fig.png`) — they'd collide on one stored key.
+A ref is bare except for an optional `?inline=true` (inline display). The import auto-derives `width`/`height` from the figure's own intrinsic dimensions and stamps them on import — so to resize a figure, change the figure itself (an SVG's root `width`/`height` keeping its `viewBox`, or a raster's pixels), never the ref. Writing `width`/`height`/`scale`/any other query param on a ref is a preflight **error** (`image-ref-param`): hand-written dimensions are meaningless (the import overrides them) and `scale` has no role on a problem image. Supported formats are **SVG, PNG, JPEG, and WebP**, each under **2 MB** (figures serve unoptimized, so they ship at full weight). Every referenced image must exist on disk; files in `images/` that nothing references produce a warning (not an error).
 
 ## Markdown & math checks
 
@@ -130,7 +130,7 @@ Each half and each hint runs through the same pipeline the site renders with. Th
 - **Math delimiters** — an odd number of unescaped `$` is an error.
 - **Parse** — malformed markdown or directives.
 - **KaTeX** — every `$…$` / `$$…$$` must render.
-- **Images** — every `images/…` reference must resolve, be a supported format (SVG/PNG/JPEG/WebP), stay under 2 MB, carry no query param other than `?inline=` (`width`/`height`/`scale` are rejected), and not share a stem with another image in the same problem.
+- **Images** — every `images/…` reference must resolve, be a supported format (SVG/PNG/JPEG/WebP), stay under 2 MB, and carry no query param other than `?inline=` (`width`/`height`/`scale` are rejected).
 
 ## Running the check
 

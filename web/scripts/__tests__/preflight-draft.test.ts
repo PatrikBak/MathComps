@@ -410,14 +410,6 @@ describe('invalid drafts — specific issues', () => {
     }
   })
 
-  it('flags two images that share a stem', async () => {
-    const manifest = await loadFixture('invalid-image-stem-collision')
-    const error = findError(manifest, (entry) => entry.rule === 'image-stem-collision')
-    expect(error?.severity).toBe('error')
-    expect(error?.message).toContain('fig.svg')
-    expect(error?.message).toContain('fig.png')
-  })
-
   it('flags a hand-sized image ref (width/height belong to the figure, not the ref)', async () => {
     const manifest = await loadFixture('invalid-image-ref-param')
     const error = findError(manifest, (entry) => entry.rule === 'image-ref-param')
