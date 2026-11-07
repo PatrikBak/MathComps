@@ -371,7 +371,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // that carries the LaTeX the examiner writes through unaltered.
         var result = await chatCaller.CompleteTextAsync(
             ChatCallRequest.For(
-                nameof(ExaminerStep.Generate), _settings.Generate, systemPrompt, conversation, images: []),
+                nameof(ExaminerStep.Generate), _settings.Generate, systemPrompt, new ChatUserMessage(conversation)),
             cancellationToken);
 
         // Stop the clock before the bookkeeping below.
@@ -466,7 +466,8 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
 
         // Call the model for its structured verdict.
         var result = await chatCaller.CompleteAsync<TResult>(
-            ChatCallRequest.For(stepKind.ToString(), step, systemPrompt, userPrompt, images: []), cancellationToken);
+            ChatCallRequest.For(stepKind.ToString(), step, systemPrompt, new ChatUserMessage(userPrompt)),
+            cancellationToken);
 
         // Stop the clock before the bookkeeping below.
         stopwatch.Stop();

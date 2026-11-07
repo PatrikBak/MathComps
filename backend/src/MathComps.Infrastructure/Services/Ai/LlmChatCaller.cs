@@ -129,13 +129,8 @@ public class LlmChatCaller(
                 RawRepresentationFactory = needsRawRepresentation ? _ => BuildRawRepresentation(request) : null,
             };
 
-        // The user message: the input the model acts on, its text followed by any images it shows.
-        var userMessage = new ChatMessage(
-            ChatRole.User,
-            [
-                new TextContent(request.UserPrompt),
-                .. request.Images.Select(image => new DataContent(image.Data, image.MediaType)),
-            ]);
+        // The user message: the input the model acts on, its text and images in their order.
+        var userMessage = new ChatMessage(ChatRole.User, [.. request.UserMessage.Parts.Select(ToContent)]);
 
         // The messages sent: the instructions as system when the call carries any, then the user message.
         ChatMessage[] messages = request.SystemPrompt is null
@@ -318,4 +313,16 @@ public class LlmChatCaller(
         // Hand the options back to the adapter as this call's raw representation.
         return options;
     }
+
+    /// <summary>
+    /// Turns one part of a user message into the content the chat client sends for it.
+    /// </summary>
+    /// <param name="part">The text or image to send.</param>
+    /// <returns>The part as message content.</returns>
+    private static AIContent ToContent(ChatPart part) => part switch
+    {
+        ChatText text => new TextContent(text.Text),
+        ChatImage image => new DataContent(image.Data, image.MediaType),
+        _ => throw new ArgumentOutOfRangeException(nameof(part), part, "Unknown chat part."),
+    };
 }
