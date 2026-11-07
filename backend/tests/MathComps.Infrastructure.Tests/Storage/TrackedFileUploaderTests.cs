@@ -115,19 +115,19 @@ public sealed class TrackedFileUploaderTests : IDisposable
     public async Task A_file_rewritten_with_identical_bytes_is_skipped()
     {
         // Push a file and persist the ledger by disposing.
-        var source = WriteSource("defense.json", "{}");
+        var source = WriteSource("x.sk.pdf", "%PDF");
         var inner = new RecordingFileUploader();
         var firstRun = Tracker(inner);
-        await firstRun.UploadIfChangedAsync(source, "handouts/defense/x.sk.json");
+        await firstRun.UploadIfChangedAsync(source, "handouts/pdfs/x.sk.pdf");
         firstRun.Dispose();
 
-        // Rewrite it with the same content and a fresher mtime, as a generator re-run would.
-        WriteSource("defense.json", "{}");
+        // Rewrite it with the same content and a fresher mtime, as a recompile would.
+        WriteSource("x.sk.pdf", "%PDF");
         File.SetLastWriteTimeUtc(source, File.GetLastWriteTimeUtc(source).AddHours(1));
 
         // A second run recognises the bytes and skips — nothing new left the process.
         var secondRun = Tracker(inner);
-        var uploaded = await secondRun.UploadIfChangedAsync(source, "handouts/defense/x.sk.json");
+        var uploaded = await secondRun.UploadIfChangedAsync(source, "handouts/pdfs/x.sk.pdf");
         Assert.False(uploaded);
         Assert.Single(inner.Uploads);
     }

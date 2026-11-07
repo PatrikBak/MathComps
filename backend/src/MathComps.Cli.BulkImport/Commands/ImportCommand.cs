@@ -14,13 +14,14 @@ namespace MathComps.Cli.BulkImport.Commands;
 
 /// <summary>
 /// Imports draft folders: checks each draft on its own terms (the TS preflight, then its figures, tag slugs and
-/// registry links), and hands a clean one to the <see cref="IDraftImportService"/>. A dry run makes the very same
-/// checks and hand-off, so a clean dry run of a folder is a clean import of it into the database as it stands.
+/// registry links), and hands a clean one to the <see cref="IDraftImportService"/>. A run is a dry run unless
+/// <see cref="Settings.Write"/> is set. A dry run makes the very same checks and hand-off, so a clean dry run of a
+/// folder is a clean import of it into the database as it stands.
 /// </summary>
 /// <param name="metadata">The metadata service backing the registry-link check.</param>
 /// <param name="import">The import itself, dry runs included.</param>
 /// <param name="logger">The logger the run's lines go through, every folder's report included.</param>
-[Description("Import draft folders: write the rows and upload the figures.")]
+[Description("Check draft folders, and with --write import them: write the rows and upload the figures.")]
 public class ImportCommand(
     IMetadataLocalizationService metadata,
     IDraftImportService import,
@@ -40,11 +41,12 @@ public class ImportCommand(
         public required string[] Folders { get; set; }
 
         /// <summary>
-        /// Whether to report what the import would do without keeping or uploading anything.
+        /// Whether to keep the import: write the rows and upload the figures. Without it the run reports what the
+        /// import would do and keeps nothing.
         /// </summary>
-        [CommandOption("--dry-run")]
-        [Description("Run every check and report what the import would do. Keeps nothing.")]
-        public bool DryRun { get; set; }
+        [CommandOption("--write")]
+        [Description("Import for real: write the rows and upload the figures. Without it, nothing is kept.")]
+        public bool Write { get; set; }
 
         /// <summary>
         /// Whether the figures go to prod's bucket rather than the dev one.
@@ -64,10 +66,10 @@ public class ImportCommand(
 
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings) =>
-        // Import every matched folder; the runner owns the glob expansion, per-folder header and tally.
+        // Import or dry-run every matched folder; the runner owns the glob expansion, per-folder header and tally.
         await MultiFolderRunner.RunAsync(
-            logger, settings.Folders, okLabel: settings.DryRun ? "passed" : "imported",
-            folder => ImportFolderAsync(folder, settings.DryRun));
+            logger, settings.Folders, okLabel: settings.Write ? "imported" : "passed",
+            folder => ImportFolderAsync(folder, dryRun: !settings.Write));
 
     /// <summary>
     /// Checks then imports a single draft folder, logging its report. Every issue is collected rather than stopping

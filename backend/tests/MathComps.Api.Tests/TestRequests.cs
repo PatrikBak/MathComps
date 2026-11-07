@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
@@ -17,11 +18,21 @@ internal static class TestRequests
     /// <param name="services">The services the request is handed.</param>
     /// <param name="body">What the body holds.</param>
     /// <returns>The request.</returns>
-    public static DefaultHttpContext WithJsonBody(ClaimsPrincipal caller, IServiceProvider services, object body)
-    {
+    public static DefaultHttpContext WithJsonBody(ClaimsPrincipal caller, IServiceProvider services, object body) =>
         // The body, written as a client would
-        var json = JsonSerializer.SerializeToUtf8Bytes(body);
+        WithBody(caller, services, JsonSerializer.SerializeToUtf8Bytes(body), MediaTypeNames.Application.Json);
 
+    /// <summary>
+    /// Builds a request from a caller carrying a body of any media type.
+    /// </summary>
+    /// <param name="caller">Who is asking.</param>
+    /// <param name="services">The services the request is handed.</param>
+    /// <param name="body">The body's bytes.</param>
+    /// <param name="contentType">The body's media type.</param>
+    /// <returns>The request.</returns>
+    public static DefaultHttpContext WithBody(
+        ClaimsPrincipal caller, IServiceProvider services, byte[] body, string contentType)
+    {
         // The request from the caller, carrying the body
         var request = new DefaultHttpContext
         {
@@ -29,9 +40,9 @@ internal static class TestRequests
             RequestServices = services,
             Request =
             {
-                ContentType = "application/json",
-                Body = new MemoryStream(json),
-                ContentLength = json.Length,
+                ContentType = contentType,
+                Body = new MemoryStream(body),
+                ContentLength = body.Length,
             },
         };
 

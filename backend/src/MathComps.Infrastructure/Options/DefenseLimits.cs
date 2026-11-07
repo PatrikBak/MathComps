@@ -30,7 +30,8 @@ public class DefenseLimits
     public required int MaxMessagesPerDefense { get; set; }
 
     /// <summary>
-    /// The most a single user may spend on defense turns per day (since UTC midnight), in credits (US dollars).
+    /// The most a single user may spend on defense turns and photo readings per day (since UTC midnight), in credits
+    /// (US dollars).
     /// Only spend that <see cref="DefenseSpend.CountsAgainstCeiling"/> marks is weighed against it.
     /// </summary>
     // The bounds are written with a dot, so they have to be read with one: left to the host's culture they

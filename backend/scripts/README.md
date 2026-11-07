@@ -38,10 +38,10 @@ The tools these run live under [`backend/src/MathComps.Cli.*`](../README.md#cli-
 # Use a specific launch profile
 ./invoke-tool.sh embeddings -p "Regenerate"
 
-# Import problem drafts into the database (one or more folders; globs allowed)
-./invoke-tool.sh -e staging bulk-import ./my-draft --dry-run              # every check, keeps nothing
-./invoke-tool.sh -e staging bulk-import 'data/problems/skmo-*' --dry-run  # a whole batch
-./invoke-tool.sh -e prod bulk-import ./my-draft                           # the real import
+# Check problem drafts against the database, or import them with --write (one or more folders; globs allowed)
+./invoke-tool.sh -e staging bulk-import ./my-draft # every check, keeps nothing
+./invoke-tool.sh -e staging bulk-import 'data/problems/skmo-*' # a whole batch
+./invoke-tool.sh -e prod bulk-import ./my-draft --write # the real import
 ```
 
 On prod, `bulk-import` gets `--publish`, so its figures go to prod's R2 bucket with the keys in `.env.prod`.
@@ -52,7 +52,7 @@ Run `./invoke-tool.sh` with no arguments for the current list of commands.
 
 ### Opening a standalone tunnel
 
-When you want a long-lived tunnel — e.g. to poke at the database with `psql` — open one directly and leave it running:
+When you want a long-lived tunnel — e.g. for a database GUI — open one directly and leave it running:
 
 ```bash
 # Production (default)
@@ -77,5 +77,6 @@ The scripts load environment variables in this order (later files override earli
 
 - **`open-db-tunnel.sh`** – Opens an SSH tunnel to the database and holds it open.
 - **`invoke-tool.sh`** – Runs a CLI tool against the tunneled database (auto-manages its own tunnel).
+- **`psql.sh`** – Opens an interactive `psql` on the tunneled database (`./psql.sh [prod|staging]`, prod by default). Autocommit is off, so nothing lands until `COMMIT;`.
 - **`lib-env.sh`**, **`lib-tunnel.sh`** – Shared helpers the scripts source: `lib-env.sh` loads the environment, `lib-tunnel.sh` opens the tunnel or reuses an open one.
 - **`publish-handouts.sh`** – Publishes the handouts to prod's R2 bucket once their PR has merged. It refuses unless the checkout is at `origin/main` with nothing uncommitted.

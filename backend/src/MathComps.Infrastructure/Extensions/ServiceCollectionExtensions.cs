@@ -288,10 +288,11 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the R2 object-storage uploader and reader with their shared settings. Settings are validated
-    /// lazily so config is only required when storage is actually reached for.
+    /// Registers R2 object storage: the uploader into the public bucket, and the private bucket as the store files go
+    /// into and the reader of what it holds. Everything is built lazily, so a host only needs settings for the buckets
+    /// it reaches for.
     /// </summary>
-    /// <param name="services">The service collection to add the uploader to.</param>
+    /// <param name="services">The service collection to add storage to.</param>
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddStorage(this IServiceCollection services)
     {
@@ -300,11 +301,15 @@ public static class ServiceCollectionExtensions
             .BindConfiguration(R2Settings.SectionName)
             .ValidateDataAnnotations();
 
-        // R2 uploader backing image uploads
-        services.TryAddSingleton<IFileUploader, R2Uploader>();
+        // The public bucket's uploader
+        services.TryAddSingleton<IFileUploader, R2PublicUploader>();
 
-        // R2 reader backing the content the API serves itself from
-        services.TryAddSingleton<IObjectReader, R2ObjectReader>();
+        // The private bucket
+        services.TryAddSingleton<R2PrivateStore>();
+
+        // Exposed as the store files go into and as the reader of what it holds, one instance behind both
+        services.TryAddSingleton<IPrivateObjectStore>(provider => provider.GetRequiredService<R2PrivateStore>());
+        services.TryAddSingleton<IObjectReader>(provider => provider.GetRequiredService<R2PrivateStore>());
 
         // Builder pattern
         return services;
@@ -481,20 +486,24 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the defense feature: the examiner engine, the input/turn/spend caps, the per-user turn gate, the
-    /// lookup of what the examiner is told about a problem, the guard saying whether a student may argue a given
-    /// target, the service that runs and persists defense conversations, and the service that records the students'
-    /// feedback on them. Assumes the chat stack is registered (see <see cref="AddLlmChat"/>) and, since the problem
-    /// content is read back out of object storage, that <see cref="AddStorage"/> has run.
+    /// Registers the defense feature: the examiner engine, the photo reader, the input/turn/spend caps, the per-user
+    /// turn gate, the lookup of what the examiner is told about a problem, the guard saying whether a student may argue a given
+    /// target, the service that runs and persists defense conversations, the service that records the students'
+    /// feedback on them, and the service that reads and keeps the photos of their handwritten work. Assumes the chat
+    /// stack is registered (see <see cref="AddLlmChat"/>) and, since the problem content is read back out of object
+    /// storage and the photos are kept there, that <see cref="AddStorage"/> has run.
     /// </summary>
     /// <param name="services">The service collection to add the defense feature to.</param>
     /// <param name="configuration">The application configuration carrying the <c>Examiner</c>,
-    /// <c>DefenseLimits</c> and <c>DefenseContent</c> sections.</param>
+    /// <c>PhotoReader</c>, <c>DefenseLimits</c> and <c>DefenseContent</c> sections.</param>
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddDefenseServices(this IServiceCollection services, IConfiguration configuration)
     {
         // The engine that produces the examiner's replies.
         services.AddExaminer(configuration);
+
+        // The reader the students' photos go through.
+        services.AddPhotoReader(configuration);
 
         // The input, turn, and spend caps, validated at startup like the examiner's config.
         services.AddOptions<DefenseLimits>()
@@ -524,6 +533,9 @@ public static class ServiceCollectionExtensions
 
         // The service that records what students thought of those conversations.
         services.TryAddScoped<IDefenseFeedbackService, DefenseFeedbackService>();
+
+        // The service that reads and keeps the photos of the students' handwritten work.
+        services.TryAddScoped<IDefensePhotoService, DefensePhotoService>();
 
         // What the defense target guard asks about a reader before it weighs a competition's gates against them,
         // and before it opens the proposals to them.

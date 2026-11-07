@@ -202,9 +202,9 @@ testing webhooks locally, see the [API README](src/MathComps.Api/README.md#webho
 
 ### 6. Configure Cloudflare R2
 
-The API reads the AI examiner's problem content from R2, the per-handout blobs the
-[Handouts CLI](src/MathComps.Cli.Handouts/README.md) publishes, so a defense against a handout problem
-needs these settings. Everything else works without them.
+The API reads the AI examiner's problem content from R2's private bucket, the per-handout blobs the
+[Handouts CLI](src/MathComps.Cli.Handouts/README.md) publishes, so the defense endpoints need these
+settings, whatever problem a defense is about. Everything else works without them.
 
 ```bash
 # From the API directory
@@ -212,14 +212,17 @@ cd backend/src/MathComps.Api
 
 # The dev bucket's keys. Prod's live in scripts/.env.prod (see scripts/README.md)
 dotnet user-secrets set "CloudflareR2:AccountId" "..."
-dotnet user-secrets set "CloudflareR2:BucketName" "..."
+dotnet user-secrets set "CloudflareR2:PublicBucketName" "..."
+dotnet user-secrets set "CloudflareR2:PrivateBucketName" "..."
 dotnet user-secrets set "CloudflareR2:AccessKeyId" "..."
 dotnet user-secrets set "CloudflareR2:SecretAccessKey" "..."
 ```
 
 Every project shares one user-secrets store, so setting these once also covers the Handouts and Bulk
-Import CLIs; they all talk to the same bucket. Deployments pass the same values as the `R2_*`
-variables in `.env` (see [Setting up a new server](#setting-up-a-new-server)).
+Import CLIs, with one key reaching both buckets. The CLIs write handout files and figures to the public
+bucket and the examiner's content to the private one; the API reads only the private one. Deployments
+pass the API's values as `R2_ACCOUNT_ID` and the `R2_PRIVATE_*` variables in `.env` (see
+[Setting up a new server](#setting-up-a-new-server)).
 
 ### 7. Run the API
 
@@ -242,12 +245,12 @@ Each tool has its own README.
 Every line a command writes is a log line, its report and its crash's stack trace included. Only Spectre's `--help` goes straight to the console. The defaults in `src/MathComps.Shared.Cli/appsettings.logging.json` log our own code from Information and everything else from Warning. Each line reads `12:04:31 info ImportCommand: …`, a multi-line entry repeats that prefix on every line, and a terminal colours the level. A tool's own config files, its user secrets or an environment variable override any of it. A category name holds dots, which the shell won't assign directly, so a one-off run goes through `env`:
 
 ```bash
-env 'Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command=Information' dotnet run --project src/MathComps.Cli.BulkImport -- ./my-draft --dry-run
+env 'Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command=Information' dotnet run --project src/MathComps.Cli.BulkImport -- ./my-draft
 ```
 
 ### Data Pipeline Tools
 
-- **[Bulk Import](src/MathComps.Cli.BulkImport/README.md)** – Imports problem-draft folders into the database, or dry-runs them
+- **[Bulk Import](src/MathComps.Cli.BulkImport/README.md)** – Dry-runs problem-draft folders against the database, or imports them with `--write`
 - **[Competitions](src/MathComps.Cli.Competitions/README.md)** – Declares a hosted group from its manifest: raises the rounds it runs and sets the terms
 - **[User Sync](src/MathComps.Cli.UserSync/README.md)** – Syncs every Clerk user into the database
 
@@ -345,6 +348,7 @@ what makes deploys automatic.
    echo '{}' > src/MathComps.Api/appsettings.Production.json
    echo '{}' > src/MathComps.Infrastructure/appsettings.examiner.Production.json
    echo '{}' > src/MathComps.Infrastructure/appsettings.llm.Production.json
+   echo '{}' > src/MathComps.Infrastructure/appsettings.photo-reader.Production.json
    ```
 
 7. Deploy by hand once, to check the stack comes up before CI ever touches it:
@@ -450,6 +454,7 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
   so once the API has restarted on the new value, the UI follows on the next page load with no frontend deploy.
 - `src/MathComps.Infrastructure/appsettings.examiner.{Env}.json` → `appsettings.examiner.json` (per-step models).
 - `src/MathComps.Infrastructure/appsettings.llm.{Env}.json` → `appsettings.llm.json` (LLM endpoint, retries)
+- `src/MathComps.Infrastructure/appsettings.photo-reader.{Env}.json` → `appsettings.photo-reader.json` (the photo reader's call and page settings)
 
 - **Apply a change:** edit the file, `./deploy.sh <env> restart api` — no `up -d`, no `--build`. `restart` takes the deploy lock, so it waits if an automatic deploy is in flight.
 - **First rollout:** create the files (`echo '{}' > …`) **before** the `up -d` that adds the mounts, else
@@ -494,7 +499,7 @@ dotnet user-secrets set "Mail:RedirectTo" "delivered@resend.dev"
 
 It guards against an honest user running away with the bill. It bounds one account, and sign-up is free, so a determined user opens another.
 
-A defense of a problem whose round the student holds a `HostedEntry` into runs past it entirely. The exemption reads only that the entry row exists, so it outlasts the clock the entry was sat under, and the practice group hands its entry out again and again. Those turns write `defense_spends` rows with `counts_against_ceiling = false`, which is what to sum if it ever starts to matter.
+A defense of a problem whose round the student holds a `HostedEntry` into runs past it entirely. The exemption reads only that the entry row exists, so it outlasts the clock the entry was sat under, and the practice group hands its entry out again and again. Those turns, and the photos read for such a defense, write `defense_spends` rows with `counts_against_ceiling = false`, which is what to sum if it ever starts to matter.
 
 #### What `deploy.sh` does around compose
 

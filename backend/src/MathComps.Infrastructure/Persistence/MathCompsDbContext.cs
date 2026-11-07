@@ -108,8 +108,14 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Model calls the drafts were made by.</summary>
     public DbSet<DefenseAttemptCall> DefenseAttemptCalls => Set<DefenseAttemptCall>();
 
-    /// <summary>Per-turn examiner spend.</summary>
+    /// <summary>What the examiner's turns and the photo readings billed.</summary>
     public DbSet<DefenseSpend> DefenseSpends => Set<DefenseSpend>();
+
+    /// <summary>Photos of handwritten pages students sent in for their defense conversations.</summary>
+    public DbSet<DefensePhoto> DefensePhotos => Set<DefensePhoto>();
+
+    /// <summary>Drawings cut out of the defense photos.</summary>
+    public DbSet<DefensePhotoCrop> DefensePhotoCrops => Set<DefensePhotoCrop>();
 
     /// <summary>Student reports on individual examiner replies.</summary>
     public DbSet<DefenseTurnReport> DefenseTurnReports => Set<DefenseTurnReport>();
@@ -1577,12 +1583,47 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         modelBuilder.Entity<DefenseSpend>(e =>
         {
-            // The per-user rolling spend query sums cost over a user's recent rows.
+            // The per-user spend query sums cost over a user's rows since UTC midnight.
             e.HasIndex(spend => new { spend.UserId, spend.CreatedAt })
              .HasDatabaseName("ix_defense_spend_user_id_created_at");
+
+            // Only a turn's reply is ever redrafted, so a photo reading's row carries no revisions.
+            e.ToTable(t => t.HasCheckConstraint(
+                "ck_defense_spend_reading_has_no_revisions", "\"photo_id\" IS NULL OR \"revisions\" = 0"));
         });
 
         #endregion DefenseSpend
+
+        #region DefensePhoto
+
+        modelBuilder.Entity<DefensePhoto>(e =>
+        {
+            // The student who sent the photo in, restricted so a photo can't lose the student it belongs to.
+            e.HasOne(photo => photo.User)
+             .WithMany()
+             .HasForeignKey(photo => photo.UserId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // The drawings cut out of the photo, cascading so dropping a photo drops its crops.
+            e.HasMany(photo => photo.Crops)
+             .WithOne(crop => crop.Photo)
+             .HasForeignKey(crop => crop.PhotoId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        #endregion DefensePhoto
+
+        #region DefensePhotoCrop
+
+        modelBuilder.Entity<DefensePhotoCrop>(e =>
+        {
+            // A photo's crops in the reading's order, unique so two can't share a place.
+            e.HasIndex(crop => new { crop.PhotoId, crop.Position })
+             .IsUnique()
+             .HasDatabaseName("ux_defense_photo_crop_photo_id_position");
+        });
+
+        #endregion DefensePhotoCrop
 
         #region DefenseTurnReport
 

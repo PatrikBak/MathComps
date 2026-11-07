@@ -21,6 +21,7 @@ services:
       - ./src/MathComps.Api/appsettings.Production.json:/app/appsettings.Production.json:ro
       - ./src/MathComps.Infrastructure/appsettings.examiner.Production.json:/app/appsettings.examiner.Production.json:ro
       - ./src/MathComps.Infrastructure/appsettings.llm.Production.json:/app/appsettings.llm.Production.json:ro
+      - ./src/MathComps.Infrastructure/appsettings.photo-reader.Production.json:/app/appsettings.photo-reader.Production.json:ro
     environment:
       ASPNETCORE_ENVIRONMENT: Production
     labels:

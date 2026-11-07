@@ -1,7 +1,6 @@
 using MathComps.Api.Authorization;
 using MathComps.Domain.Contracts.Selection;
 using MathComps.Infrastructure.Services.Selection;
-using MathComps.Infrastructure.Services.Users;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
@@ -31,13 +30,8 @@ public class ProblemSelectionEndpointsTests
     [Fact]
     public async Task Every_route_hands_its_service_the_organization_its_address_names()
     {
-        // The API's routes, mapped
-        var mapped = MappedApi.Build();
-
-        // The caller resolving to an account, for every route that asks who is calling
-        Mock.Get(mapped.Services.GetRequiredService<IUserManager>())
-            .Setup(manager => manager.GetUserIdAsync(CallerSubject, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Guid.CreateVersion7());
+        // The API's routes, mapped, with the caller resolving to an account
+        var mapped = MappedApi.Build().WithCaller(CallerSubject, Guid.CreateVersion7());
 
         // The services the selection's routes act through
         Mock[] services =

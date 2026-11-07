@@ -9,11 +9,12 @@ namespace MathComps.Cli.Competitions.Commands;
 /// <summary>
 /// Declares a hosted group: the batch of rounds the site runs as one competition, and the terms it runs on. It
 /// raises whatever the manifest names that the database has not met yet, so a group goes on the site the day its
-/// dates are decided and the problems land on its rounds later.
+/// dates are decided and the problems land on its rounds later. A run only reports what it would do unless
+/// <see cref="Settings.Write"/> is set.
 /// </summary>
 /// <param name="declare">The service that carries the manifest out.</param>
 /// <param name="logger">The logger the outcome and refusals go through.</param>
-[Description("Declare a hosted group from its manifest: link its rounds and set the terms they run on.")]
+[Description("Check a hosted group's manifest, and with --write declare it: link its rounds and set their terms.")]
 public class DeclareGroupCommand(IHostedGroupService declare, ILogger<DeclareGroupCommand> logger)
     : AsyncCommand<DeclareGroupCommand.Settings>
 {
@@ -30,11 +31,12 @@ public class DeclareGroupCommand(IHostedGroupService declare, ILogger<DeclareGro
         public required string Manifest { get; set; }
 
         /// <summary>
-        /// Whether to report what the manifest would do without writing it.
+        /// Whether to write the declaration. Without it the run reports what the manifest would do and writes
+        /// nothing.
         /// </summary>
-        [CommandOption("--dry-run")]
-        [Description("Run every check and report what would happen. Writes nothing.")]
-        public bool DryRun { get; set; }
+        [CommandOption("--write")]
+        [Description("Declare for real: write the group and its rounds. Without it, nothing is written.")]
+        public bool Write { get; set; }
     }
 
     /// <inheritdoc/>
@@ -57,12 +59,12 @@ public class DeclareGroupCommand(IHostedGroupService declare, ILogger<DeclareGro
         try
         {
             // Upsert the group and give it exactly the rounds the manifest names, or work out what that would do.
-            var outcome = await declare.DeclareAsync(manifest, settings.DryRun);
+            var outcome = await declare.DeclareAsync(manifest, dryRun: !settings.Write);
 
             // The verb for what happened to the group: created or updated, or would be on a dry run.
-            var verb = settings.DryRun
-                ? outcome.Created ? "Would create" : "Would update"
-                : outcome.Created ? "Created" : "Updated";
+            var verb = settings.Write
+                ? outcome.Created ? "Created" : "Updated"
+                : outcome.Created ? "Would create" : "Would update";
 
             // What the run did, in one line, with the group's size in rounds and the problems each round announces.
             logger.LogInformation("{Verb} group {Slug}: {Rounds} round(s) of {Problems} problem(s) each",

@@ -91,7 +91,7 @@ public sealed class CliApp
     /// <typeparam name="TDefaultCommand">The command run when no command name is given.</typeparam>
     /// <param name="args">The tool's command-line arguments.</param>
     /// <param name="configure">Optionally registers additional commands on the Spectre configurator.</param>
-    /// <returns>The process exit code: the command's own, or 1 on an unhandled exception.</returns>
+    /// <returns><inheritdoc cref="CliRunner.RunAsync" path="/returns"/></returns>
     public async Task<int> RunAsync<TDefaultCommand>(string[] args, Action<IConfigurator>? configure = null)
         where TDefaultCommand : class, ICommand
     {

@@ -387,6 +387,58 @@ namespace MathComps.Infrastructure.Migrations
                     b.ToTable("defense_attempt_calls", (string)null);
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefensePhoto", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_defense_photos");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_defense_photos_user_id");
+
+                    b.ToTable("defense_photos", (string)null);
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefensePhotoCrop", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("label");
+
+                    b.Property<Guid>("PhotoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("photo_id");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer")
+                        .HasColumnName("position");
+
+                    b.HasKey("Id")
+                        .HasName("pk_defense_photo_crops");
+
+                    b.HasIndex("PhotoId", "Position")
+                        .IsUnique()
+                        .HasDatabaseName("ux_defense_photo_crop_photo_id_position");
+
+                    b.ToTable("defense_photo_crops", (string)null);
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefenseSession", b =>
                 {
                     b.Property<Guid>("Id")
@@ -493,6 +545,10 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("duration_ms");
 
+                    b.Property<Guid?>("PhotoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("photo_id");
+
                     b.Property<int>("PromptTokens")
                         .HasColumnType("integer")
                         .HasColumnName("prompt_tokens");
@@ -515,7 +571,10 @@ namespace MathComps.Infrastructure.Migrations
                     b.HasIndex("UserId", "CreatedAt")
                         .HasDatabaseName("ix_defense_spend_user_id_created_at");
 
-                    b.ToTable("defense_spends", (string)null);
+                    b.ToTable("defense_spends", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_defense_spend_reading_has_no_revisions", "\"photo_id\" IS NULL OR \"revisions\" = 0");
+                        });
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefenseTurn", b =>
@@ -2293,6 +2352,30 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("Attempt");
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefensePhoto", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_defense_photos_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefensePhotoCrop", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.DefensePhoto", "Photo")
+                        .WithMany("Crops")
+                        .HasForeignKey("PhotoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_defense_photo_crops_defense_photos_photo_id");
+
+                    b.Navigation("Photo");
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefenseSession", b =>
                 {
                     b.HasOne("MathComps.Domain.EfCoreEntities.User", "User")
@@ -3061,6 +3144,11 @@ namespace MathComps.Infrastructure.Migrations
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Competition", b =>
                 {
                     b.Navigation("Children");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefensePhoto", b =>
+                {
+                    b.Navigation("Crops");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefenseSession", b =>

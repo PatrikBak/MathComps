@@ -5,7 +5,7 @@ description: Use this skill when adding a competition's problems to the site dat
 
 # Add problems (bulk-import draft)
 
-Turn a competition's problems into a validated **draft folder** under `data/problems/` that the bulk-import CLI can import. **Done = the dry run (`--dry-run`) passes, registry and database checks included, with the wanted languages present.** Stop at the dry run by default — only run the real import when the user explicitly tells you to in that instruction.
+Turn a competition's problems into a validated **draft folder** under `data/problems/` that the bulk-import CLI can import. **Done = the dry run (a plain run, no `--write`) passes, registry and database checks included, with the wanted languages present.** Stop at the dry run by default — only run the real import when the user explicitly tells you to in that instruction.
 
 `data/problems/` is **gitignored** (`data/problems/.gitignore` = `*`) — drafts are local staging input, never committed. The committable artifact is any taxonomy/code change.
 
@@ -133,9 +133,9 @@ Hand-editing the list afterwards: keep **exactly one Area tag**, and judge each 
 # Fast inner loop on markdown/KaTeX/images (run from web/):
 cd web && npm run draft:preflight -- ../data/problems/my-draft
 # Full check (preflight + registry + the whole import, rolled back):
-dotnet run --project backend/src/MathComps.Cli.BulkImport -- ./data/problems/my-draft --dry-run
+dotnet run --project backend/src/MathComps.Cli.BulkImport -- ./data/problems/my-draft
 ```
 
 A genuine pass shows the **Database** block (create/reuse competition, season, round) then `No issues.` and `PASS`. The preflight is the fast loop for body errors; the dry run adds the registry + DB checks (including that every tag slug is in the approved vocabulary). A draft with any error of its own never reaches the database, so its database issues show only once it is clean on its own terms.
 
-**The real import is explicit-only.** Stop at the dry run unless the user tells you to import in that same instruction — don't run it as a default last step, and don't offer to. The import writes to whatever `ConnectionStrings:DefaultConnection` points at, which is **localhost**; promoting to prod needs the connection repointed via the user's tunnel, so that stays user-run. When told to import, run `dotnet run -c Release --project=backend/src/MathComps.Cli.BulkImport -- ./data/problems/my-draft` against localhost. For prod or staging, never hand-roll a `dotnet run` with a repointed connection string — `backend/scripts/invoke-tool.sh -e prod bulk-import 'data/problems/my-draft-*'` opens the tunnel, injects the connection and takes a glob, so several rounds go in one call; its dry run is the same call with `--dry-run` after the glob. It runs the tool from your CWD, so relative draft paths only resolve from the repo root.
+**The real import is explicit-only.** Stop at the dry run unless the user tells you to import in that same instruction — don't run it as a default last step, and don't offer to. The import writes to whatever `ConnectionStrings:DefaultConnection` points at, which is **localhost**; promoting to prod needs the connection repointed via the user's tunnel, so that stays user-run. When told to import, run `dotnet run -c Release --project=backend/src/MathComps.Cli.BulkImport -- ./data/problems/my-draft --write` against localhost. For prod or staging, never hand-roll a `dotnet run` with a repointed connection string — `backend/scripts/invoke-tool.sh -e prod bulk-import 'data/problems/my-draft-*' --write` opens the tunnel, injects the connection and takes a glob, so several rounds go in one call; its dry run is the same call without `--write`. It runs the tool from your CWD, so relative draft paths only resolve from the repo root.

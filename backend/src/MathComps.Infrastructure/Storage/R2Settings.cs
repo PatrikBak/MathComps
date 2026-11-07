@@ -3,7 +3,9 @@ using System.ComponentModel.DataAnnotations;
 namespace MathComps.Infrastructure.Storage;
 
 /// <summary>
-/// Configuration for <see cref="R2Uploader"/> that specifies Cloudflare R2 connection details.
+/// The connection details of a Cloudflare R2 account and its buckets: the public one every visitor's browser
+/// reads straight from, and the private one only the application reaches. A host names only the buckets it uses: a
+/// bucket's name is required once something reaches for that bucket.
 /// </summary>
 public class R2Settings
 {
@@ -19,13 +21,17 @@ public class R2Settings
     public required string AccountId { get; set; }
 
     /// <summary>
-    /// The R2 bucket name to upload files to.
+    /// The public bucket's name.
     /// </summary>
-    [Required]
-    public required string BucketName { get; set; }
+    public string PublicBucketName { get; set; } = string.Empty;
 
     /// <summary>
-    /// The access key ID for authenticating with R2.
+    /// The private bucket's name.
+    /// </summary>
+    public string PrivateBucketName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The access key ID for authenticating with R2, reaching every bucket the host names.
     /// </summary>
     [Required]
     public required string AccessKeyId { get; set; }
