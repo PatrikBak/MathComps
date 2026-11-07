@@ -6,7 +6,8 @@ namespace MathComps.Infrastructure.Tests.TestInfrastructure;
 
 /// <summary>
 /// Builds the service provider every Postgres-backed test runs against: the DbContext pointed at one
-/// test database, plus whatever the caller adds on top.
+/// test database, the R2 settings naming the made-up account of <see cref="TestR2"/> and the links to its private
+/// files, plus whatever the caller adds on top.
 /// </summary>
 internal static class TestServiceProvider
 {
@@ -18,11 +19,18 @@ internal static class TestServiceProvider
     /// <returns>The built provider, which the caller owns and must dispose.</returns>
     public static ServiceProvider Build(string connectionString, Action<IServiceCollection>? configure = null)
     {
-        // Create in-memory configuration with the test database connection string
+        // Create in-memory configuration with the test database connection string, the made-up R2 account, and the
+        // links to its private files
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["ConnectionStrings:DefaultConnection"] = connectionString
+                ["ConnectionStrings:DefaultConnection"] = connectionString,
+                ["CloudflareR2:AccountId"] = TestR2.AccountId,
+                ["CloudflareR2:AccessKeyId"] = TestR2.AccessKeyId,
+                ["CloudflareR2:SecretAccessKey"] = TestR2.SecretAccessKey,
+                ["CloudflareR2:PrivateBucketName"] = TestR2.PrivateBucketName,
+                ["PrivateFileLinks:LinkLifetime"] = "12:00:00",
+                ["PrivateFileLinks:MaxKeptLinks"] = "100",
             })
             .Build();
 

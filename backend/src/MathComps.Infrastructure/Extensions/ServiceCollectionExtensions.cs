@@ -19,6 +19,7 @@ using MathComps.Infrastructure.Services.ConversationReview;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Engine;
+using MathComps.Infrastructure.Services.EditorUploads;
 using MathComps.Infrastructure.Services.GradeMessages;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Mail;
@@ -33,6 +34,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
 using MathComps.Domain.Tagging;
 using MathComps.Domain.Localization;
@@ -199,8 +201,9 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Registers the user account services — the user manager, the user's saved problems and lists, and comments.
-    /// Pulls in <see cref="AddClerkApi"/> since the user manager reads upstream users through the Clerk client. Expects
-    /// the DbContext from <see cref="AddMathCompsDbContext"/>.
+    /// Pulls in <see cref="AddClerkApi"/> since the user manager reads upstream users through the Clerk client, and
+    /// <see cref="AddStorage"/> for the files a comment names. Expects the DbContext from
+    /// <see cref="AddMathCompsDbContext"/>.
     /// </summary>
     /// <param name="services">The service collection to add the user services to.</param>
     /// <returns>The service collection for chaining.</returns>
@@ -227,6 +230,17 @@ public static class ServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Scoped<ICommentThreadKind, SelectionPaperThreadKind>());
         services.TryAddScoped<ICommentService, CommentService>();
         services.TryAddScoped<ICommentSeenService, CommentSeenService>();
+
+        // The private bucket the files uploaded into a comment sit in
+        services.AddStorage();
+
+        // The settings bounding the links to the files uploaded into a comment
+        services.AddOptions<EditorUploadSettings>()
+            .BindConfiguration(EditorUploadSettings.SectionName)
+            .ValidateDataAnnotations();
+
+        // The files uploaded into a comment, which a comment's read hands out links to
+        services.TryAddSingleton<IEditorUploadService, EditorUploadService>();
 
         // The list service resolves problem slugs, so make sure the lookup is available
         services.TryAddScoped<IProblemLookupService, ProblemLookupService>();
@@ -289,8 +303,8 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Registers R2 object storage: the uploader into the public bucket, and the private bucket as the store files go
-    /// into and the reader of what it holds. Everything is built lazily, so a host only needs settings for the buckets
-    /// it reaches for.
+    /// into, the reader of what it holds and the links to it. Everything is built lazily, so a host only needs the
+    /// settings of what it reaches for.
     /// </summary>
     /// <param name="services">The service collection to add storage to.</param>
     /// <returns>The service collection for chaining.</returns>
@@ -307,9 +321,25 @@ public static class ServiceCollectionExtensions
         // The private bucket
         services.TryAddSingleton<R2PrivateStore>();
 
-        // Exposed as the store files go into and as the reader of what it holds, one instance behind both
+        // Exposed as the store files go into, the reader of what it holds and the links to its files, one instance
+        // behind each
         services.TryAddSingleton<IPrivateObjectStore>(provider => provider.GetRequiredService<R2PrivateStore>());
         services.TryAddSingleton<IObjectReader>(provider => provider.GetRequiredService<R2PrivateStore>());
+        services.TryAddSingleton<IPrivateFileLinks>(provider => provider.GetRequiredService<R2PrivateStore>());
+
+        // How long the links to the private files work, and how many are kept
+        services.AddOptions<PrivateFileLinkSettings>()
+            .BindConfiguration(PrivateFileLinkSettings.SectionName)
+            .ValidateDataAnnotations();
+
+        // The clock the kept links age by
+        services.TryAddSingleton<ISystemClock, SystemClock>();
+
+        // Each read link kept a while, so browsers keep their copies. A host can register storage more than once and
+        // Scrutor decorates again on every call, so the cache goes only over links nothing has decorated yet
+        if (!services.Any(descriptor =>
+                descriptor.ServiceType == typeof(IPrivateFileLinks) && descriptor.IsDecorated()))
+            services.Decorate<IPrivateFileLinks, CachedPrivateFileLinks>();
 
         // Builder pattern
         return services;

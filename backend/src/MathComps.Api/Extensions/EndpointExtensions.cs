@@ -21,6 +21,9 @@ public static class EndpointExtensions
         // Comment threads on every kind of target
         app.MapCommentEndpoints();
 
+        // The files uploaded into the text editor
+        app.MapFileEndpoints();
+
         // The authenticated user's problem lists
         app.MapUserListEndpoints();
 

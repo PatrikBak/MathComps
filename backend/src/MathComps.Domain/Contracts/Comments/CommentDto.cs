@@ -9,6 +9,8 @@ namespace MathComps.Domain.Contracts.Comments;
 /// <param name="Id"><inheritdoc cref="Comment.Id" path="/summary"/></param>
 /// <param name="Author">The comment's author data.</param>
 /// <param name="Content"><inheritdoc cref="Comment.Content" path="/summary"/></param>
+/// <param name="FileLinks">Links to the uploaded files the content names, by their upload key, each one
+/// expiring.</param>
 /// <param name="CreatedAt">When the comment was posted, which an edit leaves as it is.</param>
 /// <param name="EditedAt">When the comment was last edited, if applicable.</param>
 /// <param name="IsDeleted">Whether the comment has been soft-deleted.</param>
@@ -18,6 +20,7 @@ public record CommentDto(
     Guid Id,
     CommentAuthorDto Author,
     string Content,
+    ImmutableDictionary<string, string> FileLinks,
     DateTimeOffset CreatedAt,
     DateTimeOffset? EditedAt,
     bool IsDeleted,
