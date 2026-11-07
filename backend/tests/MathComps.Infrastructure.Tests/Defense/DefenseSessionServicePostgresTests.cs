@@ -340,7 +340,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // Drop the last cancellation source a cancel test left behind.
         _abort?.Dispose();
 
-        // Standard IDisposable: no finalizer needs to run now that cleanup is done.
+        // No finalizer to run.
         GC.SuppressFinalize(this);
     }
 
@@ -1665,19 +1665,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         await QueryAsync(async context =>
         {
             // A row the ceiling never reached
-            context.DefenseSpends.Add(new DefenseSpend
-            {
-                UserId = _ownerId,
-                Cost = 1.00m,
-                PromptTokens = 0,
-                CompletionTokens = 0,
-                ReasoningTokens = 0,
-                CachedPromptTokens = 0,
-                DurationMs = 0,
-                Revisions = 0,
-                CountsAgainstCeiling = false,
-                CreatedAt = DateTimeOffset.UtcNow,
-            });
+            context.DefenseSpends.Add(DefenseSeed.NewSpend(
+                _ownerId, 1.00m, countsAgainstCeiling: false, DateTimeOffset.UtcNow));
 
             // Commit the seeded spend
             await context.SaveChangesAsync();
@@ -1757,19 +1746,9 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         await QueryAsync(async context =>
         {
             // One row's worth of yesterday's spend
-            context.DefenseSpends.Add(new DefenseSpend
-            {
-                UserId = _ownerId,
-                Cost = 1.00m,
-                PromptTokens = 0,
-                CompletionTokens = 0,
-                ReasoningTokens = 0,
-                CachedPromptTokens = 0,
-                DurationMs = 0,
-                Revisions = 0,
-                CountsAgainstCeiling = true,
-                CreatedAt = new DateTimeOffset(DateTime.UtcNow.Date, TimeSpan.Zero) - TimeSpan.FromSeconds(1),
-            });
+            context.DefenseSpends.Add(DefenseSeed.NewSpend(
+                _ownerId, 1.00m, countsAgainstCeiling: true,
+                new DateTimeOffset(DateTime.UtcNow.Date, TimeSpan.Zero) - TimeSpan.FromSeconds(1)));
 
             // Commit the seeded spend
             await context.SaveChangesAsync();
@@ -1779,6 +1758,22 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         var session = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
 
         // Yesterday sits outside today's window, so none of it counted and the turn ran
+        Assert.NotEmpty(session.Turns);
+    });
+
+    /// <summary>
+    /// The ceiling weighs each user's own spend alone, so another user at the ceiling doesn't stop a turn.
+    /// </summary>
+    [Fact]
+    public Task Another_users_spend_does_not_count_against_the_ceiling() => RunTestAsync(async service =>
+    {
+        // The other user is at the ceiling
+        await SeedSpendAtCeilingAsync(_otherId);
+
+        // The owner starts a turn
+        var session = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+        // Which ran, nothing of the other user's spend weighed against it
         Assert.NotEmpty(session.Turns);
     });
 
@@ -1795,19 +1790,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         await QueryAsync(async context =>
         {
             // A spend row one turn short of the ceiling
-            context.DefenseSpends.Add(new DefenseSpend
-            {
-                UserId = _ownerId,
-                Cost = 0.99m,
-                PromptTokens = 0,
-                CompletionTokens = 0,
-                ReasoningTokens = 0,
-                CachedPromptTokens = 0,
-                DurationMs = 0,
-                Revisions = 0,
-                CountsAgainstCeiling = true,
-                CreatedAt = DateTimeOffset.UtcNow,
-            });
+            context.DefenseSpends.Add(DefenseSeed.NewSpend(
+                _ownerId, 0.99m, countsAgainstCeiling: true, DateTimeOffset.UtcNow));
 
             // Commit the seeded spend
             await context.SaveChangesAsync();
@@ -2226,19 +2210,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     private Task SeedSpendAtCeilingAsync(Guid? userId = null) => QueryAsync(async context =>
     {
         // A spend row that meets the ceiling
-        context.DefenseSpends.Add(new DefenseSpend
-        {
-            UserId = userId ?? _ownerId,
-            Cost = 1.00m,
-            PromptTokens = 0,
-            CompletionTokens = 0,
-            ReasoningTokens = 0,
-            CachedPromptTokens = 0,
-            DurationMs = 0,
-            Revisions = 0,
-            CountsAgainstCeiling = true,
-            CreatedAt = DateTimeOffset.UtcNow,
-        });
+        context.DefenseSpends.Add(DefenseSeed.NewSpend(
+            userId ?? _ownerId, 1.00m, countsAgainstCeiling: true, DateTimeOffset.UtcNow));
 
         // Commit the seeded spend
         await context.SaveChangesAsync();

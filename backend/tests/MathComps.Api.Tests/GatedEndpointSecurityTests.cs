@@ -35,11 +35,13 @@ public class GatedEndpointSecurityTests
     /// named one beside it would shut out the callers they are for.
     /// </summary>
     /// <param name="area">The path every route of the area starts with.</param>
-    /// <param name="policy">The policy closing the area.</param>
+    /// <param name="policy">The policy closing the area, or null for an area open to anybody signed in, whose
+    /// routes decide for themselves what the caller reaches.</param>
     [Theory]
     [InlineData("/admin", AuthorizationPolicies.Admin)]
     [InlineData("/problem-selection", AuthorizationPolicies.OrganizationMember)]
-    public void Every_gated_route_requires_its_policy_and_is_rate_limited(string area, string policy)
+    [InlineData("/defense/photos", null)]
+    public void Every_gated_route_requires_its_policy_and_is_rate_limited(string area, string? policy)
     {
         // The area's routes as the API maps them
         var gatedRoutes = MappedApi.Build().Routes

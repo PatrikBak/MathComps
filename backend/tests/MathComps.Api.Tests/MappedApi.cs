@@ -1,5 +1,6 @@
 using MathComps.Api.Extensions;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Users;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,6 +54,33 @@ internal sealed record MappedApi(IReadOnlyList<RouteEndpoint> Routes, IServicePr
             ],
             app.Services.CreateScope().ServiceProvider);
     }
+
+    /// <summary>
+    /// Has a caller signed in under a subject resolve to an account, for every route that asks who is calling.
+    /// </summary>
+    /// <param name="subject">The subject the caller signs in under.</param>
+    /// <param name="userId">The account the caller resolves to.</param>
+    /// <returns>The same mapped routes, for chaining.</returns>
+    public MappedApi WithCaller(string subject, Guid userId)
+    {
+        // The caller resolving to the account
+        Mock.Get(Services.GetRequiredService<IUserManager>())
+            .Setup(manager => manager.GetUserIdAsync(subject, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(userId);
+
+        // The routes
+        return this;
+    }
+
+    /// <summary>
+    /// Finds the one route answering a method at a pattern.
+    /// </summary>
+    /// <param name="method">The method it answers.</param>
+    /// <param name="pattern">Its pattern.</param>
+    /// <returns>The route.</returns>
+    public RouteEndpoint Route(string method, string pattern) =>
+        // The one route of that method and pattern
+        Routes.Single(route => NameOf(route) == $"{method} {pattern}");
 
     /// <summary>
     /// Names a route by its method and its pattern, the way a request reaches it.
