@@ -1,6 +1,7 @@
 using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.EditorUploads;
 using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
@@ -14,9 +15,11 @@ namespace MathComps.Infrastructure.Services.Comments;
 /// </summary>
 /// <param name="dbContextFactory">The factory minting a context per operation.</param>
 /// <param name="kinds">Every kind of thread, exactly one per <see cref="CommentTargetType"/>.</param>
+/// <param name="editorUploads">The files uploaded into comments, which a comment read links to.</param>
 public class CommentService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
-    IEnumerable<ICommentThreadKind> kinds) : ICommentService
+    IEnumerable<ICommentThreadKind> kinds,
+    IEditorUploadService editorUploads) : ICommentService
 {
     /// <summary>
     /// Every kind of thread, in the order they were registered, which is the order a stored comment's thread is
@@ -178,6 +181,7 @@ public class CommentService(
             Id: comment.Id,
             Author: author,
             Content: comment.Content,
+            FileLinks: editorUploads.LinksIn(comment.Content),
             CreatedAt: comment.CreatedAt,
             EditedAt: null,
             IsDeleted: false,
@@ -488,7 +492,7 @@ public class CommentService(
     /// <param name="flatComments">The comments, every reply's parent among them.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The top-level comments, oldest first, each carrying its replies, oldest first.</returns>
-    private static async Task<ImmutableList<CommentDto>> BuildTreesAsync(
+    private async Task<ImmutableList<CommentDto>> BuildTreesAsync(
         MathCompsDbContext dbContext,
         IReadOnlyList<CommentRow> flatComments,
         CancellationToken cancellationToken = default)
@@ -550,6 +554,7 @@ public class CommentService(
                 Id: row.Id,
                 Author: author,
                 Content: content,
+                FileLinks: editorUploads.LinksIn(content),
                 CreatedAt: row.PostedAt,
                 EditedAt: row.PreviousVersionId.HasValue ? row.CreatedAt : null,
                 IsDeleted: isDeleted,

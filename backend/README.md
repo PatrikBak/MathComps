@@ -203,8 +203,9 @@ testing webhooks locally, see the [API README](src/MathComps.Api/README.md#webho
 ### 6. Configure Cloudflare R2
 
 The API reads the AI examiner's problem content from R2's private bucket, the per-handout blobs the
-[Handouts CLI](src/MathComps.Cli.Handouts/README.md) publishes, so the defense endpoints need these
-settings, whatever problem a defense is about. Everything else works without them.
+[Handouts CLI](src/MathComps.Cli.Handouts/README.md) publishes, and signs the links to the files people
+upload into comments, which sit there too. So the defense and comment endpoints need these settings, and
+everything else works without them.
 
 ```bash
 # From the API directory

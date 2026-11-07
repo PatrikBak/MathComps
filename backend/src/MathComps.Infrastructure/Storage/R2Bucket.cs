@@ -33,6 +33,9 @@ internal sealed class R2Bucket(R2Settings settings, string bucketName, string bu
             ServiceURL = $"https://{settings.AccountId}.r2.cloudflarestorage.com",
             // R2 requires path-style addressing
             ForcePathStyle = true,
+            // R2's one region. Left to the SDK, the region read off the R2 host is us-east-1, where a presigned link
+            // falls back to signature version 2, which R2 refuses
+            AuthenticationRegion = "auto",
         });
 
     /// <summary>
@@ -94,6 +97,22 @@ internal sealed class R2Bucket(R2Settings settings, string bucketName, string bu
             return null;
         }
     }
+
+    /// <summary>
+    /// Signs a link that reads the file under a key, for anyone holding it until it expires.
+    /// </summary>
+    /// <param name="key">The object key.</param>
+    /// <param name="expiresAt">When the link stops working.</param>
+    /// <returns>The signed link.</returns>
+    public string SignGetUrl(string key, DateTimeOffset expiresAt) =>
+        // A read of the key, signed by the bucket's credentials
+        _client.GetPreSignedURL(new GetPreSignedUrlRequest
+        {
+            BucketName = _bucketName,
+            Key = key,
+            Verb = HttpVerb.GET,
+            Expires = expiresAt.UtcDateTime,
+        });
 
     /// <inheritdoc/>
     public void Dispose() =>

@@ -41,6 +41,7 @@ public class GatedEndpointSecurityTests
     [InlineData("/admin", AuthorizationPolicies.Admin)]
     [InlineData("/problem-selection", AuthorizationPolicies.OrganizationMember)]
     [InlineData("/defense/photos", null)]
+    [InlineData("/files", null)]
     public void Every_gated_route_requires_its_policy_and_is_rate_limited(string area, string? policy)
     {
         // The area's routes as the API maps them

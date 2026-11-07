@@ -12,8 +12,8 @@ namespace MathComps.Infrastructure.Tests.Comments;
 
 /// <summary>
 /// Integration tests for the public comment threads as <see cref="ICommentService"/> keeps them against a real
-/// PostgreSQL database: who a comment is signed by, reactions, deletion, edits that write a new version and keep its
-/// replies, nesting, bulk counts, and a hosted problem, which has no thread.
+/// PostgreSQL database: who a comment is signed by, the links to the files it names, reactions, deletion, edits that
+/// write a new version and keep its replies, nesting, bulk counts, and a hosted problem, which has no thread.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class CommentServicePostgresTests(PostgresContainerFixture fixture)
@@ -93,6 +93,16 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     /// The problem in a hosted round still running.
     /// </summary>
     private readonly Guid _hostedProblemId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// The upload key of a picture uploaded into a comment.
+    /// </summary>
+    private const string UploadKey = "abc/images/1730000000000-0b6e2f3c-1111-4a2b-9c3d-123456789abc.png";
+
+    /// <summary>
+    /// A comment showing that picture, scaled as the editor writes it.
+    /// </summary>
+    private const string ContentWithPicture = $"See the figure: ![figure](media:{UploadKey}?scale=50)";
 
     /// <summary>
     /// Content exactly as long as a comment may carry.
@@ -946,13 +956,43 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A deleted comment keeps its place in the thread, its text blanked.
+    /// A comment comes with a link to each file its text names, by the upload key the text names it by, both when it
+    /// is posted and when its thread is read. The text keeps naming the file, so an edit starting from it saves the
+    /// key and never a link that expires.
+    /// </summary>
+    [Fact]
+    public Task GetCommentsAsync_LinksTheFilesTheCommentNames() => RunTestAsync(async commentService =>
+    {
+        // The first user posts a picture
+        var created = await commentService.CreateCommentAsync(_handoutThread, _user1, ContentWithPicture);
+
+        // The posted comment's one link
+        var link = Assert.Single(created.FileLinks);
+
+        // Under the picture's upload key
+        Assert.Equal(UploadKey, link.Key);
+
+        // To where the picture sits in the private bucket
+        Assert.StartsWith(TestR2.PrivateFileAddress($"user-uploads/user_{UploadKey}") + "?", link.Value);
+
+        // The thread as a signed-out reader gets it
+        var comment = Assert.Single(await commentService.GetCommentsAsync(_handoutThread, null));
+
+        // Its text naming the picture, as written
+        Assert.Equal(ContentWithPicture, comment.Content);
+
+        // And the same link beside it
+        Assert.Equal(created.FileLinks, comment.FileLinks);
+    });
+
+    /// <summary>
+    /// A deleted comment keeps its place in the thread, its text blanked and nothing it named linked any more.
     /// </summary>
     [Fact]
     public Task GetCommentsAsync_ReturnsDeletedCommentsWithEmptyContent() => RunTestAsync(async commentService =>
     {
-        // The first user's comment
-        var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Original content");
+        // The first user's comment, showing a picture
+        var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, ContentWithPicture);
 
         // The author deletes the comment
         await commentService.DeleteCommentAsync(comment.Id, _user1);
@@ -966,6 +1006,9 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
 
         // The comment's text blanked
         Assert.Equal(string.Empty, root.Content);
+
+        // With no link to the picture
+        Assert.Empty(root.FileLinks);
     });
 
     /// <summary>

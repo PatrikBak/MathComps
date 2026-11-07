@@ -5,14 +5,19 @@ using Microsoft.Extensions.Options;
 namespace MathComps.Infrastructure.Storage;
 
 /// <summary>
-/// The private Cloudflare R2 bucket, through an <see cref="R2Bucket"/>, as both the <see cref="IPrivateObjectStore"/>
-/// and the <see cref="IObjectReader"/> of what it holds. Files go in with no caching of their own, since nobody reads
-/// them straight from the bucket, and each read is logged with how long R2 took to answer.
+/// The private Cloudflare R2 bucket, through an <see cref="R2Bucket"/>, as the <see cref="IPrivateObjectStore"/>, the
+/// <see cref="IObjectReader"/> of what it holds, and the <see cref="IPrivateFileLinks"/> to it. Files go in with no
+/// caching of their own, each read is logged with how long R2 took to answer, and each link is R2's own presigned
+/// one, signed afresh on every call.
 /// </summary>
 /// <param name="logger">The logger.</param>
 /// <param name="r2Settings">The R2 connection settings, naming the private bucket.</param>
-public sealed class R2PrivateStore(ILogger<R2PrivateStore> logger, IOptions<R2Settings> r2Settings)
-    : IPrivateObjectStore, IObjectReader, IDisposable
+/// <param name="privateFileLinkSettings">The settings saying how long a read link works.</param>
+public sealed class R2PrivateStore(
+    ILogger<R2PrivateStore> logger,
+    IOptions<R2Settings> r2Settings,
+    IOptions<PrivateFileLinkSettings> privateFileLinkSettings)
+    : IPrivateObjectStore, IObjectReader, IPrivateFileLinks, IDisposable
 {
     /// <summary>
     /// The private bucket the files live in.
@@ -56,6 +61,14 @@ public sealed class R2PrivateStore(ILogger<R2PrivateStore> logger, IOptions<R2Se
         // The object's text
         return content;
     }
+
+    /// <inheritdoc/>
+    public TimeSpan LinkLifetime => privateFileLinkSettings.Value.LinkLifetime;
+
+    /// <inheritdoc/>
+    public string LinkFor(string key) =>
+        // Signed now, for as long as every read link works
+        _bucket.SignGetUrl(key, DateTimeOffset.UtcNow + LinkLifetime);
 
     /// <inheritdoc/>
     /// <remarks>The container may dispose this one instance once per registration, which the S3 client
