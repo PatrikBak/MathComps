@@ -111,6 +111,18 @@ export function refuse(route: Route, status: number, errorCode: AppErrorCode): P
 }
 
 /**
+ * The link the backend hands out to an uploaded file.
+ *
+ * @param key - The file's upload key.
+ *
+ * @returns The link, as the store would serve the file at it.
+ */
+export function fileLinkTo(key: string): string {
+  // The file's place in the store, signed
+  return `https://store.example.test/user-uploads/user_${key}?X-Amz-Signature=fake`
+}
+
+/**
  * Counts the calls the app makes to the backend and answers every one of them as unreachable.
  *
  * The count lets a single test watch the app's traffic stop and start again. Clerk's own traffic is

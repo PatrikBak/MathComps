@@ -6,7 +6,7 @@
 import { focusManager, QueryClient } from '@tanstack/react-query'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { BackendApiError } from '../api/api-error'
+import { ApiRequestError } from '../api/api-error'
 import { dropReadsInFlight, onceAnswerLands, oncePageShows } from '../query-config'
 
 /** Where the answer is cached in every case. */
@@ -173,7 +173,7 @@ describe('onceAnswerLands', () => {
   it('sets no read off after one the backend refused for good, nor while a write it is held by is out', async () => {
     // A cache whose read of the answer the backend refused, as no repeat could change
     const queryClient = new QueryClient()
-    const refused = vi.fn(() => Promise.reject(new BackendApiError({ statusCode: 404 })))
+    const refused = vi.fn(() => Promise.reject(new ApiRequestError({ statusCode: 404 })))
     await queryClient.prefetchQuery({ queryKey: KEY, queryFn: refused, retry: false })
 
     // Another answer, read fine

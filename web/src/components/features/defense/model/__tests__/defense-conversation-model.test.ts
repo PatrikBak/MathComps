@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { delay } from '@/components/shared/utils/async-utils'
-import { BackendApiError } from '@/lib/api/api-error'
+import { ApiRequestError } from '@/lib/api/api-error'
 
 import {
   DefenseConversationModel,
@@ -456,7 +456,7 @@ describe('DefenseConversationModel', () => {
   it('carries the backend failure code out of a failed send', async () => {
     // A model whose next round-trip throws a coded backend error
     const { model, backend } = makeModel()
-    backend.nextSubmitError = new BackendApiError({
+    backend.nextSubmitError = new ApiRequestError({
       message: 'too many turns',
       statusCode: 422,
       errorCode: 'DefenseMessageLimit',
@@ -642,7 +642,7 @@ describe('DefenseConversationModel', () => {
     const sessionId = backend.store[0].id
 
     // Arm a not-found failure, as the backend raises for a session deleted elsewhere
-    backend.nextDeleteError = new BackendApiError({
+    backend.nextDeleteError = new ApiRequestError({
       message: 'gone',
       statusCode: 404,
       errorCode: 'DefenseSessionNotFound',

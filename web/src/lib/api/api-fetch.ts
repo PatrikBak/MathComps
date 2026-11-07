@@ -1,8 +1,5 @@
 import { readErrorCode } from '@/lib/api/api-error-codes'
-import {
-  reportForeignRefusal,
-  reportUnansweredRequest,
-} from '@/lib/error-reporting/report-request-failure'
+import { reportUnansweredRequest } from '@/lib/error-reporting/report-request-failure'
 import type { ApiResult } from '@/types/api'
 
 /**
@@ -11,9 +8,8 @@ import type { ApiResult } from '@/types/api'
  * status and whatever machine-readable code the body held. It never rejects, so a caller branches on
  * `success` (or hands the result to `unwrap`), never a try/catch.
  *
- * Failures no server of ours records also reach error tracking. A request that gets no answer at
- * all goes to {@link reportUnansweredRequest}, unless its caller cancelled it. Every refusal goes to
- * {@link reportForeignRefusal}, which files only those from a server that isn't ours.
+ * A request that gets no answer at all, which no server of ours records, also reaches error tracking
+ * through {@link reportUnansweredRequest}, unless its caller cancelled it.
  *
  * This is the one place a response becomes a result, whichever server answers. Who is asking is the
  * caller's business, carried in as headers.
@@ -53,9 +49,6 @@ export async function fetchApiResult<T>(
 
     // The server refused it
     if (!response.ok) {
-      // Hand the refusal to its reporter, which files only a foreign server's
-      reportForeignRefusal(url, response.status)
-
       // Best-effort read of the problem body for the machine-readable failure code
       const errorCode = await readErrorCode(response)
 

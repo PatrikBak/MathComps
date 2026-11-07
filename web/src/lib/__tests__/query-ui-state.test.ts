@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { BackendApiError } from '../api/api-error'
+import { ApiRequestError } from '../api/api-error'
 import { deriveQueryUiState, isAwaitingAnswer, type QueryUiStateInput } from '../query-ui-state'
 
 /**
@@ -41,7 +41,7 @@ describe('deriveQueryUiState', () => {
 
   it('reads a refresh that gave up over data already read as failed', () => {
     // A server fault behind the refresh
-    const error = new BackendApiError({ statusCode: 500 })
+    const error = new ApiRequestError({ statusCode: 500 })
 
     // React Query keeps the data and moves the status, so this state is reachable only on a refresh
     const state = deriveQueryUiState(flags({ status: 'error', fetchStatus: 'idle', error }))
@@ -71,7 +71,7 @@ describe('deriveQueryUiState', () => {
 
   it('carries the settled failure through so its code can be read off', () => {
     // A read the backend refused by name
-    const error = new BackendApiError({ statusCode: 404, errorCode: 'ProblemNotFound' })
+    const error = new ApiRequestError({ statusCode: 404, errorCode: 'ProblemNotFound' })
 
     // The state that failure reduces to
     const state = deriveQueryUiState(flags({ status: 'error', fetchStatus: 'idle', error }))
@@ -82,7 +82,7 @@ describe('deriveQueryUiState', () => {
 
   it('marks a failure another attempt could fix as impermanent', () => {
     // A dropped connection, which carries neither a status nor a name
-    const error = new BackendApiError({ message: 'Failed to fetch' })
+    const error = new ApiRequestError({ message: 'Failed to fetch' })
 
     // The state that failure reduces to
     const state = deriveQueryUiState(flags({ status: 'error', fetchStatus: 'idle', error }))
