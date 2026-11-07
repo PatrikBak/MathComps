@@ -476,7 +476,7 @@ public class BuildCommand(
         // Extract preamble lines that need to be preserved.
         var inputLine = texContent.ExtractMatch(@"\\input\s+\S+");
         var authorLine = texContent.ExtractMatch(@"\\Author\{[^}]+\}");
-        var mathcompsLinkLine = texContent.ExtractMatch(@"\\MathcompsLink\{[^}]+\}");
+        var mathCompsLinkLine = texContent.ExtractMatch(@"\\MathCompsLink\{[^}]+\}");
 
         // Every exercise, example and problem across the sections, stripped of its solution, hints and answer.
         var allStatements = document.Sections
@@ -516,10 +516,10 @@ public class BuildCommand(
             builder.AppendLine();
         }
 
-        // MathcompsLink
-        if (mathcompsLinkLine is not null)
+        // MathCompsLink
+        if (mathCompsLinkLine is not null)
         {
-            builder.AppendLine(mathcompsLinkLine);
+            builder.AppendLine(mathCompsLinkLine);
             builder.AppendLine();
         }
 
