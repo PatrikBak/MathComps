@@ -4,11 +4,6 @@
       "commandName": "Project",
       "workingDirectory": ".",
       "commandLineArgs": "calculate-similarities --count 3600"
-    },
-    "Calculate Embeddings": {
-      "commandName": "Project",
-      "workingDirectory": ".",
-      "commandLineArgs": "calculate-similarities --count 10 --embeddings-only"
     }
   }
 }
