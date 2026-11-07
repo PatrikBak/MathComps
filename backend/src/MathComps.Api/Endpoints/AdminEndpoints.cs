@@ -1,4 +1,5 @@
 using MathComps.Api.Constants;
+using MathComps.Api.Extensions;
 
 namespace MathComps.Api.Endpoints;
 
@@ -23,8 +24,8 @@ public static class AdminEndpoints
         // Echo the caller's identity — reaching a 200 here proves the admin policy passed
         app.MapGet("/admin/whoami", (HttpContext context) =>
         {
-            // Read Clerk's external id from the subject claim
-            var externalId = context.User.FindFirst(ClerkClaims.Subject)?.Value ?? string.Empty;
+            // The caller's Clerk id
+            var externalId = context.User.ClerkId ?? string.Empty;
 
             // Read the flat Role claim
             var role = context.User.FindFirst(ClerkClaims.RoleClaimType)?.Value;

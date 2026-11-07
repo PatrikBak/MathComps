@@ -234,13 +234,17 @@ public static class ServiceCollectionExtensions
         // The private bucket the files uploaded into a comment sit in
         services.AddStorage();
 
-        // The settings bounding the links to the files uploaded into a comment
+        // The settings bounding the files uploaded into a comment and the links to them
         services.AddOptions<EditorUploadSettings>()
             .BindConfiguration(EditorUploadSettings.SectionName)
             .ValidateDataAnnotations();
 
-        // The files uploaded into a comment, which a comment's read hands out links to
-        services.TryAddSingleton<IEditorUploadService, EditorUploadService>();
+        // The files uploaded into a comment
+        services.TryAddSingleton<EditorUploadService>();
+
+        // Exposed as the uploads people make and the links a comment's read hands out, one instance behind each
+        services.TryAddSingleton<IEditorUploadService>(provider => provider.GetRequiredService<EditorUploadService>());
+        services.TryAddSingleton<IEditorUploadLinks>(provider => provider.GetRequiredService<EditorUploadService>());
 
         // The list service resolves problem slugs, so make sure the lookup is available
         services.TryAddScoped<IProblemLookupService, ProblemLookupService>();

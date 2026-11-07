@@ -1,4 +1,3 @@
-using MathComps.Api.Constants;
 using Sentry.Extensibility;
 
 namespace MathComps.Api.Extensions;
@@ -18,7 +17,7 @@ public sealed class ClerkIdSentryEventProcessor(IHttpContextAccessor httpContext
     public SentryEvent Process(SentryEvent @event)
     {
         // The caller's Clerk id, absent outside a request and from one without a valid token
-        var clerkId = httpContextAccessor.HttpContext?.User.FindFirst(ClerkClaims.Subject)?.Value;
+        var clerkId = httpContextAccessor.HttpContext?.User.ClerkId;
 
         // Name the caller by their Clerk id alone
         if (clerkId is not null)

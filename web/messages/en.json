@@ -191,6 +191,8 @@
     "UNAUTHORIZED": "You must be logged in for this action",
     "UnreadablePhoto": "This photo can't be read. Send it as a JPEG, PNG or WebP picture.",
     "UPLOAD_URL_FAILED": "Failed to get upload URL",
+    "UploadTooLarge": "This file is too large to upload.",
+    "UploadTypeNotAllowed": "This type of file can't be uploaded here.",
     "UsernameAlreadySet": "Your username is already set and cannot be changed.",
     "UsernameRejected": "That username cannot be used.",
     "UsernameTaken": "Somebody already has that username. Try another one.",

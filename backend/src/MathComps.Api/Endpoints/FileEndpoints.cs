@@ -1,11 +1,13 @@
 using MathComps.Api.Constants;
+using MathComps.Api.Extensions;
 using MathComps.Domain.Contracts.EditorUploads;
 using MathComps.Infrastructure.Services.EditorUploads;
 
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Maps the endpoints for the files people upload into the text editor.
+/// Maps the endpoints for the files people upload into the text editor. An upload's request body is the file itself,
+/// its <c>Content-Type</c> the file's media type.
 /// </summary>
 public static class FileEndpoints
 {
@@ -20,6 +22,26 @@ public static class FileEndpoints
     /// <param name="app">The route builder to register the endpoints on.</param>
     public static void MapFileEndpoints(this IEndpointRouteBuilder app)
     {
+        // Upload one file into the caller's own folder
+        app.MapPost(FilesPath, async (HttpContext context, IEditorUploadService editorUploads) =>
+        {
+            // The file's media type, without parameters such as a charset
+            var mediaType = context.Request.GetTypedHeaders().ContentType?.MediaType.Value
+                ?? throw new BadHttpRequestException("An upload must name its file's media type.");
+
+            // The caller's Clerk id, which names their folder of uploads
+            var uploaderId = context.User.ClerkId ?? throw new UserNotResolvedException();
+
+            // Store the file the body carries
+            var upload = await editorUploads.UploadAsync(
+                uploaderId, mediaType, context.Request.Body, context.RequestAborted);
+
+            // Return the key the text names the file by
+            return Results.Ok(upload);
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
         // Links to files the caller uploaded themselves
         app.MapPost($"{FilesPath}/links", (
             GetFileLinksRequest request,
@@ -30,8 +52,11 @@ public static class FileEndpoints
             if (request.Keys is not { } keys)
                 throw new BadHttpRequestException("A request for links must name the files.");
 
+            // The caller's Clerk id, which names their folder of uploads
+            var uploaderId = context.User.ClerkId ?? throw new UserNotResolvedException();
+
             // The links to the caller's own files among them
-            var links = editorUploads.LinksToOwnUploads(UploaderIdOf(context), keys);
+            var links = editorUploads.LinksToOwnUploads(uploaderId, keys);
 
             // Return the links by upload key
             return Results.Ok(links);
@@ -39,14 +64,4 @@ public static class FileEndpoints
         .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
     }
-
-    /// <summary>
-    /// The signed-in caller's Clerk user id, which names their folder of uploads.
-    /// </summary>
-    /// <param name="context">The HTTP context carrying the caller's claims.</param>
-    /// <returns>The caller's Clerk user id.</returns>
-    /// <exception cref="UserNotResolvedException">Thrown when the request carries no subject claim.</exception>
-    private static string UploaderIdOf(HttpContext context) =>
-        // The caller's subject claim
-        context.User.FindFirst(ClerkClaims.Subject)?.Value ?? throw new UserNotResolvedException();
 }

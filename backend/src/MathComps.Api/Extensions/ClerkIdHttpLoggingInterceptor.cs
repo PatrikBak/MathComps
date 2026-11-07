@@ -1,4 +1,3 @@
-using MathComps.Api.Constants;
 using Microsoft.AspNetCore.HttpLogging;
 
 namespace MathComps.Api.Extensions;
@@ -21,7 +20,7 @@ public sealed class ClerkIdHttpLoggingInterceptor : IHttpLoggingInterceptor
     public ValueTask OnResponseAsync(HttpLoggingInterceptorContext logContext)
     {
         // The caller's Clerk id, which a request without a valid token doesn't carry
-        var clerkId = logContext.HttpContext.User.FindFirst(ClerkClaims.Subject)?.Value;
+        var clerkId = logContext.HttpContext.User.ClerkId;
 
         // Name the caller on the line. An anonymous caller adds nothing, so a route logging no fields writes no line.
         if (clerkId is not null)

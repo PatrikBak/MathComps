@@ -15,11 +15,11 @@ namespace MathComps.Infrastructure.Services.Comments;
 /// </summary>
 /// <param name="dbContextFactory">The factory minting a context per operation.</param>
 /// <param name="kinds">Every kind of thread, exactly one per <see cref="CommentTargetType"/>.</param>
-/// <param name="editorUploads">The files uploaded into comments, which a comment read links to.</param>
+/// <param name="editorUploadLinks">The links to the files uploaded into comments.</param>
 public class CommentService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IEnumerable<ICommentThreadKind> kinds,
-    IEditorUploadService editorUploads) : ICommentService
+    IEditorUploadLinks editorUploadLinks) : ICommentService
 {
     /// <summary>
     /// Every kind of thread, in the order they were registered, which is the order a stored comment's thread is
@@ -181,7 +181,7 @@ public class CommentService(
             Id: comment.Id,
             Author: author,
             Content: comment.Content,
-            FileLinks: editorUploads.LinksIn(comment.Content),
+            FileLinks: editorUploadLinks.LinksIn(comment.Content),
             CreatedAt: comment.CreatedAt,
             EditedAt: null,
             IsDeleted: false,
@@ -554,7 +554,7 @@ public class CommentService(
                 Id: row.Id,
                 Author: author,
                 Content: content,
-                FileLinks: editorUploads.LinksIn(content),
+                FileLinks: editorUploadLinks.LinksIn(content),
                 CreatedAt: row.PostedAt,
                 EditedAt: row.PreviousVersionId.HasValue ? row.CreatedAt : null,
                 IsDeleted: isDeleted,
