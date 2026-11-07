@@ -1,4 +1,4 @@
-using MathComps.Api.Constants;
+using MathComps.Api.Extensions;
 using MathComps.Infrastructure.Services;
 using MathComps.Infrastructure.Services.Users;
 
@@ -32,8 +32,8 @@ internal static class UserManagerExtensions
     /// <returns>The internal user id, or null when the request is anonymous.</returns>
     public static async Task<Guid?> GetUserIdAsync(this IUserManager userManager, HttpContext context)
     {
-        // The subject claim identifying the caller, if the request carries one
-        var userExternalId = context.User.FindFirst(ClerkClaims.Subject)?.Value;
+        // The caller's Clerk id, if the request carries one
+        var userExternalId = context.User.ClerkId;
 
         // Resolve it to an internal id, treating a missing claim as no user
         return !string.IsNullOrEmpty(userExternalId)

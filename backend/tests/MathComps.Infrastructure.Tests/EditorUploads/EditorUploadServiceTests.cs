@@ -1,14 +1,18 @@
+using System.Text;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.EditorUploads;
 using MathComps.Infrastructure.Storage;
+using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Moq;
+using SkiaSharp;
 using MsOptions = Microsoft.Extensions.Options.Options;
 
 namespace MathComps.Infrastructure.Tests.EditorUploads;
 
 /// <summary>
-/// Tests for <see cref="EditorUploadService"/>: which files a link is handed out to. The links are stand-ins naming
-/// the object key they were signed for, so each test reads exactly which file a link reaches.
+/// Tests for <see cref="EditorUploadService"/>: which files an upload takes and where it stores them, and which files a
+/// link is handed out to. Files go into an in-memory store, and the links are stand-ins naming the object key they
+/// were signed for, so each test reads exactly which file a link reaches.
 /// </summary>
 public sealed class EditorUploadServiceTests
 {
@@ -18,10 +22,157 @@ public sealed class EditorUploadServiceTests
     private const string UploaderId = "user_abc";
 
     /// <summary>
-    /// The service over links that name the object key they reach, giving one request links to two files at most.
+    /// A uuid, as an upload's name writes it.
     /// </summary>
-    private readonly EditorUploadService _service = new(
-        StandInLinks(), MsOptions.Create(new EditorUploadSettings { MaxOwnLinksPerRequest = 2 }));
+    private const string UuidPattern = "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}";
+
+    /// <summary>
+    /// The store the uploads go into.
+    /// </summary>
+    private readonly FakePrivateObjectStore _store = new();
+
+    /// <summary>
+    /// The service over the store and over links that name the object key they reach, taking files up to a megabyte
+    /// and giving one request links to two files at most.
+    /// </summary>
+    private readonly EditorUploadService _service;
+
+    /// <summary>
+    /// Builds the service over the test's own store.
+    /// </summary>
+    public EditorUploadServiceTests()
+    {
+        // Files up to a megabyte of either kind
+        _service = NewService(maxImageBytes: 1_000_000, maxAttachmentBytes: 1_000_000);
+    }
+
+    /// <summary>
+    /// A picture goes into the uploader's own folder of pictures, under a fresh name, stored and named as the format
+    /// its bytes are, so a link to it is served as what it really is. That holds for a photo whose name claims another
+    /// format, which a picture saved under the wrong extension sends.
+    /// </summary>
+    /// <param name="format">The format the picture's bytes are.</param>
+    /// <param name="mediaType">The media type the upload names.</param>
+    /// <param name="storedType">The media type the picture is stored with.</param>
+    /// <param name="extension">The extension its upload key ends with.</param>
+    [Theory]
+    [InlineData("png", "image/png", "image/png", "png")]
+    [InlineData("jpeg", "image/jpeg", "image/jpeg", "jpg")]
+    [InlineData("webp", "image/webp", "image/webp", "webp")]
+    [InlineData("gif", "image/gif", "image/gif", "gif")]
+    [InlineData("png", "image/jpeg", "image/png", "png")]
+    public async Task A_picture_is_stored_as_the_format_its_bytes_are(
+        string format, string mediaType, string storedType, string extension)
+    {
+        // A picture of the format
+        var picture = BytesOf(format);
+
+        // Uploaded under the media type
+        var upload = await _service.UploadAsync(UploaderId, mediaType, new MemoryStream(picture));
+
+        // Named in the uploader's folder of pictures, by when it went up and a uuid, with the extension of its format
+        Assert.Matches($@"^abc/images/\d{{13}}-{UuidPattern}\.{extension}$", upload.Key);
+
+        // The file stored under the uploader's whole Clerk user id
+        var (stored, contentType) = _store[$"user-uploads/user_{upload.Key}"];
+
+        // Holding the picture
+        Assert.Equal(picture, stored);
+
+        // As the format it is
+        Assert.Equal(storedType, contentType);
+    }
+
+    /// <summary>
+    /// An attachment goes into the uploader's own folder of attachments, under a fresh name with its format's
+    /// extension, stored with the media type its upload names. A text's media type names UTF-8 as its charset, so its
+    /// diacritics read right when its link is opened.
+    /// </summary>
+    /// <param name="mediaType">The media type the upload names.</param>
+    /// <param name="content">The attachment's text.</param>
+    /// <param name="storedType">The media type the attachment is stored with.</param>
+    /// <param name="extension">The extension its upload key ends with.</param>
+    [Theory]
+    [InlineData("application/pdf", "%PDF-1.7\n%âãÏÓ", "application/pdf", "pdf")]
+    [InlineData("text/plain", "Riešenie: x² = 4", "text/plain; charset=utf-8", "txt")]
+    [InlineData("text/markdown", "# Úloha 1", "text/markdown; charset=utf-8", "md")]
+    public async Task An_attachment_is_stored_as_its_upload_names_it(
+        string mediaType, string content, string storedType, string extension)
+    {
+        // The attachment's bytes
+        var attachment = Encoding.UTF8.GetBytes(content);
+
+        // Uploaded under the media type
+        var upload = await _service.UploadAsync(UploaderId, mediaType, new MemoryStream(attachment));
+
+        // Named in the uploader's folder of attachments, by when it went up and a uuid, with its format's extension
+        Assert.Matches($@"^abc/attachments/\d{{13}}-{UuidPattern}\.{extension}$", upload.Key);
+
+        // The file stored under the uploader's whole Clerk user id
+        var (stored, contentType) = _store[$"user-uploads/user_{upload.Key}"];
+
+        // Holding the attachment
+        Assert.Equal(attachment, stored);
+
+        // With its media type
+        Assert.Equal(storedType, contentType);
+    }
+
+    /// <summary>
+    /// An upload whose bytes aren't what its media type says is refused and stores nothing, and so is a picture of a
+    /// format no upload may have, and one naming a media type no file may have. A file named as a picture whatever it
+    /// holds would otherwise be served as one.
+    /// </summary>
+    /// <param name="mediaType">The media type the upload names.</param>
+    /// <param name="content">What the upload's bytes are.</param>
+    [Theory]
+    [InlineData("image/png", "pdf")]
+    [InlineData("image/png", "bmp")]
+    [InlineData("image/png", "empty")]
+    [InlineData("application/pdf", "png")]
+    [InlineData("text/plain", "invalid-utf8")]
+    [InlineData("image/svg+xml", "svg")]
+    public async Task An_upload_whose_bytes_are_not_its_media_type_is_refused(string mediaType, string content)
+    {
+        // Refused
+        await Assert.ThrowsAsync<UploadTypeNotAllowedException>(() =>
+            _service.UploadAsync(UploaderId, mediaType, new MemoryStream(BytesOf(content))));
+
+        // With nothing stored
+        Assert.Empty(_store.Keys);
+    }
+
+    /// <summary>
+    /// An upload takes a file exactly as big as its kind may be, and refuses one a byte bigger, storing nothing. A
+    /// picture and an attachment each go by their own size.
+    /// </summary>
+    /// <param name="mediaType">The media type the upload names.</param>
+    /// <param name="content">What the upload's bytes are.</param>
+    [Theory]
+    [InlineData("image/png", "png")]
+    [InlineData("text/plain", "text")]
+    public async Task An_upload_takes_a_file_up_to_its_kinds_size(string mediaType, string content)
+    {
+        // A picture and a text of different sizes, so a kind held to the other kind's size fails
+        var picture = BytesOf("png");
+        var text = BytesOf("text");
+
+        // A service taking each of them at exactly its own size
+        var service = NewService(maxImageBytes: picture.Length, maxAttachmentBytes: text.Length);
+
+        // The file the upload carries, as big as its kind may be
+        var file = BytesOf(content);
+
+        // Taken at exactly that size
+        var taken = await service.UploadAsync(UploaderId, mediaType, new MemoryStream(file));
+
+        // Refused a byte over it
+        await Assert.ThrowsAsync<UploadTooLargeException>(() =>
+            service.UploadAsync(UploaderId, mediaType, new MemoryStream([.. file, 0])));
+
+        // With nothing stored but the file taken
+        Assert.Equal([$"user-uploads/user_{taken.Key}"], _store.Keys);
+    }
 
     /// <summary>
     /// A text links each uploaded file it names once, a picture and an attachment alike, and nothing else it names: a
@@ -95,6 +246,48 @@ public sealed class EditorUploadServiceTests
         // To the first two alone
         Assert.Equal(["abc/images/1-a.png", "abc/images/2-b.png"], links.Keys.Order());
     }
+
+    /// <summary>
+    /// The service over the test's own store, taking files up to the given sizes and giving one request links to two
+    /// files at most.
+    /// </summary>
+    /// <param name="maxImageBytes">The biggest picture it takes, in bytes.</param>
+    /// <param name="maxAttachmentBytes">The biggest attachment it takes, in bytes.</param>
+    /// <returns>The service.</returns>
+    private EditorUploadService NewService(long maxImageBytes, long maxAttachmentBytes) =>
+        // Over the store and the stand-in links
+        new(_store, StandInLinks(), MsOptions.Create(new EditorUploadSettings
+        {
+            MaxOwnLinksPerRequest = 2,
+            MaxImageBytes = maxImageBytes,
+            MaxAttachmentBytes = maxAttachmentBytes,
+        }));
+
+    /// <summary>
+    /// The bytes of a file an upload carries, by what they are.
+    /// </summary>
+    /// <param name="content">What the bytes are.</param>
+    /// <returns>The bytes.</returns>
+    private static byte[] BytesOf(string content) => content switch
+    {
+        "png" => TestPictures.Plain(1, 1, SKColors.Gray),
+        "jpeg" => TestPictures.Plain(1, 1, SKColors.Gray, SKEncodedImageFormat.Jpeg),
+        "webp" => TestPictures.Plain(1, 1, SKColors.Gray, SKEncodedImageFormat.Webp),
+        "gif" => TestPictures.OnePixelGif,
+        "bmp" =>
+        [
+            0x42, 0x4D, 0x3A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00,
+            0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00,
+            0x00, 0x00, 0x13, 0x0B, 0x00, 0x00, 0x13, 0x0B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0xFF, 0xFF, 0xFF, 0x00,
+        ],
+        "pdf" => "%PDF-1.7\n"u8.ToArray(),
+        "svg" => """<svg xmlns="http://www.w3.org/2000/svg"/>"""u8.ToArray(),
+        "text" => Encoding.UTF8.GetBytes(new string('x', 1000)),
+        "invalid-utf8" => [0xC3, 0x28],
+        "empty" => [],
+        _ => throw new ArgumentOutOfRangeException(nameof(content), content, "Unknown content"),
+    };
 
     /// <summary>
     /// Stand-in links to the private bucket, each naming what it does and the object key it reaches.

@@ -18,4 +18,16 @@ public class EditorUploadSettings
     /// </summary>
     [Range(1, int.MaxValue)]
     public required int MaxOwnLinksPerRequest { get; set; }
+
+    /// <summary>
+    /// The biggest picture one upload may carry, in bytes.
+    /// </summary>
+    [Range(1, long.MaxValue)]
+    public required long MaxImageBytes { get; set; }
+
+    /// <summary>
+    /// The biggest attachment one upload may carry, in bytes.
+    /// </summary>
+    [Range(1, long.MaxValue)]
+    public required long MaxAttachmentBytes { get; set; }
 }

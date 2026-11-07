@@ -191,6 +191,8 @@
     "UNAUTHORIZED": "K této akci se musíš přihlásit",
     "UnreadablePhoto": "Tuhle fotku nejde přečíst. Pošli ji jako obrázek JPEG, PNG nebo WebP.",
     "UPLOAD_URL_FAILED": "Nepodařilo se získat URL pro nahrávání",
+    "UploadTooLarge": "Tento soubor je na nahrání příliš velký.",
+    "UploadTypeNotAllowed": "Tento typ souboru sem nelze nahrát.",
     "UsernameAlreadySet": "Přezdívku už máš nastavenou a nedá se změnit.",
     "UsernameRejected": "Tuto přezdívku nelze použít.",
     "UsernameTaken": "Tuto přezdívku už někdo má. Zkus jinou.",

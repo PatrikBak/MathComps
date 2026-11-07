@@ -63,6 +63,8 @@ export const BACKEND_ERROR_CODES = [
   'SelectionTargetNotFound',
   'Unauthenticated',
   'UnreadablePhoto',
+  'UploadTooLarge',
+  'UploadTypeNotAllowed',
   'UsernameAlreadySet',
   'UsernameRejected',
   'UsernameTaken',
