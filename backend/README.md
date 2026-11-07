@@ -444,7 +444,7 @@ or adds entries but never drops the base's extra ones: restate an array in full,
 `.dockerignore` keeps them out of the build context, so the mount is the only copy. Prod secrets never reach
 an image layer, and a mount that goes missing leaves the API on the base `appsettings.json`:
 
-- `src/MathComps.Api/appsettings.{Env}.json` → `appsettings.json` (`Cors`, `DefenseLimits`, `Examiner:UseFake`, …).
+- `src/MathComps.Api/appsettings.{Env}.json` → `appsettings.json` (`Cors`, `DefenseLimits`, `RateLimits`, `Examiner:UseFake`, …).
   `Cors:Origins` is the one a server cannot go without: the base file allows `http://localhost:3000` alone, so
   until the override names the site's real origins the browser is refused on every API call while the API itself
   looks healthy. An entry may carry `*` as a wildcard.
@@ -452,6 +452,8 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
   and a message cap on one conversation. See [What the defense ceiling is for](#what-the-defense-ceiling-is-for)
   for what it does and does not reach. The cap and the two length caps ride to the browser on every session read,
   so once the API has restarted on the new value, the UI follows on the next page load with no frontend deploy.
+  `RateLimits` holds how many requests one caller, an IPv4 address or an IPv6 /64, may make in a window. Search
+  has a count of its own, and the other limited routes share the general one.
 - `src/MathComps.Infrastructure/appsettings.examiner.{Env}.json` → `appsettings.examiner.json` (per-step models).
 - `src/MathComps.Infrastructure/appsettings.llm.{Env}.json` → `appsettings.llm.json` (LLM endpoint, retries)
 - `src/MathComps.Infrastructure/appsettings.photo-reader.{Env}.json` → `appsettings.photo-reader.json` (the photo reader's call and page settings)

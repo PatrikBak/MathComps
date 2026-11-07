@@ -10,8 +10,7 @@ namespace MathComps.Api.Endpoints;
 /// for one handout environment, for one archive problem, or across every problem, starting one, continuing it
 /// with the next turn, rewinding one to an earlier point, recording or taking back what the student thought of
 /// it, and deleting one. Every session route needs an account and is scoped to the caller's own sessions; the
-/// lines are read by a visitor who has yet to sign in. The turn routes are tightly rate-limited because each
-/// turn is several LLM calls.
+/// lines are read by a visitor who has yet to sign in.
 /// </summary>
 public static class DefenseEndpoints
 {
@@ -127,7 +126,7 @@ public static class DefenseEndpoints
             return Results.Created($"{SessionsPath}/{session.Id}", session);
         })
         .RequireAuthorization()
-        .RequireRateLimiting(RateLimiterPolicies.DefenseTurnRateLimit);
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Continue a session with the student's next message
         app.MapPost($"{SessionsPath}/{{id:guid}}/turns", async (
@@ -147,7 +146,7 @@ public static class DefenseEndpoints
             return Results.Ok(session);
         })
         .RequireAuthorization()
-        .RequireRateLimiting(RateLimiterPolicies.DefenseTurnRateLimit);
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Rewind a session to an earlier point, dropping every turn after it
         app.MapPost($"{SessionsPath}/{{id:guid}}/rewind", async (

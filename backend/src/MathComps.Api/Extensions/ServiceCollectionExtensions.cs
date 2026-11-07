@@ -4,7 +4,10 @@ using System.Threading.RateLimiting;
 using MathComps.Api.Authorization;
 using MathComps.Api.Constants;
 using MathComps.Api.Errors;
+using MathComps.Api.Options;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
 using System.Text.RegularExpressions;
 
 namespace MathComps.Api.Extensions;
@@ -15,13 +18,20 @@ namespace MathComps.Api.Extensions;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds rate limiting services to prevent DoS attacks and abuse.
+    /// Adds rate limiting services to prevent DoS attacks and abuse, sized by the limits in configuration.
     /// </summary>
     /// <param name="services">The service collection to configure.</param>
+    /// <param name="configuration">The application configuration carrying the <c>RateLimits</c> section.</param>
     /// <returns>The configured service collection for chaining.</returns>
-    public static IServiceCollection AddRateLimiting(this IServiceCollection services)
+    public static IServiceCollection AddRateLimiting(this IServiceCollection services, IConfiguration configuration)
     {
-        // Configure policies
+        // The limits, checked at startup
+        services.AddOptions<RateLimitSettings>()
+            .Bind(configuration.GetSection(RateLimitSettings.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // How a refused request is answered
         services.AddRateLimiter(options =>
         {
             // Reject over-limit requests with 429 (Too Many Requests)
@@ -42,17 +52,25 @@ public static class ServiceCollectionExtensions
                     nameof(ApiErrorCode.RateLimited),
                     "You have made too many requests. Please try again shortly.");
             };
-
-            // General API rate limiting, one bucket per caller. Roomy enough for an admin stepping through
-            // conversations about once a second, a few requests a step.
-            options.AddPolicy(RateLimiterPolicies.ApiRateLimit, PartitionByCaller(permitLimit: 300, queueLimit: 10));
-
-            // More restrictive limit for search endpoints (heavier operations), one bucket per caller
-            options.AddPolicy(RateLimiterPolicies.SearchRateLimit, PartitionByCaller(permitLimit: 20, queueLimit: 5));
-
-            // Tight limit for defense turns — each is several LLM calls, so bound bursts hard
-            options.AddPolicy(RateLimiterPolicies.DefenseTurnRateLimit, PartitionByCaller(permitLimit: 10, queueLimit: 2));
         });
+
+        // The policies, sized by the limits
+        services.AddOptions<RateLimiterOptions>()
+            .Configure<IOptions<RateLimitSettings>>((options, rateLimitSettings) =>
+            {
+                // The limits as bound
+                var settings = rateLimitSettings.Value;
+
+                // General API rate limiting, one bucket per caller
+                options.AddPolicy(
+                    RateLimiterPolicies.ApiRateLimit,
+                    PartitionByCaller(settings.ApiPermitLimit, settings.ApiQueueLimit, settings.Window));
+
+                // A limit of its own for search endpoints (heavier operations), one bucket per caller
+                options.AddPolicy(
+                    RateLimiterPolicies.SearchRateLimit,
+                    PartitionByCaller(settings.SearchPermitLimit, settings.SearchQueueLimit, settings.Window));
+            });
 
         // Return the services for chaining
         return services;
@@ -63,8 +81,10 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="permitLimit">Requests allowed per caller within the window.</param>
     /// <param name="queueLimit">Requests held per caller once the limit is hit before rejection.</param>
+    /// <param name="window"><inheritdoc cref="RateLimitSettings.Window" path="/summary"/></param>
     /// <returns>A partitioner producing one fixed-window limiter per client IP.</returns>
-    private static Func<HttpContext, RateLimitPartition<string>> PartitionByCaller(int permitLimit, int queueLimit)
+    private static Func<HttpContext, RateLimitPartition<string>> PartitionByCaller(
+        int permitLimit, int queueLimit, TimeSpan window)
     {
         // Partition each request by its client so the limit applies per visitor
         return httpContext => RateLimitPartition.GetFixedWindowLimiter(
@@ -73,7 +93,7 @@ public static class ServiceCollectionExtensions
             factory: _ => new FixedWindowRateLimiterOptions
             {
                 PermitLimit = permitLimit,
-                Window = TimeSpan.FromMinutes(1),
+                Window = window,
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                 QueueLimit = queueLimit,
             });
