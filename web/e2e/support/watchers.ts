@@ -14,6 +14,8 @@ declare global {
     reportAnnouncement: (text: string) => void
     /** Whether this document's status regions are already being watched. */
     isWatchingAnnouncements?: boolean
+    /** How many elements matching the watched selector have left this document. */
+    removedCount?: number
   }
 }
 
@@ -165,6 +167,45 @@ export async function countDialogs(page: Page): Promise<() => number> {
 
   // Hand back the count on each read
   return () => dialogs
+}
+
+/**
+ * Counts the elements matching a selector that leave the open document from now on, nested ones included.
+ *
+ * An element taken out and put straight back looks untouched to a check made afterwards, so a page that draws
+ * something again from scratch passes it as readily as one that kept it. Counted as they leave, the two read apart.
+ *
+ * @param page - The page whose open document is watched.
+ * @param selector - Which elements count.
+ *
+ * @returns How many have left so far.
+ */
+export async function countRemovals(page: Page, selector: string): Promise<() => Promise<number>> {
+  // The open document, counting each matching element as it leaves
+  await page.evaluate((watched) => {
+    // Nothing has left yet
+    window.removedCount = 0
+
+    // A function which counts the matching elements in a node that left, the node itself included
+    const countLeaving = (node: Node) => {
+      // Only an element can match
+      if (!(node instanceof Element)) return
+
+      // The node itself where it matches, and each match inside it
+      const leaving = (node.matches(watched) ? 1 : 0) + node.querySelectorAll(watched).length
+
+      // Added to the count
+      window.removedCount = (window.removedCount ?? 0) + leaving
+    }
+
+    // Every removal anywhere under the body
+    new MutationObserver((mutations) =>
+      mutations.forEach((mutation) => mutation.removedNodes.forEach(countLeaving))
+    ).observe(document.body, { childList: true, subtree: true })
+  }, selector)
+
+  // A read of the count on each call
+  return () => page.evaluate(() => window.removedCount ?? 0)
 }
 
 /**

@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl'
-import { memo, type PropsWithChildren, type ReactNode } from 'react'
-import Markdown, { type Components, type ExtraProps } from 'react-markdown'
+import { memo, type PropsWithChildren, type ReactNode, useMemo } from 'react'
+import Markdown, { type Components, type ExtraProps, type UrlTransform } from 'react-markdown'
 
 import { AppLink } from '@/components/shared/components/AppLink'
 import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
@@ -132,13 +132,49 @@ function resolveListClassName(className: string | undefined, defaultMarker: stri
 }
 
 /**
+ * A function which keeps a URL that is safe to link or load and drops any other.
+ */
+const urlTransform: UrlTransform = (url) => {
+  // Normalize URL to lowercase for case-insensitive comparison
+  const lowerUrl = url.toLowerCase()
+
+  // Explicitly block dangerous schemes
+  if (
+    lowerUrl.startsWith('javascript:') ||
+    lowerUrl.startsWith('data:') ||
+    lowerUrl.startsWith('vbscript:')
+  ) {
+    return undefined
+  }
+
+  // Allow safe schemes and relative paths
+  if (
+    url.startsWith('media:') ||
+    url.startsWith('http://') ||
+    url.startsWith('https://') ||
+    url.startsWith('/') ||
+    url.startsWith('#') ||
+    url.startsWith('mailto:')
+  ) {
+    return url
+  }
+
+  // Allow domain-like URLs without protocol (e.g., example.com)
+  if (/^[a-zA-Z0-9]([a-zA-Z0-9-]*\.)+[a-zA-Z]{2,}/.test(url)) {
+    return url
+  }
+
+  // Block everything else
+  return undefined
+}
+
+/**
  * Renders markdown content with LaTeX math support and spoiler support, and where asked a `#N` as whatever the caller
  * draws for N.
  *
- * Wrapped in {@link memo} so a parent re-render with unchanged props is a no-op. Without this guard, every parent
- * re-render rebuilds the inline `components` / `urlTransform` props, which gives `react-markdown`'s element types
- * fresh referential identity and causes React to unmount the entire output subtree — including the `<img>` elements,
- * which then trigger a fresh network request.
+ * Wrapped in {@link memo} so a parent re-render with unchanged props skips parsing the markdown again. The components
+ * each tag is drawn with stay the same functions while the content changes, since a new function is a new element
+ * type to React, which remounts the whole output under it, images included.
  */
 export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
   content,
@@ -151,6 +187,211 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
 
   // Whether this content's images sit on a white card
   const lightImageBackground = imageContext !== undefined && LIGHT_IMAGE_BACKGROUND[imageContext]
+
+  // How each tag is drawn
+  const components = useMemo(
+    () =>
+      ({
+        p: ({ children, node }) => {
+          // Check if paragraph contains block-level elements (like spoiler) to avoid invalid HTML nesting (div
+          // inside p)
+          const hasBlockElement = node?.children?.some((child) => {
+            // Non-element children never trigger a wrapper change
+            if (child.type !== 'element') return false
+
+            // Spoilers and explicit divs are always block-level
+            if (child.tagName === 'spoiler' || child.tagName === 'div') return true
+
+            // Images count as block-level UNLESS they carry ?inline=true
+            if (child.tagName === 'img') {
+              // The image's address, which carries the inline flag
+              const src = child.properties?.src
+
+              // One with no address stays block-level
+              if (typeof src !== 'string') return true
+
+              // Block-level unless it asks to sit inline
+              return !parseImageUrl(src).params.inline
+            }
+
+            // Everything else stays inside <p>
+            return false
+          })
+
+          // If paragraph contains block-level elements, wrap in div
+          if (hasBlockElement) {
+            return <div className="mb-2 last:mb-0">{children}</div>
+          }
+
+          // Otherwise, render as paragraph
+          return <p className="mb-2 last:mb-0">{children}</p>
+        },
+        h2: ({ children }) => (
+          <h2 className="text-[1.25em] font-semibold text-foreground mt-5 mb-2 first:mt-0">
+            {children}
+          </h2>
+        ),
+        h3: ({ children }) => (
+          <h3 className="text-[1.125em] font-semibold text-foreground mt-4 mb-2 first:mt-0">
+            {children}
+          </h3>
+        ),
+        strong: ({ children }) => (
+          <strong className="font-semibold text-foreground">{children}</strong>
+        ),
+        em: ({ children }) => <em className="italic">{children}</em>,
+        // A fenced block arrives wrapped in its own `pre`, which carries the panel and resets the inline pill
+        // styling its `code` child would otherwise wear.
+        pre: ({ children }) => (
+          <pre className="bg-foreground/5 my-2 overflow-x-auto rounded-md p-3 text-sm [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-sm [&>code]:text-foreground">
+            {children}
+          </pre>
+        ),
+        code: ({ children }) => (
+          <code className="bg-foreground/5 px-1 py-0.5 rounded text-xs text-brand-light font-mono">
+            {/* The newline that closed the fence would render as a blank last line; inline
+                code has none to lose. */}
+            {typeof children === 'string' ? children.replace(/\n$/, '') : children}
+          </code>
+        ),
+        blockquote: ({ children }) => (
+          <blockquote className="border-l-2 border-brand/50 pl-3 my-2 text-muted italic">
+            {children}
+          </blockquote>
+        ),
+        ul: ({ children, className }) => (
+          <ul className={resolveListClassName(className, 'list-disc')}>{children}</ul>
+        ),
+        ol: ({ children, className }) => (
+          <ol className={resolveListClassName(className, 'list-decimal')}>{children}</ol>
+        ),
+        del: ({ children }) => <del className="line-through text-muted">{children}</del>,
+        a: ({ href, children }) => {
+          // Whether the link is to an attached file
+          const isAttachment = String(children).startsWith('📎')
+
+          // Resolve media: URLs to the files' links
+          const resolvedHref = href ? resolveUserUploadMediaUrl(href, fileLinks) : '#'
+
+          // An uploaded file the content came with no link to stays unlinked
+          if (resolvedHref === undefined) {
+            return isAttachment ? (
+              <AttachmentBadge href={null}>{children}</AttachmentBadge>
+            ) : (
+              <span className="text-muted">{children}</span>
+            )
+          }
+
+          // The address the link goes to
+          let normalizedHref = resolvedHref
+
+          // Normalize URLs: add protocol if missing
+          // Matches: www.example.com, example.com, sub.example.co.uk, etc.
+          // But not: /path, #anchor, javascript:, mailto:, media:, already has ://
+          if (
+            !normalizedHref.includes('://') &&
+            !normalizedHref.startsWith('/') &&
+            !normalizedHref.startsWith('#') &&
+            !normalizedHref.startsWith('mailto:') &&
+            !normalizedHref.startsWith('javascript:') &&
+            /^[a-zA-Z0-9]([a-zA-Z0-9-]*\.)+[a-zA-Z]{2,}(\/|$|\?|#)/.test(normalizedHref)
+          ) {
+            normalizedHref = `https://${normalizedHref}`
+          }
+
+          // An attachment, drawn as its badge
+          if (isAttachment) {
+            return <AttachmentBadge href={normalizedHref}>{children}</AttachmentBadge>
+          }
+
+          // Any other link, in a new tab
+          return (
+            <AppLink
+              href={normalizedHref}
+              external
+              newTab
+              plain
+              className="text-link hover:text-link-hover underline"
+            >
+              {children}
+            </AppLink>
+          )
+        },
+        img: ({ src, alt }) => {
+          // The src split into its recognised query parameters (width/height/inline/scale) and the URL without
+          // them, read before the src resolves, since an uploaded file's signed link carries none of ours
+          const parsedSrc = typeof src === 'string' ? parseImageUrl(src) : null
+
+          // The address the image loads from, resolved in this renderer's context
+          const resolvedSrc =
+            parsedSrc && resolveMarkdownImageUrl(parsedSrc.cleanUrl, imageContext, fileLinks)
+
+          // Bail to a labelled error placeholder when there is no address to load
+          if (!parsedSrc || !resolvedSrc) {
+            return (
+              <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-foreground/5 rounded text-xs text-muted italic">
+                🖼️ {alt || t('imageAlt')}
+              </span>
+            )
+          }
+
+          // The parameters the image is drawn by
+          const { params } = parsedSrc
+
+          // Intrinsic dimensions when present; zero is ImageWithLoader's sentinel for fluid mode (runtime sizing,
+          // no layout reservation)
+          const intrinsicWidth = params.width ?? 0
+          const intrinsicHeight = params.height ?? 0
+
+          // Optional white wrap so diagrams with dark strokes stay readable; inline gets a tighter rounding, block
+          // gets a card-style rounding
+          const inlineLightWrap = lightImageBackground && 'bg-white rounded p-1'
+          const blockLightWrap = lightImageBackground && 'bg-white rounded-lg p-1'
+
+          // Inline images route through ImageWithLoader's native inline mode — handles vertical alignment, zero
+          // leading and (when dimensioned) exact reserved dimensions on its own
+          if (params.inline) {
+            return (
+              <ImageWithLoader
+                inline
+                src={resolvedSrc}
+                alt={alt ?? ''}
+                width={intrinsicWidth}
+                height={intrinsicHeight}
+                scale={params.scale}
+                spinnerSize={16}
+                className="inline-block align-middle"
+                containerClassName={cn(inlineLightWrap)}
+              />
+            )
+          }
+
+          // Block images route through ImageWithLoader inside a centred wrapper — the container's explicit
+          // dimensions make the optional white bg fill the whole card (and we get a free loading spinner) when
+          // dimensions are present; fluid mode shrink-wraps the image
+          return (
+            <div className="my-2 flex justify-center">
+              <ImageWithLoader
+                src={resolvedSrc}
+                alt={alt ?? ''}
+                width={intrinsicWidth}
+                height={intrinsicHeight}
+                scale={params.scale}
+                className="block"
+                containerClassName={cn(blockLightWrap)}
+              />
+            </div>
+          )
+        },
+        spoiler: ({ children, label }: { children: ReactNode; label?: string }) => (
+          <RichMathEditorSpoiler label={label ?? t('hiddenText')}>{children}</RichMathEditorSpoiler>
+        ),
+        [NUMBER_REFERENCE_TAG]: ({ children, node }) =>
+          // What the caller draws for the number, or the `#N` as written where it draws nothing
+          renderNumberReference?.(Number(node?.properties[NUMBER_REFERENCE_NUMBER])) ?? children,
+      }) as CustomComponents,
+    [fileLinks, imageContext, lightImageBackground, renderNumberReference, t]
+  )
 
   // Preprocess display math before parsing
   const processedContent = preprocessDisplayMath(content)
@@ -167,242 +408,8 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
       // Pipeline: rehype-raw parses HTML -> rehype-sanitize removes XSS -> rehype-katex renders math
       rehypePlugins={[...sharedRehypePlugins]}
       // URL sanitization: allow-list safe schemes, explicitly block dangerous ones
-      urlTransform={(url) => {
-        // Normalize URL to lowercase for case-insensitive comparison
-        const lowerUrl = url.toLowerCase()
-
-        // Explicitly block dangerous schemes
-        if (
-          lowerUrl.startsWith('javascript:') ||
-          lowerUrl.startsWith('data:') ||
-          lowerUrl.startsWith('vbscript:')
-        ) {
-          return undefined
-        }
-
-        // Allow safe schemes and relative paths
-        if (
-          url.startsWith('media:') ||
-          url.startsWith('http://') ||
-          url.startsWith('https://') ||
-          url.startsWith('/') ||
-          url.startsWith('#') ||
-          url.startsWith('mailto:')
-        ) {
-          return url
-        }
-
-        // Allow domain-like URLs without protocol (e.g., example.com)
-        if (/^[a-zA-Z0-9]([a-zA-Z0-9-]*\.)+[a-zA-Z]{2,}/.test(url)) {
-          return url
-        }
-
-        // Block everything else
-        return undefined
-      }}
-      components={
-        {
-          p: ({ children, node }) => {
-            // Check if paragraph contains block-level elements (like spoiler) to avoid invalid HTML nesting (div
-            // inside p)
-            const hasBlockElement = node?.children?.some((child) => {
-              // Non-element children never trigger a wrapper change
-              if (child.type !== 'element') return false
-
-              // Spoilers and explicit divs are always block-level
-              if (child.tagName === 'spoiler' || child.tagName === 'div') return true
-
-              // Images count as block-level UNLESS they carry ?inline=true
-              if (child.tagName === 'img') {
-                // The image's address, which carries the inline flag
-                const src = child.properties?.src
-
-                // One with no address stays block-level
-                if (typeof src !== 'string') return true
-
-                // Block-level unless it asks to sit inline
-                return !parseImageUrl(src).params.inline
-              }
-
-              // Everything else stays inside <p>
-              return false
-            })
-
-            // If paragraph contains block-level elements, wrap in div
-            if (hasBlockElement) {
-              return <div className="mb-2 last:mb-0">{children}</div>
-            }
-
-            // Otherwise, render as paragraph
-            return <p className="mb-2 last:mb-0">{children}</p>
-          },
-          h2: ({ children }) => (
-            <h2 className="text-[1.25em] font-semibold text-foreground mt-5 mb-2 first:mt-0">
-              {children}
-            </h2>
-          ),
-          h3: ({ children }) => (
-            <h3 className="text-[1.125em] font-semibold text-foreground mt-4 mb-2 first:mt-0">
-              {children}
-            </h3>
-          ),
-          strong: ({ children }) => (
-            <strong className="font-semibold text-foreground">{children}</strong>
-          ),
-          em: ({ children }) => <em className="italic">{children}</em>,
-          // A fenced block arrives wrapped in its own `pre`, which carries the panel and resets the inline pill
-          // styling its `code` child would otherwise wear.
-          pre: ({ children }) => (
-            <pre className="bg-foreground/5 my-2 overflow-x-auto rounded-md p-3 text-sm [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-sm [&>code]:text-foreground">
-              {children}
-            </pre>
-          ),
-          code: ({ children }) => (
-            <code className="bg-foreground/5 px-1 py-0.5 rounded text-xs text-brand-light font-mono">
-              {/* The newline that closed the fence would render as a blank last line; inline
-                  code has none to lose. */}
-              {typeof children === 'string' ? children.replace(/\n$/, '') : children}
-            </code>
-          ),
-          blockquote: ({ children }) => (
-            <blockquote className="border-l-2 border-brand/50 pl-3 my-2 text-muted italic">
-              {children}
-            </blockquote>
-          ),
-          ul: ({ children, className }) => (
-            <ul className={resolveListClassName(className, 'list-disc')}>{children}</ul>
-          ),
-          ol: ({ children, className }) => (
-            <ol className={resolveListClassName(className, 'list-decimal')}>{children}</ol>
-          ),
-          del: ({ children }) => <del className="line-through text-muted">{children}</del>,
-          a: ({ href, children }) => {
-            // Whether the link is to an attached file
-            const isAttachment = String(children).startsWith('📎')
-
-            // Resolve media: URLs to the files' links
-            const resolvedHref = href ? resolveUserUploadMediaUrl(href, fileLinks) : '#'
-
-            // An uploaded file the content came with no link to stays unlinked
-            if (resolvedHref === undefined) {
-              return isAttachment ? (
-                <AttachmentBadge href={null}>{children}</AttachmentBadge>
-              ) : (
-                <span className="text-muted">{children}</span>
-              )
-            }
-
-            // The address the link goes to
-            let normalizedHref = resolvedHref
-
-            // Normalize URLs: add protocol if missing
-            // Matches: www.example.com, example.com, sub.example.co.uk, etc.
-            // But not: /path, #anchor, javascript:, mailto:, media:, already has ://
-            if (
-              !normalizedHref.includes('://') &&
-              !normalizedHref.startsWith('/') &&
-              !normalizedHref.startsWith('#') &&
-              !normalizedHref.startsWith('mailto:') &&
-              !normalizedHref.startsWith('javascript:') &&
-              /^[a-zA-Z0-9]([a-zA-Z0-9-]*\.)+[a-zA-Z]{2,}(\/|$|\?|#)/.test(normalizedHref)
-            ) {
-              normalizedHref = `https://${normalizedHref}`
-            }
-
-            // An attachment, drawn as its badge
-            if (isAttachment) {
-              return <AttachmentBadge href={normalizedHref}>{children}</AttachmentBadge>
-            }
-
-            // Any other link, in a new tab
-            return (
-              <AppLink
-                href={normalizedHref}
-                external
-                newTab
-                plain
-                className="text-link hover:text-link-hover underline"
-              >
-                {children}
-              </AppLink>
-            )
-          },
-          img: ({ src, alt }) => {
-            // The src split into its recognised query parameters (width/height/inline/scale) and the URL without
-            // them, read before the src resolves, since an uploaded file's signed link carries none of ours
-            const parsedSrc = typeof src === 'string' ? parseImageUrl(src) : null
-
-            // The address the image loads from, resolved in this renderer's context
-            const resolvedSrc =
-              parsedSrc && resolveMarkdownImageUrl(parsedSrc.cleanUrl, imageContext, fileLinks)
-
-            // Bail to a labelled error placeholder when there is no address to load
-            if (!parsedSrc || !resolvedSrc) {
-              return (
-                <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-foreground/5 rounded text-xs text-muted italic">
-                  🖼️ {alt || t('imageAlt')}
-                </span>
-              )
-            }
-
-            // The parameters the image is drawn by
-            const { params } = parsedSrc
-
-            // Intrinsic dimensions when present; zero is ImageWithLoader's sentinel for fluid mode (runtime sizing,
-            // no layout reservation)
-            const intrinsicWidth = params.width ?? 0
-            const intrinsicHeight = params.height ?? 0
-
-            // Optional white wrap so diagrams with dark strokes stay readable; inline gets a tighter rounding, block
-            // gets a card-style rounding
-            const inlineLightWrap = lightImageBackground && 'bg-white rounded p-1'
-            const blockLightWrap = lightImageBackground && 'bg-white rounded-lg p-1'
-
-            // Inline images route through ImageWithLoader's native inline mode — handles vertical alignment, zero
-            // leading and (when dimensioned) exact reserved dimensions on its own
-            if (params.inline) {
-              return (
-                <ImageWithLoader
-                  inline
-                  src={resolvedSrc}
-                  alt={alt ?? ''}
-                  width={intrinsicWidth}
-                  height={intrinsicHeight}
-                  scale={params.scale}
-                  spinnerSize={16}
-                  className="inline-block align-middle"
-                  containerClassName={cn(inlineLightWrap)}
-                />
-              )
-            }
-
-            // Block images route through ImageWithLoader inside a centred wrapper — the container's explicit
-            // dimensions make the optional white bg fill the whole card (and we get a free loading spinner) when
-            // dimensions are present; fluid mode shrink-wraps the image
-            return (
-              <div className="my-2 flex justify-center">
-                <ImageWithLoader
-                  src={resolvedSrc}
-                  alt={alt ?? ''}
-                  width={intrinsicWidth}
-                  height={intrinsicHeight}
-                  scale={params.scale}
-                  className="block"
-                  containerClassName={cn(blockLightWrap)}
-                />
-              </div>
-            )
-          },
-          spoiler: ({ children, label }: { children: ReactNode; label?: string }) => (
-            <RichMathEditorSpoiler label={label ?? t('hiddenText')}>
-              {children}
-            </RichMathEditorSpoiler>
-          ),
-          [NUMBER_REFERENCE_TAG]: ({ children, node }) =>
-            // What the caller draws for the number, or the `#N` as written where it draws nothing
-            renderNumberReference?.(Number(node?.properties[NUMBER_REFERENCE_NUMBER])) ?? children,
-        } as CustomComponents
-      }
+      urlTransform={urlTransform}
+      components={components}
     >
       {processedContent}
     </Markdown>

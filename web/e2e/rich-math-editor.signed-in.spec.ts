@@ -31,6 +31,7 @@ import {
 } from './support/interaction'
 import { searchAnswerWith, stubSearchAnswer } from './support/problem-actions'
 import { expect, test } from './support/test'
+import { countRemovals } from './support/watchers'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
 const SETTLE_TIMEOUT_MS = 15_000
@@ -224,6 +225,35 @@ test.describe('the editor expanded to its modal', () => {
 
     // The inline composer, emptied by the send
     await expect(composer).toHaveValue('')
+  })
+
+  test('keeps the images it previews while the text after them changes', async ({ page }) => {
+    // The composer, open
+    const composer = await openComposer(page)
+
+    // A draft holding two images, with a line of text after them
+    await composer.fill('![one](/og-image.en.png)\n\n![two](/og-image.sk.png)\n\nA bound')
+
+    // Taken to the expanded view, the cursor at the end of the draft
+    const expanded = await expandComposer(page)
+
+    // Both images drawn in its preview
+    await expect(expanded.locator('img')).toHaveCount(2)
+
+    // Every image leaving the page from here on, counted as it goes
+    const imagesRemoved = await countRemovals(page, 'img')
+
+    // A new line started at the end of the text
+    await page.keyboard.press('Enter')
+
+    // And a word written on it
+    await page.keyboard.type('holds')
+
+    // The preview showing the new word
+    await expect(expanded.locator('p').filter({ hasText: 'holds' })).toHaveCount(1)
+
+    // Drawn around the same two images, neither of them taken out and put back
+    expect(await imagesRemoved()).toBe(0)
   })
 })
 
