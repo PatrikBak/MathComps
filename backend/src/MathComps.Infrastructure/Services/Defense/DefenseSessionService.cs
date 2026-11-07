@@ -102,7 +102,8 @@ public class DefenseSessionService(
         // outside. Nothing weighs the message cap here: a start writes exactly one message and the cap admits at
         // least one.
         if (!holdsHostedEntry)
-            await EnsureUnderSpendCeilingAsync(dbContext, userId, cancellationToken);
+            await DefenseSpendLedger.EnsureUnderCeilingAsync(
+                dbContext, userId, _limits.DailySpendCeilingPerUser, cancellationToken);
 
         // The entry the student is graded on for the target, if anybody grades them on it. Read before anything
         // is written, so a read that fails leaves nothing saved.
@@ -203,7 +204,8 @@ public class DefenseSessionService(
         // Refuse the turn if the user is already over their spend ceiling, which an entry of their own puts them
         // outside.
         if (!loaded.HoldsHostedEntry)
-            await EnsureUnderSpendCeilingAsync(dbContext, userId, cancellationToken);
+            await DefenseSpendLedger.EnsureUnderCeilingAsync(
+                dbContext, userId, _limits.DailySpendCeilingPerUser, cancellationToken);
 
         // What the session defends, from the columns naming it.
         var target = DefenseTargets.FromColumns(
@@ -444,29 +446,6 @@ public class DefenseSessionService(
     }
 
     /// <summary>
-    /// Throws when what the user has spent today against their daily ceiling has reached it.
-    /// </summary>
-    /// <param name="dbContext">The operation's database context to query.</param>
-    /// <param name="userId">The user to check.</param>
-    /// <param name="cancellationToken">A token to cancel the query.</param>
-    private async Task EnsureUnderSpendCeilingAsync(
-        MathCompsDbContext dbContext, Guid userId, CancellationToken cancellationToken)
-    {
-        // The start of today, in UTC.
-        var dayStart = new DateTimeOffset(DateTime.UtcNow.Date, TimeSpan.Zero);
-
-        // Sum the user's spend since then, leaving out a defense they hold an entry into, which is exempt.
-        var spent = await dbContext.DefenseSpends
-            .Where(spend =>
-                spend.UserId == userId && spend.CountsAgainstCeiling && spend.CreatedAt >= dayStart)
-            .SumAsync(spend => spend.Cost, cancellationToken);
-
-        // Over the ceiling refuses the turn before any model call.
-        if (spent >= _limits.DailySpendCeilingPerUser)
-            throw new DefenseSpendLimitException();
-    }
-
-    /// <summary>
     /// Finds the entry a student is graded on for what a target names, which only a problem can have.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
@@ -593,19 +572,9 @@ public class DefenseSessionService(
             turn.Attempts = BuildAttempts(session.Id, turn.Id, outcome, repliedAt);
 
             // Record what the turn spent and how long it ran, independent of the session so it survives a delete.
-            dbContext.DefenseSpends.Add(new DefenseSpend
-            {
-                UserId = userId,
-                Cost = outcome.Usage.Cost,
-                PromptTokens = outcome.Usage.PromptTokens,
-                CompletionTokens = outcome.Usage.CompletionTokens,
-                ReasoningTokens = outcome.Usage.ReasoningTokens,
-                CachedPromptTokens = outcome.Usage.CachedPromptTokens,
-                DurationMs = (int)stopwatch.ElapsedMilliseconds,
-                Revisions = outcome.Revisions,
-                CountsAgainstCeiling = countsAgainstCeiling,
-                CreatedAt = repliedAt,
-            });
+            DefenseSpendLedger.RecordTurn(
+                dbContext, userId, outcome.Usage, (int)stopwatch.ElapsedMilliseconds, outcome.Revisions,
+                countsAgainstCeiling, repliedAt);
         }
         // Only our own token firing is a client abort. An upstream HTTP/LLM timeout also throws
         // OperationCanceledException (as TaskCanceledException, off an internal token), but that's our fault, not the
@@ -642,19 +611,8 @@ public class DefenseSessionService(
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(CancellationToken.None);
 
         // The spend fact for the cancelled turn; the examiner's revision count is lost once it threw, so record none.
-        dbContext.DefenseSpends.Add(new DefenseSpend
-        {
-            UserId = userId,
-            Cost = accrued.Cost,
-            PromptTokens = accrued.PromptTokens,
-            CompletionTokens = accrued.CompletionTokens,
-            ReasoningTokens = accrued.ReasoningTokens,
-            CachedPromptTokens = accrued.CachedPromptTokens,
-            DurationMs = durationMs,
-            Revisions = 0,
-            CountsAgainstCeiling = countsAgainstCeiling,
-            CreatedAt = DateTimeOffset.UtcNow,
-        });
+        DefenseSpendLedger.RecordTurn(
+            dbContext, userId, accrued, durationMs, revisions: 0, countsAgainstCeiling, DateTimeOffset.UtcNow);
 
         // Commit with an uncancellable token, since the request's token is already cancelled on the abort path.
         await dbContext.SaveChangesAsync(CancellationToken.None);

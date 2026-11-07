@@ -30,6 +30,9 @@ public static class EndpointExtensions
         // AI-examiner defense conversations
         app.MapDefenseEndpoints();
 
+        // The photos of handwritten work a defense conversation is written from
+        app.MapDefensePhotoEndpoints();
+
         // The competitions the site hosts itself: the groups, entries, and the problems an entry opens
         app.MapCompetitionEndpoints();
 

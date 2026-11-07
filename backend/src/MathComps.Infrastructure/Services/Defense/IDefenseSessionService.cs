@@ -138,15 +138,6 @@ public sealed class DefenseMessageLimitException()
         LogLevel.Information);
 
 /// <summary>
-/// Thrown when the user has reached their configured daily spend ceiling.
-/// </summary>
-public sealed class DefenseSpendLimitException()
-    : MathCompsException(
-        "You have reached your usage limit — try again later",
-        RefusalKind.Throttled,
-        LogLevel.Information);
-
-/// <summary>
 /// Thrown when a conversation the student is graded on is rewound or deleted. What a student argued where they are
 /// graded outlives their opinion of it.
 /// </summary>

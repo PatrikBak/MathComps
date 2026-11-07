@@ -21,8 +21,9 @@ using Sentry.Extensibility;
 // Standard ASP.NET Core app
 var builder = WebApplication.CreateBuilder(args);
 
-// Cross-service config shared with the examiner CLI, copied to output from Infrastructure: the LLM endpoint
-// and the examiner engine's per-step models. Kept here so the API and CLI don't repeat them.
+// Cross-service config shared with the examiner CLI, copied to output from Infrastructure: the LLM endpoint,
+// the examiner engine's per-step models, and the photo reader's call and page settings. Kept here so the API
+// and CLI don't repeat them.
 // These files ship only in the build output (transitively from Infrastructure), not the project dir, so
 // resolve them from the output directory rather than the content root — otherwise `dotnet run`, whose
 // content root is the project dir, can't find them. Each file takes an optional per-environment overlay,
@@ -32,6 +33,7 @@ builder.Configuration
     .SetBasePath(AppContext.BaseDirectory)
     .AddJsonFileWithEnvironmentOverlay("appsettings.llm.json", builder.Environment)
     .AddJsonFileWithEnvironmentOverlay("appsettings.examiner.json", builder.Environment)
+    .AddJsonFileWithEnvironmentOverlay("appsettings.photo-reader.json", builder.Environment)
     .AddEnvironmentVariables();
 
 // Basic security stuff
@@ -212,7 +214,7 @@ builder.Services.AddProblemServices();
 // User accounts and comments
 builder.Services.AddUserServices();
 
-// Object storage, which the defense feature reads its problem content back out of
+// Object storage, which the defense feature reads its problem content back out of and keeps the students' photos in
 builder.Services.AddStorage();
 
 // The shared chat stack and the AI-examiner defense feature
