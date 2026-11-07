@@ -119,6 +119,11 @@ public class DraftImportService(
         var authorsCache = new Dictionary<string, Author>();
         var tagsCache = new Dictionary<string, Tag>();
 
+        // Each draft problem's figures, every relative ref resolved to its content id and dimensions, keyed by the
+        // problem's order.
+        var figureRefsByOrder = problems.ToDictionary(problem => problem.Order, problem =>
+            ProblemImageRefs.BuildReplacements(problem.Images, slugByOrder[problem.Order], draftFolder));
+
         // Each problem in turn.
         foreach (var problem in problems)
         {
@@ -126,7 +131,7 @@ public class DraftImportService(
             var slug = slugByOrder[problem.Order];
 
             // Each figure's relative ref mapped to its media ref, carrying the figure's intrinsic dimensions.
-            var replacements = ProblemImageRefs.BuildReplacements(problem.Images, slug, draftFolder);
+            var replacements = figureRefsByOrder[problem.Order];
 
             // The organization whose pool takes the draft's filing of the problem, null when no pool does.
             var filingOrganizationId = refusedFilings.Contains(slug) ? null : organizationId;
@@ -189,12 +194,12 @@ public class DraftImportService(
             missingProblemOrders, sortOrderChanges, countDisagreement, embargoDisagreement, movesProposalsEmbargo,
             organizationProblem, proposalConflicts);
 
-        // Every figure the draft carries, as its local file and the key it uploads under: its content id under the
-        // problems/ prefix the resolver serves.
-        var figures = problems
-            .SelectMany(problem => problem.Images.Select(basename => (
-                LocalPath: Path.Combine(draftFolder, "images", basename),
-                Key: $"problems/{ProblemImageRefs.ContentId(slugByOrder[problem.Order], basename)}")))
+        // Every figure the draft carries, as the local file its relative ref resolves to and the key it uploads under,
+        // its content id under problems/.
+        var figures = figureRefsByOrder.Values
+            .SelectMany(figureRefs => figureRefs.Select(figure => (
+                LocalPath: Path.Combine(draftFolder, figure.Key),
+                Key: $"problems/{figure.Value.ContentId}")))
             .ToList();
 
         // Flush and land the import as far as its findings and the dry run let it go. Whatever doesn't land rolls back

@@ -4,29 +4,29 @@ namespace MathComps.Infrastructure.Tests.BulkImport;
 
 /// <summary>
 /// Unit tests for <see cref="MarkdownImageRewriter.Rewrite"/>. These pin the substitution the import relies on: every
-/// known ref is swapped for its dimensioned <c>media:</c> ref, the derived dimensions and version are stamped onto a
-/// single clean query, an author-written <c>?inline=</c> survives while other params are dropped, a prefix-sharing
-/// filename isn't clobbered, and a body referencing none of the images is left untouched.
+/// known ref is swapped for its dimensioned <c>media:</c> ref, the derived dimensions are stamped onto a single clean
+/// query, an author-written <c>?inline=</c> survives while other params are dropped, a prefix-sharing filename isn't
+/// clobbered, and a body referencing none of the images is left untouched.
 /// </summary>
 public class MarkdownImageRewriterTests
 {
     /// <summary>
-    /// A bare ref is swapped for its media key with the derived dimensions and version stamped on.
+    /// A bare ref is swapped for its media key with the derived dimensions stamped on.
     /// </summary>
     [Fact]
     public void Rewrites_a_bare_ref_with_derived_dimensions()
     {
-        // One body referencing one image, with its resolved key, intrinsic size and version.
+        // One body referencing one image, with its resolved content id and intrinsic size.
         var replacements = new Dictionary<string, ResolvedImageRef>
         {
-            ["images/incircle.svg"] = new("media:slug-incircle", 10, 10, "1a2b3c4d")
+            ["images/incircle.svg"] = new("slug-incircle", 10, 10)
         };
 
         // Rewrite the body.
         var rewritten = MarkdownImageRewriter.Rewrite("see ![fig](images/incircle.svg) here", replacements);
 
-        // The bare ref becomes the media key carrying its derived width/height and version.
-        Assert.Equal("see ![fig](media:slug-incircle?width=10&height=10&v=1a2b3c4d) here", rewritten);
+        // The bare ref becomes the media key carrying its derived width/height.
+        Assert.Equal("see ![fig](media:slug-incircle?width=10&height=10) here", rewritten);
     }
 
     /// <summary>
@@ -38,14 +38,14 @@ public class MarkdownImageRewriterTests
         // A ref the author marked inline.
         var replacements = new Dictionary<string, ResolvedImageRef>
         {
-            ["images/eq.svg"] = new("media:slug-eq", 24, 16, "5e6f7a8b")
+            ["images/eq.svg"] = new("slug-eq", 24, 16)
         };
 
         // Rewrite the inline ref.
         var rewritten = MarkdownImageRewriter.Rewrite("x ![eq](images/eq.svg?inline=true) y", replacements);
 
-        // inline leads, the derived dimensions and version follow, all in a single query string.
-        Assert.Equal("x ![eq](media:slug-eq?inline=true&width=24&height=16&v=5e6f7a8b) y", rewritten);
+        // inline leads, the derived dimensions follow, all in a single query string.
+        Assert.Equal("x ![eq](media:slug-eq?inline=true&width=24&height=16) y", rewritten);
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ public class MarkdownImageRewriterTests
         // A ref the author tried to size themselves.
         var replacements = new Dictionary<string, ResolvedImageRef>
         {
-            ["images/fig.svg"] = new("media:slug-fig", 480, 210, "9c0d1e2f")
+            ["images/fig.svg"] = new("slug-fig", 480, 210)
         };
 
         // Rewrite the hand-sized, hand-versioned ref.
@@ -65,7 +65,7 @@ public class MarkdownImageRewriterTests
             "![fig](images/fig.svg?width=148&height=73&v=deadbeef)", replacements);
 
         // The author's params are gone; only the derived ones remain, with no double-?.
-        Assert.Equal("![fig](media:slug-fig?width=480&height=210&v=9c0d1e2f)", rewritten);
+        Assert.Equal("![fig](media:slug-fig?width=480&height=210)", rewritten);
     }
 
     /// <summary>
@@ -77,14 +77,14 @@ public class MarkdownImageRewriterTests
         // A ref the author tried to scale.
         var replacements = new Dictionary<string, ResolvedImageRef>
         {
-            ["images/fig.svg"] = new("media:slug-fig", 480, 210, "9c0d1e2f")
+            ["images/fig.svg"] = new("slug-fig", 480, 210)
         };
 
         // Rewrite the scaled ref.
         var rewritten = MarkdownImageRewriter.Rewrite("![fig](images/fig.svg?scale=50)", replacements);
 
-        // Scale is gone; only the derived dimensions and version remain.
-        Assert.Equal("![fig](media:slug-fig?width=480&height=210&v=9c0d1e2f)", rewritten);
+        // Scale is gone; only the derived dimensions remain.
+        Assert.Equal("![fig](media:slug-fig?width=480&height=210)", rewritten);
     }
 
     /// <summary>
@@ -96,8 +96,8 @@ public class MarkdownImageRewriterTests
         // Two images whose stems share a prefix ("a" vs "ab").
         var replacements = new Dictionary<string, ResolvedImageRef>
         {
-            ["images/a.svg"] = new("media:slug-a", 1, 1, "aaaa1111"),
-            ["images/ab.svg"] = new("media:slug-ab", 2, 2, "bbbb2222")
+            ["images/a.svg"] = new("slug-a", 1, 1),
+            ["images/ab.svg"] = new("slug-ab", 2, 2)
         };
 
         // A body referencing both, the shorter one carrying an inline param.
@@ -106,8 +106,8 @@ public class MarkdownImageRewriterTests
 
         // Each maps to its own media key, neither bleeding into the other.
         Assert.Equal(
-            "![one](media:slug-a?inline=true&width=1&height=1&v=aaaa1111) "
-            + "![two](media:slug-ab?width=2&height=2&v=bbbb2222)",
+            "![one](media:slug-a?inline=true&width=1&height=1) "
+            + "![two](media:slug-ab?width=2&height=2)",
             rewritten);
     }
 
@@ -120,7 +120,7 @@ public class MarkdownImageRewriterTests
         // A replacement is offered, but the body never uses it.
         var replacements = new Dictionary<string, ResolvedImageRef>
         {
-            ["images/incircle.svg"] = new("media:slug-incircle", 10, 10, "1a2b3c4d")
+            ["images/incircle.svg"] = new("slug-incircle", 10, 10)
         };
 
         // Rewrite a ref-free body.

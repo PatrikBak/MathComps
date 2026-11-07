@@ -17,7 +17,7 @@ A folder with an error here never reaches the database. A clean one is imported 
 
 On the way the import collects every reason the database refuses the draft: a gap in the round's numbering, a new problem without its `pN.yaml` or without an original text, a second original, a hosted round's announced problem count or embargo, and [the pool's own checks](#filling-the-pool). The report lists every refusal at once. A stored taxonomy node the registry can't place is the one refusal that stops the import before the rest are checked.
 
-A dry run is the same import, rolled back before it commits and before any figure uploads, so a clean dry run of a folder is a clean import of it into the database as it stands. A real run (`--write`) uploads the figures to R2 once the import is known to land, then commits. The import rewrites each figure ref to the `media:` key the site resolves, stamped with the figure's size and a hash of its bytes. So a redrawn figure gets a new URL, and its re-import rewrites every text showing it.
+A dry run is the same import, rolled back before it commits and before any figure uploads, so a clean dry run of a folder is a clean import of it into the database as it stands. A real run (`--write`) uploads the figures to R2 once the import is known to land, then commits. The import rewrites each figure ref to the `media:` key the site resolves, stamped with the figure's size. The key ends in a hash of the figure's bytes, so a redrawn figure gets a new URL, and its re-import rewrites every text showing it.
 
 Image uploads are deduplicated against a gitignored ledger per bucket (`data/problems/.r2-uploads/<bucket>.json`) mapping each storage key to a hash of the bytes last pushed under it. The report's `Images` line counts what was uploaded and skipped; delete a bucket's ledger to force a fresh upload of everything to it.
 
@@ -46,7 +46,7 @@ A `visibleSince` in `_meta.yaml` holds a round back until the instant it names, 
 
 On a round a hosted group runs, the embargo stops being the draft's to move: the import refuses unless the draft's `visibleSince` equals the instant already stored on the round (`hosted-embargo`), and the refusal names that instant. Declaring the group stamps it from its `closesAt`, but the check reads the stored value, not the manifest.
 
-The embargo hides the problems, not their figures. Those go to public storage the moment a real import runs, keyed by the problem's slug and the figure's filename (`problems/75-csmo-a-iii-1-incircle`), so anyone guessing both can fetch a figure early. Everything else stays withheld until the round opens.
+Figures go to public storage the moment a real import runs, under the problem's slug and a hash of the figure's bytes (`problems/75-csmo-a-iii-1-3f2a9c1b7d4e8a60`). Public storage lists nothing, and the name can't be worked out without the file, so an embargoed round's figures stay out of reach until its texts show them.
 
 ## Filling the pool
 
