@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { BackendApiError, isTransientFailure } from '../api-error'
+import { ApiRequestError, isTransientFailure } from '../api-error'
 
 describe('isTransientFailure', () => {
   it('treats a failure that never reached the server as transient when nothing named it', () => {
     // A dropped connection: no status came back, and the client had no name for what went wrong
-    const dropped = new BackendApiError({ message: 'Failed to fetch' })
+    const dropped = new ApiRequestError({ message: 'Failed to fetch' })
 
     // Another attempt is exactly what this case is for
     expect(isTransientFailure(dropped)).toBe(true)
@@ -13,7 +13,7 @@ describe('isTransientFailure', () => {
 
   it('treats a failure the client named itself as permanent', () => {
     // Nobody is signed in, which the caller establishes without asking the server
-    const signedOut = new BackendApiError({ errorCode: 'Unauthenticated' })
+    const signedOut = new ApiRequestError({ errorCode: 'Unauthenticated' })
 
     // Repeating the call changes nothing, so it must not be retried or read as a connection problem
     expect(isTransientFailure(signedOut)).toBe(false)
@@ -21,7 +21,7 @@ describe('isTransientFailure', () => {
 
   it('treats a refused request as permanent', () => {
     // The server's verdict that the request itself is wrong
-    const refused = new BackendApiError({ statusCode: 404, errorCode: 'ProblemNotFound' })
+    const refused = new ApiRequestError({ statusCode: 404, errorCode: 'ProblemNotFound' })
 
     // Sending it again can only be refused the same way
     expect(isTransientFailure(refused)).toBe(false)
@@ -29,7 +29,7 @@ describe('isTransientFailure', () => {
 
   it('treats a rejected request as permanent at the bottom of the client-error range', () => {
     // The lower boundary of the range the server refuses on
-    const rejected = new BackendApiError({ statusCode: 400 })
+    const rejected = new ApiRequestError({ statusCode: 400 })
 
     // Sending it again can only be refused the same way
     expect(isTransientFailure(rejected)).toBe(false)
@@ -37,7 +37,7 @@ describe('isTransientFailure', () => {
 
   it('treats a server fault as transient at the bottom of the server-error range', () => {
     // The upper boundary: the first status that is the server's problem rather than the request's
-    const serverFault = new BackendApiError({ statusCode: 500 })
+    const serverFault = new ApiRequestError({ statusCode: 500 })
 
     // Worth asking again
     expect(isTransientFailure(serverFault)).toBe(true)

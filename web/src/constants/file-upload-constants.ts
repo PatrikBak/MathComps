@@ -1,6 +1,5 @@
 /**
- * Shared constants for file upload configuration.
- * Used by both client-side validation and server-side API routes.
+ * The kinds and sizes of file a reader may upload, which a file is checked against before it is sent.
  */
 
 /** File type for uploads */
@@ -18,25 +17,16 @@ const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif
 /** Allowed MIME types for attachments */
 const ALLOWED_ATTACHMENT_TYPES = ['application/pdf', 'text/plain', 'text/markdown'] as const
 
-/** URL expiration time in seconds (5 minutes) */
-const UPLOAD_URL_EXPIRATION = 300
-
-/**
- * Unified file upload configuration.
- * Provides structured access to all file type settings.
- */
-export const FILE_UPLOAD_CONFIG = {
+/** Each kind of file's size cap and allowed media types. */
+const FILE_UPLOAD_CONFIG = {
   image: {
     maxFileSizeMB: MAX_IMAGE_SIZE_MB,
     allowedTypes: ALLOWED_IMAGE_TYPES,
-    folder: 'images',
   },
   attachment: {
     maxFileSizeMB: MAX_ATTACHMENT_SIZE_MB,
     allowedTypes: ALLOWED_ATTACHMENT_TYPES,
-    folder: 'attachments',
   },
-  urlExpiration: UPLOAD_URL_EXPIRATION,
 } as const
 
 /**

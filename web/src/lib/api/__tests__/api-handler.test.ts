@@ -13,7 +13,7 @@ vi.mock('@sentry/nextjs', () => ({
 }))
 
 /**
- * Stand in for Clerk, which the handler module imports for its signed-in variant.
+ * Stand in for Clerk, which names the caller on a report.
  */
 vi.mock('@clerk/nextjs/server', () => ({
   auth: vi.fn(),

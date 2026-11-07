@@ -3,7 +3,7 @@ import { useLocale } from 'next-intl'
 import { useCallback } from 'react'
 
 import { assertNever } from '@/components/shared/utils/assert-never'
-import { BackendApiError } from '@/lib/api/api-error'
+import { ApiRequestError } from '@/lib/api/api-error'
 import { fetchApiResult } from '@/lib/api/api-fetch'
 import type { ApiResult } from '@/types/api'
 
@@ -199,7 +199,7 @@ export function apiCallOf(api: ApiState): ApiCaller | null {
 export function readyApiCall(api: ApiState): ApiCaller {
   // A ready client is required to issue a request
   if (api.state !== 'ready') {
-    throw new BackendApiError({ message: 'API not ready', errorCode: 'Unauthenticated' })
+    throw new ApiRequestError({ message: 'API not ready', errorCode: 'Unauthenticated' })
   }
 
   // The ready client's caller

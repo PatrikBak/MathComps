@@ -4,8 +4,11 @@ import type { ClipboardEventHandler } from 'react'
 import { toast } from 'sonner'
 
 import { assertNever } from '@/components/shared/utils/assert-never'
+import { readyApiCall, useApi } from '@/hooks/use-api'
+import { unwrap } from '@/lib/api/api-error'
 import { type FileType, validateFile } from '@/lib/file-upload-utils'
 
+import { uploadFile } from '../services/editor-upload-service'
 import { EDITOR_UPLOADS, editorFileTypeOf, toastUploadError } from '../utils/attachment-utils'
 import { processPaste } from '../utils/paste-utils'
 import { type UseEditorTextResult } from './use-editor-text'
@@ -57,6 +60,9 @@ export function useEditorUploads({
   // Editor and error translations
   const tEditor = useTranslations('ui.editor')
   const tApiErrors = useTranslations('apiErrors')
+
+  // The API client
+  const api = useApi()
 
   // The parts of the text the uploads and pastes reach
   const { state, textareaRef, createEditContext, applyEdit, applyTransform } = text
@@ -168,7 +174,7 @@ export function useEditorUploads({
       return
     }
 
-    // How a file of this kind is stored and written
+    // How a file of this kind is written
     const editorUpload = EDITOR_UPLOADS[fileType]
 
     // The name the file reads by in the text
@@ -186,8 +192,8 @@ export function useEditorUploads({
 
     // The upload itself, the notice taken down however it ends
     try {
-      // The file goes to the store
-      const key = await editorUpload.store(file)
+      // The file uploaded as the signed-in reader's own, its key coming back
+      const { key } = unwrap(await uploadFile(readyApiCall(api), file))
 
       // The stored file's markdown, for the screen it is uploaded from
       const markdown = await editorUpload.toMarkdown({
