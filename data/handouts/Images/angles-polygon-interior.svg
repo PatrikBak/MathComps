@@ -58,13 +58,13 @@
 <path d='M106.262 89.7763L112.971 76.357C110.952 75.3455 108.673 74.7763 106.262 74.7763C102.501 74.7763 99.0631 76.1604 96.4304 78.447L106.262 89.7763Z' fill='#ffc0d9'/>
 </g>
 <g transform='translate(81.5767 143.299)scale(.996264)'>
-<path d='M74.7616 53.4763L62.6647 62.3474C65.3948 66.0639 69.7965 68.4763 74.7616 68.4763C78.5225 68.4763 81.9601 67.0922 84.5929 64.8056L74.7616 53.4763Z' fill='#ffc080'/>
+<path d='M74.7616 53.4763L62.6647 62.3474C65.3948 66.0639 69.7965 68.4763 74.7616 68.4763C78.5225 68.4763 81.9601 67.0922 84.5929 64.8056L74.7616 53.4763Z' fill='#ffa640'/>
 </g>
 <g transform='translate(81.5767 143.299)scale(.996264)'>
-<path d='M106.262 89.7763L96.4304 78.447C93.2639 81.1972 91.2616 85.2529 91.2616 89.7763H106.262Z' fill='#ffc080'/>
+<path d='M106.262 89.7763L96.4304 78.447C93.2639 81.1972 91.2616 85.2529 91.2616 89.7763H106.262Z' fill='#ffa640'/>
 </g>
 <g transform='translate(81.5767 143.299)scale(.996264)'>
-<path d='M25.2616 89.7763H40.2616C40.2616 86.4572 39.1836 83.3898 37.3585 80.9053L25.2616 89.7763Z' fill='#ffc080'/>
+<path d='M25.2616 89.7763H40.2616C40.2616 86.4572 39.1836 83.3898 37.3585 80.9053L25.2616 89.7763Z' fill='#ffa640'/>
 </g>
 <g transform='translate(81.5767 143.299)scale(.996264)'>
 <path d='M25.2616 89.7763L23.4616 50.1763' fill='none' stroke='#0000ff' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='10.0375' stroke-width='1.00375'/>
@@ -82,7 +82,7 @@
 <path d='M124.262 53.7763L106.262 89.7763' fill='none' stroke='#ff80c0' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='10.0375' stroke-width='1.00375'/>
 </g>
 <g transform='translate(81.5767 143.299)scale(.996264)'>
-<path d='M106.262 89.7763H25.2616' fill='none' stroke='#ff8000' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='10.0375' stroke-width='1.00375'/>
+<path d='M106.262 89.7763H25.2616' fill='none' stroke='#e67300' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='10.0375' stroke-width='1.00375'/>
 </g>
 <g transform='translate(81.5767 143.299)scale(.996264)'>
 <path d='M74.7616 53.4763L25.2616 89.7763' fill='none' stroke='#000000' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='10.0375' stroke-width='1.00375'/>
