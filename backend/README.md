@@ -348,6 +348,7 @@ what makes deploys automatic.
    echo '{}' > src/MathComps.Api/appsettings.Production.json
    echo '{}' > src/MathComps.Infrastructure/appsettings.examiner.Production.json
    echo '{}' > src/MathComps.Infrastructure/appsettings.llm.Production.json
+   echo '{}' > src/MathComps.Infrastructure/appsettings.photo-reader.Production.json
    ```
 
 7. Deploy by hand once, to check the stack comes up before CI ever touches it:
@@ -453,6 +454,7 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
   so once the API has restarted on the new value, the UI follows on the next page load with no frontend deploy.
 - `src/MathComps.Infrastructure/appsettings.examiner.{Env}.json` → `appsettings.examiner.json` (per-step models).
 - `src/MathComps.Infrastructure/appsettings.llm.{Env}.json` → `appsettings.llm.json` (LLM endpoint, retries)
+- `src/MathComps.Infrastructure/appsettings.photo-reader.{Env}.json` → `appsettings.photo-reader.json` (the photo reader's call and page settings)
 
 - **Apply a change:** edit the file, `./deploy.sh <env> restart api` — no `up -d`, no `--build`. `restart` takes the deploy lock, so it waits if an automatic deploy is in flight.
 - **First rollout:** create the files (`echo '{}' > …`) **before** the `up -d` that adds the mounts, else

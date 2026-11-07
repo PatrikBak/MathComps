@@ -22,6 +22,7 @@ services:
       - ./src/MathComps.Api/appsettings.Staging.json:/app/appsettings.Staging.json:ro
       - ./src/MathComps.Infrastructure/appsettings.examiner.Staging.json:/app/appsettings.examiner.Staging.json:ro
       - ./src/MathComps.Infrastructure/appsettings.llm.Staging.json:/app/appsettings.llm.Staging.json:ro
+      - ./src/MathComps.Infrastructure/appsettings.photo-reader.Staging.json:/app/appsettings.photo-reader.Staging.json:ro
     environment:
       ASPNETCORE_ENVIRONMENT: Staging
     labels:
