@@ -55,6 +55,14 @@ pen Orange = rgb(0.9, 0.45, 0);
 pen DarkOrange = rgb(0.5, 0.25, 0);
 
 //
+// A saturated pink. `Pink` is a tint (half white mixed in), so it reads faint as a stroke or
+// as text; Magenta keeps the hue at full saturation.
+//
+pen LightMagenta = rgb(1, 0.5, 0.85);
+pen Magenta = rgb(0.9, 0, 0.6);
+pen DarkMagenta = rgb(0.5, 0, 0.33);
+
+//
 // Diagonal-hatch fill pattern. Use as `fill(path, HatchedFill)` to shade a
 // region with NE-slanting 45° lines spaced 3mm apart in medium gray.
 // Reassign per file via `add("name", hatch(...)); HatchedFill = pattern("name");`
@@ -116,6 +124,12 @@ pen Font5 = fontsize(20pt);
 // Default vertex dot radius
 //
 real vertexDotRadius = 2.95;
+
+//
+// Radius of a minor dot: an unlabelled auxiliary point (a midpoint, a foot) that has to read
+// as smaller than the named vertices around it.
+//
+real minorDotRadius = 1.8;
 
 //
 // Default shift along alignDir for point labels
@@ -678,6 +692,29 @@ void Arc(
 }
 
 //
+// Strokes the arc of the angle ∠XYZ with vertex Y at the given radius, sweeping CCW from
+// ray YX to ray YZ, with no fill.
+//
+void AngleArc(
+    pair X,
+    pair Y,
+    pair Z,
+    real radius,
+    pen color)
+{
+    // Compute start/end angles (CCW from +x)
+    real d1 = degrees(X - Y);
+    real d2 = degrees(Z - Y);
+
+    // Normalise so the sweep runs CCW from d1 to d2
+    if (d2 < d1) d2 += 360;
+
+    // Stroke the arc through its point on the angle bisector
+    Arc(Y, Polar(Y, d1, radius), Polar(Y, (d1 + d2) / 2, radius), Polar(Y, d2, radius),
+        color = color);
+}
+
+//
 // Draws a single coloured-fill black-outlined dot at point P.
 //
 // Used global variables: vertexDotRadius, vertexPen
@@ -690,6 +727,19 @@ void VertexDot(
     // Fill the disc, then outline it
     fill(circle(P, radius), fillColor);
     draw(circle(P, radius), vertexPen);
+}
+
+//
+// Draws the small dot of an unlabelled auxiliary point, in the colour of the line it
+// sits on (a midpoint on a median, a foot on an altitude).
+//
+// Used global variables: minorDotRadius
+//
+void MinorDot(
+    pair P,
+    pen fillColor = Blue)
+{
+    VertexDot(P, fillColor, minorDotRadius);
 }
 
 //
@@ -785,7 +835,8 @@ void LabeledDot(
 // `radius` is the distance from O to the outer corner, matching AngleMark's
 // `radius` so the two scale together when sharing Radius3. Filled by default
 // (pass a `Light*` pen for `color` so the L reads softly); pass filled=false
-// for the bare L-shape stroke.
+// for the bare L-shape stroke, drawn with `strokePen` (black by default, or the
+// colour of the line it marks, such as an altitude).
 //
 // Used global variables: Radius3, edgePen
 //
@@ -795,7 +846,8 @@ void RightAngleMark(
     pair B,
     real radius = Radius3,
     pen color = LightBlue,
-    bool filled = true)
+    bool filled = true,
+    pen strokePen = edgePen)
 {
     // Leg length so the outer corner sits at distance `radius` from O
     real legLen = radius * sqrt(2) / 2;
@@ -809,7 +861,7 @@ void RightAngleMark(
     if (filled) {
         fill(O -- p1 -- p2 -- p3 -- cycle, color);
     } else {
-        draw(p1 -- p2 -- p3, edgePen);
+        draw(p1 -- p2 -- p3, strokePen);
     }
 }
 

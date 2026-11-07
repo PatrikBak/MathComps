@@ -13,9 +13,9 @@ pair D = E + lenDE * (rotate(alpha) * unit(A - E));
 pair P = A + (lenBC / lenAB) * (B - A);
 pair Q = A + (lenDE / lenAB) * (E - A);
 
-fill(P -- B -- C -- cycle, LightYellow + opacity(0.5));
-fill(Q -- A -- P -- cycle, LightYellow + opacity(0.5));
-fill(D -- E -- Q -- cycle, LightYellow + opacity(0.5));
+fill(P -- B -- C -- cycle, LightYellow);
+fill(Q -- A -- P -- cycle, LightYellow);
+fill(D -- E -- Q -- cycle, LightYellow);
 
 AngleMark(C, B, A, LightBlue, radius = Radius2);
 AngleMark(B, A, E, LightBlue, radius = Radius2);

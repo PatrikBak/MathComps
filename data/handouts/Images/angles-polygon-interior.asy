@@ -1,8 +1,5 @@
 import _common;
 
-pen LightOrange = rgb(1, 0.75, 0.5);
-pen Orange = rgb(1, 0.5, 0);
-
 real scale = 1.8;
 pair A1 = scale * (0, 0);
 pair A2 = scale * (-1, 22);
