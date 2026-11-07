@@ -549,6 +549,9 @@ public class AdminDefenseReviewService(
         // The math-check records whether the claims held, so a wrong one is that verdict read the other way round.
         ExaminerFlaw.WrongClaim => attempt => !attempt.MathHolds,
 
+        // An early close is a reply that ended the examination over an incomplete solution.
+        ExaminerFlaw.EarlyClose => attempt => attempt.MathCloses && !attempt.MathComplete,
+
         // A withheld close is a reply that asked on over a complete solution.
         ExaminerFlaw.WithheldClose => attempt => attempt.MathComplete && !attempt.MathCloses,
 

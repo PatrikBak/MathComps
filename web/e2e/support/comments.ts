@@ -15,11 +15,12 @@ import type {
 } from '@/components/features/handouts/handout-metadata-types'
 import type { UserProfile } from '@/components/features/profile/model/profile-types'
 import { parseMember } from '@/components/shared/utils/collection-utils'
+import { uploadKeysIn } from '@/components/shared/utils/media-utils'
 import handoutIndex from '@/content/handouts.json'
 import { ROUTES } from '@/i18n/i18n'
 
 import messages from '../../messages/en.json'
-import { answerJson, BACKEND_ORIGIN, refuse } from './backend-routes'
+import { answerJson, BACKEND_ORIGIN, fileLinkTo, refuse } from './backend-routes'
 import { expect } from './test'
 
 /**
@@ -217,6 +218,7 @@ export function commentFrom(
     id: crypto.randomUUID(),
     author: { id: authorId, name: authorName, avatarUrl: null },
     content,
+    fileLinks: {},
     createdAt: new Date().toISOString(),
     editedAt: null,
     isDeleted: false,
@@ -387,7 +389,8 @@ export function senderOf(request: Request): string | null {
 }
 
 /**
- * A comment as the call's sender gets it, {@link READER_ID} swapped for the id their sign-in gave them.
+ * A comment as the call's sender gets it, {@link READER_ID} swapped for the id their sign-in gave them, with a link
+ * to each uploaded file it names, the way the backend signs one for every reader of the comment.
  *
  * @param comment - The comment as the fake keeps it.
  * @param sender - Who sent the call, or null for a visitor.
@@ -398,9 +401,12 @@ export function asSentTo(comment: CommentDto, sender: string | null): CommentDto
   // A function which gives the reader the sender's id, and anybody else their own
   const idOf = (userId: string) => (userId === READER_ID && sender !== null ? sender : userId)
 
-  // The comment, every id in it given as the sender knows it
+  // The comment, every id in it given as the sender knows it, with a link to each uploaded file it names
   return {
     ...comment,
+    fileLinks: Object.fromEntries(
+      uploadKeysIn(comment.content).map((key) => [key, fileLinkTo(key)])
+    ),
     author: { ...comment.author, id: idOf(comment.author.id) },
     reactions: comment.reactions.map((reaction) => ({
       ...reaction,

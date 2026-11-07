@@ -23,12 +23,14 @@ import {
 const PERIOD_DAYS = [1, 7, 14, 30, 90, 365]
 
 /**
- * The message key naming each flaw: the label of the verdict it is caught under.
+ * The message key naming each flaw: the label of the verdict it is caught under. The close flaws share one
+ * verdict, so each takes the name of its note instead.
  */
 const FLAW_LABEL_KEYS = {
   wrongClaim: 'attempts.verdicts.math',
   leak: 'attempts.verdicts.leak',
-  withheldClose: 'attempts.verdicts.close',
+  earlyClose: 'config.notes.earlyClose',
+  withheldClose: 'config.notes.withheldClose',
   languageSwitch: 'attempts.verdicts.language',
   genderedAddress: 'attempts.verdicts.address',
   route: 'attempts.verdicts.route',

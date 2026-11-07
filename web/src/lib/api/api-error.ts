@@ -2,9 +2,9 @@ import type { AppErrorCode } from '@/lib/api/api-error-codes'
 import type { ApiResult } from '@/types/api'
 
 /**
- * The details to build a {@link BackendApiError}.
+ * The details to build an {@link ApiRequestError}.
  */
-type BackendApiErrorInit = {
+type ApiRequestErrorInit = {
   /** Human-readable message for the base {@link Error}. */
   message?: string
   /** The machine-readable failure code, or undefined when the failure carried none. */
@@ -17,9 +17,10 @@ type BackendApiErrorInit = {
 
 /**
  * A failed API call raised as a throwable, carrying the machine-readable failure code and the HTTP
- * status. The single client error class for both C# backend calls and the app's own Next.js routes.
+ * status. The single client error class for calls to the C# backend and to the app's own Next.js routes, and for a
+ * call the browser refuses before sending it.
  */
-export class BackendApiError extends Error {
+export class ApiRequestError extends Error {
   /** The failure code, or undefined when the failure carried none. */
   readonly errorCode: AppErrorCode | undefined
 
@@ -34,7 +35,7 @@ export class BackendApiError extends Error {
    *
    * @param init - The failure's message, code, status, and any interpolation values.
    */
-  constructor(init: BackendApiErrorInit) {
+  constructor(init: ApiRequestErrorInit) {
     // Keep a human message on the base Error, falling back to the code
     super(init.message ?? init.errorCode ?? 'API request failed')
 
@@ -50,11 +51,11 @@ export class BackendApiError extends Error {
  *
  * @param error - The error a call threw.
  *
- * @returns The code a {@link BackendApiError} carries, or undefined for any other thrown value.
+ * @returns The code an {@link ApiRequestError} carries, or undefined for any other thrown value.
  */
 export function errorCodeOf(error: unknown): AppErrorCode | undefined {
-  // Only a BackendApiError carries a code; anything else is an opaque fault
-  return error instanceof BackendApiError ? error.errorCode : undefined
+  // Only an ApiRequestError carries a code; anything else is an opaque fault
+  return error instanceof ApiRequestError ? error.errorCode : undefined
 }
 
 /**
@@ -68,9 +69,9 @@ export function errorCodeOf(error: unknown): AppErrorCode | undefined {
  * @returns Whether another attempt could plausibly succeed.
  */
 export function isTransientFailure(error: unknown): boolean {
-  // Only a BackendApiError carries either of the things this reads; anything else is an opaque fault
-  const status = error instanceof BackendApiError ? error.statusCode : undefined
-  const errorCode = error instanceof BackendApiError ? error.errorCode : undefined
+  // Only an ApiRequestError carries either of the things this reads; anything else is an opaque fault
+  const status = error instanceof ApiRequestError ? error.statusCode : undefined
+  const errorCode = error instanceof ApiRequestError ? error.errorCode : undefined
 
   // A failure that never reached the server says which it is by whether the client could name it: a
   // named one (nobody signed in, a file the browser itself refused) is settled, and an unnamed one is
@@ -88,15 +89,15 @@ export function isTransientFailure(error: unknown): boolean {
  *
  * @param error - The error a call threw.
  *
- * @returns The values a {@link BackendApiError} carries, or undefined for any other thrown value.
+ * @returns The values an {@link ApiRequestError} carries, or undefined for any other thrown value.
  */
 export function errorDataOf(error: unknown): Record<string, string | number> | undefined {
-  // Only a BackendApiError carries interpolation values
-  return error instanceof BackendApiError ? error.data : undefined
+  // Only an ApiRequestError carries interpolation values
+  return error instanceof ApiRequestError ? error.data : undefined
 }
 
 /**
- * Unwraps a settled API result to its data, throwing a {@link BackendApiError} on failure.
+ * Unwraps a settled API result to its data, throwing an {@link ApiRequestError} on failure.
  *
  * @param result - The settled result of an API call.
  *
@@ -105,7 +106,7 @@ export function errorDataOf(error: unknown): Record<string, string | number> | u
 export function unwrap<T>(result: ApiResult<T>): T {
   // A failed call throws, carrying the failure code
   if (!result.success) {
-    throw new BackendApiError(result.error)
+    throw new ApiRequestError(result.error)
   }
 
   // The successful call's data

@@ -46,6 +46,7 @@ function comment(content: string, createdAt = '2026-10-16T10:00:00Z'): CommentDt
     id: content,
     author: { id: 'author', name: 'Author', avatarUrl: null },
     content,
+    fileLinks: {},
     createdAt,
     editedAt: null,
     isDeleted: false,

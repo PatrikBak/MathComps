@@ -144,6 +144,7 @@ export function CommentList({
         author={comment.author}
         avatarUrl={comment.avatarUrl}
         content={comment.content}
+        fileLinks={comment.fileLinks}
         timestamp={comment.timestamp}
         editedAt={comment.editedAt}
         reactions={comment.reactions}

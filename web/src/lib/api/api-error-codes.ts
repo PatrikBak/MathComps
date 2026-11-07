@@ -1,29 +1,28 @@
 import { BACKEND_ERROR_CODES, type BackendErrorCode } from '@/types/backend-error-codes'
 
 /**
- * Error codes emitted by the app's own Next.js API routes (file upload, contact, webhooks). Distinct
+ * Error codes the website raises itself, from its own API routes or from checks it runs before a request. Distinct
  * from the C# backend's {@link BackendErrorCode}s.
  */
-const NODE_ERROR_CODES = [
+const WEB_ERROR_CODES = [
   'INVALID_FILE_TYPE',
   'FILE_TOO_LARGE',
-  'UPLOAD_URL_FAILED',
   'VALIDATION_FAILED',
   'SERVER_ERROR',
-  'UNAUTHORIZED',
 ] as const
 
-/** One of the Next.js route error codes. */
-export type NodeErrorCode = (typeof NODE_ERROR_CODES)[number]
+/** One of the error codes the website raises itself. */
+export type WebErrorCode = (typeof WEB_ERROR_CODES)[number]
 
 /**
- * Every machine-readable error code the app can surface, from either the C# backend or a Next.js route.
- * Both wire it as a top-level `errorCode` field, so one client parser and one copy resolver serve both.
+ * Every machine-readable error code the app can surface, the C# backend's or the website's own. A refusal from
+ * either server carries its code as a top-level `errorCode` field, so one client parser and one copy resolver serve
+ * both.
  */
-export type AppErrorCode = BackendErrorCode | NodeErrorCode
+export type AppErrorCode = BackendErrorCode | WebErrorCode
 
 /** Every recognized code. */
-const ALL_ERROR_CODES: readonly string[] = [...BACKEND_ERROR_CODES, ...NODE_ERROR_CODES]
+const ALL_ERROR_CODES: readonly string[] = [...BACKEND_ERROR_CODES, ...WEB_ERROR_CODES]
 
 /**
  * Narrows a value read off a response body to a code the app recognizes.

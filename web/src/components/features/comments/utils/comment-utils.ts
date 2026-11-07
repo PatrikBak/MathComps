@@ -166,6 +166,7 @@ export function convertToCommentData(dto: CommentDto, viewerId: string | null): 
     author: dto.author.name,
     avatarUrl: dto.author.avatarUrl,
     content: dto.content,
+    fileLinks: dto.fileLinks,
     timestamp: new Date(dto.createdAt),
     editedAt: dto.editedAt ? new Date(dto.editedAt) : null,
     reactions: dto.reactions,

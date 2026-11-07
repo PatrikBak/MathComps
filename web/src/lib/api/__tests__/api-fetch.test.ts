@@ -1,17 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import {
-  reportForeignRefusal,
-  reportUnansweredRequest,
-} from '@/lib/error-reporting/report-request-failure'
+import { reportUnansweredRequest } from '@/lib/error-reporting/report-request-failure'
 
 import { fetchApiResult } from '../api-fetch'
 
 /**
- * Stand in for the reporters, so a test can read which failures reached them.
+ * Stand in for the reporter, so a test can read which failures reached it.
  */
 vi.mock('@/lib/error-reporting/report-request-failure', () => ({
-  reportForeignRefusal: vi.fn(),
   reportUnansweredRequest: vi.fn(),
 }))
 
@@ -53,7 +49,6 @@ afterEach(() => {
 
   // Forget the failures reported so far
   vi.mocked(reportUnansweredRequest).mockClear()
-  vi.mocked(reportForeignRefusal).mockClear()
 })
 
 describe('fetchApiResult', () => {
@@ -77,18 +72,18 @@ describe('fetchApiResult', () => {
 
   it('reads the failure code off the refusal body', async () => {
     // A route naming what it refused on
-    answerWith(JSON.stringify({ errorCode: 'FILE_TOO_LARGE' }), {
+    answerWith(JSON.stringify({ errorCode: 'VALIDATION_FAILED' }), {
       status: 400,
       statusText: 'Bad Request',
       headers: JSON_HEADERS,
     })
 
     // The call, settled
-    const result = await fetchApiResult('/api/files/upload-url')
+    const result = await fetchApiResult('/api/contact')
 
     // The code is what picks the copy the reader is shown
     expect(result.success).toBe(false)
-    expect(result.success === false && result.error.errorCode).toBe('FILE_TOO_LARGE')
+    expect(result.success === false && result.error.errorCode).toBe('VALIDATION_FAILED')
   })
 
   it('drops a code it does not recognize', async () => {
@@ -111,7 +106,7 @@ describe('fetchApiResult', () => {
     answerWith(JSON.stringify({ key: 'files/abc.png' }), { status: 200, headers: JSON_HEADERS })
 
     // The call, settled
-    const result = await fetchApiResult<{ key: string }>('/api/files/upload-url')
+    const result = await fetchApiResult<{ key: string }>('https://api.example.test/files')
 
     // The parsed body is the success
     expect(result).toEqual({ success: true, data: { key: 'files/abc.png' } })
@@ -154,20 +149,6 @@ describe('fetchApiResult', () => {
 
     // No status, since nothing reached a server, and no code, since the client had no name for it
     expect(result).toEqual({ success: false, error: { message: 'Failed to fetch' } })
-  })
-
-  it('hands a refusal to the refusal reporter, which decides whose server it was', async () => {
-    // A refusal from the file store
-    answerWith('<Error><Code>AccessDenied</Code></Error>', { status: 403 })
-
-    // The call, settled
-    await fetchApiResult('https://store.example.test/user-uploads/a.png')
-
-    // The refusal reaches the reporter with its status
-    expect(reportForeignRefusal).toHaveBeenCalledWith(
-      'https://store.example.test/user-uploads/a.png',
-      403
-    )
   })
 
   it('never reports a request that got an answer as unanswered', async () => {

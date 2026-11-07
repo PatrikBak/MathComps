@@ -6,7 +6,7 @@ A Next.js application for browsing and searching mathematical competition proble
 
 - **`src/app/`** – Next.js App Router pages
   - `[locale]/` – Localized routes (English canonical: `problems`, `handouts`, `news`, etc.)
-  - `api/` – API routes (contact form, file uploads, webhooks)
+  - `api/` – API routes (contact form, error relay, webhooks)
 - **`src/components/`** – React components organized by purpose
   - `features/` – Page-specific feature components (problems, handouts, defense, contact, etc.)
   - `shared/` – Reusable components and utilities
@@ -38,7 +38,7 @@ npm install
 
 ### 2. Environment Configuration (Optional)
 
-Most of the application works out of the box with sensible defaults. You only need to configure environment variables if you want to use the contact form, authentication, or file upload functionality.
+Most of the application works out of the box with sensible defaults. You only need to configure environment variables if you want to use the contact form or authentication.
 
 #### Authentication (Clerk)
 
@@ -74,20 +74,13 @@ The form's one bot defense is the hidden `website` honeypot field: a submission 
 
 #### File Storage (Cloudflare R2)
 
-For file upload functionality (e.g., image attachments), configure Cloudflare R2 storage:
+Handout files and problem figures load from the public bucket's address:
 
 ```bash
-# Cloudflare R2 Configuration
-R2_BUCKET_NAME=your-bucket-name
-CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
-R2_ACCESS_KEY_ID=your-r2-access-key-id
-R2_SECRET_ACCESS_KEY=your-r2-secret-access-key
 NEXT_PUBLIC_R2_URL=https://your-bucket.r2.dev
 ```
 
-These credentials can be obtained from the [Cloudflare Dashboard](https://dash.cloudflare.com/) under R2 Object Storage.
-
-**Development Mode:** Leave R2 variables empty during development – file upload features will be disabled, but the rest of the application will work normally.
+Files people upload into the editor go through the API, which keeps them in the private bucket and hands out a link to each, so the website holds no R2 keys.
 
 #### Error Reporting (Better Stack)
 

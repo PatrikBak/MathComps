@@ -537,11 +537,12 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             context.DefenseTurns.AddRange(oldestReply, newerReply, newestReply, competitionReply);
 
             // The oldest pressed on past a finished proof, in the wrong language and taking the student for a man or
-            // a woman, before the draft that went out
+            // a woman, before the draft that went out ended the examination
             context.DefenseTurnAttempts.AddRange(
                 NewAttempt(OldestSessionId, oldestReply.Id, attemptIndex: 0, "keep going",
                     withholdsClose: true, switchesLanguage: true, gendersTheReader: true),
-                NewAttempt(OldestSessionId, oldestReply.Id, attemptIndex: 1, "a closing reply"));
+                NewAttempt(OldestSessionId, oldestReply.Id, attemptIndex: 1, "a closing reply",
+                    closesComplete: true));
 
             // The newer got a claim wrong in the wrong language, then gave something away, and only then went out
             // clean, so the switched language and the leak never share a draft
@@ -603,6 +604,8 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
                 new AdminDefenseQueueFilter(CaughtFlaws: [ExaminerFlaw.WrongClaim]), 1, "newer"),
             ("a leak in two, one of them the seed's own sent-back draft",
                 new AdminDefenseQueueFilter(CaughtFlaws: [ExaminerFlaw.Leak]), 2, "newest, newer"),
+            ("an early close in one, the seed's own sent-back draft, though another closed too",
+                new AdminDefenseQueueFilter(CaughtFlaws: [ExaminerFlaw.EarlyClose]), 1, "newest"),
             ("a withheld close in one, though another's solution was complete too",
                 new AdminDefenseQueueFilter(CaughtFlaws: [ExaminerFlaw.WithheldClose]), 1, "oldest"),
             ("a switched language in three",

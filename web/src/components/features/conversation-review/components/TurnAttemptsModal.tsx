@@ -18,6 +18,8 @@ import { totalDurationMs } from '../model/turn-durations'
 type TurnAttemptsModalProps = {
   /** The drafts behind one reply, in the order they were made; null while none is being read. */
   attempts: DefenseTurnAttempt[] | null
+  /** Whether the examiner the conversation ran on checked how a reply addresses its author. */
+  isAddressChecked: boolean
   /** Closes it. */
   onClose: () => void
 }
@@ -34,7 +36,7 @@ type TurnAttemptsModalProps = {
  * It opens as a dialog rather than a third panel: a run can be four drafts long, each the size of a reply,
  * and the dialog it opens over is already carrying the conversation beside the reference solution.
  */
-export function TurnAttemptsModal({ attempts, onClose }: TurnAttemptsModalProps) {
+export function TurnAttemptsModal({ attempts, isAddressChecked, onClose }: TurnAttemptsModalProps) {
   // Shared conversation-dialog copy about the drafts
   const t = useTranslations('conversationReview.attempts')
 
@@ -74,6 +76,7 @@ export function TurnAttemptsModal({ attempts, onClose }: TurnAttemptsModalProps)
               key={attempt.attemptIndex}
               attempt={attempt}
               status={statusOf(attempt, index, drafts.length)}
+              isAddressChecked={isAddressChecked}
             />
           ))}
         </div>
@@ -159,17 +162,51 @@ type AttemptProps = {
   attempt: DefenseTurnAttempt
   /** How it ended; null where saying so would tell the reader nothing. */
   status: AttemptStatus | null
+  /** Whether a guard checked how the draft addresses the conversation's author. */
+  isAddressChecked: boolean
 }
 
 /**
  * One draft: what sent it back, what it said, what the guards made of it, and what it took.
+ *
+ * A guard the conversation's examiner did not have yet never judged the draft, so its clean verdict reads as not
+ * checked: a draft with no route-check call, or one from a conversation whose examiner had no address check.
  */
-function Attempt({ attempt, status }: AttemptProps) {
+function Attempt({ attempt, status, isAddressChecked }: AttemptProps) {
   // Shared conversation-dialog copy about the drafts
   const t = useTranslations('conversationReview.attempts')
 
   // Locale-aware number rendering, for the draft's spend
   const format = useFormatter()
+
+  // Whether the draft's ending is a flaw: it ended with a step still owed, or asked on over a complete solution
+  const closeIsFlagged = attempt.mathCloses !== attempt.mathComplete
+
+  // What a flawed ending says: the step still owed, or that the solution was already complete, with the
+  // argument the older check summarized where it wrote one
+  const closeFlagged = attempt.mathCloses
+    ? t('verdicts.closesEarly', { owed: attempt.mathOwed })
+    : attempt.established === ''
+      ? t('verdicts.withholdsClose')
+      : t('verdicts.withholdsCloseEstablished', { established: attempt.established })
+
+  // What a sound ending says: that it closed a complete solution, or what is still owed where the check listed
+  // it. A draft recorded before the check judged completeness lists nothing, so it says only that no close was
+  // missed
+  const closeClean = attempt.mathCloses
+    ? t('verdicts.closesComplete')
+    : attempt.mathOwed === ''
+      ? t('verdicts.closeClean')
+      : t('verdicts.closeOwed', { owed: attempt.mathOwed })
+
+  // What a takeover says: the answer the reply fished for, and the work it left where the check named it
+  const routeFlagged =
+    attempt.candidateWork === ''
+      ? t('verdicts.takesOver', { restatedReferenceStep: attempt.restatedReferenceStep })
+      : t('verdicts.takesOverWork', {
+          restatedReferenceStep: attempt.restatedReferenceStep,
+          candidateWork: attempt.candidateWork,
+        })
 
   return (
     <section>
@@ -225,9 +262,9 @@ function Attempt({ attempt, status }: AttemptProps) {
         />
         <Verdict
           label={t('verdicts.close')}
-          isFlagged={attempt.withholdsClose}
-          flagged={t('verdicts.withholdsClose', { established: attempt.established })}
-          clean={t('verdicts.closeClean')}
+          isFlagged={closeIsFlagged}
+          flagged={closeFlagged}
+          clean={closeClean}
         />
         <Verdict
           label={t('verdicts.language')}
@@ -239,19 +276,16 @@ function Attempt({ attempt, status }: AttemptProps) {
           label={t('verdicts.address')}
           isFlagged={attempt.gendersTheReader}
           flagged={t('verdicts.gendersTheReader')}
-          clean={t('verdicts.addressClean')}
+          clean={isAddressChecked ? t('verdicts.addressClean') : t('verdicts.unchecked')}
         />
-        {/* Route. An attempt with no route-check call was never judged, so a false flag says nothing about it */}
         <Verdict
           label={t('verdicts.route')}
           isFlagged={attempt.takesOver}
-          flagged={t('verdicts.takesOver', {
-            restatedReferenceStep: attempt.restatedReferenceStep,
-          })}
+          flagged={routeFlagged}
           clean={
             attempt.calls.some((call) => call.step === 'routeCheck')
               ? t('verdicts.routeClean')
-              : t('verdicts.routeUnknown')
+              : t('verdicts.unchecked')
           }
         />
       </ul>
@@ -279,8 +313,8 @@ type VerdictProps = {
 /**
  * One guard's verdict, with what it caught when it caught something.
  *
- * A guard writes the correction, the leak and the established argument itself, so a verdict carries whatever
- * math it wrote them in and reads through the same renderer the draft above it does.
+ * A guard writes what it reports itself (the correction, the leak, the step still owed), so a verdict carries
+ * whatever math it wrote them in and reads through the same renderer the draft above it does.
  */
 function Verdict({ label, isFlagged, flagged, clean }: VerdictProps) {
   return (
@@ -375,6 +409,7 @@ function Call({ call }: CallProps) {
           label={t('tokens')}
           value={t('tokenCounts', {
             promptTokens: format.number(call.promptTokens),
+            cachedPromptTokens: format.number(call.cachedPromptTokens),
             completionTokens: format.number(call.completionTokens),
             reasoningTokens: format.number(call.reasoningTokens),
           })}

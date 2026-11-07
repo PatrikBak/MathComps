@@ -3,12 +3,7 @@ import { toast } from 'sonner'
 import { pixelWidthOf, readPngDpi } from '@/components/shared/utils/image-utils'
 import { errorCodeOf, errorDataOf } from '@/lib/api/api-error'
 import { type ApiErrorTranslator, resolveErrorMessage } from '@/lib/api/api-error-utils'
-import {
-  type FileType,
-  isAllowedMimeType,
-  uploadAttachment,
-  uploadImage,
-} from '@/lib/file-upload-utils'
+import { type FileType, isAllowedMimeType } from '@/lib/file-upload-utils'
 
 /** The attachment limit of an editor whose config sets none */
 export const MAX_EDITOR_ATTACHMENTS = 3
@@ -91,7 +86,7 @@ export function imageScaleOf({ dpi, screenDensity, pixelWidth }: ImageScaleOptio
 }
 
 /**
- * A file the editor has stored, and what its markdown is built from.
+ * An uploaded file, and what its markdown is built from.
  */
 type StoredUpload = {
   /** The file as it was handed to the editor. */
@@ -105,11 +100,9 @@ type StoredUpload = {
 }
 
 /**
- * How one kind of file reaches the editor's text: where it is stored, and what it is written as.
+ * How one kind of file reaches the editor's text once it is stored.
  */
 type EditorUpload = {
-  /** Stores the file, resolving to the key it is kept under. */
-  store: (file: File) => Promise<string>
   /** The name the file reads by in the text. */
   nameOf: (file: File) => string
   /** The markdown a stored file is written as. */
@@ -147,7 +140,6 @@ async function imageMarkdownOf({ file, name, key, screenDensity }: StoredUpload)
  */
 export const EDITOR_UPLOADS: Record<FileType, EditorUpload> = {
   image: {
-    store: uploadImage,
     // An image reads by its alt text, which the extension has no place in
     nameOf: (file) => file.name.replace(/\.[^/.]+$/, ''),
     toMarkdown: imageMarkdownOf,
@@ -155,7 +147,6 @@ export const EDITOR_UPLOADS: Record<FileType, EditorUpload> = {
     cursorFromEnd: 1,
   },
   attachment: {
-    store: uploadAttachment,
     nameOf: (file) => file.name,
     toMarkdown: async ({ name, key }) => `[📎 ${name}](media:${key})`,
     // After the whole link

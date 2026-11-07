@@ -16,6 +16,11 @@ public enum ExaminerFlaw
     Leak,
 
     /// <summary>
+    /// An ending of the examination while a step of the candidate's solution is still owed.
+    /// </summary>
+    EarlyClose,
+
+    /// <summary>
     /// More demanded of a candidate whose solution was already complete.
     /// </summary>
     WithheldClose,

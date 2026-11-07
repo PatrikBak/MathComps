@@ -1,5 +1,6 @@
 import { cn } from '@/components/shared/utils/css-utils'
 
+import { useOwnFileLinks } from '../hooks/use-own-file-links'
 import { type NumberReferenceRenderer, RichMathEditorRenderer } from './RichMathEditorRenderer'
 
 /**
@@ -22,12 +23,16 @@ export function RichMathEditorPreview({
   renderNumberReference,
   className,
 }: RichMathEditorPreviewProps) {
+  // The links to the files the writer uploaded into the text
+  const fileLinks = useOwnFileLinks(content)
+
   // The rendered text
   return (
     <div className={cn('px-3 py-2 text-sm leading-relaxed text-muted-foreground', className)}>
       <RichMathEditorRenderer
         content={content}
         imageContext="userUploads"
+        fileLinks={fileLinks}
         renderNumberReference={renderNumberReference}
       />
     </div>

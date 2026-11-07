@@ -1,20 +1,13 @@
 import * as Sentry from '@sentry/nextjs'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { reportForeignRefusal, reportUnansweredRequest } from '../report-request-failure'
+import { reportUnansweredRequest } from '../report-request-failure'
 
 /**
  * Stand in for error tracking, so a test can read what reached it.
  */
 vi.mock('@sentry/nextjs', () => ({
   captureException: vi.fn(),
-}))
-
-/**
- * Stand in for the configured API address.
- */
-vi.mock('@/components/shared/utils/env-utils', () => ({
-  getOptionalEnv: () => 'https://api.example.test',
 }))
 
 /**
@@ -61,11 +54,8 @@ describe('reportUnansweredRequest', () => {
 
     // Each failure reaches the reporter
     reportUnansweredRequest('/api/contact', first)
-    reportUnansweredRequest('https://mathcomps.fun/api/files/upload-url', second)
-    reportUnansweredRequest(
-      'https://bucket.example.test/user-uploads/a.png?X-Amz-Signature=abc',
-      third
-    )
+    reportUnansweredRequest('https://mathcomps.fun/api/relay', second)
+    reportUnansweredRequest('https://cdn.example.test/figures/a.png', third)
 
     // One report per host, so a visitor's bad connection files a single event
     expect(reportedErrors().map((report) => report.cause)).toEqual([first, third])
@@ -90,28 +80,5 @@ describe('reportUnansweredRequest', () => {
 
     // Only the online one is reported, and the offline one did not use up the host's report
     expect(reportedErrors().map((report) => report.cause)).toEqual([onlineFailure])
-  })
-})
-
-describe('reportForeignRefusal', () => {
-  it('reports a foreign refusal once per host and status', () => {
-    // The file store refusing twice with one status and once with another
-    reportForeignRefusal('https://store.example.test/user-uploads/a.png?X-Amz-Signature=abc', 403)
-    reportForeignRefusal('https://store.example.test/user-uploads/b.png?X-Amz-Signature=def', 403)
-    reportForeignRefusal('https://store.example.test/user-uploads/c.png?X-Amz-Signature=ghi', 400)
-
-    // One report per kind of refusal, so a visitor's repeated attempts file a single event each
-    expect(reportedErrors()).toHaveLength(2)
-  })
-
-  it('leaves refusals from our own servers to them', () => {
-    // A refusal from one of the site's own routes
-    reportForeignRefusal('/api/files/upload-url', 500)
-
-    // A refusal from the API
-    reportForeignRefusal('https://api.example.test/comments', 500)
-
-    // Neither reaches error tracking from here
-    expect(reportedErrors()).toEqual([])
   })
 })

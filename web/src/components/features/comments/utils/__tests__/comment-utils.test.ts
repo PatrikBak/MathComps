@@ -17,6 +17,7 @@ const POSTED: CommentDto = {
   id: 'comment-1',
   author: { id: 'user_zuzana', name: 'Zuzana', avatarUrl: null },
   content: 'Too easy for the opener.',
+  fileLinks: {},
   createdAt: '2026-10-01T08:00:00.000Z',
   editedAt: null,
   isDeleted: false,
