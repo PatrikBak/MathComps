@@ -7,6 +7,8 @@ description: Use this skill to finalize a handout — add a completed one to the
 
 The user will name the handout (base filename, e.g. `adding-points`) or point at the `.tex` file(s), which are already final. Discover all `<base>.*.tex` in `data/handouts/` — those define the declared languages.
 
+**Then check the variants still say the same thing, before deriving anything.** Editing sessions run in one language, so the others go stale silently, and finalize is the last gate before they reach the site. Diff the command skeletons (`grep -o '^ *\\[A-Za-z]*'` per file) and the `\EnvId` order. Those catch structural drift only and match even when the prose has diverged, so then read every paragraph `git diff origin/main -- data/handouts/<base>.*.tex` shows changed, in each variant. Sync the differences with `handout-translate` before step 1, and never finalize around them.
+
 ## Workflow
 
 ### 1. Derive everything the `.tex` settles

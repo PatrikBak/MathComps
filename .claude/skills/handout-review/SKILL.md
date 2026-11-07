@@ -1,6 +1,6 @@
 ---
 name: handout-review
-description: Use this skill to math-check the solutions in one olympiad math handout `.tex` file. For each `\Problem` with a non-empty solution, spawns one parallel reviewer agent that verifies mathematical correctness — logical gaps, unstated assumptions, case-analysis errors, wrong lemmas — and flags any `\EnvId` name that gives the solution away, then produces a punch list. Trigger phrases — "review the math", "are these solutions correct", "math-check this handout", "verify the proofs", "do the problem names spoil anything". Do NOT use for spelling/typo proofreading (use `handout-typos`), prose/style polish (use `handout-editor`), or full-handout translation review (use `handout-translate`).
+description: Use this skill to math-check the solutions in one olympiad math handout `.tex` file. For each `\Problem` with a non-empty solution and each `\Theorem` with a non-empty proof, spawns one parallel reviewer agent that verifies mathematical correctness — logical gaps, unstated assumptions, case-analysis errors, wrong lemmas — and flags any `\EnvId` name that gives the solution away, sweeps the figures for objects the text names but the picture omits, then produces a punch list. Trigger phrases — "review the math", "are these solutions correct", "math-check this handout", "verify the proofs", "do the problem names spoil anything", "do the figures show everything the text names". Do NOT use for spelling/typo proofreading (use `handout-typos`), prose/style polish (use `handout-editor`), or full-handout translation review (use `handout-translate`).
 ---
 
 # Handout Review
@@ -9,17 +9,18 @@ You are a critical math reviewer for olympiad handouts. Your job is to find real
 
 ## Scope
 
-Math correctness only, plus two non-math checks that ride along on the same reviewers: whether a problem's `\EnvId` name gives its solution away (see [Name leaks](#name-leaks)), and whether the solution bashes where a synthetic route exists (see [Bashing](#bashing)). Not style, not typos, not compile. One handout `.tex` file per invocation. Read-only — never apply edits during a review.
+Math correctness only, plus two non-math checks that ride along on the same reviewers: whether a problem's `\EnvId` name gives its solution away (see [Name leaks](#name-leaks)), and whether the solution bashes where a synthetic route exists (see [Bashing](#bashing)). One more pass runs beside the per-problem fanout: whether each figure actually draws the objects its text names (see [Missing figure objects](#missing-figure-objects)). Not style, not typos, not compile. One handout `.tex` file per invocation. Read-only — never apply edits during a review.
 
 ## Workflow
 
 1. Read the target `.tex` file.
-2. Identify each `\Problem{...}` block with a non-empty solution slot (the final brace-arg). Skip problems whose solution slot is empty `{}` — there is nothing to review.
+2. Identify each `\Problem{...}` block with a non-empty solution slot (the final brace-arg), and each `\Theorem{...}` with a non-empty proof slot; a theorem is reviewed the same way, with the author's route note (if the session had one) standing in for the hint ladder and the theory stated earlier in the file listed as what it may cite. Skip anything whose slot is empty `{}` — there is nothing to review.
 
    **Review what the invocation puts in scope, not reflexively the whole file.** Default to every filled problem, but when the caller names a subset (the problems just filled this session, one section, a list of `\EnvId`s), review exactly those. Re-reviewing solutions that already passed costs an agent each and buries the new findings in a wall of CORRECT. Whenever you scope down, name the skipped problems in the report, so a partial pass is never mistaken for a full one.
 3. **For each such problem, spawn one `general-purpose` Agent in parallel.** One agent reviews exactly one problem — never batch multiple problems into one agent. The fanout is the point: each reviewer arrives cold to one problem and is not influenced by neighboring solutions.
 4. Collect verdicts. **Sanity-check each** before relaying — reviewers are themselves imperfect, and an "INCORRECT" verdict is a signal, not a verdict. Spot-check the cited error against the solution; if the reviewer is the one who is wrong, say so and downgrade.
-5. Report a punch list to the user: per-problem verdict + the substantive issues + any name that leaks, with file-relative links to the problem in the form `[Pn](data/handouts/<file>.tex#Lstart-Lend)`. Do **not** apply edits.
+5. **In parallel with the per-problem agents, sweep the figures.** Map every environment to its `\Image` calls, group the environments into five or six batches, and give each batch one agent: list every object the environment's text names (points, segments, rays, circles, and the condition that defines a point, such as `AS ⊥ AT`), read what each `.asy` (plus any `<topic>-shared.asy` it includes) actually draws, report the difference. Points alone are not enough: a `LabeledDot`-only comparison passed 26 figures in one handout that omit a side, a defining circle or the arm of a marked right angle. See [Missing figure objects](#missing-figure-objects).
+6. Report a punch list to the user: per-problem verdict + the substantive issues + any name that leaks + any figure missing an object, with file-relative links to the problem in the form `[Pn](data/handouts/<file>.tex#Lstart-Lend)`. Do **not** apply edits.
 
 ## Reviewer agent prompt template
 
@@ -66,7 +67,13 @@ Every environment carries `\EnvId{<21-char nanoid>-<name>}`, and the name half l
 
 Adjudicate the flags rather than applying them. A name is a spoiler only when it names something the statement does not, so a `\Theorem` named after the theorem it states is fine, and so is a problem named after an object its own statement introduces. Require a replacement with every LEAKS, or the verdict is an opinion instead of a finding. Renaming is a source-only edit with no migration behind it; the leading 21 characters are what must never move.
 
-Two coverage limits, worth naming in the report when they bite: environments this review spawns no agent for (theorems, definitions, examples, and problems whose solution slot is empty) get no name check at all, and each reviewer sees only its own problem, so none of them can catch two names colliding.
+Two coverage limits, worth naming in the report when they bite: environments this review spawns no agent for (exercises, definitions, examples, and problems or theorems whose slot is empty) get no name check at all, and each reviewer sees only its own problem, so none of them can catch two names colliding.
+
+## Missing figure objects
+
+An object the prose names and the picture omits is a defect the per-problem reviewers never see, because they read the `.tex` and not the `.asy`.
+
+Adjudicate rather than relay. An object named in the STATEMENT and absent is always a defect. A point that exists as a `pair` but carries no `LabeledDot` is equally missing from the reader's view, and is a one-line fix. A figure that deliberately shows one stage is fine if the omitted points play no part in what that frame illustrates, and a two-frame pair covers a point if either frame labels it. Flag the reverse too: a labelled point the text never mentions.
 
 ## Bashing
 

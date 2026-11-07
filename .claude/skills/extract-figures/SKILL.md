@@ -27,6 +27,10 @@ Known failure modes to watch for, and the fix (re-run with the flag):
 - **A non-figure slipped in** (an equation block) — usually a √-heavy or boxed equation whose strokes aren't purely horizontal. Just delete its SVG.
 - **One figure split into pieces** — raise `--row-gap` (horizontal sequence) or `--gap` (clustering).
 - **A label is clipped, or prose got pulled in** — adjust `--label-probe` / `--label-max` / `--label-cap`.
+- **Point dots or other symbols are missing**: a Type 3 font draws them as `<g id="font_…">` groups, and the crop copies only `<path id="font_…">` glyphs, so their `<use>`s point at nothing (the preview render logs `svg: cannot find linked symbol`). Copy the missing `<g>` definitions from `page.get_svg_image(text_as_path=True)` into the figure's `<defs>`.
+- **A shape runs past the figure**: the crop ignores the page's clip paths. Call `crop_svg(page, box)` with the clip rectangle as the box, in page points with y growing downward. The clip `<path>` in the page SVG carries a y-flip transform, so measure it with `_element_bbox` rather than reading the PDF's numbers.
+- **A hatch, shading or embedded image is missing**: only `<path>` and glyph `<use>` elements are copied, so `<image>`, `<pattern>` and `<rect>` drop out (a plain fill or box is a `<path>` and survives). Restore them from the page SVG by hand.
+- **Dashed or dotted lines look solid in a preview**: the PNG previews draw them solid while the SVG keeps the dash pattern. Judge dashes in a `qlmanage` render of the SVG.
 
 All knobs are CLI flags that default to Czech-MO-tuned values — run with `-h` to list them, and override per-PDF instead of editing the script.
 
