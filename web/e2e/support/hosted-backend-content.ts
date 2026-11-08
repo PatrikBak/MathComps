@@ -106,6 +106,7 @@ export const LIMITS: DefenseLimits = {
   maxCandidateChars: 4000,
   maxFeedbackCommentChars: 1000,
   maxMessagesPerDefense: 20,
+  photoLongEdge: 2000,
 }
 
 /**

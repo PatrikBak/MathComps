@@ -13,14 +13,14 @@ import { getReadHandoutPhotoUrl, getReadProblemPhotoUrl } from './defense-api-ur
  *
  * @param apiCall - The authenticated API caller.
  * @param target - What the student is defending.
- * @param photo - The photo file as the student picked it.
+ * @param photo - The photo, as the student picked it or shrunk for the upload.
  * @param signal - Aborts the read.
  * @returns The page's text, with the kept photo and its drawings.
  */
 export function readPhoto(
   apiCall: ApiCaller,
   target: DefenseTarget,
-  photo: File,
+  photo: Blob,
   signal: AbortSignal
 ): Promise<ApiResult<DefensePhotoReading>> {
   // What a file the browser can't name the type of goes as

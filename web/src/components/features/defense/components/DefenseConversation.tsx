@@ -177,6 +177,7 @@ function DefenseConversationForTarget({
     deleteSession,
     draftStorageKey: defenseDraftStorageKey(problem.target),
     target: problem.target,
+    photoLongEdge: limits?.photoLongEdge ?? null,
   })
 
   // Where this conversation stands against the entry's clock
