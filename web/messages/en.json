@@ -672,6 +672,7 @@
       "add": "Photo",
       "addPage": "Add a page",
       "addTitle": "Take a photo of your solution or pick one",
+      "enlarge": "Enlarge photo {number}",
       "insert": "{count, plural, =0 {Insert into the message} one {Insert the page into the message} other {Insert # pages into the message}}",
       "inserted": "This page's text went into the message.",
       "messagePlaceholder": "The text from this photo goes here.",
@@ -1630,6 +1631,17 @@
       "failed": "Couldn't load more.",
       "loading": "Loading more…",
       "loadMore": "Load more"
+    },
+    "photoViewer": {
+      "carousel": "gallery",
+      "next": "Next photo",
+      "photos": "Photos",
+      "previous": "Previous photo",
+      "slide": "photo",
+      "slideCounter": "{index} of {total}",
+      "viewer": "Photo viewer",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
     },
     "userMenu": {
       "label": "User menu"

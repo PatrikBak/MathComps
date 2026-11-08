@@ -672,6 +672,7 @@
       "add": "Fotka",
       "addPage": "Pridať stranu",
       "addTitle": "Odfoť riešenie alebo vyber fotku",
+      "enlarge": "Zväčšiť fotku {number}",
       "insert": "{count, plural, =0 {Vložiť do správy} one {Vložiť stranu do správy} few {Vložiť # strany do správy} other {Vložiť # strán do správy}}",
       "inserted": "Text tejto strany už bol vložený do správy.",
       "messagePlaceholder": "Sem príde text z tejto fotky.",
@@ -1630,6 +1631,17 @@
       "failed": "Ďalšie sa nepodarilo načítať.",
       "loading": "Načítavam ďalšie…",
       "loadMore": "Načítať ďalšie"
+    },
+    "photoViewer": {
+      "carousel": "galéria",
+      "next": "Ďalšia fotka",
+      "photos": "Fotky",
+      "previous": "Predchádzajúca fotka",
+      "slide": "fotka",
+      "slideCounter": "{index} z {total}",
+      "viewer": "Prehliadač fotiek",
+      "zoomIn": "Priblížiť",
+      "zoomOut": "Oddialiť"
     },
     "userMenu": {
       "label": "Používateľské menu"

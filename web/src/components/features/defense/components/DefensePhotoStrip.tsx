@@ -29,10 +29,10 @@ type DefensePhotoTileProps = {
   photo: ComposerPhoto
   /** Where it stands among the composer's photos, from 1. */
   number: number
-  /** Whether it is the photo looked at in the review. */
+  /** Whether it is the photo looked at in the review, which a press enlarges. */
   isSelected: boolean
-  /** Looks at it in the review. */
-  onOpen: () => void
+  /** Looks at it in the review, or enlarges it once it is the one looked at. */
+  onPress: () => void
   /** Reads it again. */
   onRetry: () => void
   /** Drops it from the composer. */
@@ -46,7 +46,7 @@ function DefensePhotoTile({
   photo,
   number,
   isSelected,
-  onOpen,
+  onPress,
   onRetry,
   onRemove,
 }: DefensePhotoTileProps) {
@@ -93,6 +93,9 @@ function DefensePhotoTile({
     }
   })()
 
+  // What a press on the photo does, in words
+  const pressLabel = t(isSelected ? 'enlarge' : 'open', { number })
+
   // The photo, named by its place so its buttons say which photo they act on
   return (
     <div role="group" aria-label={t('photo', { number })} className="relative size-20 shrink-0">
@@ -112,10 +115,10 @@ function DefensePhotoTile({
             'size-full cursor-pointer',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus'
           )}
-          aria-label={t('open', { number })}
+          aria-label={pressLabel}
           aria-current={isSelected || undefined}
-          title={t('open', { number })}
-          onClick={onOpen}
+          title={pressLabel}
+          onClick={onPress}
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- a local preview, nothing for a server to optimize */}
           <img src={photo.previewUrl} alt="" className="size-full object-cover" />
@@ -140,13 +143,23 @@ function DefensePhotoTile({
 }
 
 /**
+ * The photo looked at in the review, marked among the others.
+ */
+type DefensePhotoStripSelection = {
+  /** The photo's id. */
+  id: number
+  /** Shows the photo large. */
+  onEnlarge: () => void
+}
+
+/**
  * Props for the {@link DefensePhotoStrip}.
  */
 type DefensePhotoStripProps = {
   /** The composer's photos and what can be done with them. */
   photos: UseDefensePhotosResult
   /** The photo looked at in the review, or null where none is marked. */
-  selectedId: number | null
+  selected: DefensePhotoStripSelection | null
   /** Looks at a photo in the review, given its id. */
   onOpen: (id: number) => void
   /** Classes for where the photos stand. */
@@ -161,7 +174,7 @@ type DefensePhotoStripProps = {
  */
 export function DefensePhotoStrip({
   photos,
-  selectedId,
+  selected,
   onOpen,
   className,
   children,
@@ -193,17 +206,23 @@ export function DefensePhotoStrip({
             className
           )}
         >
-          {photos.photos.map((photo, index) => (
-            <DefensePhotoTile
-              key={photo.id}
-              photo={photo}
-              number={index + 1}
-              isSelected={photo.id === selectedId}
-              onOpen={() => onOpen(photo.id)}
-              onRetry={() => photos.retryPhoto(photo.id)}
-              onRemove={() => photos.removePhotos([photo.id])}
-            />
-          ))}
+          {photos.photos.map((photo, index) => {
+            // Whether it is the photo looked at, which a press enlarges
+            const isSelected = selected !== null && selected.id === photo.id
+
+            // The photo's tile
+            return (
+              <DefensePhotoTile
+                key={photo.id}
+                photo={photo}
+                number={index + 1}
+                isSelected={isSelected}
+                onPress={isSelected ? selected.onEnlarge : () => onOpen(photo.id)}
+                onRetry={() => photos.retryPhoto(photo.id)}
+                onRemove={() => photos.removePhotos([photo.id])}
+              />
+            )
+          })}
           {children}
         </div>
       )}

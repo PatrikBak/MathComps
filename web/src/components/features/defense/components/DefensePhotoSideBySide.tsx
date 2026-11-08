@@ -4,14 +4,16 @@ import { useElementSize } from '@mantine/hooks'
 import { Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { Button } from '@/components/shared/components/Button'
+import { Button, FOCUS_RING_INSET_CLASS } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
+import { PhotoViewer } from '@/components/shared/components/PhotoViewer'
 import type { ToolbarConfig } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
 
+import { useDefensePhotoViewer } from '../hooks/use-defense-photo-viewer'
 import type { ComposerPhoto, UseDefensePhotosResult } from '../hooks/use-defense-photos'
 import { DefensePhotoButton } from './DefensePhotoButton'
 import { DefensePhotoStrip } from './DefensePhotoStrip'
@@ -26,12 +28,14 @@ type DefenseSidePhotoProps = {
   number: number
   /** The composer's photos and what can be done with them. */
   photos: UseDefensePhotosResult
+  /** Shows the photo large. */
+  onEnlarge: () => void
 }
 
 /**
- * One photo beside its text, with what its reading came to over it.
+ * One photo beside its text, with what its reading came to over it, enlarged by a press.
  */
-function DefenseSidePhoto({ photo, number, photos }: DefenseSidePhotoProps) {
+function DefenseSidePhoto({ photo, number, photos, onEnlarge }: DefenseSidePhotoProps) {
   // Copy for the composer's photos
   const t = useTranslations('defense.photos')
 
@@ -50,9 +54,14 @@ function DefenseSidePhoto({ photo, number, photos }: DefenseSidePhotoProps) {
       // The reading failed, so the photo offers another go
       case 'failed':
         return (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface/85 text-sm">
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface/85 text-sm">
             <p className="text-error">{t('readError')}</p>
-            <Button variant="secondary" size="sm" onClick={() => photos.retryPhoto(photo.id)}>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="pointer-events-auto"
+              onClick={() => photos.retryPhoto(photo.id)}
+            >
               {tActions('retry')}
             </Button>
           </div>
@@ -70,8 +79,17 @@ function DefenseSidePhoto({ photo, number, photos }: DefenseSidePhotoProps) {
       aria-label={t('photo', { number })}
       className="relative overflow-hidden rounded-lg border border-foreground/10"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- a local preview, nothing for a server to optimize */}
-      <img src={photo.previewUrl} alt={t('photo', { number })} className="w-full" />
+      <button
+        type="button"
+        // The photo clips, so the ring is drawn inside it
+        className={cn('block w-full cursor-zoom-in', FOCUS_RING_INSET_CLASS)}
+        aria-label={t('enlarge', { number })}
+        title={t('enlarge', { number })}
+        onClick={onEnlarge}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- a local preview, nothing for a server to optimize */}
+        <img src={photo.previewUrl} alt="" className="w-full" />
+      </button>
       {overlay}
     </section>
   )
@@ -226,8 +244,9 @@ type DefensePhotoSideBySideProps = {
 
 /**
  * Each page beside its text, read from the photo, for the student to check before the pages' text goes into the
- * message together. A phone has no room for both, so there the pages show as their tiles alone above the text.
- * Pages are added here; the message is written on and sent from the composer.
+ * message together. A phone has no room for both, so there the pages show as their tiles alone above the text. A
+ * press on the page looked at, its tile or its photo, shows the pages large over the whole screen. Pages are added
+ * here; the message is written on and sent from the composer.
  */
 export function DefensePhotoSideBySide({
   viewedPhotoId,
@@ -253,6 +272,9 @@ export function DefensePhotoSideBySide({
 
   // The photo looked at, none while the view is shut
   const viewed = photos.photos.find((photo) => photo.id === viewedPhotoId)
+
+  // The pages shown large over the whole screen
+  const viewer = useDefensePhotoViewer({ photos, onView })
 
   // Puts the read pages' text into the message and goes back to the composer
   const insert = () => {
@@ -304,7 +326,11 @@ export function DefensePhotoSideBySide({
           {/* Photos */}
           <div className="flex flex-col gap-3 sm:min-h-0">
             {/* Every page, the one looked at marked, then more */}
-            <DefensePhotoStrip photos={photos} selectedId={viewed?.id ?? null} onOpen={onView}>
+            <DefensePhotoStrip
+              photos={photos}
+              selected={viewed !== undefined ? { id: viewed.id, onEnlarge: viewer.enlarge } : null}
+              onOpen={onView}
+            >
               <DefensePhotoButton variant="page" onPick={onPick} />
             </DefensePhotoStrip>
 
@@ -315,6 +341,7 @@ export function DefensePhotoSideBySide({
                   photo={viewed}
                   number={photos.photos.indexOf(viewed) + 1}
                   photos={photos}
+                  onEnlarge={viewer.enlarge}
                 />
               )}
             </div>
@@ -329,7 +356,9 @@ export function DefensePhotoSideBySide({
                 maxCharacters={maxCharacters}
                 toolbar={toolbar}
                 heightPx={Math.floor(textColumnHeight)}
-                autoFocus={!isTouchOnly}
+                // A page swiped to while the pages are large comes up behind them, where taking the cursor would
+                // send the keys meant for the large page into its text
+                autoFocus={!isTouchOnly && !viewer.isEnlarged}
               />
             )}
           </div>
@@ -348,6 +377,17 @@ export function DefensePhotoSideBySide({
           {t('insert', { count: readCount })}
         </Button>
       </div>
+
+      {/* The pages large, swiped through from the one looked at */}
+      {viewed !== undefined && (
+        <PhotoViewer
+          photos={viewer.viewerPhotos}
+          index={photos.photos.indexOf(viewed)}
+          isOpen={viewer.isEnlarged}
+          onIndexChange={viewer.viewSwipedTo}
+          onClose={viewer.shrink}
+        />
+      )}
     </Modal>
   )
 }

@@ -190,7 +190,7 @@ export function DefenseComposer({
           {/* Photos the turn is written from */}
           <DefensePhotoStrip
             photos={photos}
-            selectedId={null}
+            selected={null}
             onOpen={review.view}
             className="mb-2"
           />

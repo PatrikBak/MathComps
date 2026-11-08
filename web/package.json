@@ -89,6 +89,7 @@
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
     "use-long-press": "^3.3.0",
+    "yet-another-react-lightbox": "^3.33.0",
     "zod": "^4.3.6",
     "zustand": "^5.0.10"
   },
