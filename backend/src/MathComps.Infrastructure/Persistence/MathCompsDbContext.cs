@@ -1609,6 +1609,18 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
              .WithOne(crop => crop.Photo)
              .HasForeignKey(crop => crop.PhotoId)
              .OnDelete(DeleteBehavior.Cascade);
+
+            // The message the photo went out with. A rewind or a deleted conversation drops the message, which sets
+            // this to null, so nobody is shown the photo any more and it can go out again.
+            e.HasOne(photo => photo.Turn)
+             .WithMany(turn => turn.Photos)
+             .HasForeignKey(photo => photo.TurnId)
+             .OnDelete(DeleteBehavior.SetNull);
+
+            // A message's photos in page order, unique so two can't share a place.
+            e.HasIndex(photo => new { photo.TurnId, photo.Position })
+             .IsUnique()
+             .HasDatabaseName("ux_defense_photo_turn_id_position");
         });
 
         #endregion DefensePhoto

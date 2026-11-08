@@ -44,6 +44,12 @@ public class DefenseTurn
     public List<DefenseTurnAttempt> Attempts { get; set; } = [];
 
     /// <summary>
+    /// The photos of handwritten pages the student sent the turn with, whose text its content carries; empty on a turn
+    /// sent as text alone and on every examiner turn.
+    /// </summary>
+    public List<DefensePhoto> Photos { get; set; } = [];
+
+    /// <summary>
     /// When the turn was recorded.
     /// </summary>
     public required DateTimeOffset CreatedAt { get; set; }

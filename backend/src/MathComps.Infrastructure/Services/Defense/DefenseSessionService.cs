@@ -34,7 +34,8 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// <param name="examiner">The engine that produces the examiner's reply.</param>
 /// <param name="localization">Resolves the localized names a competition problem is listed under.</param>
 /// <param name="members">Reads when a student started preparing the competitions.</param>
-/// <param name="defenseLimits">The input, message, and spend caps.</param>
+/// <param name="photoFiles">The links to the photos a message was sent with and the drawings cut out of them.</param>
+/// <param name="defenseLimits">The caps on a defense.</param>
 public class DefenseSessionService(
     IDefenseTargetGuard targetGuard,
     IDefenseContentResolver<DefenseTarget> contentResolver,
@@ -44,11 +45,12 @@ public class DefenseSessionService(
     IExaminer examiner,
     IMetadataLocalizationService localization,
     IOrganizationMemberService members,
+    IDefensePhotoFiles photoFiles,
     IOptions<DefenseLimits> defenseLimits)
     : IDefenseSessionService
 {
     /// <summary>
-    /// The input, message, and spend caps.
+    /// The caps on a defense.
     /// </summary>
     private readonly DefenseLimits _limits = defenseLimits.Value;
 
@@ -72,6 +74,9 @@ public class DefenseSessionService(
 
         // Bound the student's message before doing anything with it.
         DefenseInputs.EnsureWithinLength(start.Request.Content, _limits.MaxCandidateChars);
+
+        // Cap the photos the message carries.
+        DefenseInputs.EnsureWithinPhotoCap(start.Request.PhotoIds, _limits.MaxPhotosPerMessage);
 
         // Whether this student may argue the target at all, settled before the content is so much as read: an
         // embargoed statement and its reference both ride back in the answer. Whether they hold an entry into it
@@ -123,8 +128,14 @@ public class DefenseSessionService(
         // Seed the examiner's opener, a canned greeting rather than an LLM turn.
         AppendTurn(session, TranscriptRole.Examiner, opener, seededAt);
 
+        // The photos the first message carries, refused before the engine spends anything on it.
+        var photos = await LoadUnsentPhotosAsync(dbContext, userId, start.Request.PhotoIds, cancellationToken);
+
         // Seed the student's first message.
-        AppendTurn(session, TranscriptRole.Candidate, start.Request.Content, seededAt);
+        var opening = AppendTurn(session, TranscriptRole.Candidate, start.Request.Content, seededAt);
+
+        // Attach the photos to the student's message.
+        AttachPhotos(opening, photos);
 
         // Run the engine over the seed and stage its reply and spend row.
         await RunExaminerAndStageAsync(dbContext, session, userId, !holdsHostedEntry, cancellationToken);
@@ -144,13 +155,16 @@ public class DefenseSessionService(
 
     /// <inheritdoc/>
     public async Task<DefenseSessionDto> ContinueAsync(
-        Guid userId, Guid sessionId, string content, CancellationToken cancellationToken = default)
+        Guid userId, Guid sessionId, ContinueDefenseRequest request, CancellationToken cancellationToken = default)
     {
         // Reject a blank message before anything else; there's nothing to defend.
-        DefenseInputs.EnsureNotBlank(content);
+        DefenseInputs.EnsureNotBlank(request.Content);
 
         // Bound the message before doing anything with it.
-        DefenseInputs.EnsureWithinLength(content, _limits.MaxCandidateChars);
+        DefenseInputs.EnsureWithinLength(request.Content, _limits.MaxCandidateChars);
+
+        // Cap the photos the message carries.
+        DefenseInputs.EnsureWithinPhotoCap(request.PhotoIds, _limits.MaxPhotosPerMessage);
 
         // The moment the student sent this, taken before the gate below can keep it waiting.
         var sentAt = DateTimeOffset.UtcNow;
@@ -166,14 +180,16 @@ public class DefenseSessionService(
         // than the context around it, which the analyzer reads as disposed by the time the tree runs.
         var allEntries = dbContext.HostedEntries;
 
-        // The session with its turns (tracked, for the append below), the student's answer for it and what they
-        // hold against its replies, the columns of every target arm, of which the session's kind says which are
-        // filled, and whether they hold an entry into the round its problem sits in. Split, because turns and
-        // reports are two collections off one row: joined in a single query the database would return every
-        // pairing of them, each repeating the session's statement, reference, and settings snapshot. Another
-        // user's session never comes back from it, and a missing one reads the same.
+        // The session with its turns, the photos they were sent with and the drawings cut out of them (tracked, for
+        // the append below), the student's answer for it and what they hold against its replies, the columns of every
+        // target arm, of which the session's kind says which are filled, and whether they hold an entry into the round
+        // its problem sits in. Split, because turns and reports are each a collection off one row: joined in a single
+        // query the database would return every pairing of them, each repeating the session's statement, reference,
+        // and settings snapshot. Another user's session never comes back from it, and a missing one reads the same.
         var loaded = await dbContext.DefenseSessions
             .Include(defenseSession => defenseSession.Turns)
+            .ThenInclude(turn => turn.Photos)
+            .ThenInclude(photo => photo.Crops)
             .Include(defenseSession => defenseSession.Feedback)
             .Include(defenseSession => defenseSession.Reports)
             .AsSplitQuery()
@@ -219,12 +235,18 @@ public class DefenseSessionService(
         // written, so a read that fails leaves nothing saved.
         var gradedEntry = await FindGradedEntryAsync(dbContext, userId, target, cancellationToken);
 
+        // The photos the message carries, refused before the engine spends anything on it.
+        var photos = await LoadUnsentPhotosAsync(dbContext, userId, request.PhotoIds, cancellationToken);
+
         // When the student sent the message, or the stamp of a reply in this same conversation that landed while it
         // waited, if that is later: the message goes in below that reply, and the stamps keep to turn order.
         var stampedAt = session.Turns.Select(turn => turn.CreatedAt).Append(sentAt).Max();
 
         // Append the student's message.
-        AppendTurn(session, TranscriptRole.Candidate, content, stampedAt);
+        var message = AppendTurn(session, TranscriptRole.Candidate, request.Content, stampedAt);
+
+        // Attach the photos to the student's message.
+        AttachPhotos(message, photos);
 
         // Run the engine over the whole conversation and stage its reply and spend row.
         await RunExaminerAndStageAsync(
@@ -249,9 +271,13 @@ public class DefenseSessionService(
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         // The user's sessions against this target, most recently active first: when each started, its conversation
-        // in order, the statement it is argued against, the student's answer for it, and what they hold against its
-        // replies. Split, so the turns and the reports don't multiply out.
+        // in order with the photos its messages went out with and the drawings cut out of them, the statement it is
+        // argued against, the student's answer for it, and what they hold against its replies. Split, so the turns
+        // and the reports don't multiply out.
         var rows = await dbContext.DefenseSessions
+            .Include(session => session.Turns)
+            .ThenInclude(turn => turn.Photos)
+            .ThenInclude(photo => photo.Crops)
             .AsNoTracking()
             .AsSplitQuery()
             .Where(session => session.UserId == userId)
@@ -266,7 +292,8 @@ public class DefenseSessionService(
                 session.ProblemStatement,
                 Turns = session.Turns
                     .OrderBy(turn => turn.Sequence)
-                    .Select(turn => new DefenseTurnDto(turn.Id, turn.Role, turn.Content, turn.CreatedAt))
+                    .Select(turn => new DefenseTurnDto(
+                        turn.Id, turn.Role, turn.Content, turn.CreatedAt, photoFiles.LinksFor(turn.Photos)))
                     .ToList(),
                 Feedback = session.Feedback == null
                     ? null
@@ -298,7 +325,8 @@ public class DefenseSessionService(
         return new DefenseSessionListDto(
             sessions,
             new DefenseLimitsDto(
-                _limits.MaxCandidateChars, _limits.MaxFeedbackCommentChars, _limits.MaxMessagesPerDefense));
+                _limits.MaxCandidateChars, _limits.MaxFeedbackCommentChars, _limits.MaxMessagesPerDefense,
+                _limits.MaxPhotosPerMessage));
     }
 
     /// <inheritdoc/>
@@ -443,6 +471,43 @@ public class DefenseSessionService(
                     .Where(turn => turn.SessionId == sessionId && turn.Sequence > keepThroughSequence)
                     .ExecuteDeleteAsync(cancellationToken);
             }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Loads the photos a message is sent with, in the order the student sent them. Each has to be one of the
+    /// student's own that no message carries yet, named once.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context, which tracks the photos for the save that sends
+    /// them.</param>
+    /// <param name="userId">The student sending the message.</param>
+    /// <param name="photoIds">The photos the message carries, in page order, null when it carries none.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The photos with their drawings, in page order.</returns>
+    /// <exception cref="DefensePhotoNotFoundException">Thrown when any photo named can't go out with the
+    /// message.</exception>
+    private static async Task<IReadOnlyList<DefensePhoto>> LoadUnsentPhotosAsync(
+        MathCompsDbContext dbContext, Guid userId, IReadOnlyList<Guid>? photoIds,
+        CancellationToken cancellationToken)
+    {
+        // A message sent as text alone carries none.
+        if (photoIds is null or [])
+            return [];
+
+        // The ids the student named, in the order they sent them.
+        List<Guid> ids = [.. photoIds];
+
+        // The named photos of the student's that no message carries yet, with the drawings cut out of them.
+        var photos = await dbContext.DefensePhotos
+            .Include(photo => photo.Crops)
+            .Where(photo => ids.Contains(photo.Id) && photo.UserId == userId && photo.TurnId == null)
+            .ToListAsync(cancellationToken);
+
+        // A photo that isn't there, is someone else's, already went out, or is named twice leaves the count short.
+        if (photos.Count != ids.Count)
+            throw new DefensePhotoNotFoundException();
+
+        // Hand back the photos in the order the student sent them.
+        return [.. photos.OrderBy(photo => ids.IndexOf(photo.Id))];
     }
 
     /// <summary>
@@ -647,6 +712,24 @@ public class DefenseSessionService(
     }
 
     /// <summary>
+    /// Attaches a student's photos to their message, each at its place in page order.
+    /// </summary>
+    /// <param name="turn">The student's message.</param>
+    /// <param name="photos">The photos the message carries, in page order.</param>
+    private static void AttachPhotos(DefenseTurn turn, IReadOnlyList<DefensePhoto> photos)
+    {
+        // Walk the photos in page order.
+        foreach (var (position, photo) in photos.Index())
+        {
+            // Its place among the message's photos.
+            photo.Position = position;
+
+            // Held on the message, so the caller's save links it.
+            turn.Photos.Add(photo);
+        }
+    }
+
+    /// <summary>
     /// Builds the engine's transcript from a session's stored turns, in sequence order.
     /// </summary>
     /// <param name="turns">The session's turns.</param>
@@ -746,7 +829,7 @@ public class DefenseSessionService(
     /// The entry the student is graded on for what the session defends, null where nobody grades them on it.
     /// </param>
     /// <returns>The session's client shape.</returns>
-    private static DefenseSessionDto ToSessionDto(
+    private DefenseSessionDto ToSessionDto(
         DefenseSession session,
         DefenseTarget target,
         bool hasOlderStatement,
@@ -772,14 +855,16 @@ public class DefenseSessionService(
             : new DefenseFeedbackDto(feedback.Outcome, feedback.Comment);
 
     /// <summary>
-    /// Projects a session's turns to their client shape, in sequence order.
+    /// Projects a session's turns to their client shape, in sequence order, each with the links to its photos and
+    /// their drawings.
     /// </summary>
-    /// <param name="turns">The turns to project.</param>
+    /// <param name="turns">The turns to project, with their photos and the drawings cut out of them.</param>
     /// <returns>The turns' client shapes.</returns>
-    private static IReadOnlyList<DefenseTurnDto> ToTurnDtos(IEnumerable<DefenseTurn> turns) =>
+    private IReadOnlyList<DefenseTurnDto> ToTurnDtos(IEnumerable<DefenseTurn> turns) =>
         [.. turns
             .OrderBy(turn => turn.Sequence)
-            .Select(turn => new DefenseTurnDto(turn.Id, turn.Role, turn.Content, turn.CreatedAt))];
+            .Select(turn => new DefenseTurnDto(
+                turn.Id, turn.Role, turn.Content, turn.CreatedAt, photoFiles.LinksFor(turn.Photos)))];
 
     /// <summary>
     /// Projects a session's reports to their client shape.

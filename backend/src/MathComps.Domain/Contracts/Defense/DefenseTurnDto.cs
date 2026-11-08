@@ -9,4 +9,6 @@ namespace MathComps.Domain.Contracts.Defense;
 /// <param name="Role">Who authored the turn.</param>
 /// <param name="Content">The turn's text (markdown).</param>
 /// <param name="CreatedAt">When the turn was recorded.</param>
-public record DefenseTurnDto(Guid Id, TranscriptRole Role, string Content, DateTimeOffset CreatedAt);
+/// <param name="Photos">The turn's <see cref="DefenseTurn.Photos"/>, in page order.</param>
+public record DefenseTurnDto(
+    Guid Id, TranscriptRole Role, string Content, DateTimeOffset CreatedAt, IReadOnlyList<DefenseTurnPhotoDto> Photos);

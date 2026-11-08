@@ -2,7 +2,9 @@ using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Admin;
 using MathComps.Infrastructure.Services.ConversationReview;
+using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Localization;
+using MathComps.Infrastructure.Storage;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -37,6 +39,12 @@ public abstract class ConversationReviewPostgresTestBase<TService>(PostgresConta
 
         // The display names an archive problem is named by.
         services.AddSingleton<IMetadataLocalizationService, MetadataLocalizationService>();
+
+        // Links to the private store's files, each naming the file it reaches.
+        services.AddSingleton<IPrivateFileLinks, StandInFileLinks>();
+
+        // The links to the photos a message went out with.
+        services.AddSingleton<IDefensePhotoFiles, DefensePhotoFiles>();
     }
 
     /// <inheritdoc/>
