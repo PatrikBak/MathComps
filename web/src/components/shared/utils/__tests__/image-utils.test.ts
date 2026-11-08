@@ -3,7 +3,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { describe, expect, it } from 'vitest'
 
-import { readPngDpi } from '../image-utils'
+import { readPngDpi, shrunkSize } from '../image-utils'
 
 /** The folder this test file sits in */
 const TEST_DIR = path.dirname(fileURLToPath(import.meta.url))
@@ -126,5 +126,25 @@ describe('readPngDpi', () => {
 
     // And the chunk cut short read the same way
     expect(readPngDpi(cutShort)).toBeNull()
+  })
+})
+
+describe('shrunkSize', () => {
+  it('brings a landscape photo down to the edge across, keeping its shape', () => {
+    // A 48 MP phone photo held sideways
+    expect(shrunkSize({ width: 8000, height: 6000 }, 2000)).toEqual({ width: 2000, height: 1500 })
+  })
+
+  it('brings a portrait photo down to the edge along its height', () => {
+    // The same photo held upright
+    expect(shrunkSize({ width: 6000, height: 8000 }, 2000)).toEqual({ width: 1500, height: 2000 })
+  })
+
+  it('leaves an image whose longer side already fits, at the edge exactly or under it', () => {
+    // At the edge
+    expect(shrunkSize({ width: 2000, height: 1200 }, 2000)).toBeNull()
+
+    // Under it
+    expect(shrunkSize({ width: 800, height: 600 }, 2000)).toBeNull()
   })
 })

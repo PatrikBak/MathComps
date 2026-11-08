@@ -134,8 +134,8 @@ export type DefenseSession = {
 }
 
 /**
- * The caps a defense is held to: what a student may type, and how far a conversation may go. They are the
- * backend's own configuration, so they can change without a deploy.
+ * The caps a defense is held to: what a student may type, how large a photo of their work is read, and how
+ * far a conversation may go. They are the backend's own configuration, so they can change without a deploy.
  */
 export type DefenseLimits = {
   /** The longest a single student message may be, in characters. */
@@ -144,6 +144,8 @@ export type DefenseLimits = {
   maxFeedbackCommentChars: number
   /** The most messages the student may send in one conversation. */
   maxMessagesPerDefense: number
+  /** The most pixels a photo keeps along its longer side once read; a larger one is shrunk to it. */
+  photoLongEdge: number
 }
 
 /**

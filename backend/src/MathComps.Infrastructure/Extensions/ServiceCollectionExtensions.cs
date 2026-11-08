@@ -546,7 +546,7 @@ public static class ServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        // The caps a caller is told, read once from the defense caps.
+        // The caps a caller is told, read once from the defense caps and the photo reader's settings.
         services.TryAddSingleton<IDefenseLimitsProvider, DefenseLimitsProvider>();
 
         // How long the published handout content is trusted between revalidations.

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { assertNever } from '@/components/shared/utils/assert-never'
+import { shrinkToLongEdge } from '@/components/shared/utils/image-utils'
 import { apiCallOf, useApi } from '@/hooks/use-api'
 import { resolveErrorMessage } from '@/lib/api/api-error-utils'
 
@@ -123,15 +124,29 @@ function release(resources: PhotoResources): void {
 }
 
 /**
- * Reads the photos a student takes of their handwritten work. Every photo is read at once, and each one's text
- * waits beside its photo for the student to check, until the texts go into the message together in page order. A
- * failed read leaves its photo to be read again.
+ * The options the composer's photos are read with.
+ */
+type UseDefensePhotosOptions = {
+  /** What the student is defending. */
+  target: DefenseTarget
+  /** The most pixels a photo keeps along its longer side once read, or null while that is not known yet. */
+  photoLongEdge: number | null
+}
+
+/**
+ * Reads the photos a student takes of their handwritten work. Every photo is read at once, each shrunk first to
+ * the size the API reads it at, and the shrinks go one photo at a time. Each one's text waits beside its photo for
+ * the student to check, until the texts go into the message together in page order. A failed read leaves its photo
+ * to be read again.
  *
- * @param target - What the student is defending.
+ * @param options - The options the photos are read with.
  *
  * @returns The photos, and what can be done with them.
  */
-export function useDefensePhotos(target: DefenseTarget): UseDefensePhotosResult {
+export function useDefensePhotos({
+  target,
+  photoLongEdge,
+}: UseDefensePhotosOptions): UseDefensePhotosResult {
   // Defense-surface copy
   const t = useTranslations('defense')
 
@@ -150,6 +165,9 @@ export function useDefensePhotos(target: DefenseTarget): UseDefensePhotosResult 
   // What each held photo keeps beside it, under its id, which is where a dropped photo stops being found
   const resources = useRef(new Map<number, PhotoResources>())
 
+  // The shrink last queued, which the next waits behind so only one photo is held decoded at full size
+  const lastShrink = useRef<Promise<unknown>>(Promise.resolve())
+
   /**
    * A function which moves one held photo on, keeping its place.
    *
@@ -167,8 +185,21 @@ export function useDefensePhotos(target: DefenseTarget): UseDefensePhotosResult 
    * @param signal - Aborts the read once the photo is dropped.
    */
   const read = async (id: number, file: File, signal: AbortSignal) => {
+    // The photo shrunk to the size the API reads it at, so a big one uploads fast, after every photo picked
+    // before it. A photo dropped while it waits is never decoded
+    const shrunk = lastShrink.current.then(() =>
+      photoLongEdge === null || signal.aborted ? null : shrinkToLongEdge(file, photoLongEdge)
+    )
+
+    // The next photo's shrink waits behind this one
+    lastShrink.current = shrunk
+
+    // The photo that goes up, as picked while that size is not known, when it already fits, and when this
+    // browser cannot shrink it
+    const upload = (await shrunk) ?? file
+
     // The page as the API reads it, and nothing to say while there is nobody to read it as
-    const result = apiCall === null ? null : await readPhoto(apiCall, target, file, signal)
+    const result = apiCall === null ? null : await readPhoto(apiCall, target, upload, signal)
 
     // Dropped while it was read, so there is nothing to tell anyone
     if (signal.aborted) return

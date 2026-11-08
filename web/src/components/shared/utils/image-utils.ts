@@ -106,3 +106,92 @@ export async function pixelWidthOf(image: Blob): Promise<number | null> {
     return null
   }
 }
+
+/**
+ * A size in pixels.
+ */
+export type PixelSize = {
+  /** How many pixels across. */
+  width: number
+  /** How many pixels down. */
+  height: number
+}
+
+/**
+ * The size an image takes once its longer side is brought down to a given length, keeping its shape.
+ *
+ * @param size - The image's size.
+ * @param longEdge - The most pixels the longer side may keep.
+ *
+ * @returns The smaller size, each side at least a pixel, or null for an image whose longer side already fits.
+ */
+export function shrunkSize(size: PixelSize, longEdge: number): PixelSize | null {
+  // How far the image is scaled to bring its longer side to the edge
+  const scale = longEdge / Math.max(size.width, size.height)
+
+  // An image already within the edge keeps its size
+  if (scale >= 1) return null
+
+  // Both sides scaled alike to whole pixels, a sliver kept at least a pixel thick
+  return {
+    width: Math.max(1, Math.round(size.width * scale)),
+    height: Math.max(1, Math.round(size.height * scale)),
+  }
+}
+
+/**
+ * Shrinks an image so its longer side keeps at most a given length, as a JPEG turned the way its own
+ * orientation says.
+ *
+ * @param image - The image's file.
+ * @param longEdge - The most pixels the longer side may keep.
+ *
+ * @returns The shrunk JPEG, or null for an image whose longer side already fits and for one the browser
+ *   cannot decode or encode.
+ */
+export async function shrinkToLongEdge(image: Blob, longEdge: number): Promise<Blob | null> {
+  // The quality the shrunk image is encoded at, from 0 to 1
+  const JPEG_QUALITY = 0.9
+
+  // The image's pixels, turned the way it shows by default (Chrome and Edge before 112 throw on the option
+  // asking for that), or none for a file the browser cannot decode (HEIC outside Safari)
+  const bitmap = await createImageBitmap(image).catch(() => null)
+
+  // Nothing to shrink in a file that decodes as no image
+  if (bitmap === null) return null
+
+  // The image shrunk, its pixels let go of however that goes
+  try {
+    // The size its longer side brings it down to
+    const size = shrunkSize(bitmap, longEdge)
+
+    // An image already within the edge goes as it is
+    if (size === null) return null
+
+    // The canvas the shrunk image is drawn on
+    const canvas = new OffscreenCanvas(size.width, size.height)
+
+    // Its 2D drawing context
+    const context = canvas.getContext('2d')
+
+    // Nothing to draw with where the context is unavailable
+    if (context === null) return null
+
+    // A JPEG holds no transparency, so a see-through pixel lands on white like the paper, never on black
+    context.fillStyle = 'white'
+    context.fillRect(0, 0, size.width, size.height)
+
+    // The image drawn at its new size, smoothed so thin pen strokes survive the shrink
+    context.imageSmoothingQuality = 'high'
+    context.drawImage(bitmap, 0, 0, size.width, size.height)
+
+    // The drawing as a JPEG
+    return await canvas.convertToBlob({ type: 'image/jpeg', quality: JPEG_QUALITY })
+  } catch {
+    // A drawing the browser fails to encode leaves no shrunk image
+    return null
+  } finally {
+    // The decoded pixels, let go of
+    bitmap.close()
+  }
+}

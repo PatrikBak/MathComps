@@ -50,6 +50,8 @@ type DefenseTurnControlsInput = {
   draftStorageKey: string | null
   /** What the student is defending. */
   target: DefenseTarget
+  /** The most pixels a photo keeps along its longer side once read, or null while that is not known yet. */
+  photoLongEdge: number | null
 }
 
 /**
@@ -108,7 +110,10 @@ export function useDefenseTurnControls(
   const editorRef = useRef<RichMathEditorRef>(null)
 
   // The composer's photos, each one's text waiting beside it until it goes into the draft
-  const photos = useDefensePhotos(conversation.target)
+  const photos = useDefensePhotos({
+    target: conversation.target,
+    photoLongEdge: conversation.photoLongEdge,
+  })
 
   // The composer outlives the conversation it writes into, so hand it the cursor whenever another
   // one takes over
