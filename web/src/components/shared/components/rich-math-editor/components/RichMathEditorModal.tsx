@@ -120,6 +120,7 @@ export function RichMathEditorExpandedModal({
                 <RichMathEditorPreview
                   content={text.state.text}
                   renderNumberReference={renderNumberReference}
+                  followedTextarea={text.textareaRef}
                   className="mt-1 min-h-[200px] flex-1 overflow-y-auto border-t border-foreground/10"
                 />
               </div>

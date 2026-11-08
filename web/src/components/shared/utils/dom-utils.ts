@@ -53,14 +53,77 @@ export function ensureVisibleCaret(textarea: HTMLTextAreaElement): void {
   const caretTop =
     caretBottom - parseFloat(lineHeight) - parseFloat(paddingTop) - parseFloat(paddingBottom)
 
-  // A caret under the view comes up to its bottom edge
-  if (caretBottom > textarea.scrollTop + textarea.clientHeight) {
-    textarea.scrollTop = caretBottom - textarea.clientHeight
+  // The textarea's view as it stands
+  const view = { scrollTop: textarea.scrollTop, viewHeight: textarea.clientHeight }
+
+  // Scrolled to show the caret's line, flush with the view's edge where the line was out of view
+  textarea.scrollTop = scrollTopShowing(view, { top: caretTop, bottom: caretBottom }, 0)
+}
+
+/**
+ * The view of a scrolling box.
+ */
+export type ScrollView = {
+  /** How far the box is scrolled down, in px. */
+  scrollTop: number
+  /** How tall the part of the content the box shows is, in px. */
+  viewHeight: number
+}
+
+/**
+ * How far down a scrolling box's content a stretch of it starts and ends, in px.
+ */
+export type DepthSpan = {
+  /** The depth of the stretch's top. */
+  top: number
+  /** The depth of the stretch's bottom. */
+  bottom: number
+}
+
+/**
+ * Where an element stands in a scrolling box's content, however far the box is scrolled.
+ *
+ * @param element - The element, inside the box.
+ * @param box - The scrolling box.
+ * @returns How far down the box's content the element's top and bottom stand.
+ */
+export function depthSpanOf(element: Element, box: Element): DepthSpan {
+  // Where the box's content starts on screen, under its top border
+  const contentTop = box.getBoundingClientRect().top + box.clientTop - box.scrollTop
+
+  // The element on screen
+  const elementBox = element.getBoundingClientRect()
+
+  // The element's edges down the box's content
+  return { top: elementBox.top - contentTop, bottom: elementBox.bottom - contentTop }
+}
+
+/**
+ * Where a box scrolls to show a stretch of its content. The box moves only for a stretch reaching into the room by
+ * an edge of its view, or past that edge, and then just far enough to give the stretch that room back.
+ *
+ * @param view - The box's view as it stands.
+ * @param stretch - The stretch to show.
+ * @param room - How much room is wanted between the stretch and the view's edge, in px.
+ * @returns The scroll position showing the stretch.
+ */
+export function scrollTopShowing(view: ScrollView, stretch: DepthSpan, room: number): number {
+  // The most of the view the room takes at either edge, so a short view still has a middle to keep the stretch in
+  const MAX_ROOM_SHARE = 1 / 3
+
+  // The room, cut to the most of the view it may take
+  const margin = Math.min(room, view.viewHeight * MAX_ROOM_SHARE)
+
+  // A stretch reaching into the room under the top edge, or above it, comes down out of the room
+  if (stretch.top < view.scrollTop + margin) return Math.max(0, stretch.top - margin)
+
+  // A stretch reaching into the room over the bottom edge, or under it, comes up out of the room
+  if (stretch.bottom > view.scrollTop + view.viewHeight - margin) {
+    return stretch.bottom - view.viewHeight + margin
   }
-  // A caret over the view comes down to its top edge
-  else if (caretTop < textarea.scrollTop) {
-    textarea.scrollTop = caretTop
-  }
+
+  // A stretch clear of the room at both edges leaves the view where it is
+  return view.scrollTop
 }
 
 /**

@@ -130,6 +130,34 @@ export function cursorIn(textarea: Locator): Promise<number> {
 }
 
 /**
+ * Puts the cursor at a place in a textarea.
+ *
+ * @param textarea - The textarea.
+ * @param offset - How many characters are to precede the cursor.
+ */
+export async function putCursorAt(textarea: Locator, offset: number): Promise<void> {
+  // Set on the textarea itself
+  await textarea.evaluate((node: HTMLTextAreaElement, at) => node.setSelectionRange(at, at), offset)
+}
+
+/**
+ * Puts the cursor in a textarea right after the first place a text stands in it.
+ *
+ * @param textarea - The textarea.
+ * @param text - The text the cursor is to follow.
+ */
+export async function putCursorAfter(textarea: Locator, text: string): Promise<void> {
+  // Set on the textarea itself
+  await textarea.evaluate((node: HTMLTextAreaElement, preceding) => {
+    // Where the text ends
+    const offset = node.value.indexOf(preceding) + preceding.length
+
+    // The cursor at the text's end
+    node.setSelectionRange(offset, offset)
+  }, text)
+}
+
+/**
  * How many pixels wide an image's file is, which is none until it has loaded.
  *
  * @param image - The image.
@@ -249,24 +277,28 @@ export async function longPressByTouch(page: Page, target: Locator): Promise<voi
 }
 
 /**
- * Has the page draw a blank PNG one pixel high, which every browser decodes.
+ * Has the page draw a blank PNG, which every browser decodes.
  *
  * @param page - The page drawing the image.
  * @param width - How many pixels wide the image is.
+ * @param height - How many pixels high the image is.
  *
  * @returns The image's bytes.
  */
-export async function blankPng(page: Page, width: number): Promise<Buffer> {
-  // The image as a data URL, drawn on a canvas that wide
-  const dataUrl = await page.evaluate((canvasWidth) => {
-    // A canvas that wide and one pixel high
-    const canvas = document.createElement('canvas')
-    canvas.width = canvasWidth
-    canvas.height = 1
+export async function blankPng(page: Page, width: number, height: number): Promise<Buffer> {
+  // The image as a data URL, drawn on a canvas that size
+  const dataUrl = await page.evaluate(
+    ([canvasWidth, canvasHeight]) => {
+      // A canvas that size
+      const canvas = document.createElement('canvas')
+      canvas.width = canvasWidth
+      canvas.height = canvasHeight
 
-    // Its blank pixels, encoded as a PNG
-    return canvas.toDataURL('image/png')
-  }, width)
+      // Its blank pixels, encoded as a PNG
+      return canvas.toDataURL('image/png')
+    },
+    [width, height]
+  )
 
   // The bytes the data URL carries after its header
   return Buffer.from(dataUrl.slice(dataUrl.indexOf(',') + 1), 'base64')

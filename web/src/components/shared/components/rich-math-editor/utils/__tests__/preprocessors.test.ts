@@ -9,71 +9,112 @@ import {
 describe('preprocessDisplayMath', () => {
   describe('basic conversion', () => {
     it('converts inline display math to block format', () => {
-      const result = preprocessDisplayMath('text $$x^2$$ more')
+      // A formula mid-line, rewritten
+      const result = preprocessDisplayMath('text $$x^2$$ more').text
+
+      // On lines of its own, between the prose around it
       expect(result).toBe('text \n$$\nx^2\n$$\n more')
     })
 
     it('handles already-block display math', () => {
-      const result = preprocessDisplayMath('text\n$$\nx^2\n$$\nmore')
+      // A formula already on lines of its own, rewritten
+      const result = preprocessDisplayMath('text\n$$\nx^2\n$$\nmore').text
+
+      // Set off by a blank line on each side
       expect(result).toBe('text\n\n$$\nx^2\n$$\n\nmore')
     })
 
     it('trims whitespace inside math', () => {
-      const result = preprocessDisplayMath('$$  x^2  $$')
+      // A formula padded with spaces, rewritten
+      const result = preprocessDisplayMath('$$  x^2  $$').text
+
+      // With the spaces trimmed
       expect(result).toBe('\n$$\nx^2\n$$\n')
     })
   })
 
   describe('complex math', () => {
     it('handles fractions', () => {
-      const result = preprocessDisplayMath('$$\\frac{a}{b}$$')
+      // A fraction, rewritten
+      const result = preprocessDisplayMath('$$\\frac{a}{b}$$').text
+
+      // With its backslashes kept
       expect(result).toBe('\n$$\n\\frac{a}{b}\n$$\n')
     })
 
     it('handles multiline math', () => {
-      const result = preprocessDisplayMath('$$a + b\n= c$$')
+      // A formula over two lines, rewritten
+      const result = preprocessDisplayMath('$$a + b\n= c$$').text
+
+      // With both lines inside the block
       expect(result).toBe('\n$$\na + b\n= c\n$$\n')
     })
 
     it('handles multiple display math blocks', () => {
-      const result = preprocessDisplayMath('$$a$$ and $$b$$')
+      // Two formulas on one line, rewritten
+      const result = preprocessDisplayMath('$$a$$ and $$b$$').text
+
+      // Each on lines of its own
       expect(result).toBe('\n$$\na\n$$\n and \n$$\nb\n$$\n')
     })
   })
 
   describe('edge cases', () => {
     it('does not affect inline math', () => {
-      expect(preprocessDisplayMath('text $x^2$ more')).toBe('text $x^2$ more')
+      // Inline maths, rewritten
+      const result = preprocessDisplayMath('text $x^2$ more').text
+
+      // Left as written
+      expect(result).toBe('text $x^2$ more')
     })
 
     it('returns original when no display math', () => {
-      expect(preprocessDisplayMath('Just text')).toBe('Just text')
+      // Plain text, rewritten
+      const result = preprocessDisplayMath('Just text').text
+
+      // Left as written
+      expect(result).toBe('Just text')
     })
 
     it('handles empty display math', () => {
-      const result = preprocessDisplayMath('$$$$')
+      // An empty formula, rewritten
+      const result = preprocessDisplayMath('$$$$').text
+
+      // An empty block
       expect(result).toBe('\n$$\n\n$$\n')
     })
   })
 
   describe('indentation preservation — own-line $$', () => {
     it('preserves 2-space indent (matches a `- ` marker depth)', () => {
-      const result = preprocessDisplayMath('  $$x = 1$$')
+      // A formula indented two spaces, rewritten
+      const result = preprocessDisplayMath('  $$x = 1$$').text
+
+      // With every line of the block indented the same
       expect(result).toBe('  \n  $$\n  x = 1\n  $$\n')
     })
 
     it('preserves 3-space indent (deeper than `- ` continuation)', () => {
-      const result = preprocessDisplayMath('   $$x = 1$$')
+      // A formula indented three spaces, rewritten
+      const result = preprocessDisplayMath('   $$x = 1$$').text
+
+      // With every line of the block indented the same
       expect(result).toBe('   \n   $$\n   x = 1\n   $$\n')
     })
 
     it('preserves 4-space indent (matches a nested list-item depth)', () => {
-      const result = preprocessDisplayMath('    $$x = 1$$')
+      // A formula indented four spaces, rewritten
+      const result = preprocessDisplayMath('    $$x = 1$$').text
+
+      // With every line of the block indented the same
       expect(result).toBe('    \n    $$\n    x = 1\n    $$\n')
     })
 
     it('preserves indent across multi-line math content (and avoids double-indenting continuation lines)', () => {
-      const result = preprocessDisplayMath('  $$a + b\n  = c$$')
+      // An indented formula over two lines, rewritten
+      const result = preprocessDisplayMath('  $$a + b\n  = c$$').text
+
+      // With each line indented once, the second included
       expect(result).toBe('  \n  $$\n  a + b\n  = c\n  $$\n')
     })
   })
@@ -81,24 +122,51 @@ describe('preprocessDisplayMath', () => {
   describe('indentation preservation — mid-line $$ inside a list item', () => {
     it('indents the math block to the `- ` marker depth (2 columns)', () => {
       // Math people sometimes write display math glued to the item's prose; the math block must stay in the item
-      const result = preprocessDisplayMath('- the relation $$xy$$')
+      const result = preprocessDisplayMath('- the relation $$xy$$').text
+
+      // With the block indented under the item's marker
       expect(result).toBe('- the relation \n  $$\n  xy\n  $$\n')
     })
 
     it('indents the math block to the `1. ` marker depth (3 columns)', () => {
-      const result = preprocessDisplayMath('1. the relation $$xy$$')
+      // A formula glued to a numbered item's prose, rewritten
+      const result = preprocessDisplayMath('1. the relation $$xy$$').text
+
+      // With the block indented under the item's marker
       expect(result).toBe('1. the relation \n   $$\n   xy\n   $$\n')
     })
 
     it('indents the math block to a nested `  - ` marker depth (4 columns)', () => {
-      const result = preprocessDisplayMath('  - the relation $$xy$$')
+      // A formula glued to a nested item's prose, rewritten
+      const result = preprocessDisplayMath('  - the relation $$xy$$').text
+
+      // With the block indented under the item's marker
       expect(result).toBe('  - the relation \n    $$\n    xy\n    $$\n')
     })
 
     it('does not propagate indent when $$ is mid-line outside any list', () => {
       // The two leading spaces are part of running prose, not of the $$ line itself
-      const result = preprocessDisplayMath('  text $$x$$')
+      const result = preprocessDisplayMath('  text $$x$$').text
+
+      // With the block left unindented
       expect(result).toBe('  text \n$$\nx\n$$\n')
+    })
+  })
+
+  describe('the way back to the text as written', () => {
+    it.each([
+      ['a formula mid-line', 'text $$x^2$$ more', 'more'],
+      ['several formulas', 'a $$x$$ b $$y$$ c $$z$$ d', 'd'],
+      ['a formula in a list item', '- the relation $$xy$$\n- next', 'next'],
+    ])('maps the text after %s back to where it was written', (_description, content, word) => {
+      // The processed text and its way back
+      const { text, toSourceOffset } = preprocessDisplayMath(content)
+
+      // The word's offset in the processed text, mapped back
+      const mapped = toSourceOffset(text.indexOf(word))
+
+      // At the word as written
+      expect(mapped).toBe(content.indexOf(word))
     })
   })
 })

@@ -2,6 +2,30 @@
 const LIST_MARKER_PREFIX_REGEX = /^[ \t]*(?:[-*+]|\d+[.)])[ \t]+/
 
 /**
+ * Text with its display math in block format, and the way back from it to the text as written.
+ */
+export type SourceMappedText = {
+  /** The text with its display math in block format. */
+  text: string
+  /** Maps an offset in {@link SourceMappedText.text} to the one it came from in the text as written. */
+  toSourceOffset: (textOffset: number) => number
+}
+
+/**
+ * One display formula rewritten to block format, by where it stands before and after.
+ */
+type Rewrite = {
+  /** Where the formula starts in the text as written. */
+  sourceStart: number
+  /** Where the formula ends in the text as written. */
+  sourceEnd: number
+  /** Where its block starts in the processed text. */
+  textStart: number
+  /** Where its block ends in the processed text. */
+  textEnd: number
+}
+
+/**
  * Normalizes display math to block format.
  *
  * remark-math requires $$ to be on their own lines for display math,
@@ -15,16 +39,27 @@ const LIST_MARKER_PREFIX_REGEX = /^[ \t]*(?:[-*+]|\d+[.)])[ \t]+/
  * - Own-line `$$` with pure-whitespace prefix → preserve that whitespace as indent.
  * - Mid-line `$$` on a line that opens with a list marker (`- `, `1. `, ...) →
  *   indent the emitted block to the post-marker column so the math stays in the item.
- * - Mid-line `$$` anywhere else → no indent (legacy behavior).
+ * - Mid-line `$$` anywhere else → no indent.
+ *
+ * Each rewrite is recorded, so an offset in the processed text maps back to the
+ * one it came from in the original.
  *
  * @param content - The markdown content to preprocess
  *
- * @returns The processed content with display math converted to block format
+ * @returns The processed content with display math converted to block format,
+ * and the map back to the original
  */
-export function preprocessDisplayMath(content: string): string {
-  return content.replace(
+export function preprocessDisplayMath(content: string): SourceMappedText {
+  // Every formula rewritten, in the order they stand in the text
+  const rewrites: Rewrite[] = []
+
+  // The processed text's length minus the original's, up to the formula being rewritten
+  let growth = 0
+
+  // The text with every formula rewritten
+  const text = content.replace(
     /\$\$([\s\S]*?)\$\$/g,
-    (_match, mathContent: string, offset: number, source: string) => {
+    (match, mathContent: string, offset: number, source: string) => {
       // Look up what precedes the opening `$$` on its current line (in the original, pre-replacement source)
       const lineStart = offset === 0 ? 0 : source.lastIndexOf('\n', offset - 1) + 1
       const beforeMatch = source.slice(lineStart, offset)
@@ -60,10 +95,49 @@ export function preprocessDisplayMath(content: string): string {
         })
         .join('\n')
 
-      // Re-indent the entire block
-      return `\n${indent}$$\n${indentedBody}\n${indent}$$\n`
+      // The formula as a block of its own, re-indented as a whole
+      const block = `\n${indent}$$\n${indentedBody}\n${indent}$$\n`
+
+      // Where the formula stands in both texts
+      rewrites.push({
+        sourceStart: offset,
+        sourceEnd: offset + match.length,
+        textStart: offset + growth,
+        textEnd: offset + growth + block.length,
+      })
+
+      // The text after the formula shifts by the block's length minus the formula's
+      growth += block.length - match.length
+
+      // The formula replaced by its block
+      return block
     }
   )
+
+  /**
+   * A function which maps an offset in the processed text to the one it came from in the original.
+   *
+   * @param textOffset - The offset in the processed text.
+   * @returns The offset in the original text.
+   */
+  const toSourceOffset = (textOffset: number) => {
+    // The last formula rewritten at or before the offset
+    const rewrite = rewrites.findLast((candidate) => candidate.textStart <= textOffset)
+
+    // Before every formula, the two texts agree
+    if (rewrite === undefined) return textOffset
+
+    // Past the formula, the text shifted by the rewrites' net change up to its end
+    if (textOffset >= rewrite.textEnd) {
+      return textOffset - (rewrite.textEnd - rewrite.sourceEnd)
+    }
+
+    // Inside the block, as far into the formula as written, never past its end
+    return Math.min(rewrite.sourceStart + (textOffset - rewrite.textStart), rewrite.sourceEnd)
+  }
+
+  // The processed text, and the way back from it
+  return { text, toSourceOffset }
 }
 
 /**
@@ -88,10 +162,11 @@ export function collapseExcessiveBreaks(content: string): string {
  *
  * @param content - The markdown content to preprocess
  *
- * @returns The processed content with display math converted to HTML
+ * @returns The processed content with breaks collapsed and display math in
+ * block format
  */
 export function preprocessMarkdown(content: string): string {
-  return preprocessDisplayMath(collapseExcessiveBreaks(content))
+  return preprocessDisplayMath(collapseExcessiveBreaks(content)).text
 }
 
 /**

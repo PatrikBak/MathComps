@@ -25,7 +25,7 @@ async function render(markdown: string): Promise<string> {
     .use(rehypeStringify)
 
   // The markdown preprocessed as the renderer does, then run
-  const file = await processor.process(preprocessDisplayMath(markdown))
+  const file = await processor.process(preprocessDisplayMath(markdown).text)
 
   // The rendered HTML
   return String(file)

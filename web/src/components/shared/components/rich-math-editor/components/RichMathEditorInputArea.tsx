@@ -97,6 +97,8 @@ export function RichMathEditorInputArea({
         <RichMathEditorPreview
           content={text.state.text}
           renderNumberReference={renderNumberReference}
+          // The preview covers the textarea while it shows, so there is no caret to follow
+          followedTextarea={null}
           className="absolute inset-0 overflow-y-auto cursor-auto"
         />
       )}

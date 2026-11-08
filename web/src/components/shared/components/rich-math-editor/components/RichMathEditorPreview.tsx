@@ -1,6 +1,9 @@
+import { type RefObject } from 'react'
+
 import { cn } from '@/components/shared/utils/css-utils'
 
 import { useOwnFileLinks } from '../hooks/use-own-file-links'
+import { usePreviewFollowsCaret } from '../hooks/use-preview-follows-caret'
 import { type NumberReferenceRenderer, RichMathEditorRenderer } from './RichMathEditorRenderer'
 
 /**
@@ -11,6 +14,8 @@ type RichMathEditorPreviewProps = {
   content: string
   /** What a `#N` in the text is drawn as */
   renderNumberReference: NumberReferenceRenderer | undefined
+  /** The textarea whose caret the preview keeps in view as the text is edited, or null for none */
+  followedTextarea: RefObject<HTMLTextAreaElement | null> | null
   /** Placement classes for where the preview stands */
   className: string
 }
@@ -21,19 +26,27 @@ type RichMathEditorPreviewProps = {
 export function RichMathEditorPreview({
   content,
   renderNumberReference,
+  followedTextarea,
   className,
 }: RichMathEditorPreviewProps) {
   // The links to the files the writer uploaded into the text
   const fileLinks = useOwnFileLinks(content)
 
+  // The spot being written kept in view
+  const { attachPreview } = usePreviewFollowsCaret({ followedTextarea, content })
+
   // The rendered text
   return (
-    <div className={cn('px-3 py-2 text-sm leading-relaxed text-muted-foreground', className)}>
+    <div
+      ref={attachPreview}
+      className={cn('px-3 py-2 text-sm leading-relaxed text-muted-foreground', className)}
+    >
       <RichMathEditorRenderer
         content={content}
         imageContext="userUploads"
         fileLinks={fileLinks}
         renderNumberReference={renderNumberReference}
+        marksSourceRanges={followedTextarea !== null}
       />
     </div>
   )
