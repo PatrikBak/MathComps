@@ -4,7 +4,6 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Imaging;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Defense.Engine;
-using MathComps.Infrastructure.Services.Photos;
 using MathComps.Shared.Io;
 
 namespace MathComps.Cli.Examiner.Fixtures;
@@ -13,7 +12,7 @@ namespace MathComps.Cli.Examiner.Fixtures;
 /// A defense-conversation fixture: a folder holding the problem, its reference solution, and the working transcript,
 /// the files the examiner's input is loaded from, plus any drawing a candidate turn was sent with. A candidate turn
 /// names each drawing on a line of its own, <c>![Figure 1](crops/figure-1.jpg)</c>, with the JPEG's path relative to
-/// the folder.
+/// the folder. The text in the brackets is never read, since the examiner numbers a turn's drawings by their order.
 /// </summary>
 public static class Fixture
 {
@@ -23,11 +22,11 @@ public static class Fixture
     private const string TranscriptFileName = "transcript.md";
 
     /// <summary>
-    /// Matches a crop line, the label and the path of one drawing, together with a blank line right after it, so
-    /// taking the line out leaves the paragraphs around it one blank line apart.
+    /// Matches a crop line naming one drawing's path, together with a blank line right after it, so taking the line
+    /// out leaves the paragraphs around it one blank line apart.
     /// </summary>
     private static readonly Regex _cropLinePattern = new(
-        @"^[ \t]*!\[(?<label>[^\]\n]+)\]\((?<path>[^)\n]+)\)[ \t]*(?:\n|$)(?:[ \t]*\n)?",
+        @"^[ \t]*!\[[^\]\n]*\]\((?<path>[^)\n]+)\)[ \t]*(?:\n|$)(?:[ \t]*\n)?",
         RegexOptions.Compiled | RegexOptions.Multiline);
 
     /// <summary>
@@ -107,8 +106,7 @@ public static class Fixture
 
         // Each crop line's drawing, read in order.
         var crops = await cropLines.ToAsyncEnumerable()
-            .Select(async (match, token) => await ReadCropAsync(
-                folder, match.Groups["label"].Value, match.Groups["path"].Value, token))
+            .Select(async (match, token) => await ReadCropAsync(folder, match.Groups["path"].Value, token))
             .ToListAsync(cancellationToken);
 
         // The turn's text without its crop lines.
@@ -122,12 +120,11 @@ public static class Fixture
     /// Reads one drawing a crop line names.
     /// </summary>
     /// <param name="folder">The fixture folder the path is relative to.</param>
-    /// <param name="label">The drawing's marker in the turn's text, such as <c>Figure 1</c>.</param>
     /// <param name="relativePath">The drawing's path within the fixture folder.</param>
     /// <param name="cancellationToken">A token to cancel the read.</param>
-    /// <returns>The drawing.</returns>
-    private static async Task<PhotoCrop> ReadCropAsync(
-        string folder, string label, string relativePath, CancellationToken cancellationToken)
+    /// <returns>The drawing's JPEG.</returns>
+    private static async Task<byte[]> ReadCropAsync(
+        string folder, string relativePath, CancellationToken cancellationToken)
     {
         // The drawing's bytes.
         var image = await FileUtilities.ReadRequiredBytesAsync(folder, relativePath, cancellationToken);
@@ -136,7 +133,7 @@ public static class Fixture
         if (RasterImages.MediaTypeOf(image) != MediaTypeNames.Image.Jpeg)
             throw new InvalidDataException($"Crop file '{relativePath}' in '{folder}' is not a JPEG.");
 
-        // The drawing under its marker.
-        return new PhotoCrop(label, image);
+        // The drawing.
+        return image;
     }
 }

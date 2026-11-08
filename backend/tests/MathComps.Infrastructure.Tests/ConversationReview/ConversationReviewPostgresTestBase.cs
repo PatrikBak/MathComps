@@ -43,6 +43,9 @@ public abstract class ConversationReviewPostgresTestBase<TService>(PostgresConta
         // Links to the private store's files, each naming the file it reaches.
         services.AddSingleton<IPrivateFileLinks, StandInFileLinks>();
 
+        // An empty private store to read from, since reading a conversation back reads no drawing.
+        services.AddSingleton<IObjectReader, FakePrivateObjectStore>();
+
         // The links to the photos a message went out with.
         services.AddSingleton<IDefensePhotoFiles, DefensePhotoFiles>();
     }

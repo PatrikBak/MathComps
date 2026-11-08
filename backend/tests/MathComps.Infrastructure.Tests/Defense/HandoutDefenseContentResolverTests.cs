@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Text;
 
 using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.Localization;
@@ -202,6 +203,16 @@ public sealed class HandoutDefenseContentResolverTests
 
             // The content, or nothing when that key holds none
             return Task.FromResult(_objects.GetValueOrDefault(key));
+        }
+
+        /// <inheritdoc/>
+        public Task<byte[]?> ReadBytesAsync(string key, CancellationToken cancellationToken)
+        {
+            // Record the call, so a test can assert on how storage was reached for
+            Reads = Reads.Add(key);
+
+            // The content's bytes, or nothing when that key holds none
+            return Task.FromResult(_objects.TryGetValue(key, out var content) ? Encoding.UTF8.GetBytes(content) : null);
         }
     }
 }
