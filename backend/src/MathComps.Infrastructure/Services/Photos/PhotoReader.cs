@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using System.Text.RegularExpressions;
 using MathComps.Infrastructure.Imaging;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.Ai;
@@ -14,7 +15,9 @@ namespace MathComps.Infrastructure.Services.Photos;
 /// Implements <see cref="IPhotoReader"/> with one schema-bound model call per page. The page is turned upright and
 /// shrunk before the model sees it, and the reading prompt rides as the user message's text with the page after it.
 /// The model answers with the text and a <c>box_2d</c> per drawing, and each drawing is cut out of the page in code,
-/// widened by the configured margin and clamped to the page.
+/// widened by the configured margin and clamped to the page. The model marks where each drawing sits in the text, and
+/// the reader takes those markers out: the drawings travel as crops apart from the text, where a marker would point at
+/// nothing.
 /// </summary>
 /// <param name="chatCaller">The caller the reading call runs through.</param>
 /// <param name="logger">The logger.</param>
@@ -34,6 +37,11 @@ public class PhotoReader(
     /// The reading settings.
     /// </summary>
     private readonly PhotoReaderSettings _settings = photoReaderSettings.Value;
+
+    /// <summary>
+    /// Matches a run of two or more blank lines, which a paragraph break needs only one of.
+    /// </summary>
+    private static readonly Regex _blankLinesPattern = new(@"\n([ \t]*\n){2,}", RegexOptions.Compiled);
 
     /// <inheritdoc/>
     public async Task<ChatCallResult<PhotoReading>> ReadAsync(
@@ -62,9 +70,30 @@ public class PhotoReader(
         // Cut out every drawing whose box marks out part of the page.
         var crops = reply.Value.Figures.Select(figure => Cut(page, figure)).OfType<PhotoCrop>().ToList();
 
+        // The text without the drawings' markers, a dropped drawing's included.
+        var text = WithoutMarkers(reply.Value.Text, reply.Value.Figures.Select(figure => figure.Label));
+
         // Hand back the reading with what answered and what it billed.
         return new ChatCallResult<PhotoReading>(
-            new PhotoReading(reply.Value.Text, pageJpeg, crops), reply.ServedModel, reply.Usage);
+            new PhotoReading(text, pageJpeg, crops), reply.ServedModel, reply.Usage);
+    }
+
+    /// <summary>
+    /// Takes each drawing's marker, its label in brackets, out of the page's text, along with the spaces and blank
+    /// lines it would leave behind.
+    /// </summary>
+    /// <param name="text">The page's text as the model wrote it.</param>
+    /// <param name="labels">The labels of the drawings the model found.</param>
+    /// <returns>The text with no drawing's marker in it.</returns>
+    private static string WithoutMarkers(string text, IEnumerable<string> labels)
+    {
+        // Each marker out: one opening a line with the spaces around it, one inside a line with the space before it.
+        foreach (var marker in labels.Select(label => Regex.Escape($"[{label}]")))
+            text = Regex.Replace(text, $@"^[ \t]*{marker}[ \t]*|[ \t]*{marker}", "", RegexOptions.Multiline);
+
+        // Every run of blank lines, a marker's emptied line among them, down to one paragraph break, and none at
+        // either end.
+        return _blankLinesPattern.Replace(text, "\n\n").Trim();
     }
 
     /// <summary>
