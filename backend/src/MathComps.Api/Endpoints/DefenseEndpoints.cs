@@ -140,7 +140,7 @@ public static class DefenseEndpoints
             var userId = await userManager.RequireUserIdAsync(context);
 
             // Run the next turn
-            var session = await defenseService.ContinueAsync(userId, id, request.Content, context.RequestAborted);
+            var session = await defenseService.ContinueAsync(userId, id, request, context.RequestAborted);
 
             // Return the updated session
             return Results.Ok(session);

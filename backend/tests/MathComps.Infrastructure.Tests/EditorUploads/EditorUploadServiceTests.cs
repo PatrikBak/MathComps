@@ -1,9 +1,7 @@
 using System.Text;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.EditorUploads;
-using MathComps.Infrastructure.Storage;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
-using Moq;
 using SkiaSharp;
 using MsOptions = Microsoft.Extensions.Options.Options;
 
@@ -256,7 +254,7 @@ public sealed class EditorUploadServiceTests
     /// <returns>The service.</returns>
     private EditorUploadService NewService(long maxImageBytes, long maxAttachmentBytes) =>
         // Over the store and the stand-in links
-        new(_store, StandInLinks(), MsOptions.Create(new EditorUploadSettings
+        new(_store, new StandInFileLinks(), MsOptions.Create(new EditorUploadSettings
         {
             MaxOwnLinksPerRequest = 2,
             MaxImageBytes = maxImageBytes,
@@ -288,21 +286,4 @@ public sealed class EditorUploadServiceTests
         "empty" => [],
         _ => throw new ArgumentOutOfRangeException(nameof(content), content, "Unknown content"),
     };
-
-    /// <summary>
-    /// Stand-in links to the private bucket, each naming what it does and the object key it reaches.
-    /// </summary>
-    /// <returns>The stand-in links.</returns>
-    private static IPrivateFileLinks StandInLinks()
-    {
-        // The links
-        var links = new Mock<IPrivateFileLinks>();
-
-        // A read link names the file it reads
-        links.Setup(fileLinks => fileLinks.LinkFor(It.IsAny<string>()))
-            .Returns((string key) => $"read:{key}");
-
-        // Handed out as the service's links
-        return links.Object;
-    }
 }

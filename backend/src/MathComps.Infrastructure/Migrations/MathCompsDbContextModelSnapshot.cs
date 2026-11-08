@@ -397,9 +397,17 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<int>("Position")
+                        .HasColumnType("integer")
+                        .HasColumnName("position");
+
                     b.Property<string>("Text")
                         .HasColumnType("text")
                         .HasColumnName("text");
+
+                    b.Property<Guid?>("TurnId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("turn_id");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -410,6 +418,10 @@ namespace MathComps.Infrastructure.Migrations
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_defense_photos_user_id");
+
+                    b.HasIndex("TurnId", "Position")
+                        .IsUnique()
+                        .HasDatabaseName("ux_defense_photo_turn_id_position");
 
                     b.ToTable("defense_photos", (string)null);
                 });
@@ -2358,12 +2370,20 @@ namespace MathComps.Infrastructure.Migrations
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefensePhoto", b =>
                 {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.DefenseTurn", "Turn")
+                        .WithMany("Photos")
+                        .HasForeignKey("TurnId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_defense_photos_defense_turns_turn_id");
+
                     b.HasOne("MathComps.Domain.EfCoreEntities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_defense_photos_users_user_id");
+
+                    b.Navigation("Turn");
 
                     b.Navigation("User");
                 });
@@ -3171,6 +3191,8 @@ namespace MathComps.Infrastructure.Migrations
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefenseTurn", b =>
                 {
                     b.Navigation("Attempts");
+
+                    b.Navigation("Photos");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefenseTurnAttempt", b =>

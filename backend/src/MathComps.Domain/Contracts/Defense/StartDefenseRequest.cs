@@ -7,4 +7,6 @@ namespace MathComps.Domain.Contracts.Defense;
 /// </summary>
 /// <param name="Target"><inheritdoc cref="DefenseTarget" path="/summary"/></param>
 /// <param name="Content">The student's first message.</param>
-public record StartDefenseRequest(DefenseTarget Target, string Content);
+/// <param name="PhotoIds">The photos of handwritten pages whose text the message carries, in page order; left out when
+/// it carries none.</param>
+public record StartDefenseRequest(DefenseTarget Target, string Content, IReadOnlyList<Guid>? PhotoIds = null);

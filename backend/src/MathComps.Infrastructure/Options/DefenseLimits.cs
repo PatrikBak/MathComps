@@ -6,9 +6,9 @@ namespace MathComps.Infrastructure.Options;
 
 /// <summary>
 /// Caps on a defense: how long a student's message may be, how long their feedback comment may be, how many
-/// messages the student may send in one conversation, and how much one user may spend in a day. The range
-/// annotations make a missing or zeroed section fail validation at startup rather than silently rejecting every
-/// message (a zero ceiling refuses everything).
+/// messages the student may send in one conversation, how many photos one message may carry, and how much one user
+/// may spend in a day. The range annotations make a missing or zeroed section fail validation at startup rather than
+/// silently rejecting every message (a zero ceiling refuses everything).
 /// </summary>
 public class DefenseLimits
 {
@@ -28,6 +28,10 @@ public class DefenseLimits
     /// <inheritdoc cref="DefenseLimitsDto.MaxMessagesPerDefense" path="/summary"/>
     [Range(1, int.MaxValue)]
     public required int MaxMessagesPerDefense { get; set; }
+
+    /// <inheritdoc cref="DefenseLimitsDto.MaxPhotosPerMessage" path="/summary"/>
+    [Range(1, int.MaxValue)]
+    public required int MaxPhotosPerMessage { get; set; }
 
     /// <summary>
     /// The most a single user may spend on defense turns and photo readings per day (since UTC midnight), in credits

@@ -9,7 +9,8 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// Runs and persists a user's AI-examiner defense conversations: the greeting each one opens with, opening a session,
 /// continuing it turn by turn (each turn runs the examiner engine and records its spend), listing a user's sessions
 /// against one target or all of them, rewinding one to an earlier point, and deleting one.
-/// Guardrails (input sizes, the student's message count, per-user spend) are enforced before any model call.
+/// Guardrails (input sizes, the photos a message carries, the student's message count, per-user spend) are enforced
+/// before any model call.
 /// </summary>
 public interface IDefenseSessionService
 {
@@ -23,8 +24,8 @@ public interface IDefenseSessionService
         new LocalizedCopy(language, "defense").Format("opener");
 
     /// <summary>
-    /// Opens a session: seeds the examiner's opener and the student's first message, runs the examiner for its reply,
-    /// and returns the full three-turn conversation.
+    /// Opens a session: seeds the examiner's opener and the student's first message with the photos it carries, runs
+    /// the examiner for its reply, and returns the full three-turn conversation.
     /// </summary>
     /// <param name="userId">The user opening the session.</param>
     /// <param name="start">What is being defended and the student's first message.</param>
@@ -34,15 +35,15 @@ public interface IDefenseSessionService
         Guid userId, DefenseSessionStart start, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Continues a session with the student's next message and the examiner's reply to it.
+    /// Continues a session with the student's next message, with the photos it carries, and the examiner's reply to it.
     /// </summary>
     /// <param name="userId">The user the session must belong to.</param>
     /// <param name="sessionId">The session to continue.</param>
-    /// <param name="content">The student's next message.</param>
+    /// <param name="request">The student's next message and the photos it carries.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The session with the two appended turns.</returns>
     Task<DefenseSessionDto> ContinueAsync(
-        Guid userId, Guid sessionId, string content, CancellationToken cancellationToken = default);
+        Guid userId, Guid sessionId, ContinueDefenseRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lists a user's sessions against one target, most recently active first, each with its turns, alongside the
@@ -135,6 +136,25 @@ public sealed class DefenseMessageLimitException()
     : MathCompsException(
         "This defense has reached its message limit",
         RefusalKind.PreconditionUnmet,
+        LogLevel.Information);
+
+/// <summary>
+/// Thrown when a message carries more photos than one message may.
+/// </summary>
+public sealed class DefenseTooManyPhotosException()
+    : MathCompsException(
+        "The message carries too many photos",
+        RefusalKind.Invalid,
+        LogLevel.Error);
+
+/// <summary>
+/// Thrown when a message names a photo it cannot carry: one that isn't there, is another student's, already went out
+/// with a message, or is named twice (indistinguishable to the caller).
+/// </summary>
+public sealed class DefensePhotoNotFoundException()
+    : MathCompsException(
+        "Photo not found",
+        RefusalKind.NotFound,
         LogLevel.Information);
 
 /// <summary>

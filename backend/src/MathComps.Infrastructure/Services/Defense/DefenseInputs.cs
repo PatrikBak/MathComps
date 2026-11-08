@@ -33,6 +33,18 @@ internal static class DefenseInputs
     }
 
     /// <summary>
+    /// Throws when a message carries more photos than one message may.
+    /// </summary>
+    /// <param name="photoIds">The photos the message carries, null when it carries none.</param>
+    /// <param name="maxPhotos">The most photos one message may carry.</param>
+    public static void EnsureWithinPhotoCap(IReadOnlyList<Guid>? photoIds, int maxPhotos)
+    {
+        // Over the cap is a bad request, not a server error.
+        if (photoIds?.Count > maxPhotos)
+            throw new DefenseTooManyPhotosException();
+    }
+
+    /// <summary>
     /// Throws when what is being defended is missing, or when the target the caller sent cannot address anything.
     /// </summary>
     /// <param name="target">The target to check, null when the request sent null.</param>
