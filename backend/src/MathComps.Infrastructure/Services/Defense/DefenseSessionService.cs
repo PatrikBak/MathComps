@@ -429,6 +429,14 @@ public class DefenseSessionService(
         // What the student argued where they are graded is not theirs to drop.
         await EnsureNotGradedAsync(dbContext, userId, sessionId, cancellationToken);
 
+        // One transaction for freeing the photos and dropping the session, so a delete that fails leaves them sent.
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        // Free the student's photos the conversation's messages went out with.
+        await FreePhotosAsync(
+            dbContext.DefensePhotos.Where(photo => photo.UserId == userId && photo.Turn!.SessionId == sessionId),
+            cancellationToken);
+
         // Delete the session, filtering on the owner so another user's id can't reach it. The cascade drops its
         // turns and everything the student said about the conversation; the spend rows are independent and stay.
         var deleted = await dbContext.DefenseSessions
@@ -438,6 +446,9 @@ public class DefenseSessionService(
         // Nothing deleted means the session is missing or someone else's, which read the same from here.
         if (deleted == 0)
             throw new DefenseSessionNotFoundException();
+
+        // Commit the freed photos and the deletion as one.
+        await transaction.CommitAsync(cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -463,6 +474,16 @@ public class DefenseSessionService(
                 if (keptRole != TranscriptRole.Examiner)
                     throw new DefenseRewindTargetException();
 
+                // One transaction for freeing the photos and dropping the tail, so a delete that fails leaves
+                // them sent.
+                await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+                // Free the photos the dropped messages went out with.
+                await FreePhotosAsync(
+                    dbContext.DefensePhotos.Where(photo =>
+                        photo.Turn!.SessionId == sessionId && photo.Turn.Sequence > keepThroughSequence),
+                    cancellationToken);
+
                 // Delete the tail in one statement: the doomed rows are never loaded, and the kept prefix stays
                 // a contiguous 0..keepThroughSequence, so a later append can't collide with the
                 // (session, sequence) index. Whatever the student held against the dropped replies goes with
@@ -470,6 +491,9 @@ public class DefenseSessionService(
                 await dbContext.DefenseTurns
                     .Where(turn => turn.SessionId == sessionId && turn.Sequence > keepThroughSequence)
                     .ExecuteDeleteAsync(cancellationToken);
+
+                // Commit the freed photos and the shorter conversation as one.
+                await transaction.CommitAsync(cancellationToken);
             }, cancellationToken);
     }
 
@@ -509,6 +533,20 @@ public class DefenseSessionService(
         // Hand back the photos in the order the student sent them.
         return [.. photos.OrderBy(photo => ids.IndexOf(photo.Id))];
     }
+
+    /// <summary>
+    /// Frees photos from the messages they went out with, clearing their place too, so they can go out again.
+    /// </summary>
+    /// <param name="photos">The photos to free.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>A task that completes once the photos are freed.</returns>
+    private static Task FreePhotosAsync(IQueryable<DefensePhoto> photos, CancellationToken cancellationToken) =>
+        // Each photo loses its message and its place among that message's photos
+        photos.ExecuteUpdateAsync(
+            setters => setters
+                .SetProperty(photo => photo.TurnId, (Guid?)null)
+                .SetProperty(photo => photo.Position, (int?)null),
+            cancellationToken);
 
     /// <summary>
     /// Finds the entry a student is graded on for what a target names, which only a problem can have.

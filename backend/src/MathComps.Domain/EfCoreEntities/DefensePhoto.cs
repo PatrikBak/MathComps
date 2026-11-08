@@ -44,10 +44,10 @@ public class DefensePhoto
     public DefenseTurn? Turn { get; set; }
 
     /// <summary>
-    /// Where the photo comes among its message's photos, counting from 0 in page order. Meaningful only while
-    /// <see cref="TurnId"/> is set, since a photo no message carries has no place among any.
+    /// Where the photo comes among its message's photos, counting from 0 in page order. Null while
+    /// <see cref="TurnId"/> is, since a photo no message carries has no place among any.
     /// </summary>
-    public int Position { get; set; }
+    public int? Position { get; set; }
 
     /// <summary>
     /// The drawings cut out of the page.
