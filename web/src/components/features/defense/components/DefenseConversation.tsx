@@ -176,6 +176,7 @@ function DefenseConversationForTarget({
     rewind,
     deleteSession,
     draftStorageKey: defenseDraftStorageKey(problem.target),
+    target: problem.target,
   })
 
   // Where this conversation stands against the entry's clock
@@ -373,6 +374,7 @@ function DefenseConversationForTarget({
           })}
           draft={turn.draft}
           onDraftChange={turn.setDraft}
+          photos={turn.photos}
           onSend={() => void turn.sendDraft()}
           onStop={turn.stopReply}
           editorRef={turn.editorRef}

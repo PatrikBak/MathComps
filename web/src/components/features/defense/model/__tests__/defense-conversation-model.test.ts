@@ -428,8 +428,8 @@ describe('DefenseConversationModel', () => {
     expect(model.getSnapshot().turns).toEqual([])
     expect(model.getSnapshot().currentSessionId).toBeNull()
 
-    // The abandoned round-trip resolves to stopped and never repaints the fresh view
-    expect(await sent).toEqual({ kind: 'stopped' })
+    // The abandoned round-trip resolves to superseded and never repaints the fresh view
+    expect(await sent).toEqual({ kind: 'superseded' })
     expect(model.getSnapshot().turns).toEqual([])
   })
 
@@ -537,8 +537,8 @@ describe('DefenseConversationModel', () => {
     // The resumed session is on screen
     expect(model.getSnapshot().currentSessionId).toBe(firstSession.id)
 
-    // The abandoned turn resolves to stopped and never repaints the resumed session
-    expect(await second).toEqual({ kind: 'stopped' })
+    // The abandoned turn resolves to superseded and never repaints the resumed session
+    expect(await second).toEqual({ kind: 'superseded' })
     expect(model.getSnapshot().turns).toEqual(firstSession.turns)
   })
 
@@ -713,9 +713,9 @@ describe('DefenseConversationModel', () => {
     // Rewind mid-flight to the first examiner reply
     const outcome = await model.rewind(2, backend)
 
-    // The rewind lands, the abandoned turn resolves to stopped, and the idle view is the kept prefix
+    // The rewind lands, the abandoned turn resolves to superseded, and the idle view is the kept prefix
     expect(outcome).toEqual({ kind: 'done' })
-    expect(await second).toEqual({ kind: 'stopped' })
+    expect(await second).toEqual({ kind: 'superseded' })
     const state = model.getSnapshot()
     expect(roles(state.turns)).toEqual(['examiner', 'candidate', 'examiner'])
     expect(state.isThinking).toBe(false)

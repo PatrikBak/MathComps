@@ -21,6 +21,8 @@ type RichMathEditorFrameProps = {
   variant: RichMathEditorVariant
   /** The least height the frame stands at, in px, where its surface names one */
   minHeightPx: number | undefined
+  /** The height the frame stands at, in px, where its surface gives it a fixed room, which it is not dragged out of */
+  heightPx: number | undefined
   /**
    * Whether the frame opens at the most height its surface has for it, which the surface's classes set,
    * where it otherwise opens as tall as its parts make it
@@ -41,11 +43,12 @@ type RichMathEditorFrameProps = {
 /**
  * The frame an editor's parts sit in: one border and one fill around all of them, lit the way a form
  * field is while the text has the cursor. The reader makes it taller or shorter by dragging its bottom
- * edge.
+ * edge, unless its surface gives it a fixed room.
  */
 export function RichMathEditorFrame({
   variant,
   minHeightPx,
+  heightPx,
   opensTall,
   resizeRatio,
   className,
@@ -77,14 +80,17 @@ export function RichMathEditorFrame({
   // its parts
   const openHeight = opensTall && landingHeightPx !== null ? '100vh' : 'auto'
 
+  // A frame given a fixed room stands at it, following it as the room changes, with nowhere to be dragged to
+  const hasFixedRoom = heightPx !== undefined
+
   // The frame around the editor's parts
   return (
     <Resizable
       ref={attachFrame}
-      size={{ width: '100%', height: draggedHeightPx ?? openHeight }}
-      minHeight={landingHeightPx ?? minHeightPx}
+      size={{ width: '100%', height: draggedHeightPx ?? heightPx ?? openHeight }}
+      minHeight={heightPx ?? landingHeightPx ?? minHeightPx}
       resizeRatio={resizeRatio}
-      enable={{ bottom: true }}
+      enable={{ bottom: !hasFixedRoom }}
       handleComponent={{
         bottom: (
           // The grip, across the frame's border with most of it on the inside

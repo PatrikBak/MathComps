@@ -666,6 +666,22 @@
       "somethingElse": "Nič z toho",
       "wasOff": "Bola mimo"
     },
+    "photos": {
+      "add": "Fotka",
+      "addPage": "Pridať stranu",
+      "addTitle": "Odfoť riešenie alebo vyber fotku",
+      "insert": "{count, plural, =0 {Vložiť do správy} one {Vložiť stranu do správy} few {Vložiť # strany do správy} other {Vložiť # strán do správy}}",
+      "inserted": "Text tejto strany už bol vložený do správy.",
+      "messagePlaceholder": "Sem príde text z tejto fotky.",
+      "open": "Skontrolovať fotku {number}",
+      "photo": "Fotka {number}",
+      "readError": "Fotku sa nepodarilo prečítať.",
+      "reading": "{count, plural, one {Mathilda číta fotku…} few {Mathilda číta # fotky…} other {Mathilda číta # fotiek…}}",
+      "readingPage": "Mathilda číta túto fotku…",
+      "remove": "Odobrať fotku",
+      "reviewHint": "Oprav, čo Mathilda prečítala zle. Obrázky si z fotiek vystrihne sama.",
+      "reviewTitle": "Skontroluj prepis"
+    },
     "placeholder": "Rozpíš sa…",
     "problemStrip": "Zadanie",
     "removeFeedbackMessage": "Tvoja odpoveď na túto konverzáciu sa natrvalo odstráni.",

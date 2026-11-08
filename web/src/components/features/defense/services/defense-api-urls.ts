@@ -7,6 +7,11 @@ import { buildApiUrl } from '@/components/shared/utils/url-utils'
 const SESSIONS_PATH = '/defense/sessions'
 
 /**
+ * The base path for the endpoints reading the photos students take of their handwritten work.
+ */
+const PHOTOS_PATH = '/defense/photos'
+
+/**
  * Builds the URL for reading the examiner's canned lines.
  *
  * @returns The copy URL.
@@ -117,4 +122,29 @@ export function getReportDefenseTurnUrl(sessionId: string, turnId: string): stri
 export function getDefenseFeedbackUrl(sessionId: string): string {
   // The session's own feedback endpoint
   return buildApiUrl(`${SESSIONS_PATH}/${encodeURIComponent(sessionId)}/feedback`)
+}
+
+/**
+ * Builds the URL for reading a photo for a defense of a handout environment.
+ *
+ * @param target - The handout environment being defended.
+ * @returns The read URL.
+ */
+export function getReadHandoutPhotoUrl(target: HandoutEnvironmentTarget): string {
+  // The read endpoint, told which environment the photo is for
+  return buildApiUrl(PHOTOS_PATH, {
+    handoutContentId: target.handoutContentId,
+    environmentId: target.environmentId,
+  })
+}
+
+/**
+ * Builds the URL for reading a photo for a defense of an archive problem.
+ *
+ * @param problemId - The archive problem being defended.
+ * @returns The read URL.
+ */
+export function getReadProblemPhotoUrl(problemId: string): string {
+  // The read endpoint for one archive problem
+  return buildApiUrl(`${PHOTOS_PATH}/problems/${encodeURIComponent(problemId)}`)
 }

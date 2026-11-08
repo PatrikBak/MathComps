@@ -65,6 +65,8 @@ export function showsToolbarItem(config: ToolbarConfig | undefined, item: Toolba
 export type RichMathEditorRef = {
   /** Puts the cursor in the editor. */
   focus: () => void
+  /** Closes the expanded view, where it is open over the editor. */
+  collapse: () => void
 }
 
 /**
@@ -77,6 +79,12 @@ type RichMathEditorProps = {
   toolbar?: ToolbarConfig
   /** The editor's minimum height in px */
   minHeightPx?: number
+  /**
+   * The editor's height in px, where its surface gives it a fixed room, which the editor follows and is not dragged
+   * out of. The text fills only a frame of fixed height, so a minimum height alone leaves it at its own least height
+   * inside a tall frame
+   */
+  heightPx?: number
   /** The most characters the content may hold, or null for no limit */
   maxCharacters: number | null
   /** Current text value */
@@ -110,6 +118,8 @@ type RichMathEditorProps = {
   isLoading?: boolean
   /** What the surface using the editor counts of its own */
   footerMeta?: ReactNode
+  /** Controls the surface adds of its own, at the start of the footer, the expanded view's included */
+  footerTools?: ReactNode
   /** What a `#N` in the preview is drawn as */
   renderNumberReference?: NumberReferenceRenderer
   /** Handle onto the editor's imperative controls */
@@ -124,6 +134,7 @@ export function RichMathEditor({
   variant = 'card',
   toolbar,
   minHeightPx = 200,
+  heightPx,
   maxCharacters,
   value,
   onChange,
@@ -139,6 +150,7 @@ export function RichMathEditor({
   expandedOnly = false,
   isLoading = false,
   footerMeta,
+  footerTools,
   renderNumberReference,
   ref,
 }: RichMathEditorProps) {
@@ -158,13 +170,15 @@ export function RichMathEditor({
     allowAttachmentUpload: showsToolbarItem(toolbar, 'attachment'),
   })
 
-  // Hand the caller the cursor on demand; autoFocus only offers it at mount
-  useImperativeHandle(ref, () => ({ focus: () => text.textareaRef.current?.focus() }), [
-    text.textareaRef,
-  ])
-
   // The expanded view
   const expanded = useExpandedEditor({ text, expandedOnly, onSend, onCancel })
+
+  // Hand the caller the cursor on demand, autoFocus only offering it at mount, and the expanded view's closing
+  useImperativeHandle(
+    ref,
+    () => ({ focus: () => text.textareaRef.current?.focus(), collapse: expanded.close }),
+    [text.textareaRef, expanded.close]
+  )
 
   /**
    * A function which reports focus leaving the inline editor. Focus moving from the text field to a
@@ -189,6 +203,7 @@ export function RichMathEditor({
           <RichMathEditorFrame
             variant={variant}
             minHeightPx={minHeightPx}
+            heightPx={heightPx}
             opensTall={false}
             resizeRatio={1}
           >
@@ -211,6 +226,7 @@ export function RichMathEditor({
               state={text.state}
               escapeCancels
               meta={footerMeta}
+              tools={footerTools}
               onSend={onSend}
               onCancel={onCancel}
               onStop={onStop}
@@ -236,6 +252,7 @@ export function RichMathEditor({
         onStop={onStop}
         isLoading={isLoading}
         footerMeta={footerMeta}
+        footerTools={footerTools}
       />
     </>
   )
