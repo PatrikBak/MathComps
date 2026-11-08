@@ -26,8 +26,11 @@ const LOADS = 4
 /** How long a target has to come to rest under the sticky header before a load is called a miss. */
 const LANDING_TIMEOUT_MS = 5_000
 
-/** How long a reloaded page is watched for moving away from the top, which covers its content being revealed. */
-const RELOAD_WATCH_MS = 3_000
+/**
+ * How long a load is given to finish moving itself, which covers its content being revealed, the browser's own
+ * smooth scroll to the target, and the page's own landing once its code runs.
+ */
+const SETTLE_MS = 3_000
 
 /** The handout's sections, in reading order. */
 const sections = computeSectionMetadata(document)
@@ -114,6 +117,9 @@ test.describe('a hash link into a handout', () => {
     // On its section
     await expectLandedOn(page, middleSection.id, `the first load of #${middleSection.id}`)
 
+    // Left alone until it has stopped moving, since a reader who goes up any sooner is carried back down to the section
+    await page.waitForTimeout(SETTLE_MS)
+
     // The reader back up at the top, with the hash still in the address bar
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
 
@@ -123,7 +129,7 @@ test.describe('a hash link into a handout', () => {
     // The same address, reloaded
     await page.reload()
 
-    // The furthest the page moves from the top while its content is revealed, sampled every frame
+    // The furthest the page moves from the top while it settles, sampled every frame
     const furthestScroll = await page.evaluate(
       (watchMs) =>
         new Promise<number>((resolve) => {
@@ -148,7 +154,7 @@ test.describe('a hash link into a handout', () => {
           // The first frame
           sample()
         }),
-      RELOAD_WATCH_MS
+      SETTLE_MS
     )
 
     // Never left the top, and what moved it if it did, which tells the page's own code from the browser
