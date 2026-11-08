@@ -1610,8 +1610,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
              .HasForeignKey(crop => crop.PhotoId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            // The message the photo went out with. A rewind or a deleted conversation drops the message, which sets
-            // this to null, so nobody is shown the photo any more and it can go out again.
+            // The message the photo went out with. A rewind or a deleted conversation frees the photo before it
+            // drops the message, clearing its place too, so nobody is shown it any more and it can go out again.
+            // Any other way of dropping the message falls back on this null, which leaves the photo's old place set.
             e.HasOne(photo => photo.Turn)
              .WithMany(turn => turn.Photos)
              .HasForeignKey(photo => photo.TurnId)
