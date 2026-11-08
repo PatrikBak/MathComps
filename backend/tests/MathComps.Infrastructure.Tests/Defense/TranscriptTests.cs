@@ -2,7 +2,6 @@ using System.Net.Mime;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Defense;
-using MathComps.Infrastructure.Services.Photos;
 
 namespace MathComps.Infrastructure.Tests.Defense;
 
@@ -87,38 +86,39 @@ public class TranscriptTests
     }
 
     /// <summary>
-    /// A drawing sits right after the text of the turn it came with, under a caption naming its marker, and the
+    /// A drawing sits right after the text of the turn it came with, numbered among that turn's drawings, and the
     /// conversation carries on after it. A drawing sliding to the end of the message would read as sent with the
-    /// candidate's latest turn.
+    /// candidate's latest turn, and numbering across the whole conversation would give a later message's first
+    /// drawing a number its student never counted to.
     /// </summary>
     [Fact]
-    public void ToPrompt_puts_each_drawing_after_its_own_turn()
+    public void ToPrompt_numbers_each_turns_drawings_after_its_text()
     {
-        // Two drawings standing in for the crops of one photo.
+        // Three drawings standing in for the crops of the photos.
         byte[] first = [0xFF, 0xD8, 0xFF, 0x01];
         byte[] second = [0xFF, 0xD8, 0xFF, 0x02];
+        byte[] third = [0xFF, 0xD8, 0xFF, 0x03];
 
-        // An opening turn sent with both drawings, then an exchange without any.
+        // An opening turn sent with two drawings, her question, then an answer sent with one more.
         var transcript = new Transcript(
         [
-            new TranscriptTurn(
-                TranscriptRole.Candidate, "see [Figure 1] and [Figure 2]",
-                [new PhotoCrop("Figure 1", first), new PhotoCrop("Figure 2", second)]),
+            new TranscriptTurn(TranscriptRole.Candidate, "see my pages", [first, second]),
             new TranscriptTurn(TranscriptRole.Examiner, "why?", Crops: []),
-            new TranscriptTurn(TranscriptRole.Candidate, "because", Crops: []),
+            new TranscriptTurn(TranscriptRole.Candidate, "because", [third]),
         ]);
 
         // Render the conversation as a model's user message.
         var message = transcript.ToPrompt();
 
-        // The opening turn, each drawing after its caption, then the rest of the conversation.
+        // Each turn's text with its drawings after it, counted from 1 again in the answer.
         ChatPart[] expected =
         [
-            new ChatText("## Candidate\n\nsee [Figure 1] and [Figure 2]\n\nTheir drawing [Figure 1]:"),
+            new ChatText("## Candidate\n\nsee my pages\n\nTheir drawing 1:"),
             new ChatImage(first, MediaTypeNames.Image.Jpeg),
-            new ChatText("\n\nTheir drawing [Figure 2]:"),
+            new ChatText("\n\nTheir drawing 2:"),
             new ChatImage(second, MediaTypeNames.Image.Jpeg),
-            new ChatText("\n\n## Examiner\n\nwhy?\n\n## Candidate\n\nbecause"),
+            new ChatText("\n\n## Examiner\n\nwhy?\n\n## Candidate\n\nbecause\n\nTheir drawing 1:"),
+            new ChatImage(third, MediaTypeNames.Image.Jpeg),
         ];
 
         // The message holds exactly those parts.

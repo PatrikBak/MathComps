@@ -36,31 +36,14 @@ public sealed class R2PrivateStore(
     }
 
     /// <inheritdoc/>
-    public async Task<string?> ReadTextAsync(string key, CancellationToken cancellationToken)
-    {
-        // Time the read, so a slow storage answer shows in the log
-        var stopwatch = Stopwatch.StartNew();
+    public Task<string?> ReadTextAsync(string key, CancellationToken cancellationToken) =>
+        // The object's text, its read timed
+        TimedReadAsync(key, _bucket.ReadTextAsync, cancellationToken);
 
-        // Ask for the object
-        var content = await _bucket.ReadTextAsync(key, cancellationToken);
-
-        // The read that found nothing
-        if (content is null)
-        {
-            // Say so, with how long R2 took to answer
-            logger.LogInformation(
-                "Nothing at {Key} in R2, answered in {ElapsedMs} ms", key, stopwatch.ElapsedMilliseconds);
-
-            // Nothing is stored under that key
-            return null;
-        }
-
-        // The read that found the object
-        logger.LogInformation("Read {Key} from R2 in {ElapsedMs} ms", key, stopwatch.ElapsedMilliseconds);
-
-        // The object's text
-        return content;
-    }
+    /// <inheritdoc/>
+    public Task<byte[]?> ReadBytesAsync(string key, CancellationToken cancellationToken) =>
+        // The object's bytes, their read timed
+        TimedReadAsync(key, _bucket.ReadBytesAsync, cancellationToken);
 
     /// <inheritdoc/>
     public TimeSpan LinkLifetime => privateFileLinkSettings.Value.LinkLifetime;
@@ -76,4 +59,41 @@ public sealed class R2PrivateStore(
     public void Dispose() =>
         // Dispose the bucket's client
         _bucket.Dispose();
+
+    /// <summary>
+    /// Reads an object from the bucket and logs the read, with how long R2 took to answer, so a slow storage answer
+    /// shows in the log.
+    /// </summary>
+    /// <typeparam name="T">What the object is read into.</typeparam>
+    /// <param name="key">The object key to read.</param>
+    /// <param name="read">Reads the object from the bucket.</param>
+    /// <param name="cancellationToken">Cancels the read.</param>
+    /// <returns>What the object was read into, or null when nothing is stored under that key.</returns>
+    private async Task<T?> TimedReadAsync<T>(
+        string key, Func<string, CancellationToken, Task<T?>> read, CancellationToken cancellationToken)
+        where T : class
+    {
+        // Time the read
+        var stopwatch = Stopwatch.StartNew();
+
+        // Ask for the object
+        var content = await read(key, cancellationToken);
+
+        // The read that found nothing
+        if (content is null)
+        {
+            // Say so, with how long R2 took to answer
+            logger.LogInformation(
+                "Nothing at {Key} in R2, answered in {ElapsedMs} ms", key, stopwatch.ElapsedMilliseconds);
+
+            // Nothing is stored under that key
+            return null;
+        }
+
+        // The read that found the object
+        logger.LogInformation("Read {Key} from R2 in {ElapsedMs} ms", key, stopwatch.ElapsedMilliseconds);
+
+        // The object as read
+        return content;
+    }
 }

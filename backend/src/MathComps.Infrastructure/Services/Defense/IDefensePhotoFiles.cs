@@ -5,7 +5,7 @@ namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
 /// The files of the photos students send with their defense messages: where each page and each drawing cut out of it
-/// is kept, and the links to them.
+/// is kept, the links to them, and the drawings read back.
 /// </summary>
 public interface IDefensePhotoFiles
 {
@@ -37,4 +37,14 @@ public interface IDefensePhotoFiles
     /// <returns>The photos with their links in page order, each one's drawings in the order its reading lists
     /// them.</returns>
     IReadOnlyList<DefenseTurnPhotoDto> LinksFor(IEnumerable<DefensePhoto> photos);
+
+    /// <summary>
+    /// Reads every drawing cut out of the pages a message went out with, in the order <see cref="LinksFor"/> lists
+    /// them.
+    /// </summary>
+    /// <param name="photos">The message's photos, with the drawings cut out of them.</param>
+    /// <param name="cancellationToken">Cancels the reads.</param>
+    /// <returns>Each drawing's JPEG, in that order.</returns>
+    /// <exception cref="InvalidOperationException">A drawing has no file.</exception>
+    Task<IReadOnlyList<byte[]>> ReadCropsAsync(IEnumerable<DefensePhoto> photos, CancellationToken cancellationToken);
 }

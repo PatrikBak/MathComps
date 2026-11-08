@@ -76,7 +76,48 @@ internal sealed class R2Bucket(R2Settings settings, string bucketName, string bu
     /// <param name="key">The object key.</param>
     /// <param name="cancellationToken">Cancels the read.</param>
     /// <returns>The file's text, or null when nothing is stored under that key.</returns>
-    public async Task<string?> ReadTextAsync(string key, CancellationToken cancellationToken)
+    public Task<string?> ReadTextAsync(string key, CancellationToken cancellationToken) =>
+        // The body read out as text
+        ReadAsync(key, async (body, token) =>
+        {
+            // A reader over the body
+            using var reader = new StreamReader(body);
+
+            // The object's text
+            return await reader.ReadToEndAsync(token);
+        }, cancellationToken);
+
+    /// <summary>
+    /// Reads the bytes stored under a key.
+    /// </summary>
+    /// <param name="key">The object key.</param>
+    /// <param name="cancellationToken">Cancels the read.</param>
+    /// <returns>The file's bytes, or null when nothing is stored under that key.</returns>
+    public Task<byte[]?> ReadBytesAsync(string key, CancellationToken cancellationToken) =>
+        // The body read out whole
+        ReadAsync(key, async (body, token) =>
+        {
+            // Somewhere to collect the body
+            using var bytes = new MemoryStream();
+
+            // Collect the body
+            await body.CopyToAsync(bytes, token);
+
+            // The object's bytes
+            return bytes.ToArray();
+        }, cancellationToken);
+
+    /// <summary>
+    /// Reads the file stored under a key, handing its body to a reader before the response is let go.
+    /// </summary>
+    /// <typeparam name="T">What the body is read into.</typeparam>
+    /// <param name="key">The object key.</param>
+    /// <param name="readBody">Reads the file's body into its result.</param>
+    /// <param name="cancellationToken">Cancels the read.</param>
+    /// <returns>What the body was read into, or null when nothing is stored under that key.</returns>
+    private async Task<T?> ReadAsync<T>(
+        string key, Func<Stream, CancellationToken, Task<T>> readBody, CancellationToken cancellationToken)
+        where T : class
     {
         try
         {
@@ -85,10 +126,7 @@ internal sealed class R2Bucket(R2Settings settings, string bucketName, string bu
                 new GetObjectRequest { BucketName = _bucketName, Key = key }, cancellationToken);
 
             // Read the body out before the response is disposed
-            using var reader = new StreamReader(response.ResponseStream);
-
-            // The object's text
-            return await reader.ReadToEndAsync(cancellationToken);
+            return await readBody(response.ResponseStream, cancellationToken);
         }
         catch (AmazonS3Exception exception)
             when (exception.StatusCode == HttpStatusCode.NotFound && exception.ErrorCode != "NoSuchBucket")

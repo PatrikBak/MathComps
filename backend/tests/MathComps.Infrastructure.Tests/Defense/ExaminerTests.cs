@@ -6,7 +6,6 @@ using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Dtos;
 using MathComps.Infrastructure.Services.Defense.Engine;
-using MathComps.Infrastructure.Services.Photos;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Moq;
 using MsOptions = Microsoft.Extensions.Options.Options;
@@ -1163,7 +1162,7 @@ public class ExaminerTests
 
         // A candidate turn sent with that drawing.
         var transcript = new Transcript(
-            [new TranscriptTurn(TranscriptRole.Candidate, "see [Figure 1]", [new PhotoCrop("Figure 1", drawing)])]);
+            [new TranscriptTurn(TranscriptRole.Candidate, "see my drawing", [drawing])]);
 
         // Run a turn, keeping each step's user message.
         var messages = await RunCapturingUserMessagesAsync(transcript, DraftTurnAsync);
@@ -1171,7 +1170,7 @@ public class ExaminerTests
         // The candidate's text through the drawing's caption, then the drawing.
         ChatPart[] conversation =
         [
-            new ChatText("## Candidate\n\nsee [Figure 1]\n\nTheir drawing [Figure 1]:"),
+            new ChatText("## Candidate\n\nsee my drawing\n\nTheir drawing 1:"),
             new ChatImage(drawing, MediaTypeNames.Image.Jpeg),
         ];
 
@@ -1188,7 +1187,7 @@ public class ExaminerTests
 
         // The language check reads the candidate's text and the reply, without the drawing.
         Assert.Equal<ChatPart>(
-            [new ChatText("## Candidate\n\nsee [Figure 1]\n\n## Examiner (proposed)\n\na reply.")],
+            [new ChatText("## Candidate\n\nsee my drawing\n\n## Examiner (proposed)\n\na reply.")],
             messages[nameof(ExaminerStep.LanguageCheck)]);
     }
 
@@ -1204,7 +1203,7 @@ public class ExaminerTests
 
         // A candidate turn sent with that drawing.
         var transcript = new Transcript(
-            [new TranscriptTurn(TranscriptRole.Candidate, "see [Figure 1]", [new PhotoCrop("Figure 1", drawing)])]);
+            [new TranscriptTurn(TranscriptRole.Candidate, "see my drawing", [drawing])]);
 
         // Check a written reply, keeping each check's user message.
         var messages = await RunCapturingUserMessagesAsync(transcript,
@@ -1213,7 +1212,7 @@ public class ExaminerTests
         // The candidate's text through the drawing's caption, the drawing, then the reply under judgement.
         ChatPart[] judged =
         [
-            new ChatText("## Candidate\n\nsee [Figure 1]\n\nTheir drawing [Figure 1]:"),
+            new ChatText("## Candidate\n\nsee my drawing\n\nTheir drawing 1:"),
             new ChatImage(drawing, MediaTypeNames.Image.Jpeg),
             new ChatText("\n\n## Examiner (proposed)\n\na reply."),
         ];

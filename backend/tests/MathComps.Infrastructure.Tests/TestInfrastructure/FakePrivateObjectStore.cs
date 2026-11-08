@@ -1,12 +1,14 @@
 using System.Collections.Concurrent;
+using System.Text;
 using MathComps.Infrastructure.Storage;
 
 namespace MathComps.Infrastructure.Tests.TestInfrastructure;
 
 /// <summary>
-/// A test double for <see cref="IPrivateObjectStore"/> keeping its files in memory instead of in a bucket.
+/// A test double for <see cref="IPrivateObjectStore"/> keeping its files in memory instead of in a bucket, and the
+/// <see cref="IObjectReader"/> of what it keeps.
 /// </summary>
-public sealed class FakePrivateObjectStore : IPrivateObjectStore
+public sealed class FakePrivateObjectStore : IPrivateObjectStore, IObjectReader
 {
     /// <summary>
     /// Every stored file's bytes and media type, by key.
@@ -37,4 +39,14 @@ public sealed class FakePrivateObjectStore : IPrivateObjectStore
         // Nothing leaves the process.
         return Task.CompletedTask;
     }
+
+    /// <inheritdoc/>
+    public Task<string?> ReadTextAsync(string key, CancellationToken cancellationToken) =>
+        // The file's bytes read as text, or nothing when that key holds none
+        Task.FromResult(_files.TryGetValue(key, out var file) ? Encoding.UTF8.GetString(file.Content) : null);
+
+    /// <inheritdoc/>
+    public Task<byte[]?> ReadBytesAsync(string key, CancellationToken cancellationToken) =>
+        // The file's bytes, or nothing when that key holds none
+        Task.FromResult(_files.TryGetValue(key, out var file) ? file.Content : null);
 }

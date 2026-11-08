@@ -572,7 +572,7 @@ public static class ServiceCollectionExtensions
         // The service that reads and keeps the photos of the students' handwritten work.
         services.TryAddScoped<IDefensePhotoService, DefensePhotoService>();
 
-        // The links to the students' photos and the drawings cut out of them.
+        // The files of the students' photos: the links to them and to their drawings, and the drawings read back.
         services.TryAddSingleton<IDefensePhotoFiles, DefensePhotoFiles>();
 
         // What the defense target guard asks about a reader before it weighs a competition's gates against them,

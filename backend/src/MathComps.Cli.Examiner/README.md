@@ -85,12 +85,12 @@ A `## Candidate` block can carry the drawings a photo of the candidate's page wa
 ```markdown
 ## Candidate
 
-The bisectors meet at $I$, see [Figure 1].
+The bisectors meet at $I$, see the picture.
 
 ![Figure 1](crops/figure-1.jpg)
 ```
 
-Loading takes those lines out of the turn's text and hands the examiner the drawings beside it. A missing file or one that isn't a JPEG stops the load with the file's name. Writing the next reply back into `transcript.md` keeps the lines.
+Loading takes those lines out of the turn's text and hands the examiner the drawings beside it, in the order the lines are written. What the brackets hold is never read. A missing file or one that isn't a JPEG stops the load with the file's name. Writing the next reply back into `transcript.md` keeps the lines.
 
 The flaw planted in the candidate's solution lives only in the generator's brief while it plays the candidate, so the examiner has to find it from the reasoning.
 
@@ -124,7 +124,7 @@ The config files are required at startup: [`appsettings.examiner.json`](../MathC
 
 The examiner has one template per step in [`Prompts/`](../MathComps.Infrastructure/Prompts): `generate.txt`, `math-check.txt`, `leak-check.txt`, `language-check.txt` and `route-check.txt`. Each is that step's system message.
 
-The user message is the conversation so far, each drawing right after the text of the turn it came with, captioned `Their drawing [Figure 1]:`. The math-, leak- and route-checks get the proposed reply appended to it. The language check gets the candidate's latest turn and the proposed reply as text, and nothing else.
+The user message is the conversation so far, each drawing right after the text of the turn it came with, numbered from 1 in each turn (`Their drawing 1:`). The math-, leak- and route-checks get the proposed reply appended to it. The language check gets the candidate's latest turn and the proposed reply as text, and nothing else.
 
 [`Prompts/Notes/`](../MathComps.Infrastructure/Prompts/Notes) holds the shorter pieces that fill the generate prompt: one instruction per flaw a guard can raise, the wrapper that marks them to the examiner as a revision, the wording a retry shows the turn's earlier drafts and every check's verdict on each in, the holding note a draft that outlasted the cap is replaced with, and the guidance for a reference carrying an `## AUTHOR'S HINTS` section.
 

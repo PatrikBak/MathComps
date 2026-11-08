@@ -34,7 +34,8 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// <param name="examiner">The engine that produces the examiner's reply.</param>
 /// <param name="localization">Resolves the localized names a competition problem is listed under.</param>
 /// <param name="members">Reads when a student started preparing the competitions.</param>
-/// <param name="photoFiles">The links to the photos a message was sent with and the drawings cut out of them.</param>
+/// <param name="photoFiles">The files of the photos a message was sent with: the links to them and to the drawings cut
+/// out of them, and those drawings read back.</param>
 /// <param name="defenseLimits">The caps on a defense.</param>
 public class DefenseSessionService(
     IDefenseTargetGuard targetGuard,
@@ -643,8 +644,8 @@ public class DefenseSessionService(
         MathCompsDbContext dbContext, DefenseSession session, Guid userId, bool countsAgainstCeiling,
         CancellationToken cancellationToken)
     {
-        // Build the engine's transcript from the stored turns.
-        var transcript = BuildTranscript(session.Turns);
+        // Build the engine's transcript from the stored turns, with the drawings cut out of their photos.
+        var transcript = await BuildTranscriptAsync(session.Turns, cancellationToken);
 
         // Time the engine run, the turn's dominant latency.
         var stopwatch = Stopwatch.StartNew();
@@ -768,12 +769,26 @@ public class DefenseSessionService(
     }
 
     /// <summary>
-    /// Builds the engine's transcript from a session's stored turns, in sequence order.
+    /// Builds the engine's transcript from a session's stored turns, in sequence order, each with the drawings cut out
+    /// of the photos it was sent with.
     /// </summary>
-    /// <param name="turns">The session's turns.</param>
+    /// <param name="turns">The session's turns, with their photos and the drawings cut out of them.</param>
+    /// <param name="cancellationToken">A token to cancel the reads.</param>
     /// <returns>The conversation as the engine reads it.</returns>
-    private static Transcript BuildTranscript(IEnumerable<DefenseTurn> turns) =>
-        new([.. turns.OrderBy(turn => turn.Sequence).Select(turn => new TranscriptTurn(turn.Role, turn.Content, []))]);
+    private async Task<Transcript> BuildTranscriptAsync(
+        IEnumerable<DefenseTurn> turns, CancellationToken cancellationToken)
+    {
+        // Each turn with its drawings, read from storage in the order the turn's pages show them.
+        var transcriptTurns = await turns
+            .OrderBy(turn => turn.Sequence)
+            .ToAsyncEnumerable()
+            .Select(async (turn, token) => new TranscriptTurn(
+                turn.Role, turn.Content, [.. await photoFiles.ReadCropsAsync(turn.Photos, token)]))
+            .ToListAsync(cancellationToken);
+
+        // The conversation in order.
+        return new Transcript([.. transcriptTurns]);
+    }
 
     /// <summary>
     /// Maps a turn's engine attempts onto rows against the turn they were drafted for. The fallback flag belongs to
