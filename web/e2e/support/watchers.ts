@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 declare global {
   interface Window {
@@ -206,6 +206,26 @@ export async function countRemovals(page: Page, selector: string): Promise<() =>
 
   // A read of the count on each call
   return () => page.evaluate(() => window.removedCount ?? 0)
+}
+
+/**
+ * Listens for one element to finish loading. Called before whatever lets the element load, since a load listened
+ * for only afterwards can already be over.
+ *
+ * @param element - The element, an image or anything else that loads.
+ *
+ * @returns A function waiting until the element has loaded.
+ */
+export async function hearLoad(element: Locator): Promise<() => Promise<void>> {
+  // The load, as a promise kept in the page, wrapped so the handle comes back without waiting for it
+  const pending = await element.evaluateHandle((target) => ({
+    loaded: new Promise<void>((resolve) =>
+      target.addEventListener('load', () => resolve(), { once: true })
+    ),
+  }))
+
+  // A function which waits for the load
+  return () => pending.evaluate((holder) => holder.loaded)
 }
 
 /**

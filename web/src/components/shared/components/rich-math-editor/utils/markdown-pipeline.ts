@@ -205,7 +205,7 @@ export async function validateMarkdown(text: string): Promise<ValidationResult> 
   }
 
   // Mirror the renderer's preprocessing step so display math is detected the same way
-  const preprocessed = preprocessDisplayMath(text)
+  const preprocessed = preprocessDisplayMath(text).text
 
   try {
     // Run the full pipeline

@@ -33,7 +33,7 @@ async function render(markdown: string, extraPasses = 0): Promise<string> {
   }
 
   // Mirror the renderer's display-math preprocessing, then run and stringify
-  const file = await processor.use(rehypeStringify).process(preprocessDisplayMath(markdown))
+  const file = await processor.use(rehypeStringify).process(preprocessDisplayMath(markdown).text)
 
   // Hand back the rendered HTML
   return String(file)

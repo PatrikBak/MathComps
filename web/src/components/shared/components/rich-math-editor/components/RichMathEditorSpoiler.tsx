@@ -5,6 +5,8 @@ import { type ReactNode, useState } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
+import { type SourceRangeAttributes } from '../plugins/rehype-source-ranges'
+
 /**
  * Props for the {@link RichMathEditorSpoiler} component.
  */
@@ -13,18 +15,27 @@ type RichMathEditorSpoilerProps = {
   label: string
   /** The content to display inside the spoiler */
   children: ReactNode
+  /** Where the spoiler stands in the written text, none where that is not marked */
+  sourceRange: SourceRangeAttributes
 }
 
 /**
  * Collapsible spoiler component with a clickable label header.
  * Shows the label as a clickable header. Content is hidden until clicked.
  */
-export function RichMathEditorSpoiler({ label, children }: RichMathEditorSpoilerProps) {
+export function RichMathEditorSpoiler({
+  label,
+  children,
+  sourceRange,
+}: RichMathEditorSpoilerProps) {
   // State to track whether the spoiler is open or closed
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="my-2 rounded-lg border border-foreground/10 bg-inset overflow-hidden">
+    <div
+      {...sourceRange}
+      className="my-2 rounded-lg border border-foreground/10 bg-inset overflow-hidden"
+    >
       {/* Clickable header */}
       <button
         type="button"

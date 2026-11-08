@@ -4,6 +4,7 @@ import type { UserProfile } from '@/components/features/profile/model/profile-ty
 import { assertNever } from '@/components/shared/utils/assert-never'
 
 import messages from '../messages/en.json'
+import { gateReads } from './support/answer-gate'
 import {
   answerJson,
   BACKEND_ORIGIN,
@@ -28,10 +29,12 @@ import {
   naturalWidthOf,
   pasteFile,
   pickFile,
+  putCursorAfter,
+  putCursorAt,
 } from './support/interaction'
 import { searchAnswerWith, stubSearchAnswer } from './support/problem-actions'
 import { expect, test } from './support/test'
-import { countRemovals } from './support/watchers'
+import { countRemovals, hearLoad } from './support/watchers'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
 const SETTLE_TIMEOUT_MS = 15_000
@@ -186,7 +189,7 @@ test.describe('the editor expanded to its modal', () => {
     const expandedText = expanded.locator('textarea')
 
     // With the cursor put between the two letters
-    await expandedText.evaluate((element: HTMLTextAreaElement) => element.setSelectionRange(1, 1))
+    await putCursorAt(expandedText, 1)
 
     // Inline math from the expanded view's toolbar
     await expanded.getByTitle(/^Inline math/).click()
@@ -255,6 +258,198 @@ test.describe('the editor expanded to its modal', () => {
     // Drawn around the same two images, neither of them taken out and put back
     expect(await imagesRemoved()).toBe(0)
   })
+
+  test('keeps the spot being written in view of its preview', async ({ page }) => {
+    // The composer, open
+    const composer = await openComposer(page)
+
+    // A draft far taller than the preview, one numbered paragraph after another
+    await composer.fill(
+      Array.from({ length: 40 }, (_unused, index) => `Paragraph ${index + 1}`).join('\n\n')
+    )
+
+    // Taken to the expanded view, the cursor at the end of the draft
+    const expanded = await expandComposer(page)
+
+    // The draft's last paragraph out of the preview's view
+    await expect(expanded.locator('p').filter({ hasText: 'Paragraph 40' })).not.toBeInViewport()
+
+    // A word written at the end
+    await page.keyboard.type(' holds')
+
+    // The paragraph being written, brought into the preview's view
+    await expect(expanded.locator('p').filter({ hasText: 'Paragraph 40 holds' })).toBeInViewport()
+
+    // The box the preview scrolls in, which holds its paragraphs
+    const preview = expanded.locator('p').filter({ hasText: 'Paragraph 1' }).first().locator('..')
+
+    // How far down the preview stands with the paragraph being written in view
+    const scrollTop = await preview.evaluate((element) => element.scrollTop)
+
+    // The cursor put at the end of a paragraph the preview already shows
+    await putCursorAfter(expanded.locator('textarea'), 'Paragraph 38')
+
+    // A word written at the cursor
+    await page.keyboard.type(' too')
+
+    // The preview showing the new word
+    await expect(expanded.locator('p').filter({ hasText: 'Paragraph 38 too' })).toBeInViewport()
+
+    // The preview left where it stood, since the spot was in view all along
+    expect(await preview.evaluate((element) => element.scrollTop)).toBe(scrollTop)
+
+    // The cursor put at the end of the first paragraph, far above the view
+    await putCursorAfter(expanded.locator('textarea'), 'Paragraph 1')
+
+    // A formula written at the cursor from the toolbar, which places its cursor only once the text is in
+    await expanded.getByTitle(/^Inline math/).click()
+
+    // The first paragraph, brought back into the preview's view
+    await expect(preview.locator('p').first()).toBeInViewport()
+  })
+
+  test('brings the spot back under a figure that loads after it, unless the reader moved on', async ({
+    page,
+  }) => {
+    // A figure much taller than the preview
+    const figure = await blankPng(page, 200, 800)
+
+    // Answered for every address the draft names
+    await page.route('**/late-figure-*.png', (route) =>
+      route.fulfill({ body: figure, contentType: 'image/png' })
+    )
+
+    // Each figure held back until the test lets it through
+    const releaseFirst = (await gateReads(page, '**/late-figure-1.png')).hold()
+    const releaseSecond = (await gateReads(page, '**/late-figure-2.png')).hold()
+    const releaseThird = (await gateReads(page, '**/late-figure-3.png')).hold()
+    const releaseFourth = (await gateReads(page, '**/late-figure-4.png')).hold()
+
+    // The composer, open
+    const composer = await openComposer(page)
+
+    // Thirty numbered paragraphs
+    const paragraphs = Array.from({ length: 30 }, (_unused, index) => `Paragraph ${index + 1}`)
+
+    // A long draft ending in the figures and a line under them
+    await composer.fill(
+      [
+        ...paragraphs,
+        '![first](/late-figure-1.png)',
+        '![second](/late-figure-2.png)',
+        '![third](/late-figure-3.png)',
+        '![fourth](/late-figure-4.png)',
+        'The end',
+      ].join('\n\n')
+    )
+
+    // Taken to the expanded view, the cursor at the end of the draft
+    const expanded = await expandComposer(page)
+
+    // A word written at the end
+    await page.keyboard.type(' holds')
+
+    // The line being written
+    const lastLine = expanded.locator('p').filter({ hasText: 'The end holds' })
+
+    // The line brought into the preview's view
+    await expect(lastLine).toBeInViewport()
+
+    // The first figure, listened to as it loads
+    const firstLoaded = await hearLoad(expanded.getByAltText('first'))
+
+    // Let through
+    releaseFirst()
+
+    // And loaded
+    await firstLoaded()
+
+    // The line, pushed down under the first figure, brought back into view
+    await expect(lastLine).toBeInViewport()
+
+    // The box the preview scrolls in, which holds its paragraphs
+    const preview = lastLine.locator('..')
+
+    // The pointer over the preview
+    await preview.hover()
+
+    // Scrolled back to the top with the mouse wheel
+    await page.mouse.wheel(0, -100_000)
+
+    // The preview at its very top
+    await expect.poll(() => preview.evaluate((element) => element.scrollTop)).toBe(0)
+
+    // The second figure, listened to as it loads
+    const secondLoaded = await hearLoad(expanded.getByAltText('second'))
+
+    // Let through
+    releaseSecond()
+
+    // And loaded
+    await secondLoaded()
+
+    // The preview left where the reader put it
+    expect(await preview.evaluate((element) => element.scrollTop)).toBe(0)
+
+    // Another word written at the end
+    await page.keyboard.type(' again')
+
+    // The end brought back into view
+    await expect(expanded.locator('p').filter({ hasText: 'The end holds again' })).toBeInViewport()
+
+    // The preview pressed in its margin, clear of the text and the figures
+    await preview.click({ position: { x: 2, y: 20 } })
+
+    // How far down the preview stands where the reader pressed it
+    const pressedAt = await preview.evaluate((element) => element.scrollTop)
+
+    // The third figure, listened to as it loads
+    const thirdLoaded = await hearLoad(expanded.getByAltText('third'))
+
+    // Let through
+    releaseThird()
+
+    // And loaded
+    await thirdLoaded()
+
+    // The preview left where the reader pressed it
+    expect(await preview.evaluate((element) => element.scrollTop)).toBe(pressedAt)
+
+    // The draft's textarea
+    const text = expanded.locator('textarea')
+
+    // The textarea back in focus, for the next word
+    await text.focus()
+
+    // The cursor back at the end
+    await putCursorAfter(text, 'The end holds again')
+
+    // A word written at the end once more
+    await page.keyboard.type(' still')
+
+    // The end brought back into view
+    await expect(
+      expanded.locator('p').filter({ hasText: 'The end holds again still' })
+    ).toBeInViewport()
+
+    // The cursor moved up to the first paragraph, with nothing written there
+    await putCursorAfter(text, 'Paragraph 1')
+
+    // How far down the preview stands with the end in view
+    const scrollTop = await preview.evaluate((element) => element.scrollTop)
+
+    // The fourth figure, listened to as it loads
+    const fourthLoaded = await hearLoad(expanded.getByAltText('fourth'))
+
+    // Let through
+    releaseFourth()
+
+    // And loaded
+    await fourthLoaded()
+
+    // The preview left where it stood, since the cursor moved without an edit
+    expect(await preview.evaluate((element) => element.scrollTop)).toBe(scrollTop)
+  })
 })
 
 test.describe('the preview in place of the text', () => {
@@ -266,7 +461,7 @@ test.describe('the preview in place of the text', () => {
     await composer.fill('Since $x^2 \\ge 0$, the bound holds.')
 
     // The cursor put right after the draft's first word
-    await composer.evaluate((element: HTMLTextAreaElement) => element.setSelectionRange(5, 5))
+    await putCursorAt(composer, 5)
 
     // The toggle swapping the draft for what it renders as
     const preview = page.getByRole('button', { name: editorCopy.preview, exact: true })
@@ -347,7 +542,7 @@ test.describe('the toolbar over the text', () => {
     await composer.fill('ab')
 
     // The cursor put between the draft's two letters
-    await composer.evaluate((element: HTMLTextAreaElement) => element.setSelectionRange(1, 1))
+    await putCursorAt(composer, 1)
 
     // Inline math, which writes a formula to type over and selects it
     await page.getByTitle(/^Inline math/).click()
@@ -590,7 +785,7 @@ test.describe('the view over a long draft', () => {
     await expect(composer).toHaveJSProperty('scrollTop', bottom)
 
     // The cursor put at the very start, the view left at the bottom
-    await composer.evaluate((element: HTMLTextAreaElement) => element.setSelectionRange(0, 0))
+    await putCursorAt(composer, 0)
 
     // The same tool used at the cursor
     await page.getByTitle(/^Bold/).click()
@@ -922,7 +1117,7 @@ test.describe('an image the editor uploads', () => {
     await acceptUploads(page)
 
     // An image as wide as a Full HD screen
-    const image = await blankPng(page, 1920)
+    const image = await blankPng(page, 1920, 1)
 
     // The image handed to the editor
     const composer = await attachImage(page, image)
@@ -963,7 +1158,7 @@ test.describe('an image the editor uploads', () => {
     await composer.fill('ab')
 
     // With the cursor between the draft's two letters
-    await composer.evaluate((element: HTMLTextAreaElement) => element.setSelectionRange(1, 1))
+    await putCursorAt(composer, 1)
 
     // An image handed to the image tool
     await pickFile(discussion.getByTitle(editorCopy.image), DIAGRAM)
@@ -1068,7 +1263,7 @@ test.describe('an image the editor uploads', () => {
     await acceptUploads(page)
 
     // An image as wide as a Full HD screen
-    const image = await blankPng(page, 1920)
+    const image = await blankPng(page, 1920, 1)
 
     // The upload keys each request for the reader's own links asks for
     const askedKeys: string[][] = []

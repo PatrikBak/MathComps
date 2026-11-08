@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl'
 import { memo, type PropsWithChildren, type ReactNode, useMemo } from 'react'
 import Markdown, { type Components, type ExtraProps, type UrlTransform } from 'react-markdown'
+import type { PluggableList } from 'unified'
 
 import { AppLink } from '@/components/shared/components/AppLink'
 import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
@@ -12,6 +13,7 @@ import {
   resolveUserUploadMediaUrl,
 } from '@/components/shared/utils/media-utils'
 
+import { rehypeSourceRanges, sourceRangeOf } from '../plugins/rehype-source-ranges'
 import {
   NUMBER_REFERENCE_NUMBER,
   NUMBER_REFERENCE_TAG,
@@ -45,6 +47,8 @@ type RichMathEditorRendererProps = {
   fileLinks?: FileLinks
   /** What a `#N` in the content is drawn as, every `#N` staying text without it. */
   renderNumberReference?: NumberReferenceRenderer
+  /** Whether the rendered elements are stamped with where they stand in the content. */
+  marksSourceRanges?: boolean
 }
 
 /**
@@ -99,11 +103,19 @@ function AttachmentBadge({ href, children }: AttachmentBadgeProps) {
 }
 
 /**
+ * The props react-markdown hands the component that draws a spoiler.
+ */
+type SpoilerTagProps = PropsWithChildren<ExtraProps> & {
+  /** The spoiler's label, as the content writes it */
+  label?: string
+}
+
+/**
  * The markdown components, plus the custom tags for spoilers and `#N` references.
  */
 type CustomComponents = Components & {
   /** Custom component for spoilers */
-  spoiler?: ({ children }: { children: ReactNode }) => ReactNode
+  spoiler?: ({ children, label, node }: SpoilerTagProps) => ReactNode
   /** Custom component for a `#N` in the text */
   [NUMBER_REFERENCE_TAG]?: ({ children, node }: PropsWithChildren<ExtraProps>) => ReactNode
 }
@@ -181,6 +193,7 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
   imageContext,
   fileLinks,
   renderNumberReference,
+  marksSourceRanges,
 }: RichMathEditorRendererProps) {
   // Editor translations
   const t = useTranslations('ui.editor')
@@ -220,19 +233,33 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
 
           // If paragraph contains block-level elements, wrap in div
           if (hasBlockElement) {
-            return <div className="mb-2 last:mb-0">{children}</div>
+            return (
+              <div {...sourceRangeOf(node)} className="mb-2 last:mb-0">
+                {children}
+              </div>
+            )
           }
 
           // Otherwise, render as paragraph
-          return <p className="mb-2 last:mb-0">{children}</p>
+          return (
+            <p {...sourceRangeOf(node)} className="mb-2 last:mb-0">
+              {children}
+            </p>
+          )
         },
-        h2: ({ children }) => (
-          <h2 className="text-[1.25em] font-semibold text-foreground mt-5 mb-2 first:mt-0">
+        h2: ({ children, node }) => (
+          <h2
+            {...sourceRangeOf(node)}
+            className="text-[1.25em] font-semibold text-foreground mt-5 mb-2 first:mt-0"
+          >
             {children}
           </h2>
         ),
-        h3: ({ children }) => (
-          <h3 className="text-[1.125em] font-semibold text-foreground mt-4 mb-2 first:mt-0">
+        h3: ({ children, node }) => (
+          <h3
+            {...sourceRangeOf(node)}
+            className="text-[1.125em] font-semibold text-foreground mt-4 mb-2 first:mt-0"
+          >
             {children}
           </h3>
         ),
@@ -242,8 +269,11 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
         em: ({ children }) => <em className="italic">{children}</em>,
         // A fenced block arrives wrapped in its own `pre`, which carries the panel and resets the inline pill
         // styling its `code` child would otherwise wear.
-        pre: ({ children }) => (
-          <pre className="bg-foreground/5 my-2 overflow-x-auto rounded-md p-3 text-sm [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-sm [&>code]:text-foreground">
+        pre: ({ children, node }) => (
+          <pre
+            {...sourceRangeOf(node)}
+            className="bg-foreground/5 my-2 overflow-x-auto rounded-md p-3 text-sm [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-sm [&>code]:text-foreground"
+          >
             {children}
           </pre>
         ),
@@ -254,16 +284,23 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
             {typeof children === 'string' ? children.replace(/\n$/, '') : children}
           </code>
         ),
-        blockquote: ({ children }) => (
-          <blockquote className="border-l-2 border-brand/50 pl-3 my-2 text-muted italic">
+        blockquote: ({ children, node }) => (
+          <blockquote
+            {...sourceRangeOf(node)}
+            className="border-l-2 border-brand/50 pl-3 my-2 text-muted italic"
+          >
             {children}
           </blockquote>
         ),
-        ul: ({ children, className }) => (
-          <ul className={resolveListClassName(className, 'list-disc')}>{children}</ul>
+        ul: ({ children, className, node }) => (
+          <ul {...sourceRangeOf(node)} className={resolveListClassName(className, 'list-disc')}>
+            {children}
+          </ul>
         ),
-        ol: ({ children, className }) => (
-          <ol className={resolveListClassName(className, 'list-decimal')}>{children}</ol>
+        ol: ({ children, className, node }) => (
+          <ol {...sourceRangeOf(node)} className={resolveListClassName(className, 'list-decimal')}>
+            {children}
+          </ol>
         ),
         del: ({ children }) => <del className="line-through text-muted">{children}</del>,
         a: ({ href, children }) => {
@@ -383,8 +420,10 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
             </div>
           )
         },
-        spoiler: ({ children, label }: { children: ReactNode; label?: string }) => (
-          <RichMathEditorSpoiler label={label ?? t('hiddenText')}>{children}</RichMathEditorSpoiler>
+        spoiler: ({ children, label, node }: SpoilerTagProps) => (
+          <RichMathEditorSpoiler label={label ?? t('hiddenText')} sourceRange={sourceRangeOf(node)}>
+            {children}
+          </RichMathEditorSpoiler>
         ),
         [NUMBER_REFERENCE_TAG]: ({ children, node }) =>
           // What the caller draws for the number, or the `#N` as written where it draws nothing
@@ -393,20 +432,26 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
     [fileLinks, imageContext, lightImageBackground, renderNumberReference, t]
   )
 
-  // Preprocess display math before parsing
-  const processedContent = preprocessDisplayMath(content)
+  // Preprocess display math before parsing, keeping the way back to the content as written
+  const { text: processedContent, toSourceOffset } = preprocessDisplayMath(content)
 
   // The remark plugins, turning each `#N` into a reference where the caller draws one
   const remarkPlugins =
     renderNumberReference === undefined ? sharedRemarkPlugins : remarkPluginsWithNumberReferences
+
+  // The rehype plugins, stamping the rendered elements with where they stand in the content when asked
+  const rehypePlugins: PluggableList = marksSourceRanges
+    ? [...sharedRehypePlugins, [rehypeSourceRanges, { toSourceOffset }]]
+    : sharedRehypePlugins
 
   return (
     <Markdown
       // Pipeline: GFM -> directive (parses :::) -> spoiler (transforms directive) -> math -> breaks, then
       // where asked the `#N` references
       remarkPlugins={remarkPlugins}
-      // Pipeline: rehype-raw parses HTML -> rehype-sanitize removes XSS -> rehype-katex renders math
-      rehypePlugins={[...sharedRehypePlugins]}
+      // Pipeline: rehype-raw parses HTML -> rehype-sanitize removes XSS -> rehype-katex renders math ->
+      // rehype-math-nowrap keeps inline math with its punctuation, then where asked the source ranges
+      rehypePlugins={rehypePlugins}
       // URL sanitization: allow-list safe schemes, explicitly block dangerous ones
       urlTransform={urlTransform}
       components={components}
