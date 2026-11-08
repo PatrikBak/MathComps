@@ -40,7 +40,7 @@ public static class DefenseSeed
     public static DefensePhoto NewPhoto(Guid userId, int drawings)
     {
         // An unsent photo of the student's
-        var photo = new DefensePhoto { UserId = userId, CreatedAt = DateTimeOffset.UtcNow };
+        var photo = new DefensePhoto { UserId = userId, Text = "The page as read", CreatedAt = DateTimeOffset.UtcNow };
 
         // Its drawings, in reading order
         photo.Crops =

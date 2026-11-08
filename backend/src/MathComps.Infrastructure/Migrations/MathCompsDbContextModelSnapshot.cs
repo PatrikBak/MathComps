@@ -401,6 +401,10 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("position");
 
+                    b.Property<string>("Text")
+                        .HasColumnType("text")
+                        .HasColumnName("text");
+
                     b.Property<Guid?>("TurnId")
                         .HasColumnType("uuid")
                         .HasColumnName("turn_id");

@@ -23,6 +23,12 @@ public class DefensePhoto
     public User User { get; set; } = null!;
 
     /// <summary>
+    /// The page's text as the model read it, before the student edits it. Null on photos read before readings kept
+    /// their text.
+    /// </summary>
+    public required string? Text { get; set; }
+
+    /// <summary>
     /// When the photo was read.
     /// </summary>
     public required DateTimeOffset CreatedAt { get; set; }

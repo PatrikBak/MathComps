@@ -4,14 +4,14 @@ using MathComps.Infrastructure.Services.Photos;
 namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
-/// Reads the photos students take of their handwritten work for a defense conversation, and keeps each photo and the
-/// drawings cut out of it. A reading is held to the same spend ceiling as a turn, weighed before the model is called.
+/// Reads the photos students take of their handwritten work for a defense conversation, and keeps each photo, its text
+/// and its drawings. A reading is held to the same spend ceiling as a turn, weighed before the model is called.
 /// </summary>
 public interface IDefensePhotoService
 {
     /// <summary>
-    /// Reads one photo of a page for a defense of a target, keeps the page and its drawings, and records what the
-    /// reading cost.
+    /// Reads one photo of a page for a defense of a target, keeps the page, its text and its drawings, and records
+    /// what the reading cost.
     /// </summary>
     /// <param name="userId">The student uploading the photo.</param>
     /// <param name="target">What the student is defending.</param>

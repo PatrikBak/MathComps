@@ -61,8 +61,13 @@ public class DefensePhotoService(
         // Stop the clock before the storing.
         stopwatch.Stop();
 
-        // The photo's row.
-        var stored = new DefensePhoto { UserId = userId, CreatedAt = DateTimeOffset.UtcNow };
+        // The photo's row, with the page's text as the reading gave it.
+        var stored = new DefensePhoto
+        {
+            UserId = userId,
+            Text = reading.Value.Text,
+            CreatedAt = DateTimeOffset.UtcNow,
+        };
 
         // A row for each drawing, in the order the reading lists them, beside the drawing's image.
         var crops = reading.Value.Crops
