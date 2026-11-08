@@ -10,10 +10,10 @@ namespace MathComps.Infrastructure.Tests.Photos;
 
 /// <summary>
 /// Tests what <see cref="PhotoReader"/> does around its one model call: the bytes it refuses before calling, the page
-/// it shows the model, and the drawings it cuts out of that page from the model's boxes. The page and the drawings
-/// fail silently when wrong: a model shown the wrong image still gives a fluent reading, and a misread box still cuts
-/// a picture. A stand-in endpoint answers the real caller
-/// with the reply JSON the model would send.
+/// it shows the model, the drawings it cuts out of that page from the model's boxes, and the markers it takes out of
+/// the text. The page and the drawings fail silently when wrong: a model shown the wrong image still gives a fluent
+/// reading, and a misread box still cuts a picture. A stand-in endpoint answers the real caller with the reply JSON
+/// the model would send.
 /// </summary>
 public class PhotoReaderTests
 {
@@ -126,6 +126,37 @@ public class PhotoReaderTests
 
         // Only the good box was cut.
         Assert.Equal("Figure 5", Assert.Single(reading.Value.Crops).Label);
+    }
+
+    /// <summary>
+    /// Every drawing's marker leaves the text, a dropped drawing's too, along with the spaces and blank lines around
+    /// it, while brackets that mark no drawing stay. A marker left in would show the student a <c>[Figure 1]</c> that
+    /// points at nothing.
+    /// </summary>
+    [Fact]
+    public async Task The_drawings_markers_leave_the_text()
+    {
+        // A plain page.
+        var photo = TestPictures.Plain(1000, 500, SKColors.Gray);
+
+        // A marker on a line of its own, one inside a line, and one opening a line for a drawing whose box marks out
+        // nothing, around a bit the model couldn't read.
+        using var endpoint = FakeChatEndpoint.Answering(/*lang=json,strict*/ """
+            {
+              "text": "Let $ABC$ be a triangle.\n\n[Figure 1]\n\nAs [Figure 2] shows, $x = [unreadable]$.\n[Figure 3] Done.",
+              "figures": [
+                { "label": "Figure 1", "box_2d": [100, 100, 300, 300] },
+                { "label": "Figure 2", "box_2d": [500, 100, 700, 300] },
+                { "label": "Figure 3", "box_2d": [100, 100, 300] }
+              ]
+            }
+            """);
+
+        // Read the photo.
+        var reading = await ReaderOver(endpoint).ReadAsync(photo);
+
+        // The text with no marker in it, and its unreadable bit kept.
+        Assert.Equal("Let $ABC$ be a triangle.\n\nAs shows, $x = [unreadable]$.\nDone.", reading.Value.Text);
     }
 
     /// <summary>

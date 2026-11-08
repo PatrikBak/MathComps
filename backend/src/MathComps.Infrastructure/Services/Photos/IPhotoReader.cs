@@ -4,8 +4,8 @@ using Microsoft.Extensions.Logging;
 namespace MathComps.Infrastructure.Services.Photos;
 
 /// <summary>
-/// Reads a photo of a handwritten page: writes out its text as the writer put it, with a marker where each drawing
-/// sits, and cuts every drawing out as a picture of its own.
+/// Reads a photo of a handwritten page: writes out its text as the writer put it, and cuts every drawing out as a
+/// picture of its own.
 /// </summary>
 public interface IPhotoReader
 {

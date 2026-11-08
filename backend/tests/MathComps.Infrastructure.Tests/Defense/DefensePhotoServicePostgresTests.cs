@@ -49,7 +49,7 @@ public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
     /// What the stand-in reader reads every photo as: a page with two drawings on it.
     /// </summary>
     private static readonly PhotoReading _reading = new(
-        "Look at [Figure 1], then [Figure 2].",
+        "Look at the triangle, then the circle.",
         [10, 11, 12],
         [new PhotoCrop("Figure 1", [20, 21]), new PhotoCrop("Figure 2", [30, 31])]);
 
@@ -116,7 +116,7 @@ public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
             // Read a photo.
             var reading = await service.ReadAsync(_ownerId, _target, _photo);
 
-            // The page's text comes back as the model wrote it.
+            // The page's text comes back as the reader gave it.
             Assert.Equal(_reading.Text, reading.Text);
 
             // The drawings come back in the reading's order.

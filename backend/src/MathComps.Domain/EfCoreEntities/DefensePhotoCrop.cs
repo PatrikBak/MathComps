@@ -21,7 +21,7 @@ public class DefensePhotoCrop
     public DefensePhoto Photo { get; set; } = null!;
 
     /// <summary>
-    /// The drawing's marker in the photo's text, such as <c>Figure 1</c>, as the model wrote it.
+    /// What the model named the drawing, such as <c>Figure 1</c>.
     /// </summary>
     public required string Label { get; set; }
 

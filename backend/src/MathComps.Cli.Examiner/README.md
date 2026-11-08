@@ -61,7 +61,7 @@ The transcript's last turn must be a `## Candidate` turn, since the examiner rep
 
 A mid-conversation rewind keeps the examiner turns written before any prompt change. That is what you want for "the conversation was fine through turn N, regenerate from there", and it is not a clean comparison of new prompts.
 
-`read-photo` runs the photo reader (`Services/Photos`) on local files. Each photo's reading goes to a `<name>-reading` folder beside it: the text as `text.md`, the page the model read as `page.jpg`, and each drawing as a JPEG named after its marker (`[Figure 2]` is `figure-2.jpg`), replacing what an earlier run wrote. It prints each photo's figure count, the model that answered, the cost and the time, then what the run spent. The prompt is [`Prompts/read-photo.txt`](../MathComps.Infrastructure/Prompts/read-photo.txt), sent as the user message beside the page. To try another model or prompt, override the config from the environment:
+`read-photo` runs the photo reader (`Services/Photos`) on local files. Each photo's reading goes to a `<name>-reading` folder beside it: the text as `text.md`, the page the model read as `page.jpg`, and each drawing as a JPEG named after its label (`Figure 2` is `figure-2.jpg`), replacing what an earlier run wrote. It prints each photo's figure count, the model that answered, the cost and the time, then what the run spent. The prompt is [`Prompts/read-photo.txt`](../MathComps.Infrastructure/Prompts/read-photo.txt), sent as the user message beside the page. To try another model or prompt, override the config from the environment:
 
 ```bash
 PhotoReader__Reading__Model=google/gemini-3.8-flash PhotoReader__Reading__Prompt=/abs/path/prompt.txt \

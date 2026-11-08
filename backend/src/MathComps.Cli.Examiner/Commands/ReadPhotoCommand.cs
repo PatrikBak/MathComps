@@ -17,8 +17,8 @@ namespace MathComps.Cli.Examiner.Commands;
 /// <param name="logger">The logger each reading, each failure and the run's total go through.</param>
 [Description("""
     Read photos of handwritten pages. Each photo's reading goes to a folder beside it, <name>-reading, holding the
-    text as text.md, the page the model read as page.jpg, and each drawing as a JPEG named after its marker in the
-    text ([[Figure 2]] is figure-2.jpg), replacing what an earlier run wrote there. Takes JPEG, PNG and WebP.
+    text as text.md, the page the model read as page.jpg, and each drawing as a JPEG named after its label (Figure 2
+    is figure-2.jpg), replacing what an earlier run wrote there. Takes JPEG, PNG and WebP.
 """)]
 public class ReadPhotoCommand(
     IPhotoReader photoReader,
@@ -152,8 +152,8 @@ public class ReadPhotoCommand(
 
     /// <summary>
     /// Writes a reading into the folder beside its photo, named after the photo with <c>-reading</c> added: the text
-    /// as <c>text.md</c>, the page the model read as <c>page.jpg</c>, and each drawing as a JPEG named after its marker
-    /// in the text, so <c>[Figure 2]</c> is <c>figure-2.jpg</c>. Every JPEG already in the folder is cleared first.
+    /// as <c>text.md</c>, the page the model read as <c>page.jpg</c>, and each drawing as a JPEG named after its label,
+    /// so <c>Figure 2</c> is <c>figure-2.jpg</c>. Every JPEG already in the folder is cleared first.
     /// </summary>
     /// <param name="path">The photo the reading came from.</param>
     /// <param name="reading">The reading to write.</param>
@@ -163,7 +163,7 @@ public class ReadPhotoCommand(
         // The reading's folder beside the photo, out of reach of a glob over the photos themselves.
         var folder = Directory.CreateDirectory($"{Path.ChangeExtension(path, null)}-reading");
 
-        // Clear every JPEG in the folder, so no marker missing from this reading keeps a file.
+        // Clear every JPEG in the folder, so no drawing missing from this reading keeps a file.
         foreach (var stale in folder.EnumerateFiles("*.jpg"))
             stale.Delete();
 
@@ -173,7 +173,7 @@ public class ReadPhotoCommand(
         // Write the page the model read.
         await File.WriteAllBytesAsync(Path.Combine(folder.FullName, "page.jpg"), reading.Page, cancellationToken);
 
-        // Write each drawing under its marker's name.
+        // Write each drawing under its label.
         foreach (var crop in reading.Crops)
             await File.WriteAllBytesAsync(
                 Path.Combine(folder.FullName, $"{crop.Label.ToSlug()}.jpg"), crop.Image, cancellationToken);
