@@ -4,6 +4,7 @@ using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Services.ConversationReview;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
+using Microsoft.EntityFrameworkCore;
 using static MathComps.Infrastructure.Tests.ConversationReview.ConversationReviewSeed;
 
 namespace MathComps.Infrastructure.Tests.ConversationReview;
@@ -11,8 +12,8 @@ namespace MathComps.Infrastructure.Tests.ConversationReview;
 /// <summary>
 /// Integration tests for <see cref="ConversationReviewService"/> against a real PostgreSQL database: that a
 /// conversation reads back whole, with the drafts behind each reply, what its author said about it and its own notes
-/// alone, that an archive problem is named by where it comes from, and that a conversation that isn't there can't be
-/// read or marked.
+/// alone, that its messages link the photos they went out with, that an archive problem is named by where it comes
+/// from, and that a conversation that isn't there can't be read or marked.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class ConversationReviewServicePostgresTests(PostgresContainerFixture fixture)
@@ -46,6 +47,68 @@ public class ConversationReviewServicePostgresTests(PostgresContainerFixture fix
 
         // Along with what the student made of the conversation as a whole
         Assert.Equal(DefenseOutcome.FoundTheMistake, detail.Feedback?.Outcome);
+    });
+
+    /// <summary>
+    /// A message reads back with links to the photos it went out with, in page order, and to the drawings cut out of
+    /// them, so a reviewer sees the pages the student sent.
+    /// </summary>
+    [Fact]
+    public Task The_detail_links_the_photos_a_message_went_out_with() => RunTestAsync(async service =>
+    {
+        // Two pages the student sent with their answer, the one read second going first
+        var (firstPage, secondPage) = await QueryValueAsync(async context =>
+        {
+            // The student's answer
+            var answerId = await context.DefenseTurns
+                .Where(turn => turn.SessionId == OldestSessionId && turn.Role == TranscriptRole.Candidate)
+                .Select(turn => turn.Id)
+                .SingleAsync();
+
+            // The page read first, with a drawing, sent second
+            var readFirst = DefenseSeed.NewPhoto(StudentId, drawings: 1);
+            readFirst.TurnId = answerId;
+            readFirst.Position = 1;
+
+            // The page read second, sent first
+            var readSecond = DefenseSeed.NewPhoto(StudentId, drawings: 0);
+            readSecond.TurnId = answerId;
+            readSecond.Position = 0;
+
+            // Stage both pages
+            context.DefensePhotos.AddRange(readFirst, readSecond);
+
+            // Commit them
+            await context.SaveChangesAsync();
+
+            // Hand them back in page order
+            return (readSecond, readFirst);
+        });
+
+        // Read the conversation
+        var detail = await service.GetDetailAsync(ReviewerId, OldestSessionId, Language.EN);
+
+        // The student's answer
+        var answer = detail.Turns[1];
+
+        // Carries both pages in the order sent
+        Assert.Equal([firstPage.Id, secondPage.Id], answer.Photos.Select(photo => photo.Id));
+
+        // Each page linked to its own file
+        Assert.Equal(
+            [$"read:defense/photos/{firstPage.Id}.jpg", $"read:defense/photos/{secondPage.Id}.jpg"],
+            answer.Photos.Select(photo => photo.Link));
+
+        // The second page's one drawing
+        var drawing = Assert.Single(answer.Photos[1].Crops);
+
+        // Linked to its own file beside the page
+        Assert.Equal(
+            (secondPage.Crops.Single().Id, $"read:defense/photos/{secondPage.Id}/crops/{drawing.Id}.jpg"),
+            (drawing.Id, drawing.Link));
+
+        // While the examiner's opener carries no photos
+        Assert.Empty(detail.Turns[0].Photos);
     });
 
     /// <summary>

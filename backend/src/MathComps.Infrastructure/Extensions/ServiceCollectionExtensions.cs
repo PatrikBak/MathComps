@@ -521,11 +521,12 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Registers the defense feature: the examiner engine, the photo reader, the input/turn/spend caps, the per-user
-    /// turn gate, the lookup of what the examiner is told about a problem, the guard saying whether a student may argue a given
-    /// target, the service that runs and persists defense conversations, the service that records the students'
-    /// feedback on them, and the service that reads and keeps the photos of their handwritten work. Assumes the chat
-    /// stack is registered (see <see cref="AddLlmChat"/>) and, since the problem content is read back out of object
-    /// storage and the photos are kept there, that <see cref="AddStorage"/> has run.
+    /// turn gate, the lookup of what the examiner is told about a problem, the guard saying whether a student may argue
+    /// a given target, the service that runs and persists defense conversations, the service that records the
+    /// students' feedback on them, the service that reads and keeps the photos of their handwritten work, and the
+    /// links to those photos. Assumes the chat stack is registered (see <see cref="AddLlmChat"/>) and, since the
+    /// problem content is read back out of object storage and the photos are kept there, that
+    /// <see cref="AddStorage"/> has run.
     /// </summary>
     /// <param name="services">The service collection to add the defense feature to.</param>
     /// <param name="configuration">The application configuration carrying the <c>Examiner</c>,
@@ -570,6 +571,9 @@ public static class ServiceCollectionExtensions
 
         // The service that reads and keeps the photos of the students' handwritten work.
         services.TryAddScoped<IDefensePhotoService, DefensePhotoService>();
+
+        // The links to the students' photos and the drawings cut out of them.
+        services.TryAddSingleton<IDefensePhotoFiles, DefensePhotoFiles>();
 
         // What the defense target guard asks about a reader before it weighs a competition's gates against them,
         // and before it opens the proposals to them.
@@ -658,8 +662,9 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Adds the services reviewing one defense conversation: reading it back, recording how far it has been read,
-    /// and keeping the notes written about it.
+    /// Adds the services reviewing one defense conversation: reading it back with links to the photos its messages
+    /// went out with, recording how far it has been read, and keeping the notes written about it. Assumes, since the
+    /// photos are kept in object storage, that <see cref="AddStorage"/> has run.
     /// </summary>
     /// <param name="services">The service collection to add the review services to.</param>
     /// <returns>The service collection for chaining.</returns>
@@ -668,7 +673,10 @@ public static class ServiceCollectionExtensions
         // The service that reads a conversation back and records how far it has been read.
         services.TryAddScoped<IConversationReviewService, ConversationReviewService>();
 
-        // The service that keeps what gets written down about it.
+        // The links to the photos the conversation's messages went out with.
+        services.TryAddSingleton<IDefensePhotoFiles, DefensePhotoFiles>();
+
+        // The service that keeps what gets written down about a conversation.
         services.TryAddScoped<IReviewNoteService, ReviewNoteService>();
 
         // Builder pattern

@@ -23,7 +23,7 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// <param name="photoReader">Reads a photo into its text and its drawings.</param>
 /// <param name="objectStore">Where the photos and their drawings are kept.</param>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
-/// <param name="defenseLimits">The input, message, and spend caps.</param>
+/// <param name="defenseLimits">The caps on a defense.</param>
 public class DefensePhotoService(
     IDefenseTargetGuard targetGuard,
     IPhotoReader photoReader,
@@ -33,12 +33,7 @@ public class DefensePhotoService(
     : IDefensePhotoService
 {
     /// <summary>
-    /// The prefix every defense photo lives under in private storage.
-    /// </summary>
-    private const string KeyPrefix = "defense/photos";
-
-    /// <summary>
-    /// The input, message, and spend caps.
+    /// The caps on a defense.
     /// </summary>
     private readonly DefenseLimits _limits = defenseLimits.Value;
 
@@ -80,10 +75,10 @@ public class DefensePhotoService(
         await Task.WhenAll(
         [
             objectStore.PutAsync(
-                PhotoKey(stored.Id), reading.Value.Page, MediaTypeNames.Image.Jpeg,
+                IDefensePhotoFiles.PhotoKey(stored.Id), reading.Value.Page, MediaTypeNames.Image.Jpeg,
                 CancellationToken.None),
             .. crops.Select(crop => objectStore.PutAsync(
-                CropKey(stored.Id, crop.Row.Id), crop.Image, MediaTypeNames.Image.Jpeg,
+                IDefensePhotoFiles.CropKey(stored.Id, crop.Row.Id), crop.Image, MediaTypeNames.Image.Jpeg,
                 CancellationToken.None)),
         ]);
 
@@ -107,20 +102,4 @@ public class DefensePhotoService(
             reading.Value.Text,
             [.. crops.Select(crop => new DefensePhotoCropDto(crop.Row.Id, crop.Row.Label))]);
     }
-
-    /// <summary>
-    /// The key a photo's page lives under. Keys are built from the rows' ids alone, so a row is all it takes to find
-    /// its file.
-    /// </summary>
-    /// <param name="photoId">The photo.</param>
-    /// <returns>The object key.</returns>
-    private static string PhotoKey(Guid photoId) => $"{KeyPrefix}/{photoId}.jpg";
-
-    /// <summary>
-    /// The key one of a photo's drawings lives under, beside the photo it was cut out of.
-    /// </summary>
-    /// <param name="photoId">The photo the drawing was cut out of.</param>
-    /// <param name="cropId">The drawing.</param>
-    /// <returns>The object key.</returns>
-    private static string CropKey(Guid photoId, Guid cropId) => $"{KeyPrefix}/{photoId}/crops/{cropId}.jpg";
 }

@@ -11,6 +11,7 @@ using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Dtos;
 using MathComps.Infrastructure.Services.Defense.Engine;
 using MathComps.Infrastructure.Services.Localization;
+using MathComps.Infrastructure.Storage;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,11 +21,12 @@ namespace MathComps.Infrastructure.Tests.Defense;
 /// <summary>
 /// Integration tests for <see cref="DefenseSessionService"/> against a real PostgreSQL database, with a fake examiner
 /// (no live LLM): the conversation flow (start, continue, list, delete), that what the student has said about a
-/// conversation comes back with it, that each turn writes an independent spend row that outlives the session, that a
-/// turn records every draft it went through and drops them when the turn is rewound past, ownership isolation, the
-/// guardrails (message length, the student's message cap, per-user spend ceiling), that a turn the client cancels
-/// still records the cost its calls billed so aborting can't dodge the ceiling, and that a turn the client aborts once
-/// the examiner has answered is saved whole.
+/// conversation comes back with it, that a message carries its photos and every answer links them, that each turn
+/// writes an independent spend row that outlives the session, that a turn records every draft it went through and drops
+/// them when the turn is rewound past, ownership isolation, the guardrails (message length, the photos a message
+/// carries, the student's message cap, per-user spend ceiling), that a turn the client cancels still records the cost
+/// its calls billed so aborting can't dodge the ceiling, and that a turn the client aborts once the examiner has
+/// answered is saved whole.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture)
@@ -156,6 +158,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             limits.MaxCandidateChars = 100;
             limits.MaxFeedbackCommentChars = 50;
             limits.MaxMessagesPerDefense = 2;
+            limits.MaxPhotosPerMessage = 3;
             limits.DailySpendCeilingPerUser = 1.00m;
         });
 
@@ -191,6 +194,12 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // The display names a competition problem is listed under.
         services.AddSingleton<IMetadataLocalizationService, MetadataLocalizationService>();
+
+        // Links to the private store's files, each naming the file it reaches.
+        services.AddSingleton<IPrivateFileLinks, StandInFileLinks>();
+
+        // The links to the photos a message went out with.
+        services.AddSingleton<IDefensePhotoFiles, DefensePhotoFiles>();
 
         // The service under test.
         services.AddScoped<IDefenseSessionService, DefenseSessionService>();
@@ -389,7 +398,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         var started = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
 
         // Continue it with a second student message
-        var continued = await service.ContinueAsync(_ownerId, started.Id, "my next point");
+        var continued = await service.ContinueAsync(_ownerId, started.Id, new ContinueDefenseRequest("my next point"));
 
         // The two new turns are appended after the opening three
         Assert.Equal(
@@ -443,7 +452,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         });
 
         // Take the conversation one turn further
-        var continued = await service.ContinueAsync(_ownerId, started.Id, "my next point");
+        var continued = await service.ContinueAsync(_ownerId, started.Id, new ContinueDefenseRequest("my next point"));
 
         // The answer for the conversation comes back with it
         Assert.Equal(DefenseOutcome.NotEnoughHelp, continued.Feedback?.Outcome);
@@ -465,7 +474,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         var newer = await service.StartAsync(_ownerId, Request("prob-1", "newer"));
 
         // Take the one started first further
-        await service.ContinueAsync(_ownerId, older.Id, "back to this one");
+        await service.ContinueAsync(_ownerId, older.Id, new ContinueDefenseRequest("back to this one"));
 
         // List the problem's sessions
         var sessions = (await service.ListAsync(
@@ -605,7 +614,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         Assert.True(listed.HasOlderStatement);
 
         // The conversation, taken one turn further
-        var continued = await service.ContinueAsync(_ownerId, started.Id, "my next point");
+        var continued = await service.ContinueAsync(_ownerId, started.Id, new ContinueDefenseRequest("my next point"));
 
         // Said to be argued against an older one there too
         Assert.True(continued.HasOlderStatement);
@@ -626,7 +635,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // The next turn, refused
         await Assert.ThrowsAsync<HttpRequestException>(
-            () => service.ContinueAsync(_ownerId, started.Id, "my next point"));
+            () => service.ContinueAsync(_ownerId, started.Id, new ContinueDefenseRequest("my next point")));
 
         // The conversation's turns, as stored
         var turnCount = await QueryValueAsync(context =>
@@ -652,7 +661,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     {
         // The same environment id, "prob-1", in two different handouts
         var inFirstHandout = await service.StartAsync(_ownerId, Request("prob-1", "first handout"));
-        await service.StartAsync(_ownerId, Request("prob-1", "second handout", "handout-2"));
+        await service.StartAsync(_ownerId, Request("prob-1", "second handout", handoutContentId: "handout-2"));
 
         // List against handout-1's prob-1
         var sessions = (await service.ListAsync(
@@ -677,11 +686,12 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // Read a problem nothing has been defended against yet, since the caps stand whatever the history holds
         var listing = await service.ListAsync(_ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1"));
 
-        // Every cap comes back as configured. All three are ints, so the values are kept distinct: a projection
-        // handing them over in the wrong order would otherwise sail past.
+        // Every cap comes back as configured. Each is an int, so the values are kept distinct: a projection handing
+        // them over in the wrong order would otherwise sail past.
         Assert.Equal(100, listing.Limits.MaxCandidateChars);
         Assert.Equal(50, listing.Limits.MaxFeedbackCommentChars);
         Assert.Equal(2, listing.Limits.MaxMessagesPerDefense);
+        Assert.Equal(3, listing.Limits.MaxPhotosPerMessage);
     });
 
     /// <summary>
@@ -700,7 +710,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         await service.StartAsync(_otherId, Request("prob-1", "someone else"));
 
         // Take the oldest one further, so activity order and creation order disagree
-        await service.ContinueAsync(_ownerId, first.Id, "one more thing");
+        await service.ContinueAsync(_ownerId, first.Id, new ContinueDefenseRequest("one more thing"));
 
         // List every session the owner holds
         var sessions = await service.ListAllAsync(_ownerId, Language.EN);
@@ -1028,7 +1038,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         Assert.True(graded.IsGraded);
 
         // The next turn
-        var continued = await service.ContinueAsync(_ownerId, graded.Id, "more");
+        var continued = await service.ContinueAsync(_ownerId, graded.Id, new ContinueDefenseRequest("more"));
 
         // Says so too
         Assert.True(continued.IsGraded);
@@ -1345,7 +1355,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // The other user can neither continue, rewind, nor delete it
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
-            () => service.ContinueAsync(_otherId, session.Id, "sneaking in"));
+            () => service.ContinueAsync(_otherId, session.Id, new ContinueDefenseRequest("sneaking in")));
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
             () => service.RewindAsync(_otherId, session.Id, 0));
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
@@ -1364,7 +1374,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // Every operation that names a session treats it as absent
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
-            () => service.ContinueAsync(_ownerId, missingId, "into the void"));
+            () => service.ContinueAsync(_ownerId, missingId, new ContinueDefenseRequest("into the void")));
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
             () => service.RewindAsync(_ownerId, missingId, 0));
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
@@ -1401,7 +1411,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         var session = await service.StartAsync(_ownerId, Request("prob-1", "first"));
 
         // Continue it to the two-message cap: opener, student, examiner, student, examiner
-        await service.ContinueAsync(_ownerId, session.Id, "second");
+        await service.ContinueAsync(_ownerId, session.Id, new ContinueDefenseRequest("second"));
 
         // Rewind to the first examiner reply, dropping the second student turn and its reply
         await service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 2);
@@ -1424,7 +1434,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // Continuing again lands the next student turn at sequence 3 without colliding, and the rewind freed the
         // turn budget that the pre-rewind conversation had already exhausted
-        var continued = await service.ContinueAsync(_ownerId, session.Id, "redo");
+        var continued = await service.ContinueAsync(_ownerId, session.Id, new ContinueDefenseRequest("redo"));
 
         // The redone turn is appended after the kept prefix
         Assert.Equal(
@@ -1563,7 +1573,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // Starting against it is refused rather than failing the write
         await Assert.ThrowsAsync<DefenseMessageTooLongException>(
-            () => service.StartAsync(_ownerId, Request("prob-1", "my defense", tooLong)));
+            () => service.StartAsync(_ownerId, Request("prob-1", "my defense", handoutContentId: tooLong)));
 
         // No anchor row was minted for it either
         Assert.Equal(0, await QueryValueAsync(context => context.Handouts.CountAsync()));
@@ -1587,7 +1597,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // Continuing it with an empty message is refused too
         await Assert.ThrowsAsync<DefenseMessageEmptyException>(
-            () => service.ContinueAsync(_ownerId, session.Id, ""));
+            () => service.ContinueAsync(_ownerId, session.Id, new ContinueDefenseRequest("")));
     });
 
     /// <summary>
@@ -1600,11 +1610,221 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         var session = await service.StartAsync(_ownerId, Request("prob-1", "first"));
 
         // Continue once more, reaching the cap of two
-        await service.ContinueAsync(_ownerId, session.Id, "second");
+        await service.ContinueAsync(_ownerId, session.Id, new ContinueDefenseRequest("second"));
 
         // A third student message is over the cap
         await Assert.ThrowsAsync<DefenseMessageLimitException>(
-            () => service.ContinueAsync(_ownerId, session.Id, "third"));
+            () => service.ContinueAsync(_ownerId, session.Id, new ContinueDefenseRequest("third")));
+    });
+
+    /// <summary>
+    /// A message carries the photos it was sent with in the order they were sent, and every answer carrying the
+    /// conversation links each photo and each drawing cut out of it, while the examiner's turns carry none. The pages
+    /// go out in an order of their own and a page's drawings are read in one, so neither can be told from when it was
+    /// read.
+    /// </summary>
+    [Fact]
+    public Task A_message_carries_its_photos_and_every_answer_links_them() => RunTestAsync(async service =>
+    {
+        // Three of the owner's photos, read in this order, the first with two drawings and the last with one
+        var (first, second, third) = await QueryValueAsync(async context =>
+        {
+            // The owner's photos
+            DefensePhoto[] photos =
+            [
+                DefenseSeed.NewPhoto(_ownerId, drawings: 2),
+                DefenseSeed.NewPhoto(_ownerId, drawings: 0),
+                DefenseSeed.NewPhoto(_ownerId, drawings: 1),
+            ];
+
+            // The first page's drawings read the other way round from how they were cut
+            photos[0].Crops.First().Position = 1;
+            photos[0].Crops.Last().Position = 0;
+
+            // Stage the photos
+            context.DefensePhotos.AddRange(photos);
+
+            // Commit them
+            await context.SaveChangesAsync();
+
+            // Hand them back
+            return (photos[0], photos[1], photos[2]);
+        });
+
+        // The first message goes out with the third page ahead of the first
+        var started = await service.StartAsync(_ownerId, Request("prob-1", "my defense", [third.Id, first.Id]));
+
+        // The next one with the second page
+        var continued = await service.ContinueAsync(
+            _ownerId, started.Id, new ContinueDefenseRequest("my next point", [second.Id]));
+
+        // The conversation as its history reads it back
+        var listed = await service.ListAsync(_ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1"));
+
+        // The first message's pages in the order sent, each followed by its drawings in reading order
+        IReadOnlyList<(Guid, string)> opening =
+        [
+            .. Linked(third.Id, third.Crops.Single().Id),
+            .. Linked(first.Id, first.Crops.Last().Id, first.Crops.First().Id),
+        ];
+
+        // The next message's one page, which no drawing came out of
+        var next = Linked(second.Id);
+
+        // The start links the first message's pages and drawings
+        Assert.Equal(opening, LinksOf(started.Turns[1]));
+
+        // The continue reads the first message's links back from the conversation, beside the next message's
+        Assert.Equal(opening, LinksOf(continued.Turns[1]));
+        Assert.Equal(next, LinksOf(continued.Turns[3]));
+
+        // The history holds the one conversation
+        var session = Assert.Single(listed.Sessions);
+
+        // Linking both messages' photos the same way
+        Assert.Equal(opening, LinksOf(session.Turns[1]));
+        Assert.Equal(next, LinksOf(session.Turns[3]));
+
+        // The examiner's turns carry no photos in any of the answers
+        Assert.All(
+            [.. started.Turns, .. continued.Turns, .. session.Turns],
+            turn => Assert.True(turn.Role == TranscriptRole.Candidate || turn.Photos.Count == 0));
+    });
+
+    /// <summary>
+    /// A message may carry as many photos as the cap of three, and one carrying more is refused before any is looked
+    /// up, whether it opens the conversation or continues it. The ids name nothing, so a message the cap lets through
+    /// is refused as a missing photo instead.
+    /// </summary>
+    [Fact]
+    public Task A_message_is_held_to_the_photo_cap() => RunTestAsync(async service =>
+    {
+        // Three photos, as many as the cap allows
+        IReadOnlyList<Guid> atCap = [Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7()];
+
+        // An opening message carrying them gets past the cap to the lookup
+        await Assert.ThrowsAsync<DefensePhotoNotFoundException>(
+            () => service.StartAsync(_ownerId, Request("prob-1", "my defense", atCap)));
+
+        // Four photos, one past the cap
+        IReadOnlyList<Guid> photoIds = [.. atCap, Guid.CreateVersion7()];
+
+        // An opening message carrying them is refused
+        await Assert.ThrowsAsync<DefenseTooManyPhotosException>(
+            () => service.StartAsync(_ownerId, Request("prob-1", "my defense", photoIds)));
+
+        // A conversation opened without them
+        var session = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+        // Refuses a later message carrying them too
+        await Assert.ThrowsAsync<DefenseTooManyPhotosException>(
+            () => service.ContinueAsync(_ownerId, session.Id, new ContinueDefenseRequest("more", photoIds)));
+    });
+
+    /// <summary>
+    /// A message naming a photo it can't carry is refused, and nothing of it is saved or paid for: a photo that isn't
+    /// there, another student's, one already sent with a message, and one named twice.
+    /// </summary>
+    /// <param name="photo">Which photo the message names.</param>
+    [Theory]
+    [InlineData("missing")]
+    [InlineData("another student's")]
+    [InlineData("already sent")]
+    [InlineData("named twice")]
+    public Task A_photo_a_message_cannot_carry_is_refused(string photo) => RunTestAsync(async service =>
+    {
+        // A photo of the owner's still to send, one the owner opens a conversation with, and the other student's
+        var (unsent, sent, theirs) = await QueryValueAsync(async context =>
+        {
+            // The two students' photos
+            DefensePhoto[] photos =
+            [
+                DefenseSeed.NewPhoto(_ownerId, drawings: 1),
+                DefenseSeed.NewPhoto(_ownerId, drawings: 1),
+                DefenseSeed.NewPhoto(_otherId, drawings: 1),
+            ];
+
+            // Stage the photos
+            context.DefensePhotos.AddRange(photos);
+
+            // Commit them
+            await context.SaveChangesAsync();
+
+            // Hand back their ids
+            return (photos[0].Id, photos[1].Id, photos[2].Id);
+        });
+
+        // The conversation the owner opens, sending the one photo
+        var session = await service.StartAsync(_ownerId, Request("prob-1", "my defense", [sent]));
+
+        // The photos the next message names
+        IReadOnlyList<Guid> photoIds = photo switch
+        {
+            // Each case's photos
+            "missing" => [Guid.CreateVersion7()],
+            "another student's" => [theirs],
+            "already sent" => [sent],
+            "named twice" => [unsent, unsent],
+
+            _ => throw new ArgumentOutOfRangeException(nameof(photo), photo, "Unknown photo"),
+        };
+
+        // The message is refused
+        await Assert.ThrowsAsync<DefensePhotoNotFoundException>(
+            () => service.ContinueAsync(_ownerId, session.Id, new ContinueDefenseRequest("more", photoIds)));
+
+        // Nothing of it was saved, and nothing was spent on it
+        await QueryAsync(async context =>
+        {
+            // The conversation still ends on her first reply
+            Assert.Equal(3, await context.DefenseTurns.CountAsync(turn => turn.SessionId == session.Id));
+
+            // Only the opening turn was paid for
+            Assert.Equal(1, await context.DefenseSpends.CountAsync(spend => spend.UserId == _ownerId));
+        });
+    });
+
+    /// <summary>
+    /// Rewinding past a message frees the photos it went out with, so they can go out again with the message that
+    /// replaces it, while the messages kept keep theirs.
+    /// </summary>
+    [Fact]
+    public Task Rewinding_past_a_message_frees_its_photos() => RunTestAsync(async service =>
+    {
+        // Two of the owner's photos
+        var (first, second) = await QueryValueAsync(async context =>
+        {
+            // The owner's photos
+            DefensePhoto[] photos =
+                [DefenseSeed.NewPhoto(_ownerId, drawings: 0), DefenseSeed.NewPhoto(_ownerId, drawings: 0)];
+
+            // Stage the photos
+            context.DefensePhotos.AddRange(photos);
+
+            // Commit them
+            await context.SaveChangesAsync();
+
+            // Hand back their ids
+            return (photos[0].Id, photos[1].Id);
+        });
+
+        // A conversation opened with the first
+        var session = await service.StartAsync(_ownerId, Request("prob-1", "first", [first]));
+
+        // Continued with the second
+        await service.ContinueAsync(_ownerId, session.Id, new ContinueDefenseRequest("second", [second]));
+
+        // Rewound to her first reply, dropping the second message
+        await service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 2);
+
+        // The message taking its place goes out with the second photo again
+        var redone = await service.ContinueAsync(_ownerId, session.Id, new ContinueDefenseRequest("redo", [second]));
+
+        // The redone message carries the second photo
+        Assert.Equal([second], redone.Turns[3].Photos.Select(photo => photo.Id));
+
+        // The first message still carries the first
+        Assert.Equal([first], redone.Turns[1].Photos.Select(photo => photo.Id));
     });
 
     /// <summary>
@@ -1640,7 +1860,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         var session = await service.StartAsync(_ownerId, ProblemRequest(_problemId, "my defense"));
 
         // And carries on, which is the turn a student mid-entry would otherwise lose
-        await service.ContinueAsync(_ownerId, session.Id, "second");
+        await service.ContinueAsync(_ownerId, session.Id, new ContinueDefenseRequest("second"));
 
         // Both turns billed on top of the seeded row
         Assert.Equal(
@@ -1728,7 +1948,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         var session = await service.StartAsync(_ownerId, ProblemRequest(_practiceProblemId, "my defense"));
 
         // And carries on
-        await service.ContinueAsync(_ownerId, session.Id, "second");
+        await service.ContinueAsync(_ownerId, session.Id, new ContinueDefenseRequest("second"));
 
         // Both of the student's messages are there
         Assert.Equal(2, await QueryValueAsync(context => context.DefenseTurns
@@ -1867,7 +2087,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         var beforeSending = DateTimeOffset.UtcNow;
 
         // Send the next message, which has to wait for that turn
-        var continuing = service.ContinueAsync(_ownerId, started.Id, "my next point");
+        var continuing = service.ContinueAsync(_ownerId, started.Id, new ContinueDefenseRequest("my next point"));
 
         // A moment before the gate lets it through
         var waitingAt = DateTimeOffset.UtcNow;
@@ -1902,8 +2122,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
             // Send from both tabs
             var sending = Task.WhenAll(
-                service.ContinueAsync(_ownerId, started.Id, "from one tab"),
-                service.ContinueAsync(_ownerId, started.Id, "from the other"));
+                service.ContinueAsync(_ownerId, started.Id, new ContinueDefenseRequest("from one tab")),
+                service.ContinueAsync(_ownerId, started.Id, new ContinueDefenseRequest("from the other")));
 
             // The other turn finishes, letting them through one after the other
             otherTurn.Dispose();
@@ -2129,7 +2349,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             _abort = new CancellationTokenSource();
 
             // Continuing runs the examiner, which answers and then sees the abort.
-            await service.ContinueAsync(_ownerId, started.Id, "my next point", _abort.Token);
+            await service.ContinueAsync(
+                _ownerId, started.Id, new ContinueDefenseRequest("my next point"), _abort.Token);
 
             // The token fired before the write, so it ran past a real abort.
             Assert.True(_abort.IsCancellationRequested);
@@ -2186,12 +2407,37 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     /// </summary>
     /// <param name="environmentId">The environment's id within its handout.</param>
     /// <param name="content">The student's first message.</param>
+    /// <param name="photoIds">The photos the message carries, in page order.</param>
     /// <param name="handoutContentId">The handout the environment belongs to.</param>
     /// <returns>The session start.</returns>
     private static DefenseSessionStart Request(
-        string environmentId, string content, string handoutContentId = "handout-1") =>
-        new(new StartDefenseRequest(new HandoutEnvironmentTarget(handoutContentId, environmentId), content),
+        string environmentId, string content, IReadOnlyList<Guid>? photoIds = null,
+        string handoutContentId = "handout-1") =>
+        new(new StartDefenseRequest(new HandoutEnvironmentTarget(handoutContentId, environmentId), content, photoIds),
             Language.EN);
+
+    /// <summary>
+    /// The links a turn hands out to the photos it went out with: each page's, followed by each of its drawings'.
+    /// </summary>
+    /// <param name="turn">The turn as an answer carries it.</param>
+    /// <returns>Each photo's and drawing's id beside its link, in the order the turn carries them.</returns>
+    private static IReadOnlyList<(Guid, string)> LinksOf(DefenseTurnDto turn) =>
+        [.. turn.Photos.SelectMany(photo => photo.Crops
+            .Select(crop => (crop.Id, crop.Link))
+            .Prepend((photo.Id, photo.Link)))];
+
+    /// <summary>
+    /// The links a stored photo is shown by: its page's, followed by each listed drawing's, each reaching the file the
+    /// photo's reading stored.
+    /// </summary>
+    /// <param name="photoId">The photo.</param>
+    /// <param name="cropIds">The photo's drawings, in the order they should come.</param>
+    /// <returns>The photo's id and each drawing's, each beside its link.</returns>
+    private static IReadOnlyList<(Guid, string)> Linked(Guid photoId, params Guid[] cropIds) =>
+    [
+        (photoId, $"read:defense/photos/{photoId}.jpg"),
+        .. cropIds.Select(cropId => (cropId, $"read:defense/photos/{photoId}/crops/{cropId}.jpg")),
+    ];
 
     /// <summary>
     /// Builds a session start against one of the seeded competition problems.

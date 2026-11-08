@@ -2,7 +2,8 @@ namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
 /// A photo of a handwritten page a student sent in for a defense conversation, kept as the upright, shrunk page the
-/// model read. Its file and its crops' files live in private storage under keys built from the ids.
+/// model read. Its file and its crops' files live in private storage under keys built from the ids. It belongs to no
+/// message until the student sends one carrying its text, and only whoever may see that message is shown it.
 /// </summary>
 public class DefensePhoto
 {
@@ -25,6 +26,22 @@ public class DefensePhoto
     /// When the photo was read.
     /// </summary>
     public required DateTimeOffset CreatedAt { get; set; }
+
+    /// <summary>
+    /// The message the photo went out with, null while it hasn't gone out with one.
+    /// </summary>
+    public Guid? TurnId { get; set; }
+
+    /// <summary>
+    /// Navigation to the message.
+    /// </summary>
+    public DefenseTurn? Turn { get; set; }
+
+    /// <summary>
+    /// Where the photo comes among its message's photos, counting from 0 in page order. Meaningful only while
+    /// <see cref="TurnId"/> is set, since a photo no message carries has no place among any.
+    /// </summary>
+    public int Position { get; set; }
 
     /// <summary>
     /// The drawings cut out of the page.

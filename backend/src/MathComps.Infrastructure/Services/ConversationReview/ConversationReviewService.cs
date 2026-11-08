@@ -12,13 +12,15 @@ using Microsoft.EntityFrameworkCore;
 namespace MathComps.Infrastructure.Services.ConversationReview;
 
 /// <summary>
-/// Implements <see cref="IConversationReviewService"/> over the database.
+/// Implements <see cref="IConversationReviewService"/> over the database and <see cref="IDefensePhotoFiles"/>.
 /// </summary>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
 /// <param name="localization">The resolver of localized display names.</param>
+/// <param name="photoFiles">The links to the photos a message was sent with and the drawings cut out of them.</param>
 public class ConversationReviewService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
-    IMetadataLocalizationService localization)
+    IMetadataLocalizationService localization,
+    IDefensePhotoFiles photoFiles)
     : IConversationReviewService
 {
     /// <inheritdoc/>
@@ -33,10 +35,14 @@ public class ConversationReviewService(
         var notes = dbContext.AdminNotes;
         var reviews = dbContext.AdminSessionReviews;
 
-        // The whole conversation, everything the examiner held, and what has been said about it since. Split,
-        // because turns, reports and notes are three collections off one row: joined in a single query the
-        // database would return every pairing of them, each repeating the statement and the settings snapshot.
+        // The whole conversation with the photos its messages went out with and the drawings cut out of them,
+        // everything the examiner held, and what has been said about it since. Split, because turns, reports and notes
+        // are each a collection off one row: joined in a single query the database would return every pairing of
+        // them, each repeating the statement and the settings snapshot.
         var loaded = await dbContext.DefenseSessions
+            .Include(session => session.Turns)
+            .ThenInclude(turn => turn.Photos)
+            .ThenInclude(photo => photo.Crops)
             .AsNoTracking()
             .AsSplitQuery()
             .Where(session => session.Id == sessionId
@@ -62,7 +68,8 @@ public class ConversationReviewService(
                 session.ExaminerConfig,
                 Turns = session.Turns
                     .OrderBy(turn => turn.Sequence)
-                    .Select(turn => new DefenseTurnDto(turn.Id, turn.Role, turn.Content, turn.CreatedAt))
+                    .Select(turn => new DefenseTurnDto(
+                        turn.Id, turn.Role, turn.Content, turn.CreatedAt, photoFiles.LinksFor(turn.Photos)))
                     .ToList(),
                 Attempts = session.Turns
                     .SelectMany(turn => turn.Attempts)

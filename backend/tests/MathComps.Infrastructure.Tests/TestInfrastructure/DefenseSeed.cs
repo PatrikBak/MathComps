@@ -3,7 +3,7 @@ using MathComps.Domain.EfCoreEntities;
 namespace MathComps.Infrastructure.Tests.TestInfrastructure;
 
 /// <summary>
-/// Seeds what the defense feature has already billed.
+/// Seeds what the defense feature has already billed, and the photos students have read for it.
 /// </summary>
 public static class DefenseSeed
 {
@@ -30,4 +30,30 @@ public static class DefenseSeed
             PhotoId = null,
             CreatedAt = createdAt,
         };
+
+    /// <summary>
+    /// Builds a photo a student has read that no message carries yet, with drawings cut out of it.
+    /// </summary>
+    /// <param name="userId"><inheritdoc cref="DefensePhoto.UserId" path="/summary"/></param>
+    /// <param name="drawings">How many drawings were cut out of the photo.</param>
+    /// <returns>The photo, carrying its drawings in reading order.</returns>
+    public static DefensePhoto NewPhoto(Guid userId, int drawings)
+    {
+        // An unsent photo of the student's
+        var photo = new DefensePhoto { UserId = userId, CreatedAt = DateTimeOffset.UtcNow };
+
+        // Its drawings, in reading order
+        photo.Crops =
+        [
+            .. Enumerable.Range(0, drawings).Select(position => new DefensePhotoCrop
+            {
+                PhotoId = photo.Id,
+                Label = $"Figure {position + 1}",
+                Position = position,
+            }),
+        ];
+
+        // Hand back the photo with its drawings
+        return photo;
+    }
 }

@@ -450,9 +450,10 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
   until the override names the site's real origins the browser is refused on every API call while the API itself
   looks healthy. An entry may carry `*` as a wildcard.
   `DefenseLimits` holds what bounds the defense feature: a daily spend ceiling in dollars, reckoned **per user**,
-  and a message cap on one conversation. See [What the defense ceiling is for](#what-the-defense-ceiling-is-for)
-  for what it does and does not reach. The cap and the two length caps ride to the browser on every session read,
-  so once the API has restarted on the new value, the UI follows on the next page load with no frontend deploy.
+  a message cap on one conversation and a photo cap on one message. See
+  [What the defense ceiling is for](#what-the-defense-ceiling-is-for) for what it does and does not reach. Every cap
+  but the ceiling rides to the browser on every session read, so once the API has restarted on the new value, the UI
+  follows on the next page load with no frontend deploy.
   `RateLimits` holds how many requests one caller, an IPv4 address or an IPv6 /64, may make in a window. Search
   has a count of its own, and the other limited routes share the general one.
 - `src/MathComps.Infrastructure/appsettings.examiner.{Env}.json` → `appsettings.examiner.json` (per-step models).
