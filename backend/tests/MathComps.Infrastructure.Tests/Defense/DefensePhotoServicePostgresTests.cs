@@ -154,6 +154,25 @@ public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
         });
 
     /// <summary>
+    /// A reading keeps the page's text on the photo's row, exactly as it answers it.
+    /// </summary>
+    [Fact]
+    public Task A_reading_keeps_the_text_it_answers_on_its_photo_row() => RunTestAsync(async service =>
+    {
+        // Read a photo.
+        var reading = await service.ReadAsync(_ownerId, _target, _photo);
+
+        // The text kept on the photo's row.
+        var text = await QueryValueAsync(context => context.DefensePhotos
+            .Where(photo => photo.Id == reading.PhotoId)
+            .Select(photo => photo.Text)
+            .SingleAsync());
+
+        // The same text the reading answered.
+        Assert.Equal(reading.Text, text);
+    });
+
+    /// <summary>
     /// A reading for a handout writes one spend row naming the photo and carrying what the model billed, weighed
     /// against the student's ceiling like a turn.
     /// </summary>
