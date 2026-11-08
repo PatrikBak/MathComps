@@ -146,6 +146,11 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     /// </summary>
     private readonly Guid _proposedProblemId = Guid.CreateVersion7();
 
+    /// <summary>
+    /// The private store the photos' files are kept in, holding a file for every drawing a test keeps.
+    /// </summary>
+    private readonly FakePrivateObjectStore _store = new();
+
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
     {
@@ -198,7 +203,10 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // Links to the private store's files, each naming the file it reaches.
         services.AddSingleton<IPrivateFileLinks, StandInFileLinks>();
 
-        // The links to the photos a message went out with.
+        // The store the drawings are read back from.
+        services.AddSingleton<IObjectReader>(_store);
+
+        // The photos' files: the links to them and the drawings read back.
         services.AddSingleton<IDefensePhotoFiles, DefensePhotoFiles>();
 
         // The service under test.
@@ -1647,6 +1655,9 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             // Commit them
             await context.SaveChangesAsync();
 
+            // Keep each drawing's file in the store
+            await DefenseSeed.StoreCropFilesAsync(_store, photos);
+
             // Hand them back
             return (photos[0], photos[1], photos[2]);
         });
@@ -1690,6 +1701,79 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             [.. started.Turns, .. continued.Turns, .. session.Turns],
             turn => Assert.True(turn.Role == TranscriptRole.Candidate || turn.Photos.Count == 0));
     });
+
+    /// <summary>
+    /// The examiner reads each message with the drawings cut out of the photos it went out with, on the turn answering
+    /// it and on every later one: the pages in the order sent, each page's drawings in the order its reading lists
+    /// them. Her own turns carry none.
+    /// </summary>
+    [Fact]
+    public Task The_examiner_reads_each_message_with_its_drawings()
+    {
+        // The suite's own examiner, keeping what each turn is run over
+        var recording = new RecordingExaminer(_examiner);
+        _examiner = recording;
+
+        // Send two messages with photos and read what the examiner was handed
+        return RunTestAsync(async service =>
+        {
+            // Three of the owner's photos, read in this order, the first with two drawings and the others with one
+            var (first, second, third) = await QueryValueAsync(async context =>
+            {
+                // The owner's photos
+                DefensePhoto[] photos =
+                [
+                    DefenseSeed.NewPhoto(_ownerId, drawings: 2),
+                    DefenseSeed.NewPhoto(_ownerId, drawings: 1),
+                    DefenseSeed.NewPhoto(_ownerId, drawings: 1),
+                ];
+
+                // The first page's drawings read the other way round from how they were cut
+                photos[0].Crops.First().Position = 1;
+                photos[0].Crops.Last().Position = 0;
+
+                // Stage the photos
+                context.DefensePhotos.AddRange(photos);
+
+                // Commit them
+                await context.SaveChangesAsync();
+
+                // Keep each drawing's file in the store
+                await DefenseSeed.StoreCropFilesAsync(_store, photos);
+
+                // Hand them back
+                return (photos[0], photos[1], photos[2]);
+            });
+
+            // The first message goes out with the third page ahead of the first
+            var started = await service.StartAsync(_ownerId, Request("prob-1", "my defense", [third.Id, first.Id]));
+
+            // The next one with the second page
+            await service.ContinueAsync(
+                _ownerId, started.Id, new ContinueDefenseRequest("my next point", [second.Id]));
+
+            // The first message's drawings: the third page's, then the first page's in the order read
+            Guid[] opening = [third.Crops.Single().Id, first.Crops.Last().Id, first.Crops.First().Id];
+
+            // The conversation the first message was answered over
+            var answeringFirst = recording.Inputs[0].Transcript.Turns;
+
+            // The first message carries its drawings on the turn answering it
+            Assert.Equal(opening, answeringFirst[1].Crops.Select(crop => new Guid(crop)));
+
+            // The conversation the next message was answered over
+            var answeringNext = recording.Inputs[1].Transcript.Turns;
+
+            // The first message's drawings, read back from the conversation
+            Assert.Equal(opening, answeringNext[1].Crops.Select(crop => new Guid(crop)));
+
+            // The next message's own drawing
+            Assert.Equal([second.Crops.Single().Id], answeringNext[3].Crops.Select(crop => new Guid(crop)));
+
+            // Her turns carry none
+            Assert.All([answeringFirst[0], answeringNext[0], answeringNext[2]], turn => Assert.Empty(turn.Crops));
+        });
+    }
 
     /// <summary>
     /// A message may carry as many photos as the cap of three, and one carrying more is refused before any is looked
@@ -1749,6 +1833,9 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
             // Commit them
             await context.SaveChangesAsync();
+
+            // Keep each drawing's file in the store
+            await DefenseSeed.StoreCropFilesAsync(_store, photos);
 
             // Hand back their ids
             return (photos[0].Id, photos[1].Id, photos[2].Id);
@@ -2747,6 +2834,35 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
             // The answer goes back all the same, as it does from an engine whose last call has finished.
             return outcome;
+        }
+
+        /// <inheritdoc/>
+        public Task<ExaminerAttempt> CheckReplyAsync(
+            ExaminerInput input, string reply, ModelUsageAccumulator checkUsage, CancellationToken cancellationToken) =>
+            // The session service only ever asks for a turn, so judging a lone reply is never reached
+            throw new NotSupportedException();
+    }
+
+    /// <summary>
+    /// An examiner that hands every turn to another, keeping the input each turn was run over.
+    /// </summary>
+    /// <param name="inner">The examiner that answers.</param>
+    private sealed class RecordingExaminer(IExaminer inner) : IExaminer
+    {
+        /// <summary>
+        /// The input of every turn run, in order.
+        /// </summary>
+        public List<ExaminerInput> Inputs { get; } = [];
+
+        /// <inheritdoc/>
+        public Task<ExaminerTurnOutcome> NextReplyAsync(
+            ExaminerInput input, ModelUsageAccumulator turnUsage, CancellationToken cancellationToken)
+        {
+            // Keep what the turn was run over.
+            Inputs.Add(input);
+
+            // The other examiner's answer.
+            return inner.NextReplyAsync(input, turnUsage, cancellationToken);
         }
 
         /// <inheritdoc/>

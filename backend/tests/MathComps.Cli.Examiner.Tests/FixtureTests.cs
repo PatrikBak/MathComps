@@ -78,7 +78,8 @@ public class FixtureTests
 
     /// <summary>
     /// A candidate turn's crop lines come out of its text and back as its drawings, in the order written, wherever
-    /// in the turn they sit. The paragraphs around a crop line close up to one blank line between them.
+    /// in the turn they sit and whatever their brackets hold. The paragraphs around a crop line close up to one blank
+    /// line between them.
     /// </summary>
     [Fact]
     public async Task LoadAsync_turns_crop_lines_into_the_turns_drawings()
@@ -87,12 +88,12 @@ public class FixtureTests
         const string transcript = """
             ## Candidate
 
-            see [Figure 1]
+            see the first page
 
             ![Figure 1](crops/one.jpg)
 
-            and [Figure 2]
-            ![Figure 2](crops/two.jpg)
+            and the second
+            ![](crops/two.jpg)
 
             ## Examiner
 
@@ -121,14 +122,12 @@ public class FixtureTests
             var candidate = fixture.Transcript.Turns[0];
 
             // The candidate turn's text holds its paragraphs and no crop line.
-            Assert.Equal("see [Figure 1]\n\nand [Figure 2]", candidate.Text);
+            Assert.Equal("see the first page\n\nand the second", candidate.Text);
 
-            // The turn's drawings carry their labels in the order the lines were written.
-            Assert.Equal(["Figure 1", "Figure 2"], candidate.Crops.Select(crop => crop.Label));
-
-            // Each drawing carries its own file's bytes.
-            Assert.Equal(one, candidate.Crops[0].Image);
-            Assert.Equal(two, candidate.Crops[1].Image);
+            // The turn's drawings are the files' bytes, in the order the lines were written.
+            Assert.Equal(2, candidate.Crops.Length);
+            Assert.Equal(one, candidate.Crops[0]);
+            Assert.Equal(two, candidate.Crops[1]);
 
             // The examiner turn sent no drawing.
             Assert.Empty(fixture.Transcript.Turns[1].Crops);

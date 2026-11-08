@@ -1,4 +1,6 @@
+using System.Net.Mime;
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Infrastructure.Storage;
 
 namespace MathComps.Infrastructure.Tests.TestInfrastructure;
 
@@ -55,5 +57,21 @@ public static class DefenseSeed
 
         // Hand back the photo with its drawings
         return photo;
+    }
+
+    /// <summary>
+    /// Keeps a file for every drawing cut out of the photos where the reading keeps it, its bytes the drawing's id, so
+    /// a test reads back which drawing a file is.
+    /// </summary>
+    /// <param name="store">The store to keep the files in.</param>
+    /// <param name="photos">The photos, with their drawings.</param>
+    /// <returns>A task that completes once every file is kept.</returns>
+    public static async Task StoreCropFilesAsync(IPrivateObjectStore store, IEnumerable<DefensePhoto> photos)
+    {
+        // Each drawing of each photo gets its file
+        foreach (var (photo, crop) in photos.SelectMany(photo => photo.Crops.Select(crop => (photo, crop))))
+            await store.PutAsync(
+                $"defense/photos/{photo.Id}/crops/{crop.Id}.jpg", crop.Id.ToByteArray(), MediaTypeNames.Image.Jpeg,
+                CancellationToken.None);
     }
 }
