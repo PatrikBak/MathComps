@@ -1904,6 +1904,13 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // Rewound to her first reply, dropping the second message
         await service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 2);
 
+        // The second photo as the rewind left it
+        var freed = await QueryValueAsync(context => context.DefensePhotos.SingleAsync(photo => photo.Id == second));
+
+        // It belongs to no message and holds no place among any message's photos
+        Assert.Null(freed.TurnId);
+        Assert.Null(freed.Position);
+
         // The message taking its place goes out with the second photo again
         var redone = await service.ContinueAsync(_ownerId, session.Id, new ContinueDefenseRequest("redo", [second]));
 
@@ -1912,6 +1919,83 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // The first message still carries the first
         Assert.Equal([first], redone.Turns[1].Photos.Select(photo => photo.Id));
+    });
+
+    /// <summary>
+    /// Rewinding one conversation frees only the photos its own dropped messages went out with, so the student's
+    /// other conversations keep theirs.
+    /// </summary>
+    [Fact]
+    public Task Rewinding_one_conversation_leaves_anothers_photos() => RunTestAsync(async service =>
+    {
+        // Two of the owner's photos
+        var (rewoundId, keptId) = await QueryValueAsync(async context =>
+        {
+            // The owner's photos
+            DefensePhoto[] photos =
+                [DefenseSeed.NewPhoto(_ownerId, drawings: 0), DefenseSeed.NewPhoto(_ownerId, drawings: 0)];
+
+            // Stage the photos
+            context.DefensePhotos.AddRange(photos);
+
+            // Commit them
+            await context.SaveChangesAsync();
+
+            // Hand back their ids
+            return (photos[0].Id, photos[1].Id);
+        });
+
+        // A conversation opened with the first photo
+        var rewound = await service.StartAsync(_ownerId, Request("prob-1", "first", [rewoundId]));
+
+        // Another conversation opened with the second photo
+        var other = await service.StartAsync(_ownerId, Request("prob-2", "second", [keptId]));
+
+        // The first rewound to her opening, dropping the message its photo went out with
+        await service.RewindAsync(_ownerId, rewound.Id, keepThroughSequence: 0);
+
+        // The second photo as the rewind left it
+        var kept = await QueryValueAsync(context => context.DefensePhotos.SingleAsync(photo => photo.Id == keptId));
+
+        // It still holds its message and its place there
+        Assert.Equal(other.Turns[1].Id, kept.TurnId);
+        Assert.Equal(0, kept.Position);
+    });
+
+    /// <summary>
+    /// Deleting a conversation keeps the photos its messages went out with, freed so they can go out again.
+    /// </summary>
+    [Fact]
+    public Task Deleting_a_conversation_frees_its_photos() => RunTestAsync(async service =>
+    {
+        // One of the owner's photos
+        var photoId = await QueryValueAsync(async context =>
+        {
+            // The owner's photo
+            var photo = DefenseSeed.NewPhoto(_ownerId, drawings: 0);
+
+            // Stage the photo
+            context.DefensePhotos.Add(photo);
+
+            // Commit it
+            await context.SaveChangesAsync();
+
+            // Hand back its id
+            return photo.Id;
+        });
+
+        // A conversation opened with it
+        var session = await service.StartAsync(_ownerId, Request("prob-1", "first", [photoId]));
+
+        // The conversation deleted
+        await service.DeleteAsync(_ownerId, session.Id);
+
+        // The photo as the deletion left it
+        var freed = await QueryValueAsync(context => context.DefensePhotos.SingleAsync(photo => photo.Id == photoId));
+
+        // It belongs to no message and holds no place among any message's photos
+        Assert.Null(freed.TurnId);
+        Assert.Null(freed.Position);
     });
 
     /// <summary>

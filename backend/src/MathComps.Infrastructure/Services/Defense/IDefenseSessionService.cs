@@ -71,8 +71,8 @@ public interface IDefenseSessionService
         Guid userId, Language language, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Deletes a session and its turns outright. The session must belong to the user, and must not be one they are
-    /// graded on.
+    /// Deletes a session and its turns outright. The photos its messages went out with stay, free to go out again.
+    /// The session must belong to the user, and must not be one they are graded on.
     /// </summary>
     /// <param name="userId">The user the session must belong to.</param>
     /// <param name="sessionId">The session to delete.</param>
@@ -81,8 +81,9 @@ public interface IDefenseSessionService
 
     /// <summary>
     /// Rewinds a session to a chosen point, deleting every turn after it so the conversation can be taken
-    /// from there again. The kept point must be an examiner turn, so the result awaits the student's next
-    /// message. The session must belong to the user, and must not be one they are graded on.
+    /// from there again. The photos the deleted turns went out with are free to go out again. The kept point
+    /// must be an examiner turn, so the result awaits the student's next message. The session must belong to
+    /// the user, and must not be one they are graded on.
     /// </summary>
     /// <param name="userId">The user the session must belong to.</param>
     /// <param name="sessionId">The session to rewind.</param>

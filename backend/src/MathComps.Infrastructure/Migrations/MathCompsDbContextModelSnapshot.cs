@@ -397,7 +397,7 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<int>("Position")
+                    b.Property<int?>("Position")
                         .HasColumnType("integer")
                         .HasColumnName("position");
 
