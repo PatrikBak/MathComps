@@ -2,7 +2,7 @@
 
 import { MessageSquare } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import type { Ref } from 'react'
+import type { RefObject } from 'react'
 
 import { LoginButton } from '@/components/login/LoginButton'
 import { Button } from '@/components/shared/components/Button'
@@ -13,13 +13,32 @@ import type {
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { CounterBadge } from '@/components/shared/components/rich-math-editor/components/RichMathEditorFooter'
 import { assertNever } from '@/components/shared/utils/assert-never'
+import { useIsAdmin } from '@/hooks/use-is-admin'
 
+import { useDefensePhotoReview } from '../hooks/use-defense-photo-review'
+import type { UseDefensePhotosResult } from '../hooks/use-defense-photos'
 import type { DefenseComposerState } from '../model/defense-composer-state'
 import {
   MESSAGES_LEFT_TO_ALARM_AT,
   MESSAGES_LEFT_TO_WARN_AT,
 } from '../model/defense-composer-state'
+import { DefensePhotoButton } from './DefensePhotoButton'
+import { DefensePhotoSideBySide } from './DefensePhotoSideBySide'
+import { DefensePhotoStrip } from './DefensePhotoStrip'
 import { MathildaConsentGate } from './MathildaConsentGate'
+
+/**
+ * Whether the composer is open for a turn under each of its states, the one state its photos are reviewed in.
+ */
+const IS_OPEN_FOR_A_TURN: Record<DefenseComposerState['kind'], boolean> = {
+  loading: false,
+  signInRequired: false,
+  conversationUnavailable: false,
+  consentRequired: false,
+  consentUnknown: false,
+  full: false,
+  open: true,
+}
 
 /**
  * The composer's toolbar for a defense turn, cut to the tools an argument is written with.
@@ -42,12 +61,14 @@ type DefenseComposerProps = {
   draft: string
   /** Takes what the student types. */
   onDraftChange: (draft: string) => void
+  /** The photos of handwritten work the turn is written from. */
+  photos: UseDefensePhotosResult
   /** Sends the written turn. */
   onSend: () => void
   /** Abandons the reply in flight, handing the turn back. */
   onStop: () => void
   /** Focuses the editor from outside it. */
-  editorRef: Ref<RichMathEditorRef>
+  editorRef: RefObject<RichMathEditorRef | null>
   /** Whether a reply is in flight. */
   isThinking: boolean
   /** The longest a single student message may be, or null while the caps are not known. */
@@ -73,6 +94,7 @@ export function DefenseComposer({
   state,
   draft,
   onDraftChange,
+  photos,
   onSend,
   onStop,
   editorRef,
@@ -90,6 +112,15 @@ export function DefenseComposer({
 
   // Copy for the buttons the whole app shares
   const tActions = useTranslations('ui.actions')
+
+  // The review of the photos, where each page's text is checked before it goes into the message
+  const review = useDefensePhotoReview({ photos, editorRef })
+
+  // The review lasts only while the composer is open for a turn, and shuts with it
+  if (!IS_OPEN_FOR_A_TURN[state.kind] && review.viewedPhotoId !== null) review.close()
+
+  // Photos are for admins until the rest of the photo flow ships
+  const canAddPhotos = useIsAdmin()
 
   // The editor, or the reason there is nothing to write into
   switch (state.kind) {
@@ -155,37 +186,66 @@ export function DefenseComposer({
     // Open for the next turn
     case 'open':
       return (
-        // Where the next message is written, its footer counting the conversation's room beside the
-        // draft's characters
-        <RichMathEditor
-          variant="card"
-          toolbar={DEFENSE_TOOLBAR}
-          maxCharacters={maxCharacters}
-          // Nothing sends until the caps are known, there being nothing to hold the turn to before then
-          canSend={maxCharacters !== null}
-          value={draft}
-          onChange={onDraftChange}
-          onSend={onSend}
-          onStop={onStop}
-          autoFocus
-          ref={editorRef}
-          isLoading={isThinking}
-          minHeightPx={editorMinHeightPx}
-          placeholder={t('placeholder')}
-          footerMeta={
-            state.messagesLeft !== null && maxMessages !== null ? (
-              <CounterBadge
-                icon={MessageSquare}
-                count={maxMessages - state.messagesLeft}
-                max={maxMessages}
-                isSpent={state.messagesLeft <= MESSAGES_LEFT_TO_ALARM_AT}
-                isNear={state.messagesLeft <= MESSAGES_LEFT_TO_WARN_AT}
-                title={t('messagesLeft', { count: state.messagesLeft })}
-                tabular
-              />
-            ) : undefined
-          }
-        />
+        <>
+          {/* Photos the turn is written from */}
+          <DefensePhotoStrip
+            photos={photos}
+            selectedId={null}
+            onOpen={review.view}
+            className="mb-2"
+          />
+
+          {/* The pages beside their text */}
+          <DefensePhotoSideBySide
+            viewedPhotoId={review.viewedPhotoId}
+            onView={review.view}
+            onPick={review.pick}
+            onClose={review.close}
+            onClosed={() => editorRef.current?.focus()}
+            photos={photos}
+            draft={draft}
+            onDraftChange={onDraftChange}
+            maxCharacters={maxCharacters}
+            toolbar={DEFENSE_TOOLBAR}
+          />
+
+          {/* Where the next message is written, its footer counting the conversation's room beside the
+              draft's characters */}
+          <RichMathEditor
+            variant="card"
+            toolbar={DEFENSE_TOOLBAR}
+            maxCharacters={maxCharacters}
+            // Nothing sends until the caps are known, there being nothing to hold the turn to before then
+            canSend={maxCharacters !== null}
+            value={draft}
+            onChange={onDraftChange}
+            onSend={onSend}
+            onStop={onStop}
+            autoFocus
+            ref={editorRef}
+            isLoading={isThinking}
+            minHeightPx={editorMinHeightPx}
+            placeholder={t('placeholder')}
+            footerTools={
+              canAddPhotos ? (
+                <DefensePhotoButton variant="compact" onPick={review.pick} />
+              ) : undefined
+            }
+            footerMeta={
+              state.messagesLeft !== null && maxMessages !== null ? (
+                <CounterBadge
+                  icon={MessageSquare}
+                  count={maxMessages - state.messagesLeft}
+                  max={maxMessages}
+                  isSpent={state.messagesLeft <= MESSAGES_LEFT_TO_ALARM_AT}
+                  isNear={state.messagesLeft <= MESSAGES_LEFT_TO_WARN_AT}
+                  title={t('messagesLeft', { count: state.messagesLeft })}
+                  tabular
+                />
+              ) : undefined
+            }
+          />
+        </>
       )
 
     // Every state is handled above

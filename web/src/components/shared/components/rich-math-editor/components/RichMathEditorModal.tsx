@@ -40,6 +40,8 @@ type RichMathEditorExpandedModalProps = {
   isLoading: boolean
   /** What the surface counts of its own */
   footerMeta: ReactNode
+  /** Controls the surface adds of its own, at the footer's start */
+  footerTools: ReactNode
 }
 
 /**
@@ -57,6 +59,7 @@ export function RichMathEditorExpandedModal({
   onStop,
   isLoading,
   footerMeta,
+  footerTools,
 }: RichMathEditorExpandedModalProps) {
   // Editor translations
   const tEditor = useTranslations('ui.editor')
@@ -79,6 +82,7 @@ export function RichMathEditorExpandedModal({
         <RichMathEditorFrame
           variant="card"
           minHeightPx={undefined}
+          heightPx={undefined}
           opensTall
           // Held by its middle, the dialog standing in the middle of the screen
           resizeRatio={2}
@@ -132,6 +136,7 @@ export function RichMathEditorExpandedModal({
             state={text.state}
             escapeCancels={expanded.isOnlyEditor}
             meta={footerMeta}
+            tools={footerTools}
             onSend={expanded.send}
             onCancel={expanded.cancel}
             onStop={onStop}

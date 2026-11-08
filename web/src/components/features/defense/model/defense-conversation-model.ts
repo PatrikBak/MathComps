@@ -21,11 +21,19 @@ type TurnSent = {
 }
 
 /**
- * A stopped student turn: the student aborted the round-trip, or a session switch superseded it.
+ * A stopped student turn: the student aborted the round-trip, taking its message back.
  */
 type TurnStopped = {
   /** The discriminator. */
   kind: 'stopped'
+}
+
+/**
+ * A superseded student turn: a rewind or a switch to another conversation dropped it, its message with it.
+ */
+type TurnSuperseded = {
+  /** The discriminator. */
+  kind: 'superseded'
 }
 
 /**
@@ -49,7 +57,7 @@ type TurnFailed = {
 /**
  * The outcome of sending a student turn.
  */
-export type SendOutcome = TurnSent | TurnStopped | TurnBusy | TurnFailed
+export type SendOutcome = TurnSent | TurnStopped | TurnSuperseded | TurnBusy | TurnFailed
 
 /**
  * A completed rewind: the conversation was truncated to the kept prefix.
@@ -150,6 +158,8 @@ type InFlight = {
   content: string
   /** The transcript before the student's turn. */
   priorTurns: readonly Turn[]
+  /** Whether the student stopped it, taking its turn back, where a rewind or a switch drops it. */
+  isStopped: boolean
 }
 
 /**
@@ -410,7 +420,12 @@ export class DefenseConversationModel {
     const sessionId = this.state.currentSessionId
 
     // Claim the run synchronously, before the first await, so a second send this tick sees it
-    const run: InFlight = { controller: new AbortController(), content, priorTurns }
+    const run: InFlight = {
+      controller: new AbortController(),
+      content,
+      priorTurns,
+      isStopped: false,
+    }
     this.currentRun = run
 
     // Show the student's turn and the examiner at work immediately
@@ -428,7 +443,7 @@ export class DefenseConversationModel {
 
       // A stop or switch superseded this run during the wait: drop the reply it no longer owns
       if (run.controller.signal.aborted || !this.ownsView(run)) {
-        return { kind: 'stopped' }
+        return run.isStopped ? { kind: 'stopped' } : { kind: 'superseded' }
       }
 
       // Swap in the server-dated transcript, open the session, and drop the indicator. What the student has
@@ -453,7 +468,7 @@ export class DefenseConversationModel {
       // A stop or switch aborted this run, or it no longer owns the view: stay silent, its rollback
       // was handled by whoever took over
       if (run.controller.signal.aborted || !this.ownsView(run)) {
-        return { kind: 'stopped' }
+        return run.isStopped ? { kind: 'stopped' } : { kind: 'superseded' }
       }
 
       // A real failure on the still-open conversation: drop the optimistic turn and the indicator
@@ -478,6 +493,9 @@ export class DefenseConversationModel {
     if (inFlight === null) {
       return null
     }
+
+    // The student's own doing, which their send reports as stopped
+    inFlight.isStopped = true
 
     // Abort the in-flight round-trip
     inFlight.controller.abort()

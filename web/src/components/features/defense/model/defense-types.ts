@@ -167,6 +167,16 @@ export type DefenseSessionList = {
 }
 
 /**
+ * What a photo of a handwritten page read as.
+ */
+export type DefensePhotoReading = {
+  /** The kept photo. */
+  photoId: string
+  /** The page written out as Markdown with LaTeX math, mistakes included, the drawings going beside it. */
+  text: string
+}
+
+/**
  * An archive problem a conversation was held against, named as well as addressed: nothing on the reader's
  * side can name a competition still under embargo.
  */

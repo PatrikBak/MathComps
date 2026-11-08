@@ -70,6 +70,8 @@ type RichMathEditorFooterProps = {
   escapeCancels: boolean
   /** What the surface counts of its own, shown beside the draft's counters */
   meta: ReactNode
+  /** Controls the surface adds of its own, at the footer's start */
+  tools: ReactNode
   /**
    * Callback triggered when the send button is clicked. The action buttons, cancel included, show only
    * where it is given
@@ -95,6 +97,7 @@ export function RichMathEditorFooter({
   state,
   escapeCancels,
   meta,
+  tools,
   onSend,
   onCancel,
   onStop,
@@ -122,12 +125,22 @@ export function RichMathEditorFooter({
   const hasMetrics =
     meta !== undefined || state.maxCharacters !== null || imageCount > 0 || attachmentCount > 0
 
-  // Nothing to count and nothing to send, so no row to give it
-  if (!hasMetrics && !onSend) return null
+  // Nothing to count, nothing to send and nothing of the surface's own, so no row to give it
+  if (!hasMetrics && !onSend && tools === undefined) return null
 
-  // The counters, then the actions
+  // The surface's controls, the counters, then the actions. A control at the start sits as far in as the actions
+  // at the end
   return (
-    <div className={cn('flex items-center justify-end gap-3 pb-1.5 pl-3 pr-1.5 pt-1', className)}>
+    <div
+      className={cn(
+        'flex items-center justify-end gap-3 pb-1.5 pr-1.5 pt-1',
+        tools !== undefined ? 'pl-1.5' : 'pl-3',
+        className
+      )}
+    >
+      {/* Surface controls, pushed to the start */}
+      {tools !== undefined && <div className="mr-auto flex shrink-0 items-center">{tools}</div>}
+
       {/* Metrics */}
       {hasMetrics && (
         <div className="flex min-w-0 items-center gap-3 text-xs">

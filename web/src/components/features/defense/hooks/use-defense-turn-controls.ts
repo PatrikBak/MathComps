@@ -11,7 +11,10 @@ import type { AppErrorCode } from '@/lib/api/api-error-codes'
 import { resolveErrorMessage } from '@/lib/api/api-error-utils'
 
 import type { DeleteOutcome, RewindOutcome, SendOutcome } from '../model/defense-conversation-model'
+import type { DefenseTarget } from '../model/defense-target'
 import type { Turn } from '../model/defense-types'
+import type { UseDefensePhotosResult } from './use-defense-photos'
+import { useDefensePhotos } from './use-defense-photos'
 
 /**
  * A rewind awaiting confirmation: the cut point to keep through, and the composer draft to restore once
@@ -45,6 +48,8 @@ type DefenseTurnControlsInput = {
   deleteSession: (sessionId: string) => Promise<DeleteOutcome>
   /** Where the unsent turn is kept across closes and reloads, or null to keep it only for this mount. */
   draftStorageKey: string | null
+  /** What the student is defending. */
+  target: DefenseTarget
 }
 
 /**
@@ -55,6 +60,8 @@ type UseDefenseTurnControlsResult = {
   draft: string
   /** Replaces it. */
   setDraft: (draft: string) => void
+  /** The photos of handwritten work the composer holds. */
+  photos: UseDefensePhotosResult
   /** The composer's handle. */
   editorRef: React.RefObject<RichMathEditorRef | null>
   /** Sends the composed reply. */
@@ -100,6 +107,9 @@ export function useDefenseTurnControls(
   // The composer's handle
   const editorRef = useRef<RichMathEditorRef>(null)
 
+  // The composer's photos, each one's text waiting beside it until it goes into the draft
+  const photos = useDefensePhotos(conversation.target)
+
   // The composer outlives the conversation it writes into, so hand it the cursor whenever another
   // one takes over
   useEffect(() => {
@@ -114,7 +124,7 @@ export function useDefenseTurnControls(
     toast.error(resolveErrorMessage(errorCode, tApiErrors, { fallback: t(fallback) }))
   }
 
-  // Sends the composed reply, unless it's empty or a turn is already in flight
+  // Sends the composed reply, unless it's empty or a turn is in flight
   const sendDraft = async () => {
     // The trimmed reply
     const content = draft.trim()
@@ -124,22 +134,41 @@ export function useDefenseTurnControls(
       return
     }
 
+    // The photos whose text the reply carries
+    const sentPhotoIds = photos.photos
+      .filter((photo) => photo.kind === 'inserted')
+      .map((photo) => photo.id)
+
     // Clear the composer optimistically
     setDraft('')
+
+    // The photos go with the reply until it lands or fails
+    photos.setAside(sentPhotoIds)
 
     // Drive the turn
     const outcome = await conversation.send(content)
 
     // Recover per outcome
     switch (outcome.kind) {
-      // The reply landed, or the turn was stopped or superseded: nothing to put back
+      // The reply landed, so the photos whose text it carried are done with, and any picked while it was
+      // out stay
       case 'sent':
-      case 'stopped':
+        photos.removePhotos(sentPhotoIds)
         break
-      // The round-trip failed: tell the student why and hand their draft back to resend
+      // The student stopped the turn: its photos come back, as its text did with the stop
+      case 'stopped':
+        photos.bringBack(sentPhotoIds)
+        break
+      // Another conversation took over, dropping the turn's text, and its photos go with it
+      case 'superseded':
+        photos.removePhotos(sentPhotoIds)
+        break
+      // The round-trip failed: tell the student why and hand their draft back to resend, above whatever
+      // was typed while it was out
       case 'failed':
         showActionError(outcome.errorCode, 'sendError')
-        setDraft((current) => (current.trim() ? current : content))
+        photos.bringBack(sentPhotoIds)
+        setDraft((current) => (current.trim() ? `${content}\n\n${current}` : content))
         break
       // A double-tap: the in-flight turn already carries this content, so the composer stays cleared
       case 'busy':
@@ -238,6 +267,7 @@ export function useDefenseTurnControls(
   return {
     draft,
     setDraft,
+    photos,
     editorRef,
     sendDraft,
     stopReply,

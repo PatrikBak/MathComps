@@ -666,6 +666,22 @@
       "somethingElse": "None of these",
       "wasOff": "She was off"
     },
+    "photos": {
+      "add": "Photo",
+      "addPage": "Add a page",
+      "addTitle": "Take a photo of your solution or pick one",
+      "insert": "{count, plural, =0 {Insert into the message} one {Insert the page into the message} other {Insert # pages into the message}}",
+      "inserted": "This page's text went into the message.",
+      "messagePlaceholder": "The text from this photo goes here.",
+      "open": "Check photo {number}",
+      "photo": "Photo {number}",
+      "readError": "Mathilda couldn't read the photo.",
+      "reading": "{count, plural, one {Mathilda is reading the photo…} other {Mathilda is reading # photos…}}",
+      "readingPage": "Mathilda is reading this photo…",
+      "remove": "Remove the photo",
+      "reviewHint": "Fix anything Mathilda misread. She cuts the drawings out of the photos herself.",
+      "reviewTitle": "Check the transcription"
+    },
     "placeholder": "Explain your thinking…",
     "problemStrip": "Statement",
     "removeFeedbackMessage": "Your answer for this conversation will be permanently removed.",
