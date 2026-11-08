@@ -46,14 +46,13 @@ public interface IDefenseSessionService
         Guid userId, Guid sessionId, ContinueDefenseRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Lists a user's sessions against one target, most recently active first, each with its turns, alongside the
-    /// caps a further turn against it has to stay within.
+    /// Lists a user's sessions against one target, most recently active first, each with its turns.
     /// </summary>
     /// <param name="userId">The user whose sessions to list.</param>
     /// <param name="target">What the sessions defend.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>The user's sessions against that target, and the caps they are held to.</returns>
-    Task<DefenseSessionListDto> ListAsync(
+    /// <returns>The user's sessions against that target.</returns>
+    Task<IReadOnlyList<DefenseSessionDto>> ListAsync(
         Guid userId, DefenseTarget target, CancellationToken cancellationToken = default);
 
     /// <summary>

@@ -47,7 +47,8 @@ public static class DefenseEndpoints
             string environmentId,
             HttpContext context,
             IUserManager userManager,
-            IDefenseSessionService defenseService) =>
+            IDefenseSessionService defenseService,
+            IDefenseLimitsProvider limitsProvider) =>
         {
             // Resolve the calling user
             var userId = await userManager.RequireUserIdAsync(context);
@@ -55,11 +56,11 @@ public static class DefenseEndpoints
             // The environment the sessions are held against
             var target = new HandoutEnvironmentTarget(handoutContentId, environmentId);
 
-            // Fetch the user's sessions against it, and the caps a further turn is held to
-            var list = await defenseService.ListAsync(userId, target, context.RequestAborted);
+            // Fetch the user's sessions against it
+            var sessions = await defenseService.ListAsync(userId, target, context.RequestAborted);
 
-            // Return them
-            return Results.Ok(list);
+            // Return them with the caps a further turn is held to
+            return Results.Ok(new DefenseSessionListDto(sessions, limitsProvider.Limits));
         })
         .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
@@ -69,7 +70,8 @@ public static class DefenseEndpoints
             Guid problemId,
             HttpContext context,
             IUserManager userManager,
-            IDefenseSessionService defenseService) =>
+            IDefenseSessionService defenseService,
+            IDefenseLimitsProvider limitsProvider) =>
         {
             // Resolve the calling user
             var userId = await userManager.RequireUserIdAsync(context);
@@ -77,12 +79,12 @@ public static class DefenseEndpoints
             // The problem the sessions are held against
             var target = new ProblemTarget(problemId);
 
-            // Fetch the user's sessions against it, and the caps a further turn is held to. Only their own come
-            // back, so an embargoed statement reaches nobody it has not already reached
-            var list = await defenseService.ListAsync(userId, target, context.RequestAborted);
+            // Fetch the user's sessions against it. Only their own come back, so an embargoed statement reaches
+            // nobody it has not already reached
+            var sessions = await defenseService.ListAsync(userId, target, context.RequestAborted);
 
-            // Return them
-            return Results.Ok(list);
+            // Return them with the caps a further turn is held to
+            return Results.Ok(new DefenseSessionListDto(sessions, limitsProvider.Limits));
         })
         .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);

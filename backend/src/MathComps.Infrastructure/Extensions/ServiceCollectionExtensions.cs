@@ -520,13 +520,13 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the defense feature: the examiner engine, the photo reader, the input/turn/spend caps, the per-user
-    /// turn gate, the lookup of what the examiner is told about a problem, the guard saying whether a student may argue
-    /// a given target, the service that runs and persists defense conversations, the service that records the
-    /// students' feedback on them, the service that reads and keeps the photos of their handwritten work, and the
-    /// links to those photos. Assumes the chat stack is registered (see <see cref="AddLlmChat"/>) and, since the
-    /// problem content is read back out of object storage and the photos are kept there, that
-    /// <see cref="AddStorage"/> has run.
+    /// Registers the defense feature: the examiner engine, the photo reader, the input/turn/spend caps and the ones a
+    /// caller is told, the per-user turn gate, the lookup of what the examiner is told about a problem, the guard
+    /// saying whether a student may argue a given target, the service that runs and persists defense conversations,
+    /// the service that records the students' feedback on them, the service that reads and keeps the photos of their
+    /// handwritten work, and the links to those photos. Assumes the chat stack is registered (see
+    /// <see cref="AddLlmChat"/>) and, since the problem content is read back out of object storage and the photos are
+    /// kept there, that <see cref="AddStorage"/> has run.
     /// </summary>
     /// <param name="services">The service collection to add the defense feature to.</param>
     /// <param name="configuration">The application configuration carrying the <c>Examiner</c>,
@@ -545,6 +545,9 @@ public static class ServiceCollectionExtensions
             .Bind(configuration.GetSection(DefenseLimits.SectionName))
             .ValidateDataAnnotations()
             .ValidateOnStart();
+
+        // The caps a caller is told, read once from the defense caps.
+        services.TryAddSingleton<IDefenseLimitsProvider, DefenseLimitsProvider>();
 
         // How long the published handout content is trusted between revalidations.
         services.AddOptions<DefenseContentOptions>()

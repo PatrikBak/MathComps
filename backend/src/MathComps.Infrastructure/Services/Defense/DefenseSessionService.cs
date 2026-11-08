@@ -262,7 +262,7 @@ public class DefenseSessionService(
     }
 
     /// <inheritdoc/>
-    public async Task<DefenseSessionListDto> ListAsync(
+    public async Task<IReadOnlyList<DefenseSessionDto>> ListAsync(
         Guid userId, DefenseTarget target, CancellationToken cancellationToken = default)
     {
         // Every statement the target has now, in any language.
@@ -310,8 +310,9 @@ public class DefenseSessionService(
 
         // Each session against the target the caller named, flagged when no language still has its statement, and
         // graded when it started while the student's graded entry was counting.
-        var sessions = rows
-            .Select(row => new DefenseSessionDto(
+        return
+        [
+            .. rows.Select(row => new DefenseSessionDto(
                 row.Id,
                 target,
                 row.ProblemStatement,
@@ -319,15 +320,8 @@ public class DefenseSessionService(
                 row.Turns,
                 row.Feedback,
                 row.Reports,
-                gradedEntry?.Window.Holds(row.CreatedAt) == true))
-            .ToList();
-
-        // Hand them back with the caps a further turn is held to.
-        return new DefenseSessionListDto(
-            sessions,
-            new DefenseLimitsDto(
-                _limits.MaxCandidateChars, _limits.MaxFeedbackCommentChars, _limits.MaxMessagesPerDefense,
-                _limits.MaxPhotosPerMessage));
+                gradedEntry?.Window.Holds(row.CreatedAt) == true)),
+        ];
     }
 
     /// <inheritdoc/>
