@@ -71,8 +71,8 @@ export function RichMathEditorPane({
         onExpand={onExpand}
         onEdit={text.applyTransform}
         onInsert={text.insertAtCursor}
-        onImageClick={uploads.openImagePicker}
-        onAttachmentClick={uploads.openAttachmentPicker}
+        imagePicker={uploads.imagePicker}
+        attachmentPicker={uploads.attachmentPicker}
       />
 
       {/* The text, or its preview */}

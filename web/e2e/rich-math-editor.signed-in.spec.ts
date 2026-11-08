@@ -1170,6 +1170,34 @@ test.describe('an image the editor uploads', () => {
     expect(await cursorIn(composer)).toBe(DIAGRAM_MARKDOWN.length)
   })
 
+  test('takes a second image once the first is written', async ({ page }) => {
+    // The route minting a URL, and the store taking the file at it
+    await acceptUploads(page)
+
+    // The discussion, open
+    const discussion = await openDiscussion(page)
+
+    // The discussion's composer
+    const composer = discussion.locator('textarea')
+
+    // An image handed to the image tool
+    await pickFile(discussion.getByTitle(editorCopy.image), DIAGRAM)
+
+    // The image written in
+    await expect(composer).toHaveValue(DIAGRAM_MARKDOWN)
+
+    // The cursor moved past the image
+    await composer.evaluate((element: HTMLTextAreaElement) =>
+      element.setSelectionRange(element.value.length, element.value.length)
+    )
+
+    // A second image handed to the same tool, which opens again once its first picker has closed
+    await pickFile(discussion.getByTitle(editorCopy.image), DIAGRAM)
+
+    // The second image written after the first
+    await expect(composer).toHaveValue(DIAGRAM_MARKDOWN.repeat(2))
+  })
+
   test('writes a pasted image under a name of its own', async ({ page }) => {
     // The API storing the file
     await acceptUploads(page)
