@@ -65,15 +65,18 @@ function createParticles(width: number, height: number, count: number): Particle
 
 /**
  * Pre-render the soft glow sprite once, so each particle is a cheap {@link CanvasRenderingContext2D.drawImage}
- * per frame. Returns null where {@link OffscreenCanvas} isn't available.
+ * per frame. Returns null where {@link OffscreenCanvas} isn't available, or when the glow color is empty.
  *
  * @param glow - The color of the glow sprite.
  *
- * @returns The cached sprite, or null when the platform can't provide one
+ * @returns The cached sprite, or null when the platform can't provide one or the color is empty
  */
 function createParticleTemplate(glow: string): OffscreenCanvas | null {
   // Bail where OffscreenCanvas isn't supported
   if (typeof OffscreenCanvas === 'undefined') return null
+
+  // Bail without a color, since a gradient stop throws on an empty one
+  if (!glow) return null
 
   // Fixed 20px sprite
   const size = 20
@@ -201,7 +204,7 @@ export default function ParticleSystem() {
     // Bail if the context is unavailable
     if (!context) return
 
-    // Reuse the cached sprite, creating it (in the theme's glow color) on first need
+    // Reuse the cached sprite, creating it (in the theme's glow color) while none exists
     const template = (templateRef.current ??= createParticleTemplate(
       getComputedStyle(document.documentElement).getPropertyValue('--color-glow').trim()
     ))
