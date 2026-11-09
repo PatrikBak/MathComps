@@ -189,7 +189,7 @@ export const MobileNavigationDrawer = ({
                         <UserMenuItem type="signOut" variant="mobile" onClick={onClose} />
                       </div>
                     ) : (
-                      <div className="pb-4 flex justify-center">
+                      <div className="pb-4 flex">
                         <LoginNavItem
                           className={cn(
                             buttonVariants({

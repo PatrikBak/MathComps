@@ -24,7 +24,8 @@ export type UserMenuItemVariant = 'dropdown' | 'mobile'
  */
 export const USER_MENU_ROW_CLASS: Record<UserMenuItemVariant, string> = {
   dropdown: 'flex items-center gap-3 px-4 py-2.5 text-sm text-foreground/70',
-  mobile: 'flex items-center gap-3 px-4 py-3 text-base font-medium text-muted-foreground',
+  // A drawer row's padding hangs into the drawer's gutter, so its tile starts where the page links' text does
+  mobile: 'flex items-center gap-3 -mx-4 px-4 py-3 text-base font-medium text-muted-foreground',
 }
 
 /**
@@ -257,7 +258,7 @@ export const UserMenuItem = (props: UserMenuItemProps) => {
       // How an item looks in the mobile drawer
       const mobileClasses = cn(
         USER_MENU_ROW_CLASS.mobile,
-        'w-full hover:text-foreground hover:bg-foreground/5 rounded-xl transition-all duration-200',
+        'hover:text-foreground hover:bg-foreground/5 rounded-xl transition-all duration-200',
         disabled ? 'opacity-50 cursor-default pointer-events-none' : 'cursor-pointer'
       )
 
