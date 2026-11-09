@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
 import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
+import { ScaledContent } from '@/components/shared/components/ScaledContent'
 import { Tooltip } from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
 import type { Locale } from '@/i18n/i18n'
@@ -36,11 +37,13 @@ export function StatementPreview({ proposal, language, children }: StatementPrev
   return (
     <Tooltip
       placement="bottom-start"
+      // The screen's width, which the tooltip caps at its widest: a definite width for the scaled statement
+      className="w-screen"
       content={
-        // The statement as its own page sets it, scaled down whole, math, gaps and figures alike
-        <div className="[zoom:0.8]">
+        // The statement as its own page sets it, drawn smaller whole, math, gaps and figures alike
+        <ScaledContent scale={0.8}>
           <ProposalStatement proposal={proposal} language={language} />
-        </div>
+        </ScaledContent>
       }
     >
       {/* The trigger, the page icon unless text is given in its place */}
