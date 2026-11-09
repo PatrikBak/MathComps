@@ -1,21 +1,14 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
 
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { shrinkToLongEdge } from '@/components/shared/utils/image-utils'
 import { apiCallOf, useApi } from '@/hooks/use-api'
-import { resolveErrorMessage } from '@/lib/api/api-error-utils'
+import type { AppErrorCode } from '@/lib/api/api-error-codes'
 
 import type { DefenseTarget } from '../model/defense-target'
 import { readPhoto } from '../services/photo-service'
-
-/**
- * The toast a failed reading shows, one however many fail together.
- */
-const READ_ERROR_TOAST_ID = 'defense-photo-read-error'
 
 /**
  * What every photo held in the composer carries.
@@ -64,11 +57,13 @@ type InsertedPhoto = KeptPhoto & {
 }
 
 /**
- * A photo the reading failed on, which can be read again.
+ * A photo the reading failed on, which can be read again unless the photo itself is why.
  */
 type FailedPhoto = HeldPhoto & {
   /** The discriminant. */
   kind: 'failed'
+  /** Why the reading failed, or undefined when nothing said why. */
+  errorCode: AppErrorCode | undefined
 }
 
 /**
@@ -137,7 +132,7 @@ type UseDefensePhotosOptions = {
  * Reads the photos a student takes of their handwritten work. Every photo is read at once, each shrunk first to
  * the size the API reads it at, and the shrinks go one photo at a time. Each one's text waits beside its photo for
  * the student to check, until the texts go into the message together in page order. A failed read leaves its photo
- * to be read again.
+ * holding why, to be read again or removed.
  *
  * @param options - The options the photos are read with.
  *
@@ -147,12 +142,6 @@ export function useDefensePhotos({
   target,
   photoLongEdge,
 }: UseDefensePhotosOptions): UseDefensePhotosResult {
-  // Defense-surface copy
-  const t = useTranslations('defense')
-
-  // Central failure-code copy
-  const tApiErrors = useTranslations('apiErrors')
-
   // The caller the reads go through, or null while there is nobody to read them as
   const apiCall = apiCallOf(useApi())
 
@@ -178,7 +167,7 @@ export function useDefensePhotos({
     setPhotos((held) => held.map((photo) => (photo.id === id ? next(photo) : photo)))
 
   /**
-   * A function which reads one held photo, its text landing beside it, and tells the student when the read fails.
+   * A function which reads one held photo, its text landing beside it, or why it failed.
    *
    * @param id - The photo.
    * @param file - The photo file.
@@ -201,7 +190,7 @@ export function useDefensePhotos({
     // The page as the API reads it, and nothing to say while there is nobody to read it as
     const result = apiCall === null ? null : await readPhoto(apiCall, target, upload, signal)
 
-    // Dropped while it was read, so there is nothing to tell anyone
+    // Dropped while it was read, so nothing comes of the reading
     if (signal.aborted) return
 
     // Read, its text waiting beside it
@@ -219,16 +208,13 @@ export function useDefensePhotos({
       return
     }
 
-    // Failed, which the photo says, offering another go
-    updatePhoto(id, (photo) => ({ kind: 'failed', id, previewUrl: photo.previewUrl }))
-
-    // The message for the failure's code, or the generic one
-    const message = resolveErrorMessage(result?.error.errorCode, tApiErrors, {
-      fallback: t('photos.readError'),
-    })
-
-    // The student hears why, once however many fail together
-    toast.error(message, { id: READ_ERROR_TOAST_ID })
+    // Failed, the photo holding why
+    updatePhoto(id, (photo) => ({
+      kind: 'failed',
+      id,
+      previewUrl: photo.previewUrl,
+      errorCode: result?.error.errorCode,
+    }))
   }
 
   /**

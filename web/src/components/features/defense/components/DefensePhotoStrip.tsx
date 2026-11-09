@@ -1,11 +1,12 @@
 'use client'
 
 import { useMounted } from '@mantine/hooks'
-import { Loader2, X } from 'lucide-react'
+import { Loader2, TriangleAlert, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
+import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -33,28 +34,17 @@ type DefensePhotoTileProps = {
   isSelected: boolean
   /** Looks at it in the review, or enlarges it once it is the one looked at. */
   onPress: () => void
-  /** Reads it again. */
-  onRetry: () => void
   /** Drops it from the composer. */
   onRemove: () => void
 }
 
 /**
- * One photo held in the composer, previewing from the student's device, with what its reading came to.
+ * One photo held in the composer, previewing from the student's device, with what its reading came to. A failed
+ * one is only marked here; why it failed is said where its text would be.
  */
-function DefensePhotoTile({
-  photo,
-  number,
-  isSelected,
-  onPress,
-  onRetry,
-  onRemove,
-}: DefensePhotoTileProps) {
+function DefensePhotoTile({ photo, number, isSelected, onPress, onRemove }: DefensePhotoTileProps) {
   // Copy for the composer's photos
   const t = useTranslations('defense.photos')
-
-  // Copy for the buttons the whole app shares
-  const tActions = useTranslations('ui.actions')
 
   // What lies over the photo, by where its reading stands
   const overlay = (() => {
@@ -72,18 +62,11 @@ function DefensePhotoTile({
       case 'inserted':
         return null
 
-      // The reading failed, so the photo offers another go
+      // The reading failed, which the photo is marked with
       case 'failed':
         return (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-surface/80 p-1">
-            <Button
-              variant="secondary"
-              size="sm"
-              className="pointer-events-auto min-h-0 px-1.5 py-1 text-xs leading-tight"
-              onClick={onRetry}
-            >
-              {tActions('retry')}
-            </Button>
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-surface/60">
+            <TriangleAlert className="size-5 text-error" aria-hidden="true" />
           </div>
         )
 
@@ -120,8 +103,13 @@ function DefensePhotoTile({
           title={pressLabel}
           onClick={onPress}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element -- a local preview, nothing for a server to optimize */}
-          <img src={photo.previewUrl} alt="" className="size-full object-cover" />
+          <ImageWithLoader
+            src={photo.previewUrl}
+            alt=""
+            fill
+            className="object-cover"
+            fallback={null}
+          />
         </button>
         {overlay}
       </div>
@@ -218,7 +206,6 @@ export function DefensePhotoStrip({
                 number={index + 1}
                 isSelected={isSelected}
                 onPress={isSelected ? selected.onEnlarge : () => onOpen(photo.id)}
-                onRetry={() => photos.retryPhoto(photo.id)}
                 onRemove={() => photos.removePhotos([photo.id])}
               />
             )
