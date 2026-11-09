@@ -110,6 +110,15 @@ export function refuse(route: Route, status: number, errorCode: AppErrorCode): P
   })
 }
 
+/** Where the store serves uploaded files from. */
+const STORE_ORIGIN = 'https://store.example.test'
+
+/** The smallest image a browser draws, one transparent pixel. */
+const ONE_PIXEL_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+  'base64'
+)
+
 /**
  * The link the backend hands out to an uploaded file.
  *
@@ -119,7 +128,21 @@ export function refuse(route: Route, status: number, errorCode: AppErrorCode): P
  */
 export function fileLinkTo(key: string): string {
   // The file's place in the store, signed
-  return `https://store.example.test/user-uploads/user_${key}?X-Amz-Signature=fake`
+  return `${STORE_ORIGIN}/user-uploads/user_${key}?X-Amz-Signature=fake`
+}
+
+/**
+ * Serves every file in the store as one small image, so an uploaded image on the page loads the way it does from
+ * the real store. A spec whose subject is the file itself registers its own route afterwards, which Playwright then
+ * tries first.
+ *
+ * @param page - The page to serve the files on.
+ */
+export async function serveStoredFiles(page: Page): Promise<void> {
+  // Whatever file is asked for, answered with the one image
+  await page.route(`${STORE_ORIGIN}/**`, (route) =>
+    route.fulfill({ status: 200, contentType: 'image/png', body: ONE_PIXEL_PNG })
+  )
 }
 
 /**

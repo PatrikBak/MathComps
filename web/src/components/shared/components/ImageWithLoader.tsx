@@ -2,18 +2,25 @@
 
 import { ImageOff, Loader2 } from 'lucide-react'
 import Image from 'next/image'
+import type { ReactNode } from 'react'
 import { useState } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
 /**
- * Props for the {@link ImageWithLoader} component.
+ * How an image's load ended.
  */
-type ImageWithLoaderProps = {
-  /** Image source URL */
+type SettledLoad = {
+  /** The source that loaded or failed. */
   src: string
-  /** Alt text for accessibility */
-  alt: string
+  /** Whether it loaded or failed. */
+  state: 'loaded' | 'error'
+}
+
+/**
+ * An image's own dimensions, and how it sits among the text around it.
+ */
+type ImageDimensions = {
   /**
    * Width in pixels — used for reserving space. Pass 0 to render in fluid mode
    * (no reserved space, image sized at runtime by its intrinsic dimensions).
@@ -24,16 +31,8 @@ type ImageWithLoaderProps = {
    * (no reserved space, image sized at runtime by its intrinsic dimensions).
    */
   height: number
-  /** Additional class names for the image */
-  className?: string
-  /** Additional class names for the container */
-  containerClassName?: string
-  /** If true, the image is loaded with priority (LCP optimization) */
-  priority?: boolean
   /** Scale factor for the image (uses CSS zoom) */
   scale?: number
-  /** Size of the spinner icon in pixels */
-  spinnerSize?: number
   /**
    * If true, the container renders as inline-flex with vertical-align: middle
    * and zero line-height so the image can flow inside a line of text.
@@ -42,25 +41,75 @@ type ImageWithLoaderProps = {
 }
 
 /**
- * A Next.js Image wrapper that shows a loading spinner until the image loads.
- * Reserves exact dimensions to prevent layout shifts when width and height
- * are provided; with width=0 / height=0 the image renders fluidly at its
- * intrinsic size (max-width capped to the parent) and no spinner is shown.
+ * An image drawn by its own dimensions.
  */
-export function ImageWithLoader({
-  src,
-  alt,
-  width,
-  height,
-  className,
-  containerClassName,
-  priority = false,
-  scale = 1,
-  spinnerSize = 24,
-  inline = false,
-}: ImageWithLoaderProps) {
-  // Track image load state
-  const [loadState, setLoadState] = useState<'loading' | 'loaded' | 'error'>('loading')
+type DimensionedImageProps = ImageDimensions & {
+  /** The discriminant, absent or false where the image keeps its own size. */
+  fill?: false
+}
+
+/**
+ * An image that fills the box its container gives it, the way a thumbnail does.
+ */
+type FillingImageProps = {
+  /** The discriminant. */
+  fill: true
+}
+
+/**
+ * Props for the {@link ImageWithLoader} component.
+ */
+type ImageWithLoaderProps = (DimensionedImageProps | FillingImageProps) & {
+  /** Image source URL */
+  src: string
+  /** Alt text for accessibility */
+  alt: string
+  /** Additional class names for the image */
+  className?: string
+  /** Additional class names for the container */
+  containerClassName?: string
+  /** If true, the image is loaded with priority (LCP optimization) */
+  priority?: boolean
+  /** Size of the spinner icon in pixels */
+  spinnerSize?: number
+  /** What stands in the image's place once it fails to load, nothing at all when null. */
+  fallback?: ReactNode
+}
+
+/**
+ * The dimensions a filling image goes by: none of its own, its container's box reserving the room.
+ */
+const FILL_DIMENSIONS: ImageDimensions = { width: 0, height: 0 }
+
+/**
+ * A Next.js Image wrapper that shows a loading spinner until the image loads, and a fallback where it fails to.
+ * Reserves exact dimensions to prevent layout shifts when width and height are provided; with width=0 / height=0 the
+ * image renders fluidly at its intrinsic size (max-width capped to the parent) and no spinner is shown. A filling
+ * image takes its container's box instead.
+ */
+export function ImageWithLoader(props: ImageWithLoaderProps) {
+  // What every image takes
+  const {
+    src,
+    alt,
+    className,
+    containerClassName,
+    priority = false,
+    spinnerSize = 24,
+    fallback = <ImageOff className="text-muted" size={spinnerSize} strokeWidth={1.5} />,
+  } = props
+
+  // Whether the image fills its container's box
+  const fill = props.fill === true
+
+  // The image's own dimensions, none where it fills its container
+  const { width, height, scale = 1, inline = false } = fill ? FILL_DIMENSIONS : props
+
+  // How the load ended, held against its source so a new source starts out loading
+  const [settled, setSettled] = useState<SettledLoad | null>(null)
+
+  // Where the current source's load stands
+  const loadState = settled?.src === src ? settled.state : 'loading'
 
   // Whether the caller passed concrete dimensions. Zero is the documented
   // sentinel for fluid mode — render at intrinsic size, no layout reservation
@@ -74,19 +123,32 @@ export function ImageWithLoader({
   // block mode is the default centred-flex layout. box-content keeps caller-set
   // padding outside the reserved width/height so the image's content area
   // matches the dimensions the caller asked for. Fluid mode skips the reserved
-  // box entirely and just lets the wrapper shrink-wrap the image
-  const baseContainerClass = hasIntrinsicSize
-    ? inline
-      ? 'relative inline-flex items-center justify-center align-middle box-content'
-      : 'relative flex items-center justify-center box-content'
-    : inline
-      ? 'inline-flex align-middle'
-      : 'mx-auto w-fit overflow-hidden rounded-md'
+  // box entirely and just lets the wrapper shrink-wrap the image. Fill mode
+  // takes the box its container gives it
+  const baseContainerClass = fill
+    ? 'relative size-full'
+    : hasIntrinsicSize
+      ? inline
+        ? 'relative inline-flex items-center justify-center align-middle box-content'
+        : 'relative flex items-center justify-center box-content'
+      : inline
+        ? 'inline-flex align-middle'
+        : 'mx-auto w-fit overflow-hidden rounded-md'
 
   // Inline wrappers must be span-typed so the markup stays valid when the
   // component is dropped inside a <p> — a div there triggers the parser's
   // auto-close and visibly breaks the surrounding text
   const Wrapper = inline ? 'span' : 'div'
+
+  // The image's size: its container's in fill mode, else the reserved box, or the file's own where none is reserved
+  const sizing = fill
+    ? { fill: true }
+    : {
+        width: hasIntrinsicSize ? width : 0,
+        height: hasIntrinsicSize ? height : 0,
+        sizes: hasIntrinsicSize ? undefined : '100vw',
+        style: { width: 'auto', height: 'auto', ...(scale !== 1 && { zoom: scale }) },
+      }
 
   // Block mode uses width: 100% + max-width + aspect-ratio so the wrapper
   // shrinks proportionally in both axes when its parent is narrower than the
@@ -122,41 +184,41 @@ export function ImageWithLoader({
         </Wrapper>
       )}
 
-      {/* Error state — same caveat as the spinner */}
+      {/* Fallback over the reserved box, which keeps its size */}
       {hasIntrinsicSize && loadState === 'error' && (
-        <Wrapper className="absolute inset-0 flex items-center justify-center">
-          <ImageOff className="text-muted" size={spinnerSize} strokeWidth={1.5} />
-        </Wrapper>
+        <Wrapper className="absolute inset-0 flex items-center justify-center">{fallback}</Wrapper>
       )}
 
-      {/* The actual image. Content images always run unoptimized: they're served from the R2 CDN, which next/image's
-          optimizer isn't configured for, and resizing a figure buys little. Width/height still reserve layout when
-          known; fluid mode (0/0) sizes from the source. */}
-      <Image
-        src={src}
-        alt={alt}
-        width={hasIntrinsicSize ? width : 0}
-        height={hasIntrinsicSize ? height : 0}
-        sizes={hasIntrinsicSize ? undefined : '100vw'}
-        unoptimized
-        priority={priority}
-        className={cn(
-          'transition-opacity duration-200 ease-in-out',
-          hasIntrinsicSize && loadState !== 'loaded' && 'opacity-0',
-          !hasIntrinsicSize &&
-            (inline
-              ? 'inline-block max-w-full h-auto object-contain'
-              : 'block max-w-full h-auto object-contain'),
-          className
-        )}
-        style={{
-          width: 'auto',
-          height: 'auto',
-          ...(scale !== 1 && { zoom: scale }),
-        }}
-        onLoad={() => setLoadState('loaded')}
-        onError={() => setLoadState('error')}
-      />
+      {/* With no reserved box, a failed image leaves its place to the fallback */}
+      {!hasIntrinsicSize && loadState === 'error' ? (
+        // The fallback, which a screen reader still hears as the image's alt
+        <Wrapper role={alt === '' ? undefined : 'img'} aria-label={alt === '' ? undefined : alt}>
+          {fallback}
+        </Wrapper>
+      ) : (
+        // The actual image. Content images always run unoptimized: they're served from the R2 CDN, which next/image's
+        // optimizer isn't configured for, and resizing a figure buys little. Width/height still reserve layout when
+        // known; fluid mode (0/0) sizes from the source.
+        <Image
+          src={src}
+          alt={alt}
+          {...sizing}
+          unoptimized
+          priority={priority}
+          className={cn(
+            'transition-opacity duration-200 ease-in-out',
+            hasIntrinsicSize && loadState !== 'loaded' && 'opacity-0',
+            !hasIntrinsicSize &&
+              !fill &&
+              (inline
+                ? 'inline-block max-w-full h-auto object-contain'
+                : 'block max-w-full h-auto object-contain'),
+            className
+          )}
+          onLoad={() => setSettled({ src, state: 'loaded' })}
+          onError={() => setSettled({ src, state: 'error' })}
+        />
+      )}
     </Wrapper>
   )
 }

@@ -1,10 +1,12 @@
 'use client'
 
 import { useElementSize } from '@mantine/hooks'
-import { Loader2 } from 'lucide-react'
+import { ImageOff, Loader2, TriangleAlert } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import type { ReactNode } from 'react'
 
 import { Button, FOCUS_RING_INSET_CLASS } from '@/components/shared/components/Button'
+import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
 import { Modal } from '@/components/shared/components/Modal'
 import { PhotoViewer } from '@/components/shared/components/PhotoViewer'
 import type { ToolbarConfig } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
@@ -12,9 +14,11 @@ import { RichMathEditor } from '@/components/shared/components/rich-math-editor/
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
+import { resolveErrorMessage } from '@/lib/api/api-error-utils'
 
 import { useDefensePhotoViewer } from '../hooks/use-defense-photo-viewer'
 import type { ComposerPhoto, UseDefensePhotosResult } from '../hooks/use-defense-photos'
+import { canReadAgain, MAX_PHOTO_SIZE_MB } from '../model/photo-reading'
 import { DefensePhotoButton } from './DefensePhotoButton'
 import { DefensePhotoStrip } from './DefensePhotoStrip'
 
@@ -26,58 +30,22 @@ type DefenseSidePhotoProps = {
   photo: ComposerPhoto
   /** Where it stands among the composer's photos, from 1. */
   number: number
-  /** The composer's photos and what can be done with them. */
-  photos: UseDefensePhotosResult
   /** Shows the photo large. */
   onEnlarge: () => void
 }
 
 /**
- * One photo beside its text, with what its reading came to over it, enlarged by a press.
+ * One photo beside its text, enlarged by a press. A file that is no image shows as an empty page.
  */
-function DefenseSidePhoto({ photo, number, photos, onEnlarge }: DefenseSidePhotoProps) {
+function DefenseSidePhoto({ photo, number, onEnlarge }: DefenseSidePhotoProps) {
   // Copy for the composer's photos
   const t = useTranslations('defense.photos')
 
-  // Copy for the buttons the whole app shares
-  const tActions = useTranslations('ui.actions')
-
-  // What lies over the photo, by where its reading stands
-  const overlay = (() => {
-    switch (photo.kind) {
-      // Still being read, which its text beside it says, or read, its text there
-      case 'reading':
-      case 'read':
-      case 'inserted':
-        return null
-
-      // The reading failed, so the photo offers another go
-      case 'failed':
-        return (
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface/85 text-sm">
-            <p className="text-error">{t('readError')}</p>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="pointer-events-auto"
-              onClick={() => photos.retryPhoto(photo.id)}
-            >
-              {tActions('retry')}
-            </Button>
-          </div>
-        )
-
-      // Every state is handled above
-      default:
-        return assertNever(photo)
-    }
-  })()
-
-  // The photo under what its reading came to
+  // The photo
   return (
     <section
       aria-label={t('photo', { number })}
-      className="relative overflow-hidden rounded-lg border border-foreground/10"
+      className="overflow-hidden rounded-lg border border-foreground/10"
     >
       <button
         type="button"
@@ -87,10 +55,20 @@ function DefenseSidePhoto({ photo, number, photos, onEnlarge }: DefenseSidePhoto
         title={t('enlarge', { number })}
         onClick={onEnlarge}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element -- a local preview, nothing for a server to optimize */}
-        <img src={photo.previewUrl} alt="" className="w-full" />
+        <ImageWithLoader
+          src={photo.previewUrl}
+          alt=""
+          width={0}
+          height={0}
+          // Its box spans the column, the frame around it rounding the corners
+          containerClassName="w-full rounded-none"
+          fallback={
+            <div className="flex aspect-[3/4] w-full items-center justify-center bg-foreground/5 text-muted">
+              <ImageOff className="size-8" strokeWidth={1.5} aria-hidden="true" />
+            </div>
+          }
+        />
       </button>
-      {overlay}
     </section>
   )
 }
@@ -115,7 +93,8 @@ type DefensePageTextProps = {
 
 /**
  * One page's text, by where its reading stands: shut while the page is read, there to check once it is, and a note
- * once it is in the message or the reading failed.
+ * once it is in the message or the reading failed. A failed reading's note is the one place that says why, with
+ * another go where one could come out differently and the page's removal where none could.
  */
 function DefensePageText({
   photo,
@@ -127,6 +106,12 @@ function DefensePageText({
 }: DefensePageTextProps) {
   // Copy for the composer's photos
   const t = useTranslations('defense.photos')
+
+  // Copy for the buttons the whole app shares
+  const tActions = useTranslations('ui.actions')
+
+  // Central failure-code copy
+  const tApiErrors = useTranslations('apiErrors')
 
   /**
    * A function which draws the page's text in its editor, once its column is measured.
@@ -177,19 +162,19 @@ function DefensePageText({
   /**
    * A function which says why the page has no text to edit here.
    *
-   * @param why - What to say.
+   * @param why - What to say, with any way on.
    *
    * @returns The note.
    */
-  const note = (why: string) => (
-    <p
+  const note = (why: ReactNode) => (
+    <div
       className={cn(
-        'flex flex-1 items-center justify-center p-6 text-center text-sm text-muted',
+        'flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center text-sm text-muted',
         'rounded-lg border border-dashed border-foreground/10'
       )}
     >
       {why}
-    </p>
+    </div>
   )
 
   // The text, or why there is none to edit here
@@ -204,11 +189,43 @@ function DefensePageText({
 
     // In the message, where its text is edited now
     case 'inserted':
-      return note(t('inserted'))
+      return note(<p>{t('inserted')}</p>)
 
-    // The reading failed, which the photo offers to try again
-    case 'failed':
-      return note(t('readError'))
+    // The reading failed, which says why and the way on
+    case 'failed': {
+      // Why, in words, or the generic failure where nothing said why. The cap goes along for the copy that names it
+      const why = resolveErrorMessage(photo.errorCode, tApiErrors, {
+        fallback: t('readError'),
+        data: { max: MAX_PHOTO_SIZE_MB },
+      })
+
+      // The note, saying why and the way on
+      return note(
+        <>
+          {/* The mark the photo's tile carries too */}
+          <TriangleAlert className="size-5 text-error" aria-hidden="true" />
+
+          {/* Why, heard as it comes, in the foreground since the error red is too faint for small text on the
+              dialog */}
+          <p role="alert" className="text-balance text-foreground">
+            {why}
+          </p>
+
+          {/* The way on, by whether another reading could come out differently */}
+          {canReadAgain(photo.errorCode) ? (
+            // Another go
+            <Button variant="secondary" size="sm" onClick={() => photos.retryPhoto(photo.id)}>
+              {tActions('retry')}
+            </Button>
+          ) : (
+            // The page's removal, no reading of it coming out any other way
+            <Button variant="secondary" size="sm" onClick={() => photos.removePhotos([photo.id])}>
+              {t('remove')}
+            </Button>
+          )}
+        </>
+      )
+    }
 
     // Every state is handled above
     default:
@@ -340,7 +357,6 @@ export function DefensePhotoSideBySide({
                 <DefenseSidePhoto
                   photo={viewed}
                   number={photos.photos.indexOf(viewed) + 1}
-                  photos={photos}
                   onEnlarge={viewer.enlarge}
                 />
               )}
