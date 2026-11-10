@@ -107,10 +107,10 @@ export function CommentSection({
   )
 
   // The draft of a new top-level comment, kept for the reader until it is sent
-  const [commentInputText, setCommentInputText] = usePersistentDraft(
-    commentDraftStorageKey(userId ?? null, target, null),
-    ''
-  )
+  const [commentInputText, setCommentInputText] = usePersistentDraft({
+    storageKey: commentDraftStorageKey(userId ?? null, target, null),
+    emptyValue: '',
+  })
 
   // A function which posts the new top-level comment
   const handleSubmitComment = useCallback(async () => {

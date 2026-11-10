@@ -17,7 +17,7 @@ public interface IDefensePhotoService
     /// <param name="target">What the student is defending.</param>
     /// <param name="photo"><inheritdoc cref="IPhotoReader.ReadAsync" path="/param[@name='photo']"/></param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>The page's text, with the kept photo and drawings.</returns>
+    /// <returns>The page's text, with the kept photo, a link to its page and its drawings.</returns>
     /// <exception cref="UnreadablePhotoException">Thrown when the photo is not an image that can be read, or would
     /// decode too large.</exception>
     /// <exception cref="DefenseSpendLimitException">Thrown when the student's day's allowance is spent and no entry

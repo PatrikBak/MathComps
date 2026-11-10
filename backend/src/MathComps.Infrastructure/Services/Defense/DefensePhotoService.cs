@@ -12,22 +12,24 @@ using Microsoft.Extensions.Options;
 namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
-/// Implements <see cref="IDefensePhotoService"/> over the photo reader, the private object store and the database. A
-/// reading passes through no <see cref="IDefenseUserTurnGate"/>, so one student's photos are read side by side. The
-/// cost is that readings in flight together each weigh the ceiling against the same total, so a day can end that many
-/// readings past it. Once the
-/// model has answered, the reading is paid for, so storing it and recording its spend run to the end even when the
-/// student has left. The files are stored before their rows, so no row names a file that isn't there.
+/// Implements <see cref="IDefensePhotoService"/> over the photo reader, the private object store, the photos' files and
+/// the database. A reading passes through no <see cref="IDefenseUserTurnGate"/>, so one student's photos are read side
+/// by side. The cost is that readings in flight together each weigh the ceiling against the same total, so a day can
+/// end that many readings past it. Once the model has answered, the reading is paid for, so storing it and recording
+/// its spend run to the end even when the student has left. The files are stored before their rows, so no row names a
+/// file that isn't there.
 /// </summary>
 /// <param name="targetGuard">Says whether a student may argue what the target names.</param>
 /// <param name="photoReader">Reads a photo into its text and its drawings.</param>
 /// <param name="objectStore">Where the photos and their drawings are kept.</param>
+/// <param name="photoFiles">The photos' files and the links to them.</param>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
 /// <param name="defenseLimits">The caps on a defense.</param>
 public class DefensePhotoService(
     IDefenseTargetGuard targetGuard,
     IPhotoReader photoReader,
     IPrivateObjectStore objectStore,
+    IDefensePhotoFiles photoFiles,
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IOptions<DefenseLimits> defenseLimits)
     : IDefensePhotoService
@@ -101,9 +103,10 @@ public class DefensePhotoService(
         // Commit the rows and the spend together.
         await dbContext.SaveChangesAsync(CancellationToken.None);
 
-        // The page's text, with the kept photo and drawings.
+        // The page's text, with the kept photo, a link to its page and its drawings.
         return new DefensePhotoReadingDto(
             stored.Id,
+            photoFiles.PhotoLinkFor(stored.Id),
             reading.Value.Text,
             [.. crops.Select(crop => new DefensePhotoCropDto(crop.Row.Id, crop.Row.Label))]);
     }

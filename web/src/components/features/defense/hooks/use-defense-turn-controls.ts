@@ -12,6 +12,7 @@ import { resolveErrorMessage } from '@/lib/api/api-error-utils'
 
 import type { DeleteOutcome, RewindOutcome, SendOutcome } from '../model/defense-conversation-model'
 import type { DefenseTarget } from '../model/defense-target'
+import { defenseDraftStorageKey } from '../model/defense-target'
 import type { DefenseTurnPhoto, Turn } from '../model/defense-types'
 import type { UseDefensePhotosResult } from './use-defense-photos'
 import { useDefensePhotos } from './use-defense-photos'
@@ -46,8 +47,6 @@ type DefenseTurnControlsInput = {
   rewind: (keepThroughSequence: number) => Promise<RewindOutcome>
   /** Deletes a session, dropping back to a fresh conversation when it was the open one. */
   deleteSession: (sessionId: string) => Promise<DeleteOutcome>
-  /** Where the unsent turn is kept across closes and reloads, or null to keep it only for this mount. */
-  draftStorageKey: string | null
   /** What the student is defending. */
   target: DefenseTarget
   /** The most pixels a photo keeps along its longer side once read, or null while that is not known yet. */
@@ -102,8 +101,11 @@ export function useDefenseTurnControls(
   // Central failure-code copy
   const tApiErrors = useTranslations('apiErrors')
 
-  // The in-progress composer text, kept wherever the caller asked for it
-  const [draft, setDraft] = usePersistentDraft(conversation.draftStorageKey, '')
+  // The in-progress composer text, kept across closes and reloads wherever the target keeps a draft
+  const [draft, setDraft] = usePersistentDraft({
+    storageKey: defenseDraftStorageKey(conversation.target),
+    emptyValue: '',
+  })
 
   // The rewind awaiting confirmation, or null
   const [rewindTarget, setRewindTarget] = useState<RewindTarget | null>(null)

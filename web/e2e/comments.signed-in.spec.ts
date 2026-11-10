@@ -6,7 +6,10 @@ import type {
   CommentDto,
   CommentReactionDto,
 } from '@/components/features/comments/services/comment-api-types'
-import { PENDING_COMMENT_REACTION_STORAGE_KEY } from '@/constants/local-storage-constants'
+import {
+  PENDING_COMMENT_REACTION_STORAGE_KEY,
+  UNKEPT_DRAFT_STORAGE_KEY,
+} from '@/constants/local-storage-constants'
 
 import messages from '../messages/en.json'
 import { gateReads } from './support/answer-gate'
@@ -25,6 +28,7 @@ import {
 } from './support/comments'
 import { editorCopy } from './support/competitions'
 import { returnToTab } from './support/emulation'
+import { leaveInStorage } from './support/interaction'
 import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** The copy a thread reads under. */
@@ -124,10 +128,7 @@ function rewritten(edited: CommentDto, content: string): CommentDto {
  */
 async function leavePendingPress(page: Page, pending: CommentReactionPress): Promise<void> {
   // Waiting in the browser before the page loads
-  await page.addInitScript(({ key, value }) => window.localStorage.setItem(key, value), {
-    key: PENDING_COMMENT_REACTION_STORAGE_KEY,
-    value: JSON.stringify(pending),
-  })
+  await leaveInStorage(page, PENDING_COMMENT_REACTION_STORAGE_KEY, JSON.stringify(pending))
 }
 
 /**
@@ -307,6 +308,33 @@ test.describe('a comment thread, read by a signed-in reader', () => {
 
     // The reply still open on its text, to send again
     await expect(replyBox).toHaveValue(REPLY_TEXT)
+  })
+
+  test('opens a reply on an empty box, whatever a draft kept nowhere left in storage', async ({
+    page,
+  }) => {
+    // A list left where every draft kept nowhere stands, as a draft of photos leaves one
+    await leaveInStorage(page, UNKEPT_DRAFT_STORAGE_KEY, '[]')
+
+    // The thread, and what reaches the backend
+    await stubPageThread(page, [theirComment()])
+
+    // The thread's page, opened
+    await openThread(page, THEIR_TEXT)
+
+    // A reply, opened under the comment
+    await commentBy(page, 'Zuzana', THEIR_TEXT)
+      .getByRole('button', { name: commentsCopy.reply })
+      .click()
+
+    // The box it is written in
+    const replyBox = page.getByPlaceholder(commentsCopy.replyPlaceholder)
+
+    // Holding the cursor
+    await expect(replyBox).toBeFocused()
+
+    // With nothing in it
+    await expect(replyBox).toHaveValue('')
   })
 
   test('sends a reply once, however the reader replies elsewhere and comes back to it while it is on its way', async ({

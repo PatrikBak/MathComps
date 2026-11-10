@@ -1,76 +1,16 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { shrinkToLongEdge } from '@/components/shared/utils/image-utils'
 import { apiCallOf, useApi } from '@/hooks/use-api'
-import type { AppErrorCode } from '@/lib/api/api-error-codes'
 
+import type { ComposerPhoto, ReadingPhoto } from '../model/composer-photos'
 import type { DefenseTarget } from '../model/defense-target'
 import type { DefenseTurnPhoto } from '../model/defense-types'
 import { readPhoto } from '../services/photo-service'
-
-/**
- * What every photo held in the composer carries.
- */
-type HeldPhoto = {
-  /** The photo, unique among those the composer has held. */
-  id: number
-  /** Where the photo previews from: the student's own device, or the stored page of one a message went out with. */
-  previewUrl: string
-}
-
-/**
- * A photo whose reading is on its way.
- */
-type ReadingPhoto = HeldPhoto & {
-  /** The discriminant. */
-  kind: 'reading'
-}
-
-/**
- * What every photo the API has read and kept carries.
- */
-type KeptPhoto = HeldPhoto & {
-  /** The kept photo. */
-  photoId: string
-}
-
-/**
- * A photo that has been read, its text waiting beside it for the student to check before it goes into the message.
- */
-type ReadPhoto = KeptPhoto & {
-  /** The discriminant. */
-  kind: 'read'
-  /** The page's text as the student has left it. */
-  text: string
-}
-
-/**
- * A photo whose text has gone into the message, where it is edited from then on.
- */
-type InsertedPhoto = KeptPhoto & {
-  /** The discriminant. */
-  kind: 'inserted'
-  /** Whether it went out with a message still on its way, out of the composer until that lands or fails. */
-  isGoingOut: boolean
-}
-
-/**
- * A photo the reading failed on, which can be read again unless the photo itself is why.
- */
-type FailedPhoto = HeldPhoto & {
-  /** The discriminant. */
-  kind: 'failed'
-  /** Why the reading failed, or undefined when nothing said why. */
-  errorCode: AppErrorCode | undefined
-}
-
-/**
- * A photo of the student's handwritten work, held in the composer.
- */
-export type ComposerPhoto = ReadingPhoto | ReadPhoto | InsertedPhoto | FailedPhoto
+import { useHeldDefensePhotos } from './use-held-defense-photos'
 
 /**
  * What a photo picked in the composer needs kept beside it and never drawn.
@@ -148,11 +88,8 @@ export function useDefensePhotos({
   // The caller the reads go through, or null while there is nobody to read them as
   const apiCall = apiCallOf(useApi())
 
-  // The photos held, in page order: each pick after the last, a pick's photos by when they were taken
-  const [photos, setPhotos] = useState<readonly ComposerPhoto[]>([])
-
-  // The id the next photo picked gets
-  const nextId = useRef(0)
+  // The photos held, and what a new one is held with
+  const { photos, setPhotos, nextId, insertedPhotoOf } = useHeldDefensePhotos(target)
 
   // What each photo picked in the composer keeps beside it, under its id, which is where a dropped photo stops
   // being found
@@ -205,6 +142,7 @@ export function useDefensePhotos({
         id,
         previewUrl: photo.previewUrl,
         photoId: result.data.photoId,
+        link: result.data.link,
         text: result.data.text,
       }))
 
@@ -247,7 +185,7 @@ export function useDefensePhotos({
     const added = files.map(
       (file): ReadingPhoto => ({
         kind: 'reading',
-        id: nextId.current++,
+        id: nextId(),
         previewUrl: URL.createObjectURL(file),
       })
     )
@@ -311,6 +249,7 @@ export function useDefensePhotos({
               id: photo.id,
               previewUrl: photo.previewUrl,
               photoId: photo.photoId,
+              link: photo.link,
               isGoingOut: false,
             }
 
@@ -335,7 +274,7 @@ export function useDefensePhotos({
   const removePhotos = (ids: readonly number[]) => {
     // Each photo lets go of what it kept
     ids.forEach((id) => {
-      // What the photo kept, none if it was already dropped or came back from a sent message
+      // What the photo kept, none if it was already dropped or previews from its stored page
       const held = resources.current.get(id)
       if (held === undefined) return
 
@@ -390,15 +329,7 @@ export function useDefensePhotos({
   // Puts the photos a message went out with back into the composer, previewing from their stored pages
   const restoreSent = (sent: readonly DefenseTurnPhoto[]) => {
     // Each as a photo whose text is in the message, kept as it already is
-    const restored = sent.map(
-      (photo): InsertedPhoto => ({
-        kind: 'inserted',
-        id: nextId.current++,
-        previewUrl: photo.link,
-        photoId: photo.id,
-        isGoingOut: false,
-      })
-    )
+    const restored = sent.map((photo) => insertedPhotoOf(photo.id, photo.link))
 
     // Ahead of those held, as their text is ahead of anything else in the message
     setPhotos((held) => [...restored, ...held])

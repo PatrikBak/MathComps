@@ -16,8 +16,8 @@ namespace MathComps.Infrastructure.Tests.Defense;
 
 /// <summary>
 /// Integration tests for <see cref="DefensePhotoService"/> against a real PostgreSQL database, with the reader and the
-/// target guard standing in and the files kept in memory: what a reading keeps and bills, the ceiling it is held to
-/// and who an entry exempts, and that a reading the student walked out on is still billed. A reading billed wrong
+/// target guard standing in and the files kept in memory: what a reading keeps, links and bills, the ceiling it is held
+/// to and who an entry exempts, and that a reading the student walked out on is still billed. A reading billed wrong
 /// moves the ceiling silently.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
@@ -91,6 +91,15 @@ public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
         // Where the files are kept.
         services.AddSingleton<IPrivateObjectStore>(_store);
 
+        // The links to the kept pages, each naming the file it reads.
+        services.AddSingleton<IPrivateFileLinks, StandInFileLinks>();
+
+        // The kept files read back.
+        services.AddSingleton<IObjectReader>(_store);
+
+        // The photos' files, linked through the stand-in links.
+        services.AddSingleton<IDefensePhotoFiles, DefensePhotoFiles>();
+
         // The service under test.
         services.AddScoped<IDefensePhotoService, DefensePhotoService>();
     }
@@ -152,6 +161,19 @@ public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
             // Every one of them a JPEG.
             Assert.All(keys, key => Assert.Equal(MediaTypeNames.Image.Jpeg, _store[key].ContentType));
         });
+
+    /// <summary>
+    /// A reading answers a link to the very page it kept.
+    /// </summary>
+    [Fact]
+    public Task A_reading_answers_a_link_to_the_page_it_kept() => RunTestAsync(async service =>
+    {
+        // Read a photo.
+        var reading = await service.ReadAsync(_ownerId, _target, _photo);
+
+        // The link reads the page kept under the photo's id.
+        Assert.Equal($"read:defense/photos/{reading.PhotoId}.jpg", reading.Link);
+    });
 
     /// <summary>
     /// A reading keeps the page's text on the photo's row, exactly as it answers it.

@@ -44,7 +44,7 @@ public class DefensePhotoEndpointsTests
             .Setup(service => service.ReadAsync(
                 It.IsAny<Guid>(), It.IsAny<DefenseTarget>(), It.IsAny<ReadOnlyMemory<byte>>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new DefensePhotoReadingDto(Guid.CreateVersion7(), "text", []));
+            .ReturnsAsync(new DefensePhotoReadingDto(Guid.CreateVersion7(), "link", "text", []));
 
         // A problem a reading can be for
         var problemId = Guid.CreateVersion7();

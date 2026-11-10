@@ -201,6 +201,8 @@ export type DefenseSessionList = {
 export type DefensePhotoReading = {
   /** The kept photo. */
   photoId: string
+  /** Where the kept page loads from, for as long as its link lasts. */
+  link: string
   /** The page written out as Markdown with LaTeX math, mistakes included, the drawings going beside it. */
   text: string
 }
