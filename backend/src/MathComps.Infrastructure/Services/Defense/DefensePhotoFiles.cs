@@ -19,12 +19,17 @@ public class DefensePhotoFiles(
     : IDefensePhotoFiles
 {
     /// <inheritdoc/>
+    public string PhotoLinkFor(Guid photoId) =>
+        // The link to the page, under the key its id builds
+        fileLinks.LinkFor(IDefensePhotoFiles.PhotoKey(photoId));
+
+    /// <inheritdoc/>
     public IReadOnlyList<DefenseTurnPhotoDto> LinksFor(IEnumerable<DefensePhoto> photos) =>
         // Each page's link in page order, with its drawings' in reading order
         [.. InPageOrder(photos)
             .Select(page => new DefenseTurnPhotoDto(
                 page.Photo.Id,
-                fileLinks.LinkFor(IDefensePhotoFiles.PhotoKey(page.Photo.Id)),
+                PhotoLinkFor(page.Photo.Id),
                 [.. page.Crops
                     .Select(crop => new DefenseTurnCropDto(
                         crop.Id, fileLinks.LinkFor(IDefensePhotoFiles.CropKey(page.Photo.Id, crop.Id))))]))];

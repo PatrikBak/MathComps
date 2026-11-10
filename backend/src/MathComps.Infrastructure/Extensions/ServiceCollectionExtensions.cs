@@ -524,13 +524,14 @@ public static class ServiceCollectionExtensions
     /// caller is told, the per-user turn gate, the lookup of what the examiner is told about a problem, the guard
     /// saying whether a student may argue a given target, the service that runs and persists defense conversations,
     /// the service that records the students' feedback on them, the service that reads and keeps the photos of their
-    /// handwritten work, and the links to those photos. Assumes the chat stack is registered (see
-    /// <see cref="AddLlmChat"/>) and, since the problem content is read back out of object storage and the photos are
-    /// kept there, that <see cref="AddStorage"/> has run.
+    /// handwritten work, the links to those photos, and the service handing photos from a student's phone over to a
+    /// composer open elsewhere. Assumes the chat stack is registered (see <see cref="AddLlmChat"/>) and, since the
+    /// problem content is read back out of object storage and the photos are kept there, that <see cref="AddStorage"/>
+    /// has run.
     /// </summary>
     /// <param name="services">The service collection to add the defense feature to.</param>
     /// <param name="configuration">The application configuration carrying the <c>Examiner</c>,
-    /// <c>PhotoReader</c>, <c>DefenseLimits</c> and <c>DefenseContent</c> sections.</param>
+    /// <c>PhotoReader</c>, <c>DefenseLimits</c>, <c>DefenseContent</c> and <c>DefensePhotoHandoff</c> sections.</param>
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddDefenseServices(this IServiceCollection services, IConfiguration configuration)
     {
@@ -577,6 +578,15 @@ public static class ServiceCollectionExtensions
 
         // The files of the students' photos: the links to them and to their drawings, and the drawings read back.
         services.TryAddSingleton<IDefensePhotoFiles, DefensePhotoFiles>();
+
+        // How long a code sending photos from a student's phone works, validated at startup like the caps.
+        services.AddOptions<DefensePhotoHandoffSettings>()
+            .Bind(configuration.GetSection(DefensePhotoHandoffSettings.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // The service handing photos from a student's phone over to a composer open elsewhere.
+        services.TryAddScoped<IDefensePhotoHandoffService, DefensePhotoHandoffService>();
 
         // What the defense target guard asks about a reader before it weighs a competition's gates against them,
         // and before it opens the proposals to them.

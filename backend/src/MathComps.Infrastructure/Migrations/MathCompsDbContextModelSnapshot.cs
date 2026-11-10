@@ -455,6 +455,86 @@ namespace MathComps.Infrastructure.Migrations
                     b.ToTable("defense_photo_crops", (string)null);
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefensePhotoHandoff", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<Guid?>("HandoutEnvironmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("handout_environment_id");
+
+                    b.Property<Guid?>("ProblemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("problem_id");
+
+                    b.HasKey("UserId")
+                        .HasName("pk_defense_photo_handoffs");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ux_defense_photo_handoff_code");
+
+                    b.HasIndex("HandoutEnvironmentId")
+                        .HasDatabaseName("ix_defense_photo_handoffs_handout_environment_id");
+
+                    b.HasIndex("ProblemId")
+                        .HasDatabaseName("ix_defense_photo_handoffs_problem_id");
+
+                    b.ToTable("defense_photo_handoffs", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_defense_photo_handoff_one_target", "num_nonnulls(\"handout_environment_id\", \"problem_id\") = 1");
+                        });
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefensePhotoHandoffPage", b =>
+                {
+                    b.Property<Guid>("PhotoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("photo_id");
+
+                    b.Property<DateTimeOffset>("CapturedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("captured_at");
+
+                    b.Property<Guid?>("HandoutEnvironmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("handout_environment_id");
+
+                    b.Property<Guid?>("ProblemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("problem_id");
+
+                    b.Property<DateTimeOffset?>("TakenAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("taken_at");
+
+                    b.HasKey("PhotoId")
+                        .HasName("pk_defense_photo_handoff_pages");
+
+                    b.HasIndex("HandoutEnvironmentId")
+                        .HasDatabaseName("ix_defense_photo_handoff_pages_handout_environment_id");
+
+                    b.HasIndex("ProblemId")
+                        .HasDatabaseName("ix_defense_photo_handoff_pages_problem_id");
+
+                    b.ToTable("defense_photo_handoff_pages", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_defense_photo_handoff_page_one_target", "num_nonnulls(\"handout_environment_id\", \"problem_id\") = 1");
+                        });
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefenseSession", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2398,6 +2478,62 @@ namespace MathComps.Infrastructure.Migrations
                         .HasConstraintName("fk_defense_photo_crops_defense_photos_photo_id");
 
                     b.Navigation("Photo");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefensePhotoHandoff", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.HandoutEnvironment", "HandoutEnvironment")
+                        .WithMany()
+                        .HasForeignKey("HandoutEnvironmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_defense_photo_handoffs_handout_environments_handout_environ");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Problem", "Problem")
+                        .WithMany()
+                        .HasForeignKey("ProblemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_defense_photo_handoffs_problems_problem_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.User", "User")
+                        .WithOne()
+                        .HasForeignKey("MathComps.Domain.EfCoreEntities.DefensePhotoHandoff", "UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_defense_photo_handoffs_users_user_id");
+
+                    b.Navigation("HandoutEnvironment");
+
+                    b.Navigation("Problem");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefensePhotoHandoffPage", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.HandoutEnvironment", "HandoutEnvironment")
+                        .WithMany()
+                        .HasForeignKey("HandoutEnvironmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_defense_photo_handoff_pages_handout_environments_handout_en");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.DefensePhoto", "Photo")
+                        .WithOne()
+                        .HasForeignKey("MathComps.Domain.EfCoreEntities.DefensePhotoHandoffPage", "PhotoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_defense_photo_handoff_pages_defense_photos_photo_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Problem", "Problem")
+                        .WithMany()
+                        .HasForeignKey("ProblemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_defense_photo_handoff_pages_problems_problem_id");
+
+                    b.Navigation("HandoutEnvironment");
+
+                    b.Navigation("Photo");
+
+                    b.Navigation("Problem");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.DefenseSession", b =>

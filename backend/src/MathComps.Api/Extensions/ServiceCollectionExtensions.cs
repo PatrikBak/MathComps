@@ -61,15 +61,27 @@ public static class ServiceCollectionExtensions
                 // The limits as bound
                 var settings = rateLimitSettings.Value;
 
-                // General API rate limiting, one bucket per caller
+                // General API rate limiting, one bucket per address
                 options.AddPolicy(
                     RateLimiterPolicies.ApiRateLimit,
-                    PartitionByCaller(settings.ApiPermitLimit, settings.ApiQueueLimit, settings.Window));
+                    PartitionByAddress(settings.ApiPermitLimit, settings.ApiQueueLimit, settings.Window));
 
-                // A limit of its own for search endpoints (heavier operations), one bucket per caller
+                // A limit of its own for search endpoints (heavier operations), one bucket per address
                 options.AddPolicy(
                     RateLimiterPolicies.SearchRateLimit,
-                    PartitionByCaller(settings.SearchPermitLimit, settings.SearchQueueLimit, settings.Window));
+                    PartitionByAddress(settings.SearchPermitLimit, settings.SearchQueueLimit, settings.Window));
+
+                // A limit of its own for routes a signed-in page asks every few seconds, one bucket per account
+                options.AddPolicy(
+                    RateLimiterPolicies.AccountPollRateLimit,
+                    PartitionByAccount(
+                        settings.AccountPollPermitLimit, settings.AccountPollQueueLimit, settings.Window));
+
+                // A limit of its own for routes a page with no account asks every few seconds, one bucket per address
+                options.AddPolicy(
+                    RateLimiterPolicies.AddressPollRateLimit,
+                    PartitionByAddress(
+                        settings.AddressPollPermitLimit, settings.AddressPollQueueLimit, settings.Window));
             });
 
         // Return the services for chaining
@@ -77,19 +89,49 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Builds a per-caller fixed-window rate limiting partitioner keyed on the request's client IP.
+    /// Builds a per-address fixed-window rate limiting partitioner keyed on the request's client IP.
     /// </summary>
-    /// <param name="permitLimit">Requests allowed per caller within the window.</param>
-    /// <param name="queueLimit">Requests held per caller once the limit is hit before rejection.</param>
+    /// <param name="permitLimit">Requests allowed per address within the window.</param>
+    /// <param name="queueLimit">Requests held per address once the limit is hit before rejection.</param>
     /// <param name="window"><inheritdoc cref="RateLimitSettings.Window" path="/summary"/></param>
     /// <returns>A partitioner producing one fixed-window limiter per client IP.</returns>
-    private static Func<HttpContext, RateLimitPartition<string>> PartitionByCaller(
-        int permitLimit, int queueLimit, TimeSpan window)
-    {
-        // Partition each request by its client so the limit applies per visitor
-        return httpContext => RateLimitPartition.GetFixedWindowLimiter(
-            // Key on the caller's IP, collapsed to a stable per-client value
-            partitionKey: ClientPartitionKey(httpContext.Connection.RemoteIpAddress),
+    private static Func<HttpContext, RateLimitPartition<string>> PartitionByAddress(
+        int permitLimit, int queueLimit, TimeSpan window) =>
+        // Key on the caller's IP, collapsed to a stable per-client value
+        PartitionBy(
+            httpContext => ClientPartitionKey(httpContext.Connection.RemoteIpAddress), permitLimit, queueLimit, window);
+
+    /// <summary>
+    /// Builds a per-account fixed-window rate limiting partitioner keyed on the signed-in caller, so callers sharing an
+    /// address (a school's network) don't share a limit. The account is read off a token already validated, so a
+    /// caller can't make one up for a fresh limit. A request with no account falls back on its client IP.
+    /// </summary>
+    /// <param name="permitLimit">Requests allowed per account within the window.</param>
+    /// <param name="queueLimit">Requests held per account once the limit is hit before rejection.</param>
+    /// <param name="window"><inheritdoc cref="RateLimitSettings.Window" path="/summary"/></param>
+    /// <returns>A partitioner producing one fixed-window limiter per account.</returns>
+    private static Func<HttpContext, RateLimitPartition<string>> PartitionByAccount(
+        int permitLimit, int queueLimit, TimeSpan window) =>
+        // Key on the caller's Clerk id, and on their IP when they have none
+        PartitionBy(
+            httpContext => httpContext.User.ClerkId ?? ClientPartitionKey(httpContext.Connection.RemoteIpAddress),
+            permitLimit,
+            queueLimit,
+            window);
+
+    /// <summary>
+    /// Builds a fixed-window rate limiting partitioner, one limiter per key.
+    /// </summary>
+    /// <param name="keyOf">Reads which bucket a request counts against.</param>
+    /// <param name="permitLimit">Requests allowed per key within the window.</param>
+    /// <param name="queueLimit">Requests held per key once the limit is hit before rejection.</param>
+    /// <param name="window"><inheritdoc cref="RateLimitSettings.Window" path="/summary"/></param>
+    /// <returns>A partitioner producing one fixed-window limiter per key.</returns>
+    private static Func<HttpContext, RateLimitPartition<string>> PartitionBy(
+        Func<HttpContext, string> keyOf, int permitLimit, int queueLimit, TimeSpan window) =>
+        // Partition each request by its key so the limit applies per bucket
+        httpContext => RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: keyOf(httpContext),
             factory: _ => new FixedWindowRateLimiterOptions
             {
                 PermitLimit = permitLimit,
@@ -97,7 +139,6 @@ public static class ServiceCollectionExtensions
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                 QueueLimit = queueLimit,
             });
-    }
 
     /// <summary>
     /// Derives a stable per-client rate-limiting key from a request's remote address.

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net.Http.Headers;
 using MathComps.Domain.Localization;
 
 namespace MathComps.Api.Endpoints;
@@ -21,4 +22,21 @@ internal static class EndpointHelpers
                 out var language)
             ? language
             : throw new InvalidOperationException($"Unsupported culture '{CultureInfo.CurrentCulture.TwoLetterISOLanguageName}'");
+
+    /// <summary>
+    /// Reads the credential a request sends in its <c>Authorization</c> header under one scheme.
+    /// </summary>
+    /// <param name="request">The request carrying the header.</param>
+    /// <param name="scheme">The scheme the credential is sent under.</param>
+    /// <returns>The credential.</returns>
+    /// <exception cref="BadHttpRequestException">
+    /// Thrown when the header is missing, unreadable, under another scheme, or carries no credential.
+    /// </exception>
+    public static string GetAuthorizationCredential(HttpRequest request, string scheme)
+        // The credential sent under the scheme, a request without one refused as unreadable
+        => AuthenticationHeaderValue.TryParse(request.Headers.Authorization.ToString(), out var header)
+            && string.Equals(header.Scheme, scheme, StringComparison.OrdinalIgnoreCase)
+            && !string.IsNullOrWhiteSpace(header.Parameter)
+                ? header.Parameter
+                : throw new BadHttpRequestException($"The request must carry its credential under {scheme}.");
 }

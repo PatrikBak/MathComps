@@ -117,6 +117,12 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Drawings cut out of the defense photos.</summary>
     public DbSet<DefensePhotoCrop> DefensePhotoCrops => Set<DefensePhotoCrop>();
 
+    /// <summary>The students' codes for sending photos from their phones into a composer open elsewhere.</summary>
+    public DbSet<DefensePhotoHandoff> DefensePhotoHandoffs => Set<DefensePhotoHandoff>();
+
+    /// <summary>Photos sent from the students' phones to a problem, each waiting for a composer on it.</summary>
+    public DbSet<DefensePhotoHandoffPage> DefensePhotoHandoffPages => Set<DefensePhotoHandoffPage>();
+
     /// <summary>Student reports on individual examiner replies.</summary>
     public DbSet<DefenseTurnReport> DefenseTurnReports => Set<DefenseTurnReport>();
 
@@ -1637,6 +1643,78 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion DefensePhotoCrop
+
+        #region DefensePhotoHandoff
+
+        modelBuilder.Entity<DefensePhotoHandoff>(e =>
+        {
+            // A student has one handoff, so their id doubles as its key.
+            e.HasKey(handoff => handoff.UserId);
+
+            // The student whose photos the code sends, restricted as a photo's student is.
+            e.HasOne(handoff => handoff.User)
+             .WithOne()
+             .HasForeignKey<DefensePhotoHandoff>(handoff => handoff.UserId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // The handout environment photos go to now, restricted where a session's cascades, so nothing drops the
+            // row a take locks.
+            e.HasOne(handoff => handoff.HandoutEnvironment)
+             .WithMany()
+             .HasForeignKey(handoff => handoff.HandoutEnvironmentId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // The archive problem photos go to now, restricted as a session's is.
+            e.HasOne(handoff => handoff.Problem)
+             .WithMany()
+             .HasForeignKey(handoff => handoff.ProblemId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // A phone finds the handoff by its code alone, unique so one code sends one student's photos.
+            e.HasIndex(handoff => handoff.Code)
+             .IsUnique()
+             .HasDatabaseName("ux_defense_photo_handoff_code");
+
+            // Photos go to exactly one problem: a handout environment or an archive problem.
+            e.ToTable(t => t.HasCheckConstraint(
+                "ck_defense_photo_handoff_one_target",
+                "num_nonnulls(\"handout_environment_id\", \"problem_id\") = 1"));
+        });
+
+        #endregion DefensePhotoHandoff
+
+        #region DefensePhotoHandoffPage
+
+        modelBuilder.Entity<DefensePhotoHandoffPage>(e =>
+        {
+            // A photo is sent once, so its id doubles as the page's key.
+            e.HasKey(page => page.PhotoId);
+
+            // The photo, cascading so dropping a photo drops what said where it was sent.
+            e.HasOne(page => page.Photo)
+             .WithOne()
+             .HasForeignKey<DefensePhotoHandoffPage>(page => page.PhotoId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // The handout environment the page went to, cascading as a session's target does.
+            e.HasOne(page => page.HandoutEnvironment)
+             .WithMany()
+             .HasForeignKey(page => page.HandoutEnvironmentId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // The archive problem the page went to, restricted as a session's target is.
+            e.HasOne(page => page.Problem)
+             .WithMany()
+             .HasForeignKey(page => page.ProblemId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // A page went to exactly one problem: a handout environment or an archive problem.
+            e.ToTable(t => t.HasCheckConstraint(
+                "ck_defense_photo_handoff_page_one_target",
+                "num_nonnulls(\"handout_environment_id\", \"problem_id\") = 1"));
+        });
+
+        #endregion DefensePhotoHandoffPage
 
         #region DefenseTurnReport
 
