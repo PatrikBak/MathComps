@@ -33,7 +33,7 @@ import {
 import { areaCopy, editorCopy, SELECTION_PATH } from './support/competitions'
 import { stubPageVisibility } from './support/emulation'
 import { pickPillAnswer, pickPillOption } from './support/facets'
-import { openUserMenu, selectedTab } from './support/interaction'
+import { isPanelPlaced, openUserMenu, selectedTab } from './support/interaction'
 import {
   ALGEBRA,
   BILINGUAL,
@@ -536,7 +536,7 @@ test.describe("the pool's discussions", () => {
     await expect(thread.getByRole('button', { name: '#999' })).toHaveCount(0)
   })
 
-  test('previews the statement of a problem a reply names by its number while the reply is still being written', async ({
+  test('previews the statement of a problem a reply names by its number while the reply is still being written, the preview staying up as it grows over the number on its way into place', async ({
     page,
   }) => {
     // A reader with a username, which a reply is signed with
@@ -562,11 +562,17 @@ test.describe("the pool's discussions", () => {
     // The reply's preview, up in place of its text
     await thread.getByRole('button', { name: editorCopy.preview, exact: true }).click()
 
-    // The algebra problem's number in the preview, hovered
-    await thread.getByRole('button', { name: `#${ALGEBRA.number}`, exact: true }).hover()
+    // The algebra problem's number in the preview
+    const number = thread.getByRole('button', { name: `#${ALGEBRA.number}`, exact: true })
+
+    // Hovered low on the window, where its statement opens above it and grows down over it on its way into place
+    await number.hover()
 
     // The algebra problem's statement
     await expect(page.getByRole('tooltip')).toContainText(`Part 1 of problem ${ALGEBRA.number}.`)
+
+    // Still up once sized to the statement and placed clear of the number
+    await expect.poll(() => isPanelPlaced(page.getByRole('tooltip'), number)).toBe(true)
   })
 
   test('takes a layout picked straight after another, before the first one has been drawn', async ({

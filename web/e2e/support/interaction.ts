@@ -133,6 +133,59 @@ export function topInView(element: Locator): Promise<number> {
 }
 
 /**
+ * Whether a floating panel has been sized and placed: it shows, everything it holds lies inside it, and it covers
+ * none of the element it opened from. A panel scrolling what it holds never reads as placed.
+ *
+ * @param panel - The floating panel, which may not be on the page.
+ * @param opener - The element the panel opened from.
+ *
+ * @returns Whether the panel shows, sized to what it holds and clear of its opener.
+ */
+export async function isPanelPlaced(panel: Locator, opener: Locator): Promise<boolean> {
+  // How far, in pixels, two edges may disagree and still count as one, since a scaled box lands between pixels
+  const SUBPIXEL_SLACK_PX = 1
+
+  // Where the opener stands
+  const openerBox = await opener.boundingBox()
+
+  // An opener off the page has nothing to stand clear of
+  if (openerBox === null) return false
+
+  // The panel read in one go, so its box and its content's come from the same moment
+  return panel.evaluateAll(
+    (panels, { opener, slack }) => {
+      // A panel not on the page, or one the locator cannot single out, is not placed
+      if (panels.length !== 1) return false
+
+      // The panel's box
+      const box = panels[0].getBoundingClientRect()
+
+      // Whether everything the panel holds lies inside it, to within rounding
+      const holdsAllInside = Array.from(panels[0].querySelectorAll('*'), (child) =>
+        child.getBoundingClientRect()
+      ).every(
+        (childBox) =>
+          childBox.top >= box.top - slack &&
+          childBox.bottom <= box.bottom + slack &&
+          childBox.left >= box.left - slack &&
+          childBox.right <= box.right + slack
+      )
+
+      // Whether the panel shares no area with its opener
+      const isClearOfOpener =
+        box.bottom <= opener.y ||
+        box.top >= opener.y + opener.height ||
+        box.right <= opener.x ||
+        box.left >= opener.x + opener.width
+
+      // Placed once both hold
+      return holdsAllInside && isClearOfOpener
+    },
+    { opener: openerBox, slack: SUBPIXEL_SLACK_PX }
+  )
+}
+
+/**
  * Where the cursor stands in a textarea.
  *
  * @param textarea - The textarea.
