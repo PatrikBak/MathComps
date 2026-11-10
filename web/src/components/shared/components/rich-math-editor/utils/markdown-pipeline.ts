@@ -17,6 +17,7 @@ import { remarkInlineQuote } from '../plugins/remark-inline-quote'
 import { remarkListStyle } from '../plugins/remark-list-style'
 import { NUMBER_REFERENCE_NUMBER, NUMBER_REFERENCE_TAG } from '../plugins/remark-number-references'
 import { remarkSpoiler } from '../plugins/remark-spoiler'
+import { remarkUnclaimedTextDirectives } from '../plugins/remark-unclaimed-text-directives'
 import { hasUnbalancedDollars } from './math-delimiters'
 import { preprocessDisplayMath } from './preprocessors'
 
@@ -73,6 +74,8 @@ const sanitizeSchema: SanitizeOptions = {
  * validator. Order is significant: directive must run before the directive-
  * consuming plugins (spoiler, list-style, inline-quote) so each `:::name` and
  * `:name[…]` shape has its directive node ready to transform.
+ * {@link remarkUnclaimedTextDirectives} runs after them, so it puts back as
+ * text only the `:word` none of them claimed.
  */
 export const remarkPlugins: PluggableList = [
   remarkGfm,
@@ -80,6 +83,7 @@ export const remarkPlugins: PluggableList = [
   remarkSpoiler,
   remarkListStyle,
   remarkInlineQuote,
+  remarkUnclaimedTextDirectives,
   remarkImageParams,
   remarkMath,
   remarkBreaks,
@@ -114,21 +118,12 @@ export const rehypePlugins: PluggableList = [
  *   pipeline, and stringifies the resulting hast tree to HTML.
  */
 function createValidationProcessor() {
+  // The renderer's plugins between a parser and an HTML stringifier
   return unified()
     .use(remarkParse)
-    .use(remarkGfm)
-    .use(remarkDirective)
-    .use(remarkSpoiler)
-    .use(remarkListStyle)
-    .use(remarkInlineQuote)
-    .use(remarkImageParams)
-    .use(remarkMath)
-    .use(remarkBreaks)
+    .use(remarkPlugins)
     .use(remarkRehype, { allowDangerousHtml: true })
-    .use(rehypeRaw)
-    .use(rehypeSanitize, sanitizeSchema)
-    .use(rehypeKatex)
-    .use(rehypeMathNowrap)
+    .use(rehypePlugins)
     .use(rehypeStringify)
 }
 
