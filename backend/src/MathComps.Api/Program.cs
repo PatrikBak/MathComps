@@ -285,7 +285,7 @@ var app = builder.Build();
 
 // We can take requests from the website. A preflight is answered right here, so it never reaches the request
 // logging below.
-app.UseCors("default");
+app.UseCors();
 
 // Log requests ahead of the middleware below, so a refusal from any of them gets its entry too. A fault's
 // entry is written as it unwinds out of the logging, so inside the exception handler it would carry the 200
