@@ -11,16 +11,16 @@ using Microsoft.EntityFrameworkCore;
 namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
-/// Names what a defense conversation was held against, for the surfaces that read conversations back. The
-/// naming happens once a page is in hand rather than in the query, since it reads the taxonomy and the
-/// database knows nothing of it. The proposals among a page's problems are read in one query of their own, by
-/// the problems the page names.
+/// Names the problem a defense conversation was held against or a photo handoff sends to, for the surfaces that show
+/// it. The naming happens once the rows are in hand rather than in the query, since it reads the taxonomy and the
+/// database knows nothing of it. The proposals among the rows' problems are read in one query of their own, by the
+/// problems the rows name.
 /// </summary>
 public static class NamedDefenseTargets
 {
     /// <summary>
-    /// What the database holds about the problem a conversation was held against. A conversation carries one
-    /// arm's columns and nulls for the other's, since it is held against one problem of one kind.
+    /// What the database holds about one defense problem, the one a conversation was held against or a photo handoff
+    /// sends to. It carries one arm's columns and nulls for every other arm's, since it is one problem of one kind.
     /// </summary>
     /// <param name="HandoutContentId"><inheritdoc cref="NamedHandoutTarget.HandoutContentId" path="/summary"/></param>
     /// <param name="EnvironmentId"><inheritdoc cref="NamedHandoutTarget.EnvironmentId" path="/summary"/></param>
@@ -38,21 +38,38 @@ public static class NamedDefenseTargets
         int? ProblemNumber,
         string? CompetitionPath,
         int? EditionNumber,
-        int? SeasonStartYear);
+        int? SeasonStartYear)
+    {
+        /// <summary>
+        /// The problem the columns hold, as a defense names it: the handout pair, or the archive problem's id.
+        /// </summary>
+        public DefenseTarget Target => this switch
+        {
+            // A handout problem, which both content ids locate.
+            { HandoutContentId: { } handoutContentId, EnvironmentId: { } environmentId } =>
+                new HandoutEnvironmentTarget(handoutContentId, environmentId),
+
+            // An archive problem, which its id identifies outright.
+            { ProblemId: { } problemId } => new ProblemTarget(problemId),
+
+            // Neither arm came back, which the queries reading this are written to rule out.
+            _ => throw new InvalidOperationException("The columns hold neither a handout nor a problem."),
+        };
+    }
 
     /// <summary>
-    /// Reads the proposals among the problems some conversations were held against, each as the target that
-    /// names it. A problem counts as one while the selection holds it (<see cref="SelectionRules.IsInSelection"/>),
-    /// deleted proposals included, since a deleted one keeps its row and its name.
+    /// Reads the proposals among some defense problems, each as the target that names it. A problem counts as one
+    /// while the selection holds it (<see cref="SelectionRules.IsInSelection"/>), deleted proposals included, since a
+    /// deleted one keeps its row and its name.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
-    /// <param name="columns">What the database holds about each conversation's problem.</param>
+    /// <param name="columns">What the database holds about each problem.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The proposals, by the id of the problem each one files.</returns>
     public static async Task<IReadOnlyDictionary<Guid, NamedProposalTarget>> LoadProposalsAsync(
         MathCompsDbContext dbContext, IEnumerable<Columns> columns, CancellationToken cancellationToken)
     {
-        // The problems the conversations were held against
+        // The problems being named
         var problemIds = columns
             .Select(column => column.ProblemId)
             .OfType<Guid>()
@@ -92,7 +109,7 @@ public static class NamedDefenseTargets
     }
 
     /// <summary>
-    /// Names what a conversation was held against, in the reader's language.
+    /// Names a defense problem, in the reader's language.
     /// </summary>
     /// <param name="localization">The resolver of localized display names.</param>
     /// <param name="language">The language to name it in.</param>
@@ -139,7 +156,7 @@ public static class NamedDefenseTargets
 
         // Neither arm came back, which the queries reading this are written to rule out.
         throw new ArgumentOutOfRangeException(
-            nameof(columns), columns, "The conversation was held against neither a handout nor a problem.");
+            nameof(columns), columns, "The columns hold neither a handout nor a problem.");
     }
 
     /// <summary>
