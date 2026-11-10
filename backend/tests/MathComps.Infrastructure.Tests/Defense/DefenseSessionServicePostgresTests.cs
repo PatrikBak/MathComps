@@ -1740,16 +1740,16 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             var answeringFirst = recording.Inputs[0].Transcript.Turns;
 
             // The first message carries its drawings on the turn answering it
-            Assert.Equal(opening, answeringFirst[1].Crops.Select(crop => new Guid(crop)));
+            Assert.Equal(opening, answeringFirst[1].Crops.Select(crop => new Guid(crop!)));
 
             // The conversation the next message was answered over
             var answeringNext = recording.Inputs[1].Transcript.Turns;
 
             // The first message's drawings, read back from the conversation
-            Assert.Equal(opening, answeringNext[1].Crops.Select(crop => new Guid(crop)));
+            Assert.Equal(opening, answeringNext[1].Crops.Select(crop => new Guid(crop!)));
 
             // The next message's own drawing
-            Assert.Equal([second.Crops.Single().Id], answeringNext[3].Crops.Select(crop => new Guid(crop)));
+            Assert.Equal([second.Crops.Single().Id], answeringNext[3].Crops.Select(crop => new Guid(crop!)));
 
             // Her turns carry none
             Assert.All([answeringFirst[0], answeringNext[0], answeringNext[2]], turn => Assert.Empty(turn.Crops));

@@ -40,11 +40,11 @@ public interface IDefensePhotoFiles
 
     /// <summary>
     /// Reads every drawing cut out of the pages a message went out with, in the order <see cref="LinksFor"/> lists
-    /// them.
+    /// them. A drawing that can't be read, its file gone or the read failing, keeps its place as null, and the others
+    /// are read all the same.
     /// </summary>
     /// <param name="photos">The message's photos, with the drawings cut out of them.</param>
     /// <param name="cancellationToken">Cancels the reads.</param>
-    /// <returns>Each drawing's JPEG, in that order.</returns>
-    /// <exception cref="InvalidOperationException">A drawing has no file.</exception>
-    Task<IReadOnlyList<byte[]>> ReadCropsAsync(IEnumerable<DefensePhoto> photos, CancellationToken cancellationToken);
+    /// <returns>Each drawing's JPEG, or null for one that couldn't be read, in that order.</returns>
+    Task<IReadOnlyList<byte[]?>> ReadCropsAsync(IEnumerable<DefensePhoto> photos, CancellationToken cancellationToken);
 }
