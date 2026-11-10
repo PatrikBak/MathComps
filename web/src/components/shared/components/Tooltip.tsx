@@ -3,6 +3,7 @@
 import {
   FloatingFocusManager,
   FloatingPortal,
+  type OpenChangeReason,
   type Placement,
   useClick,
   useDismiss,
@@ -15,6 +16,7 @@ import {
 import * as React from 'react'
 import { useState } from 'react'
 
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { useFloatingPanel } from '@/hooks/use-floating-panel'
 
 /**
@@ -41,13 +43,74 @@ type TooltipTriggerProps = React.HTMLAttributes<HTMLElement> & {
 }
 
 /**
+ * How a tooltip stands: shut, opened by the mouse resting on its trigger, or opened by a press or
+ * by focus.
+ */
+type TooltipOpening = 'shut' | 'hover' | 'pressOrFocus'
+
+/**
+ * Whether the pointer passes through a tooltip to what lies under it, by what opened the tooltip.
+ * A tooltip the mouse opened shuts once the mouse leaves the trigger, so the mouse never reaches
+ * it. Letting the pointer through keeps such a tooltip from shutting itself as it grows over its
+ * trigger before it is placed again. One opened by a press or by focus stays reachable, so the
+ * finger that pressed it, or a mouse coming from elsewhere, can scroll it.
+ */
+const POINTER_PASSES_THROUGH = {
+  shut: false,
+  hover: true,
+  pressOrFocus: false,
+} satisfies Record<TooltipOpening, boolean>
+
+/**
+ * How a tooltip stands once floating-ui opens or shuts it.
+ *
+ * @param isOpen - Whether the tooltip is now open.
+ * @param reason - What opened or shut it.
+ * @returns How the tooltip stands now.
+ */
+function openingAfter(isOpen: boolean, reason: OpenChangeReason | undefined): TooltipOpening {
+  // Shut, whatever shut it
+  if (!isOpen) return 'shut'
+
+  // Open, by what opened it
+  switch (reason) {
+    // Opened by the mouse coming to rest on the trigger
+    case 'hover':
+      return 'hover'
+
+    // Opened by a press or by focus
+    case 'click':
+    case 'focus':
+      return 'pressOrFocus'
+
+    // Reasons none of the tooltip's interactions open it with, left reachable like a press
+    case 'list-navigation':
+    case 'outside-press':
+    case 'escape-key':
+    case 'ancestor-scroll':
+    case 'reference-press':
+    case 'focus-out':
+    case 'safe-polygon':
+    case undefined:
+      return 'pressOrFocus'
+
+    // Every reason floating-ui gives sorted into an arm above
+    default:
+      return assertNever(reason)
+  }
+}
+
+/**
  * A tooltip which works on both desktop (on hover) and tablet (on click)
  *
  * @param {TooltipProps} props - The props for the component.
  */
 export function Tooltip({ children, content, placement, className = '' }: TooltipProps) {
-  // Track if the tooltip is open or closed
-  const [open, setOpen] = useState(false)
+  // Whether the tooltip is open, and what opened it
+  const [opening, setOpening] = useState<TooltipOpening>('shut')
+
+  // Whether the tooltip is open
+  const open = opening !== 'shut'
 
   // Set up floating UI logic for tooltip positioning and sizing
   const { x, y, refs, context } = useFloatingPanel({
@@ -58,8 +121,11 @@ export function Tooltip({ children, content, placement, className = '' }: Toolti
     pinSide: false,
     // Currently open/closed state of tooltip
     open,
-    // Called when open state changes (on hover/click)
-    onOpenChange: setOpen,
+    // Called whenever the tooltip opens or shuts, keeping what opened it
+    onOpenChange(isOpen, _event, reason) {
+      // How the tooltip stands now
+      setOpening(openingAfter(isOpen, reason))
+    },
     // Gap between the trigger and the tooltip
     gap: 5,
     // How much of the viewport's edge it keeps clear
@@ -154,6 +220,8 @@ export function Tooltip({ children, content, placement, className = '' }: Toolti
                   left: x ?? 0,
                   overflowWrap: 'break-word',
                   lineHeight: '1.5',
+                  // Reached by the pointer, or passed through to what lies under it
+                  pointerEvents: POINTER_PASSES_THROUGH[opening] ? 'none' : undefined,
                 },
               })}
             >
