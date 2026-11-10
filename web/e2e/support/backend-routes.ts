@@ -114,7 +114,7 @@ export function refuse(route: Route, status: number, errorCode: AppErrorCode): P
 const STORE_ORIGIN = 'https://store.example.test'
 
 /** The smallest image a browser draws, one transparent pixel. */
-const ONE_PIXEL_PNG = Buffer.from(
+export const ONE_PIXEL_PNG = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
   'base64'
 )

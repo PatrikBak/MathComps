@@ -318,20 +318,23 @@ export type CarriedFile = {
 }
 
 /**
- * Presses a control that opens the file picker, and hands the picker a file.
+ * Presses a control that opens the file picker, and hands the picker a file, or several picked together.
  *
  * @param control - The control.
- * @param file - The file the picker is handed.
+ * @param files - The file the picker is handed, or the files.
  */
-export async function pickFile(control: Locator, file: CarriedFile): Promise<void> {
+export async function pickFile(
+  control: Locator,
+  files: CarriedFile | CarriedFile[]
+): Promise<void> {
   // The file picker the control is about to open
   const picker = control.page().waitForEvent('filechooser')
 
   // The control, pressed
   await control.click()
 
-  // The picker handed the file
-  await (await picker).setFiles(file)
+  // The picker handed the files
+  await (await picker).setFiles(files)
 }
 
 /**

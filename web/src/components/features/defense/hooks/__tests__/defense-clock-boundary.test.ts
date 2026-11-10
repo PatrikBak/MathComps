@@ -16,7 +16,8 @@ describe('findFirstUncountedTurnId', () => {
    * @returns The turn.
    */
   function saved(id: string, createdAt: string): Turn {
-    return { id, createdAt, role: 'candidate', content: 'x' }
+    // A student turn saved at that moment
+    return { id, createdAt, role: 'candidate', content: 'x', photos: [] }
   }
 
   /**
@@ -25,7 +26,8 @@ describe('findFirstUncountedTurnId', () => {
    * @returns The draft.
    */
   function draft(): Turn {
-    return { id: null, createdAt: null, role: 'candidate', content: 'x' }
+    // A student turn with neither an id nor a timestamp yet
+    return { id: null, createdAt: null, role: 'candidate', content: 'x', photos: [] }
   }
 
   it('marks nothing in a conversation nobody has held', () => {
@@ -78,7 +80,13 @@ describe('findFirstUncountedTurnId', () => {
   it('marks nothing when the only uncounted turn carries no id', () => {
     // The transcript draws the line by matching an id, so a turn without one cannot carry it
     const turns: Turn[] = [
-      { id: null, createdAt: '2026-09-20T12:30:00.000Z', role: 'candidate', content: 'x' },
+      {
+        id: null,
+        createdAt: '2026-09-20T12:30:00.000Z',
+        role: 'candidate',
+        content: 'x',
+        photos: [],
+      },
     ]
 
     // Nothing the line can be hung off, so none is drawn

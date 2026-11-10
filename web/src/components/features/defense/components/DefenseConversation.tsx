@@ -150,7 +150,7 @@ function DefenseConversationForTarget({
   const shownTurns = useMemo(
     () =>
       currentSessionId === null && opener !== null
-        ? [draftTurn('examiner', opener), ...turns]
+        ? [draftTurn('examiner', opener, []), ...turns]
         : turns,
     [currentSessionId, opener, turns]
   )
@@ -178,6 +178,7 @@ function DefenseConversationForTarget({
     draftStorageKey: defenseDraftStorageKey(problem.target),
     target: problem.target,
     photoLongEdge: limits?.photoLongEdge ?? null,
+    maxPhotosPerMessage: limits?.maxPhotosPerMessage ?? null,
   })
 
   // Where this conversation stands against the entry's clock
@@ -315,6 +316,9 @@ function DefenseConversationForTarget({
         // How long each turn took is review data. The examiner's reads to a student as an apology for the wait,
         // and their own as being watched
         turnDurationsMs={null}
+        // The student sent their pages whole, so their chat shows only those; the drawings cut out of them are
+        // what Mathilda is handed
+        showsDrawings={false}
         footer={
           canAnswer || isFreshBesideSaved ? (
             <div className="flex flex-col items-center gap-2">

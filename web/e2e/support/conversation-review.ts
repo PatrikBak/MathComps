@@ -5,12 +5,16 @@ import type {
   DefenseTurnAttempt,
 } from '@/components/features/conversation-review/model/conversation-detail'
 import type {
+  DefenseTurnPhoto,
   NamedDefenseTarget,
   StoredTurn,
 } from '@/components/features/defense/model/defense-types'
 import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 
 import messages from '../../messages/en.json'
+import { fileLinkTo } from './backend-routes'
+import { photosText } from './competitions'
+import { expectViewerShut, shownPhoto } from './photo-viewer'
 import { expect } from './test'
 
 /**
@@ -64,6 +68,16 @@ const VERDICT_COMMENT = 'Fair questions.'
 
 /** What the student held against the reply. */
 const REPORT_COMMENT = 'She all but told me.'
+
+/** The pages the follow-up was written from, a drawing cut out of the first. */
+const FOLLOW_UP_PHOTOS: DefenseTurnPhoto[] = [
+  {
+    id: 'follow-up-page-1',
+    link: fileLinkTo('follow-up-page-1'),
+    crops: [{ id: 'follow-up-drawing', link: fileLinkTo('follow-up-drawing') }],
+  },
+  { id: 'follow-up-page-2', link: fileLinkTo('follow-up-page-2'), crops: [] },
+]
 
 /**
  * Builds one draft behind the reply, with the one call that wrote it.
@@ -124,8 +138,8 @@ function draftOf(
 
 /**
  * Builds a conversation with everything the student and Mathilda put into one: her opener and the student's
- * answer, her reply after a draft the leak check sent back, the student's follow-up, what they reported on the
- * reply, and their verdict on the whole.
+ * answer, her reply after a draft the leak check sent back, the student's follow-up and the pages it was written
+ * from, what they reported on the reply, and their verdict on the whole.
  *
  * @param opening - The parts the caller chooses.
  *
@@ -157,24 +171,28 @@ export function wholeConversationOf(opening: ConversationOpening): ConversationD
         role: 'examiner',
         content: 'Walk me through it.',
         createdAt: opening.startedAt,
+        photos: [],
       },
       {
         id: `${opening.id}-answer`,
         role: 'candidate',
         content: opening.answer,
         createdAt: opening.startedAt,
+        photos: [],
       },
       {
         id: replyId,
         role: 'examiner',
         content: REPLY,
         createdAt: new Date(replyAtMs).toISOString(),
+        photos: [],
       },
       {
         id: `${opening.id}-follow-up`,
         role: 'candidate',
         content: 'Because halving can be undone.',
         createdAt: new Date(replyAtMs + FOLLOW_UP_MS).toISOString(),
+        photos: FOLLOW_UP_PHOTOS,
       },
     ],
     attempts: [
@@ -209,6 +227,7 @@ export function partlyReadConversationOf(conversation: ConversationDetail): Conv
       role: index % 2 === 0 ? 'examiner' : 'candidate',
       content: `Turn ${index + 1}. ${PARTLY_READ_FILLER}`,
       createdAt: new Date(startedAtMs + index * PARTLY_READ_SPACING_MS).toISOString(),
+      photos: [],
     })
   )
 
@@ -224,7 +243,8 @@ export function partlyReadConversationOf(conversation: ConversationDetail): Conv
 
 /**
  * Checks a dialog shows a conversation {@link wholeConversationOf} built, whole: how long the reply and the
- * follow-up took, the author's report and verdict, and the drafts behind the reply.
+ * follow-up took, the author's report and verdict, the drawing cut out of the follow-up's pages under its label
+ * and the pages themselves, each opened large and put away, and the drafts behind the reply.
  *
  * @param dialog - The dialog the conversation is open in.
  */
@@ -252,6 +272,50 @@ export async function expectWholeConversation(dialog: Locator): Promise<void> {
 
   // In their words too
   await expect(dialog.getByText(REPORT_COMMENT)).toBeVisible()
+
+  // The label the follow-up's drawings sit under
+  await expect(dialog.getByText(messages.defense.photos.drawingsCutOut)).toBeVisible()
+
+  // The drawing cut out of the follow-up's first page
+  const drawing = dialog.getByRole('button', {
+    name: photosText('enlargeDrawing', { number: 1 }),
+  })
+
+  // Shown from where the backend keeps it
+  await expect(drawing.locator('img')).toHaveAttribute('src', fileLinkTo('follow-up-drawing'))
+
+  // The drawing, pressed
+  await drawing.click()
+
+  // Shown large
+  await expect(shownPhoto(dialog.page())).toHaveAttribute(
+    'alt',
+    photosText('drawing', { number: 1 })
+  )
+
+  // Put away again
+  await dialog.page().keyboard.press('Escape')
+
+  // The viewer gone
+  await expectViewerShut(dialog.page())
+
+  // The follow-up's second page
+  const secondPage = dialog.getByRole('button', { name: photosText('enlarge', { number: 2 }) })
+
+  // The second page, pressed
+  await secondPage.click()
+
+  // Shown large
+  await expect(shownPhoto(dialog.page())).toHaveAttribute('alt', photosText('photo', { number: 2 }))
+
+  // Put away again
+  await dialog.page().keyboard.press('Escape')
+
+  // The viewer gone
+  await expectViewerShut(dialog.page())
+
+  // Leaving the conversation open, the focus back on the page it was shown from
+  await expect(secondPage).toBeFocused()
 
   // The drafts behind the reply, opened from the reply
   await dialog

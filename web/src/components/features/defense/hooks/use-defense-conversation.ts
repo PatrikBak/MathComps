@@ -31,6 +31,7 @@ import type {
   DefenseOpening,
   DefenseProblem,
   DefenseSession,
+  DefenseTurnPhoto,
 } from '../model/defense-types'
 import { deleteSession, listSessions, rewindTurns, submitTurn } from '../services/session-service'
 import { defenseSessionsQueryKey, invalidateDefenseLists } from './defense-cache'
@@ -76,8 +77,8 @@ type UseDefenseConversationResult = DefenseConversationState &
     openingStatus: DefenseOpeningStatus
     /** Reads this problem's session history again after a failed read. */
     retrySessions: () => void
-    /** Sends a student turn and folds in the examiner's reply. */
-    send: (content: string) => Promise<SendOutcome>
+    /** Sends a student turn and its photos, and folds in the examiner's reply. */
+    send: (content: string, photos: readonly DefenseTurnPhoto[]) => Promise<SendOutcome>
     /** Deletes a session, dropping back to a fresh conversation when it was the open one. */
     deleteSession: (sessionId: string) => Promise<DeleteOutcome>
     /** Rewinds the open conversation to a chosen point, dropping every later turn. */
@@ -256,10 +257,10 @@ export function useDefenseConversation(
     [buildServices]
   )
 
-  // Sends a student turn and folds in the examiner's reply.
+  // Sends a student turn and its photos, and folds in the examiner's reply.
   const send = useCallback(
-    (content: string): Promise<SendOutcome> =>
-      runWithServices((services) => model.send(content, services)),
+    (content: string, photos: readonly DefenseTurnPhoto[]): Promise<SendOutcome> =>
+      runWithServices((services) => model.send(content, photos, services)),
     [model, runWithServices]
   )
 

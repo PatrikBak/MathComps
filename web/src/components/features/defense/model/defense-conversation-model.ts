@@ -5,6 +5,7 @@ import type {
   DefenseFeedback,
   DefenseProblem,
   DefenseSession,
+  DefenseTurnPhoto,
   DefenseTurnReport,
   DefenseTurnRequest,
   StoredTurn,
@@ -68,6 +69,15 @@ type RewindDone = {
 }
 
 /**
+ * A superseded rewind: the stored session was truncated, but another conversation took over while it was, so the
+ * one on screen is left as it is.
+ */
+type RewindSuperseded = {
+  /** The discriminator. */
+  kind: 'superseded'
+}
+
+/**
  * A failed rewind: the round-trip errored, leaving the conversation untouched.
  */
 type RewindFailed = {
@@ -80,7 +90,7 @@ type RewindFailed = {
 /**
  * The outcome of a rewind.
  */
-export type RewindOutcome = RewindDone | RewindFailed
+export type RewindOutcome = RewindDone | RewindSuperseded | RewindFailed
 
 /**
  * A completed delete: the session was removed from the store.
@@ -168,12 +178,17 @@ type InFlight = {
  *
  * @param role - The turn's author.
  * @param content - The turn's markdown/math source.
+ * @param photos - The photos whose text the turn carries, in page order.
  *
  * @returns The turn.
  */
-export function draftTurn(role: TurnRole, content: string): Turn {
+export function draftTurn(
+  role: TurnRole,
+  content: string,
+  photos: readonly DefenseTurnPhoto[]
+): Turn {
   // The unsaved draft turn
-  return { id: null, createdAt: null, role, content }
+  return { id: null, createdAt: null, role, content, photos }
 }
 
 /**
@@ -399,12 +414,15 @@ export class DefenseConversationModel {
    * Sends a student turn and folds in the examiner's reply.
    *
    * @param content - The student turn's markdown/math source.
+   * @param photos - The photos whose text the turn carries, in page order, shown on the turn until the stored
+   *   ones replace them.
    * @param services - The backend call to send the turn.
    *
    * @returns How the turn resolved.
    */
   send = async (
     content: string,
+    photos: readonly DefenseTurnPhoto[],
     services: Pick<DefenseConversationServices, 'submitTurn'>
   ): Promise<SendOutcome> => {
     // Deterministic guard against a double-tap: a second send before the first settles is refused, so
@@ -429,13 +447,23 @@ export class DefenseConversationModel {
     this.currentRun = run
 
     // Show the student's turn and the examiner at work immediately
-    this.setState({ turns: [...priorTurns, draftTurn('candidate', content)], isThinking: true })
+    this.setState({
+      turns: [...priorTurns, draftTurn('candidate', content, photos)],
+      isThinking: true,
+    })
+
+    // The turn as every request carries it, its photos named in page order
+    const submitted = {
+      content,
+      photoIds: photos.map((photo) => photo.id),
+      signal: run.controller.signal,
+    }
 
     // Open a new session (the backend mints its id), or append to the session already open
     const request: DefenseTurnRequest =
       sessionId === null
-        ? { kind: 'start', target: this.problem.target, content, signal: run.controller.signal }
-        : { kind: 'continue', sessionId, content, signal: run.controller.signal }
+        ? { kind: 'start', target: this.problem.target, ...submitted }
+        : { kind: 'continue', sessionId, ...submitted }
 
     try {
       // One round-trip: save the turn and get back the updated session
@@ -679,6 +707,15 @@ export class DefenseConversationModel {
     } catch (error) {
       // The server still holds the full conversation, so leave the transcript as it was
       return { kind: 'failed', errorCode: errorCodeOf(error) }
+    }
+
+    // Another conversation took over while the rewind was out, and the one on screen stays as it is
+    if (sessionId !== this.state.currentSessionId) {
+      // The rewound session was still truncated, so the history refreshes to match
+      this.onSessionsChanged()
+
+      // Nothing on screen was rewound
+      return { kind: 'superseded' }
     }
 
     // Drop any turn still in flight so a trailing reply can't repaint the shortened transcript

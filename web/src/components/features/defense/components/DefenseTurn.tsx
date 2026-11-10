@@ -12,6 +12,7 @@ import { formatDurationMs } from '@/components/shared/utils/duration-utils'
 
 import { TURN_ID_ATTRIBUTE } from '../hooks/use-reveal-pointed-turn'
 import type { Turn } from '../model/defense-types'
+import { DefenseTurnPhotos } from './DefenseTurnPhotos'
 import { TURN_LABEL_CLASS, TURN_STYLES } from './turn-styles'
 
 /**
@@ -94,6 +95,8 @@ type DefenseTurnProps = {
   draftsMark: TurnDraftsMark | null
   /** How long its author took over this turn, in milliseconds; null where no timing is shown for it. */
   durationMs: number | null
+  /** Whether the drawings cut out of its photos for Mathilda show under them. */
+  showsDrawings: boolean
   /** The localized role label shown above the message. */
   label: string
   /** Whether this turn just arrived and should fade in. */
@@ -111,7 +114,7 @@ type DefenseTurnProps = {
 
 /**
  * Renders one message of a defense conversation, styled by who authored it, with its body rendered as
- * read-only rich math.
+ * read-only rich math and the photos it was sent with under it.
  *
  * Its controls are never hover-revealed, and kept low-emphasis instead: a hover- or focus-toggled control
  * fights a Safari bug where the modal's `backdrop-filter` panel leaves hidden descendants painted as stale
@@ -133,6 +136,7 @@ export function DefenseTurn({
   noteMark,
   draftsMark,
   durationMs,
+  showsDrawings,
 }: DefenseTurnProps) {
   // Defense copy
   const t = useTranslations('defense')
@@ -287,6 +291,11 @@ export function DefenseTurn({
       <div className={style.body}>
         <RichMathEditorRenderer content={turn.content} />
       </div>
+
+      {/* The photos it was sent with */}
+      {turn.photos.length > 0 && (
+        <DefenseTurnPhotos photos={turn.photos} showsDrawings={showsDrawings} />
+      )}
     </div>
   )
 }
