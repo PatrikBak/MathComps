@@ -139,6 +139,7 @@
     "DefenseMessageEmpty": "Your message is empty.",
     "DefenseMessageLimit": "This conversation has reached its message limit.",
     "DefenseMessageTooLong": "Your message is too long.",
+    "DefensePhotoHandoffNotFound": "This code no longer works. Make a new one where you write to Mathilda.",
     "DefensePhotoNotFound": "The photos can no longer be sent, so they were taken off the message.",
     "DefenseReportTarget": "That reply is no longer there.",
     "DefenseRewindTarget": "That rewind point is no longer valid.",

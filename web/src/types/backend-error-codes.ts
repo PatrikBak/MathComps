@@ -16,6 +16,7 @@ export const BACKEND_ERROR_CODES = [
   'DefenseMessageEmpty',
   'DefenseMessageLimit',
   'DefenseMessageTooLong',
+  'DefensePhotoHandoffNotFound',
   'DefensePhotoNotFound',
   'DefenseReportTarget',
   'DefenseRewindTarget',

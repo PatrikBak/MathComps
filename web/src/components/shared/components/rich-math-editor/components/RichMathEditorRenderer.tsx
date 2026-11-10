@@ -446,8 +446,7 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
 
   return (
     <Markdown
-      // Pipeline: GFM -> directive (parses :::) -> spoiler (transforms directive) -> math -> breaks, then
-      // where asked the `#N` references
+      // Pipeline: the shared remark plugins in their own order, then where asked the `#N` references
       remarkPlugins={remarkPlugins}
       // Pipeline: rehype-raw parses HTML -> rehype-sanitize removes XSS -> rehype-katex renders math ->
       // rehype-math-nowrap keeps inline math with its punctuation, then where asked the source ranges

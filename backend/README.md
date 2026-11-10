@@ -455,7 +455,8 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
   but the ceiling rides to the browser on every session read, so once the API has restarted on the new value, the UI
   follows on the next page load with no frontend deploy.
   `RateLimits` holds how many requests one caller, an IPv4 address or an IPv6 /64, may make in a window. Search
-  has a count of its own, and the other limited routes share the general one.
+  and the routes a page asks every few seconds have counts of their own, the signed-in one counted per account,
+  and the other limited routes share the general one.
 - `src/MathComps.Infrastructure/appsettings.examiner.{Env}.json` → `appsettings.examiner.json` (per-step models).
 - `src/MathComps.Infrastructure/appsettings.llm.{Env}.json` → `appsettings.llm.json` (LLM endpoint, retries)
 - `src/MathComps.Infrastructure/appsettings.photo-reader.{Env}.json` → `appsettings.photo-reader.json` (the photo reader's call and page settings)

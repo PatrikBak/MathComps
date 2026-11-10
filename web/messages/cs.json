@@ -139,6 +139,7 @@
     "DefenseMessageEmpty": "Tvoje zpráva je prázdná.",
     "DefenseMessageLimit": "Tato konverzace dosáhla limitu počtu zpráv.",
     "DefenseMessageTooLong": "Tvoje zpráva je příliš dlouhá.",
+    "DefensePhotoHandoffNotFound": "Tento kód už neplatí. Vytvoř si nový tam, kde píšeš Mathildě.",
     "DefensePhotoNotFound": "Fotky už nelze poslat, proto byly ze zprávy odebrány.",
     "DefenseReportTarget": "Tato odpověď už neexistuje.",
     "DefenseRewindTarget": "Tento bod pro vrácení už není platný.",

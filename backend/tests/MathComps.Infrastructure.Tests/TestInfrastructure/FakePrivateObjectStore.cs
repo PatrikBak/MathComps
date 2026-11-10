@@ -41,12 +41,22 @@ public sealed class FakePrivateObjectStore : IPrivateObjectStore, IObjectReader
     }
 
     /// <inheritdoc/>
-    public Task<string?> ReadTextAsync(string key, CancellationToken cancellationToken) =>
+    public Task<string?> ReadTextAsync(string key, CancellationToken cancellationToken)
+    {
+        // A cancelled read reads nothing, as a bucket's does.
+        cancellationToken.ThrowIfCancellationRequested();
+
         // The file's bytes read as text, or nothing when that key holds none
-        Task.FromResult(_files.TryGetValue(key, out var file) ? Encoding.UTF8.GetString(file.Content) : null);
+        return Task.FromResult(_files.TryGetValue(key, out var file) ? Encoding.UTF8.GetString(file.Content) : null);
+    }
 
     /// <inheritdoc/>
-    public Task<byte[]?> ReadBytesAsync(string key, CancellationToken cancellationToken) =>
+    public Task<byte[]?> ReadBytesAsync(string key, CancellationToken cancellationToken)
+    {
+        // A cancelled read reads nothing, as a bucket's does.
+        cancellationToken.ThrowIfCancellationRequested();
+
         // The file's bytes, or nothing when that key holds none
-        Task.FromResult(_files.TryGetValue(key, out var file) ? file.Content : null);
+        return Task.FromResult(_files.TryGetValue(key, out var file) ? file.Content : null);
+    }
 }

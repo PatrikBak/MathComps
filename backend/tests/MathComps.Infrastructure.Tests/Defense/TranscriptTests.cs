@@ -7,8 +7,8 @@ namespace MathComps.Infrastructure.Tests.Defense;
 
 /// <summary>
 /// Tests the transcript model: parsing the <c>## Candidate</c> / <c>## Examiner</c> markdown into ordered turns,
-/// round-tripping back to markdown, rendering the user message with each drawing in place, appending a turn, and the
-/// guard that the examiner only replies to a candidate.
+/// round-tripping back to markdown, rendering the user message with each drawing in place, an unread one as its
+/// caption and a note, appending a turn, and the guard that the examiner only replies to a candidate.
 /// </summary>
 public class TranscriptTests
 {
@@ -118,6 +118,37 @@ public class TranscriptTests
             new ChatText("\n\nTheir drawing 2:"),
             new ChatImage(second, MediaTypeNames.Image.Jpeg),
             new ChatText("\n\n## Examiner\n\nwhy?\n\n## Candidate\n\nbecause\n\nTheir drawing 1:"),
+            new ChatImage(third, MediaTypeNames.Image.Jpeg),
+        ];
+
+        // The message holds exactly those parts.
+        Assert.Equal(expected, message.Parts);
+    }
+
+    /// <summary>
+    /// A drawing that couldn't be read keeps its number among its turn's drawings, with a note after its caption in
+    /// place of the image, so the drawings after it keep the numbers their student counted.
+    /// </summary>
+    [Fact]
+    public void ToPrompt_captions_a_drawing_that_couldnt_be_read_in_its_place()
+    {
+        // Two drawings standing in for the crops read, either side of one that couldn't be.
+        byte[] first = [0xFF, 0xD8, 0xFF, 0x01];
+        byte[] third = [0xFF, 0xD8, 0xFF, 0x03];
+
+        // A turn sent with three drawings, the second of them unread.
+        var transcript = new Transcript(
+            [new TranscriptTurn(TranscriptRole.Candidate, "see my pages", [first, null, third])]);
+
+        // Render the conversation as a model's user message.
+        var message = transcript.ToPrompt();
+
+        // The first and third drawings under their own numbers, the second's caption and note between them.
+        ChatPart[] expected =
+        [
+            new ChatText("## Candidate\n\nsee my pages\n\nTheir drawing 1:"),
+            new ChatImage(first, MediaTypeNames.Image.Jpeg),
+            new ChatText("\n\nTheir drawing 2: (they sent it, but it couldn't be loaded)\n\nTheir drawing 3:"),
             new ChatImage(third, MediaTypeNames.Image.Jpeg),
         ];
 

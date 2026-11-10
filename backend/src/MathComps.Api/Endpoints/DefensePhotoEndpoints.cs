@@ -14,10 +14,10 @@ public static class DefensePhotoEndpoints
     /// <summary>
     /// Base path for the photo routes.
     /// </summary>
-    private const string PhotosPath = "/defense/photos";
+    internal const string PhotosPath = "/defense/photos";
 
     /// <summary>
-    /// Maps the <c>/defense/photos</c> endpoints onto the route builder.
+    /// Maps the photo-reading endpoints under <c>/defense/photos</c> onto the route builder.
     /// </summary>
     /// <param name="app">The route builder to register the endpoints on.</param>
     public static void MapDefensePhotoEndpoints(this IEndpointRouteBuilder app)
