@@ -12,9 +12,10 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// </summary>
 /// <param name="Role">Who authored the turn.</param>
 /// <param name="Text">The turn's text.</param>
-/// <param name="Crops">The drawings cut from the photos the turn was sent with, each a JPEG, the pages in page order
-/// and each page's drawings in reading order; empty for a turn sent as text alone.</param>
-public record TranscriptTurn(TranscriptRole Role, string Text, ImmutableArray<byte[]> Crops);
+/// <param name="Crops">The drawings cut from the photos the turn was sent with, each a JPEG, or null for one that
+/// couldn't be read; the pages in page order and each page's drawings in reading order; empty for a turn sent as text
+/// alone.</param>
+public record TranscriptTurn(TranscriptRole Role, string Text, ImmutableArray<byte[]?> Crops);
 
 /// <summary>
 /// A defense conversation in its markdown form: alternating <c>## Candidate</c> / <c>## Examiner</c> blocks. Parses
@@ -91,7 +92,8 @@ public record Transcript(ImmutableArray<TranscriptTurn> Turns)
 
     /// <summary>
     /// Renders the conversation as the user message a model reads: the markdown form, with each drawing right after
-    /// the text of the turn it came with, under a caption numbering it among that turn's drawings. A conversation
+    /// the text of the turn it came with, under a caption numbering it among that turn's drawings. A drawing that
+    /// couldn't be read keeps its number and caption, with a note saying so in place of the image. A conversation
     /// without drawings is one text, equal to <see cref="ToMarkdown"/>.
     /// </summary>
     /// <returns>The conversation as text and images, in order.</returns>
@@ -111,9 +113,15 @@ public record Transcript(ImmutableArray<TranscriptTurn> Turns)
 
             // Each drawing follows the turn's text, numbered from 1 in the order the turn's pages show them.
             foreach (var (position, crop) in turn.Crops.Index())
-                message = message
-                    .Append($"\n\nTheir drawing {position + 1}:")
-                    .Append(new ChatImage(crop, MediaTypeNames.Image.Jpeg));
+            {
+                // The drawing's caption, numbering it among the turn's drawings.
+                message = message.Append($"\n\nTheir drawing {position + 1}:");
+
+                // The drawing, or for one that couldn't be read, a note saying so.
+                message = crop is null
+                    ? message.Append(" (they sent it, but it couldn't be loaded)")
+                    : message.Append(new ChatImage(crop, MediaTypeNames.Image.Jpeg));
+            }
         }
 
         // Hand back the message.
