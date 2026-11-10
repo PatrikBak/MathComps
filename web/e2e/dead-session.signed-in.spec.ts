@@ -9,11 +9,8 @@ import { installHostedBackend } from './support/hosted-backend'
 import { userMenuCopy } from './support/interaction'
 import { searchAnswerWith, stubProblemActions, stubSearchAnswer } from './support/problem-actions'
 import { dropSessionWithoutNotifying } from './support/session'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 import { recordNotices } from './support/watchers'
-
-/** How long a surface gets to boot Clerk, work out who is reading, and settle on what to show. */
-const SETTLE_TIMEOUT_MS = 15_000
 
 /** The copy every surface waiting on a connection reads under. */
 const networkCopy = messages.ui.network

@@ -2,10 +2,7 @@ import { addressParams } from './support/address'
 import { BACKEND_ORIGIN } from './support/backend-routes'
 import { areaCopy, areaPath, authCopy, LIST_PATH, showRoundHolding } from './support/competitions'
 import { installHostedBackend, PROBLEM_COUNT, problemIdOf } from './support/hosted-backend'
-import { expect, test } from './support/test'
-
-/** How long the fake backend has to answer before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** A competition that closed a month ago, whose problems the list offers to anybody. */
 const CLOSED_COMPETITION_SLUG = 'closed-special-set'

@@ -18,11 +18,8 @@ import {
   UPCOMING_COMPETITION_SLUG,
 } from './support/hosted-backend'
 import { userMenuCopy } from './support/interaction'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 import { recordNotices } from './support/watchers'
-
-/** How long the fake backend has to answer before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
 
 /** The season every conversation the fake holds reads as having been set in. */
 const SEASON_YEARS = '2026/2027'

@@ -29,12 +29,11 @@ import {
   selectionCopy,
   selectionText,
   SET_ASIDE,
-  SETTLE_TIMEOUT_MS,
   slotOf,
   stubSelection,
   USED,
 } from './support/problem-selection'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** Any note saying which languages a round would refuse a slot's problem in, whichever languages it names. */
 const MISSING_LANGUAGES_NOTE = new RegExp(

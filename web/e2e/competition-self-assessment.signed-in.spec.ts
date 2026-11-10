@@ -1,9 +1,6 @@
 import { actionsCopy, areaCopy, areaPath, LIST_PATH } from './support/competitions'
 import { COMPETITION_SLUG, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
-import { expect, test } from './support/test'
-
-/** How long the fake backend has to answer before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** What a student writes about one of their own solutions, distinctive enough to find again. */
 const NOTE = 'I think the last case holds, I just could not write it up in time'

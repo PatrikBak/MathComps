@@ -11,7 +11,7 @@ import { GROUP_NAME, installGradingBackend } from './support/grading-backend'
 import { installHostedBackend } from './support/hosted-backend'
 import { userMenuCopy } from './support/interaction'
 import { conversationOf, installQueueBackend } from './support/review-backend'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 import { countDialogs } from './support/watchers'
 
 /** The group whose board each test opens, except the one following the way in from a round's panel. */
@@ -19,9 +19,6 @@ const GROUP_SLUG = 'mc-test'
 
 /** The test group's board, in English, which is the locale the assertions' copy is taken from. */
 const BOARD_PATH = `/en${ROUTES.ADMIN_GRADING.replace('[slug]', GROUP_SLUG)}`
-
-/** How long the fake backend has to answer before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
 
 /** The grading copy, in English. */
 const copy = messages.admin.grading

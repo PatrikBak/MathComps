@@ -3,14 +3,8 @@ import { errorsCopy, filtersCopy, KEPT_FILTER, signInCopy } from './support/arch
 import type { SearchCall } from './support/backend-routes'
 import { PROBLEMS_PATH, stubProblemSearch } from './support/backend-routes'
 import { endSessionInPlace, loginPromptFor, signInTestUser } from './support/session'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 import { recordNotices } from './support/watchers'
-
-/**
- * How long the library needs to settle: read the URL, weigh whoever is reading, and send at most one
- * search off the back of the two. Generous, since a real sign-in rides in front of half of these.
- */
-const SETTLE_TIMEOUT_MS = 15_000
 
 /**
  * How long to sit on a settled page before calling it done: long enough for a request or a notice

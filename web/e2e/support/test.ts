@@ -54,4 +54,10 @@ export const test = base.extend<{ hermeticBackend: void }>({
   ],
 })
 
+/**
+ * How long the app gets to settle before a wait on it is called a failure. Held under a test's own
+ * timeout, so the wait is the one that fires.
+ */
+export const SETTLE_TIMEOUT_MS = 15_000
+
 export { expect }

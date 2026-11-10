@@ -2,10 +2,7 @@ import { ROUTES } from '@/i18n/i18n'
 
 import { MATHILDA_OPENER } from './support/backend-routes'
 import { chatCopy } from './support/competitions'
-import { expect, test } from './support/test'
-
-/** How long the page has to settle before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /**
  * A published handout whose problems carry a solution to defend, in English, which is the canonical

@@ -2,10 +2,7 @@ import { RETURN_URL_PARAM } from '@/constants/auth-constants'
 import { ROUTES } from '@/i18n/i18n'
 
 import { addressParams } from './support/address'
-import { expect, test } from './support/test'
-
-/** How long the redirect has to land before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** The test group's board, in English. */
 const BOARD_PATH = `/en${ROUTES.ADMIN_GRADING.replace('[slug]', 'mc-test')}`
