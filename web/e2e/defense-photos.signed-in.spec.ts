@@ -209,6 +209,43 @@ test.describe('a message written from photos', () => {
     ).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
   })
 
+  test('keeps its pages through a reload, and goes out with them', async ({ page }) => {
+    // A conversation, and the composer to write it in
+    const composer = await openPracticeConversation(page)
+
+    // A page picked
+    await pickPages(page, 1)
+
+    // Read and put into the message
+    await insertPages(page, 1)
+
+    // Which now says what the page says
+    await expect(composer).toHaveValue(pageTextOf(1))
+
+    // A stray reload, which takes the page's copy on the student's device with it
+    await page.reload()
+
+    // Back into a conversation about the same problem
+    await page.getByRole('button', { name: areaCopy.startDefense }).first().click()
+
+    // Where the message is still waiting
+    await expect(composer).toHaveValue(pageTextOf(1), { timeout: SETTLE_TIMEOUT_MS })
+
+    // With its page beside it, shown from where it is kept
+    await expect(
+      page.getByRole('button', { name: photosText('open', { number: 1 }) }).locator('img')
+    ).toHaveAttribute('src', fileLinkTo('photo-1'))
+
+    // The turn, as it goes out
+    const sent = nextTurnSent(page)
+
+    // Sent
+    await composer.press('Meta+Enter')
+
+    // Carrying the kept photo
+    expect(photoIdsOf(await sent)).toEqual(['photo-1'])
+  })
+
   test('comes back into the composer with its pages when it fails to go out', async ({ page }) => {
     // A conversation, and the composer to write it in
     const composer = await openPracticeConversation(page)

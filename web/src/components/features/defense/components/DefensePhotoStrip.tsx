@@ -10,7 +10,8 @@ import { PhotoTile } from '@/components/shared/components/PhotoTile'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 
-import type { ComposerPhoto, UseDefensePhotosResult } from '../hooks/use-defense-photos'
+import type { UseDefensePhotosResult } from '../hooks/use-defense-photos'
+import type { ComposerPhoto } from '../model/composer-photos'
 
 /**
  * The edge of a photo's tile, by where its reading stands: only a failed one is marked.

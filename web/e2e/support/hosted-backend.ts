@@ -632,9 +632,13 @@ export async function installHostedBackend(
     // A number no photo before it took
     photosRead++
 
-    // The kept photo, and its page written out
+    // The kept photo's id
+    const photoId = `photo-${photosRead}`
+
+    // The kept photo, with a link to its page and the page written out
     await answer(page, route, {
-      photoId: `photo-${photosRead}`,
+      photoId,
+      link: fileLinkTo(photoId),
       text: pageTextOf(photosRead),
     } satisfies DefensePhotoReading)
   })

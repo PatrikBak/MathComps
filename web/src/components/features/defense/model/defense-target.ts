@@ -1,7 +1,11 @@
 import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
 import { resolveHandoutProblemRef } from '@/components/features/handouts/handout-problem-ref'
 import { assertNever } from '@/components/shared/utils/assert-never'
-import { DEFENSE_DRAFT_STORAGE_PREFIX } from '@/constants/local-storage-constants'
+import {
+  DEFENSE_DRAFT_PHOTOS_STORAGE_PREFIX,
+  DEFENSE_DRAFT_STORAGE_PREFIX,
+} from '@/constants/local-storage-constants'
+import { forgetPersistentDraft } from '@/hooks/use-persistent-draft'
 import type { Locale } from '@/i18n/i18n'
 
 import type { DefenseSessionTarget, NamedDefenseTarget } from './defense-types'
@@ -175,26 +179,22 @@ export function isSubjectReachable(target: DefenseTarget, locale: Locale): boole
 }
 
 /**
- * Names where, under {@link DEFENSE_DRAFT_STORAGE_PREFIX}, a target's unsent composer text is kept.
+ * Names where, under a prefix, one part of a target's unsent composer is kept.
  *
  * Keyed by the problem rather than the conversation, so a draft survives starting a fresh conversation
  * about the same problem, and by the reader on top of that, a browser being a thing students share.
  *
- * @param target - The target the text is being written against.
+ * @param prefix - What the part is kept under.
+ * @param target - The target the composer is being written against.
  *
  * @returns The storage key, or null for a target whose drafts are not kept past the chat closing.
  */
-export function defenseDraftStorageKey(target: DefenseTarget): string | null {
+function draftStorageKeyUnder(prefix: string, target: DefenseTarget): string | null {
   switch (target.kind) {
     // A competition entry is irreversible and its clock runs, so a stray reload must not cost the
     // half-written solution
     case 'competition':
-      return [
-        DEFENSE_DRAFT_STORAGE_PREFIX,
-        'competition',
-        target.readerKey ?? 'anonymous',
-        target.problemId,
-      ].join(':')
+      return [prefix, 'competition', target.readerKey ?? 'anonymous', target.problemId].join(':')
 
     // A handout problem and a proposed one can be reopened whenever, so a draft lives only as long as the chat
     case 'handout':
@@ -208,26 +208,42 @@ export function defenseDraftStorageKey(target: DefenseTarget): string | null {
 }
 
 /**
- * Forgets whatever unsent composer text is being kept against one target.
+ * Names where, under {@link DEFENSE_DRAFT_STORAGE_PREFIX}, a target's unsent composer text is kept.
+ *
+ * @param target - The target the text is being written against.
+ *
+ * @returns The storage key, or null for a target whose drafts are not kept past the chat closing.
+ */
+export function defenseDraftStorageKey(target: DefenseTarget): string | null {
+  // The text's key, under its own prefix
+  return draftStorageKeyUnder(DEFENSE_DRAFT_STORAGE_PREFIX, target)
+}
+
+/**
+ * Names where, under {@link DEFENSE_DRAFT_PHOTOS_STORAGE_PREFIX}, the photos whose text is in a target's unsent
+ * composer text are kept. They go out with the message, so they are kept wherever its text is.
+ *
+ * @param target - The target the text is being written against.
+ *
+ * @returns The storage key, or null for a target whose drafts are not kept past the chat closing.
+ */
+export function defenseDraftPhotosStorageKey(target: DefenseTarget): string | null {
+  // The photos' key, under a prefix of their own
+  return draftStorageKeyUnder(DEFENSE_DRAFT_PHOTOS_STORAGE_PREFIX, target)
+}
+
+/**
+ * Forgets whatever unsent composer text is being kept against one target, and the photos whose text is in it.
  *
  * A competition problem's draft is keyed by the problem, which outlives the entry: a fresh entry is a
  * fresh run, and until this is called the last one's half-written turn is waiting in its composer.
  *
- * @param target - Whose text to forget.
+ * @param target - Whose draft to forget.
  */
 export function forgetDefenseDraft(target: DefenseTarget): void {
-  // Where it would be kept, if it is kept anywhere
-  const storageKey = defenseDraftStorageKey(target)
+  // The draft's text
+  forgetPersistentDraft(defenseDraftStorageKey(target))
 
-  // A target whose drafts never outlive the chat has nothing left to forget
-  if (storageKey === null) {
-    return
-  }
-
-  // A browser can refuse storage outright, and a draft is not worth failing an entry over
-  try {
-    window.localStorage.removeItem(storageKey)
-  } catch {
-    // Nothing to do about it: whatever is in there is what the composer opens on
-  }
+  // The draft's photos
+  forgetPersistentDraft(defenseDraftPhotosStorageKey(target))
 }

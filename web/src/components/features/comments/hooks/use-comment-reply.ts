@@ -94,10 +94,11 @@ export function useCommentReply({
   const commentKey = repliedTo === null ? null : commentKeyOf(repliedTo)
 
   // The draft of the open reply, kept for the reader under the comment it answers until it is sent or cancelled
-  const [text, setText] = usePersistentDraft(
-    commentKey === null ? null : commentDraftStorageKey(userId ?? null, target, commentKey),
-    ''
-  )
+  const [text, setText] = usePersistentDraft({
+    storageKey:
+      commentKey === null ? null : commentDraftStorageKey(userId ?? null, target, commentKey),
+    emptyValue: '',
+  })
 
   // Whether a reply to the open reply's comment is on its way, sent from this thread or another showing the comment.
   // A reply under any other comment is left out, so one opened there meanwhile can still be sent

@@ -94,6 +94,21 @@ export function isKeptInStorage(page: Page, text: string): Promise<boolean> {
 }
 
 /**
+ * Leaves a value in the page's storage before the page loads, as an earlier visit in the same browser would.
+ *
+ * @param page - The page, not yet opened.
+ * @param key - Where the value is kept.
+ * @param value - What is kept there.
+ */
+export async function leaveInStorage(page: Page, key: string, value: string): Promise<void> {
+  // Set in the browser's storage before the page's own scripts run
+  await page.addInitScript(
+    ({ storageKey, storedValue }) => window.localStorage.setItem(storageKey, storedValue),
+    { storageKey: key, storedValue: value }
+  )
+}
+
+/**
  * How far down the window could be scrolled at most, which is how much taller the page is than the window.
  *
  * @param page - The page.

@@ -20,12 +20,7 @@ import { useDefenseTurnControls } from '../hooks/use-defense-turn-controls'
 import { useMathildaConsent } from '../hooks/use-mathilda-consent'
 import { resolveComposerState } from '../model/defense-composer-state'
 import { draftTurn } from '../model/defense-conversation-model'
-import {
-  defenseDraftStorageKey,
-  defenseTargetKey,
-  isSubjectReachable,
-  toWireTarget,
-} from '../model/defense-target'
+import { defenseTargetKey, isSubjectReachable, toWireTarget } from '../model/defense-target'
 import type { DefenseOpening, DefenseProblem, TurnRole } from '../model/defense-types'
 import { DefenseComposer } from './DefenseComposer'
 import { DefenseFeedbackDialogs } from './DefenseFeedbackDialogs'
@@ -175,7 +170,6 @@ function DefenseConversationForTarget({
     stop,
     rewind,
     deleteSession,
-    draftStorageKey: defenseDraftStorageKey(problem.target),
     target: problem.target,
     photoLongEdge: limits?.photoLongEdge ?? null,
     maxPhotosPerMessage: limits?.maxPhotosPerMessage ?? null,

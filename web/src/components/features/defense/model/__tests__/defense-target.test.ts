@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { DefenseTarget } from '../defense-target'
 import {
+  defenseDraftPhotosStorageKey,
   defenseDraftStorageKey,
   defenseTargetKey,
   isSubjectReachable,
@@ -73,6 +74,15 @@ describe('defenseDraftStorageKey', () => {
     // Nothing is at stake in reopening a handout problem, and what is written about one would otherwise
     // outlive the browser it was written in and greet whoever reads that handout next
     expect(defenseDraftStorageKey(HANDOUT)).toBeNull()
+  })
+})
+
+describe('defenseDraftPhotosStorageKey', () => {
+  it("keeps a competition draft's photos beside its text, under a key of their own", () => {
+    // Its own prefix, then the same reader and problem the text's key names
+    expect(defenseDraftPhotosStorageKey(COMPETITION)).toBe(
+      'defense-draft-photos:competition:user_2abc:open-intermediate-p2'
+    )
   })
 })
 
