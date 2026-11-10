@@ -3,10 +3,7 @@ import { stubProblemSearch } from './support/backend-routes'
 import { areaCopy, areaPath, LIST_PATH, showRoundHolding } from './support/competitions'
 import { holdClock } from './support/emulation'
 import { COMPETITION_SLUG, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
-import { expect, test } from './support/test'
-
-/** How long the fake backend has to answer before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** How long something a spec says never happens gets to happen first. */
 const LANDING_WINDOW_MS = 1_000

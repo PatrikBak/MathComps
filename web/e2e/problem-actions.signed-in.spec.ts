@@ -11,17 +11,11 @@ import {
   stubSearchAnswer,
   stubSearchRule,
 } from './support/problem-actions'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 import { recordNotices } from './support/watchers'
 
 /** The copy the problem cards and their toasts read under, taken from the app's own messages. */
 const problemsCopy = messages.problems
-
-/**
- * How long the library needs to settle: boot Clerk, resolve who is reading, and draw the rows off
- * the search it sends once it knows.
- */
-const SETTLE_TIMEOUT_MS = 15_000
 
 /**
  * How long to watch a settled list before calling it final, which has to outlast an action the

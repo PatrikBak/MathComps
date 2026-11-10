@@ -9,16 +9,13 @@ import {
   threadPage,
 } from './support/comments'
 import { loginPromptFor, signInTestUser } from './support/session'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** The copy a thread reads under. */
 const commentsCopy = messages.comments
 
 /** A function which declines a counted noun with the number in front of it, the way the page does. */
 const pluralText = createTranslator({ locale: 'en', messages, namespace: 'plurals' })
-
-/** How long the page gets to catch up before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 30_000
 
 /** How long a press gets to go out before a test is willing to say none did. */
 const LANDING_WINDOW_MS = 1_000

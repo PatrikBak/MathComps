@@ -46,10 +46,7 @@ import {
   SelectionWriteRefused,
   takesBoard,
 } from './selection-writes'
-import { expect } from './test'
-
-/** How long the fake backend has to answer before a wait is called a failure. */
-export const SETTLE_TIMEOUT_MS = 15_000
+import { expect, SETTLE_TIMEOUT_MS } from './test'
 
 /** How long a read gets to go out before a test is willing to say none did. */
 export const LANDING_WINDOW_MS = 1_000

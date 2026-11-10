@@ -2,14 +2,8 @@ import { addressParams } from './support/address'
 import { errorsCopy, filtersCopy, KEPT_FILTER } from './support/archive-filters'
 import { PROBLEMS_PATH, stubProblemSearch } from './support/backend-routes'
 import { loginPromptFor } from './support/session'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 import { recordNotices } from './support/watchers'
-
-/**
- * How long the library needs to settle: boot Clerk, resolve who is reading, and send its first
- * search off the back of that.
- */
-const SETTLE_TIMEOUT_MS = 15_000
 
 /**
  * How long to sit on a settled page before calling its traffic finished. Each test below turns on

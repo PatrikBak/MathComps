@@ -6,10 +6,7 @@ import {
   PROBLEM_COUNT,
   UPCOMING_COMPETITION_SLUG,
 } from './support/hosted-backend'
-import { expect, test } from './support/test'
-
-/** How long the fake backend has to answer before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** A competition no state ever holds an entry on, so the guard has something to turn away. */
 const UNENTERED_COMPETITION_SLUG = 'open-advanced'

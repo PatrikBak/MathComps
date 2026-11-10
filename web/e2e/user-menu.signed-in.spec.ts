@@ -5,10 +5,7 @@ import messages from '../messages/en.json'
 import { stubOwnOrganizations } from './support/backend-routes'
 import { selectionPath } from './support/competitions'
 import { openUserMenu } from './support/interaction'
-import { expect, test } from './support/test'
-
-/** How long the page has to settle before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** A page with nothing on it but the header, in English. */
 const ABOUT_PATH = `/en${ROUTES.ABOUT}`

@@ -21,10 +21,7 @@ import {
   SESSION_LIST_ADDRESS,
 } from './support/hosted-backend'
 import { SCRIPTED_REPLIES } from './support/hosted-backend-content'
-import { expect, test } from './support/test'
-
-/** How long the fake backend has to answer before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 test.describe('the conversation inside a competition', () => {
   test('takes a turn and answers it', async ({ page }) => {

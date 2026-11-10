@@ -2,10 +2,7 @@ import type { HandoutIndex } from '@/components/features/handouts/handout-metada
 import { supportsLocale } from '@/components/features/handouts/handout-metadata-types'
 import handoutIndex from '@/content/handouts.json'
 
-import { expect, test } from './support/test'
-
-/** How long the page has to settle before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** A visit to a path with no locale prefix, and where the site sends it. */
 type RedirectCase = {

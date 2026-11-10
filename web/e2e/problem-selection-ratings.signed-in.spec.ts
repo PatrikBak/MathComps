@@ -32,12 +32,11 @@ import {
   SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
-  SETTLE_TIMEOUT_MS,
   stubSelection,
   switchElementaryOn,
   UNWRITTEN,
 } from './support/problem-selection'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** The rating copy. */
 const ratingsCopy = selectionCopy.ratings

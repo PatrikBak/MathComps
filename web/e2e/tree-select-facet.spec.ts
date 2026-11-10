@@ -15,13 +15,10 @@ import {
   rowTabStops,
 } from './support/facets'
 import { LONG_PRESS_MS } from './support/interaction'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** The title of the facet listing competitions, a tree whose every branch starts open. */
 const COMPETITION = filtersCopy.facets.competition
-
-/** How long the library needs to read the URL and send the one search off the back of it. */
-const SETTLE_TIMEOUT_MS = 15_000
 
 /** The competition the fixture's one problem comes from. */
 const FOUND_COMPETITION = 'tst-d3'

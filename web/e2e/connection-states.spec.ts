@@ -14,14 +14,7 @@ import {
   searchAnswerWithMoreToCome,
   stubSearchRule,
 } from './support/problem-actions'
-import { expect, test } from './support/test'
-
-/**
- * How long the page needs to exhaust its retry burst: four attempts spread over roughly 3.5s of
- * backoff, plus room for the requests themselves. A generous bound rather than an exact one, so
- * raising the retry count is meant to bring you here rather than to quietly stretch the wait.
- */
-const SETTLE_TIMEOUT_MS = 15_000
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /**
  * The copy the assertions match on, taken from the app's own English messages: what each of them

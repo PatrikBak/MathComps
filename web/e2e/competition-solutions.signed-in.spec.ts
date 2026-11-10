@@ -1,9 +1,6 @@
 import { areaCopy, areaPath, LIST_PATH, modalCopy, showRoundHolding } from './support/competitions'
 import { COMPETITION_SLUG, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
-import { expect, test } from './support/test'
-
-/** How long the fake backend has to answer before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** A competition that closed a month ago, which a newcomer has no entry on and may still read. */
 const CLOSED_COMPETITION_SLUG = 'closed-special-set'

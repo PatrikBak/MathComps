@@ -58,13 +58,12 @@ import {
   selectionCopy,
   selectionText,
   SET_ASIDE,
-  SETTLE_TIMEOUT_MS,
   stubSelection,
   tabRowOn,
   USED,
 } from './support/problem-selection'
 import { MATHCOMPS_ORGANIZATION_SLUG } from './support/selection-writes'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 import { recordStatusAnnouncements } from './support/watchers'
 
 /** The copy a thread reads under. */
