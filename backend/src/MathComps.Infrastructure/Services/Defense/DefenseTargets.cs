@@ -7,7 +7,8 @@ namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
 /// How a defense target maps to storage: which kind a session is stamped with, which row says what it defends,
-/// how a stored session's target is read back, and how the sessions held against one target are selected.
+/// how a stored session's target is read back, how the sessions held against one target and the handoff pages sent to
+/// one are selected, and the anchor rows a handout environment is held by.
 /// </summary>
 internal static class DefenseTargets
 {
@@ -39,6 +40,26 @@ internal static class DefenseTargets
         // One id identifies the problem outright.
         ProblemTarget problem => session =>
             session.ProblemTarget != null && session.ProblemTarget.ProblemId == problem.ProblemId,
+
+        // A target nothing here knows, which is a bug rather than a bad request.
+        _ => throw new ArgumentOutOfRangeException(nameof(target), target, "Unknown defense target."),
+    };
+
+    /// <summary>
+    /// Builds the filter selecting the photos sent from a phone to one target.
+    /// </summary>
+    /// <param name="target">The target the pages were sent to.</param>
+    /// <returns>The predicate over the pages, by whichever arm the target is.</returns>
+    public static Expression<Func<DefensePhotoHandoffPage, bool>> PagesSentTo(DefenseTarget target) => target switch
+    {
+        // Both content ids identify the environment, the second only within the first.
+        HandoutEnvironmentTarget handout => page =>
+            page.HandoutEnvironment != null
+            && page.HandoutEnvironment.ContentId == handout.EnvironmentId
+            && page.HandoutEnvironment.Handout.ContentId == handout.HandoutContentId,
+
+        // One id identifies the problem outright.
+        ProblemTarget problem => page => page.ProblemId == problem.ProblemId,
 
         // A target nothing here knows, which is a bug rather than a bad request.
         _ => throw new ArgumentOutOfRangeException(nameof(target), target, "Unknown defense target."),
@@ -112,14 +133,14 @@ internal static class DefenseTargets
     }
 
     /// <summary>
-    /// Stages the handout and environment anchor rows a defense against a handout hangs off, reusing whichever
-    /// already exist.
+    /// Writes the handout and environment anchor rows a handout environment is held by, reusing whichever already
+    /// exist.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
-    /// <param name="target">The environment being defended.</param>
+    /// <param name="target">The handout environment.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The environment row's id.</returns>
-    private static async Task<Guid> UpsertHandoutEnvironmentAsync(
+    public static async Task<Guid> UpsertHandoutEnvironmentAsync(
         MathCompsDbContext dbContext, HandoutEnvironmentTarget target, CancellationToken cancellationToken)
     {
         // The handout the environment hangs off.

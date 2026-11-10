@@ -3,8 +3,9 @@ using System.ComponentModel.DataAnnotations;
 namespace MathComps.Api.Options;
 
 /// <summary>
-/// How many requests one caller may make in a window, for search and for the other limited routes. A caller is one
-/// IPv4 address, or one IPv6 /64.
+/// How many requests one caller may make in a window, for search, for the routes a page asks every few seconds and for
+/// the other limited routes. A caller is one IPv4 address or one IPv6 /64, except on the signed-in polled routes, where
+/// it is one account.
 /// </summary>
 internal class RateLimitSettings
 {
@@ -44,4 +45,30 @@ internal class RateLimitSettings
     /// </summary>
     [Range(0, int.MaxValue)]
     public int SearchQueueLimit { get; set; }
+
+    /// <summary>
+    /// The requests one account may make in one window to the routes a signed-in page asks every few seconds.
+    /// </summary>
+    [Range(1, int.MaxValue)]
+    public int AccountPollPermitLimit { get; set; }
+
+    /// <summary>
+    /// How many more polls of an account wait for the next window once it reaches
+    /// <see cref="AccountPollPermitLimit"/>, before the rest are refused.
+    /// </summary>
+    [Range(0, int.MaxValue)]
+    public int AccountPollQueueLimit { get; set; }
+
+    /// <summary>
+    /// The requests one caller may make in one window to the routes a page with no account asks every few seconds.
+    /// </summary>
+    [Range(1, int.MaxValue)]
+    public int AddressPollPermitLimit { get; set; }
+
+    /// <summary>
+    /// How many more polls of a caller with no account wait for the next window once it reaches
+    /// <see cref="AddressPollPermitLimit"/>, before the rest are refused.
+    /// </summary>
+    [Range(0, int.MaxValue)]
+    public int AddressPollQueueLimit { get; set; }
 }

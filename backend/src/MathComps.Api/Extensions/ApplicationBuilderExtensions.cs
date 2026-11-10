@@ -101,11 +101,11 @@ public static class ApplicationBuilderExtensions
     {
         // Traefik handles HTTPS redirection
 
-        // Enable rate limiting middleware
-        app.UseRateLimiter();
-
         // Enable authentication
         app.UseAuthentication();
+
+        // Enable rate limiting middleware, after authentication so a policy counting per account sees the caller
+        app.UseRateLimiter();
 
         // Enable authorization
         app.UseAuthorization();

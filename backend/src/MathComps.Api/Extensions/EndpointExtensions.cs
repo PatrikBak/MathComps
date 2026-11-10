@@ -36,6 +36,9 @@ public static class EndpointExtensions
         // The photos of handwritten work a defense conversation is written from
         app.MapDefensePhotoEndpoints();
 
+        // Photos sent from a student's phone into a composer open elsewhere, the phone's side taking no account
+        app.MapDefensePhotoHandoffEndpoints();
+
         // The competitions the site hosts itself: the groups, entries, and the problems an entry opens
         app.MapCompetitionEndpoints();
 
