@@ -1,21 +1,18 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.RateLimiting;
-using MathComps.Api.Authorization;
 using MathComps.Api.Constants;
 using MathComps.Api.Errors;
 using MathComps.Api.Options;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
-using System.Text.RegularExpressions;
 
 namespace MathComps.Api.Extensions;
 
 /// <summary>
-/// Extension methods for configuring services in the dependency injection container.
+/// Extension methods for configuring rate limiting.
 /// </summary>
-public static class ServiceCollectionExtensions
+public static class RateLimitingExtensions
 {
     /// <summary>
     /// Adds rate limiting services to prevent DoS attacks and abuse, sized by the limits in configuration.
@@ -164,64 +161,11 @@ public static class ServiceCollectionExtensions
 
         // An IPv6 client controls a whole /64, so collapse to that prefix to stop address rotation
         var bytes = address.GetAddressBytes();
+
         // Zero the host half, keeping only the /64 network prefix
         Array.Clear(bytes, 8, 8);
+
         // Rebuild the address from the masked prefix and use it as the key
         return new IPAddress(bytes).ToString();
-    }
-
-    /// <summary>
-    /// Adds the authorization policies endpoints require, and what looks the caller's account up on an organization's
-    /// list.
-    /// </summary>
-    /// <param name="services">The service collection to configure.</param>
-    /// <returns>The configured service collection for chaining.</returns>
-    public static IServiceCollection AddApiAuthorization(this IServiceCollection services)
-    {
-        // The policies, each by the accounts it lets in
-        services.AddAuthorizationBuilder()
-            .AddPolicy(AuthorizationPolicies.Admin, policy => policy.RequireRole(ClerkClaims.AdminRole))
-            .AddPolicy(AuthorizationPolicies.OrganizationMember, policy => policy
-                .RequireAuthenticatedUser()
-                .AddRequirements(new OrganizationMemberRequirement()));
-
-        // What looks the caller's account up on an organization's list
-        services.AddScoped<IAuthorizationHandler, OrganizationMemberHandler>();
-
-        // Return the services for chaining
-        return services;
-    }
-
-    /// <summary>
-    /// Adds CORS configuration for cross-origin requests.
-    /// </summary>
-    /// <param name="services">The service collection to configure.</param>
-    /// <param name="configuration">The application configuration containing CORS settings.</param>
-    /// <returns>The configured service collection for chaining.</returns>
-    public static IServiceCollection AddCorsConfiguration(this IServiceCollection services, IConfiguration configuration)
-    {
-        // Configure Cors
-        services.AddCors(options => options
-            // With one policy, more than enough
-            .AddPolicy("default", policyBuilder => policyBuilder
-                // Custom origin validation to support wildcards
-                .SetIsOriginAllowed(origin =>
-                     // Get allowed origins from configuration
-                     (configuration.GetSection("Cors:Origins").Get<string[]>() ?? [])
-                         // Convert wildcard patterns to regex patterns
-                         .Select(allowedOrigin =>
-                             // Escape special regex characters first, then replace * with .*
-                             $"^{Regex.Escape(allowedOrigin).Replace("\\*", ".*")}$")
-                        // Check if the origin matches any of the regex patterns
-                        .Any(pattern => Regex.IsMatch(origin, pattern, RegexOptions.IgnoreCase)))
-                // Allow common headers for browser requests
-                .WithHeaders("Content-Type", "X-Requested-With", "Authorization", "Accept", "Accept-Language")
-                // Only required HTTP methods
-                .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-            )
-        );
-
-        // Return the services for chaining
-        return services;
     }
 }

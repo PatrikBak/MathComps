@@ -17,10 +17,7 @@ import type { SentTurnBody } from './support/hosted-backend'
 import { installHostedBackend, pageTextOf } from './support/hosted-backend'
 import { pickFile } from './support/interaction'
 import { expectViewerShut, shownPhoto } from './support/photo-viewer'
-import { expect, test } from './support/test'
-
-/** How long the fake backend has to answer before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /**
  * Opens a conversation about the first problem of the practice run, where nothing has been argued yet, and where a

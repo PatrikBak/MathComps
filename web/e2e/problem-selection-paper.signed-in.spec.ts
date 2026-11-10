@@ -22,11 +22,10 @@ import {
   problemCount,
   READY,
   selectionCopy,
-  SETTLE_TIMEOUT_MS,
   stubSelection,
   tabRowOn,
 } from './support/problem-selection'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** The elementary paper of the board on screen: {@link FIRST} in E1, then two empty slots. */
 const ELEMENTARY = DRAFT_BOARD.papers[0]

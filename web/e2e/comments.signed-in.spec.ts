@@ -29,16 +29,13 @@ import {
 import { editorCopy } from './support/competitions'
 import { returnToTab } from './support/emulation'
 import { leaveInStorage } from './support/interaction'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** The copy a thread reads under. */
 const commentsCopy = messages.comments
 
 /** A function which fills counted nouns, the way the page does. */
 const pluralText = createTranslator({ locale: 'en', messages, namespace: 'plurals' })
-
-/** How long the page has to show the thread before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 30_000
 
 /** What a comment by somebody other than the reader says. */
 const THEIR_TEXT = 'The third problem falls to induction.'

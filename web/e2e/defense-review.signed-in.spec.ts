@@ -9,13 +9,10 @@ import {
   FIRST_UNREAD_TURN_TEXT,
 } from './support/conversation-review'
 import { conversationOf, installQueueBackend } from './support/review-backend'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** The review queue in English, which is the locale the assertions' copy is taken from. */
 const QUEUE_PATH = `/en${ROUTES.ADMIN_DEFENSES}`
-
-/** How long the fake backend has to answer before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
 
 test.describe('the review queue', () => {
   test('reads every loaded page again on refresh, putting a new conversation on top', async ({

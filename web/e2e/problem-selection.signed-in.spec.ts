@@ -42,7 +42,6 @@ import {
   selectionCopy,
   selectionText,
   SET_ASIDE,
-  SETTLE_TIMEOUT_MS,
   slotOf,
   SLOVAK_ALONE,
   SLOVAK_ALONE_STATEMENT,
@@ -52,7 +51,7 @@ import {
   UNWRITTEN,
   USED,
 } from './support/problem-selection'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** Where the pool is left when a problem is opened from it, in pixels from the top. */
 const POOL_SPOT = 400

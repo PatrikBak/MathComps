@@ -33,11 +33,8 @@ import {
   putCursorAt,
 } from './support/interaction'
 import { searchAnswerWith, stubSearchAnswer } from './support/problem-actions'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 import { countRemovals, hearLoad } from './support/watchers'
-
-/** How long the fake backend has to answer before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
 
 /** A pause longer than the text's history takes to call the next edit a step of its own. */
 const HISTORY_STEP_MS = 600

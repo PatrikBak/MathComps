@@ -41,13 +41,12 @@ import {
   selectionCopy,
   selectionText,
   SET_ASIDE,
-  SETTLE_TIMEOUT_MS,
   slotOf,
   statusLine,
   stubSelection,
   USED,
 } from './support/problem-selection'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 import { recordNotices } from './support/watchers'
 
 /** What the page says about a write the backend refused, by the code it refused it with. */

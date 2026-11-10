@@ -42,12 +42,11 @@ import {
   REVISION,
   selectionCopy,
   selectionText,
-  SETTLE_TIMEOUT_MS,
   stubSelection,
   tabRowOn,
   untilSelectionReadAgain,
 } from './support/problem-selection'
-import { expect, test } from './support/test'
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 import { countDialogs } from './support/watchers'
 
 /** What a reviewer writes into {@link OPENED}'s discussion while a test watches. */

@@ -8,10 +8,7 @@ import {
   stubProblemSearch,
 } from './support/backend-routes'
 import { triggerOf } from './support/facets'
-import { expect, test } from './support/test'
-
-/** How long the library needs to read the URL and send the one search off the back of it. */
-const SETTLE_TIMEOUT_MS = 15_000
+import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /**
  * How long to watch a settled tree before calling its counts final: long enough for a reading the
