@@ -5,8 +5,8 @@ import 'yet-another-react-lightbox/styles.css'
 import { Portal } from '@headlessui/react'
 import { useFocusReturn } from '@mantine/hooks'
 import { useTranslations } from 'next-intl'
-import { useEffect, useRef } from 'react'
-import type { Labels } from 'yet-another-react-lightbox'
+import { useEffect, useRef, useState } from 'react'
+import type { Labels, SlideImage } from 'yet-another-react-lightbox'
 import Lightbox from 'yet-another-react-lightbox'
 import Zoom from 'yet-another-react-lightbox/plugins/zoom'
 
@@ -18,6 +18,25 @@ export type ViewerPhoto = {
   src: string
   /** What the photo shows, for readers who can't see it. */
   alt: string
+}
+
+/**
+ * Whether the viewer's slides show the photos: the same images under the same names, in the same order.
+ *
+ * @param slides - The slides the viewer holds.
+ * @param photos - The photos the viewer is to show.
+ *
+ * @returns Whether the slides show exactly those photos.
+ */
+function showsPhotos(slides: readonly SlideImage[], photos: readonly ViewerPhoto[]): boolean {
+  // As many slides as photos, each one the photo at its place
+  return (
+    slides.length === photos.length &&
+    photos.every(
+      (photo, position) =>
+        slides[position]?.src === photo.src && slides[position]?.alt === photo.alt
+    )
+  )
 }
 
 /**
@@ -93,6 +112,14 @@ export function PhotoViewer({ photos, index, isOpen, onIndexChange, onClose }: P
     '{index} of {total}': t.raw('slideCounter'),
   } satisfies Required<Labels>
 
+  // The photos as the viewer's slides, one array for as long as the photos stay the same. The viewer goes back to
+  // the photo `index` names whenever it is handed a new array, and `index` catches up with a swipe only after
+  // `on.view`, so a page render landing together with a swipe would undo the swipe
+  const [slides, setSlides] = useState<SlideImage[]>([])
+
+  // A new array once the photos change
+  if (!showsPhotos(slides, photos)) setSlides(photos.map(({ src, alt }) => ({ src, alt })))
+
   // The viewer in the portal of whatever dialog it is opened from
   return (
     <Portal>
@@ -101,7 +128,7 @@ export function PhotoViewer({ photos, index, isOpen, onIndexChange, onClose }: P
           open={isOpen}
           close={onClose}
           index={index}
-          slides={photos.map(({ src, alt }) => ({ src, alt }))}
+          slides={slides}
           plugins={[Zoom]}
           labels={labels}
           portal={{ root: () => rootRef.current }}
