@@ -8,6 +8,7 @@ import { apiCallOf, useApi } from '@/hooks/use-api'
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
 
 import type { DefenseTarget } from '../model/defense-target'
+import type { DefenseTurnPhoto } from '../model/defense-types'
 import { readPhoto } from '../services/photo-service'
 
 /**
@@ -16,7 +17,7 @@ import { readPhoto } from '../services/photo-service'
 type HeldPhoto = {
   /** The photo, unique among those the composer has held. */
   id: number
-  /** Where the photo previews from, on the student's own device. */
+  /** Where the photo previews from: the student's own device, or the stored page of one a message went out with. */
   previewUrl: string
 }
 
@@ -72,7 +73,7 @@ type FailedPhoto = HeldPhoto & {
 export type ComposerPhoto = ReadingPhoto | ReadPhoto | InsertedPhoto | FailedPhoto
 
 /**
- * What a held photo needs kept beside it and never drawn.
+ * What a photo picked in the composer needs kept beside it and never drawn.
  */
 type PhotoResources = {
   /** The photo file as the student picked it. */
@@ -103,6 +104,8 @@ export type UseDefensePhotosResult = {
   setAside: (ids: readonly number[]) => void
   /** Puts photos set aside back into the composer, their message having not gone out. */
   bringBack: (ids: readonly number[]) => void
+  /** Puts the photos a message went out with back into the composer, ahead of those held, its text there again. */
+  restoreSent: (sent: readonly DefenseTurnPhoto[]) => void
 }
 
 /**
@@ -151,7 +154,8 @@ export function useDefensePhotos({
   // The id the next photo picked gets
   const nextId = useRef(0)
 
-  // What each held photo keeps beside it, under its id, which is where a dropped photo stops being found
+  // What each photo picked in the composer keeps beside it, under its id, which is where a dropped photo stops
+  // being found
   const resources = useRef(new Map<number, PhotoResources>())
 
   // The shrink last queued, which the next waits behind so only one photo is held decoded at full size
@@ -331,7 +335,7 @@ export function useDefensePhotos({
   const removePhotos = (ids: readonly number[]) => {
     // Each photo lets go of what it kept
     ids.forEach((id) => {
-      // What the photo kept, gone if it was already dropped
+      // What the photo kept, none if it was already dropped or came back from a sent message
       const held = resources.current.get(id)
       if (held === undefined) return
 
@@ -383,6 +387,23 @@ export function useDefensePhotos({
   // Puts photos set aside back into the composer
   const bringBack = (ids: readonly number[]) => markGoingOut(ids, false)
 
+  // Puts the photos a message went out with back into the composer, previewing from their stored pages
+  const restoreSent = (sent: readonly DefenseTurnPhoto[]) => {
+    // Each as a photo whose text is in the message, kept as it already is
+    const restored = sent.map(
+      (photo): InsertedPhoto => ({
+        kind: 'inserted',
+        id: nextId.current++,
+        previewUrl: photo.link,
+        photoId: photo.id,
+        isGoingOut: false,
+      })
+    )
+
+    // Ahead of those held, as their text is ahead of anything else in the message
+    setPhotos((held) => [...restored, ...held])
+  }
+
   // Once the composer is gone, so are the reads still on their way and every preview
   useEffect(() => {
     // What the held photos keep, one map for the composer's whole life
@@ -411,5 +432,6 @@ export function useDefensePhotos({
     removePhotos,
     setAside,
     bringBack,
+    restoreSent,
   }
 }

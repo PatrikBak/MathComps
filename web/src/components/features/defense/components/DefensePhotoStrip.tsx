@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
-import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
+import { PhotoTile } from '@/components/shared/components/PhotoTile'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -16,9 +16,9 @@ import type { ComposerPhoto, UseDefensePhotosResult } from '../hooks/use-defense
  * The edge of a photo's tile, by where its reading stands: only a failed one is marked.
  */
 const TILE_BORDER: Record<ComposerPhoto['kind'], string> = {
-  reading: 'border-foreground/10',
-  read: 'border-foreground/10',
-  inserted: 'border-foreground/10',
+  reading: '',
+  read: '',
+  inserted: '',
   failed: 'border-error/40',
 }
 
@@ -39,8 +39,8 @@ type DefensePhotoTileProps = {
 }
 
 /**
- * One photo held in the composer, previewing from the student's device, with what its reading came to. A failed
- * one is only marked here; why it failed is said where its text would be.
+ * One photo held in the composer, previewing from the student's device or its stored page, with what its reading
+ * came to. A failed one is only marked here; why it failed is said where its text would be.
  */
 function DefensePhotoTile({ photo, number, isSelected, onPress, onRemove }: DefensePhotoTileProps) {
   // Copy for the composer's photos
@@ -81,38 +81,18 @@ function DefensePhotoTile({ photo, number, isSelected, onPress, onRemove }: Defe
 
   // The photo, named by its place so its buttons say which photo they act on
   return (
-    <div role="group" aria-label={t('photo', { number })} className="relative size-20 shrink-0">
+    <div role="group" aria-label={t('photo', { number })} className="relative shrink-0">
       {/* The photo under what its reading came to, clipped to the tile apart from the removal, whose focus
           ring reaches past it */}
-      <div
-        className={cn(
-          'relative size-full overflow-hidden rounded-lg border bg-surface',
-          TILE_BORDER[photo.kind],
-          isSelected && 'border-brand ring-2 ring-brand/40'
-        )}
+      <PhotoTile
+        src={photo.previewUrl}
+        label={pressLabel}
+        isCurrent={isSelected}
+        onPress={onPress}
+        className={TILE_BORDER[photo.kind]}
       >
-        <button
-          type="button"
-          // The tile clips, so the ring is drawn inside it
-          className={cn(
-            'size-full cursor-pointer',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus'
-          )}
-          aria-label={pressLabel}
-          aria-current={isSelected || undefined}
-          title={pressLabel}
-          onClick={onPress}
-        >
-          <ImageWithLoader
-            src={photo.previewUrl}
-            alt=""
-            fill
-            className="object-cover"
-            fallback={null}
-          />
-        </button>
         {overlay}
-      </div>
+      </PhotoTile>
 
       {/* Removal */}
       <Button

@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test'
+import { createTranslator } from 'next-intl'
 
 import { ROUTES } from '@/i18n/i18n'
 
@@ -20,6 +21,9 @@ export const authCopy = messages.auth
 
 /** The copy the defense chat reads under. */
 export const chatCopy = messages.defense
+
+/** A function which fills the copy the photos of handwritten work read under, the way the page does. */
+export const photosText = createTranslator({ locale: 'en', messages, namespace: 'defense.photos' })
 
 /** The labels every shared control reads under, whichever surface it is on. */
 export const actionsCopy = messages.ui.actions

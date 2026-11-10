@@ -103,6 +103,8 @@ export function TranscriptPane({
           onOpen: readDrafts,
         }}
         turnDurationsMs={turnDurationsMs}
+        // The drawings Mathilda was handed in place of each page, so a reviewer sees what she read
+        showsDrawings
         footer={
           <AuthorVerdict
             feedback={conversation.feedback}

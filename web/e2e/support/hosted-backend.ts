@@ -2,7 +2,9 @@ import type { Page, Route } from '@playwright/test'
 
 import type {
   DefenseCopy,
+  DefensePhotoReading,
   DefenseSessionList,
+  DefenseTurnPhoto,
   MathildaConsent,
 } from '@/components/features/defense/model/defense-types'
 import { derivePhase } from '@/components/features/hosted-competitions/model/hosted-competition-state'
@@ -14,7 +16,7 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import { SUPPORTED_LOCALES } from '@/i18n/i18n'
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
 
-import { BACKEND_ORIGIN } from './backend-routes'
+import { BACKEND_ORIGIN, fileLinkTo } from './backend-routes'
 import { HANDOUT_SESSION, LIMITS, OPENER, SCRIPTED_REPLIES } from './hosted-backend-content'
 import {
   areProblemsReadable,
@@ -106,6 +108,35 @@ const DROP_REFUSAL_STATUSES = {
 
 /** A refusal a drop can be answered with. */
 type DropRefusal = keyof typeof DROP_REFUSAL_STATUSES
+
+/**
+ * What the backend reads off the photo of a page, the pages numbered in the order they were read.
+ *
+ * @param pageNumber - Which page, from 1.
+ *
+ * @returns The page, written out.
+ */
+export function pageTextOf(pageNumber: number): string {
+  // A line telling the pages apart
+  return `Page ${pageNumber}: the residues repeat`
+}
+
+/**
+ * The photos a turn was sent with, as the backend hands them back: each page linked from the store, with the one
+ * drawing cut out of it.
+ *
+ * @param photoIds - The photos, in page order.
+ *
+ * @returns The photos, linked.
+ */
+function linkedPhotos(photoIds: readonly string[]): DefenseTurnPhoto[] {
+  // Each page, and the drawing cut out of it
+  return photoIds.map((photoId) => ({
+    id: photoId,
+    link: fileLinkTo(photoId),
+    crops: [{ id: `${photoId}-drawing`, link: fileLinkTo(`${photoId}-drawing`) }],
+  }))
+}
 
 /**
  * What to vary about the student beyond the state they are in.
@@ -248,13 +279,21 @@ async function think(page: Page): Promise<void> {
 }
 
 /**
+ * What every turn the chat sends carries, opening a conversation or continuing one.
+ */
+export type SentTurnBody = {
+  /** What the turn says. */
+  content: string
+  /** The photos the turn was written from, in page order. */
+  photoIds: string[]
+}
+
+/**
  * What opening a conversation sends, in as much of it as the fake reads.
  */
-type StartRequestBody = {
+type StartRequestBody = SentTurnBody & {
   /** The problem being argued. */
   target: { problemId: string }
-  /** What the turn opening the argument says. */
-  content: string
 }
 
 /**
@@ -263,14 +302,6 @@ type StartRequestBody = {
 type RewindRequestBody = {
   /** The sequence of the last turn to keep; every later one goes. */
   keepThroughSequence: number
-}
-
-/**
- * What a further turn in an open conversation sends.
- */
-type TurnRequestBody = {
-  /** What the turn says. */
-  content: string
 }
 
 /**
@@ -593,6 +624,21 @@ export async function installHostedBackend(
     await route.fulfill({ status: 204, body: '' })
   })
 
+  // How many photos have been read, which numbers the next one
+  let photosRead = 0
+
+  // Reading the photo of a page of handwritten work, which keeps the photo and writes the page out
+  await page.route(`${BACKEND_ORIGIN}/defense/photos/problems/*`, async (route) => {
+    // A number no photo before it took
+    photosRead++
+
+    // The kept photo, and its page written out
+    await answer(page, route, {
+      photoId: `photo-${photosRead}`,
+      text: pageTextOf(photosRead),
+    } satisfies DefensePhotoReading)
+  })
+
   // The examiner's canned lines, which the chat reads before it has anything else to show
   await page.route(`${BACKEND_ORIGIN}/defense/copy`, (route) =>
     answer(page, route, { opener: OPENER } satisfies DefenseCopy)
@@ -762,7 +808,7 @@ export async function installHostedBackend(
       statement,
       turns: [
         storedTurn(state, 'examiner', OPENER, receivedAt),
-        storedTurn(state, 'candidate', body.content, receivedAt + 1),
+        storedTurn(state, 'candidate', body.content, receivedAt + 1, linkedPhotos(body.photoIds)),
         // Stamped where it was actually said, which is once there is a reply to say
         storedTurn(state, 'examiner', SCRIPTED_REPLIES[0]!, await pageNow(page)),
       ],
@@ -786,8 +832,8 @@ export async function installHostedBackend(
     // Which conversation the turn belongs to
     const sessionId = new URL(route.request().url()).pathname.split('/').at(-2) ?? ''
 
-    // What the student just said
-    const { content } = route.request().postDataJSON() as TurnRequestBody
+    // What the student just said, and the photos it was written from
+    const { content, photoIds } = route.request().postDataJSON() as SentTurnBody
 
     // Wherever it is being held
     const session = [...state.transcripts.values()]
@@ -818,7 +864,7 @@ export async function installHostedBackend(
 
     // The turn where it landed, and the reply where it was actually said
     session.turns.push(
-      storedTurn(state, 'candidate', content, receivedAt),
+      storedTurn(state, 'candidate', content, receivedAt, linkedPhotos(photoIds)),
       storedTurn(
         state,
         'examiner',

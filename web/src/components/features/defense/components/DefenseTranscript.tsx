@@ -84,6 +84,8 @@ export type DefenseTranscriptProps = {
   draftsMark: TurnDraftsMark | null
   /** How long each turn took its author, by turn; null where the reader isn't shown timings. */
   turnDurationsMs: ReadonlyMap<string, number> | null
+  /** Whether a message's drawings show under its pages, as they were cut out of them for Mathilda. */
+  showsDrawings: boolean
   /** Whether to number the examiner's replies, so something outside the conversation can refer to one. */
   showReplyNumbers?: boolean
   /** The turn something outside the conversation currently points at; null when nothing does. */
@@ -113,6 +115,7 @@ export function DefenseTranscript({
   noteMark,
   draftsMark,
   turnDurationsMs,
+  showsDrawings,
   showReplyNumbers = false,
   pointedAtTurnId = null,
   openingTurnId = null,
@@ -229,6 +232,7 @@ export function DefenseTranscript({
                     noteMark={replyId === null ? null : noteMark}
                     draftsMark={draftsMark}
                     durationMs={turn.id === null ? null : (turnDurationsMs?.get(turn.id) ?? null)}
+                    showsDrawings={showsDrawings}
                   />
                 </Fragment>
               )

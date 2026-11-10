@@ -2,6 +2,7 @@ import type {
   DefenseSession,
   DefenseSessionListItem,
   DefenseSessionTarget,
+  DefenseTurnPhoto,
   StoredTurn,
 } from '@/components/features/defense/model/defense-types'
 import { MAX_MARK } from '@/components/features/hosted-competitions/model/hosted-competition-score'
@@ -101,6 +102,7 @@ export function problemIdOf(competitionSlug: string, position: number): string {
  * @param role - Who authored it.
  * @param content - What it says.
  * @param atMs - When it was authored, in epoch milliseconds.
+ * @param photos - The photos it was sent with, none on the examiner's turns.
  *
  * @returns The turn.
  */
@@ -108,13 +110,20 @@ export function storedTurn(
   state: FakeState,
   role: StoredTurn['role'],
   content: string,
-  atMs: number
+  atMs: number,
+  photos: readonly DefenseTurnPhoto[] = []
 ): StoredTurn {
   // A number no turn before it took
   state.minted++
 
   // The turn, wearing that number
-  return { id: `turn-${state.minted}`, createdAt: new Date(atMs).toISOString(), role, content }
+  return {
+    id: `turn-${state.minted}`,
+    createdAt: new Date(atMs).toISOString(),
+    role,
+    content,
+    photos,
+  }
 }
 
 /**

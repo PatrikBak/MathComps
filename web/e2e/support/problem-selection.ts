@@ -561,8 +561,8 @@ function turnOf(
   content: string,
   createdAt: string
 ): StoredTurn {
-  // The turn as the backend stores it
-  return { id, role, content, createdAt }
+  // The turn as the backend stores it, sent with no photos
+  return { id, role, content, createdAt, photos: [] }
 }
 
 /**

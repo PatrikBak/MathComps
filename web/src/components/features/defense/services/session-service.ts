@@ -105,6 +105,7 @@ export function submitTurn(
         body: JSON.stringify({
           target: toWireTarget(request.target),
           content: request.content,
+          photoIds: request.photoIds,
         }),
       })
     // Append the student's message to the open session
@@ -112,7 +113,7 @@ export function submitTurn(
       return apiCall<DefenseSession>(() => getContinueDefenseUrl(request.sessionId), {
         method: 'POST',
         signal: request.signal,
-        body: JSON.stringify({ content: request.content }),
+        body: JSON.stringify({ content: request.content, photoIds: request.photoIds }),
       })
     // Every request kind is handled above
     default:

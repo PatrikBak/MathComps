@@ -290,8 +290,30 @@ export function DefensePhotoSideBySide({
   // The photo looked at, none while the view is shut
   const viewed = photos.photos.find((photo) => photo.id === viewedPhotoId)
 
+  // A function which looks at the page swiped to in the review too, so its text is there on the way back
+  const viewSwipedTo = (index: number) => {
+    // The page swiped to, if one stands there
+    const swipedTo = photos.photos.at(index)
+
+    // Looked at in the review
+    if (swipedTo !== undefined) onView(swipedTo.id)
+  }
+
   // The pages shown large over the whole screen
-  const viewer = useDefensePhotoViewer({ photos, onView })
+  const viewer = useDefensePhotoViewer({
+    links: photos.photos.map((photo) => photo.previewUrl),
+    item: 'photo',
+    onSwipe: viewSwipedTo,
+  })
+
+  // A function which shows the pages large from the one looked at
+  const enlarge = () => {
+    // Nothing to show while no page is looked at
+    if (viewed === undefined) return
+
+    // From the page looked at
+    viewer.openAt(photos.photos.indexOf(viewed))
+  }
 
   // Puts the read pages' text into the message and goes back to the composer
   const insert = () => {
@@ -345,7 +367,7 @@ export function DefensePhotoSideBySide({
             {/* Every page, the one looked at marked, then more */}
             <DefensePhotoStrip
               photos={photos}
-              selected={viewed !== undefined ? { id: viewed.id, onEnlarge: viewer.enlarge } : null}
+              selected={viewed !== undefined ? { id: viewed.id, onEnlarge: enlarge } : null}
               onOpen={onView}
             >
               <DefensePhotoButton variant="page" onPick={onPick} />
@@ -357,7 +379,7 @@ export function DefensePhotoSideBySide({
                 <DefenseSidePhoto
                   photo={viewed}
                   number={photos.photos.indexOf(viewed) + 1}
-                  onEnlarge={viewer.enlarge}
+                  onEnlarge={enlarge}
                 />
               )}
             </div>
@@ -374,7 +396,7 @@ export function DefensePhotoSideBySide({
                 heightPx={Math.floor(textColumnHeight)}
                 // A page swiped to while the pages are large comes up behind them, where taking the cursor would
                 // send the keys meant for the large page into its text
-                autoFocus={!isTouchOnly && !viewer.isEnlarged}
+                autoFocus={!isTouchOnly && !viewer.isOpen}
               />
             )}
           </div>
@@ -398,10 +420,12 @@ export function DefensePhotoSideBySide({
       {viewed !== undefined && (
         <PhotoViewer
           photos={viewer.viewerPhotos}
+          // The page looked at, which a swipe moves too, so the large page stays on it while pages come and go
+          // around it
           index={photos.photos.indexOf(viewed)}
-          isOpen={viewer.isEnlarged}
-          onIndexChange={viewer.viewSwipedTo}
-          onClose={viewer.shrink}
+          isOpen={viewer.isOpen}
+          onIndexChange={viewer.swipeTo}
+          onClose={viewer.close}
         />
       )}
     </Modal>

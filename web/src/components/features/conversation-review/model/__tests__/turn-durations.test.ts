@@ -15,8 +15,8 @@ import { resolveTurnDurationsMs } from '../turn-durations'
  * @returns The turn.
  */
 function turn(id: string, role: TurnRole, createdAt: string): StoredTurn {
-  // The body stays empty, since no timing reads it
-  return { id, role, createdAt, content: '' }
+  // The body and photos stay empty, since no timing reads them
+  return { id, role, createdAt, content: '', photos: [] }
 }
 
 /**

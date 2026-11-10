@@ -10,7 +10,29 @@ import type { DefenseTarget } from './defense-target'
 export type TurnRole = 'examiner' | 'candidate'
 
 /**
- * A single message in a defense conversation: who authored it and its body.
+ * A drawing cut out of a photo a message was sent with.
+ */
+type DefenseTurnCrop = {
+  /** The drawing's identifier. */
+  id: string
+  /** Where the drawing loads from. */
+  link: string
+}
+
+/**
+ * A photo of a handwritten page a message was sent with.
+ */
+export type DefenseTurnPhoto = {
+  /** The photo's identifier. */
+  id: string
+  /** Where the page loads from. */
+  link: string
+  /** The drawings cut out of the page, in the order its reading lists them. */
+  crops: readonly DefenseTurnCrop[]
+}
+
+/**
+ * A single message in a defense conversation: who authored it, its body, and the photos it was sent with.
  */
 export type Turn = {
   /** Stable identifier; null while the message is a draft the backend hasn't taken yet. */
@@ -21,6 +43,8 @@ export type Turn = {
   role: TurnRole
   /** The message body as markdown/math source. */
   content: string
+  /** The photos of handwritten pages whose text the message carries, in page order; none on the examiner's. */
+  photos: readonly DefenseTurnPhoto[]
 }
 
 /**
@@ -134,8 +158,9 @@ export type DefenseSession = {
 }
 
 /**
- * The caps a defense is held to: what a student may type, how large a photo of their work is read, and how
- * far a conversation may go. They are the backend's own configuration, so they can change without a deploy.
+ * The caps a defense is held to: what a student may type, how many photos a message may carry and how large each
+ * is read, and how far a conversation may go. They are the backend's own configuration, so they can change
+ * without a deploy.
  */
 export type DefenseLimits = {
   /** The longest a single student message may be, in characters. */
@@ -144,6 +169,8 @@ export type DefenseLimits = {
   maxFeedbackCommentChars: number
   /** The most messages the student may send in one conversation. */
   maxMessagesPerDefense: number
+  /** The most photos one message may carry. */
+  maxPhotosPerMessage: number
   /** The most pixels a photo keeps along its longer side once read; a larger one is shrunk to it. */
   photoLongEdge: number
 }
@@ -286,35 +313,39 @@ export type DefenseProblem = {
 }
 
 /**
+ * The student's turn as every turn request carries it, and the way to stop it.
+ */
+type SubmittedTurn = {
+  /** The student's turn as markdown/math source. */
+  content: string
+  /** The photos whose text the turn carries, in page order. */
+  photoIds: readonly string[]
+  /** Aborts the in-flight round-trip when the student stops the turn, or the conversation moves on without it. */
+  signal: AbortSignal
+}
+
+/**
  * A request to open a brand-new defense session with the student's first turn: the backend mints the
  * session (its id comes back on the response), seeds it with the examiner's greeting, saves the turn,
  * and answers it in one round-trip. Only the target rides along — the backend looks the problem itself
  * up from it.
  */
-type StartDefenseTurnRequest = {
+type StartDefenseTurnRequest = SubmittedTurn & {
   /** Marks the request that opens a new session. */
   kind: 'start'
   /** What the new session is about. */
   target: DefenseTarget
-  /** The student's turn as markdown/math source. */
-  content: string
-  /** Aborts the in-flight round-trip when the student stops the turn. */
-  signal: AbortSignal
 }
 
 /**
  * A request to advance an open defense session by one turn: the backend saves the student's turn,
  * answers it, and returns the grown session in one round-trip.
  */
-type ContinueDefenseTurnRequest = {
+type ContinueDefenseTurnRequest = SubmittedTurn & {
   /** Marks a request against an existing session. */
   kind: 'continue'
   /** The open session's id. */
   sessionId: string
-  /** The student's turn as markdown/math source. */
-  content: string
-  /** Aborts the in-flight round-trip when the student stops the turn. */
-  signal: AbortSignal
 }
 
 /**

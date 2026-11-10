@@ -60,6 +60,9 @@ class FakeBackend implements DefenseConversationServices {
   /** When true, the next rewindTurns throws instead of truncating. */
   failNextRewind = false
 
+  /** When set, rewindTurns waits on this before answering. */
+  rewindGate: PromiseWithResolvers<void> | null = null
+
   /** Whether an abort rejects a held round-trip, as a real fetch does. */
   autoRejectOnAbort = true
 
@@ -104,6 +107,7 @@ class FakeBackend implements DefenseConversationServices {
       createdAt: null,
       role: 'candidate',
       content: request.content,
+      photos: request.photoIds.map((id) => ({ id, link: `stored/${id}`, crops: [] })),
     }
 
     // A distinct examiner reply
@@ -112,6 +116,7 @@ class FakeBackend implements DefenseConversationServices {
       createdAt: null,
       role: 'examiner',
       content: `probe ${(this.replyCount += 1)}`,
+      photos: [],
     }
 
     // Both new turns, stamped as the backend would
@@ -128,7 +133,9 @@ class FakeBackend implements DefenseConversationServices {
         statement: SAMPLE_PROBLEM.statement,
         hasOlderStatement: false,
         turns: [
-          ...this.stampTurns([{ id: null, createdAt: null, role: 'examiner', content: OPENER }]),
+          ...this.stampTurns([
+            { id: null, createdAt: null, role: 'examiner', content: OPENER, photos: [] },
+          ]),
           ...newTurns,
         ],
         feedback: null,
@@ -181,6 +188,11 @@ class FakeBackend implements DefenseConversationServices {
 
   /** @inheritdoc */
   rewindTurns = async (sessionId: string, keepThroughSequence: number): Promise<void> => {
+    // Hold the rewind open while the gate is set
+    if (this.rewindGate) {
+      await this.rewindGate.promise
+    }
+
     // Fail once when armed
     if (this.failNextRewind) {
       this.failNextRewind = false
@@ -257,7 +269,7 @@ describe('DefenseConversationModel', () => {
     const { model, backend } = makeModel()
 
     // Send a turn, leaving it unresolved
-    void model.send('my answer', backend)
+    void model.send('my answer', [], backend)
 
     // The student turn and the indicator are already on screen
     const state = model.getSnapshot()
@@ -269,7 +281,7 @@ describe('DefenseConversationModel', () => {
   it('folds in the reply and opens the session when the round-trip resolves', async () => {
     // A model with a turn in flight
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
 
     // Release the round-trip
@@ -289,7 +301,7 @@ describe('DefenseConversationModel', () => {
   it('appends to the same open session on a later turn', async () => {
     // A model with one completed turn
     const { model, backend } = makeModel()
-    const first = model.send('first', backend)
+    const first = model.send('first', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await first
@@ -298,7 +310,7 @@ describe('DefenseConversationModel', () => {
     const sessionId = model.getSnapshot().currentSessionId
 
     // Send a second turn and let it land
-    const second = model.send('second', backend)
+    const second = model.send('second', [], backend)
     await flush()
     backend.submitCalls[1].gate.resolve()
     await second
@@ -315,13 +327,54 @@ describe('DefenseConversationModel', () => {
     ])
   })
 
+  it('sends each turn with its photos in page order, showing them until the stored ones come back', async () => {
+    // A fresh model
+    const { model, backend } = makeModel()
+
+    // A first turn sent with one photo, previewing from the device
+    const first = model.send('page one', [{ id: 'p1', link: 'blob:p1', crops: [] }], backend)
+    await flush()
+
+    // The opening request names the photo
+    expect(backend.submitCalls[0].request.photoIds).toEqual(['p1'])
+
+    // Let the first turn land
+    backend.submitCalls[0].gate.resolve()
+    await first
+
+    // Two pages, in the order they were written
+    const pages = [
+      { id: 'p3', link: 'blob:p3', crops: [] },
+      { id: 'p2', link: 'blob:p2', crops: [] },
+    ]
+
+    // A second turn sent with them
+    const second = model.send('pages two and three', pages, backend)
+    await flush()
+
+    // The request growing the session names them in that order
+    expect(backend.submitCalls[1].request.photoIds).toEqual(['p3', 'p2'])
+
+    // While the second turn is out, it shows the pages as they preview
+    const draftPages = model.getSnapshot().turns.at(-1)?.photos
+    expect(draftPages?.map((photo) => photo.link)).toEqual(['blob:p3', 'blob:p2'])
+
+    // Let the second turn land
+    backend.submitCalls[1].gate.resolve()
+    await second
+
+    // The stored turn, just before the reply, shows the stored pages instead
+    const storedPages = model.getSnapshot().turns.at(-2)?.photos
+    expect(storedPages?.map((photo) => photo.link)).toEqual(['stored/p3', 'stored/p2'])
+  })
+
   it('refuses a second send while a turn is in flight and mints a single session', async () => {
     // A model with a turn in flight
     const { model, backend } = makeModel()
-    const first = model.send('first', backend)
+    const first = model.send('first', [], backend)
 
     // A second send inside that window, as a double-tap would fire, is refused
-    const second = await model.send('second', backend)
+    const second = await model.send('second', [], backend)
     expect(second).toEqual({ kind: 'busy' })
 
     // No second round-trip started
@@ -341,7 +394,7 @@ describe('DefenseConversationModel', () => {
   it('stops an in-flight turn, reclaiming it and saving nothing', async () => {
     // A model with a turn in flight
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     expect(backend.submitCalls).toHaveLength(1)
 
@@ -362,7 +415,7 @@ describe('DefenseConversationModel', () => {
   it('ignores a stop once the turn has settled', async () => {
     // A model whose turn has landed
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -378,7 +431,7 @@ describe('DefenseConversationModel', () => {
     // A model whose round-trip resolves even after an abort
     const { model, backend } = makeModel()
     backend.autoRejectOnAbort = false
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
 
     // Release the round-trip and stop in the same tick, before its continuation runs
@@ -397,7 +450,7 @@ describe('DefenseConversationModel', () => {
     // A model whose backend ignores the abort rather than rejecting on it
     const { model, backend } = makeModel()
     backend.autoRejectOnAbort = false
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
 
     // Arm a non-abort failure
@@ -418,7 +471,7 @@ describe('DefenseConversationModel', () => {
   it('does not clobber a fresh conversation when a session switch abandons an in-flight turn', async () => {
     // A model with a turn in flight
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
 
     // Switch to a fresh conversation mid-flight
@@ -439,7 +492,7 @@ describe('DefenseConversationModel', () => {
     backend.nextSubmitError = new Error('submit failed')
 
     // Send into the failing round-trip
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
 
@@ -463,7 +516,7 @@ describe('DefenseConversationModel', () => {
     })
 
     // Send into the coded failure
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
 
@@ -474,7 +527,7 @@ describe('DefenseConversationModel', () => {
   it('opens a stored session on resume', async () => {
     // A model with one completed session
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -500,7 +553,7 @@ describe('DefenseConversationModel', () => {
     backend.gradesNewSessions = true
 
     // A first turn, which mints one
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -520,7 +573,7 @@ describe('DefenseConversationModel', () => {
   it('abandons an in-flight turn when another session is resumed', async () => {
     // A model with one completed, stored session
     const { model, backend } = makeModel()
-    const first = model.send('first', backend)
+    const first = model.send('first', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await first
@@ -528,7 +581,7 @@ describe('DefenseConversationModel', () => {
 
     // A second conversation with its turn in flight
     model.startNew()
-    const second = model.send('second', backend)
+    const second = model.send('second', [], backend)
     await flush()
 
     // Resume the first session mid-flight
@@ -545,7 +598,7 @@ describe('DefenseConversationModel', () => {
   it('ignores a re-resume of the open session from a stale snapshot', async () => {
     // A model with one completed, open session
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -570,7 +623,7 @@ describe('DefenseConversationModel', () => {
   it('starts fresh when the open session is deleted', async () => {
     // A model with one completed, open session
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -589,7 +642,7 @@ describe('DefenseConversationModel', () => {
   it('leaves the open conversation untouched when a different session is deleted', async () => {
     // A model with one completed session
     const { model, backend } = makeModel()
-    const first = model.send('first', backend)
+    const first = model.send('first', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await first
@@ -597,7 +650,7 @@ describe('DefenseConversationModel', () => {
 
     // A second completed session after a fresh start
     model.startNew()
-    const second = model.send('second', backend)
+    const second = model.send('second', [], backend)
     await flush()
     backend.submitCalls[1].gate.resolve()
     await second
@@ -614,7 +667,7 @@ describe('DefenseConversationModel', () => {
   it('keeps the open conversation on screen when deleting it fails', async () => {
     // A model with one completed, open session
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -635,7 +688,7 @@ describe('DefenseConversationModel', () => {
   it('treats deleting an already-gone session as a successful delete', async () => {
     // A model with one completed, open session
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -660,11 +713,11 @@ describe('DefenseConversationModel', () => {
   it('rewinds the open conversation to the kept prefix', async () => {
     // A model grown to two exchanges: examiner, candidate, examiner, candidate, examiner
     const { model, backend } = makeModel()
-    const first = model.send('first', backend)
+    const first = model.send('first', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await first
-    const second = model.send('second', backend)
+    const second = model.send('second', [], backend)
     await flush()
     backend.submitCalls[1].gate.resolve()
     await second
@@ -680,10 +733,103 @@ describe('DefenseConversationModel', () => {
     expect(roles(backend.store[0].turns)).toEqual(['examiner', 'candidate', 'examiner'])
   })
 
+  it('leaves a conversation opened while a rewind was out as it is', async () => {
+    // A fresh model
+    const { model, backend, changes } = makeModel()
+
+    // Two sessions, each grown to two exchanges
+    for (const [index, content] of ['a1', 'a2', 'b1', 'b2'].entries()) {
+      // The second session starts fresh
+      if (index === 2) model.startNew()
+
+      // Each exchange lands
+      const sent = model.send(content, [], backend)
+      await flush()
+      backend.submitCalls[index].gate.resolve()
+      await sent
+    }
+
+    // The two stored sessions, oldest first
+    const [firstSession, secondSession] = backend.store
+
+    // Back on the first session
+    model.resume(firstSession)
+
+    // The next rewind held on its way
+    backend.rewindGate = Promise.withResolvers<void>()
+
+    // A rewind of the first session to its first reply
+    const rewound = model.rewind(2, backend)
+
+    // The second session opened meanwhile
+    model.resume(secondSession)
+
+    // How many history refreshes were asked for before the rewind landed
+    const changesBefore = changes()
+
+    // Let the rewind land
+    backend.rewindGate.resolve()
+
+    // The rewind reports the view moved on, and the second session keeps its whole transcript
+    expect(await rewound).toEqual({ kind: 'superseded' })
+    expect(model.getSnapshot().turns).toHaveLength(5)
+
+    // The first session was truncated all the same, and the history asked to show it so
+    expect(roles(backend.store[0].turns)).toEqual(['examiner', 'candidate', 'examiner'])
+    expect(changes()).toBe(changesBefore + 1)
+  })
+
+  it('keeps a turn going that was sent in a conversation opened while a rewind was out', async () => {
+    // A fresh model
+    const { model, backend } = makeModel()
+
+    // Two sessions, each grown to two exchanges
+    for (const [index, content] of ['a1', 'a2', 'b1', 'b2'].entries()) {
+      // The second session starts fresh
+      if (index === 2) model.startNew()
+
+      // Each exchange lands
+      const sent = model.send(content, [], backend)
+      await flush()
+      backend.submitCalls[index].gate.resolve()
+      await sent
+    }
+
+    // The two stored sessions, oldest first
+    const [firstSession, secondSession] = backend.store
+
+    // Back on the first session
+    model.resume(firstSession)
+
+    // The next rewind held on its way
+    backend.rewindGate = Promise.withResolvers<void>()
+
+    // A rewind of the first session to its first reply
+    const rewound = model.rewind(2, backend)
+
+    // The second session opened meanwhile
+    model.resume(secondSession)
+
+    // A turn sent in the second session, its reply still out
+    const sentMeanwhile = model.send('b3', [], backend)
+    await flush()
+
+    // Let the rewind land
+    backend.rewindGate.resolve()
+    await rewound
+
+    // Let the reply land
+    backend.submitCalls[4].gate.resolve()
+
+    // The turn went through, its reply landing in the second session
+    expect(await sentMeanwhile).toEqual({ kind: 'sent' })
+    expect(model.getSnapshot().turns).toHaveLength(7)
+  })
+
   it('reports failed and leaves the transcript untouched when the rewind errors', async () => {
     // A completed, open session
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -702,11 +848,11 @@ describe('DefenseConversationModel', () => {
   it('abandons an in-flight turn when the conversation is rewound', async () => {
     // A model with one completed exchange and a second turn left in flight
     const { model, backend } = makeModel()
-    const first = model.send('first', backend)
+    const first = model.send('first', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await first
-    const second = model.send('second', backend)
+    const second = model.send('second', [], backend)
     await flush()
     expect(model.getSnapshot().isThinking).toBe(true)
 
@@ -736,7 +882,7 @@ describe('DefenseConversationModel', () => {
   it('shows a resumed conversation answer and asks again on a fresh one', async () => {
     // A model with one completed, stored session
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -769,7 +915,7 @@ describe('DefenseConversationModel', () => {
   it('ignores an answer that lands after the conversation has moved on', async () => {
     // A model with one completed, open session
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -788,7 +934,7 @@ describe('DefenseConversationModel', () => {
   it('ignores a report that lands after the conversation has moved on', async () => {
     // A model with one completed, open session
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -812,7 +958,7 @@ describe('DefenseConversationModel', () => {
   it('keeps a conversation answered through the turns that follow it', async () => {
     // A model with one completed, open session
     const { model, backend } = makeModel()
-    const first = model.send('first', backend)
+    const first = model.send('first', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await first
@@ -823,7 +969,7 @@ describe('DefenseConversationModel', () => {
 
     // Carry on with it: the reply this turn brings back was composed before the answer landed, so
     // folding its view of the conversation in would undo it
-    const second = model.send('second', backend)
+    const second = model.send('second', [], backend)
     await flush()
     backend.submitCalls[1].gate.resolve()
     await second
@@ -835,7 +981,7 @@ describe('DefenseConversationModel', () => {
   it('keeps a reply reported through the turns that follow it', async () => {
     // A model with one completed, open session
     const { model, backend } = makeModel()
-    const first = model.send('first', backend)
+    const first = model.send('first', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await first
@@ -851,7 +997,7 @@ describe('DefenseConversationModel', () => {
 
     // Carry on with the conversation: the reply this turn brings back was composed before the report
     // landed, so folding its view of the conversation in would undo it
-    const second = model.send('second', backend)
+    const second = model.send('second', [], backend)
     await flush()
     backend.submitCalls[1].gate.resolve()
     await second
@@ -863,11 +1009,11 @@ describe('DefenseConversationModel', () => {
   it('keeps a surviving reply reported through a rewind', async () => {
     // A model grown to two exchanges: examiner, candidate, examiner, candidate, examiner
     const { model, backend } = makeModel()
-    const first = model.send('first', backend)
+    const first = model.send('first', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await first
-    const second = model.send('second', backend)
+    const second = model.send('second', [], backend)
     await flush()
     backend.submitCalls[1].gate.resolve()
     await second
@@ -887,7 +1033,7 @@ describe('DefenseConversationModel', () => {
   it('reopens a conversation already showing what was reported in it', async () => {
     // A model with one completed session, whose reply the student reported in an earlier sitting
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -910,11 +1056,11 @@ describe('DefenseConversationModel', () => {
   it('keeps every reported reply marked as another one is reported', async () => {
     // A model grown to two exchanges, so it holds two of the examiner's replies
     const { model, backend } = makeModel()
-    const first = model.send('first', backend)
+    const first = model.send('first', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await first
-    const second = model.send('second', backend)
+    const second = model.send('second', [], backend)
     await flush()
     backend.submitCalls[1].gate.resolve()
     await second
@@ -937,7 +1083,7 @@ describe('DefenseConversationModel', () => {
   it('replaces what is held against a reply when the student revises it', async () => {
     // A model with one completed, open session whose reply is already reported
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -962,7 +1108,7 @@ describe('DefenseConversationModel', () => {
   it('stops holding anything against a reply once it is taken back', async () => {
     // A model with one completed, open session whose reply is reported
     const { model, backend } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -985,12 +1131,12 @@ describe('DefenseConversationModel', () => {
   it('leaves what was said about one conversation behind when another is resumed', async () => {
     // A model with two completed, stored conversations
     const { model, backend } = makeModel()
-    const first = model.send('first', backend)
+    const first = model.send('first', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await first
     model.startNew()
-    const second = model.send('second', backend)
+    const second = model.send('second', [], backend)
     await flush()
     backend.submitCalls[1].gate.resolve()
     await second
@@ -1017,7 +1163,7 @@ describe('DefenseConversationModel', () => {
   it('requests a history refresh after a turn lands, a rewind, and a delete', async () => {
     // A model with a completed, open session
     const { model, backend, changes } = makeModel()
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -1044,7 +1190,7 @@ describe('DefenseConversationModel', () => {
     const start = model.getSnapshot().conversationEpoch
 
     // A send stays within the same conversation
-    const sent = model.send('answer', backend)
+    const sent = model.send('answer', [], backend)
     await flush()
     backend.submitCalls[0].gate.resolve()
     await sent
@@ -1086,9 +1232,27 @@ describe('DefenseConversationModel', () => {
 describe('findFirstTurnAfter', () => {
   // A conversation whose three turns are a minute apart
   const TURNS: StoredTurn[] = [
-    { id: 't1', role: 'examiner', content: 'Hello.', createdAt: '2026-08-01T10:00:00.000Z' },
-    { id: 't2', role: 'candidate', content: 'My proof.', createdAt: '2026-08-01T10:01:00.000Z' },
-    { id: 't3', role: 'examiner', content: 'Go on.', createdAt: '2026-08-01T10:02:00.000Z' },
+    {
+      id: 't1',
+      role: 'examiner',
+      content: 'Hello.',
+      createdAt: '2026-08-01T10:00:00.000Z',
+      photos: [],
+    },
+    {
+      id: 't2',
+      role: 'candidate',
+      content: 'My proof.',
+      createdAt: '2026-08-01T10:01:00.000Z',
+      photos: [],
+    },
+    {
+      id: 't3',
+      role: 'examiner',
+      content: 'Go on.',
+      createdAt: '2026-08-01T10:02:00.000Z',
+      photos: [],
+    },
   ]
 
   it('finds where a reader coming back left off', () => {
@@ -1121,14 +1285,33 @@ describe('findFirstTurnAfter', () => {
 describe('findReadPassBefore', () => {
   // A conversation opening on a pair saved together, carried on a minute later and again after that
   const TURNS: StoredTurn[] = [
-    { id: 't1', role: 'examiner', content: 'Hello.', createdAt: '2026-08-01T10:00:00.000Z' },
-    { id: 't2', role: 'candidate', content: 'My proof.', createdAt: '2026-08-01T10:00:00.000Z' },
-    { id: 't3', role: 'examiner', content: 'Go on.', createdAt: '2026-08-01T10:01:00.000Z' },
+    {
+      id: 't1',
+      role: 'examiner',
+      content: 'Hello.',
+      createdAt: '2026-08-01T10:00:00.000Z',
+      photos: [],
+    },
+    {
+      id: 't2',
+      role: 'candidate',
+      content: 'My proof.',
+      createdAt: '2026-08-01T10:00:00.000Z',
+      photos: [],
+    },
+    {
+      id: 't3',
+      role: 'examiner',
+      content: 'Go on.',
+      createdAt: '2026-08-01T10:01:00.000Z',
+      photos: [],
+    },
     {
       id: 't4',
       role: 'candidate',
       content: 'Then k is even.',
       createdAt: '2026-08-01T10:02:00.000Z',
+      photos: [],
     },
   ]
 
@@ -1165,7 +1348,13 @@ describe('findReadPassBefore', () => {
     const boundary = findReadPassBefore(
       [
         ...TURNS,
-        { id: 't5', role: 'examiner', content: 'Go on.', createdAt: '2026-08-01T10:03:00.000Z' },
+        {
+          id: 't5',
+          role: 'examiner',
+          content: 'Go on.',
+          createdAt: '2026-08-01T10:03:00.000Z',
+          photos: [],
+        },
       ],
       't5'
     )
