@@ -3,6 +3,7 @@ import type {
   DefenseSessionListItem,
   DefenseSessionTarget,
   DefenseTurnPhoto,
+  NamedProblemTarget,
   StoredTurn,
 } from '@/components/features/defense/model/defense-types'
 import { MAX_MARK } from '@/components/features/hosted-competitions/model/hosted-competition-score'
@@ -93,6 +94,44 @@ export type FakeState = {
 export function problemIdOf(competitionSlug: string, position: number): string {
   // Named after the competition it belongs to, so two sets never collide
   return `${competitionSlug}-p${position}`
+}
+
+/** The season every hosted problem reads as having been set in. */
+const HOSTED_SEASON_START_YEAR = 2026
+
+/**
+ * Names one problem of one competition's set the way the backend names what a defense is held against.
+ *
+ * @param competitionSlug - Which competition the set belongs to.
+ * @param position - Where the problem sits in it, counting from one.
+ * @param competitionName - What the competition is called in English.
+ *
+ * @returns The problem, named.
+ */
+export function namedProblemOf(
+  competitionSlug: string,
+  position: number,
+  competitionName: string
+): NamedProblemTarget {
+  // The problem's id, which addresses it too
+  const problemId = problemIdOf(competitionSlug, position)
+
+  // Set in the competition, under MathComps, in the one season every hosted problem has
+  return {
+    kind: 'problem',
+    problemId,
+    competitionSlug,
+    slug: problemId,
+    source: {
+      season: { slug: '76', displayName: 'Edition 76 (2026/2027)', fullName: null },
+      startYear: HOSTED_SEASON_START_YEAR,
+      competition: [
+        { slug: 'mathcomps', displayName: 'MathComps', fullName: null },
+        { slug: competitionSlug, displayName: competitionName, fullName: null },
+      ],
+      number: position,
+    },
+  }
 }
 
 /**
@@ -367,9 +406,6 @@ export function groupOf(
   )
 }
 
-/** The season every conversation in the library reads as having been set in. */
-const LIBRARY_SEASON_START_YEAR = 2026
-
 /**
  * Builds the cross-problem list the library reads: every conversation the fake holds, most recently
  * spoken in first, each named the way the backend names one.
@@ -421,21 +457,7 @@ function libraryItemsOf(
   // A row per conversation, named the way the backend names one
   return transcriptsOf(state, problemId).map((session) => ({
     id: session.id,
-    target: {
-      kind: 'problem' as const,
-      problemId,
-      competitionSlug,
-      slug: problemId,
-      source: {
-        season: { slug: '76', displayName: 'Edition 76 (2026/2027)', fullName: null },
-        startYear: LIBRARY_SEASON_START_YEAR,
-        competition: [
-          { slug: 'mathcomps', displayName: 'MathComps', fullName: null },
-          { slug: competitionSlug, displayName: group.name.en, fullName: null },
-        ],
-        number: position,
-      },
-    },
+    target: namedProblemOf(competitionSlug, position, group.name.en),
     statement: session.statement,
     lastActivityAt: session.turns.at(-1)?.createdAt ?? new Date(0).toISOString(),
     lastStudentMessage:

@@ -133,7 +133,7 @@ Most script names say what they do, and `package.json` has all of them. The ones
 
 ### Browser tests
 
-Every backend call the specs make is answered by a stub, so the suite needs no API and no database. The runner in [`e2e/support/test.ts`](e2e/support/test.ts) refuses anything no stub claimed and fails the test naming the call, which is how a new test that quietly leans on a local backend gets caught. Two things to know when writing one: a call your page makes needs a stub even when your test is about something else, and `route.continue()` reaches the network rather than the stubs, so nothing may use it.
+Every backend call the specs make is answered by a stub, so the suite needs no API and no database. The runner in [`e2e/support/test.ts`](e2e/support/test.ts) refuses anything no stub claimed and fails the test naming the call, which is how a new test that quietly leans on a local backend gets caught. Two things to know when writing one: a call your page makes needs a stub even when your test is about something else, and `route.continue()` reaches the network rather than the stubs, so nothing may use it. A test needing the student's phone beside the computer takes the runner's `phone` page, a phone's browser of its own that is signed in to nothing and held to the same rule. A browser context the test opens itself is held to nothing.
 
 ### Signed-in browser
 

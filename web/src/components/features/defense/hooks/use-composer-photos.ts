@@ -5,9 +5,14 @@ import { apiCallOf, useApi } from '@/hooks/use-api'
 
 import type { DefenseTarget } from '../model/defense-target'
 import { defenseDraftPhotosStorageKey } from '../model/defense-target'
-import type { DefensePhotoReading, DefenseTurnPhoto } from '../model/defense-types'
+import type {
+  DefensePhotoHandoffPage,
+  DefensePhotoReading,
+  DefenseTurnPhoto,
+} from '../model/defense-types'
 import { readDraftPhotos, writeDraftPhotos } from '../model/draft-photos'
-import type { DefensePhoto, InsertedPhoto, PhotoReader } from '../model/photo-reading'
+import { placeByCaptureTime } from '../model/photo-order'
+import type { DefensePhoto, InsertedPhoto, PhotoReader, ReadPhoto } from '../model/photo-reading'
 import { insertedPhotoOf } from '../model/photo-reading'
 import { readPhoto } from '../services/photo-service'
 import type { UseDefensePhotosResult } from './use-defense-photos'
@@ -21,6 +26,8 @@ import { useHeldDefensePhotos } from './use-held-defense-photos'
 export type UseComposerPhotosResult = Omit<UseDefensePhotosResult, 'photos'> & {
   /** The photos in page order, apart from those going out with a message. */
   photos: readonly DefensePhoto[]
+  /** Takes pages the student's phone sent, already read, handing back their ids in page order. */
+  addArrived: (pages: readonly DefensePhotoHandoffPage[]) => readonly number[]
   /** Takes the student's change to a read photo's text. */
   editText: (id: number, text: string) => void
   /** Marks every read photo as in the message, handing back their texts in page order to put there. */
@@ -46,7 +53,8 @@ type UseComposerPhotosOptions = {
 /**
  * The photos of handwritten work a student takes in the composer. Each one is read as it is picked, its text waiting
  * beside it for the student to check, until the texts go into the message together in page order. Those in the
- * message go out with it, and are kept beside its text wherever the draft is kept.
+ * message go out with it, and are kept beside its text wherever the draft is kept. Pages the student's phone sent
+ * come in read already.
  *
  * @param options - The options the composer's photos are read with.
  *
@@ -92,6 +100,29 @@ export function useComposerPhotos({
   // The way the photos held change, and the ids new ones are held under
   const { setPhotos, nextId } = held
 
+  // Takes pages the student's phone sent, each previewing from its stored page
+  const addArrived = (pages: readonly DefensePhotoHandoffPage[]) => {
+    // Each page as a photo of its own, read already
+    const arrived = pages.map(
+      (page): ReadPhoto<DefensePhotoReading> => ({
+        kind: 'read',
+        id: nextId(),
+        previewUrl: page.link,
+        capturedAt: Date.parse(page.capturedAt),
+        reading: { photoId: page.photoId, link: page.link, text: page.text },
+        text: page.text,
+      })
+    )
+
+    // The pages go in by when each was taken, among the photos whose text is not in the message yet
+    setPhotos((current) => placeByCaptureTime(current, arrived))
+
+    // The new pages' ids, in the order they now stand in
+    return arrived
+      .toSorted((first, second) => first.capturedAt - second.capturedAt)
+      .map((photo) => photo.id)
+  }
+
   // Takes the student's change to a read photo's text
   const editText = (id: number, text: string) =>
     setPhotos((current) =>
@@ -123,6 +154,9 @@ export function useComposerPhotos({
     // The read photos, in page order
     const readPhotos = photos.filter((photo) => photo.kind === 'read')
 
+    // The photos whose texts go in
+    const insertedIds = readPhotos.map((photo) => photo.id)
+
     // Each of them now in the message
     setPhotos((current) =>
       current.map((photo) => {
@@ -130,6 +164,10 @@ export function useComposerPhotos({
         switch (photo.kind) {
           // A read photo's text goes into the message
           case 'read':
+            // A page that came in since the texts were gathered keeps its text beside it
+            if (!insertedIds.includes(photo.id)) return photo
+
+            // The photo, its text in the message
             return {
               kind: 'inserted',
               id: photo.id,
@@ -209,6 +247,7 @@ export function useComposerPhotos({
   return {
     photos: shownPhotos,
     addPhotos,
+    addArrived,
     retryPhoto,
     editText,
     insertRead,

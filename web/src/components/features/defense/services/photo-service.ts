@@ -7,6 +7,7 @@ import type { DefenseTarget } from '../model/defense-target'
 import { toWireTarget } from '../model/defense-target'
 import type {
   DefensePhotoHandoffCode,
+  DefensePhotoHandoffPages,
   DefensePhotoReading,
   HandoffPhotoReading,
   HandoffPhotoSent,
@@ -16,6 +17,7 @@ import type { PhotoReadRequest } from '../model/photo-reading'
 import { MAX_PHOTO_SIZE_MB } from '../model/photo-reading'
 import {
   getHandoffPhotosUrl,
+  getPhotoHandoffPagesUrl,
   getPhotoHandoffUrl,
   getReadHandoutPhotoUrl,
   getReadProblemPhotoUrl,
@@ -161,6 +163,25 @@ export function pointPhotoHandoff(
 ): Promise<ApiResult<DefensePhotoHandoffCode>> {
   // The target in the body, as the API names it
   return apiCall<DefensePhotoHandoffCode>(getPhotoHandoffUrl, {
+    method: 'POST',
+    body: JSON.stringify({ target: toWireTarget(target) }),
+  })
+}
+
+/**
+ * Takes the pages the student's phone sent to what they are defending that no composer has taken yet. The API
+ * marks them taken as it answers, so each page comes back once.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param target - What the student is defending.
+ * @returns The pages, and whether the student's code still works.
+ */
+export function takePhotoHandoffPages(
+  apiCall: ApiCaller,
+  target: DefenseTarget
+): Promise<ApiResult<DefensePhotoHandoffPages>> {
+  // The target in the body, as the API names it
+  return apiCall<DefensePhotoHandoffPages>(getPhotoHandoffPagesUrl, {
     method: 'POST',
     body: JSON.stringify({ target: toWireTarget(target) }),
   })

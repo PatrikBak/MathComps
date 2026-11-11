@@ -66,6 +66,8 @@ type DefenseComposerProps = {
   photos: UseComposerPhotosResult
   /** What the student is defending. */
   target: DefenseTarget
+  /** The ids of the pages the student's phone sent last, in page order. */
+  latestArrival: readonly number[]
   /** Sends the written turn. */
   onSend: () => void
   /** Abandons the reply in flight, handing the turn back. */
@@ -99,6 +101,7 @@ export function DefenseComposer({
   onDraftChange,
   photos,
   target,
+  latestArrival,
   onSend,
   onStop,
   editorRef,
@@ -119,7 +122,7 @@ export function DefenseComposer({
 
   // The dialog over the photos: their review, where each page's text is checked before it goes into the message, or
   // their handoff to the student's phone
-  const review = useDefensePhotoReview({ photos, editorRef, target })
+  const review = useDefensePhotoReview({ photos, editorRef, target, latestArrival })
 
   // The dialog lasts only while the composer is open for a turn, and shuts with it
   if (!IS_OPEN_FOR_A_TURN[state.kind] && review.dialog.kind !== 'shut') review.close()

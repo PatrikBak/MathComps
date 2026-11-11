@@ -1,4 +1,4 @@
-import type { Locator, Page, Request } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { TURN_ID_ATTRIBUTE } from '@/components/features/defense/hooks/use-reveal-pointed-turn'
 
@@ -13,9 +13,15 @@ import {
   photosText,
   transcriptOf,
 } from './support/competitions'
-import type { SentTurnBody } from './support/hosted-backend'
-import { installHostedBackend, pageTextOf, problemIdOf } from './support/hosted-backend'
+import {
+  installHostedBackend,
+  namedProblemOf,
+  nextTurnSent,
+  pageTextOf,
+  photoIdsOf,
+} from './support/hosted-backend'
 import { pickFile } from './support/interaction'
+import { HANDOFF_CODE, installPhotoHandoffBackend } from './support/photo-handoff-backend'
 import { expectViewerShut, shownPhoto } from './support/photo-viewer'
 import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
@@ -113,34 +119,6 @@ async function insertPages(page: Page, count: number): Promise<void> {
 
   // Back in the composer
   await expect(review).toHaveCount(0)
-}
-
-/**
- * Waits for the next turn the chat sends the backend, opening a conversation or continuing one.
- *
- * @param page - The page the chat is open on.
- *
- * @returns The request carrying the turn.
- */
-function nextTurnSent(page: Page): Promise<Request> {
-  // The opening of a conversation, or a further turn in one
-  return page.waitForRequest(
-    (request) =>
-      request.method() === 'POST' &&
-      (request.url() === `${BACKEND_ORIGIN}/defense/sessions` || request.url().endsWith('/turns'))
-  )
-}
-
-/**
- * The photos a turn went out with, as the request carrying it names them.
- *
- * @param request - The request.
- *
- * @returns The photos' ids, in the order sent.
- */
-function photoIdsOf(request: Request): string[] {
-  // Read off the request's body
-  return (request.postDataJSON() as SentTurnBody).photoIds
 }
 
 test.describe('a message written from photos', () => {
@@ -470,19 +448,17 @@ test.describe('photos from a phone', () => {
     // A conversation, and the composer to write it in
     await openPracticeConversation(page)
 
-    // Every ask for a code
-    const asked: unknown[] = []
+    // The problem the conversation is about
+    const problem = namedProblemOf('practice-set', 1, 'Practice competition')
 
-    // The first ask refused, the next answered
-    await page.route(`${BACKEND_ORIGIN}/defense/photos/handoff`, (route) => {
-      // Kept, to check what it pointed the code at
-      asked.push(route.request().postDataJSON())
-
-      // Refused the first time, answered after
-      return asked.length === 1
-        ? answerJson(route, 500, {})
-        : answerJson(route, 200, { code: 'a-live-code', expiresAt: new Date().toISOString() })
+    // A student with no code yet, the phone's backend pointing one at that problem
+    const phone = await installPhotoHandoffBackend(page, HANDOFF_CODE, problem, {
+      isLive: false,
+      waiting: [],
     })
+
+    // The first ask for a code refused, the next answered
+    phone.refuseNextPoint({ status: 500, errorCode: undefined })
 
     // The composer's photo button, which opens its menu on a computer
     await page.getByRole('button', { name: chatCopy.photos.add, exact: true }).click()
@@ -506,9 +482,9 @@ test.describe('photos from a phone', () => {
     await expect(dialog.getByText(chatCopy.photos.phoneScan)).toBeVisible()
 
     // The problem the conversation is about, as the API names it
-    const target = { kind: 'problem', problemId: problemIdOf('practice-set', 1) }
+    const target = { kind: 'problem', problemId: problem.problemId }
 
     // Both asks pointing the code at it
-    expect(asked).toEqual([{ target }, { target }])
+    expect(phone.pointedTargets()).toEqual([target, target])
   })
 })

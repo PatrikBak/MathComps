@@ -3,6 +3,7 @@ import type { Page, Request, Route } from '@playwright/test'
 import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
 import type {
   DefenseCopy,
+  DefensePhotoHandoffPages,
   DefenseSessionListItem,
 } from '@/components/features/defense/model/defense-types'
 import type { Organization } from '@/components/features/problem-selection/model/selection-types'
@@ -343,21 +344,30 @@ const NO_CONVERSATIONS: DefenseSessionListItem[] = []
 /** The greeting the chat opens on, standing in for whatever the backend currently greets with. */
 export const MATHILDA_OPENER: DefenseCopy = { opener: 'Tell me how you got there.' }
 
+/** A take finding nothing waiting, for a student holding no code a phone could send by. */
+const NO_PHONE_PAGES: DefensePhotoHandoffPages = { pages: [], hasLiveCode: false }
+
 /**
  * Answers one read a page makes on its own account, and only the read.
  *
- * A write on the same path is something a spec is doing on purpose, so it is passed on to the refusal
- * underneath and named there.
+ * A call going any other way on the same path is something a spec is doing on purpose, so it is passed on to the
+ * refusal underneath and named there.
  *
  * @param page - The page to intercept the read on.
  * @param pattern - Which URLs it answers, as a Playwright route glob.
+ * @param method - The method the read goes as.
  * @param body - What it answers with.
  */
-async function stubAmbientRead(page: Page, pattern: string, body: unknown): Promise<void> {
+async function stubAmbientRead(
+  page: Page,
+  pattern: string,
+  method: 'GET' | 'POST',
+  body: unknown
+): Promise<void> {
   // Stand in for that one endpoint
   await page.route(pattern, async (route) => {
-    // Anything but a read belongs to whichever spec is making it
-    if (route.request().method() !== 'GET') {
+    // Anything but the read belongs to whichever spec is making it
+    if (route.request().method() !== method) {
       // Passed to the refusal underneath, which names it
       await route.fallback()
 
@@ -417,22 +427,31 @@ export async function stubOwnOrganizations(
  */
 export async function stubAmbientReads(page: Page): Promise<void> {
   // Every discussion a page opens, whatever it sits under
-  await stubAmbientRead(page, `${BACKEND_ORIGIN}/comments*`, NO_COMMENTS)
+  await stubAmbientRead(page, `${BACKEND_ORIGIN}/comments*`, 'GET', NO_COMMENTS)
 
   // The reader's own lists, which the library sidebar asks for
-  await stubAmbientRead(page, `${BACKEND_ORIGIN}/users/me/lists`, NO_LISTS)
+  await stubAmbientRead(page, `${BACKEND_ORIGIN}/users/me/lists`, 'GET', NO_LISTS)
 
   // What the site holds on the reader, which the header asks for
-  await stubAmbientRead(page, `${BACKEND_ORIGIN}/users/me/profile`, NOTHING_SAID)
+  await stubAmbientRead(page, `${BACKEND_ORIGIN}/users/me/profile`, 'GET', NOTHING_SAID)
 
   // The organizations the reader is on, which the header asks for
-  await stubAmbientRead(page, `${BACKEND_ORIGIN}/users/me/organizations`, NO_ORGANIZATIONS)
+  await stubAmbientRead(page, `${BACKEND_ORIGIN}/users/me/organizations`, 'GET', NO_ORGANIZATIONS)
 
   // The reader's own conversations, which opening the header's menu reads ahead
-  await stubAmbientRead(page, `${BACKEND_ORIGIN}/defense/sessions/mine`, NO_CONVERSATIONS)
+  await stubAmbientRead(page, `${BACKEND_ORIGIN}/defense/sessions/mine`, 'GET', NO_CONVERSATIONS)
 
   // The examiner's greeting, which an opened chat shows before it has anything else
-  await stubAmbientRead(page, `${BACKEND_ORIGIN}/defense/copy`, MATHILDA_OPENER)
+  await stubAmbientRead(page, `${BACKEND_ORIGIN}/defense/copy`, 'GET', MATHILDA_OPENER)
+
+  // The pages the student's phone sent, which a computer's composer takes as it opens. A take hands its pages
+  // over, so it goes as a POST
+  await stubAmbientRead(
+    page,
+    `${BACKEND_ORIGIN}/defense/photos/handoff/pages`,
+    'POST',
+    NO_PHONE_PAGES
+  )
 }
 
 /**

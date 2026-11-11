@@ -35,12 +35,13 @@ describe('writeDraftPhotos', () => {
           link: 'https://files.example/photo-2.jpg',
           text: 'Let $n$ be odd.',
         },
+        capturedAt: 0,
         text: 'Let $n$ be odd.',
       },
       inserted(2, 'photo-3', true),
       inserted(3, 'photo-4', false),
-      { kind: 'reading', id: 4, previewUrl: 'blob:photo-5' },
-      { kind: 'failed', id: 5, previewUrl: 'blob:photo-6', errorCode: undefined },
+      { kind: 'reading', id: 4, previewUrl: 'blob:photo-5', capturedAt: 0 },
+      { kind: 'failed', id: 5, previewUrl: 'blob:photo-6', capturedAt: 0, errorCode: undefined },
     ]
 
     // Written and read back

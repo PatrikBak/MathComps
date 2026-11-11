@@ -1,4 +1,4 @@
-import type { Page, Route } from '@playwright/test'
+import type { Page, Request, Route } from '@playwright/test'
 
 import type {
   DefenseCopy,
@@ -29,6 +29,7 @@ import {
   type HeldSession,
   isGroupTakingEntries,
   isSolutionOpen,
+  namedProblemOf,
   problemIdOf,
   seedStraddlingDefense,
   servedSession,
@@ -62,7 +63,7 @@ import {
  */
 
 // Re-exported so a spec reads them off the module it installs the fake from
-export { COMPETITION_SLUG, LIMITS, OPENER, problemIdOf, UPCOMING_COMPETITION_SLUG }
+export { COMPETITION_SLUG, LIMITS, namedProblemOf, OPENER, problemIdOf, UPCOMING_COMPETITION_SLUG }
 
 /** {@link PROBLEMS_PER_COMPETITION}, as the specs read it. */
 export const PROBLEM_COUNT = PROBLEMS_PER_COMPETITION
@@ -281,11 +282,39 @@ async function think(page: Page): Promise<void> {
 /**
  * What every turn the chat sends carries, opening a conversation or continuing one.
  */
-export type SentTurnBody = {
+type SentTurnBody = {
   /** What the turn says. */
   content: string
   /** The photos the turn was written from, in page order. */
   photoIds: string[]
+}
+
+/**
+ * Waits for the next turn the chat sends the backend, opening a conversation or continuing one.
+ *
+ * @param page - The page the chat is open on.
+ *
+ * @returns The request carrying the turn.
+ */
+export function nextTurnSent(page: Page): Promise<Request> {
+  // The opening of a conversation, or a further turn in one
+  return page.waitForRequest(
+    (request) =>
+      request.method() === 'POST' &&
+      (request.url() === `${BACKEND_ORIGIN}/defense/sessions` || request.url().endsWith('/turns'))
+  )
+}
+
+/**
+ * The photos a turn went out with, as the request carrying it names them.
+ *
+ * @param request - The request.
+ *
+ * @returns The photos' ids, in the order sent.
+ */
+export function photoIdsOf(request: Request): string[] {
+  // Read off the request's body
+  return (request.postDataJSON() as SentTurnBody).photoIds
 }
 
 /**

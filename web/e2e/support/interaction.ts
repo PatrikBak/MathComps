@@ -1,10 +1,14 @@
 import type { JSHandle, Locator, Page } from '@playwright/test'
+import jsQR from 'jsqr'
 
 import messages from '../../messages/en.json'
 import { expect } from './test'
 
 /** The labels the header's user menu reads under. */
 export const userMenuCopy = messages.ui.userMenu
+
+/** How many pixels across a QR is drawn at to be read. */
+const QR_READ_SIDE = 512
 
 /** How long sign-in has to settle before the header's user menu is called missing. */
 const SIGN_IN_TIMEOUT_MS = 15_000
@@ -370,6 +374,51 @@ export async function blankPng(page: Page, width: number, height: number): Promi
 
   // The bytes the data URL carries after its header
   return Buffer.from(dataUrl.slice(dataUrl.indexOf(',') + 1), 'base64')
+}
+
+/**
+ * Reads what a QR the page draws says, as a phone's camera pointed at the screen reads it.
+ *
+ * @param qr - The QR, an SVG on the page.
+ *
+ * @returns The text the QR carries.
+ */
+export async function readQrCode(qr: Locator): Promise<string> {
+  // The QR's pixels, drawn at the size it is read at
+  const pixels = await qr.evaluate(async (svg, side) => {
+    // The QR as an image of its own
+    const image = new Image()
+    image.src = `data:image/svg+xml,${encodeURIComponent(new XMLSerializer().serializeToString(svg))}`
+
+    // Once the browser has drawn it
+    await image.decode()
+
+    // A canvas that size
+    const canvas = document.createElement('canvas')
+    canvas.width = side
+    canvas.height = side
+
+    // Its drawing surface
+    const surface = canvas.getContext('2d')
+
+    // Every browser this suite runs has one
+    if (surface === null) throw new Error('The browser drew no canvas.')
+
+    // The QR drawn across the canvas
+    surface.drawImage(image, 0, 0, side, side)
+
+    // Its pixels, four bytes each, carried out of the page as plain numbers
+    return Array.from(surface.getImageData(0, 0, side, side).data)
+  }, QR_READ_SIDE)
+
+  // What the QR says, read off those pixels
+  const read = jsQR(Uint8ClampedArray.from(pixels), QR_READ_SIDE, QR_READ_SIDE)
+
+  // A QR nothing can read is a broken QR
+  if (read === null) throw new Error('The QR could not be read.')
+
+  // Its text
+  return read.data
 }
 
 /**

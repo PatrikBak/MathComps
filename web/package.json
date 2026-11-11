@@ -117,6 +117,7 @@
     "eslint-plugin-simple-import-sort": "^13.0.0",
     "globals": "^17.2.0",
     "jsonc-eslint-parser": "^3.1.0",
+    "jsqr": "^1.4.0",
     "knip": "^6.15.0",
     "postcss": "^8.5.6",
     "prettier": "^3.8.1",

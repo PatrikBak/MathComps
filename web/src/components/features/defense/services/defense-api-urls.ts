@@ -175,3 +175,13 @@ export function getHandoffPhotosUrl(capturedAt: Date): string {
   // The photos endpoint, told when this photo was taken
   return buildApiUrl(`${PHOTO_HANDOFF_PATH}/photos`, { capturedAt: capturedAt.toISOString() })
 }
+
+/**
+ * Builds the URL for taking the pages the student's phone sent to what they are defending.
+ *
+ * @returns The pages URL.
+ */
+export function getPhotoHandoffPagesUrl(): string {
+  // The handoff's pages endpoint, told the target in the body
+  return buildApiUrl(`${PHOTO_HANDOFF_PATH}/pages`)
+}

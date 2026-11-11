@@ -51,6 +51,8 @@ type UseDefensePhotoReviewOptions = {
   editorRef: RefObject<RichMathEditorRef | null>
   /** What the student is defending. */
   target: DefenseTarget
+  /** The ids of the pages the student's phone sent last, in page order. */
+  latestArrival: readonly number[]
 }
 
 /**
@@ -75,9 +77,9 @@ export type UseDefensePhotoReviewResult = {
 /**
  * Opens and shuts the dialog over the composer's photos. Picking photos, from the composer or from the review itself,
  * starts their reading and looks at the first of them. Asking for the phone, from either place too, points the
- * student's code at the target and shows it.
+ * student's code at the target and shows it, and the first page the phone sends while it shows opens the review.
  *
- * @param options - The composer's photos, its handle and its target.
+ * @param options - The composer's photos, its handle, its target and the pages the phone sent last.
  *
  * @returns What the dialog shows, and the ways into and out of it.
  */
@@ -85,9 +87,27 @@ export function useDefensePhotoReview({
   photos,
   editorRef,
   target,
+  latestArrival,
 }: UseDefensePhotoReviewOptions): UseDefensePhotoReviewResult {
   // What the dialog shows, shut at first
   const [dialog, setDialog] = useState<DefensePhotoDialog>({ kind: 'shut' })
+
+  // The pages from the phone the dialog has already answered
+  const [answeredArrival, setAnsweredArrival] = useState(latestArrival)
+
+  // Pages the phone sent while the QR shows replace it with the review, the student having just photographed them
+  if (answeredArrival !== latestArrival) {
+    // Answered from now on
+    setAnsweredArrival(latestArrival)
+
+    // The first of them, in page order
+    const [first] = latestArrival
+
+    // Looked at in the code's place, while every other dialog leaves them to join the photos
+    if (dialog.kind === 'phone' && first !== undefined) {
+      setDialog({ kind: 'review', photoId: first })
+    }
+  }
 
   // A photo dropped while it was looked at hands the review to the first page, and the last one dropped shuts it
   if (dialog.kind === 'review' && !photos.photos.some((photo) => photo.id === dialog.photoId)) {

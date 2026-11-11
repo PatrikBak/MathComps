@@ -1,5 +1,6 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 
 import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
@@ -9,6 +10,7 @@ import type { DefenseTarget } from '../model/defense-target'
 import type { DefensePhotoHandoffCode } from '../model/defense-types'
 import type { DefensePhotoHandoff } from '../model/photo-handoff-code'
 import { pointPhotoHandoff } from '../services/photo-service'
+import { refreshPhotoHandoffPages } from './defense-cache'
 
 /**
  * Options for {@link useDefensePhotoHandoff}.
@@ -42,6 +44,9 @@ export function useDefensePhotoHandoff({
   // Copy for the composer's photos
   const t = useTranslations('defense.photos')
 
+  // The cache the composer's take of the phone's pages lives in
+  const queryClient = useQueryClient()
+
   // Pointing the code
   const mutation = useOptimisticMutation<DefensePhotoHandoffCode, DefenseTarget>({
     // Call the handoff endpoint
@@ -52,6 +57,9 @@ export function useDefensePhotoHandoff({
 
     // No toast, since the failure is said in place
     errorMessage: null,
+
+    // The pages taken straight away, which finds the code working, so the composer goes on asking for them
+    onSuccess: (_data, pointedTarget) => void refreshPhotoHandoffPages(queryClient, pointedTarget),
   })
 
   // Where the last point stands: refused or never answered, or else the code once it has come, each point starting
