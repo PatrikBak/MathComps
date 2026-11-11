@@ -88,5 +88,7 @@ export default defineConfig({
     // Attach to a server already up rather than starting a second one on the same port. Never on CI,
     // which has nothing of its own to attach to and would otherwise test whatever it found there.
     reuseExistingServer: !isCi,
+    // The dev-only pages served by the built app too, since some specs open them
+    env: { SERVE_DEV_PAGES: 'true' },
   },
 })

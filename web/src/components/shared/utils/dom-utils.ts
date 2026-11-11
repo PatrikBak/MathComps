@@ -247,3 +247,48 @@ export function isInArrowKeyWidget(target: EventTarget | null): boolean {
   // An element inside one of the widgets, or the widget itself
   return target instanceof Element && target.closest(ARROW_KEY_WIDGET_SELECTOR) !== null
 }
+
+/**
+ * An element and each element holding it, nearest first, up to the first that stands directly in the body or in an
+ * open modal dialog.
+ *
+ * @param element - Where the climb starts.
+ *
+ * @returns The element and its holders, outermost last.
+ */
+function holdersUpToModalOrBody(element: Element): Element[] {
+  // What holds the element
+  const parent = element.parentElement
+
+  // The climb stops in the body, in a modal dialog, or at an element nothing holds
+  if (!parent || parent === document.body || parent.getAttribute('aria-modal') === 'true') {
+    return [element]
+  }
+
+  // The element, then what holds it and so on up
+  return [element, ...holdersUpToModalOrBody(parent)]
+}
+
+/**
+ * Shuts what surrounds an element to the keyboard and to screen readers, the way a surface laid over everything else
+ * must: whatever sits beside it at each level up to the body. Inside a modal dialog it stops at the dialog, which has
+ * shut everything outside itself already. Anything already shut is left to whatever shut it.
+ *
+ * @param element - What stays open.
+ *
+ * @returns A function opening again what this shut.
+ */
+export function shutAllAround(element: Element): () => void {
+  // Whatever sits beside the element or any of its holders, leaving out what is shut already
+  const shut = holdersUpToModalOrBody(element).flatMap((holder) =>
+    [...(holder.parentElement?.children ?? [])].filter(
+      (sibling) => sibling !== holder && !sibling.hasAttribute('inert')
+    )
+  )
+
+  // What surrounds the element shut
+  shut.forEach((sibling) => sibling.setAttribute('inert', ''))
+
+  // A function opening again what this shut
+  return () => shut.forEach((sibling) => sibling.removeAttribute('inert'))
+}

@@ -5,10 +5,12 @@ import 'yet-another-react-lightbox/styles.css'
 import { Portal } from '@headlessui/react'
 import { useFocusReturn } from '@mantine/hooks'
 import { useTranslations } from 'next-intl'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Labels, SlideImage } from 'yet-another-react-lightbox'
 import Lightbox from 'yet-another-react-lightbox'
 import Zoom from 'yet-another-react-lightbox/plugins/zoom'
+
+import { shutAllAround } from '@/components/shared/utils/dom-utils'
 
 /**
  * One photo the viewer shows.
@@ -70,8 +72,8 @@ export function PhotoViewer({ photos, index, isOpen, onIndexChange, onClose }: P
   // Copy for the buttons the whole app shares
   const tActions = useTranslations('ui.actions')
 
-  // Where the viewer mounts
-  const rootRef = useRef<HTMLDivElement>(null)
+  // Where the viewer mounts, once the portal holding it is on the page, which can be a render after the viewer opens
+  const [root, setRoot] = useState<HTMLDivElement | null>(null)
 
   // The focus goes back where it was once the viewer shuts
   useFocusReturn({ opened: isOpen })
@@ -79,24 +81,12 @@ export function PhotoViewer({ photos, index, isOpen, onIndexChange, onClose }: P
   // While the viewer is open, the content it opened over is shut to the keyboard and to screen readers. The library
   // shuts only what sits beside the viewer in the element it mounts into, and that element holds the viewer alone
   useEffect(() => {
-    // The viewer's portal, and what holds it beside the content it opened over
-    const portal = rootRef.current?.parentElement
-    const host = portal?.parentElement
+    // Nothing to shut while the viewer is shut, or before it has anywhere to mount
+    if (!isOpen || !root) return
 
-    // Nothing to shut while the viewer is shut, or before it is mounted
-    if (!isOpen || !portal || !host) return
-
-    // Everything beside the viewer, leaving out what something else has shut already
-    const shut = [...host.children].filter(
-      (element) => element !== portal && !element.hasAttribute('inert')
-    )
-
-    // Shut while the viewer is open
-    shut.forEach((element) => element.setAttribute('inert', ''))
-
-    // Open again once the viewer shuts
-    return () => shut.forEach((element) => element.removeAttribute('inert'))
-  }, [isOpen])
+    // Everything around the viewer shut while it is open, and opened again once it shuts
+    return shutAllAround(root)
+  }, [isOpen, root])
 
   // Every label the viewer reads, the slide counter left raw for the viewer to fill
   const labels = {
@@ -123,7 +113,7 @@ export function PhotoViewer({ photos, index, isOpen, onIndexChange, onClose }: P
   // The viewer in the portal of whatever dialog it is opened from
   return (
     <Portal>
-      <div ref={rootRef}>
+      <div ref={setRoot}>
         <Lightbox
           open={isOpen}
           close={onClose}
@@ -131,7 +121,7 @@ export function PhotoViewer({ photos, index, isOpen, onIndexChange, onClose }: P
           slides={slides}
           plugins={[Zoom]}
           labels={labels}
-          portal={{ root: () => rootRef.current }}
+          portal={{ root: () => root }}
           // Swiping stops at the first photo and at the last
           carousel={{ finite: true }}
           // A tap beside the photo or a swipe down shuts the viewer
