@@ -374,6 +374,7 @@ function DefenseConversationForTarget({
           draft={turn.draft}
           onDraftChange={turn.setDraft}
           photos={turn.photos}
+          target={problem.target}
           onSend={() => void turn.sendDraft()}
           onStop={turn.stopReply}
           editorRef={turn.editorRef}

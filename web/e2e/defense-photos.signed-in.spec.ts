@@ -14,7 +14,7 @@ import {
   transcriptOf,
 } from './support/competitions'
 import type { SentTurnBody } from './support/hosted-backend'
-import { installHostedBackend, pageTextOf } from './support/hosted-backend'
+import { installHostedBackend, pageTextOf, problemIdOf } from './support/hosted-backend'
 import { pickFile } from './support/interaction'
 import { expectViewerShut, shownPhoto } from './support/photo-viewer'
 import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
@@ -67,8 +67,8 @@ function lookedAtTile(review: Locator, number: number): Locator {
 }
 
 /**
- * Picks pages of handwritten work for the message through the composer's photo button, the way a student picks
- * them off their phone, which opens the review on the first of them.
+ * Picks pages of handwritten work for the message through the composer's photo button and its "From this computer"
+ * row, which opens the review on the first of them.
  *
  * @param page - The page the chat is open on.
  * @param count - How many pages.
@@ -81,8 +81,11 @@ async function pickPages(page: Page, count: number): Promise<void> {
     buffer: ONE_PIXEL_PNG,
   }))
 
-  // Picked through the composer's photo button
-  await pickFile(page.getByRole('button', { name: chatCopy.photos.add, exact: true }), pages)
+  // The composer's photo button, which opens its menu on a computer
+  await page.getByRole('button', { name: chatCopy.photos.add, exact: true }).click()
+
+  // Picked from the computer
+  await pickFile(page.getByRole('menuitem', { name: chatCopy.photos.fromComputer }), pages)
 
   // The review, once it is up
   await expect(
@@ -433,5 +436,79 @@ test.describe('the review of the picked pages', () => {
 
     // The one left, now the first, looked at
     await expect(lookedAtTile(review, 1)).toHaveAttribute('aria-current', 'true')
+  })
+})
+
+test.describe('the photo button on a phone', () => {
+  // A touchscreen, where the main pointer is a finger
+  test.use({ hasTouch: true })
+
+  test('opens the picker straight away', async ({ page }) => {
+    // A conversation, and the composer to write it in
+    await openPracticeConversation(page)
+
+    // A page picked through the photo button itself
+    await pickFile(page.getByRole('button', { name: chatCopy.photos.add, exact: true }), {
+      name: 'page-1.png',
+      mimeType: 'image/png',
+      buffer: ONE_PIXEL_PNG,
+    })
+
+    // The review, once it is up
+    await expect(
+      page
+        .getByRole('dialog', { name: chatCopy.photos.reviewTitle })
+        .getByText(chatCopy.photos.reviewHint)
+    ).toBeVisible()
+  })
+})
+
+test.describe('photos from a phone', () => {
+  test('show a QR for a code pointed at the problem, and say in place when none could be made', async ({
+    page,
+  }) => {
+    // A conversation, and the composer to write it in
+    await openPracticeConversation(page)
+
+    // Every ask for a code
+    const asked: unknown[] = []
+
+    // The first ask refused, the next answered
+    await page.route(`${BACKEND_ORIGIN}/defense/photos/handoff`, (route) => {
+      // Kept, to check what it pointed the code at
+      asked.push(route.request().postDataJSON())
+
+      // Refused the first time, answered after
+      return asked.length === 1
+        ? answerJson(route, 500, {})
+        : answerJson(route, 200, { code: 'a-live-code', expiresAt: new Date().toISOString() })
+    })
+
+    // The composer's photo button, which opens its menu on a computer
+    await page.getByRole('button', { name: chatCopy.photos.add, exact: true }).click()
+
+    // The phone asked for
+    await page.getByRole('menuitem', { name: chatCopy.photos.fromPhone }).click()
+
+    // The dialog it opens
+    const dialog = page.getByRole('dialog', { name: chatCopy.photos.phoneTitle })
+
+    // Saying in place that no code came
+    await expect(dialog.getByRole('alert')).toHaveText(chatCopy.photos.phoneError)
+
+    // Asked again
+    await dialog.getByRole('button', { name: actionsCopy.retry }).click()
+
+    // The QR
+    await expect(dialog.getByRole('img', { name: chatCopy.photos.phoneQr })).toBeVisible()
+
+    // And how to use it
+    await expect(dialog.getByText(chatCopy.photos.phoneScan)).toBeVisible()
+
+    // The problem the conversation is about, as the API names it
+    const target = { kind: 'problem', problemId: problemIdOf('practice-set', 1) }
+
+    // Both asks pointing the code at it
+    expect(asked).toEqual([{ target }, { target }])
   })
 })

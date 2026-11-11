@@ -6,6 +6,7 @@ import type { ApiResult } from '@/types/api'
 import type { DefenseTarget } from '../model/defense-target'
 import { toWireTarget } from '../model/defense-target'
 import type {
+  DefensePhotoHandoffCode,
   DefensePhotoReading,
   HandoffPhotoReading,
   HandoffPhotoSent,
@@ -144,4 +145,23 @@ export async function sendHandoffPhoto(
   return result.success
     ? { success: true, data: { ...result.data.reading, target: result.data.target } }
     : result
+}
+
+/**
+ * Points the student's phone photo handoff at what they are defending, so the photos their phone sends from then on
+ * go there. A student with no code that still works is made one.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param target - What the student is defending.
+ * @returns The student's live code.
+ */
+export function pointPhotoHandoff(
+  apiCall: ApiCaller,
+  target: DefenseTarget
+): Promise<ApiResult<DefensePhotoHandoffCode>> {
+  // The target in the body, as the API names it
+  return apiCall<DefensePhotoHandoffCode>(getPhotoHandoffUrl, {
+    method: 'POST',
+    body: JSON.stringify({ target: toWireTarget(target) }),
+  })
 }

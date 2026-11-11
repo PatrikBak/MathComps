@@ -208,6 +208,16 @@ export type DefensePhotoReading = {
 }
 
 /**
+ * A student's live phone photo handoff code, as the API answers.
+ */
+export type DefensePhotoHandoffCode = {
+  /** The secret the phone sends its photos by. */
+  code: string
+  /** When the code stops working, as an ISO 8601 instant. */
+  expiresAt: string
+}
+
+/**
  * What a photo sent through a handoff code read as, and the problem it went to, as the API answers.
  */
 export type HandoffPhotoSent = {

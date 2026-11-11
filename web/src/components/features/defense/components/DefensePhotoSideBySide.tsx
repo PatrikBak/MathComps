@@ -7,7 +7,6 @@ import type { ReactNode } from 'react'
 
 import { Button, FOCUS_RING_INSET_CLASS } from '@/components/shared/components/Button'
 import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
-import { Modal } from '@/components/shared/components/Modal'
 import { PhotoViewer } from '@/components/shared/components/PhotoViewer'
 import type { ToolbarConfig } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
@@ -206,16 +205,16 @@ function DefensePageText({
  * Props for the {@link DefensePhotoSideBySide}.
  */
 type DefensePhotoSideBySideProps = {
-  /** The photo looked at, or null while the view is shut. */
-  viewedPhotoId: number | null
+  /** The photo looked at. */
+  viewed: DefensePhoto
   /** Looks at a photo, given its id. */
   onView: (id: number) => void
   /** Takes newly picked pages, looking at the first of them. */
   onPick: (files: readonly File[]) => void
-  /** Shuts the view. */
+  /** Opens the QR code for sending photos from the student's phone. */
+  onPhone: () => void
+  /** Shuts the dialog. */
   onClose: () => void
-  /** Called once the view is gone and the composer is the student's again. */
-  onClosed: () => void
   /** The composer's photos and what can be done with them. */
   photos: UseComposerPhotosResult
   /** The turn being written. */
@@ -232,14 +231,14 @@ type DefensePhotoSideBySideProps = {
  * Each page beside its text, read from the photo, for the student to check before the pages' text goes into the
  * message together. A phone has no room for both, so there the pages show as their tiles alone above the text. A
  * press on the page looked at, its tile or its photo, shows the pages large over the whole screen. Pages are added
- * here; the message is written on and sent from the composer.
+ * here; the message is written on and sent from the composer. It fills the dialog its host opens it in.
  */
 export function DefensePhotoSideBySide({
-  viewedPhotoId,
+  viewed,
   onView,
   onPick,
+  onPhone,
   onClose,
-  onClosed,
   photos,
   draft,
   onDraftChange,
@@ -255,9 +254,6 @@ export function DefensePhotoSideBySide({
   // Whether touch is the only way in, where the text taking the cursor as it comes up would bring up the keyboard
   // before the student asks for it
   const { isTouchOnly } = useDeviceCapabilities()
-
-  // The photo looked at, none while the view is shut
-  const viewed = photos.photos.find((photo) => photo.id === viewedPhotoId)
 
   // A function which looks at the page swiped to in the review too, so its text is there on the way back
   const viewSwipedTo = (index: number) => {
@@ -276,13 +272,7 @@ export function DefensePhotoSideBySide({
   })
 
   // A function which shows the pages large from the one looked at
-  const enlarge = () => {
-    // Nothing to show while no page is looked at
-    if (viewed === undefined) return
-
-    // From the page looked at
-    viewer.openAt(photos.photos.indexOf(viewed))
-  }
+  const enlarge = () => viewer.openAt(photos.photos.indexOf(viewed))
 
   // Puts the read pages' text into the message and goes back to the composer
   const insert = () => {
@@ -312,15 +302,7 @@ export function DefensePhotoSideBySide({
 
   // The pages on one side, the text of the one looked at on the other
   return (
-    <Modal
-      isOpen={viewed !== undefined}
-      onClose={onClose}
-      onClosed={onClosed}
-      title={t('reviewTitle')}
-      showCloseButton
-      tall
-      className="sm:max-w-6xl"
-    >
+    <>
       {/* Everything above the insert, scrolling on a phone only once the tiles leave the text too little room */}
       <div
         className={cn(
@@ -338,40 +320,36 @@ export function DefensePhotoSideBySide({
               photos={photos.photos}
               actions={{
                 kind: 'review',
-                selected: viewed !== undefined ? { id: viewed.id, onEnlarge: enlarge } : null,
+                selected: { id: viewed.id, onEnlarge: enlarge },
                 onOpen: onView,
                 onRemove: photos.removePhotos,
               }}
             >
-              <DefensePhotoButton variant="page" onPick={onPick} />
+              <DefensePhotoButton variant="page" onPick={onPick} onPhone={onPhone} />
             </DefensePhotoStrip>
 
             {/* The page looked at, where there is room for it beside its text */}
             <div className="hidden sm:block sm:min-h-0 sm:flex-1 sm:overflow-y-auto">
-              {viewed !== undefined && (
-                <DefenseSidePhoto
-                  photo={viewed}
-                  number={photos.photos.indexOf(viewed) + 1}
-                  onEnlarge={enlarge}
-                />
-              )}
+              <DefenseSidePhoto
+                photo={viewed}
+                number={photos.photos.indexOf(viewed) + 1}
+                onEnlarge={enlarge}
+              />
             </div>
           </div>
 
           {/* Its text, standing as tall as its column once that is measured */}
           <div ref={textColumnRef} className="flex min-h-64 flex-1 flex-col sm:min-h-0">
-            {viewed !== undefined && (
-              <DefensePageText
-                photo={viewed}
-                photos={photos}
-                maxCharacters={maxCharacters}
-                toolbar={toolbar}
-                heightPx={Math.floor(textColumnHeight)}
-                // A page swiped to while the pages are large comes up behind them, where taking the cursor would
-                // send the keys meant for the large page into its text
-                autoFocus={!isTouchOnly && !viewer.isOpen}
-              />
-            )}
+            <DefensePageText
+              photo={viewed}
+              photos={photos}
+              maxCharacters={maxCharacters}
+              toolbar={toolbar}
+              heightPx={Math.floor(textColumnHeight)}
+              // A page swiped to while the pages are large comes up behind them, where taking the cursor would
+              // send the keys meant for the large page into its text
+              autoFocus={!isTouchOnly && !viewer.isOpen}
+            />
           </div>
         </div>
       </div>
@@ -390,17 +368,15 @@ export function DefensePhotoSideBySide({
       </div>
 
       {/* The pages large, swiped through from the one looked at */}
-      {viewed !== undefined && (
-        <PhotoViewer
-          photos={viewer.viewerPhotos}
-          // The page looked at, which a swipe moves too, so the large page stays on it while pages come and go
-          // around it
-          index={photos.photos.indexOf(viewed)}
-          isOpen={viewer.isOpen}
-          onIndexChange={viewer.swipeTo}
-          onClose={viewer.close}
-        />
-      )}
-    </Modal>
+      <PhotoViewer
+        photos={viewer.viewerPhotos}
+        // The page looked at, which a swipe moves too, so the large page stays on it while pages come and go
+        // around it
+        index={photos.photos.indexOf(viewed)}
+        isOpen={viewer.isOpen}
+        onIndexChange={viewer.swipeTo}
+        onClose={viewer.close}
+      />
+    </>
   )
 }

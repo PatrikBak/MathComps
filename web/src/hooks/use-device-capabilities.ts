@@ -12,6 +12,8 @@ export type UseDeviceCapabilitiesResult = {
   isMac: boolean
   /** Whether touch is the only way in. */
   isTouchOnly: boolean
+  /** Whether the main pointer is a mouse or a trackpad, which marks a computer. */
+  hasFinePointer: boolean
 }
 
 /**
@@ -40,6 +42,10 @@ export function useDeviceCapabilities(): UseDeviceCapabilitiesResult {
   // A mobile OS with no pointer at all
   const isTouchOnly = isMobileOS && !hasPointer
 
+  // Whether the main pointer is a mouse or a trackpad, tracked live too.
+  // The initial false keeps the server and the first client render agreeing.
+  const hasFinePointer = useMediaQuery('(pointer: fine)', false, { getInitialValueInEffect: true })
+
   // The device's input capabilities
-  return { isMobileOS, isMac, isTouchOnly }
+  return { isMobileOS, isMac, isTouchOnly, hasFinePointer }
 }

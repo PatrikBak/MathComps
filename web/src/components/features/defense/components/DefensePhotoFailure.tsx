@@ -1,6 +1,5 @@
 'use client'
 
-import { TriangleAlert } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/shared/components/Button'
@@ -8,6 +7,7 @@ import type { AppErrorCode } from '@/lib/api/api-error-codes'
 import { resolveErrorMessage } from '@/lib/api/api-error-utils'
 
 import { canReadAgain, MAX_PHOTO_SIZE_MB } from '../model/photo-reading'
+import { DefensePhotoTrouble } from './DefensePhotoTrouble'
 
 /**
  * Props for the {@link DefensePhotoFailure}.
@@ -49,21 +49,12 @@ export function DefensePhotoFailure({
     data: { max: MAX_PHOTO_SIZE_MB },
   })
 
-  // The mark, why, and the way on
+  // The mark, which photo when the note stands apart from it, why, and the way on
   return (
-    <>
-      {/* The mark the photo's tile carries too */}
-      <TriangleAlert className="size-5 text-error" aria-hidden="true" />
-
-      {/* Which photo, when the note stands apart from it, and why, heard as it comes, in the foreground since the
-          error red is too faint for small text */}
-      <div role="alert" className="min-w-0 text-foreground">
-        {photoNumber !== null && (
-          <p className="font-medium">{t('photo', { number: photoNumber })}</p>
-        )}
-        <p className="text-balance">{why}</p>
-      </div>
-
+    <DefensePhotoTrouble
+      heading={photoNumber === null ? null : t('photo', { number: photoNumber })}
+      why={why}
+    >
       {/* The way on, by whether another reading could come out differently */}
       {canReadAgain(errorCode) ? (
         // Another go
@@ -76,6 +67,6 @@ export function DefensePhotoFailure({
           {t('remove')}
         </Button>
       )}
-    </>
+    </DefensePhotoTrouble>
   )
 }
