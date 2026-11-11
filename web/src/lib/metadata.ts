@@ -205,6 +205,7 @@ type PageNamespace =
   | 'pages.adminDefenses'
   | 'pages.adminGrading'
   | 'pages.problemSelection'
+  | 'pages.photoHandoff'
 
 /**
  * Options for creating page metadata with automatic translations.

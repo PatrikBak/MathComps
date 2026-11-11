@@ -12,6 +12,11 @@ const SESSIONS_PATH = '/defense/sessions'
 const PHOTOS_PATH = '/defense/photos'
 
 /**
+ * The base path for the endpoints handing photos taken on a phone over to a composer open elsewhere.
+ */
+const PHOTO_HANDOFF_PATH = `${PHOTOS_PATH}/handoff`
+
+/**
  * Builds the URL for reading the examiner's canned lines.
  *
  * @returns The copy URL.
@@ -147,4 +152,26 @@ export function getReadHandoutPhotoUrl(target: HandoutEnvironmentTarget): string
 export function getReadProblemPhotoUrl(problemId: string): string {
   // The read endpoint for one archive problem
   return buildApiUrl(`${PHOTOS_PATH}/problems/${encodeURIComponent(problemId)}`)
+}
+
+/**
+ * Builds the URL of a handoff code: pointing the student's code at what they are defending, or reading where a code
+ * sends photos now.
+ *
+ * @returns The handoff URL.
+ */
+export function getPhotoHandoffUrl(): string {
+  // The handoff endpoint
+  return buildApiUrl(PHOTO_HANDOFF_PATH)
+}
+
+/**
+ * Builds the URL for sending a photo through a handoff code.
+ *
+ * @param capturedAt - When the photo was taken.
+ * @returns The send URL.
+ */
+export function getHandoffPhotosUrl(capturedAt: Date): string {
+  // The photos endpoint, told when this photo was taken
+  return buildApiUrl(`${PHOTO_HANDOFF_PATH}/photos`, { capturedAt: capturedAt.toISOString() })
 }

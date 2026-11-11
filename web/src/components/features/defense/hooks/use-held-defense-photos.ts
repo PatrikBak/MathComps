@@ -6,73 +6,78 @@ import { useRef } from 'react'
 import type { PersistentDraftCodec } from '@/hooks/use-persistent-draft'
 import { usePersistentDraft } from '@/hooks/use-persistent-draft'
 
-import type { ComposerPhoto, InsertedPhoto } from '../model/composer-photos'
-import type { DefenseTarget } from '../model/defense-target'
-import { defenseDraftPhotosStorageKey } from '../model/defense-target'
-import { readDraftPhotos, writeDraftPhotos } from '../model/draft-photos'
+import type { HeldPhoto } from '../model/photo-reading'
 
 /**
- * The composer holding no photos.
+ * No photos held, whatever kind they would be.
  */
-const NO_PHOTOS: readonly ComposerPhoto[] = []
+const NO_PHOTOS: readonly never[] = []
 
 /**
- * The photos the composer holds, and what a new one is held with.
+ * Where held photos are kept, and how they are written there and read back. Taken once per key, as a
+ * {@link PersistentDraftCodec} is, so neither function may depend on the render that passed it.
+ *
+ * @template TPhoto - The photos held.
  */
-export type UseHeldDefensePhotosResult = {
-  /** The photos held, in page order, those going out with a message included. */
-  photos: readonly ComposerPhoto[]
-  /** Replaces the photos held, taking the photos or an updater like `useState` does. */
-  setPhotos: Dispatch<SetStateAction<readonly ComposerPhoto[]>>
-  /** Hands out the id of a photo about to be held, never the same one twice. */
-  nextId: () => number
-  /** Builds a photo whose text is in the message, previewing from its stored page, under an id of its own. */
-  insertedPhotoOf: (photoId: string, link: string) => InsertedPhoto
+export type HeldPhotoStorage<TPhoto extends HeldPhoto> = {
+  /** Where the photos are kept. */
+  key: string
+  /** Writes the photos worth keeping the way storage keeps them. */
+  serialize: (photos: readonly TPhoto[]) => string
+  /** Reads what storage keeps back as photos, each under an id the given function hands out. */
+  deserialize: (stored: string | undefined, nextId: () => number) => readonly TPhoto[]
 }
 
 /**
- * Holds the photos of a student's handwritten work in the composer, each under an id of its own. In a target whose
- * draft is kept, the photos whose text is in the message are kept beside its text as their stored pages, and come
- * back with it as photos in the message.
+ * The photos held, and what a new one is held with.
  *
- * @param target - What the student is defending.
+ * @template TPhoto - The photos held.
+ */
+export type UseHeldDefensePhotosResult<TPhoto extends HeldPhoto> = {
+  /** The photos held, in page order. */
+  photos: readonly TPhoto[]
+  /** Replaces the photos held, taking the photos or an updater like `useState` does. */
+  setPhotos: Dispatch<SetStateAction<readonly TPhoto[]>>
+  /** Hands out the id of a photo about to be held, never the same one twice. */
+  nextId: () => number
+}
+
+/**
+ * Holds the photos of a student's handwritten work, each under an id of its own, kept through a reload where a
+ * storage is given.
+ *
+ * @template TPhoto - The photos held.
+ *
+ * @param storage - Where the photos are kept and how, or null to hold them only while mounted.
  *
  * @returns The photos held, and what a new one is held with.
  */
-export function useHeldDefensePhotos(target: DefenseTarget): UseHeldDefensePhotosResult {
+export function useHeldDefensePhotos<TPhoto extends HeldPhoto>(
+  storage: HeldPhotoStorage<TPhoto> | null
+): UseHeldDefensePhotosResult<TPhoto> {
   // The id the next photo held gets
   const upcomingId = useRef(0)
 
   // A function which hands out the next id, moving past it
   const nextId = () => upcomingId.current++
 
-  // A function which builds a photo whose text is in the message, previewing from its stored page
-  const insertedPhotoOf = (photoId: string, link: string): InsertedPhoto => ({
-    kind: 'inserted',
-    id: nextId(),
-    previewUrl: link,
-    photoId,
-    link,
-    isGoingOut: false,
-  })
+  // How the photos are written into storage and read back, each read back photo under an id of its own, or none
+  // without a storage
+  const codec: PersistentDraftCodec<readonly TPhoto[]> | undefined =
+    storage === null
+      ? undefined
+      : {
+          serialize: storage.serialize,
+          deserialize: (stored) => storage.deserialize(stored, nextId),
+        }
 
-  // How the photos are kept beside the draft's text
-  const codec: PersistentDraftCodec<readonly ComposerPhoto[]> = {
-    // The photos whose text is in the message, as their stored pages
-    serialize: writeDraftPhotos,
-
-    // Those pages read back as photos in the message, previewing from them
-    deserialize: (stored) =>
-      readDraftPhotos(stored).map((photo) => insertedPhotoOf(photo.photoId, photo.link)),
-  }
-
-  // The photos held, in page order, kept wherever the draft's text is
-  const [photos, setPhotos] = usePersistentDraft({
-    storageKey: defenseDraftPhotosStorageKey(target),
+  // The photos held, in page order, kept wherever the storage says
+  const [photos, setPhotos] = usePersistentDraft<readonly TPhoto[]>({
+    storageKey: storage?.key ?? null,
     emptyValue: NO_PHOTOS,
     codec,
   })
 
   // The photos held, and what a new one is held with
-  return { photos, setPhotos, nextId, insertedPhotoOf }
+  return { photos, setPhotos, nextId }
 }

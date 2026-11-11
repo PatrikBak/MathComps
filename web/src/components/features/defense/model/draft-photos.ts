@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import type { ComposerPhoto } from './composer-photos'
+import type { DefensePhoto } from './photo-reading'
 
 /**
  * The photos kept beside an unsent message's text, as storage holds them.
@@ -27,7 +27,7 @@ export type DraftPhoto = z.infer<typeof draftPhotosSchema>[number]
  *
  * @returns What storage keeps.
  */
-export function writeDraftPhotos(held: readonly ComposerPhoto[]): string {
+export function writeDraftPhotos(held: readonly DefensePhoto[]): string {
   // The photos whose text is in the message, as their stored pages
   const kept: readonly DraftPhoto[] = held
     .filter((photo) => photo.kind === 'inserted')

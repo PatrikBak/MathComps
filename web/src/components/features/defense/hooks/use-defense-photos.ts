@@ -2,18 +2,14 @@
 
 import { useEffect, useRef } from 'react'
 
-import { assertNever } from '@/components/shared/utils/assert-never'
 import { shrinkToLongEdge } from '@/components/shared/utils/image-utils'
-import { apiCallOf, useApi } from '@/hooks/use-api'
 
-import type { ComposerPhoto, ReadingPhoto } from '../model/composer-photos'
-import type { DefenseTarget } from '../model/defense-target'
-import type { DefenseTurnPhoto } from '../model/defense-types'
-import { readPhoto } from '../services/photo-service'
-import { useHeldDefensePhotos } from './use-held-defense-photos'
+import type { DefensePhotoReading } from '../model/defense-types'
+import type { HeldPhoto, PhotoReader, PickedPhoto, ReadingPhoto } from '../model/photo-reading'
+import type { UseHeldDefensePhotosResult } from './use-held-defense-photos'
 
 /**
- * What a photo picked in the composer needs kept beside it and never drawn.
+ * What a photo picked on the device needs kept beside it and never drawn.
  */
 type PhotoResources = {
   /** The photo file as the student picked it. */
@@ -25,27 +21,23 @@ type PhotoResources = {
 }
 
 /**
- * The photos held in the composer, and what can be done with them.
+ * The photos held, and the ways they are picked, read again and dropped.
+ *
+ * @template TReading - What the API reads a photo as.
+ * @template TOtherPhoto - Photos held beside those picked, which the reading leaves as they are.
  */
-export type UseDefensePhotosResult = {
-  /** The photos in page order, apart from those going out with a message. */
-  photos: readonly ComposerPhoto[]
+export type UseDefensePhotosResult<
+  TReading extends DefensePhotoReading = DefensePhotoReading,
+  TOtherPhoto extends HeldPhoto = never,
+> = {
+  /** The photos held, in page order. */
+  photos: readonly (PickedPhoto<TReading> | TOtherPhoto)[]
   /** Starts reading newly picked photos, handing back their ids in page order. */
   addPhotos: (files: readonly File[]) => readonly number[]
   /** Reads a photo the reading failed on again. */
   retryPhoto: (id: number) => void
-  /** Takes the student's change to a read photo's text. */
-  editText: (id: number, text: string) => void
-  /** Puts every read photo's text into the message, handing back those texts in page order. */
-  insertRead: () => readonly string[]
-  /** Drops photos from the composer, aborting any read still on its way. */
+  /** Drops photos, aborting any read still on its way. */
   removePhotos: (ids: readonly number[]) => void
-  /** Takes photos out of the composer while the message they go out with is on its way. */
-  setAside: (ids: readonly number[]) => void
-  /** Puts photos set aside back into the composer, their message having not gone out. */
-  bringBack: (ids: readonly number[]) => void
-  /** Puts the photos a message went out with back into the composer, ahead of those held, its text there again. */
-  restoreSent: (sent: readonly DefenseTurnPhoto[]) => void
 }
 
 /**
@@ -62,37 +54,47 @@ function release(resources: PhotoResources): void {
 }
 
 /**
- * The options the composer's photos are read with.
+ * The options the photos are read with.
+ *
+ * @template TReading - What the API reads a photo as.
+ * @template TOtherPhoto - Photos held beside those picked, which the reading leaves as they are.
  */
-type UseDefensePhotosOptions = {
-  /** What the student is defending. */
-  target: DefenseTarget
+type UseDefensePhotosOptions<
+  TReading extends DefensePhotoReading,
+  TOtherPhoto extends HeldPhoto,
+> = {
+  /** The photos held, which the reads move on. */
+  held: UseHeldDefensePhotosResult<PickedPhoto<TReading> | TOtherPhoto>
+  /** Where the photos are sent to be read, or null while there is no way to send them yet. */
+  reader: PhotoReader<TReading> | null
   /** The most pixels a photo keeps along its longer side once read, or null while that is not known yet. */
   photoLongEdge: number | null
 }
 
 /**
  * Reads the photos a student takes of their handwritten work. Every photo is read at once, each shrunk first to
- * the size the API reads it at, and the shrinks go one photo at a time. Each one's text waits beside its photo for
- * the student to check, until the texts go into the message together in page order. A failed read leaves its photo
- * holding why, to be read again or removed.
+ * the size the API reads it at, and the shrinks go one photo at a time. A read photo holds what it read as, and a
+ * failed one holds why, to be read again or removed.
+ *
+ * @template TReading - What the API reads a photo as.
+ * @template TOtherPhoto - Photos held beside those picked, which the reading leaves as they are.
  *
  * @param options - The options the photos are read with.
  *
- * @returns The photos, and what can be done with them.
+ * @returns The photos, and the ways they are picked, read again and dropped.
  */
-export function useDefensePhotos({
-  target,
+export function useDefensePhotos<
+  TReading extends DefensePhotoReading,
+  TOtherPhoto extends HeldPhoto = never,
+>({
+  held,
+  reader,
   photoLongEdge,
-}: UseDefensePhotosOptions): UseDefensePhotosResult {
-  // The caller the reads go through, or null while there is nobody to read them as
-  const apiCall = apiCallOf(useApi())
+}: UseDefensePhotosOptions<TReading, TOtherPhoto>): UseDefensePhotosResult<TReading, TOtherPhoto> {
+  // The photos held, and the ways they change
+  const { photos, setPhotos, nextId } = held
 
-  // The photos held, and what a new one is held with
-  const { photos, setPhotos, nextId, insertedPhotoOf } = useHeldDefensePhotos(target)
-
-  // What each photo picked in the composer keeps beside it, under its id, which is where a dropped photo stops
-  // being found
+  // What each photo picked on the device keeps beside it, under its id
   const resources = useRef(new Map<number, PhotoResources>())
 
   // The shrink last queued, which the next waits behind so only one photo is held decoded at full size
@@ -104,8 +106,10 @@ export function useDefensePhotos({
    * @param id - The photo.
    * @param next - What the photo becomes.
    */
-  const updatePhoto = (id: number, next: (photo: ComposerPhoto) => ComposerPhoto) =>
-    setPhotos((held) => held.map((photo) => (photo.id === id ? next(photo) : photo)))
+  const updatePhoto = (
+    id: number,
+    next: (photo: PickedPhoto<TReading> | TOtherPhoto) => PickedPhoto<TReading>
+  ) => setPhotos((current) => current.map((photo) => (photo.id === id ? next(photo) : photo)))
 
   /**
    * A function which reads one held photo, its text landing beside it, or why it failed.
@@ -128,21 +132,23 @@ export function useDefensePhotos({
     // browser cannot shrink it
     const upload = (await shrunk) ?? file
 
-    // The page as the API reads it, and nothing to say while there is nobody to read it as
-    const result = apiCall === null ? null : await readPhoto(apiCall, target, upload, signal)
+    // When the photo was taken, which the device stamps on the file
+    const capturedAt = new Date(file.lastModified)
+
+    // The page as the API reads it, and nothing to say while there is no way to send it
+    const result = reader === null ? null : await reader({ photo: upload, capturedAt, signal })
 
     // Dropped while it was read, so nothing comes of the reading
     if (signal.aborted) return
 
     // Read, its text waiting beside it
     if (result?.success) {
-      // The photo read, with its text
+      // The photo read, holding what it read as and its text
       updatePhoto(id, (photo) => ({
         kind: 'read',
         id,
         previewUrl: photo.previewUrl,
-        photoId: result.data.photoId,
-        link: result.data.link,
+        reading: result.data,
         text: result.data.text,
       }))
 
@@ -191,7 +197,7 @@ export function useDefensePhotos({
     )
 
     // The photos go in after those already held
-    setPhotos((held) => [...held, ...added])
+    setPhotos((current) => [...current, ...added])
 
     // Their reads start
     added.forEach((photo, index) => startRead(photo.id, files[index], photo.previewUrl))
@@ -203,166 +209,50 @@ export function useDefensePhotos({
   // Reads a photo the reading failed on again, its text landing in its own place
   const retryPhoto = (id: number) => {
     // What the photo kept, gone once it was dropped
-    const held = resources.current.get(id)
-    if (held === undefined) return
+    const kept = resources.current.get(id)
+    if (kept === undefined) return
 
     // The photo is reading again
     updatePhoto(id, (photo) => ({ kind: 'reading', id, previewUrl: photo.previewUrl }))
 
     // And its read starts over
-    startRead(id, held.file, held.previewUrl)
+    startRead(id, kept.file, kept.previewUrl)
   }
 
-  // Takes the student's change to a read photo's text
-  const editText = (id: number, text: string) =>
-    updatePhoto(id, (photo) => {
-      switch (photo.kind) {
-        // A read photo's text is the student's to change
-        case 'read':
-          return { ...photo, text }
-
-        // Any other photo has no text waiting beside it
-        case 'reading':
-        case 'inserted':
-        case 'failed':
-          return photo
-
-        // Every state is handled above
-        default:
-          return assertNever(photo)
-      }
-    })
-
-  // Puts every read photo's text into the message
-  const insertRead = () => {
-    // The read photos, in page order
-    const readPhotos = photos.filter((photo) => photo.kind === 'read')
-
-    // Each of them now in the message
-    setPhotos((held) =>
-      held.map((photo) => {
-        switch (photo.kind) {
-          // A read photo's text goes into the message
-          case 'read':
-            return {
-              kind: 'inserted',
-              id: photo.id,
-              previewUrl: photo.previewUrl,
-              photoId: photo.photoId,
-              link: photo.link,
-              isGoingOut: false,
-            }
-
-          // Any other photo has no text waiting to go in
-          case 'reading':
-          case 'inserted':
-          case 'failed':
-            return photo
-
-          // Every state is handled above
-          default:
-            return assertNever(photo)
-        }
-      })
-    )
-
-    // Their texts, for the message
-    return readPhotos.map((photo) => photo.text)
-  }
-
-  // Drops photos from the composer; text already in the message stays the student's
+  // Drops photos, any read still on its way going nowhere
   const removePhotos = (ids: readonly number[]) => {
     // Each photo lets go of what it kept
     ids.forEach((id) => {
-      // What the photo kept, none if it was already dropped or previews from its stored page
-      const held = resources.current.get(id)
-      if (held === undefined) return
+      // What the photo kept, none if it was already dropped or never picked on this device
+      const kept = resources.current.get(id)
+      if (kept === undefined) return
 
       // Its read aborted and its preview freed
-      release(held)
+      release(kept)
 
       // And it is no longer found
       resources.current.delete(id)
     })
 
-    // The photos gone from the composer
-    setPhotos((held) => held.filter((photo) => !ids.includes(photo.id)))
+    // The photos gone
+    setPhotos((current) => current.filter((photo) => !ids.includes(photo.id)))
   }
 
-  /**
-   * A function which sends photos whose text is in the message out with it, or brings them back.
-   *
-   * @param ids - The photos.
-   * @param isGoingOut - Whether they go out, or come back.
-   */
-  const markGoingOut = (ids: readonly number[], isGoingOut: boolean) =>
-    setPhotos((held) =>
-      held.map((photo) => {
-        // Only the photos named
-        if (!ids.includes(photo.id)) return photo
-
-        // By where the photo's reading stands
-        switch (photo.kind) {
-          // A photo whose text is in the message goes where the message goes
-          case 'inserted':
-            return { ...photo, isGoingOut }
-
-          // Any other photo has nothing in the message to go out with
-          case 'reading':
-          case 'read':
-          case 'failed':
-            return photo
-
-          // Every state is handled above
-          default:
-            return assertNever(photo)
-        }
-      })
-    )
-
-  // Takes photos out of the composer while their message is on its way
-  const setAside = (ids: readonly number[]) => markGoingOut(ids, true)
-
-  // Puts photos set aside back into the composer
-  const bringBack = (ids: readonly number[]) => markGoingOut(ids, false)
-
-  // Puts the photos a message went out with back into the composer, previewing from their stored pages
-  const restoreSent = (sent: readonly DefenseTurnPhoto[]) => {
-    // Each as a photo whose text is in the message, kept as it already is
-    const restored = sent.map((photo) => insertedPhotoOf(photo.id, photo.link))
-
-    // Ahead of those held, as their text is ahead of anything else in the message
-    setPhotos((held) => [...restored, ...held])
-  }
-
-  // Once the composer is gone, so are the reads still on their way and every preview
+  // Once the photos are let go, so are the reads still on their way and every preview
   useEffect(() => {
-    // What the held photos keep, one map for the composer's whole life
-    const held = resources.current
+    // What the held photos keep, one map for as long as they are held
+    const kept = resources.current
 
     // Let go of on the way out
     return () => {
       // Each photo's read aborted and its preview freed
-      held.forEach(release)
+      kept.forEach(release)
 
       // And none of them found any more
-      held.clear()
+      kept.clear()
     }
   }, [])
 
-  // The photos the composer shows, those going out with a message left out
-  const shownPhotos = photos.filter((photo) => photo.kind !== 'inserted' || !photo.isGoingOut)
-
-  // The photos, and what can be done with them
-  return {
-    photos: shownPhotos,
-    addPhotos,
-    retryPhoto,
-    editText,
-    insertRead,
-    removePhotos,
-    setAside,
-    bringBack,
-    restoreSent,
-  }
+  // The photos, and the ways they are picked, read again and dropped
+  return { photos, addPhotos, retryPhoto, removePhotos }
 }

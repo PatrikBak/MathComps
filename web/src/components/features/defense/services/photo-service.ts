@@ -5,27 +5,40 @@ import type { ApiResult } from '@/types/api'
 
 import type { DefenseTarget } from '../model/defense-target'
 import { toWireTarget } from '../model/defense-target'
-import type { DefensePhotoReading } from '../model/defense-types'
+import type {
+  DefensePhotoReading,
+  HandoffPhotoReading,
+  HandoffPhotoSent,
+  PhotoHandoffCheck,
+} from '../model/defense-types'
+import type { PhotoReadRequest } from '../model/photo-reading'
 import { MAX_PHOTO_SIZE_MB } from '../model/photo-reading'
-import { getReadHandoutPhotoUrl, getReadProblemPhotoUrl } from './defense-api-urls'
+import {
+  getHandoffPhotosUrl,
+  getPhotoHandoffUrl,
+  getReadHandoutPhotoUrl,
+  getReadProblemPhotoUrl,
+} from './defense-api-urls'
 
 /**
- * Reads a photo of a handwritten page for a defense of a target, which keeps the photo and the drawings cut
- * out of it. A photo past {@link MAX_PHOTO_SIZE_MB} is refused without being sent.
+ * Sends a photo of a handwritten page to a route that reads it, the photo as the body itself. A photo past
+ * {@link MAX_PHOTO_SIZE_MB} is refused without being sent.
  *
- * @param apiCall - The authenticated API caller.
- * @param target - What the student is defending.
- * @param photo - The photo, as the student picked it or shrunk for the upload.
- * @param signal - Aborts the read.
- * @returns The page's text, with the kept photo and its drawings.
+ * @template TReading - What the route reads the photo as.
+ *
+ * @param apiCall - The API caller.
+ * @param endpoint - Builds the route's URL.
+ * @param request - The photo and what aborts its read.
+ * @param headers - Headers the route asks for beside the photo's type.
+ * @returns What the photo read as.
  */
-export async function readPhoto(
+async function postPhoto<TReading>(
   apiCall: ApiCaller,
-  target: DefenseTarget,
-  photo: Blob,
-  signal: AbortSignal
-): Promise<ApiResult<DefensePhotoReading>> {
-  // Too big for the API to take, so it isn't sent. The website's own code, since its copy names the limit and the
+  endpoint: () => string,
+  { photo, signal }: PhotoReadRequest,
+  headers: Record<string, string> = {}
+): Promise<ApiResult<TReading>> {
+  // Too big for the API to take, so it isn't sent. The website's own error code, since its copy names the limit and the
   // backend's UploadTooLarge can't
   if (photo.size > MAX_PHOTO_SIZE_MB * MEGABYTE_BYTES) {
     return { success: false, error: { message: 'Photo too large', errorCode: 'FILE_TOO_LARGE' } }
@@ -34,11 +47,35 @@ export async function readPhoto(
   // What a file the browser can't name the type of goes as
   const unknownFileType = 'application/octet-stream'
 
+  // The photo, sent as the body itself
+  return apiCall<TReading>(endpoint, {
+    method: 'POST',
+    signal,
+    body: photo,
+    headers: { ...headers, 'Content-Type': photo.type || unknownFileType },
+  })
+}
+
+/**
+ * Reads a photo of a handwritten page for a defense of a target, which keeps the photo and the drawings cut
+ * out of it.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param target - What the student is defending.
+ * @param request - The photo and what aborts its read.
+ * @returns The page's text, with the kept photo and its drawings.
+ */
+export function readPhoto(
+  apiCall: ApiCaller,
+  target: DefenseTarget,
+  request: PhotoReadRequest
+): Promise<ApiResult<DefensePhotoReading>> {
   // The target as the API names it, which settles which route reads the photo
   const wireTarget = toWireTarget(target)
 
-  // The photo, sent as the body itself
-  return apiCall<DefensePhotoReading>(
+  // The photo, sent to be read
+  return postPhoto<DefensePhotoReading>(
+    apiCall,
     () => {
       // The route for the kind of target the photo is for
       switch (wireTarget.kind) {
@@ -53,11 +90,58 @@ export async function readPhoto(
           return assertNever(wireTarget)
       }
     },
-    {
-      method: 'POST',
-      signal,
-      body: photo,
-      headers: { 'Content-Type': photo.type || unknownFileType },
-    }
+    request
   )
+}
+
+/**
+ * The scheme a handoff code is sent under. The code is all a phone has to prove which student it sends for, so it
+ * rides in the request's credentials, out of the URL the API's logs record.
+ */
+const HANDOFF_AUTHORIZATION_SCHEME = 'PhotoHandoff'
+
+/**
+ * Reads where a handoff code sends photos now, for a phone that holds the code and nothing else.
+ *
+ * @param apiCall - The API caller, signed in or not.
+ * @param code - The handoff code.
+ * @returns The problem the code points at, until when it works, and the size photos are read at.
+ */
+export function checkPhotoHandoff(
+  apiCall: ApiCaller,
+  code: string
+): Promise<ApiResult<PhotoHandoffCheck>> {
+  // The handoff route, told the code in its header
+  return apiCall<PhotoHandoffCheck>(getPhotoHandoffUrl, {
+    method: 'GET',
+    headers: { Authorization: `${HANDOFF_AUTHORIZATION_SCHEME} ${code}` },
+  })
+}
+
+/**
+ * Sends a photo of a handwritten page through a handoff code, read as the code's student for the problem the code
+ * points at when the photo arrives.
+ *
+ * @param apiCall - The API caller, signed in or not.
+ * @param code - The handoff code.
+ * @param request - The photo, when it was taken, and what aborts its read.
+ * @returns The page's text, and the problem it went to.
+ */
+export async function sendHandoffPhoto(
+  apiCall: ApiCaller,
+  code: string,
+  request: PhotoReadRequest
+): Promise<ApiResult<HandoffPhotoReading>> {
+  // The photo, stamped with when it was taken, the code in its header
+  const result = await postPhoto<HandoffPhotoSent>(
+    apiCall,
+    () => getHandoffPhotosUrl(request.capturedAt),
+    request,
+    { Authorization: `${HANDOFF_AUTHORIZATION_SCHEME} ${code}` }
+  )
+
+  // A failure as it came, and a reading with the problem it went to beside its text
+  return result.success
+    ? { success: true, data: { ...result.data.reading, target: result.data.target } }
+    : result
 }

@@ -25,6 +25,23 @@ export function defenseCopyQueryKey(locale: string): QueryKey {
 }
 
 /**
+ * Builds the query key for where a handoff code sends photos now.
+ *
+ * Kept out of {@link DEFENSE_QUERY_KEY}, since a code is moved on the device that made it, never by a write from the
+ * one reading it.
+ * The locale belongs in the key because the problem comes back named in the language the request asks for.
+ *
+ * @param code - The handoff code.
+ * @param locale - The language the problem is named in.
+ *
+ * @returns The query key.
+ */
+export function photoHandoffQueryKey(code: string, locale: string): QueryKey {
+  // One entry per code and language
+  return ['photo-handoff', code, locale] as const
+}
+
+/**
  * Builds the query key for a user's cross-problem list of defenses.
  *
  * The language belongs in it because the list names each conversation's competition, which is worded.

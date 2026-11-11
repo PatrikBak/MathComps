@@ -95,13 +95,30 @@ export function answerJson(route: Route, status: number, body: unknown): Promise
 }
 
 /**
- * Refuses a call in the shape the backend writes a refusal as.
+ * A call the backend turns away.
+ */
+export type Refusal = {
+  /** The status it is refused with. */
+  status: number
+  /** The code saying why, or undefined for a failure that names none. */
+  errorCode: AppErrorCode | undefined
+}
+
+/**
+ * Refuses a call, as a problem document when a code says why, or with an empty body where nothing does.
  *
  * @param route - The call.
  * @param status - The status it is refused with.
- * @param errorCode - The code saying why.
+ * @param errorCode - The code saying why, or undefined for a failure that names none, which comes with no body.
  */
-export function refuse(route: Route, status: number, errorCode: AppErrorCode): Promise<void> {
+export function refuse(
+  route: Route,
+  status: number,
+  errorCode: AppErrorCode | undefined
+): Promise<void> {
+  // A failure naming no code, with nothing to say
+  if (errorCode === undefined) return route.fulfill({ status, body: '' })
+
   // The status and the code, as a problem document
   return route.fulfill({
     status,

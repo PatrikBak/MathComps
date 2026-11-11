@@ -669,6 +669,12 @@
       "somethingElse": "Nic z toho",
       "wasOff": "Byla mimo"
     },
+    "photoHandoff": {
+      "checkError": "Nepodařilo se zjistit, kam jdou fotky.",
+      "earlier": "Odeslané dříve",
+      "goesTo": "Fotky jdou k úloze",
+      "hint": "Vyfoť každou stranu řešení. Mathilda každou fotku přečte a za chvíli ji uvidíš na počítači. Tam zkontroluješ text a odebereš fotku, kterou nechceš."
+    },
     "photos": {
       "add": "Fotka",
       "addPage": "Přidat stranu",
@@ -1064,6 +1070,10 @@
     "news": {
       "description": "Nové materiály, přidané úlohy a změny na MathComps.",
       "title": "Novinky"
+    },
+    "photoHandoff": {
+      "description": "Fotky řešení z mobilu rovnou do rozhovoru s Mathildou.",
+      "title": "Fotky z mobilu"
     },
     "privacy": {
       "description": "Jak MathComps nakládá s tvými údaji a za jakých podmínek ho můžeš používat.",

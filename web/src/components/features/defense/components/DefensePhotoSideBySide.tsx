@@ -1,7 +1,7 @@
 'use client'
 
 import { useElementSize } from '@mantine/hooks'
-import { ImageOff, Loader2, TriangleAlert } from 'lucide-react'
+import { ImageOff, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
@@ -14,13 +14,12 @@ import { RichMathEditor } from '@/components/shared/components/rich-math-editor/
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
-import { resolveErrorMessage } from '@/lib/api/api-error-utils'
 
+import type { UseComposerPhotosResult } from '../hooks/use-composer-photos'
 import { useDefensePhotoViewer } from '../hooks/use-defense-photo-viewer'
-import type { UseDefensePhotosResult } from '../hooks/use-defense-photos'
-import type { ComposerPhoto } from '../model/composer-photos'
-import { canReadAgain, MAX_PHOTO_SIZE_MB } from '../model/photo-reading'
+import type { DefensePhoto } from '../model/photo-reading'
 import { DefensePhotoButton } from './DefensePhotoButton'
+import { DefensePhotoFailure } from './DefensePhotoFailure'
 import { DefensePhotoStrip } from './DefensePhotoStrip'
 
 /**
@@ -28,7 +27,7 @@ import { DefensePhotoStrip } from './DefensePhotoStrip'
  */
 type DefenseSidePhotoProps = {
   /** The photo. */
-  photo: ComposerPhoto
+  photo: DefensePhoto
   /** Where it stands among the composer's photos, from 1. */
   number: number
   /** Shows the photo large. */
@@ -79,9 +78,9 @@ function DefenseSidePhoto({ photo, number, onEnlarge }: DefenseSidePhotoProps) {
  */
 type DefensePageTextProps = {
   /** The page whose text it is. */
-  photo: ComposerPhoto
+  photo: DefensePhoto
   /** The composer's photos and what can be done with them. */
-  photos: UseDefensePhotosResult
+  photos: UseComposerPhotosResult
   /** The longest a single student message may be, or null while the caps are not known. */
   maxCharacters: number | null
   /** The tools the text is written with. */
@@ -94,8 +93,8 @@ type DefensePageTextProps = {
 
 /**
  * One page's text, by where its reading stands: shut while the page is read, there to check once it is, and a note
- * once it is in the message or the reading failed. A failed reading's note is the one place that says why, with
- * another go where one could come out differently and the page's removal where none could.
+ * once it is in the message or the reading failed. A failed reading's note is the one place in the composer that says
+ * why, with the way on.
  */
 function DefensePageText({
   photo,
@@ -107,12 +106,6 @@ function DefensePageText({
 }: DefensePageTextProps) {
   // Copy for the composer's photos
   const t = useTranslations('defense.photos')
-
-  // Copy for the buttons the whole app shares
-  const tActions = useTranslations('ui.actions')
-
-  // Central failure-code copy
-  const tApiErrors = useTranslations('apiErrors')
 
   /**
    * A function which draws the page's text in its editor, once its column is measured.
@@ -192,41 +185,16 @@ function DefensePageText({
     case 'inserted':
       return note(<p>{t('inserted')}</p>)
 
-    // The reading failed, which says why and the way on
-    case 'failed': {
-      // Why, in words, or the generic failure where nothing said why. The cap goes along for the copy that names it
-      const why = resolveErrorMessage(photo.errorCode, tApiErrors, {
-        fallback: t('readError'),
-        data: { max: MAX_PHOTO_SIZE_MB },
-      })
-
-      // The note, saying why and the way on
+    // The reading failed, its note saying why and the way on
+    case 'failed':
       return note(
-        <>
-          {/* The mark the photo's tile carries too */}
-          <TriangleAlert className="size-5 text-error" aria-hidden="true" />
-
-          {/* Why, heard as it comes, in the foreground since the error red is too faint for small text on the
-              dialog */}
-          <p role="alert" className="text-balance text-foreground">
-            {why}
-          </p>
-
-          {/* The way on, by whether another reading could come out differently */}
-          {canReadAgain(photo.errorCode) ? (
-            // Another go
-            <Button variant="secondary" size="sm" onClick={() => photos.retryPhoto(photo.id)}>
-              {tActions('retry')}
-            </Button>
-          ) : (
-            // The page's removal, no reading of it coming out any other way
-            <Button variant="secondary" size="sm" onClick={() => photos.removePhotos([photo.id])}>
-              {t('remove')}
-            </Button>
-          )}
-        </>
+        <DefensePhotoFailure
+          photoNumber={null}
+          errorCode={photo.errorCode}
+          onRetry={() => photos.retryPhoto(photo.id)}
+          onRemove={() => photos.removePhotos([photo.id])}
+        />
       )
-    }
 
     // Every state is handled above
     default:
@@ -249,7 +217,7 @@ type DefensePhotoSideBySideProps = {
   /** Called once the view is gone and the composer is the student's again. */
   onClosed: () => void
   /** The composer's photos and what can be done with them. */
-  photos: UseDefensePhotosResult
+  photos: UseComposerPhotosResult
   /** The turn being written. */
   draft: string
   /** Takes the turn with the pages' text put into it. */
@@ -367,9 +335,13 @@ export function DefensePhotoSideBySide({
           <div className="flex flex-col gap-3 sm:min-h-0">
             {/* Every page, the one looked at marked, then more */}
             <DefensePhotoStrip
-              photos={photos}
-              selected={viewed !== undefined ? { id: viewed.id, onEnlarge: enlarge } : null}
-              onOpen={onView}
+              photos={photos.photos}
+              actions={{
+                kind: 'review',
+                selected: viewed !== undefined ? { id: viewed.id, onEnlarge: enlarge } : null,
+                onOpen: onView,
+                onRemove: photos.removePhotos,
+              }}
             >
               <DefensePhotoButton variant="page" onPick={onPick} />
             </DefensePhotoStrip>

@@ -208,6 +208,41 @@ export type DefensePhotoReading = {
 }
 
 /**
+ * What a photo sent through a handoff code read as, and the problem it went to, as the API answers.
+ */
+export type HandoffPhotoSent = {
+  /** What the photo read as. */
+  reading: DefensePhotoReading
+  /** The problem the code pointed at when the API took the photo. */
+  target: NamedDefenseTarget
+}
+
+/**
+ * What a photo sent through a handoff code read as, the problem it went to beside its text.
+ */
+export type HandoffPhotoReading = DefensePhotoReading & Pick<HandoffPhotoSent, 'target'>
+
+/**
+ * Where a live handoff code sends photos now, and until when it works.
+ */
+type PhotoHandoffTarget = {
+  /** The problem photos go to now. */
+  target: NamedDefenseTarget
+  /** When the code stops working, as an ISO-8601 string. */
+  expiresAt: string
+}
+
+/**
+ * What a phone holding a handoff code is told about it.
+ */
+export type PhotoHandoffCheck = {
+  /** Where the code sends photos now, and until when. */
+  handoff: PhotoHandoffTarget
+  /** The most pixels a photo keeps along its longer side once read, as {@link DefenseLimits.photoLongEdge} has it. */
+  photoLongEdge: number
+}
+
+/**
  * An archive problem a conversation was held against, named as well as addressed: nothing on the reader's
  * side can name a competition still under embargo.
  */

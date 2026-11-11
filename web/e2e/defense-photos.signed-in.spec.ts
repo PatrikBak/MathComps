@@ -54,6 +54,19 @@ async function openPracticeConversation(page: Page): Promise<Locator> {
 }
 
 /**
+ * Finds a page's tile in the review while it is the one looked at, which a press shows large.
+ *
+ * @param review - The review.
+ * @param number - The page's place among the pages, from 1.
+ *
+ * @returns The page's tile.
+ */
+function lookedAtTile(review: Locator, number: number): Locator {
+  // The strip's tile, ahead of the page shown beside its text, which carries the same name
+  return review.getByRole('button', { name: photosText('enlarge', { number }) }).first()
+}
+
+/**
  * Picks pages of handwritten work for the message through the composer's photo button, the way a student picks
  * them off their phone, which opens the review on the first of them.
  *
@@ -344,21 +357,17 @@ test.describe('the review of the picked pages', () => {
     // The review
     const review = page.getByRole('dialog', { name: chatCopy.photos.reviewTitle })
 
-    // A function which finds a page's tile while it is the one looked at, which a press shows large
-    const lookedAt = (number: number) =>
-      review.getByRole('button', { name: photosText('enlarge', { number }) }).first()
-
     // Looking at the first page
-    await expect(lookedAt(1)).toHaveAttribute('aria-current', 'true')
+    await expect(lookedAtTile(review, 1)).toHaveAttribute('aria-current', 'true')
 
     // The second page opened
     await review.getByRole('button', { name: photosText('open', { number: 2 }) }).click()
 
     // Looked at now
-    await expect(lookedAt(2)).toHaveAttribute('aria-current', 'true')
+    await expect(lookedAtTile(review, 2)).toHaveAttribute('aria-current', 'true')
 
     // Pressed there
-    await lookedAt(2).click()
+    await lookedAtTile(review, 2).click()
 
     // Shown large
     await expect(shownPhoto(page)).toHaveAttribute('alt', photosText('photo', { number: 2 }))
@@ -376,6 +385,56 @@ test.describe('the review of the picked pages', () => {
     await expectViewerShut(page)
 
     // Leaving the review open, now on the page swiped to
-    await expect(lookedAt(1)).toHaveAttribute('aria-current', 'true')
+    await expect(lookedAtTile(review, 1)).toHaveAttribute('aria-current', 'true')
+  })
+
+  test("goes into the message with a page's text as the student left it", async ({ page }) => {
+    // A conversation, and the composer to write it in
+    const composer = await openPracticeConversation(page)
+
+    // A page picked, the review opening on it
+    await pickPages(page, 1)
+
+    // The page's text in the review
+    const pageText = page
+      .getByRole('dialog', { name: chatCopy.photos.reviewTitle })
+      .locator('textarea')
+
+    // Filled in once the page is read
+    await expect(pageText).toHaveValue(pageTextOf(1), { timeout: SETTLE_TIMEOUT_MS })
+
+    // Corrected by the student
+    await pageText.fill('Page 1: the residues repeat every six steps')
+
+    // Put into the message
+    await insertPages(page, 1)
+
+    // Which says what the student left
+    await expect(composer).toHaveValue('Page 1: the residues repeat every six steps')
+  })
+
+  test('drops a page from its corner, looking at the one left', async ({ page }) => {
+    // A conversation to write
+    await openPracticeConversation(page)
+
+    // Two pages picked, the review opening on the first
+    await pickPages(page, 2)
+
+    // The review
+    const review = page.getByRole('dialog', { name: chatCopy.photos.reviewTitle })
+
+    // The first page dropped from its tile's corner
+    await review
+      .getByRole('group', { name: photosText('photo', { number: 1 }), exact: true })
+      .getByRole('button', { name: chatCopy.photos.remove })
+      .click()
+
+    // No second page left
+    await expect(
+      review.getByRole('group', { name: photosText('photo', { number: 2 }), exact: true })
+    ).toHaveCount(0)
+
+    // The one left, now the first, looked at
+    await expect(lookedAtTile(review, 1)).toHaveAttribute('aria-current', 'true')
   })
 })
