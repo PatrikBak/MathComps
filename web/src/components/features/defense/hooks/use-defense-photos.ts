@@ -148,6 +148,7 @@ export function useDefensePhotos<
         kind: 'read',
         id,
         previewUrl: photo.previewUrl,
+        capturedAt: file.lastModified,
         reading: result.data,
         text: result.data.text,
       }))
@@ -161,6 +162,7 @@ export function useDefensePhotos<
       kind: 'failed',
       id,
       previewUrl: photo.previewUrl,
+      capturedAt: file.lastModified,
       errorCode: result?.error.errorCode,
     }))
   }
@@ -193,6 +195,7 @@ export function useDefensePhotos<
         kind: 'reading',
         id: nextId(),
         previewUrl: URL.createObjectURL(file),
+        capturedAt: file.lastModified,
       })
     )
 
@@ -213,7 +216,12 @@ export function useDefensePhotos<
     if (kept === undefined) return
 
     // The photo is reading again
-    updatePhoto(id, (photo) => ({ kind: 'reading', id, previewUrl: photo.previewUrl }))
+    updatePhoto(id, (photo) => ({
+      kind: 'reading',
+      id,
+      previewUrl: photo.previewUrl,
+      capturedAt: kept.file.lastModified,
+    }))
 
     // And its read starts over
     startRead(id, kept.file, kept.previewUrl)

@@ -41,6 +41,7 @@ function readPhoto(id: number, target: NamedDefenseTarget): HandoffPhoto {
     kind: 'read',
     id,
     previewUrl: `blob:${id}`,
+    capturedAt: 0,
     reading: {
       photoId: `photo-${id}`,
       link: `https://files.example/photo-${id}.jpg`,
@@ -60,7 +61,7 @@ function readPhoto(id: number, target: NamedDefenseTarget): HandoffPhoto {
  */
 function readingPhoto(id: number): HandoffPhoto {
   // Nothing answered yet
-  return { kind: 'reading', id, previewUrl: `blob:${id}` }
+  return { kind: 'reading', id, previewUrl: `blob:${id}`, capturedAt: 0 }
 }
 
 /**
@@ -72,7 +73,7 @@ function readingPhoto(id: number): HandoffPhoto {
  */
 function failedPhoto(id: number): HandoffPhoto {
   // Failed with no reason given
-  return { kind: 'failed', id, previewUrl: `blob:${id}`, errorCode: undefined }
+  return { kind: 'failed', id, previewUrl: `blob:${id}`, capturedAt: 0, errorCode: undefined }
 }
 
 /**

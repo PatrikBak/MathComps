@@ -16,6 +16,7 @@ import { defenseDraftStorageKey } from '../model/defense-target'
 import type { DefenseTurnPhoto, Turn } from '../model/defense-types'
 import type { UseComposerPhotosResult } from './use-composer-photos'
 import { useComposerPhotos } from './use-composer-photos'
+import { useDefensePhotoHandoffPages } from './use-defense-photo-handoff-pages'
 
 /**
  * A rewind awaiting confirmation: the cut point to keep through, and the student's turn it drops, which comes back
@@ -65,6 +66,8 @@ type UseDefenseTurnControlsResult = {
   setDraft: (draft: string) => void
   /** The photos of handwritten work the composer holds. */
   photos: UseComposerPhotosResult
+  /** The ids of the pages the student's phone sent last, in page order, or none before any came. */
+  latestArrival: readonly number[]
   /** The composer's handle. */
   editorRef: React.RefObject<RichMathEditorRef | null>
   /** Sends the composed reply. */
@@ -120,6 +123,12 @@ export function useDefenseTurnControls(
   const photos = useComposerPhotos({
     target: conversation.target,
     photoLongEdge: conversation.photoLongEdge,
+  })
+
+  // The latest pages the student's phone sent, each joining the composer's photos as it comes
+  const { latestArrival } = useDefensePhotoHandoffPages({
+    target: conversation.target,
+    onArrive: photos.addArrived,
   })
 
   // The composer outlives the conversation it writes into, so hand it the cursor whenever another
@@ -338,6 +347,7 @@ export function useDefenseTurnControls(
     draft,
     setDraft,
     photos,
+    latestArrival,
     editorRef,
     sendDraft,
     stopReply,

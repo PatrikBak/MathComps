@@ -253,6 +253,25 @@ export type PhotoHandoffCheck = {
 }
 
 /**
+ * A page the student's phone sent, read, as a composer on the problem it went to takes it.
+ */
+export type DefensePhotoHandoffPage = DefensePhotoReading & {
+  /** When the phone says the photo was taken, as an ISO 8601 instant. */
+  capturedAt: string
+}
+
+/**
+ * The pages the student's phone sent to one problem that no composer had taken yet, now taken, and whether their
+ * code still works, which says whether more can come.
+ */
+export type DefensePhotoHandoffPages = {
+  /** The pages, in the order they were taken on the phone. */
+  pages: readonly DefensePhotoHandoffPage[]
+  /** Whether the student has a handoff code that still works. */
+  hasLiveCode: boolean
+}
+
+/**
  * An archive problem a conversation was held against, named as well as addressed: nothing on the reader's
  * side can name a competition still under embargo.
  */

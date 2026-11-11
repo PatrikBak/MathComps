@@ -42,6 +42,60 @@ export function photoHandoffQueryKey(code: string, locale: string): QueryKey {
 }
 
 /**
+ * The key every take of the pages a user's phone sent to one problem hangs off.
+ *
+ * Kept out of {@link DEFENSE_QUERY_KEY}: a take hands its pages over once, and a write refreshing every defense read
+ * would cancel a take in flight after the API had already given its pages away. Both
+ * {@link photoHandoffPagesQueryKey}, which adds the user, and {@link refreshPhotoHandoffPages}, which matches on this
+ * much alone, are built from it.
+ *
+ * @param target - What the pages were sent to.
+ *
+ * @returns The key.
+ */
+function photoHandoffPagesKeyPrefix(target: DefenseTarget): QueryKey {
+  // One entry per problem, the target named as the API names it
+  return ['defense-photo-handoff-pages', toWireTarget(target)] as const
+}
+
+/**
+ * Builds the query key for taking the pages a user's phone sent to one problem.
+ *
+ * @param target - What the pages were sent to.
+ * @param userId - The signed-in user's id, or null while it isn't known.
+ *
+ * @returns The query key.
+ */
+export function photoHandoffPagesQueryKey(target: DefenseTarget, userId: string | null): QueryKey {
+  // Keyed by user, so a switched account never takes the previous one's pages
+  return [...photoHandoffPagesKeyPrefix(target), userId] as const
+}
+
+/**
+ * Takes the pages a user's phone sent to one problem straight away, as after their code was pointed at it, so the
+ * take learns the code works and goes on asking. A take already out lands first, its pages handed over.
+ *
+ * @param queryClient - The cache the take lives in.
+ * @param target - What the pages were sent to.
+ */
+export async function refreshPhotoHandoffPages(
+  queryClient: QueryClient,
+  target: DefenseTarget
+): Promise<void> {
+  // The problem's take in an open composer, whichever user it is made as. A shut one has nowhere to put pages
+  const filters = { queryKey: photoHandoffPagesKeyPrefix(target), type: 'active' } as const
+
+  // A take already out, waited for, since the API gives its pages away as it answers. It went out before the code
+  // was pointed, so its answer can say no code works
+  if (queryClient.isFetching(filters) > 0) {
+    await queryClient.refetchQueries(filters, { cancelRefetch: false })
+  }
+
+  // Then one taken now, which finds the code working
+  await queryClient.refetchQueries(filters, { cancelRefetch: false })
+}
+
+/**
  * Builds the query key for a user's cross-problem list of defenses.
  *
  * The language belongs in it because the list names each conversation's competition, which is worded.

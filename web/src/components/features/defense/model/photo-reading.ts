@@ -37,9 +37,18 @@ export type HeldPhoto = {
 }
 
 /**
+ * What every photo whose text has yet to go into the message carries, a page from the phone taking its place among
+ * them by when it was taken.
+ */
+type WaitingPhoto = HeldPhoto & {
+  /** When the photo was taken, in milliseconds since the epoch. */
+  capturedAt: number
+}
+
+/**
  * A photo whose reading is on its way.
  */
-export type ReadingPhoto = HeldPhoto & {
+export type ReadingPhoto = WaitingPhoto & {
   /** The discriminant. */
   kind: 'reading'
 }
@@ -49,7 +58,7 @@ export type ReadingPhoto = HeldPhoto & {
  *
  * @template TReading - What the API reads a photo as.
  */
-type ReadPhoto<TReading> = HeldPhoto & {
+export type ReadPhoto<TReading> = WaitingPhoto & {
   /** The discriminant. */
   kind: 'read'
   /** What the API read the photo as. */
@@ -86,7 +95,7 @@ export function insertedPhotoOf(id: number, photoId: string, link: string): Inse
 /**
  * A photo the reading failed on, which can be read again unless the photo itself is why.
  */
-type FailedPhoto = HeldPhoto & {
+type FailedPhoto = WaitingPhoto & {
   /** The discriminant. */
   kind: 'failed'
   /** Why the reading failed, or undefined when nothing said why. */
