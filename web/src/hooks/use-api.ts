@@ -43,7 +43,10 @@ type ApiUnauthenticatedState = {
 type ApiReadyState = {
   /** The discriminant. */
   state: 'ready'
-  /** The caller for issuing requests, authenticated whenever a signed-in user is behind it. */
+  /**
+   * The caller for issuing requests, sending the signed-in user's session with each call that carries no credential
+   * of its own.
+   */
   apiCall: ApiCaller
 }
 
@@ -65,7 +68,8 @@ type ApiOptions = {
 }
 
 /**
- * The API client for the current reader, minting a fresh Clerk token for every request it makes.
+ * The API client for the current reader, minting a fresh Clerk token, while someone is signed in, for every request
+ * that carries no credential of its own.
  *
  * @param options - What the call site asks of the client.
  *
@@ -95,8 +99,12 @@ export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
       // The session token, which only a signed-in reader has one of
       let token: string | null = null
 
-      // A reader with a session has one to mint, and Clerk goes to the network to do it
-      if (isSignedIn) {
+      // Whether the call proves who it is by a credential of its own, which a session token must not replace
+      const hasOwnCredential = new Headers(options.headers).has('Authorization')
+
+      // A reader with a session mints one for a call with no credential of its own, and Clerk goes to the
+      // network to do it
+      if (isSignedIn && !hasOwnCredential) {
         try {
           token = await getToken()
         } catch (error) {
@@ -129,7 +137,7 @@ export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
         ...options.headers,
       }
 
-      // A token is what turns the call authenticated
+      // A session token, where one was minted, signs the call in as the reader
       if (token) {
         ;(headers as Record<string, string>).Authorization = `Bearer ${token}`
       }

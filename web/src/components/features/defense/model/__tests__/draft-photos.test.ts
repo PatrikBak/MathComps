@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import type { ComposerPhoto, InsertedPhoto } from '../composer-photos'
 import { readDraftPhotos, writeDraftPhotos } from '../draft-photos'
+import type { DefensePhoto, InsertedPhoto } from '../photo-reading'
 
 /**
  * A photo whose text went into the message.
@@ -24,14 +24,17 @@ describe('writeDraftPhotos', () => {
   it('keeps only the photos whose text is in the message, in page order', () => {
     // A page in the message, one still being checked, one on its way out with a message, another in the message,
     // one being read and one the reading failed on
-    const held: readonly ComposerPhoto[] = [
+    const held: readonly DefensePhoto[] = [
       inserted(0, 'photo-1', false),
       {
         kind: 'read',
         id: 1,
         previewUrl: 'blob:photo-2',
-        photoId: 'photo-2',
-        link: 'https://files.example/photo-2.jpg',
+        reading: {
+          photoId: 'photo-2',
+          link: 'https://files.example/photo-2.jpg',
+          text: 'Let $n$ be odd.',
+        },
         text: 'Let $n$ be odd.',
       },
       inserted(2, 'photo-3', true),

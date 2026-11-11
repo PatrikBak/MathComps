@@ -669,6 +669,12 @@
       "somethingElse": "None of these",
       "wasOff": "She was off"
     },
+    "photoHandoff": {
+      "checkError": "Couldn't find out where the photos go.",
+      "earlier": "Sent earlier",
+      "goesTo": "Photos go to",
+      "hint": "Take a photo of each page of your solution. Mathilda reads each one, and it shows up on your computer a moment later. Check the text there, and remove any photo you don't want."
+    },
     "photos": {
       "add": "Photo",
       "addPage": "Add a page",
@@ -1064,6 +1070,10 @@
     "news": {
       "description": "New handouts, added problems, and changes on MathComps.",
       "title": "News"
+    },
+    "photoHandoff": {
+      "description": "Photos of your solution from your phone, straight into your conversation with Mathilda.",
+      "title": "Photos from your phone"
     },
     "privacy": {
       "description": "How MathComps handles your data, and the terms you use it under.",

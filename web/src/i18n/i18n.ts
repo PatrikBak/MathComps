@@ -78,6 +78,7 @@ export const ROUTES = {
   ADMIN_DEFENSES: '/admin/defenses',
   ADMIN_GRADING: '/admin/grading/[slug]',
   ORGANIZATION_SELECTION: '/problem-selection/[slug]',
+  PHOTO_HANDOFF: '/photos',
 } as const
 
 /** A route, as its path in the canonical locale. */
@@ -106,6 +107,7 @@ const ROUTE_TRANSLATIONS: Record<RouteKey, NonCanonicalLocaleTranslations> = {
   '/admin/defenses': { sk: '/admin/obhajoby', cs: '/admin/obhajoby' },
   '/admin/grading/[slug]': { sk: '/admin/hodnotenie/[slug]', cs: '/admin/hodnoceni/[slug]' },
   '/problem-selection/[slug]': { sk: '/vyber-uloh/[slug]', cs: '/vyber-uloh/[slug]' },
+  '/photos': { sk: '/fotky', cs: '/fotky' },
 }
 
 /** The site's in-page anchors, each as its fragment in the canonical locale. */

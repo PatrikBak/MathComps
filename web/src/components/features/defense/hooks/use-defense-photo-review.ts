@@ -5,14 +5,14 @@ import { useState } from 'react'
 
 import type { RichMathEditorRef } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 
-import type { UseDefensePhotosResult } from './use-defense-photos'
+import type { UseComposerPhotosResult } from './use-composer-photos'
 
 /**
  * Options for {@link useDefensePhotoReview}.
  */
 type UseDefensePhotoReviewOptions = {
   /** The composer's photos and what can be done with them. */
-  photos: UseDefensePhotosResult
+  photos: UseComposerPhotosResult
   /** The composer's handle. */
   editorRef: RefObject<RichMathEditorRef | null>
 }

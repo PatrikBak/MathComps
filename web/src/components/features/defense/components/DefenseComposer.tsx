@@ -15,8 +15,8 @@ import { CounterBadge } from '@/components/shared/components/rich-math-editor/co
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { useIsAdmin } from '@/hooks/use-is-admin'
 
+import type { UseComposerPhotosResult } from '../hooks/use-composer-photos'
 import { useDefensePhotoReview } from '../hooks/use-defense-photo-review'
-import type { UseDefensePhotosResult } from '../hooks/use-defense-photos'
 import type { DefenseComposerState } from '../model/defense-composer-state'
 import {
   MESSAGES_LEFT_TO_ALARM_AT,
@@ -62,7 +62,7 @@ type DefenseComposerProps = {
   /** Takes what the student types. */
   onDraftChange: (draft: string) => void
   /** The photos of handwritten work the turn is written from. */
-  photos: UseDefensePhotosResult
+  photos: UseComposerPhotosResult
   /** Sends the written turn. */
   onSend: () => void
   /** Abandons the reply in flight, handing the turn back. */
@@ -189,9 +189,13 @@ export function DefenseComposer({
         <>
           {/* Photos the turn is written from */}
           <DefensePhotoStrip
-            photos={photos}
-            selected={null}
-            onOpen={review.view}
+            photos={photos.photos}
+            actions={{
+              kind: 'review',
+              selected: null,
+              onOpen: review.view,
+              onRemove: photos.removePhotos,
+            }}
             className="mb-2"
           />
 

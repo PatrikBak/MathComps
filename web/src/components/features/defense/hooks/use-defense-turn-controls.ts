@@ -14,8 +14,8 @@ import type { DeleteOutcome, RewindOutcome, SendOutcome } from '../model/defense
 import type { DefenseTarget } from '../model/defense-target'
 import { defenseDraftStorageKey } from '../model/defense-target'
 import type { DefenseTurnPhoto, Turn } from '../model/defense-types'
-import type { UseDefensePhotosResult } from './use-defense-photos'
-import { useDefensePhotos } from './use-defense-photos'
+import type { UseComposerPhotosResult } from './use-composer-photos'
+import { useComposerPhotos } from './use-composer-photos'
 
 /**
  * A rewind awaiting confirmation: the cut point to keep through, and the student's turn it drops, which comes back
@@ -64,7 +64,7 @@ type UseDefenseTurnControlsResult = {
   /** Replaces it. */
   setDraft: (draft: string) => void
   /** The photos of handwritten work the composer holds. */
-  photos: UseDefensePhotosResult
+  photos: UseComposerPhotosResult
   /** The composer's handle. */
   editorRef: React.RefObject<RichMathEditorRef | null>
   /** Sends the composed reply. */
@@ -117,7 +117,7 @@ export function useDefenseTurnControls(
   const editorRef = useRef<RichMathEditorRef>(null)
 
   // The composer's photos, each one's text waiting beside it until it goes into the draft
-  const photos = useDefensePhotos({
+  const photos = useComposerPhotos({
     target: conversation.target,
     photoLongEdge: conversation.photoLongEdge,
   })
