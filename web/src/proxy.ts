@@ -19,15 +19,22 @@ const intlMiddleware = createMiddleware({
 /** Matches any locale-prefixed path under /dev/ (e.g. /en/dev/renderer-preview). */
 const DEV_ROUTE_PATTERN = /^\/(?:sk|cs|en)\/dev(?:\/|$)/
 
+/**
+ * Whether the dev-only preview pages are served: always in development, and by a production server only when it is
+ * started with `SERVE_DEV_PAGES=true`.
+ */
+const SERVES_DEV_PAGES =
+  process.env.NODE_ENV === 'development' || process.env['SERVE_DEV_PAGES'] === 'true'
+
 /** Matches the app's own API routes (e.g. /api/contact). */
 const API_ROUTE_PATTERN = /^\/api(?:\/|$)/
 
 /**
  * Combined middleware: dev-route gate + Clerk auth + next-intl routing.
  *
- * Outside development, any `/<locale>/dev/...` URL answers 404, keeping internal
- * preview pages unreachable in production and out of search indexes. In development
- * the gate is bypassed and the request flows through normal locale routing.
+ * Unless {@link SERVES_DEV_PAGES} says otherwise, any `/<locale>/dev/...` URL answers 404,
+ * keeping internal preview pages unreachable in production and out of search indexes.
+ * Where they are served, the request flows through normal locale routing.
  *
  * Clerk wraps the request so `auth()` works in server components and API routes. A page
  * then goes on to next-intl for locale handling, which an API route has no part in. A page
@@ -40,8 +47,8 @@ export default clerkMiddleware(async (_auth, request) => {
     return NextResponse.next()
   }
 
-  // Dev-only preview pages answer 404 outside development
-  if (process.env.NODE_ENV !== 'development' && DEV_ROUTE_PATTERN.test(request.nextUrl.pathname)) {
+  // Dev-only preview pages answer 404 where they aren't served
+  if (!SERVES_DEV_PAGES && DEV_ROUTE_PATTERN.test(request.nextUrl.pathname)) {
     return new NextResponse(null, { status: 404 })
   }
 

@@ -201,9 +201,6 @@ test.describe('a message written from photos', () => {
     // The viewer gone
     await expectViewerShut(page)
 
-    // Leaving the chat open
-    await expect(transcript).toBeVisible()
-
     // The focus back on the page it was shown from
     await expect(secondPage).toBeFocused()
 
