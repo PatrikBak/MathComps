@@ -22,8 +22,9 @@ import {
   MESSAGES_LEFT_TO_ALARM_AT,
   MESSAGES_LEFT_TO_WARN_AT,
 } from '../model/defense-composer-state'
+import type { DefenseTarget } from '../model/defense-target'
 import { DefensePhotoButton } from './DefensePhotoButton'
-import { DefensePhotoSideBySide } from './DefensePhotoSideBySide'
+import { DefensePhotoDialog } from './DefensePhotoDialog'
 import { DefensePhotoStrip } from './DefensePhotoStrip'
 import { MathildaConsentGate } from './MathildaConsentGate'
 
@@ -63,6 +64,8 @@ type DefenseComposerProps = {
   onDraftChange: (draft: string) => void
   /** The photos of handwritten work the turn is written from. */
   photos: UseComposerPhotosResult
+  /** What the student is defending. */
+  target: DefenseTarget
   /** Sends the written turn. */
   onSend: () => void
   /** Abandons the reply in flight, handing the turn back. */
@@ -95,6 +98,7 @@ export function DefenseComposer({
   draft,
   onDraftChange,
   photos,
+  target,
   onSend,
   onStop,
   editorRef,
@@ -113,11 +117,12 @@ export function DefenseComposer({
   // Copy for the buttons the whole app shares
   const tActions = useTranslations('ui.actions')
 
-  // The review of the photos, where each page's text is checked before it goes into the message
-  const review = useDefensePhotoReview({ photos, editorRef })
+  // The dialog over the photos: their review, where each page's text is checked before it goes into the message, or
+  // their handoff to the student's phone
+  const review = useDefensePhotoReview({ photos, editorRef, target })
 
-  // The review lasts only while the composer is open for a turn, and shuts with it
-  if (!IS_OPEN_FOR_A_TURN[state.kind] && review.viewedPhotoId !== null) review.close()
+  // The dialog lasts only while the composer is open for a turn, and shuts with it
+  if (!IS_OPEN_FOR_A_TURN[state.kind] && review.dialog.kind !== 'shut') review.close()
 
   // Photos are for admins until the rest of the photo flow ships
   const canAddPhotos = useIsAdmin()
@@ -199,18 +204,15 @@ export function DefenseComposer({
             className="mb-2"
           />
 
-          {/* The pages beside their text */}
-          <DefensePhotoSideBySide
-            viewedPhotoId={review.viewedPhotoId}
-            onView={review.view}
-            onPick={review.pick}
-            onClose={review.close}
-            onClosed={() => editorRef.current?.focus()}
+          {/* The pages beside their text, or the way to send them from the phone */}
+          <DefensePhotoDialog
+            review={review}
             photos={photos}
             draft={draft}
             onDraftChange={onDraftChange}
             maxCharacters={maxCharacters}
             toolbar={DEFENSE_TOOLBAR}
+            onClosed={() => editorRef.current?.focus()}
           />
 
           {/* Where the next message is written, its footer counting the conversation's room beside the
@@ -232,7 +234,11 @@ export function DefenseComposer({
             placeholder={t('placeholder')}
             footerTools={
               canAddPhotos ? (
-                <DefensePhotoButton variant="compact" onPick={review.pick} />
+                <DefensePhotoButton
+                  variant="compact"
+                  onPick={review.pick}
+                  onPhone={review.openPhone}
+                />
               ) : undefined
             }
             footerMeta={

@@ -41,3 +41,17 @@ export function focusForReader(
   // Focused, ringed as the latest press decides
   target?.focus({ ...options, focusVisible: pointerPressTarget === null })
 }
+
+/**
+ * Puts focus on an element on the reader's behalf as it appears, only when the focus was dropped: the control that
+ * held it went away, leaving it on the page's body. Passed as a ref.
+ *
+ * @param target - The element; null for none, which leaves focus where it is.
+ */
+export function focusIfDropped(target: HTMLElement | null): void {
+  // No element, or focus still held by a control, which keeps it
+  if (target === null || document.activeElement !== document.body) return
+
+  // Focused, ringed as the latest press decides
+  focusForReader(target)
+}

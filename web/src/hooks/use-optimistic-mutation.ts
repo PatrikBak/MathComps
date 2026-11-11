@@ -71,9 +71,10 @@ export type OptimisticMutationConfig<TData, TVariables, TContext> = {
    */
   onLoginPromptDismiss?: () => void
   /**
-   * Fallback error toast copy for a failure that carried no recognized error code.
+   * Fallback error toast copy for a failure that carried no recognized error code, or null for a caller that shows
+   * its failures in place, which then get no toast.
    */
-  errorMessage: string
+  errorMessage: string | null
   /**
    * Runs the mutation's calls one at a time alongside every other mutation sharing the id, in the order they
    * were fired. For calls that write the same thing, where landing out of order would leave the last one
@@ -164,10 +165,13 @@ export function useOptimisticMutation<TData = unknown, TVariables = void, TConte
 
     // Surface a failure and let the caller roll back
     onError: (error, variables, context) => {
-      // Toast the failure's localized copy, falling back to the caller's generic message
-      toast.error(
-        resolveErrorMessage(errorCodeOf(error), tApiErrors, { fallback: config.errorMessage })
-      )
+      // Toast the failure's localized copy, falling back to the caller's generic message, unless the caller says it
+      // in place
+      if (config.errorMessage !== null) {
+        toast.error(
+          resolveErrorMessage(errorCodeOf(error), tApiErrors, { fallback: config.errorMessage })
+        )
+      }
 
       // Let the caller roll back the optimistic update
       config.onError?.(error, variables, context)

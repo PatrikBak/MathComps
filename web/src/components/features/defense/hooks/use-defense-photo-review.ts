@@ -5,7 +5,41 @@ import { useState } from 'react'
 
 import type { RichMathEditorRef } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 
+import type { DefenseTarget } from '../model/defense-target'
+import type { DefensePhotoHandoff } from '../model/photo-handoff-code'
 import type { UseComposerPhotosResult } from './use-composer-photos'
+import { useDefensePhotoHandoff } from './use-defense-photo-handoff'
+
+/**
+ * No photo dialog open.
+ */
+type ShutPhotoDialog = {
+  /** The discriminant. */
+  kind: 'shut'
+}
+
+/**
+ * The dialog with the QR code the student scans to send photos from their phone.
+ */
+type PhonePhotoDialog = {
+  /** The discriminant. */
+  kind: 'phone'
+}
+
+/**
+ * The review, open on one photo, where each page's text is checked before it goes into the message.
+ */
+type ReviewPhotoDialog = {
+  /** The discriminant. */
+  kind: 'review'
+  /** The photo looked at. */
+  photoId: number
+}
+
+/**
+ * What the dialog over the composer's photos shows.
+ */
+type DefensePhotoDialog = ShutPhotoDialog | PhonePhotoDialog | ReviewPhotoDialog
 
 /**
  * Options for {@link useDefensePhotoReview}.
@@ -15,48 +49,60 @@ type UseDefensePhotoReviewOptions = {
   photos: UseComposerPhotosResult
   /** The composer's handle. */
   editorRef: RefObject<RichMathEditorRef | null>
+  /** What the student is defending. */
+  target: DefenseTarget
 }
 
 /**
- * The review of the composer's photos, where each page's text is checked before it goes into the message, and the
- * ways into it.
+ * The dialog over the composer's photos, and the ways into it: the review of the photos, or the QR code for
+ * sending them from the student's phone.
  */
 export type UseDefensePhotoReviewResult = {
-  /** The photo looked at in the review, or null while the review is shut. */
-  viewedPhotoId: number | null
+  /** What the dialog shows. */
+  dialog: DefensePhotoDialog
+  /** The state of the code the student's phone sends photos with. */
+  handoff: DefensePhotoHandoff
   /** Looks at a photo, opening the review on it while it is shut. */
   view: (id: number) => void
-  /** Shuts the review. */
+  /** Shuts the dialog. */
   close: () => void
   /** Takes newly picked photos, opening the review on the first of them. */
   pick: (files: readonly File[]) => void
+  /** Opens the QR dialog, pointing the student's code at the target. */
+  openPhone: () => void
 }
 
 /**
- * Opens and shuts the review of the composer's photos. Picking photos, from the composer or from the review itself,
- * starts their reading and looks at the first of them.
+ * Opens and shuts the dialog over the composer's photos. Picking photos, from the composer or from the review itself,
+ * starts their reading and looks at the first of them. Asking for the phone, from either place too, points the
+ * student's code at the target and shows it.
  *
- * @param options - The composer's photos and its handle.
+ * @param options - The composer's photos, its handle and its target.
  *
- * @returns The photo looked at, and the ways into and out of the review.
+ * @returns What the dialog shows, and the ways into and out of it.
  */
 export function useDefensePhotoReview({
   photos,
   editorRef,
+  target,
 }: UseDefensePhotoReviewOptions): UseDefensePhotoReviewResult {
-  // The photo looked at, null while the review is shut
-  const [viewedPhotoId, setViewedPhotoId] = useState<number | null>(null)
+  // What the dialog shows, shut at first
+  const [dialog, setDialog] = useState<DefensePhotoDialog>({ kind: 'shut' })
 
-  // A photo dropped while it was looked at hands the view to the first page, and the last one dropped shuts it
-  if (viewedPhotoId !== null && !photos.photos.some((photo) => photo.id === viewedPhotoId)) {
-    setViewedPhotoId(photos.photos.at(0)?.id ?? null)
+  // A photo dropped while it was looked at hands the review to the first page, and the last one dropped shuts it
+  if (dialog.kind === 'review' && !photos.photos.some((photo) => photo.id === dialog.photoId)) {
+    // The first page left, if any
+    const first = photos.photos.at(0)
+
+    // Looked at, or the dialog shut with nothing left to look at
+    setDialog(first === undefined ? { kind: 'shut' } : { kind: 'review', photoId: first.id })
   }
 
   // Looks at a photo
-  const view = (id: number) => setViewedPhotoId(id)
+  const view = (id: number) => setDialog({ kind: 'review', photoId: id })
 
-  // Shuts the review
-  const close = () => setViewedPhotoId(null)
+  // Shuts the dialog
+  const close = () => setDialog({ kind: 'shut' })
 
   // Takes picked photos, looking at the first of them straight away
   const pick = (files: readonly File[]) => {
@@ -67,9 +113,24 @@ export function useDefensePhotoReview({
     const [first] = photos.addPhotos(files)
 
     // And the first of them is looked at
-    if (first !== undefined) setViewedPhotoId(first)
+    if (first !== undefined) view(first)
   }
 
-  // The photo looked at, and the ways into and out of the review
-  return { viewedPhotoId, view, close, pick }
+  // The code the student's phone sends photos with, and the way to point it
+  const { handoff, point } = useDefensePhotoHandoff({ target })
+
+  // Opens the QR dialog
+  const openPhone = () => {
+    // The expanded editor collapses, since its photo button opens this dialog too
+    editorRef.current?.collapse()
+
+    // The code is pointed at the target, which the dialog shows once it comes
+    point()
+
+    // And the dialog shows the handoff
+    setDialog({ kind: 'phone' })
+  }
+
+  // What the dialog shows, and the ways into and out of it
+  return { dialog, handoff, view, close, pick, openPhone }
 }
