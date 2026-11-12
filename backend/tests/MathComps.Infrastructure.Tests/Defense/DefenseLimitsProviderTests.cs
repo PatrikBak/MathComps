@@ -23,7 +23,6 @@ public class DefenseLimitsProviderTests
             MaxFeedbackCommentChars = 50,
             MaxMessagesPerDefense = 2,
             MaxPhotosPerMessage = 3,
-            MaxPhotoLinksPerRequest = 4,
             DailySpendCeilingPerUser = 1.00m,
         };
 

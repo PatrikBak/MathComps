@@ -449,10 +449,9 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
   `Cors:Origins` is the one a server cannot go without: the base file allows `http://localhost:3000` alone, so
   until the override names the site's real origins the browser is refused on every API call while the API itself
   looks healthy. An entry may carry `*` as a wildcard.
-  `DefenseLimits` holds what bounds the defense feature: a daily spend ceiling in dollars, reckoned **per user**,
-  a message cap on one conversation, a photo cap on one message and a cap on the photo links one request gets. See
-  [What the defense ceiling is for](#what-the-defense-ceiling-is-for) for what it does and does not reach. Every cap
-  but the ceiling and the link cap rides to the browser on every session read, so once the API has restarted on the
+  `DefenseLimits` holds the defense feature's caps, a daily spend ceiling in dollars among them, reckoned **per
+  user**. See [What the defense ceiling is for](#what-the-defense-ceiling-is-for) for what it does and does not
+  reach. Every cap but the ceiling rides to the browser on every session read, so once the API has restarted on the
   new value, the UI follows on the next page load with no frontend deploy.
   `RateLimits` holds how many requests one caller, an IPv4 address or an IPv6 /64, may make in a window. Search
   and the routes a page asks every few seconds have counts of their own, the signed-in one counted per account,

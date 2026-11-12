@@ -118,8 +118,8 @@ public class DefensePhotoService(
     public async Task<ImmutableDictionary<Guid, string>> LinksToUnsentPhotosAsync(
         Guid userId, IEnumerable<Guid> photoIds, CancellationToken cancellationToken = default)
     {
-        // The photos named, once each and no more than one call gets links to.
-        List<Guid> ids = [.. photoIds.Distinct().Take(_limits.MaxPhotoLinksPerRequest)];
+        // The photos named, once each and no more than one message may carry.
+        List<Guid> ids = [.. photoIds.Distinct().Take(_limits.MaxPhotosPerMessage)];
 
         // The operation's database context.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
