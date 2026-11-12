@@ -3,6 +3,7 @@
 import { useCallbackRef, useFileDialog, useTimeout, useWindowEvent } from '@mantine/hooks'
 import { useState } from 'react'
 
+import { acceptKeepingCamera } from '@/components/shared/utils/file-picker-utils'
 import { SECOND_MS } from '@/components/shared/utils/time-units'
 
 /**
@@ -31,7 +32,8 @@ export type UseFilePickerResult = {
  * The system's file picker, with word of the wait while it comes up. Some browsers, Safari above all, take a
  * moment to show it, and the page would otherwise sit there as if the press had missed. The wait ends when the
  * picker takes the window's focus, or is closed with files or without, and after a few seconds at the latest. A
- * picker that comes and goes without any of those would otherwise leave every later press ignored.
+ * picker that comes and goes without any of those would otherwise leave every later press ignored. A picker of
+ * images keeps the camera on offer on Chromium for Android, whose photo picker has none.
  *
  * @param options - Which files the picker offers, and what takes the ones picked.
  *
@@ -79,9 +81,13 @@ export function useFilePicker({
     onPick(Array.from(files))
   })
 
+  // The kinds of file the picker goes out with, the camera kept on offer, or as given on the server
+  const pickerAccept =
+    typeof navigator === 'undefined' ? accept : acceptKeepingCamera(accept, navigator)
+
   // The picker itself
   const dialog = useFileDialog({
-    accept,
+    accept: pickerAccept,
     multiple,
     onChange: handOn,
     onCancel: endWait,
