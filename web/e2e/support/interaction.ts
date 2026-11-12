@@ -1,8 +1,10 @@
 import type { JSHandle, Locator, Page } from '@playwright/test'
 import jsQR from 'jsqr'
 
+import { type Locale, LOCALE_NAMES } from '@/i18n/i18n'
+
 import messages from '../../messages/en.json'
-import { expect } from './test'
+import { expect, SETTLE_TIMEOUT_MS } from './test'
 
 /** The labels the header's user menu reads under. */
 export const userMenuCopy = messages.ui.userMenu
@@ -27,6 +29,43 @@ export async function openUserMenu(page: Page): Promise<void> {
 
   // Opened
   await userMenu.click()
+}
+
+/**
+ * The header's sign-in link, which the header draws only once it runs in the browser.
+ *
+ * @param page - The page.
+ *
+ * @returns The link.
+ */
+export function headerSignInLink(page: Page): Locator {
+  // The link in the page's banner
+  return page.getByRole('banner').getByRole('link', { name: messages.auth.signIn })
+}
+
+/**
+ * Switches the page to another language from the header's language menu, returning once the page reads in it.
+ *
+ * @param page - The page.
+ * @param locale - The language to switch to.
+ */
+export async function switchLanguage(page: Page, locale: Locale): Promise<void> {
+  // The header's sign-in link or its user menu, drawn once the header runs in the browser
+  const account = headerSignInLink(page).or(
+    page.getByRole('banner').getByRole('button', { name: userMenuCopy.label })
+  )
+
+  // The header drawn, so its language menu answers a press
+  await expect(account).toBeVisible({ timeout: SIGN_IN_TIMEOUT_MS })
+
+  // The language menu, opened
+  await page.getByRole('button', { name: messages.common.language.change }).click()
+
+  // The language, picked
+  await page.getByRole('menuitem', { name: LOCALE_NAMES[locale] }).click()
+
+  // The page, reading in that language
+  await expect(page.locator('html')).toHaveAttribute('lang', locale, { timeout: SETTLE_TIMEOUT_MS })
 }
 
 /**

@@ -102,7 +102,7 @@ export function useCompetitionArea(competitionSlug: string): UseCompetitionAreaR
   const showLoginPrompt = useLoginPromptToast()
 
   // The page to come back to once signed in
-  const getCurrentUrl = useCurrentUrl()
+  const { getCurrentUrl } = useCurrentUrl()
 
   // The competition, the group setting its terms, and the entry the reader spent on it
   const {

@@ -110,7 +110,7 @@ function SelectionAccess({ children }: SelectionAccessProps) {
   const { selection, uiState, retry } = useSelectionWorkspace()
 
   // The way to an account, which comes back to this page
-  const { getLoginUrl } = useLoginRedirect()
+  const { loginLink } = useLoginRedirect()
 
   // Nobody to read the selection as, so its read never starts
   if (isLoaded && !isSignedIn) {
@@ -118,7 +118,7 @@ function SelectionAccess({ children }: SelectionAccessProps) {
       <SelectionNotice>
         <p>
           {t.rich('signIn', {
-            link: (chunks) => <ProseLink href={getLoginUrl()}>{chunks}</ProseLink>,
+            link: (chunks) => <ProseLink {...loginLink}>{chunks}</ProseLink>,
           })}
         </p>
       </SelectionNotice>

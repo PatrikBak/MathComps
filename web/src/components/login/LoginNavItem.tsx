@@ -16,7 +16,7 @@ import { cn } from '../shared/utils/css-utils'
 type LoginNavItemProps = {
   /** Optional Tailwind classes forwarded to the underlying {@link AppLink}. */
   className?: string
-  /** Click handler invoked after navigation (primarily for closing drawers). */
+  /** Click handler run as the link is followed (primarily for closing drawers). */
   onClick?: () => void
   /** When true, renders a skeleton placeholder matching the button dimensions. */
   isLoading?: boolean
@@ -31,16 +31,11 @@ export const LoginNavItem = ({ className, onClick, isLoading }: LoginNavItemProp
   // Translations for section
   const t = useTranslations('auth')
 
-  // Get the function which generates the login URL
-  const { getLoginUrl } = useLoginRedirect()
+  // The link to the login page, coming back to this one
+  const { loginLink } = useLoginRedirect()
 
-  // If already on login page
-  const loginUrl =
-    usePathname() === ROUTES.LOGIN
-      ? // Do not add return URL
-        ROUTES.LOGIN
-      : // Otherwise add return URL determined at the time of navigation
-        getLoginUrl()
+  // On the login page itself the link carries no way back, which would only lead to the same page
+  const link = usePathname() === ROUTES.LOGIN ? { href: ROUTES.LOGIN } : loginLink
 
   // Loading skeleton - matches exact dimensions of the real button
   if (isLoading) {
@@ -69,7 +64,7 @@ export const LoginNavItem = ({ className, onClick, isLoading }: LoginNavItemProp
   return (
     <AppLink
       plain
-      href={loginUrl}
+      {...link}
       className={cn(className, 'flex items-center gap-2 whitespace-nowrap')}
       onClick={onClick}
     >

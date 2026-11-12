@@ -13,6 +13,7 @@ import {
   getContentFileBasename,
   supportsLocale,
 } from '@/components/features/handouts/handout-metadata-types'
+import { listEnvironmentAnchors } from '@/components/features/handouts/handout-problem-ref'
 import { computeSectionMetadata } from '@/components/features/handouts/handout-utils'
 import HandoutDetail from '@/components/features/handouts/HandoutDetail'
 import Layout from '@/components/layout/Layout'
@@ -213,8 +214,11 @@ export default withLocale(async function RenderPage({
       <JsonLd data={breadcrumbJsonLd} />
       {/* Handout learning-resource structured data */}
       <JsonLd data={handoutJsonLd} />
-      {/* The provider exposes slug translations for the language switcher */}
-      <LocalizedRouteProvider slugTranslations={handoutMeta.slug}>
+      {/* The handout's names and anchors in every language, for the language switcher */}
+      <LocalizedRouteProvider
+        slugTranslations={handoutMeta.slug}
+        anchorTranslations={listEnvironmentAnchors(handoutMeta.id)}
+      >
         <Layout tocItems={tableOfContentsItems}>
           <HandoutDetail
             handout={handoutData}

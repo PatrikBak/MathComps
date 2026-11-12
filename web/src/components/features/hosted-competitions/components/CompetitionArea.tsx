@@ -66,7 +66,7 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
   const openedResults = useAddressedDisclosure(RESULTS_PARAM)
 
   // The way to an account, which comes back to this competition
-  const { getLoginUrl } = useLoginRedirect()
+  const { loginLink } = useLoginRedirect()
 
   // The solution's disclosure, closing the hints as it opens, so the set never has both open at once
   const solutionDisclosure: AddressedDisclosure = {
@@ -162,7 +162,7 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
       {readerKey === null && (
         <ReaderPrompt className="-mt-4 mb-5">
           {t.rich('areaSignedOut', {
-            link: (chunks) => <ProseLink href={getLoginUrl()}>{chunks}</ProseLink>,
+            link: (chunks) => <ProseLink {...loginLink}>{chunks}</ProseLink>,
           })}
         </ReaderPrompt>
       )}

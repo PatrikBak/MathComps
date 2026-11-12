@@ -1,3 +1,4 @@
+import type { LinkProps } from 'next/link'
 import { useCallback } from 'react'
 
 import { RETURN_URL_PARAM } from '@/constants/auth-constants'
@@ -6,23 +7,42 @@ import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
 
 /**
+ * A link to the login page that comes back to the page it sits on.
+ */
+type LoginLink = {
+  /**
+   * The login page, coming back to this page without its fragment. A link opened in a new tab gets
+   * only this.
+   */
+  href: string
+  /** Takes a click on the link over, so the way back carries the page's fragment at the click. */
+  onNavigate: NonNullable<LinkProps['onNavigate']>
+}
+
+/**
  * Result of the {@link useLoginRedirect} hook.
  */
 type UseLoginRedirectResult = {
   /**
    * Redirects the user to the login page.
    *
-   * @param returnUrl - Optional specific return URL. If not provided, uses the current URL.
+   * @param returnUrl - The page to come back to, by default this one with its fragment.
    */
   redirectToLogin: (returnUrl?: string) => void
-  /**
-   * Generates the login URL with the return URL query parameter.
-   *
-   * @param returnUrl - Optional specific return URL. If not provided, uses the current URL.
-   *
-   * @returns The full path to the login page with the return URL.
-   */
-  getLoginUrl: (returnUrl?: string) => string
+  /** A link to the login page coming back to this page. */
+  loginLink: LoginLink
+}
+
+/**
+ * Builds the address of the login page that sends the user to a given page once signed in.
+ *
+ * @param returnUrl - The page to come back to.
+ *
+ * @returns The path to the login page with the return URL.
+ */
+function loginUrlFor(returnUrl: string): string {
+  // The login page, carrying the way back as a parameter
+  return `${ROUTES.LOGIN}?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl)}`
 }
 
 /**
@@ -32,37 +52,33 @@ export function useLoginRedirect(): UseLoginRedirectResult {
   // We need to use the router to do the redirect
   const router = useRouter()
 
-  // We need the current URL to redirect pass to the login page as the return URL
-  const getCurrentUrl = useCurrentUrl()
+  // The page's address as rendered, and a function reading it with its fragment
+  const { pathWithQuery, getCurrentUrl } = useCurrentUrl()
 
-  /**
-   * Generates the login URL with the return URL query parameter.
-   *
-   * @param returnUrl - Optional specific return URL. If not provided, uses the current URL.
-   * @returns The full path to the login page with the return URL.
-   */
-  const getLoginUrl = useCallback(
-    (returnUrl?: string) => {
-      return `${ROUTES.LOGIN}?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl ?? getCurrentUrl())}`
-    },
-    [getCurrentUrl]
-  )
-
-  /**
-   * Redirects the user to the login page.
-   *
-   * @param returnUrl - Optional specific return URL. If not provided, uses the current URL.
-   */
+  // A function which sends the reader to the login page
   const redirectToLogin = useCallback(
     (returnUrl?: string) => {
-      router.push(getLoginUrl(returnUrl))
+      // Off to the login page, with the given way back or this page as it stands now
+      router.push(loginUrlFor(returnUrl ?? getCurrentUrl()))
     },
-    [router, getLoginUrl]
+    [router, getCurrentUrl]
   )
 
-  // Return the redirect function and the URL generator
-  return {
-    redirectToLogin,
-    getLoginUrl,
-  }
+  // A function which takes a click on a login link over, reading the fragment at that moment
+  const onLoginLinkNavigate: LoginLink['onNavigate'] = useCallback(
+    (event) => {
+      // The link's own navigation cancelled, since its address has no fragment
+      event.preventDefault()
+
+      // The login page, coming back to the page as it stands now
+      redirectToLogin()
+    },
+    [redirectToLogin]
+  )
+
+  // The link to the login page, whose click reads the way back afresh
+  const loginLink: LoginLink = { href: loginUrlFor(pathWithQuery), onNavigate: onLoginLinkNavigate }
+
+  // Return the redirect function and the link
+  return { redirectToLogin, loginLink }
 }
