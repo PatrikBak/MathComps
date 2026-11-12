@@ -1,7 +1,7 @@
 import type { LinkProps } from 'next/link'
 import type { ReactNode } from 'react'
 
-import { AppLink } from './AppLink'
+import { AppLink, type RouteHref } from './AppLink'
 
 /**
  * An inline text link used inside a sentence of prose, always underlined so it doesn't rely on color
@@ -14,8 +14,8 @@ export const PROSE_LINK_CLASS =
  * Props for the {@link ProseLink} component.
  */
 type ProseLinkProps = {
-  /** The destination URL. */
-  href: string
+  /** Where the link leads, as an address or as a route by name. */
+  href: string | RouteHref
   /** Whether to open the link in a new tab. */
   newTab?: boolean
   /** Called as a click starts the link's client-side navigation, which it can cancel. */

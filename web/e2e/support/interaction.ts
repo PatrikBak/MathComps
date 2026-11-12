@@ -3,11 +3,20 @@ import jsQR from 'jsqr'
 
 import { type Locale, LOCALE_NAMES } from '@/i18n/i18n'
 
-import messages from '../../messages/en.json'
+import czechMessages from '../../messages/cs.json'
+import englishMessages from '../../messages/en.json'
+import slovakMessages from '../../messages/sk.json'
 import { expect, SETTLE_TIMEOUT_MS } from './test'
 
-/** The labels the header's user menu reads under. */
-export const userMenuCopy = messages.ui.userMenu
+/** The labels the header's user menu reads under in English. */
+export const userMenuCopy = englishMessages.ui.userMenu
+
+/** What the header's sign-in link reads in each language. */
+const SIGN_IN_LABELS: Record<Locale, string> = {
+  en: englishMessages.auth.signIn,
+  sk: slovakMessages.auth.signIn,
+  cs: czechMessages.auth.signIn,
+}
 
 /** How many pixels across a QR is drawn at to be read. */
 const QR_READ_SIDE = 512
@@ -35,12 +44,13 @@ export async function openUserMenu(page: Page): Promise<void> {
  * The header's sign-in link, which the header draws only once it runs in the browser.
  *
  * @param page - The page.
+ * @param locale - The language the page reads in.
  *
  * @returns The link.
  */
-export function headerSignInLink(page: Page): Locator {
+export function headerSignInLink(page: Page, locale: Locale = 'en'): Locator {
   // The link in the page's banner
-  return page.getByRole('banner').getByRole('link', { name: messages.auth.signIn })
+  return page.getByRole('banner').getByRole('link', { name: SIGN_IN_LABELS[locale] })
 }
 
 /**
@@ -59,7 +69,7 @@ export async function switchLanguage(page: Page, locale: Locale): Promise<void> 
   await expect(account).toBeVisible({ timeout: SIGN_IN_TIMEOUT_MS })
 
   // The language menu, opened
-  await page.getByRole('button', { name: messages.common.language.change }).click()
+  await page.getByRole('button', { name: englishMessages.common.language.change }).click()
 
   // The language, picked
   await page.getByRole('menuitem', { name: LOCALE_NAMES[locale] }).click()
