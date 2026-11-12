@@ -123,10 +123,12 @@ export function useDefenseTurnControls(
   // The composer's handle
   const editorRef = useRef<RichMathEditorRef>(null)
 
-  // The composer's photos, each one's text waiting beside it until it goes into the draft
+  // The composer's photos, each one's text waiting beside it until it goes into the draft, no more picked than one
+  // message may carry
   const photos = useComposerPhotos({
     target: conversation.target,
     photoLongEdge: conversation.photoLongEdge,
+    maxPhotos: conversation.maxPhotosPerMessage,
   })
 
   // The latest pages the student's phone sent, each joining the composer's photos as it comes

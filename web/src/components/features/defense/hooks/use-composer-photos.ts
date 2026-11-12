@@ -41,6 +41,12 @@ export type UseComposerPhotosResult = Omit<UseDefensePhotosResult, 'photos'> & {
   bringBack: (ids: readonly number[]) => void
   /** Puts the photos a message went out with back into the composer, ahead of those held, its text there again. */
   restoreSent: (sent: readonly DefenseTurnPhoto[]) => void
+  /** The most photos one message may carry, which is as many as the composer takes, or null while not known yet. */
+  maxPhotos: number | null
+  /** Whether the composer shows as many photos as one message may carry, or more, so it takes no more picked ones. */
+  isFull: boolean
+  /** Whether the composer shows more photos than one message may carry. */
+  isOverFull: boolean
 }
 
 /**
@@ -51,6 +57,34 @@ type UseComposerPhotosOptions = {
   target: DefenseTarget
   /** The most pixels a photo keeps along its longer side once read, or null while that is not known yet. */
   photoLongEdge: number | null
+  /** The most photos one message may carry, or null while that is not known yet. */
+  maxPhotos: number | null
+}
+
+/**
+ * Says whether the composer shows a photo it holds, which it does unless the photo is out with a message.
+ *
+ * @param photo - The photo.
+ *
+ * @returns Whether the composer shows it.
+ */
+function isShown(photo: DefensePhoto): boolean {
+  // By where the photo's reading stands
+  switch (photo.kind) {
+    // A photo whose text is in the message is away while that message is on its way
+    case 'inserted':
+      return !photo.isGoingOut
+
+    // Any other photo stays in the composer
+    case 'reading':
+    case 'read':
+    case 'failed':
+      return true
+
+    // Every state is handled above
+    default:
+      return assertNever(photo)
+  }
 }
 
 /**
@@ -60,6 +94,10 @@ type UseComposerPhotosOptions = {
  * student's phone sent come in read already. A photo previewing from its stored page shows from a fresh link once one
  * comes, the link it was kept with standing in until then, since that one may have run out.
  *
+ * The composer takes no more picked photos than one message may carry, every photo it shows counting. Pages from the
+ * phone, a kept draft's photos and photos put back come in whatever the count, since each was read already, and the
+ * student removes those past it.
+ *
  * @param options - The options the composer's photos are read with.
  *
  * @returns The photos, and what can be done with them.
@@ -67,6 +105,7 @@ type UseComposerPhotosOptions = {
 export function useComposerPhotos({
   target,
   photoLongEdge,
+  maxPhotos,
 }: UseComposerPhotosOptions): UseComposerPhotosResult {
   // The caller the reads go through, or null while there is nobody to read them as
   const apiCall = apiCallOf(useApi())
@@ -91,11 +130,18 @@ export function useComposerPhotos({
   // The photos held, those in the message and those read beside it kept wherever the draft's text is
   const held = useHeldDefensePhotos(storage)
 
+  // The photos the composer shows, those going out with a message left out
+  const shownPhotos = held.photos.filter(isShown)
+
+  // How many more picked photos the composer takes, none once it shows as many as a message may carry, and any
+  // number while that is not known
+  const room = maxPhotos === null ? null : Math.max(0, maxPhotos - shownPhotos.length)
+
   // The photos as they are picked and read, those in the message left as they are
   const { photos, addPhotos, retryPhoto, removePhotos } = useDefensePhotos<
     DefensePhotoReading,
     InsertedPhoto
-  >({ held, reader, photoLongEdge })
+  >({ held, reader, photoLongEdge, room })
 
   // The way the photos held change, and the ids new ones are held under
   const { setPhotos, nextId } = held
@@ -231,9 +277,6 @@ export function useComposerPhotos({
     setPhotos((current) => [...restored, ...current])
   }
 
-  // The photos the composer shows, those going out with a message left out
-  const shownPhotos = photos.filter((photo) => photo.kind !== 'inserted' || !photo.isGoingOut)
-
   // The kept photos the shown ones preview from, whose links may have run out since they were kept
   const storedPreviewIds = shownPhotos.flatMap((photo) => storedPreviewOf(photo) ?? [])
 
@@ -252,6 +295,12 @@ export function useComposerPhotos({
     return freshLink === undefined ? photo : { ...photo, previewUrl: freshLink }
   })
 
+  // Whether the composer takes no more picked photos
+  const isFull = room === 0
+
+  // Whether the composer shows more photos than one message may carry
+  const isOverFull = maxPhotos !== null && shownPhotos.length > maxPhotos
+
   // The photos, and what can be done with them
   return {
     photos: previewedPhotos,
@@ -264,5 +313,8 @@ export function useComposerPhotos({
     setAside,
     bringBack,
     restoreSent,
+    maxPhotos,
+    isFull,
+    isOverFull,
   }
 }

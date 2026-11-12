@@ -29,15 +29,17 @@ type DefensePhotoButtonProps = {
   onPick: (files: readonly File[]) => void
   /** Opens the QR code for sending photos from the student's phone, or none where no phone is offered. */
   onPhone?: () => void
+  /** Whether no more photos fit, which turns the button off. */
+  isFull: boolean
 }
 
 /**
  * The composer's way to photos of handwritten work: a phone offers its camera, its library and its files, a
  * computer its files. Several can be picked at once. The system's picker can take a moment to come up, so the
  * button spins until it does. Where the main pointer is a mouse or a trackpad and the phone is offered, the button
- * opens a menu with both.
+ * opens a menu with both. Once no more photos fit, it opens nothing.
  */
-export function DefensePhotoButton({ variant, onPick, onPhone }: DefensePhotoButtonProps) {
+export function DefensePhotoButton({ variant, onPick, onPhone, isFull }: DefensePhotoButtonProps) {
   // Copy for the photos of handwritten work
   const t = useTranslations('defense.photos')
 
@@ -73,6 +75,11 @@ export function DefensePhotoButton({ variant, onPick, onPhone }: DefensePhotoBut
             className="px-2.5"
             title={t('addTitle')}
             aria-busy={picker.isOpening || undefined}
+            // Unavailable by its ARIA state alone once no more photos fit, which keeps the focus on it through the
+            // pick that fills the composer
+            aria-disabled={isFull || undefined}
+            // Never disabled outright, which the menu's trigger would otherwise pass on to it once no more fit
+            disabled={false}
             onClick={onClick}
           >
             {icon}
@@ -88,6 +95,11 @@ export function DefensePhotoButton({ variant, onPick, onPhone }: DefensePhotoBut
             className="size-20 shrink-0 flex-col gap-1 border-dashed px-1 text-center text-xs leading-tight"
             title={t('addTitle')}
             aria-busy={picker.isOpening || undefined}
+            // Unavailable by its ARIA state alone once no more photos fit, which keeps the focus on it through the
+            // pick that fills the composer
+            aria-disabled={isFull || undefined}
+            // Never disabled outright, which the menu's trigger would otherwise pass on to it once no more fit
+            disabled={false}
             onClick={onClick}
           >
             {icon}
@@ -108,7 +120,9 @@ export function DefensePhotoButton({ variant, onPick, onPhone }: DefensePhotoBut
   // The menu opens over a card, the editor's or the dialog's, whichever button it comes from
   return (
     <DropdownMenu modal={false}>
-      <DropdownMenuTrigger asChild>{button}</DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild disabled={isFull}>
+        {button}
+      </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start" opensOver="card">
         {/* The computer's own files */}

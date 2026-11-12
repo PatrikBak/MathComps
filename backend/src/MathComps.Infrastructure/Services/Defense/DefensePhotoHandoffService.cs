@@ -106,6 +106,18 @@ public class DefensePhotoHandoffService(
     }
 
     /// <inheritdoc/>
+    public async Task<string?> FindStudentAsync(string code, CancellationToken cancellationToken = default)
+    {
+        // The operation's database context.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The student of the handoff whose code still works, if any
+        return await Live(dbContext, code)
+            .Select(handoff => handoff.User.ExternalId)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public async Task<DefensePhotoHandoffTargetDto> CheckAsync(
         string code, Language language, CancellationToken cancellationToken = default)
     {
@@ -230,15 +242,9 @@ public class DefensePhotoHandoffService(
     /// <exception cref="DefensePhotoHandoffNotFoundException">Thrown when no handoff has the code, or its code has run
     /// out.</exception>
     private static async Task<LiveHandoff> FindLiveAsync(
-        MathCompsDbContext dbContext, string code, CancellationToken cancellationToken)
-    {
-        // The instant the code is weighed against.
-        var now = DateTimeOffset.UtcNow;
-
+        MathCompsDbContext dbContext, string code, CancellationToken cancellationToken) =>
         // The handoff with the code that still works, with what names its problem
-        return await dbContext.DefensePhotoHandoffs
-            .AsNoTracking()
-            .Where(handoff => handoff.Code == code && handoff.ExpiresAt > now)
+        await Live(dbContext, code)
             .Select(handoff => new LiveHandoff(
                 handoff.UserId,
                 handoff.ExpiresAt,
@@ -254,6 +260,22 @@ public class DefensePhotoHandoffService(
                     handoff.Problem!.Round.Season.StartYear)))
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new DefensePhotoHandoffNotFoundException();
+
+    /// <summary>
+    /// The handoff a code finds, as long as the code still works.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="code">The code, as the phone holds it.</param>
+    /// <returns>The query finding the handoff, empty when no handoff has the code or its code has run out.</returns>
+    private static IQueryable<DefensePhotoHandoff> Live(MathCompsDbContext dbContext, string code)
+    {
+        // The instant the code is weighed against.
+        var now = DateTimeOffset.UtcNow;
+
+        // The handoff with the code, as long as its end time is still ahead
+        return dbContext.DefensePhotoHandoffs
+            .AsNoTracking()
+            .Where(handoff => handoff.Code == code && handoff.ExpiresAt > now);
     }
 
     /// <summary>
