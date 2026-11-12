@@ -76,11 +76,13 @@ export function usePhotoHandoff(code: string): UsePhotoHandoffResult {
   // The photos held, only while the page is open
   const held = useHeldDefensePhotos<HandoffPhoto>(null)
 
-  // The photos as they are picked and sent, shrunk to the size the code's check gives before they go
+  // The photos as they are picked and sent, shrunk to the size the code's check gives before they go, as many as
+  // the student likes, since the composer takes every page sent
   const photos = useDefensePhotos<HandoffPhotoReading>({
     held,
     reader,
     photoLongEdge: check?.photoLongEdge ?? null,
+    room: null,
   })
 
   // Where the code stands

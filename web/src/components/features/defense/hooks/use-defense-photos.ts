@@ -32,7 +32,7 @@ export type UseDefensePhotosResult<
 > = {
   /** The photos held, in page order. */
   photos: readonly (PickedPhoto<TReading> | TOtherPhoto)[]
-  /** Starts reading newly picked photos, handing back their ids in page order. */
+  /** Starts reading newly picked photos, as many as there is room for, handing back their ids in page order. */
   addPhotos: (files: readonly File[]) => readonly number[]
   /** Reads a photo the reading failed on again. */
   retryPhoto: (id: number) => void
@@ -69,12 +69,15 @@ type UseDefensePhotosOptions<
   reader: PhotoReader<TReading> | null
   /** The most pixels a photo keeps along its longer side once read, or null while that is not known yet. */
   photoLongEdge: number | null
+  /** How many more picked photos are taken, or null where any number are. */
+  room: number | null
 }
 
 /**
  * Reads the photos a student takes of their handwritten work. Every photo is read at once, each shrunk first to
  * the size the API reads it at, and the shrinks go one photo at a time. A read photo holds what it read as, and a
- * failed one holds why, to be read again or removed.
+ * failed one holds why, to be read again or removed. Of a batch picked past the room left, the photos taken first
+ * are kept.
  *
  * @template TReading - What the API reads a photo as.
  * @template TOtherPhoto - Photos held beside those picked, which the reading leaves as they are.
@@ -90,6 +93,7 @@ export function useDefensePhotos<
   held,
   reader,
   photoLongEdge,
+  room,
 }: UseDefensePhotosOptions<TReading, TOtherPhoto>): UseDefensePhotosResult<TReading, TOtherPhoto> {
   // The photos held, and the ways they change
   const { photos, setPhotos, nextId } = held
@@ -186,8 +190,11 @@ export function useDefensePhotos<
   // Starts reading newly picked photos, each previewing from the device straight away
   const addPhotos = (picked: readonly File[]) => {
     // The photos in the order they were taken, since pages are photographed in order and a picker lists a batch
-    // in an order of its own; photos taken at the same moment keep the picker's order
-    const files = picked.toSorted((first, second) => first.lastModified - second.lastModified)
+    // in an order of its own; photos taken at the same moment keep the picker's order. Only as many as there is
+    // room for, the earliest pages
+    const files = picked
+      .toSorted((first, second) => first.lastModified - second.lastModified)
+      .slice(0, room ?? picked.length)
 
     // Each file as a photo of its own, reading
     const added = files.map(
