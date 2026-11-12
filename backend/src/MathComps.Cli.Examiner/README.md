@@ -68,6 +68,8 @@ PhotoReader__Reading__Model=google/gemini-3.8-flash PhotoReader__Reading__Prompt
   dotnet run --project backend/src/MathComps.Cli.Examiner -- read-photo ~/photos/*.jpg
 ```
 
+A photo the API couldn't read is kept in the private bucket as it was uploaded, under the `defense/photos/failed/<user id>/<id>` key its log line names. Download it from there to read it again here.
+
 **`read-photo` options:**
 
 - `--parallel <COUNT>`: how many photos are read at once (default: 3)

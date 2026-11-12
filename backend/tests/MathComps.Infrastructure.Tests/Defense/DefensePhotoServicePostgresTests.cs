@@ -8,6 +8,7 @@ using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Photos;
 using MathComps.Infrastructure.Storage;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
+using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -17,8 +18,8 @@ namespace MathComps.Infrastructure.Tests.Defense;
 /// <summary>
 /// Integration tests for <see cref="DefensePhotoService"/> against a real PostgreSQL database, with the reader and the
 /// target guard standing in and the files kept in memory: what a reading keeps, links and bills, the ceiling it is held
-/// to and who an entry exempts, and that a reading the student walked out on is still billed. A reading billed wrong
-/// moves the ceiling silently.
+/// to and who an entry exempts, that a reading the student walked out on is still billed, and what a failed reading
+/// keeps. A reading billed wrong moves the ceiling silently.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
@@ -292,6 +293,78 @@ public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
         // And the reading billed.
         Assert.Equal(1, await QueryValueAsync(context => context.DefenseSpends.CountAsync()));
     });
+
+    /// <summary>
+    /// A reading that fails keeps the upload as it came in, under a key of its own that the failure names for the
+    /// log. That holds whether the decoder couldn't open it or the model timed out on every attempt, and the failure
+    /// goes on as the reader threw it. A reading the student walks out on keeps nothing.
+    /// </summary>
+    [Fact]
+    public Task A_failed_reading_keeps_its_upload_under_the_key_it_names_and_a_cancelled_one_keeps_nothing() =>
+        RunTestAsync(async service =>
+        {
+            // The refusal of a photo the decoder can't open.
+            var unreadable = new UnreadablePhotoException();
+
+            // The reader refuses the photo.
+            _reader.Setup(reader => reader.ReadAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(unreadable);
+
+            // The reading is refused with the reader's own refusal.
+            Assert.Same(unreadable, await Assert.ThrowsAsync<UnreadablePhotoException>(
+                () => service.ReadAsync(_ownerId, _target, _photo)));
+
+            // The one file the refusal kept.
+            var unreadableKey = Assert.Single(_store.Keys);
+
+            // Named in what the refusal adds for the log.
+            Assert.Contains(unreadableKey, unreadable.LogDetail);
+
+            // A model that times out on every attempt, which isn't the student leaving.
+            var timeout = new TaskCanceledException();
+
+            // The reader fails with it.
+            _reader.Setup(reader => reader.ReadAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(timeout);
+
+            // The reading fails with the reader's own failure.
+            Assert.Same(timeout, await Assert.ThrowsAsync<TaskCanceledException>(
+                () => service.ReadAsync(_ownerId, _target, _photo)));
+
+            // The one file the failure kept, beside the first.
+            var timedOutKey = Assert.Single(_store.Keys.Except([unreadableKey]));
+
+            // Named in what the failure adds for the log.
+            Assert.Contains(timedOutKey, timeout.LogDetail);
+
+            // Both files the failures kept.
+            string[] kept = [unreadableKey, timedOutKey];
+
+            // Each one kept as it came in.
+            Assert.All(kept, key =>
+            {
+                // Among the student's failed uploads.
+                Assert.StartsWith($"defense/photos/failed/{_ownerId}/", key);
+
+                // The bytes that came in.
+                Assert.Equal(_photo, _store[key].Content);
+
+                // Typed as bare bytes.
+                Assert.Equal(MediaTypeNames.Application.Octet, _store[key].ContentType);
+            });
+
+            // The student leaves while the model reads.
+            _reader.Setup(reader => reader.ReadAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
+                .Callback(() => _walkOut.Cancel())
+                .ThrowsAsync(new OperationCanceledException(_walkOut.Token));
+
+            // The reading is called off.
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(
+                () => service.ReadAsync(_ownerId, _target, _photo, _walkOut.Token));
+
+            // And nothing more is kept.
+            Assert.Equal(kept.Order(), _store.Keys.Order());
+        });
 
     /// <inheritdoc/>
     public void Dispose()

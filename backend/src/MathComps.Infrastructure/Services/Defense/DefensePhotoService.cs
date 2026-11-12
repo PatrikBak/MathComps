@@ -4,8 +4,10 @@ using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Photos;
 using MathComps.Infrastructure.Storage;
+using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -57,8 +59,8 @@ public class DefensePhotoService(
         // Time the reading.
         var stopwatch = Stopwatch.StartNew();
 
-        // Read the page.
-        var reading = await photoReader.ReadAsync(photo, cancellationToken);
+        // Read the page, keeping the upload when the reading fails.
+        var reading = await ReadKeepingFailedUploadAsync(userId, photo, cancellationToken);
 
         // Stop the clock before the storing.
         stopwatch.Stop();
@@ -109,5 +111,49 @@ public class DefensePhotoService(
             photoFiles.PhotoLinkFor(stored.Id),
             reading.Value.Text,
             [.. crops.Select(crop => new DefensePhotoCropDto(crop.Row.Id, crop.Row.Label))]);
+    }
+
+    /// <summary>
+    /// Reads the page. A reading that fails for any reason but the student leaving keeps the upload as it came in, and
+    /// its failure goes on unchanged but for the log detail it carries: the key the upload is kept under, or why it
+    /// couldn't be kept.
+    /// </summary>
+    /// <param name="userId">The student uploading the photo.</param>
+    /// <param name="photo">The photo file's bytes.</param>
+    /// <param name="cancellationToken">A token to cancel the reading.</param>
+    /// <returns><inheritdoc cref="IPhotoReader.ReadAsync" path="/returns"/></returns>
+    private async Task<ChatCallResult<PhotoReading>> ReadKeepingFailedUploadAsync(
+        Guid userId, ReadOnlyMemory<byte> photo, CancellationToken cancellationToken)
+    {
+        // Read the page, catching any failure that isn't the student leaving.
+        try
+        {
+            // The reading.
+            return await photoReader.ReadAsync(photo, cancellationToken);
+        }
+        catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
+        {
+            // Where the upload is kept.
+            var key = IDefensePhotoFiles.FailedUploadKey(userId, Guid.CreateVersion7());
+
+            // Keep the upload as it came in, even if the student leaves meanwhile.
+            try
+            {
+                // Store the upload.
+                await objectStore.PutAsync(
+                    key, photo.ToArray(), MediaTypeNames.Application.Octet, CancellationToken.None);
+
+                // The failure's log line names where the upload is kept.
+                exception.LogDetail = $"the upload is kept at {key}";
+            }
+            catch (Exception keepFailure)
+            {
+                // The store failed, so the failure's log line says the upload wasn't kept, and why.
+                exception.LogDetail = $"keeping the upload at {key} failed: {keepFailure.Message}";
+            }
+
+            // The reading's own failure goes on, so an unreadable photo is refused as one.
+            throw;
+        }
     }
 }

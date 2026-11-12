@@ -5,7 +5,7 @@ namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
 /// The files of the photos students take of their handwritten work for a defense: where each page and each drawing cut
-/// out of it is kept, the links to them, and the drawings read back.
+/// out of it is kept, the links to them, the drawings read back, and where an upload that couldn't be read is kept.
 /// </summary>
 public interface IDefensePhotoFiles
 {
@@ -29,6 +29,15 @@ public interface IDefensePhotoFiles
     /// <param name="cropId">The drawing.</param>
     /// <returns>The object key.</returns>
     internal static string CropKey(Guid photoId, Guid cropId) => $"{KeyPrefix}/{photoId}/crops/{cropId}.jpg";
+
+    /// <summary>
+    /// The key an upload whose reading failed is kept under, as it came in, so the reading can be run on it again.
+    /// It has no row, so the key carries its student. It has no extension, since its bytes may be no image at all.
+    /// </summary>
+    /// <param name="userId">The student who uploaded it.</param>
+    /// <param name="uploadId">The kept upload.</param>
+    /// <returns>The object key.</returns>
+    internal static string FailedUploadKey(Guid userId, Guid uploadId) => $"{KeyPrefix}/failed/{userId}/{uploadId}";
 
     /// <summary>
     /// A link to a photo's page.
