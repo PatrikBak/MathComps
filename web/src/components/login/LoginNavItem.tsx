@@ -1,6 +1,7 @@
 'use client'
 
 import { LogIn } from 'lucide-react'
+import type { LinkProps } from 'next/link'
 import { useTranslations } from 'next-intl'
 
 import { AppLink } from '@/components/shared/components/AppLink'
@@ -23,6 +24,17 @@ type LoginNavItemProps = {
 }
 
 /**
+ * Cancels a press on the sign-in link made on the login page itself, since following the bare login
+ * route would drop any way back the address holds.
+ *
+ * @param event - The navigation the press started.
+ */
+const stayOnLoginPage: NonNullable<LinkProps['onNavigate']> = (event) => {
+  // The reader stays where they are
+  event.preventDefault()
+}
+
+/**
  * Navigation entry that links to the login route and pairs the {@link LogIn} icon with the label,
  * for both desktop and mobile menus. The caller owns the appearance.
  * Automatically captures the current page to redirect back after login.
@@ -34,8 +46,9 @@ export const LoginNavItem = ({ className, onClick, isLoading }: LoginNavItemProp
   // The link to the login page, coming back to this one
   const { loginLink } = useLoginRedirect()
 
-  // On the login page itself the link carries no way back, which would only lead to the same page
-  const link = usePathname() === ROUTES.LOGIN ? { href: ROUTES.LOGIN } : loginLink
+  // The link, which stays put on the login page itself
+  const link =
+    usePathname() === ROUTES.LOGIN ? { href: ROUTES.LOGIN, onNavigate: stayOnLoginPage } : loginLink
 
   // Loading skeleton - matches exact dimensions of the real button
   if (isLoading) {
