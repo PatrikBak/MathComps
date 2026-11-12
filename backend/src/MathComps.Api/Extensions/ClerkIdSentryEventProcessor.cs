@@ -3,7 +3,7 @@ using Sentry.Extensibility;
 namespace MathComps.Api.Extensions;
 
 /// <summary>
-/// An <see cref="ISentryEventProcessor"/> naming the signed-in caller on an error a request reports, by the Clerk id
+/// An <see cref="ISentryEventProcessor"/> naming the account a request acts for on an error it reports, by the Clerk id
 /// the website's events carry too, so one student's errors match between the website and the API. The id is all that
 /// goes.
 /// </summary>
@@ -12,12 +12,12 @@ public sealed class ClerkIdSentryEventProcessor(IHttpContextAccessor httpContext
 {
     /// <inheritdoc />
     /// <remarks>
-    /// An error outside a request, or in one without a valid token, keeps the user the SDK gives it.
+    /// An error outside a request, or in an anonymous one, keeps the user the SDK gives it.
     /// </remarks>
     public SentryEvent Process(SentryEvent @event)
     {
-        // The caller's Clerk id, absent outside a request and from one without a valid token
-        var clerkId = httpContextAccessor.HttpContext?.User.ClerkId;
+        // The Clerk id of the account the request acts for, absent outside a request and from an anonymous one
+        var clerkId = httpContextAccessor.HttpContext?.CallerClerkId;
 
         // Name the caller by their Clerk id alone
         if (clerkId is not null)

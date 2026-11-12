@@ -1,4 +1,5 @@
 using MathComps.Api.Constants;
+using MathComps.Api.Extensions;
 using MathComps.Domain.Contracts.Defense;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Users;
@@ -73,8 +74,8 @@ public static class DefensePhotoHandoffEndpoints
             IDefensePhotoHandoffService handoffService,
             IDefenseLimitsProvider limitsProvider) =>
         {
-            // The phone's code
-            var code = EndpointHelpers.GetAuthorizationCredential(context.Request, CodeScheme);
+            // The phone's code, its student named as the request's caller
+            var code = await ReadCodeAsync(context, handoffService);
 
             // Where the code sends photos, named in the request's language
             var handoff = await handoffService.CheckAsync(
@@ -91,8 +92,8 @@ public static class DefensePhotoHandoffEndpoints
             HttpContext context,
             IDefensePhotoHandoffService handoffService) =>
         {
-            // The phone's code
-            var code = EndpointHelpers.GetAuthorizationCredential(context.Request, CodeScheme);
+            // The phone's code, its student named as the request's caller
+            var code = await ReadCodeAsync(context, handoffService);
 
             // Read the photo as the code's student, the body only once the code is found to work
             var sent = await handoffService.SendAsync(
@@ -102,5 +103,24 @@ public static class DefensePhotoHandoffEndpoints
             return Results.Created($"{DefensePhotoEndpoints.PhotosPath}/{sent.Reading.PhotoId}", sent);
         })
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+    }
+
+    /// <summary>
+    /// Reads the code a phone sends, and names the code's student as the account the request acts for, so the request
+    /// log and error reports name them as they would had they signed in. A code that doesn't work names nobody.
+    /// </summary>
+    /// <param name="context">The phone's request.</param>
+    /// <param name="handoffService">The service handing phone photos over to a composer.</param>
+    /// <returns>The code.</returns>
+    private static async Task<string> ReadCodeAsync(HttpContext context, IDefensePhotoHandoffService handoffService)
+    {
+        // The code, under its scheme
+        var code = EndpointHelpers.GetAuthorizationCredential(context.Request, CodeScheme);
+
+        // The code's student, named before anything the request does can fail
+        context.CredentialOwnerClerkId = await handoffService.FindStudentAsync(code, context.RequestAborted);
+
+        // The code itself
+        return code;
     }
 }
