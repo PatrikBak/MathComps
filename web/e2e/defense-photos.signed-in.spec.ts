@@ -17,6 +17,7 @@ import {
 import {
   answerPhotoLinks,
   installHostedBackend,
+  LIMITS,
   namedProblemOf,
   nextTurnSent,
   pageTextOf,
@@ -468,6 +469,52 @@ test.describe('the review of the picked pages', () => {
 
     // The one left, now the first, looked at
     await expect(lookedAtTile(review, 1)).toHaveAttribute('aria-current', 'true')
+  })
+
+  test('takes no more pages than one message carries, saying so where the way to more is off', async ({
+    page,
+  }) => {
+    // A conversation to write
+    await openPracticeConversation(page)
+
+    // The most pages one message carries
+    const max = LIMITS.maxPhotosPerMessage
+
+    // One page more than that picked, the review opening on the first
+    await pickPages(page, max + 1)
+
+    // The review
+    const review = page.getByRole('dialog', { name: chatCopy.photos.reviewTitle })
+
+    // A function which finds a page's tile in the review by its place
+    const tile = (number: number) =>
+      review.getByRole('group', { name: photosText('photo', { number }), exact: true })
+
+    // As many pages as a message carries taken
+    await expect(tile(max)).toBeVisible()
+
+    // The page past the most a message carries left out
+    await expect(tile(max + 1)).toHaveCount(0)
+
+    // The review saying why
+    await expect(review.getByText(photosText('full', { max }))).toBeVisible()
+
+    // The review's tile for another page off
+    await expect(review.getByRole('button', { name: chatCopy.photos.addPage })).toBeDisabled()
+
+    // The review shut
+    await review.getByRole('button', { name: modalCopy.close }).click()
+
+    // Back in the composer
+    await expect(review).toHaveCount(0)
+
+    // The composer saying why too
+    await expect(page.getByText(photosText('full', { max }))).toBeVisible()
+
+    // The composer's photo button off
+    await expect(
+      page.getByRole('button', { name: chatCopy.photos.add, exact: true })
+    ).toBeDisabled()
   })
 })
 

@@ -11,6 +11,7 @@ import {
 import {
   COMPETITION_SLUG,
   installHostedBackend,
+  LIMITS,
   namedProblemOf,
   nextTurnSent,
   pageTextOf,
@@ -279,6 +280,64 @@ test.describe('pages sent from the phone', () => {
 
     // And no dialog came up for either
     await expect(page.getByRole('dialog', { name: photosCopy.reviewTitle })).toHaveCount(0)
+  })
+
+  test('come in past the most a message carries, held out of the message until enough are removed', async ({
+    page,
+  }) => {
+    // The most pages one message carries
+    const max = LIMITS.maxPhotosPerMessage
+
+    // Two pages more than that, sent from the phone a minute apart while no composer was open
+    const waiting = Array.from({ length: max + 2 }, (_unused, index) => ({
+      photoId: `page-${index + 1}`,
+      text: `Page ${index + 1} of the proof.`,
+      capturedAt: new Date(Date.UTC(2026, 10, 10, 9, index)).toISOString(),
+    }))
+
+    // A student whose code still works, the composer taking every page as it opens
+    await openComposer(page, { isLive: true, waiting })
+
+    // Every waiting page taken, none dropped
+    await expect(stripPreviews(page)).toHaveCount(max + 2, { timeout: SETTLE_TIMEOUT_MS })
+
+    // The composer saying how many have to go
+    await expect(page.getByText(photosText('overFull', { max, count: 2 }))).toBeVisible()
+
+    // The composer's photo button off
+    await expect(page.getByTitle(photosCopy.addTitle)).toBeDisabled()
+
+    // The first page opened in the review
+    await page.getByRole('button', { name: photosText('open', { number: 1 }), exact: true }).click()
+
+    // The review
+    const review = page.getByRole('dialog', { name: photosCopy.reviewTitle })
+
+    // A function which finds the insert button by how many pages it puts in
+    const insert = (count: number) =>
+      review.getByRole('button', { name: photosText('insert', { count }) })
+
+    // The insert button off while the pages are too many for one message
+    await expect(insert(max + 2)).toBeDisabled()
+
+    // A function which removes a page from its tile's corner, by its place
+    const remove = (number: number) =>
+      review
+        .getByRole('group', { name: photosText('photo', { number }), exact: true })
+        .getByRole('button', { name: photosCopy.remove })
+        .click()
+
+    // The last page removed
+    await remove(max + 2)
+
+    // The page past the most a message carries removed too
+    await remove(max + 1)
+
+    // The pages left go in now
+    await expect(insert(max)).toBeEnabled()
+
+    // The review saying only how many a message carries
+    await expect(review.getByText(photosText('full', { max }))).toBeVisible()
   })
 
   test('are not asked for again while the student holds no working code', async ({ page }) => {
