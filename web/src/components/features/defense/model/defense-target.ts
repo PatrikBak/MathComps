@@ -220,8 +220,9 @@ export function defenseDraftStorageKey(target: DefenseTarget): string | null {
 }
 
 /**
- * Names where, under {@link DEFENSE_DRAFT_PHOTOS_STORAGE_PREFIX}, the photos whose text is in a target's unsent
- * composer text are kept. They go out with the message, so they are kept wherever its text is.
+ * Names where, under {@link DEFENSE_DRAFT_PHOTOS_STORAGE_PREFIX}, the photos in a target's unsent composer are kept.
+ * Those whose text is in the message go out with it, and the read ones wait for their text to go in. They are kept
+ * wherever the message's text is.
  *
  * @param target - The target the text is being written against.
  *
@@ -233,7 +234,7 @@ export function defenseDraftPhotosStorageKey(target: DefenseTarget): string | nu
 }
 
 /**
- * Forgets whatever unsent composer text is being kept against one target, and the photos whose text is in it.
+ * Forgets whatever unsent composer text is being kept against one target, and the photos kept beside it.
  *
  * A competition problem's draft is keyed by the problem, which outlives the entry: a fresh entry is a
  * fresh run, and until this is called the last one's half-written turn is waiting in its composer.

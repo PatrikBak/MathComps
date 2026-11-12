@@ -52,8 +52,8 @@ export const UNKEPT_DRAFT_STORAGE_KEY = 'persistent-draft:unused'
 export const DEFENSE_DRAFT_STORAGE_PREFIX = 'defense-draft'
 
 /**
- * Prefix under which the photos whose text is in a competition problem's unsent composer text are kept, so the message
- * still goes out with them after closing the chat or reloading the page.
+ * Prefix under which a competition problem's unsent composer photos are kept: those whose text is in the message and
+ * the read ones waiting beside it. They survive closing the chat or reloading the page.
  */
 export const DEFENSE_DRAFT_PHOTOS_STORAGE_PREFIX = 'defense-draft-photos'
 

@@ -9,6 +9,7 @@ import {
   chatCopy,
   closeChat,
   LIST_PATH,
+  modalCopy,
   openExistingDefense,
   photosText,
   transcriptOf,
@@ -20,7 +21,7 @@ import {
   pageTextOf,
   photoIdsOf,
 } from './support/hosted-backend'
-import { pickFile } from './support/interaction'
+import { isKeptInStorage, pickFile } from './support/interaction'
 import { HANDOFF_CODE, installPhotoHandoffBackend } from './support/photo-handoff-backend'
 import { expectViewerShut, shownPhoto } from './support/photo-viewer'
 import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
@@ -197,7 +198,9 @@ test.describe('a message written from photos', () => {
     ).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
   })
 
-  test('keeps its pages through a reload, and goes out with them', async ({ page }) => {
+  test('keeps its pages through a reload, read ones with their text, and goes out with them', async ({
+    page,
+  }) => {
     // A conversation, and the composer to write it in
     const composer = await openPracticeConversation(page)
 
@@ -210,7 +213,36 @@ test.describe('a message written from photos', () => {
     // Which now says what the page says
     await expect(composer).toHaveValue(pageTextOf(1))
 
-    // A stray reload, which takes the page's copy on the student's device with it
+    // A second page picked, the review opening on it
+    await pickPages(page, 1)
+
+    // The review
+    const review = page.getByRole('dialog', { name: chatCopy.photos.reviewTitle })
+
+    // The second page's text in it
+    const pageText = review.locator('textarea')
+
+    // Filled in once the page is read
+    await expect(pageText).toHaveValue(pageTextOf(2), { timeout: SETTLE_TIMEOUT_MS })
+
+    // The text the student corrects it to
+    const corrected = 'Page 2: the residues repeat every six steps'
+
+    // Corrected by the student
+    await pageText.fill(corrected)
+
+    // Kept as corrected
+    await expect
+      .poll(() => isKeptInStorage(page, corrected), { timeout: SETTLE_TIMEOUT_MS })
+      .toBe(true)
+
+    // The review shut with the page's text still beside it
+    await review.getByRole('button', { name: modalCopy.close }).click()
+
+    // Back in the composer
+    await expect(review).toHaveCount(0)
+
+    // A stray reload, which takes the pages' copies on the student's device with it
     await page.reload()
 
     // Back into a conversation about the same problem
@@ -224,14 +256,32 @@ test.describe('a message written from photos', () => {
       page.getByRole('button', { name: photosText('open', { number: 1 }) }).locator('img')
     ).toHaveAttribute('src', fileLinkTo('photo-1'))
 
+    // The read page's tile, after the first
+    const readPage = page.getByRole('button', { name: photosText('open', { number: 2 }) })
+
+    // Previewing from its stored page
+    await expect(readPage.locator('img')).toHaveAttribute('src', fileLinkTo('photo-2'))
+
+    // Opened
+    await readPage.click()
+
+    // Its text still as the student left it
+    await expect(pageText).toHaveValue(corrected)
+
+    // Put into the message
+    await insertPages(page, 1)
+
+    // Which now says both, in page order
+    await expect(composer).toHaveValue(`${pageTextOf(1)}\n\n${corrected}`)
+
     // The turn, as it goes out
     const sent = nextTurnSent(page)
 
     // Sent
     await composer.press('Meta+Enter')
 
-    // Carrying the kept photo
-    expect(photoIdsOf(await sent)).toEqual(['photo-1'])
+    // Carrying both kept photos, in page order
+    expect(photoIdsOf(await sent)).toEqual(['photo-1', 'photo-2'])
   })
 
   test('comes back into the composer with its pages when it fails to go out', async ({ page }) => {
