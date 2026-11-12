@@ -2,6 +2,7 @@ import type { Page, Request, Route } from '@playwright/test'
 
 import type {
   DefenseCopy,
+  DefensePhotoLinks,
   DefensePhotoReading,
   DefenseSessionList,
   DefenseTurnPhoto,
@@ -331,6 +332,39 @@ type StartRequestBody = SentTurnBody & {
 type RewindRequestBody = {
   /** The sequence of the last turn to keep; every later one goes. */
   keepThroughSequence: number
+}
+
+/**
+ * The body of a request for fresh links to kept pages.
+ */
+type PhotoLinksRequestBody = {
+  /** The kept photos. */
+  photoIds: string[]
+}
+
+/**
+ * Answers every request for fresh links to kept pages, each page's link as the given function builds it. A spec
+ * handing out links unlike those the pages were kept with calls this after {@link installHostedBackend}, and
+ * Playwright then tries its route first.
+ *
+ * @param page - The page to answer on.
+ * @param linkOf - Builds the fresh link to a kept photo's page.
+ */
+export async function answerPhotoLinks(
+  page: Page,
+  linkOf: (photoId: string) => string
+): Promise<void> {
+  // Every request for links, each photo it names linked
+  await page.route(`${BACKEND_ORIGIN}/defense/photos/links`, async (route) => {
+    // The photos asked about
+    const { photoIds } = route.request().postDataJSON() as PhotoLinksRequestBody
+
+    // Each one's fresh link, by its id
+    const links = Object.fromEntries(photoIds.map((photoId) => [photoId, linkOf(photoId)]))
+
+    // Handed back
+    await answer(page, route, links satisfies DefensePhotoLinks)
+  })
 }
 
 /**
@@ -671,6 +705,9 @@ export async function installHostedBackend(
       text: pageTextOf(photosRead),
     } satisfies DefensePhotoReading)
   })
+
+  // Fresh links to kept pages, each the link its page was kept with
+  await answerPhotoLinks(page, fileLinkTo)
 
   // The examiner's canned lines, which the chat reads before it has anything else to show
   await page.route(`${BACKEND_ORIGIN}/defense/copy`, (route) =>

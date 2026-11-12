@@ -77,8 +77,15 @@ public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
     {
-        // A tight ceiling, so a single seeded row meets it.
-        services.Configure<DefenseLimits>(limits => limits.DailySpendCeilingPerUser = 1.00m);
+        // The caps every test runs under.
+        services.Configure<DefenseLimits>(limits =>
+        {
+            // A tight ceiling, so a single seeded row meets it.
+            limits.DailySpendCeilingPerUser = 1.00m;
+
+            // Links to every photo a test names.
+            limits.MaxPhotoLinksPerRequest = 10;
+        });
 
         // The reader, reading every photo as the same page.
         _reader.Setup(reader => reader.ReadAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
@@ -291,6 +298,79 @@ public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
 
         // And the reading billed.
         Assert.Equal(1, await QueryValueAsync(context => context.DefenseSpends.CountAsync()));
+    });
+
+    /// <summary>
+    /// Links go only to the student's own photos that no message carries yet: a photo of someone else's and one the
+    /// student already sent are left out. A link to the first hands one student's page to another, and the second is
+    /// no longer a draft's to show.
+    /// </summary>
+    [Fact]
+    public Task Links_go_only_to_the_students_own_unsent_photos() => RunTestAsync(async service =>
+    {
+        // A photo of the student's still to send.
+        var unsent = DefenseSeed.NewPhoto(_ownerId, drawings: 0);
+
+        // Another student.
+        var otherId = Guid.CreateVersion7();
+
+        // A photo of the other student's.
+        var others = DefenseSeed.NewPhoto(otherId, drawings: 0);
+
+        // A photo of the student's that already went out.
+        var sent = DefenseSeed.NewPhoto(_ownerId, drawings: 0);
+
+        // The conversation the sent photo went out in, and the message that carried it.
+        var sessionId = Guid.CreateVersion7();
+        var turnId = Guid.CreateVersion7();
+
+        // The other student, the conversation and every photo, kept.
+        await QueryAsync(async context =>
+        {
+            // The other student.
+            context.Users.Add(new User { Id = otherId, ExternalId = "ext-other", Username = "Other" });
+
+            // The student's conversation.
+            context.DefenseSessions.Add(new DefenseSession
+            {
+                Id = sessionId,
+                UserId = _ownerId,
+                TargetKind = DefenseTargetKind.Handout,
+                ProblemStatement = "Statement",
+                ProblemReference = "Reference",
+                ExaminerConfig = "{}",
+                CreatedAt = DateTimeOffset.UtcNow,
+            });
+
+            // The message the sent photo went out with.
+            context.DefenseTurns.Add(new DefenseTurn
+            {
+                Id = turnId,
+                SessionId = sessionId,
+                Role = TranscriptRole.Candidate,
+                Content = "my defense",
+                Sequence = 0,
+                CreatedAt = DateTimeOffset.UtcNow,
+            });
+
+            // The sent photo, carried by the student's message.
+            sent.TurnId = turnId;
+            sent.Position = 0;
+
+            // The photos.
+            context.DefensePhotos.AddRange(unsent, others, sent);
+
+            // Commit the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // Ask for links to every photo kept.
+        var links = await service.LinksToUnsentPhotosAsync(_ownerId, [unsent.Id, others.Id, sent.Id]);
+
+        // Only the unsent one of the student's gets one, reading its page.
+        Assert.Equal(
+            [KeyValuePair.Create(unsent.Id, $"read:defense/photos/{unsent.Id}.jpg")],
+            links);
     });
 
     /// <inheritdoc/>

@@ -7,7 +7,8 @@ namespace MathComps.Api.Endpoints;
 
 /// <summary>
 /// Maps the endpoints for the photos students take of their handwritten work, reading one for a defense of a handout
-/// environment or of a problem. A reading's request body is the photo file itself. Every route needs an account.
+/// environment or of a problem, and linking the ones a student has yet to send. A reading's request body is the photo
+/// file itself. Every route needs an account.
 /// </summary>
 public static class DefensePhotoEndpoints
 {
@@ -17,7 +18,7 @@ public static class DefensePhotoEndpoints
     internal const string PhotosPath = "/defense/photos";
 
     /// <summary>
-    /// Maps the photo-reading endpoints under <c>/defense/photos</c> onto the route builder.
+    /// Maps the photo endpoints under <c>/defense/photos</c> onto the route builder.
     /// </summary>
     /// <param name="app">The route builder to register the endpoints on.</param>
     public static void MapDefensePhotoEndpoints(this IEndpointRouteBuilder app)
@@ -42,6 +43,29 @@ public static class DefensePhotoEndpoints
             IDefensePhotoService photoService) =>
             // Read the request's photo against the problem
             ReadAsync(new ProblemTarget(problemId), context, userManager, photoService))
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Links to photos the caller took and has not sent yet
+        app.MapPost($"{PhotosPath}/links", async (
+            GetDefensePhotoLinksRequest request,
+            HttpContext context,
+            IUserManager userManager,
+            IDefensePhotoService photoService) =>
+        {
+            // A body naming no photos names nothing to link
+            if (request.PhotoIds is not { } photoIds)
+                throw new BadHttpRequestException("A request for links must name the photos.");
+
+            // Resolve the calling user
+            var userId = await userManager.RequireUserIdAsync(context);
+
+            // The links to the caller's own unsent photos among them
+            var links = await photoService.LinksToUnsentPhotosAsync(userId, photoIds, context.RequestAborted);
+
+            // Return the links by photo id
+            return Results.Ok(links);
+        })
         .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
     }
