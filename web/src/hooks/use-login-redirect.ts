@@ -1,6 +1,7 @@
 import type { LinkProps } from 'next/link'
 import { useCallback } from 'react'
 
+import type { RouteHref } from '@/components/shared/components/AppLink'
 import { RETURN_URL_PARAM } from '@/constants/auth-constants'
 import { useCurrentUrl } from '@/hooks/use-current-url'
 import { ROUTES } from '@/i18n/i18n'
@@ -14,7 +15,7 @@ type LoginLink = {
    * The login page, coming back to this page without its fragment. A link opened in a new tab gets
    * only this.
    */
-  href: string
+  href: RouteHref
   /** Takes a click on the link over, so the way back carries the page's fragment at the click. */
   onNavigate: NonNullable<LinkProps['onNavigate']>
 }
@@ -34,15 +35,15 @@ type UseLoginRedirectResult = {
 }
 
 /**
- * Builds the address of the login page that sends the user to a given page once signed in.
+ * Names the login page that sends the user to a given page once signed in.
  *
  * @param returnUrl - The page to come back to.
  *
- * @returns The path to the login page with the return URL.
+ * @returns The login route, carrying the return URL.
  */
-function loginUrlFor(returnUrl: string): string {
+function loginHrefFor(returnUrl: string): RouteHref {
   // The login page, carrying the way back as a parameter
-  return `${ROUTES.LOGIN}?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl)}`
+  return { pathname: ROUTES.LOGIN, query: { [RETURN_URL_PARAM]: returnUrl } }
 }
 
 /**
@@ -59,7 +60,7 @@ export function useLoginRedirect(): UseLoginRedirectResult {
   const redirectToLogin = useCallback(
     (returnUrl?: string) => {
       // Off to the login page, with the given way back or this page as it stands now
-      router.push(loginUrlFor(returnUrl ?? getCurrentUrl()))
+      router.push(loginHrefFor(returnUrl ?? getCurrentUrl()))
     },
     [router, getCurrentUrl]
   )
@@ -77,7 +78,10 @@ export function useLoginRedirect(): UseLoginRedirectResult {
   )
 
   // The link to the login page, whose click reads the way back afresh
-  const loginLink: LoginLink = { href: loginUrlFor(pathWithQuery), onNavigate: onLoginLinkNavigate }
+  const loginLink: LoginLink = {
+    href: loginHrefFor(pathWithQuery),
+    onNavigate: onLoginLinkNavigate,
+  }
 
   // Return the redirect function and the link
   return { redirectToLogin, loginLink }

@@ -1,7 +1,10 @@
 import type { HandoutIndex } from '@/components/features/handouts/handout-metadata-types'
 import { supportsLocale } from '@/components/features/handouts/handout-metadata-types'
+import { RETURN_URL_PARAM } from '@/constants/auth-constants'
 import handoutIndex from '@/content/handouts.json'
 
+import { addressParams } from './support/address'
+import { headerSignInLink } from './support/interaction'
 import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** A visit to a path with no locale prefix, and where the site sends it. */
@@ -82,5 +85,38 @@ test.describe('an old unprefixed handout link', () => {
 
     // The English handout, under its own English slug
     await expect(page).toHaveURL(`/en/handouts/${handout.slug.en}`, { timeout: SETTLE_TIMEOUT_MS })
+  })
+})
+
+test.describe('a Slovak sign-in link', () => {
+  test('opens the Slovak login page with no redirect on the way', async ({ page }) => {
+    // Every request for the login page under its English path, each answered with a redirect
+    const englishPathRequests: string[] = []
+
+    // Watched from before the page loads, so a prefetch is caught too
+    page.on('request', (request) => {
+      // Kept when it asks for the English path under the Slovak prefix
+      if (new URL(request.url()).pathname === '/sk/sign-in') englishPathRequests.push(request.url())
+    })
+
+    // The Slovak about page
+    await page.goto('/sk/o-projekte')
+
+    // The header's link names the Slovak login page, which is what a new tab opens
+    await expect(headerSignInLink(page, 'sk')).toHaveAttribute('href', /^\/sk\/prihlasit-sa\?/, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Sign in from the header
+    await headerSignInLink(page, 'sk').click()
+
+    // The Slovak login page
+    await expect(page).toHaveURL(/\/sk\/prihlasit-sa\?/, { timeout: SETTLE_TIMEOUT_MS })
+
+    // Coming back to the about page
+    expect(addressParams(page).get(RETURN_URL_PARAM)).toBe('/sk/o-projekte')
+
+    // Reached without ever asking for the English path
+    expect(englishPathRequests).toEqual([])
   })
 })
