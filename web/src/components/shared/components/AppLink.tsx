@@ -41,6 +41,12 @@ type AppLinkProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> 
    */
   prefetch?: LinkProps['prefetch']
   /**
+   * Called as a click on an internal link starts its client-side navigation, which it can cancel.
+   * A click opening a new tab never reaches it, and neither does one on an external link or a hash
+   * anchor.
+   */
+  onNavigate?: LinkProps['onNavigate']
+  /**
    * Force external link behavior (renders `<a>` instead of Next.js `Link`),
    * bypassing the automatic URL detection.
    *
@@ -71,7 +77,7 @@ type AppLinkProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> 
  * Provides consistent styling and security defaults (`rel="noopener noreferrer"` for new tabs).
  */
 export const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(
-  ({ href, className, prefetch, newTab, external, plain, ...rest }, ref) => {
+  ({ href, className, prefetch, onNavigate, newTab, external, plain, ...rest }, ref) => {
     // Apply the default link styling, unless the caller opts out to control appearance itself
     const classes = plain
       ? cn(className)
@@ -107,6 +113,7 @@ export const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(
         ref={ref}
         href={href as ComponentProps<typeof Link>['href']}
         prefetch={prefetch ?? true}
+        onNavigate={onNavigate}
         className={classes}
         target={target}
         rel={rel}

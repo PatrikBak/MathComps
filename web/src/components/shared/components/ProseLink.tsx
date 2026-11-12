@@ -1,3 +1,4 @@
+import type { LinkProps } from 'next/link'
 import type { ReactNode } from 'react'
 
 import { AppLink } from './AppLink'
@@ -17,6 +18,8 @@ type ProseLinkProps = {
   href: string
   /** Whether to open the link in a new tab. */
   newTab?: boolean
+  /** Called as a click starts the link's client-side navigation, which it can cancel. */
+  onNavigate?: LinkProps['onNavigate']
   /** The link's visible text. */
   children: ReactNode
 }
@@ -24,9 +27,10 @@ type ProseLinkProps = {
 /**
  * An inline text link for use inside prose.
  */
-export function ProseLink({ href, newTab, children }: ProseLinkProps) {
+export function ProseLink({ href, newTab, onNavigate, children }: ProseLinkProps) {
+  // The link, styled to sit inside a sentence
   return (
-    <AppLink href={href} newTab={newTab} plain className={PROSE_LINK_CLASS}>
+    <AppLink href={href} newTab={newTab} onNavigate={onNavigate} plain className={PROSE_LINK_CLASS}>
       {children}
     </AppLink>
   )

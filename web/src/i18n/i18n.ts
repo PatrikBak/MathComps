@@ -141,6 +141,45 @@ export function getLocalizedAnchor(anchor: AnchorKey, locale: Locale): string {
   return ANCHOR_TRANSLATIONS[anchor][locale]
 }
 
+/** Each of the site's in-page anchors, by its fragment in every locale. */
+const SITE_ANCHOR_FRAGMENTS: readonly LocalizedString[] = Object.values(ANCHORS).map(
+  (anchor) =>
+    Object.fromEntries(
+      SUPPORTED_LOCALES.map((locale) => [locale, getLocalizedAnchor(anchor, locale)])
+    ) as LocalizedString
+)
+
+/**
+ * Re-spells a URL fragment from one locale into another. A fragment naming one of the site's anchors, or one of
+ * the route's own, becomes that anchor's fragment in the other locale, or none where that locale lacks the anchor.
+ * Any other fragment stays as it is, unless the route names anchors of its own: its other anchors are then spelled
+ * in one locale alone, so the fragment is dropped.
+ *
+ * @param fragment - The fragment, without its `#`.
+ * @param from - The locale the fragment is spelled in.
+ * @param to - The locale to spell it in.
+ * @param routeAnchors - The route's own anchors, each by its fragment in every locale carrying it, when it names any.
+ *
+ * @returns The fragment in the other locale, empty when it means nothing there.
+ */
+export function translateFragment(
+  fragment: string,
+  from: Locale,
+  to: Locale,
+  routeAnchors: readonly PartialLocalizedString[] | undefined
+): string {
+  // The anchor the fragment names in the locale being left, the site's or the route's
+  const anchor = [...SITE_ANCHOR_FRAGMENTS, ...(routeAnchors ?? [])].find(
+    (fragments) => fragments[from] === fragment
+  )
+
+  // A named anchor takes its fragment in the other locale, or none where that locale lacks it
+  if (anchor !== undefined) return anchor[to] ?? ''
+
+  // Anything else stays, unless the route spells its other anchors in one locale alone
+  return routeAnchors === undefined ? fragment : ''
+}
+
 /**
  * Builds the pathnames map out of {@link ROUTES} and {@link ROUTE_TRANSLATIONS}: each route's path in every locale,
  * or the bare route where no locale changes it.
@@ -172,10 +211,17 @@ export const pathnames = buildPathnames()
 /** Locale prefix strategy for URLs. Always show the locale prefix. */
 export const localePrefix = 'always'
 
+/**
+ * The cookie holding the locale a visitor last read in, which picks where an address with no prefix
+ * leads.
+ */
+export const localeCookie = { name: 'NEXT_LOCALE', sameSite: 'lax' } as const
+
 /** Next-intl routing configuration. */
 export const routing = defineRouting({
   locales: SUPPORTED_LOCALES,
   defaultLocale: DEFAULT_LOCALE,
   localePrefix,
+  localeCookie,
   pathnames,
 })
