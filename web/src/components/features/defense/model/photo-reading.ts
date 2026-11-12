@@ -61,10 +61,35 @@ export type ReadingPhoto = WaitingPhoto & {
 export type ReadPhoto<TReading> = WaitingPhoto & {
   /** The discriminant. */
   kind: 'read'
-  /** What the API read the photo as. */
+  /** What the photo read as, with the page's text as it stood when the photo came in. */
   reading: TReading
   /** The page's text, as read or as the student has changed it since. */
   text: string
+}
+
+/**
+ * Builds a read photo previewing from its stored page, its text waiting beside it.
+ *
+ * @param id - The photo's id among those held.
+ * @param reading - What the photo read as, with the page's text as it now stands.
+ * @param capturedAt - When the photo was taken, in milliseconds since the epoch.
+ *
+ * @returns The photo, its text still to go into the message.
+ */
+export function readPhotoOf(
+  id: number,
+  reading: DefensePhotoReading,
+  capturedAt: number
+): ReadPhoto<DefensePhotoReading> {
+  // Previewing from its stored page, what it read as kept beside the page's text
+  return {
+    kind: 'read',
+    id,
+    previewUrl: reading.link,
+    capturedAt,
+    reading: { photoId: reading.photoId, link: reading.link, text: reading.text },
+    text: reading.text,
+  }
 }
 
 /**

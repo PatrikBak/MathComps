@@ -12,8 +12,8 @@ import type {
 } from '../model/defense-types'
 import { readDraftPhotos, writeDraftPhotos } from '../model/draft-photos'
 import { placeByCaptureTime } from '../model/photo-order'
-import type { DefensePhoto, InsertedPhoto, PhotoReader, ReadPhoto } from '../model/photo-reading'
-import { insertedPhotoOf } from '../model/photo-reading'
+import type { DefensePhoto, InsertedPhoto, PhotoReader } from '../model/photo-reading'
+import { insertedPhotoOf, readPhotoOf } from '../model/photo-reading'
 import { readPhoto } from '../services/photo-service'
 import type { UseDefensePhotosResult } from './use-defense-photos'
 import { useDefensePhotos } from './use-defense-photos'
@@ -53,8 +53,8 @@ type UseComposerPhotosOptions = {
 /**
  * The photos of handwritten work a student takes in the composer. Each one is read as it is picked, its text waiting
  * beside it for the student to check, until the texts go into the message together in page order. Those in the
- * message go out with it, and are kept beside its text wherever the draft is kept. Pages the student's phone sent
- * come in read already.
+ * message go out with it. They and the read photos still waiting are kept wherever the draft's text is. Pages the
+ * student's phone sent come in read already.
  *
  * @param options - The options the composer's photos are read with.
  *
@@ -74,21 +74,14 @@ export function useComposerPhotos({
   // Where the photos are kept beside the draft's text, if its text is kept at all
   const storageKey = defenseDraftPhotosStorageKey(target)
 
-  // How the photos whose text is in the message are kept beside the draft's text, as their stored pages coming back
-  // as photos previewing from them, or none where the draft's text isn't kept
+  // How the photos in the message and those read beside it are kept with the draft's text, or none where the draft's
+  // text isn't kept
   const storage: HeldPhotoStorage<DefensePhoto> | null =
     storageKey === null
       ? null
-      : {
-          key: storageKey,
-          serialize: writeDraftPhotos,
-          deserialize: (stored, nextId) =>
-            readDraftPhotos(stored).map((photo) =>
-              insertedPhotoOf(nextId(), photo.photoId, photo.link)
-            ),
-        }
+      : { key: storageKey, serialize: writeDraftPhotos, deserialize: readDraftPhotos }
 
-  // The photos held, those in the message kept wherever the draft's text is
+  // The photos held, those in the message and those read beside it kept wherever the draft's text is
   const held = useHeldDefensePhotos(storage)
 
   // The photos as they are picked and read, those in the message left as they are
@@ -103,16 +96,7 @@ export function useComposerPhotos({
   // Takes pages the student's phone sent, each previewing from its stored page
   const addArrived = (pages: readonly DefensePhotoHandoffPage[]) => {
     // Each page as a photo of its own, read already
-    const arrived = pages.map(
-      (page): ReadPhoto<DefensePhotoReading> => ({
-        kind: 'read',
-        id: nextId(),
-        previewUrl: page.link,
-        capturedAt: Date.parse(page.capturedAt),
-        reading: { photoId: page.photoId, link: page.link, text: page.text },
-        text: page.text,
-      })
-    )
+    const arrived = pages.map((page) => readPhotoOf(nextId(), page, Date.parse(page.capturedAt)))
 
     // The pages go in by when each was taken, among the photos whose text is not in the message yet
     setPhotos((current) => placeByCaptureTime(current, arrived))
