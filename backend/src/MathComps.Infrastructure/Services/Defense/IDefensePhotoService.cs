@@ -13,7 +13,8 @@ public interface IDefensePhotoService
 {
     /// <summary>
     /// Reads one photo of a page for a defense of a target, keeps the page, its text and its drawings, and records
-    /// what the reading cost.
+    /// what the reading cost. A reading that fails for any reason but the caller cancelling it keeps the photo file as
+    /// it came in, and the exception it fails with names where.
     /// </summary>
     /// <param name="userId">The student uploading the photo.</param>
     /// <param name="target">What the student is defending.</param>
