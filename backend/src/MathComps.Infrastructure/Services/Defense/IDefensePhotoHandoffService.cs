@@ -25,6 +25,14 @@ public interface IDefensePhotoHandoffService
         Guid userId, DefenseTarget target, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Finds the student a code sends photos for.
+    /// </summary>
+    /// <param name="code">The code, as the phone holds it.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The student's <see cref="User.ExternalId"/>, or null when the code is unknown or has run out.</returns>
+    Task<string?> FindStudentAsync(string code, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Reads where a code sends photos now.
     /// </summary>
     /// <param name="code">The code, as the phone holds it.</param>

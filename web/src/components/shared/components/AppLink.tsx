@@ -9,8 +9,9 @@ import { isExternalHref } from '../utils/url-utils'
 
 /**
  * A destination named by its route rather than by a path built out of it, which is the only form a
- * localized route with a dynamic segment can be named in: a built path matches no route, so next-intl
- * carries it through as itself and the reader reaches the localized one by being redirected off it.
+ * localized route with a dynamic segment or a query can be named in: a built path matches no route,
+ * so next-intl carries it through as itself and the reader reaches the localized one by being
+ * redirected off it.
  */
 export type RouteHref = {
   /** The canonical route, dynamic segments and all. */
@@ -27,10 +28,10 @@ export type RouteHref = {
 type AppLinkProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
   /**
    * The destination URL. Can be:
-   * - An internal path (e.g., `/about`, `/problems?category=imo`)
+   * - An internal path (e.g., `/about`)
    * - An external URL (e.g., `https://example.com`)
    * - A hash anchor (e.g., `#section`, `/#hero`)
-   * - A {@link RouteHref}, which is what a localized route with a dynamic segment needs
+   * - A {@link RouteHref}, which is what a localized route with a dynamic segment or a query needs
    */
   href: string | RouteHref
   /**

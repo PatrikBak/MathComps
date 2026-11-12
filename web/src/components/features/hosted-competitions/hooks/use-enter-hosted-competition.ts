@@ -76,7 +76,7 @@ export function useEnterHostedCompetition(
 
       // And every half-written turn the last run left in a composer
       for (const problem of spent.problems) {
-        forgetDefenseDraft({ kind: 'competition', problemId: problem.id, readerKey })
+        forgetDefenseDraft(readerKey, { kind: 'competition', problemId: problem.id })
       }
 
       // The acceptance that rode along with it, a first entry ever carrying one, unless they

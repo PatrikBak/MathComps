@@ -8,6 +8,7 @@ import { toWireTarget } from '../model/defense-target'
 import type {
   DefensePhotoHandoffCode,
   DefensePhotoHandoffPages,
+  DefensePhotoLinks,
   DefensePhotoReading,
   HandoffPhotoReading,
   HandoffPhotoSent,
@@ -16,6 +17,7 @@ import type {
 import type { PhotoReadRequest } from '../model/photo-reading'
 import { MAX_PHOTO_SIZE_MB } from '../model/photo-reading'
 import {
+  getDefensePhotoLinksUrl,
   getHandoffPhotosUrl,
   getPhotoHandoffPagesUrl,
   getPhotoHandoffUrl,
@@ -95,6 +97,24 @@ export function readPhoto(
     },
     request
   )
+}
+
+/**
+ * Fetches links to the kept pages of photos the caller took and has not sent yet.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param photoIds - The kept photos.
+ * @returns The link to each photo among them that is the caller's own and that no message carries yet.
+ */
+export function getDefensePhotoLinks(
+  apiCall: ApiCaller,
+  photoIds: string[]
+): Promise<ApiResult<DefensePhotoLinks>> {
+  // The photos in the body
+  return apiCall<DefensePhotoLinks>(getDefensePhotoLinksUrl, {
+    method: 'POST',
+    body: JSON.stringify({ photoIds }),
+  })
 }
 
 /**

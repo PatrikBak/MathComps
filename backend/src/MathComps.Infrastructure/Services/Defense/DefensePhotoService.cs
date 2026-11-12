@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Net.Mime;
 using MathComps.Domain.Contracts.Defense;
@@ -111,6 +112,26 @@ public class DefensePhotoService(
             photoFiles.PhotoLinkFor(stored.Id),
             reading.Value.Text,
             [.. crops.Select(crop => new DefensePhotoCropDto(crop.Row.Id, crop.Row.Label))]);
+    }
+
+    /// <inheritdoc/>
+    public async Task<ImmutableDictionary<Guid, string>> LinksToUnsentPhotosAsync(
+        Guid userId, IEnumerable<Guid> photoIds, CancellationToken cancellationToken = default)
+    {
+        // The photos named, once each and no more than one call gets links to.
+        List<Guid> ids = [.. photoIds.Distinct().Take(_limits.MaxPhotoLinksPerRequest)];
+
+        // The operation's database context.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The student's photos among them that no message carries yet.
+        var unsentIds = await dbContext.DefensePhotos
+            .WhereUnsentOf(userId, ids)
+            .Select(photo => photo.Id)
+            .ToListAsync(cancellationToken);
+
+        // Each one's link to its page.
+        return unsentIds.ToImmutableDictionary(id => id, photoFiles.PhotoLinkFor);
     }
 
     /// <summary>

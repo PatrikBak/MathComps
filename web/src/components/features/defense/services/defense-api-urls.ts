@@ -144,6 +144,16 @@ export function getReadHandoutPhotoUrl(target: HandoutEnvironmentTarget): string
 }
 
 /**
+ * Builds the URL for reading links to the caller's own photos that no message carries yet.
+ *
+ * @returns The links URL.
+ */
+export function getDefensePhotoLinksUrl(): string {
+  // The links endpoint, under the photos one
+  return buildApiUrl(`${PHOTOS_PATH}/links`)
+}
+
+/**
  * Builds the URL for reading a photo for a defense of an archive problem.
  *
  * @param problemId - The archive problem being defended.

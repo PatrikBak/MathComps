@@ -1,11 +1,13 @@
+using System.Collections.Immutable;
 using MathComps.Domain.Contracts.Defense;
 using MathComps.Infrastructure.Services.Photos;
 
 namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
-/// Reads the photos students take of their handwritten work for a defense conversation, and keeps each photo, its text
-/// and its drawings. A reading is held to the same spend ceiling as a turn, weighed before the model is called.
+/// Reads the photos students take of their handwritten work for a defense conversation, keeps each photo, its text
+/// and its drawings, and hands a student links to the photos they have yet to send. A reading is held to the same
+/// spend ceiling as a turn, weighed before the model is called.
 /// </summary>
 public interface IDefensePhotoService
 {
@@ -25,4 +27,15 @@ public interface IDefensePhotoService
     /// exempts the target.</exception>
     Task<DefensePhotoReadingDto> ReadAsync(
         Guid userId, DefenseTarget target, ReadOnlyMemory<byte> photo, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Links to the student's own photos among those named that no message carries yet. Any other photo is left out,
+    /// and so is every photo past the most one call gets links to.
+    /// </summary>
+    /// <param name="userId">The student.</param>
+    /// <param name="photoIds">The photos.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>Each such photo's link to its page, by its id.</returns>
+    Task<ImmutableDictionary<Guid, string>> LinksToUnsentPhotosAsync(
+        Guid userId, IEnumerable<Guid> photoIds, CancellationToken cancellationToken = default);
 }
