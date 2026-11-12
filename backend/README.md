@@ -503,7 +503,7 @@ dotnet user-secrets set "Mail:RedirectTo" "delivered@resend.dev"
 
 It guards against an honest user running away with the bill. It bounds one account, and sign-up is free, so a determined user opens another.
 
-A defense of a problem whose round the student holds a `HostedEntry` into runs past it entirely. The exemption reads only that the entry row exists, so it outlasts the clock the entry was sat under, and the practice group hands its entry out again and again. Those turns, and the photos read for such a defense, write `defense_spends` rows with `counts_against_ceiling = false`, which is what to sum if it ever starts to matter.
+A turn or photo reading made while the student is competing skips it: from their clock starting to the earlier of the hand-in and the clock running out. Everything else counts: the same problems after the competition, a forfeited entry, which ran no clock, and a practice run, whose group never closes. Skipped work writes `defense_spends` rows with `counts_against_ceiling = false`, which is what to sum if it ever starts to matter.
 
 #### What `deploy.sh` does around compose
 

@@ -4,20 +4,28 @@ using Microsoft.Extensions.Logging;
 namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
-/// Says whether a student may argue what a defense target names.
+/// Says whether a student may argue what a defense target names, and whether they are competing on it.
 /// </summary>
 public interface IDefenseTargetGuard
 {
     /// <summary>
-    /// Throws unless the student may argue the target, and says whether they hold an entry into it.
+    /// Throws unless the student may argue the target.
     /// </summary>
     /// <param name="userId">The student asking.</param>
     /// <param name="target">What they want to argue.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>Whether the student has spent an entry into the round the target is set in; false for a
-    /// handout, which nobody enters.</returns>
-    Task<bool> EnsureCanDefendAsync(
-        Guid userId, DefenseTarget target, CancellationToken cancellationToken = default);
+    /// <returns>A task that completes once the student is cleared.</returns>
+    Task EnsureCanDefendAsync(Guid userId, DefenseTarget target, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Says whether the student is competing on the target right now: their clock in the round it is set in is
+    /// running, in a group that closes. Settles nothing about whether they may argue it.
+    /// </summary>
+    /// <param name="userId">The student.</param>
+    /// <param name="target">What they argue.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>Whether they are competing; false for a handout, which nobody enters.</returns>
+    Task<bool> IsCompetingAsync(Guid userId, DefenseTarget target, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
