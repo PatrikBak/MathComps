@@ -97,7 +97,7 @@ public static class HostedEntryRules
         if (finishedAt is not null)
             return true;
 
-        // Otherwise the clock says it: one still running is a student still competing.
+        // Otherwise the clock says it: one still running is a student still sitting the round, practice included.
         return clockStartedAt.AddMinutes(clockMinutes) <= now;
     }
 
@@ -116,6 +116,28 @@ public static class HostedEntryRules
         // A hand-in counts only when it came first.
         return finishedAt is { } handedInAt && handedInAt < clockRunsOutAt ? handedInAt : clockRunsOutAt;
     }
+
+    /// <summary>
+    /// Whether a student is competing in a round at an instant: their clock in a group that closes has started and
+    /// not yet ended. A group that never closes runs practice, and an entry given up for the problems ran no clock.
+    /// </summary>
+    /// <param name="groupClosesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
+    /// <param name="startedAt">When the student's clock in the round started; null where none ever ran.</param>
+    /// <param name="finishedAt"><inheritdoc cref="HostedEntry.FinishedAt" path="/summary"/></param>
+    /// <param name="clockMinutes"><inheritdoc cref="HostedGroup.ClockMinutes" path="/summary"/></param>
+    /// <param name="at">The instant asked about.</param>
+    /// <returns>Whether the student is competing then.</returns>
+    public static bool IsCompeting(
+        DateTimeOffset? groupClosesAt,
+        DateTimeOffset? startedAt,
+        DateTimeOffset? finishedAt,
+        int clockMinutes,
+        DateTimeOffset at) =>
+        // A group that closes, a clock that ran, and the instant inside that run
+        groupClosesAt is not null
+        && startedAt is { } clockStartedAt
+        && at >= clockStartedAt
+        && at < EndedAt(clockStartedAt, finishedAt, clockMinutes);
 
     /// <summary>
     /// Whether a run is a preparer's run: its owner was already preparing the competitions when its clock started.

@@ -80,10 +80,11 @@ public class DefenseSessionService(
         DefenseInputs.EnsureWithinPhotoCap(start.Request.PhotoIds, _limits.MaxPhotosPerMessage);
 
         // Whether this student may argue the target at all, settled before the content is so much as read: an
-        // embargoed statement and its reference both ride back in the answer. Whether they hold an entry into it
-        // comes back with the verdict.
-        var holdsHostedEntry = await targetGuard.EnsureCanDefendAsync(
-            userId, start.Request.Target, cancellationToken);
+        // embargoed statement and its reference both ride back in the answer.
+        await targetGuard.EnsureCanDefendAsync(userId, start.Request.Target, cancellationToken);
+
+        // Whether the student is competing on the target as they send this.
+        var isCompeting = await targetGuard.IsCompetingAsync(userId, start.Request.Target, cancellationToken);
 
         // The problem itself comes from the site's own content, so a caller can only choose which problem to
         // defend, never what the examiner is told about it. A target naming content nothing is published for is a
@@ -104,10 +105,9 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Refuse the turn if the user is already over their spend ceiling, which an entry of their own puts them
-        // outside. Nothing weighs the message cap here: a start writes exactly one message and the cap admits at
-        // least one.
-        if (!holdsHostedEntry)
+        // Refuse the turn if the user is already over their spend ceiling, unless they are competing. Nothing weighs
+        // the message cap here: a start writes exactly one message and the cap admits at least one.
+        if (!isCompeting)
             await DefenseSpendLedger.EnsureUnderCeilingAsync(
                 dbContext, userId, _limits.DailySpendCeilingPerUser, cancellationToken);
 
@@ -139,7 +139,7 @@ public class DefenseSessionService(
         AttachPhotos(opening, photos);
 
         // Run the engine over the seed and stage its reply and spend row.
-        await RunExaminerAndStageAsync(dbContext, session, userId, !holdsHostedEntry, cancellationToken);
+        await RunExaminerAndStageAsync(dbContext, session, userId, !isCompeting, cancellationToken);
 
         // Track the new session.
         dbContext.DefenseSessions.Add(session);
@@ -177,16 +177,12 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The set the projection below reads. Held as its own value so the expression tree captures a set rather
-        // than the context around it, which the analyzer reads as disposed by the time the tree runs.
-        var allEntries = dbContext.HostedEntries;
-
         // The session with its turns, the photos they were sent with and the drawings cut out of them (tracked, for
-        // the append below), the student's answer for it and what they hold against its replies, the columns of every
-        // target arm, of which the session's kind says which are filled, and whether they hold an entry into the round
-        // its problem sits in. Split, because turns and reports are each a collection off one row: joined in a single
-        // query the database would return every pairing of them, each repeating the session's statement, reference,
-        // and settings snapshot. Another user's session never comes back from it, and a missing one reads the same.
+        // the append below), the student's answer for it and what they hold against its replies, and the columns of
+        // every target arm, of which the session's kind says which are filled. Split, because turns and reports are
+        // each a collection off one row: joined in a single query the database would return every pairing of them,
+        // each repeating the session's statement, reference, and settings snapshot. Another user's session never
+        // comes back from it, and a missing one reads the same.
         var loaded = await dbContext.DefenseSessions
             .Include(defenseSession => defenseSession.Turns)
             .ThenInclude(turn => turn.Photos)
@@ -201,9 +197,6 @@ public class DefenseSessionService(
                 HandoutContentId = (string?)defenseSession.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
                 EnvironmentId = (string?)defenseSession.EnvironmentTarget.HandoutEnvironment.ContentId,
                 ProblemId = (Guid?)defenseSession.ProblemTarget!.ProblemId,
-                HoldsHostedEntry = allEntries.Any(entry =>
-                    entry.UserId == userId
-                    && entry.RoundId == defenseSession.ProblemTarget!.Problem.RoundId),
             })
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new DefenseSessionNotFoundException();
@@ -218,15 +211,20 @@ public class DefenseSessionService(
         if (studentMessages >= _limits.MaxMessagesPerDefense)
             throw new DefenseMessageLimitException();
 
-        // Refuse the turn if the user is already over their spend ceiling, which an entry of their own puts them
-        // outside.
-        if (!loaded.HoldsHostedEntry)
-            await DefenseSpendLedger.EnsureUnderCeilingAsync(
-                dbContext, userId, _limits.DailySpendCeilingPerUser, cancellationToken);
-
         // What the session defends, from the columns naming it.
         var target = DefenseTargets.FromColumns(
             session.TargetKind, loaded.HandoutContentId, loaded.EnvironmentId, loaded.ProblemId);
+
+        // Whether the student may still argue the target, which they may have lost since the conversation started.
+        await targetGuard.EnsureCanDefendAsync(userId, target, cancellationToken);
+
+        // Whether the student is competing on the target right now.
+        var isCompeting = await targetGuard.IsCompetingAsync(userId, target, cancellationToken);
+
+        // Refuse the turn if the user is already over their spend ceiling, unless they are competing.
+        if (!isCompeting)
+            await DefenseSpendLedger.EnsureUnderCeilingAsync(
+                dbContext, userId, _limits.DailySpendCeilingPerUser, cancellationToken);
 
         // Every statement the target has now, in any language. Read before the turn is written, so a source that
         // cannot be read leaves nothing saved.
@@ -250,8 +248,7 @@ public class DefenseSessionService(
         AttachPhotos(message, photos);
 
         // Run the engine over the whole conversation and stage its reply and spend row.
-        await RunExaminerAndStageAsync(
-            dbContext, session, userId, !loaded.HoldsHostedEntry, cancellationToken);
+        await RunExaminerAndStageAsync(dbContext, session, userId, !isCompeting, cancellationToken);
 
         // Persist the appended turns and the spend row in one write, past any client abort.
         await dbContext.SaveChangesAsync(CancellationToken.None);

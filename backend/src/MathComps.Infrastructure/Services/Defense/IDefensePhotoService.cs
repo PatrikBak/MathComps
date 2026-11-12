@@ -23,8 +23,8 @@ public interface IDefensePhotoService
     /// <returns>The page's text, with the kept photo, a link to its page and its drawings.</returns>
     /// <exception cref="UnreadablePhotoException">Thrown when the photo is not an image that can be read, or would
     /// decode too large.</exception>
-    /// <exception cref="DefenseSpendLimitException">Thrown when the student's day's allowance is spent and no entry
-    /// exempts the target.</exception>
+    /// <exception cref="DefenseSpendLimitException">Thrown when the student's day's allowance is spent and they are not
+    /// competing on the target.</exception>
     Task<DefensePhotoReadingDto> ReadAsync(
         Guid userId, DefenseTarget target, ReadOnlyMemory<byte> photo, CancellationToken cancellationToken = default);
 

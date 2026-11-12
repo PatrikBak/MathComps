@@ -58,9 +58,9 @@ public class DefenseSpend
     public required int Revisions { get; set; }
 
     /// <summary>
-    /// Whether this spend is weighed against the user's daily ceiling. False for a defense of a problem whose
-    /// round the student holds an entry into: the ceiling is there so handout practice cannot run away, and an
-    /// entered competition's turns and readings would spend the very allowance the practice is held to.
+    /// Whether this spend is weighed against the user's daily ceiling. False for a turn or a reading asked for while
+    /// the student was competing on the problem, with their clock running: the ceiling is there so practice cannot
+    /// run away, and the competition's own turns and readings would spend the very allowance the practice is held to.
     /// </summary>
     public required bool CountsAgainstCeiling { get; set; }
 

@@ -856,24 +856,38 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         var competition = await service.StartAsync(_ownerId, ProblemRequest(_problemId, "my defense"));
 
         // The proposal deleted afterwards
-        await QueryAsync(async context =>
-        {
-            // The proposal filing the problem
-            var proposal = await context.Proposals.SingleAsync(
-                candidate => candidate.ProblemId == _proposedProblemId);
-
-            // Deleted, as the selection deletes one
-            proposal.DeletedAt = DateTimeOffset.UtcNow;
-
-            // Commit the deletion
-            await context.SaveChangesAsync();
-        });
+        await DeleteTheProposalAsync();
 
         // Listing the owner's conversations
         var sessions = await service.ListAllAsync(_ownerId, Language.EN);
 
         // Which holds the competition one alone
         Assert.Equal([competition.Id], sessions.Select(session => session.Id));
+    });
+
+    /// <summary>
+    /// Every message asks again whether the student may argue what the conversation defends, so one who lost the
+    /// right since it started is refused the next message, and the examiner never sees it.
+    /// </summary>
+    [Fact]
+    public Task A_conversation_about_a_deleted_proposal_takes_no_further_message() => RunTestAsync(async service =>
+    {
+        // The owner reviews the proposals, which takes their address on the MathComps organization's list
+        await MakeOwnerReviewerAsync();
+
+        // The owner's conversation about a problem parked among the proposals
+        var session = await service.StartAsync(_ownerId, ProblemRequest(_proposedProblemId, "my defense"));
+
+        // The proposal deleted afterwards
+        await DeleteTheProposalAsync();
+
+        // The next message is refused, like a problem that is not there
+        await Assert.ThrowsAsync<HostedProblemNotFoundException>(
+            () => service.ContinueAsync(_ownerId, session.Id, new ContinueDefenseRequest("second")));
+
+        // And nothing was appended to the conversation
+        Assert.Equal(3, await QueryValueAsync(context => context.DefenseTurns
+            .CountAsync(turn => turn.SessionId == session.Id)));
     });
 
     /// <summary>
@@ -1033,18 +1047,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         Assert.True(continued.IsGraded);
 
         // The owner then hands the entry in
-        await QueryAsync(async context =>
-        {
-            // The owner's entry
-            var entry = await context.HostedEntries.SingleAsync(
-                candidate => candidate.UserId == _ownerId && candidate.RoundId == _roundId);
-
-            // Closed now
-            entry.FinishedAt = DateTimeOffset.UtcNow;
-
-            // Commit the hand-in
-            await context.SaveChangesAsync();
-        });
+        await HandInOwnersEntryAsync();
 
         // A conversation started after that
         var late = await service.StartAsync(_ownerId, ProblemRequest(_problemId, "my defense"));
@@ -1998,9 +2001,9 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
-    /// A student who holds an entry into the round runs past the ceiling: the conversation opens and carries on
-    /// with the day's allowance already spent. The turn's cost is still recorded, marked as outside the ceiling.
-    /// What changes is what the ceiling reaches, not what the ledger holds.
+    /// A student competing runs past the ceiling while their clock runs: the conversation opens and carries on with
+    /// the day's allowance already spent. The turn's cost is still recorded, marked as outside the ceiling. What
+    /// changes is what the ceiling reaches, not what the ledger holds.
     /// </summary>
     [Fact]
     public Task The_spend_ceiling_does_not_reach_a_competition_conversation() => RunTestAsync(async service =>
@@ -2086,25 +2089,62 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
-    /// The practice round's entry is an entry like any other, so a conversation about its problem runs past the
-    /// ceiling too. Only the per-conversation message cap still holds it, which is the trade: a practice group
-    /// hands its entry out again and again.
+    /// The exemption lasts only while the student's clock runs. A student back on the competition's problems after
+    /// their clock ran out is weighed against the ceiling like anybody practising, or a past competition would be an
+    /// unmetered examiner for everybody who once sat it.
     /// </summary>
     [Fact]
-    public Task The_spend_ceiling_does_not_reach_a_practice_conversation() => RunTestAsync(async service =>
+    public Task The_spend_ceiling_reaches_a_competition_problem_once_the_clock_ran_out() =>
+        RunTestAsync(async service =>
+        {
+            // The owner's three-hour clock started four hours ago, so it ran out an hour ago
+            await StartOwnersClockAtAsync(DateTimeOffset.UtcNow.AddHours(-4));
+
+            // Argue the problem now
+            await service.StartAsync(_ownerId, ProblemRequest(_problemId, "my defense"));
+
+            // The turn's one spend row is weighed against the ceiling
+            Assert.True(await QueryValueAsync(context => context.DefenseSpends
+                .Select(spend => spend.CountsAgainstCeiling)
+                .SingleAsync()));
+        });
+
+    /// <summary>
+    /// Each turn is judged on its own, never by when its conversation started. A conversation begun mid-competition is
+    /// spared while the clock runs, and once the student hands in, their next message is weighed against the ceiling.
+    /// </summary>
+    [Fact]
+    public Task A_competition_conversation_meets_the_ceiling_once_the_entry_is_handed_in() =>
+        RunTestAsync(async service =>
+        {
+            // A conversation begun while the owner's clock runs
+            var session = await service.StartAsync(_ownerId, ProblemRequest(_problemId, "my defense"));
+
+            // The owner hands the entry in
+            await HandInOwnersEntryAsync();
+
+            // Spend that meets the ceiling
+            await SeedSpendAtCeilingAsync();
+
+            // The next message is refused
+            await Assert.ThrowsAsync<DefenseSpendLimitException>(
+                () => service.ContinueAsync(_ownerId, session.Id, new ContinueDefenseRequest("second")));
+        });
+
+    /// <summary>
+    /// The practice group never closes, so its entry spares nothing, even while its clock runs. A practice group
+    /// hands its entry out again and again, so sparing it would leave the examiner unmetered for anybody who keeps
+    /// re-entering.
+    /// </summary>
+    [Fact]
+    public Task The_spend_ceiling_reaches_a_practice_conversation() => RunTestAsync(async service =>
     {
         // Spend that meets the ceiling
         await SeedSpendAtCeilingAsync();
 
-        // The practice conversation opens regardless
-        var session = await service.StartAsync(_ownerId, ProblemRequest(_practiceProblemId, "my defense"));
-
-        // And carries on
-        await service.ContinueAsync(_ownerId, session.Id, new ContinueDefenseRequest("second"));
-
-        // Both of the student's messages are there
-        Assert.Equal(2, await QueryValueAsync(context => context.DefenseTurns
-            .CountAsync(turn => turn.SessionId == session.Id && turn.Role == TranscriptRole.Candidate)));
+        // The practice conversation is refused, its clock running notwithstanding
+        await Assert.ThrowsAsync<DefenseSpendLimitException>(
+            () => service.StartAsync(_ownerId, ProblemRequest(_practiceProblemId, "my defense")));
     });
 
     /// <summary>
@@ -2635,6 +2675,22 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
+    /// Deletes the proposal filing the problem parked among the proposals, as the selection deletes one.
+    /// </summary>
+    /// <returns>A task that completes once the deletion is committed.</returns>
+    private Task DeleteTheProposalAsync() => QueryAsync(async context =>
+    {
+        // The proposal filing the problem
+        var proposal = await context.Proposals.SingleAsync(candidate => candidate.ProblemId == _proposedProblemId);
+
+        // Deleted, as the selection deletes one
+        proposal.DeletedAt = DateTimeOffset.UtcNow;
+
+        // Commit the deletion
+        await context.SaveChangesAsync();
+    });
+
+    /// <summary>
     /// Moves the start of the owner's clock on the graded round to a given instant.
     /// </summary>
     /// <param name="startedAt">When the clock starts.</param>
@@ -2649,6 +2705,23 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         entry.StartedAt = startedAt;
 
         // Commit the start
+        await context.SaveChangesAsync();
+    });
+
+    /// <summary>
+    /// Hands the owner's entry into the graded round in, now.
+    /// </summary>
+    /// <returns>A task that completes once the hand-in is written.</returns>
+    private Task HandInOwnersEntryAsync() => QueryAsync(async context =>
+    {
+        // The owner's entry
+        var entry = await context.HostedEntries.SingleAsync(
+            candidate => candidate.UserId == _ownerId && candidate.RoundId == _roundId);
+
+        // Closed now
+        entry.FinishedAt = DateTimeOffset.UtcNow;
+
+        // Commit the hand-in
         await context.SaveChangesAsync();
     });
 

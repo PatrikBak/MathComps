@@ -46,14 +46,17 @@ public class DefensePhotoService(
     public async Task<DefensePhotoReadingDto> ReadAsync(
         Guid userId, DefenseTarget target, ReadOnlyMemory<byte> photo, CancellationToken cancellationToken = default)
     {
-        // Refuse a target the student may not argue, and learn whether an entry of theirs exempts it from the ceiling.
-        var holdsHostedEntry = await targetGuard.EnsureCanDefendAsync(userId, target, cancellationToken);
+        // Refuse a target the student may not argue.
+        await targetGuard.EnsureCanDefendAsync(userId, target, cancellationToken);
+
+        // Whether the student is competing on the target right now.
+        var isCompeting = await targetGuard.IsCompetingAsync(userId, target, cancellationToken);
 
         // The operation's database context.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Refuse the reading if the student is already over their spend ceiling and no entry puts them outside it.
-        if (!holdsHostedEntry)
+        // Refuse the reading if the student is already over their spend ceiling, unless they are competing.
+        if (!isCompeting)
             await DefenseSpendLedger.EnsureUnderCeilingAsync(
                 dbContext, userId, _limits.DailySpendCeilingPerUser, cancellationToken);
 
@@ -100,7 +103,7 @@ public class DefensePhotoService(
 
         // Record what the reading cost and how long it ran.
         DefenseSpendLedger.RecordReading(
-            dbContext, userId, reading.Usage, (int)stopwatch.ElapsedMilliseconds, !holdsHostedEntry, stored.Id,
+            dbContext, userId, reading.Usage, (int)stopwatch.ElapsedMilliseconds, !isCompeting, stored.Id,
             stored.CreatedAt);
 
         // Commit the rows and the spend together.

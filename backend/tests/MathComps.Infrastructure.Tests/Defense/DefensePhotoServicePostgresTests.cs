@@ -18,8 +18,8 @@ namespace MathComps.Infrastructure.Tests.Defense;
 /// <summary>
 /// Integration tests for <see cref="DefensePhotoService"/> against a real PostgreSQL database, with the reader and the
 /// target guard standing in and the files kept in memory: what a reading keeps, links and bills, the ceiling it is held
-/// to and who an entry exempts, that a reading the student walked out on is still billed, and what a failed reading
-/// keeps. A reading billed wrong moves the ceiling silently.
+/// to and that competing spares it, that a reading the student walked out on is still billed, and what a failed
+/// reading keeps. A reading billed wrong moves the ceiling silently.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
@@ -60,8 +60,8 @@ public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
     private readonly Mock<IPhotoReader> _reader = new();
 
     /// <summary>
-    /// The stand-in target guard, letting every target through and finding no entry unless a test sets it up
-    /// otherwise.
+    /// The stand-in target guard, letting every target through and finding the student not competing unless a test
+    /// sets it up otherwise.
     /// </summary>
     private readonly Mock<IDefenseTargetGuard> _guard = new();
 
@@ -249,15 +249,36 @@ public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A student holding an entry into the round reads past a spent allowance, and the reading is recorded as outside
-    /// the ceiling, so a competition never spends what their handout practice is held to.
+    /// A reading for a target the student may not argue is refused before the model is called, and nothing is kept.
     /// </summary>
     [Fact]
-    public Task An_entrant_reads_past_the_ceiling_and_their_reading_is_not_weighed_against_it() =>
+    public Task A_reading_for_a_target_the_student_may_not_argue_is_refused() => RunTestAsync(async service =>
+    {
+        // The guard refuses the student what they defend.
+        _guard.Setup(guard => guard.EnsureCanDefendAsync(_ownerId, _target, It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new HostedProblemNotFoundException());
+
+        // The reading is refused the same way.
+        await Assert.ThrowsAsync<HostedProblemNotFoundException>(() => service.ReadAsync(_ownerId, _target, _photo));
+
+        // Before the model was asked anything.
+        _reader.Verify(
+            reader => reader.ReadAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()), Times.Never);
+
+        // And with nothing kept.
+        Assert.Empty(_store.Keys);
+    });
+
+    /// <summary>
+    /// A student competing reads past a spent allowance, and the reading is recorded as outside the ceiling, so a
+    /// competition never spends what their practice is held to.
+    /// </summary>
+    [Fact]
+    public Task A_competitor_reads_past_the_ceiling_and_their_reading_is_not_weighed_against_it() =>
         RunTestAsync(async service =>
         {
-            // The student holds an entry into what they defend.
-            _guard.Setup(guard => guard.EnsureCanDefendAsync(_ownerId, _target, It.IsAny<CancellationToken>()))
+            // The student is competing on what they defend.
+            _guard.Setup(guard => guard.IsCompetingAsync(_ownerId, _target, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             // Spend that meets the ceiling, the way a morning on handouts leaves it.
