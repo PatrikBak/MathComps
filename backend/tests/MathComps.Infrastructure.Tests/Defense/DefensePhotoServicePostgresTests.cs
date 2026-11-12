@@ -84,7 +84,7 @@ public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
             limits.DailySpendCeilingPerUser = 1.00m;
 
             // Links to every photo a test names.
-            limits.MaxPhotoLinksPerRequest = 10;
+            limits.MaxPhotosPerMessage = 10;
         });
 
         // The reader, reading every photo as the same page.

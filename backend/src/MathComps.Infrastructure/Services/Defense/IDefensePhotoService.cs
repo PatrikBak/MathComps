@@ -29,7 +29,7 @@ public interface IDefensePhotoService
 
     /// <summary>
     /// Links to the student's own photos among those named that no message carries yet. Any other photo is left out,
-    /// and so is every photo past the most one call gets links to.
+    /// and so is every photo past the most one message may carry.
     /// </summary>
     /// <param name="userId">The student.</param>
     /// <param name="photoIds">The photos.</param>
