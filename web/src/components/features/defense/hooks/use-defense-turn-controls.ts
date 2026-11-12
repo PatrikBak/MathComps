@@ -1,5 +1,6 @@
 'use client'
 
+import { useAuth } from '@clerk/nextjs'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -104,9 +105,12 @@ export function useDefenseTurnControls(
   // Central failure-code copy
   const tApiErrors = useTranslations('apiErrors')
 
-  // The in-progress composer text, kept across closes and reloads wherever the target keeps a draft
+  // Whose draft this is, once Clerk knows
+  const { userId } = useAuth()
+
+  // The in-progress composer text, kept for the reader across closes and reloads
   const [draft, setDraft] = usePersistentDraft({
-    storageKey: defenseDraftStorageKey(conversation.target),
+    storageKey: defenseDraftStorageKey(userId ?? null, conversation.target),
     emptyValue: '',
   })
 

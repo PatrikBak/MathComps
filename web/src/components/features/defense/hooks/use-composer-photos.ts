@@ -1,5 +1,7 @@
 'use client'
 
+import { useAuth } from '@clerk/nextjs'
+
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { apiCallOf, useApi } from '@/hooks/use-api'
 
@@ -73,8 +75,11 @@ export function useComposerPhotos({
   const reader: PhotoReader<DefensePhotoReading> | null =
     apiCall === null ? null : (request) => readPhoto(apiCall, target, request)
 
-  // Where the photos are kept beside the draft's text, if its text is kept at all
-  const storageKey = defenseDraftPhotosStorageKey(target)
+  // Whose draft the photos sit in, once Clerk knows
+  const { userId } = useAuth()
+
+  // Where the photos are kept beside the draft's text, while somebody is signed in to keep them for
+  const storageKey = defenseDraftPhotosStorageKey(userId ?? null, target)
 
   // How the photos in the message and those read beside it are kept with the draft's text, or none where the draft's
   // text isn't kept
