@@ -1,5 +1,6 @@
 using MathComps.Api.Errors;
 using MathComps.Infrastructure.Services;
+using MathComps.Shared.Extensions;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace MathComps.Api.Extensions;
@@ -8,7 +9,8 @@ namespace MathComps.Api.Extensions;
 /// An <see cref="IExceptionHandler"/> that translates exceptions escaping the endpoints into RFC 9457
 /// problem responses. A known business exception is mapped to its HTTP status plus the machine-readable
 /// <c>errorCode</c> and logged at the level it states; anything else is an unexpected fault, logged as an error and
-/// returned as a bare <c>500</c>, never leaking a stack trace or an HTML error page.
+/// returned as a bare <c>500</c>, never leaking a stack trace or an HTML error page. Either line carries what the
+/// exception adds for the log, when it adds something, and the response never does.
 /// </summary>
 /// <param name="logger">The logger.</param>
 /// <param name="problemDetailsService">Writes the RFC 9457 problem body.</param>
@@ -22,6 +24,9 @@ public sealed class GlobalExceptionHandler(
         Exception exception,
         CancellationToken cancellationToken)
     {
+        // What the exception adds for the log, as the end of its line, or nothing when it adds nothing
+        var detail = exception.LogDetail is { } note ? $": {note}" : "";
+
         // A recognized business failure maps to a client-facing status and code
         if (Classify(exception) is { } mapping)
         {
@@ -30,11 +35,12 @@ public sealed class GlobalExceptionHandler(
             logger.Log(
                 exception is MathCompsException { LogLevel: var level } ? level : LogLevel.Error,
                 exception,
-                "{ErrorCode} ({StatusCode}) for {Method} {Path}",
+                "{ErrorCode} ({StatusCode}) for {Method} {Path}{LogDetail}",
                 mapping.Code,
                 mapping.Status,
                 httpContext.Request.Method,
-                httpContext.Request.Path);
+                httpContext.Request.Path,
+                detail);
 
             // Write the problem body carrying that status, the exception's detail, and the code
             await ProblemResponseWriter.WriteAsync(
@@ -47,9 +53,10 @@ public sealed class GlobalExceptionHandler(
         // Everything else is an unexpected fault worth recording
         logger.LogError(
             exception,
-            "Unhandled exception for {Method} {Path}",
+            "Unhandled exception for {Method} {Path}{LogDetail}",
             httpContext.Request.Method,
-            httpContext.Request.Path);
+            httpContext.Request.Path,
+            detail);
 
         // An unexpected fault is a server error
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
