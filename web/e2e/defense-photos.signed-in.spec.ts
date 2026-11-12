@@ -15,6 +15,7 @@ import {
   transcriptOf,
 } from './support/competitions'
 import {
+  answerPhotoLinks,
   installHostedBackend,
   namedProblemOf,
   nextTurnSent,
@@ -242,6 +243,9 @@ test.describe('a message written from photos', () => {
     // Back in the composer
     await expect(review).toHaveCount(0)
 
+    // Links the backend hands out from now on, unlike those the pages were kept with
+    await answerPhotoLinks(page, (photoId) => fileLinkTo(`${photoId}-renewed`))
+
     // A stray reload, which takes the pages' copies on the student's device with it
     await page.reload()
 
@@ -251,16 +255,16 @@ test.describe('a message written from photos', () => {
     // Where the message is still waiting
     await expect(composer).toHaveValue(pageTextOf(1), { timeout: SETTLE_TIMEOUT_MS })
 
-    // With its page beside it, shown from where it is kept
+    // With its page beside it, shown from its stored page through a fresh link
     await expect(
       page.getByRole('button', { name: photosText('open', { number: 1 }) }).locator('img')
-    ).toHaveAttribute('src', fileLinkTo('photo-1'))
+    ).toHaveAttribute('src', fileLinkTo('photo-1-renewed'))
 
     // The read page's tile, after the first
     const readPage = page.getByRole('button', { name: photosText('open', { number: 2 }) })
 
-    // Previewing from its stored page
-    await expect(readPage.locator('img')).toHaveAttribute('src', fileLinkTo('photo-2'))
+    // Previewing from its stored page through a fresh link too
+    await expect(readPage.locator('img')).toHaveAttribute('src', fileLinkTo('photo-2-renewed'))
 
     // Opened
     await readPage.click()

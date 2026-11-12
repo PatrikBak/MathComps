@@ -518,7 +518,7 @@ public class DefenseSessionService(
         // The named photos of the student's that no message carries yet, with the drawings cut out of them.
         var photos = await dbContext.DefensePhotos
             .Include(photo => photo.Crops)
-            .Where(photo => ids.Contains(photo.Id) && photo.UserId == userId && photo.TurnId == null)
+            .WhereUnsentOf(userId, ids)
             .ToListAsync(cancellationToken);
 
         // A photo that isn't there, is someone else's, already went out, or is named twice leaves the count short.

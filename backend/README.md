@@ -450,10 +450,10 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
   until the override names the site's real origins the browser is refused on every API call while the API itself
   looks healthy. An entry may carry `*` as a wildcard.
   `DefenseLimits` holds what bounds the defense feature: a daily spend ceiling in dollars, reckoned **per user**,
-  a message cap on one conversation and a photo cap on one message. See
+  a message cap on one conversation, a photo cap on one message and a cap on the photo links one request gets. See
   [What the defense ceiling is for](#what-the-defense-ceiling-is-for) for what it does and does not reach. Every cap
-  but the ceiling rides to the browser on every session read, so once the API has restarted on the new value, the UI
-  follows on the next page load with no frontend deploy.
+  but the ceiling and the link cap rides to the browser on every session read, so once the API has restarted on the
+  new value, the UI follows on the next page load with no frontend deploy.
   `RateLimits` holds how many requests one caller, an IPv4 address or an IPv6 /64, may make in a window. Search
   and the routes a page asks every few seconds have counts of their own, the signed-in one counted per account,
   and the other limited routes share the general one.

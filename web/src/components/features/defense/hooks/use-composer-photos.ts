@@ -13,8 +13,9 @@ import type {
 import { readDraftPhotos, writeDraftPhotos } from '../model/draft-photos'
 import { placeByCaptureTime } from '../model/photo-order'
 import type { DefensePhoto, InsertedPhoto, PhotoReader } from '../model/photo-reading'
-import { insertedPhotoOf, readPhotoOf } from '../model/photo-reading'
+import { insertedPhotoOf, readPhotoOf, storedPreviewOf } from '../model/photo-reading'
 import { readPhoto } from '../services/photo-service'
+import { useDefensePhotoLinks } from './use-defense-photo-links'
 import type { UseDefensePhotosResult } from './use-defense-photos'
 import { useDefensePhotos } from './use-defense-photos'
 import type { HeldPhotoStorage } from './use-held-defense-photos'
@@ -54,7 +55,8 @@ type UseComposerPhotosOptions = {
  * The photos of handwritten work a student takes in the composer. Each one is read as it is picked, its text waiting
  * beside it for the student to check, until the texts go into the message together in page order. Those in the
  * message go out with it. They and the read photos still waiting are kept wherever the draft's text is. Pages the
- * student's phone sent come in read already.
+ * student's phone sent come in read already. A photo previewing from its stored page shows from a fresh link once one
+ * comes, the link it was kept with standing in until then, since that one may have run out.
  *
  * @param options - The options the composer's photos are read with.
  *
@@ -227,9 +229,27 @@ export function useComposerPhotos({
   // The photos the composer shows, those going out with a message left out
   const shownPhotos = photos.filter((photo) => photo.kind !== 'inserted' || !photo.isGoingOut)
 
+  // The kept photos the shown ones preview from, whose links may have run out since they were kept
+  const storedPreviewIds = shownPhotos.flatMap((photo) => storedPreviewOf(photo) ?? [])
+
+  // Fresh links to those kept photos' pages
+  const freshLinks = useDefensePhotoLinks(storedPreviewIds)
+
+  // The shown photos, each one previewing from its stored page switched to the fresh link once that has come
+  const previewedPhotos = shownPhotos.map((photo) => {
+    // The kept photo whose page this photo previews from, if any
+    const photoId = storedPreviewOf(photo)
+
+    // The fresh link to the kept photo's page, once it has come
+    const freshLink = photoId === null ? undefined : freshLinks?.[photoId]
+
+    // The photo as it is until its fresh link comes, and previewing from that link after
+    return freshLink === undefined ? photo : { ...photo, previewUrl: freshLink }
+  })
+
   // The photos, and what can be done with them
   return {
-    photos: shownPhotos,
+    photos: previewedPhotos,
     addPhotos,
     addArrived,
     retryPhoto,

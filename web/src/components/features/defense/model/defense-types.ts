@@ -208,6 +208,11 @@ export type DefensePhotoReading = {
 }
 
 /**
+ * Where kept pages load from, by the kept photo's id, each for as long as its link lasts.
+ */
+export type DefensePhotoLinks = Readonly<Record<string, string>>
+
+/**
  * A student's live phone photo handoff code, as the API answers.
  */
 export type DefensePhotoHandoffCode = {
