@@ -46,14 +46,14 @@ export const PENDING_COMMENT_TARGET_STORAGE_KEY = 'pending-comment-target'
 export const UNKEPT_DRAFT_STORAGE_KEY = 'persistent-draft:unused'
 
 /**
- * Prefix under which a competition problem's unsent composer text is kept, so a half-written solution
+ * Prefix under which a reader's unsent composer text about a problem is kept, so a half-written solution
  * survives closing the chat or reloading the page.
  */
 export const DEFENSE_DRAFT_STORAGE_PREFIX = 'defense-draft'
 
 /**
- * Prefix under which a competition problem's unsent composer photos are kept: those whose text is in the message and
- * the read ones waiting beside it. They survive closing the chat or reloading the page.
+ * Prefix under which a reader's unsent composer photos about a problem are kept: those whose text is in the message
+ * and the read ones waiting beside it. They survive closing the chat or reloading the page.
  */
 export const DEFENSE_DRAFT_PHOTOS_STORAGE_PREFIX = 'defense-draft-photos'
 

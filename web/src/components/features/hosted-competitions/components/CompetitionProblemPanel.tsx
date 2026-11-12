@@ -199,7 +199,7 @@ export function CompetitionProblemPanel({
           <DefenseConversation
             key={openedSessionId ?? 'fresh'}
             problem={{
-              target: { kind: 'competition', problemId: problem.id, readerKey },
+              target: { kind: 'competition', problemId: problem.id },
               statement: problem.statement[locale],
             }}
             onClose={close}

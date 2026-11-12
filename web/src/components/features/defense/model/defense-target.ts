@@ -28,8 +28,6 @@ type CompetitionDefenseTarget = {
   kind: 'competition'
   /** The problem's id. */
   problemId: string
-  /** Whose entry it is being argued under, or null for a reader the program does not know. */
-  readerKey: string | null
 }
 
 /**
@@ -179,72 +177,77 @@ export function isSubjectReachable(target: DefenseTarget, locale: Locale): boole
 }
 
 /**
- * Names where, under a prefix, one part of a target's unsent composer is kept.
+ * Names where, under a prefix, one part of a reader's unsent composer about a target is kept.
  *
- * Keyed by the problem rather than the conversation, so a draft survives starting a fresh conversation
- * about the same problem, and by the reader on top of that, a browser being a thing students share.
+ * Keyed by what the defense is held against rather than by the conversation, so a draft survives starting a fresh
+ * conversation about the same problem and is there wherever that problem's chat is opened. Keyed by the reader on
+ * top of that, a browser being a thing students share.
  *
  * @param prefix - What the part is kept under.
+ * @param readerId - The signed-in reader, or null while nobody is signed in.
  * @param target - The target the composer is being written against.
  *
- * @returns The storage key, or null for a target whose drafts are not kept past the chat closing.
+ * @returns The storage key, or null where nothing is kept.
  */
-function draftStorageKeyUnder(prefix: string, target: DefenseTarget): string | null {
-  switch (target.kind) {
-    // A competition entry is irreversible and its clock runs, so a stray reload must not cost the
-    // half-written solution
-    case 'competition':
-      return [prefix, 'competition', target.readerKey ?? 'anonymous', target.problemId].join(':')
+function draftStorageKeyUnder(
+  prefix: string,
+  readerId: string | null,
+  target: DefenseTarget
+): string | null {
+  // Nobody signed in, so nobody to keep a draft for
+  if (readerId === null) return null
 
-    // A handout problem and a proposed one can be reopened whenever, so a draft lives only as long as the chat
-    case 'handout':
-    case 'proposal':
-      return null
-
-    // Every target is handled above
-    default:
-      return assertNever(target)
-  }
+  // The reader, then what the defense is held against, keyed alike wherever its chat is opened
+  return [prefix, readerId, defenseTargetKey(toWireTarget(target))].join(':')
 }
 
 /**
- * Names where, under {@link DEFENSE_DRAFT_STORAGE_PREFIX}, a target's unsent composer text is kept.
+ * Names where, under {@link DEFENSE_DRAFT_STORAGE_PREFIX}, a reader's unsent composer text about a target is kept.
  *
+ * @param readerId - The signed-in reader, or null while nobody is signed in.
  * @param target - The target the text is being written against.
  *
- * @returns The storage key, or null for a target whose drafts are not kept past the chat closing.
+ * @returns The storage key, or null where nothing is kept.
  */
-export function defenseDraftStorageKey(target: DefenseTarget): string | null {
+export function defenseDraftStorageKey(
+  readerId: string | null,
+  target: DefenseTarget
+): string | null {
   // The text's key, under its own prefix
-  return draftStorageKeyUnder(DEFENSE_DRAFT_STORAGE_PREFIX, target)
+  return draftStorageKeyUnder(DEFENSE_DRAFT_STORAGE_PREFIX, readerId, target)
 }
 
 /**
- * Names where, under {@link DEFENSE_DRAFT_PHOTOS_STORAGE_PREFIX}, the photos in a target's unsent composer are kept.
- * Those whose text is in the message go out with it, and the read ones wait for their text to go in. They are kept
- * wherever the message's text is.
+ * Names where, under {@link DEFENSE_DRAFT_PHOTOS_STORAGE_PREFIX}, the photos in a reader's unsent composer about a
+ * target are kept. Those whose text is in the message go out with it, and the read ones wait for their text to go in.
+ * They are kept wherever the message's text is.
  *
+ * @param readerId - The signed-in reader, or null while nobody is signed in.
  * @param target - The target the text is being written against.
  *
- * @returns The storage key, or null for a target whose drafts are not kept past the chat closing.
+ * @returns The storage key, or null where nothing is kept.
  */
-export function defenseDraftPhotosStorageKey(target: DefenseTarget): string | null {
+export function defenseDraftPhotosStorageKey(
+  readerId: string | null,
+  target: DefenseTarget
+): string | null {
   // The photos' key, under a prefix of their own
-  return draftStorageKeyUnder(DEFENSE_DRAFT_PHOTOS_STORAGE_PREFIX, target)
+  return draftStorageKeyUnder(DEFENSE_DRAFT_PHOTOS_STORAGE_PREFIX, readerId, target)
 }
 
 /**
- * Forgets whatever unsent composer text is being kept against one target, and the photos kept beside it.
+ * Forgets whatever unsent composer text a reader has kept against one target, and the photos kept beside it.
  *
- * A competition problem's draft is keyed by the problem, which outlives the entry: a fresh entry is a
- * fresh run, and until this is called the last one's half-written turn is waiting in its composer.
+ * A draft is keyed by the problem, which outlives a competition entry: a fresh entry is a fresh run, and until this
+ * is called the last one's half-written turn is waiting in its composer.
  *
- * @param target - Whose draft to forget.
+ * @param readerId - Whose draft to forget, or null while nobody is signed in.
+ * @param target - What the draft was written against.
  */
-export function forgetDefenseDraft(target: DefenseTarget): void {
+export function forgetDefenseDraft(readerId: string | null, target: DefenseTarget): void {
   // The draft's text
-  forgetPersistentDraft(defenseDraftStorageKey(target))
+  forgetPersistentDraft(defenseDraftStorageKey(readerId, target))
 
   // The draft's photos
-  forgetPersistentDraft(defenseDraftPhotosStorageKey(target))
+  forgetPersistentDraft(defenseDraftPhotosStorageKey(readerId, target))
 }
