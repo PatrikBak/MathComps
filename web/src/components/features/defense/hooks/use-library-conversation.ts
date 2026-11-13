@@ -79,11 +79,7 @@ export function useLibraryConversation(
     case 'problem': {
       // The problem as the competition's own area opens it
       const problem: DefenseProblem = {
-        target: {
-          kind: 'competition',
-          problemId: defense.target.problemId,
-          readerKey: userId ?? null,
-        },
+        target: { kind: 'competition', problemId: defense.target.problemId },
         statement: defense.statement,
       }
 

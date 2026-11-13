@@ -5,21 +5,22 @@ using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MathComps.Infrastructure.Tests.Defense;
 
 /// <summary>
-/// Covers <see cref="DefenseTargetGuard"/>: the arms deciding whether a problem may be argued at all, and the
-/// entry lookup deciding whether this student may argue an embargoed one. The rule that lookup feeds is pure and
-/// pinned in <see cref="Competitions.HostedEntryRulesEntitlementTests"/>; what is covered here is the query, which
-/// the guard writes itself.
+/// Covers <see cref="DefenseTargetGuard"/>: the arms deciding whether a problem may be argued at all, the entry
+/// lookup deciding whether this student may argue an embargoed one, and the read saying whether they are competing
+/// on it. The rule that lookup feeds is pure and pinned in <see cref="Competitions.HostedEntryRulesEntitlementTests"/>;
+/// what is covered here is the queries, which the guard writes itself.
 /// </summary>
 /// <remarks>
 /// The guard takes a problem from the caller and never re-checks which round or student its entry lookup
 /// matched, so a row satisfying it for the wrong round or the wrong student opens an embargoed problem with
-/// nothing downstream to stop it. It also lifts the daily spend ceiling, which is why the scoping cases below
-/// are the ones that matter most.
+/// nothing downstream to stop it, which is why the scoping cases below are the ones that matter most. The same
+/// mismatch in the competing read would spare the wrong student the daily spend ceiling.
 /// </remarks>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
@@ -131,20 +132,13 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
                 () => guard.EnsureCanDefendAsync(_studentId, new ProblemTarget(_proposedProblemId))));
 
     /// <summary>
-    /// A preparer argues a parked problem a live proposal files, and the spend ceiling still reaches them, there
-    /// being no entry to lift it. Every refusal of a proposal varies one thing from this case, so a guard turning
-    /// the reviewers away too fails here.
+    /// A preparer argues a parked problem a live proposal files. Every refusal of a proposal varies one thing from
+    /// this case, so a guard turning the reviewers away too fails here.
     /// </summary>
     [Fact]
     public Task A_problem_among_the_proposals_can_be_argued_by_a_preparer() => RunTestAsync(async guard =>
-    {
         // Cleared, on a round nobody has entered or could
-        var holdsEntry = await guard.EnsureCanDefendAsync(
-            _preparerId, new ProblemTarget(_proposedProblemId));
-
-        // And the ceiling reaches them, there being no entry to lift it
-        Assert.False(holdsEntry);
-    });
+        await guard.EnsureCanDefendAsync(_preparerId, new ProblemTarget(_proposedProblemId)));
 
     /// <summary>
     /// A deleted proposal is gone from the selection, so even a preparer is told its problem is not there. The
@@ -176,8 +170,8 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
     [Fact]
     public Task A_proposal_is_argued_by_its_organizations_members_alone() => RunTestAsync(async guard =>
     {
-        // The commissioner cleared on the olympiad's proposal, the ceiling reaching them
-        Assert.False(await guard.EnsureCanDefendAsync(_commissionerId, new ProblemTarget(_olympiadProblemId)));
+        // The commissioner cleared on the olympiad's proposal
+        await guard.EnsureCanDefendAsync(_commissionerId, new ProblemTarget(_olympiadProblemId));
 
         // The preparer refused it, like a problem that is not there
         await Assert.ThrowsAsync<HostedProblemNotFoundException>(
@@ -202,7 +196,7 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
     /// <summary>
     /// An entry buys the round it was taken into and not the one beside it. Both are embargoed until the same
     /// instant, so a guard matching an entry without checking which round it names would open an embargoed
-    /// problem to anybody holding an entry anywhere, and lift the spend ceiling on it too.
+    /// problem to anybody holding an entry anywhere.
     /// </summary>
     [Fact]
     public Task An_entry_into_one_round_does_not_open_a_problem_of_another() => RunTestAsync(
@@ -222,14 +216,13 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             () => guard.EnsureCanDefendAsync(_studentId, new ProblemTarget(_enteredProblemId))));
 
     /// <summary>
-    /// The student's own entry into the round a problem sits in opens it, and lifts the spend ceiling with it.
-    /// The case the two above are varied from, so a guard that refused everybody would not pass them.
+    /// The student's own entry into the round a problem sits in opens it. The case the two above are varied from, so
+    /// a guard that refused everybody would not pass them.
     /// </summary>
     [Fact]
     public Task The_students_own_entry_opens_the_problem() => RunTestAsync(async guard =>
-        // Cleared, and the entry is what says the ceiling does not reach this conversation
-        Assert.True(
-            await guard.EnsureCanDefendAsync(_neighbourId, new ProblemTarget(_enteredProblemId))));
+        // Cleared on the round they entered
+        await guard.EnsureCanDefendAsync(_neighbourId, new ProblemTarget(_enteredProblemId)));
 
     /// <summary>
     /// An entry given up for the problems opens them to the examiner too. Giving it up is how a student reads
@@ -238,26 +231,81 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
     /// </summary>
     [Fact]
     public Task An_entry_given_up_opens_the_problem_too() => RunTestAsync(async guard =>
-        // Cleared on the round they forfeited into, and the entry lifts the ceiling whichever way it was spent
-        Assert.True(
-            await guard.EnsureCanDefendAsync(_forfeiterId, new ProblemTarget(_enteredProblemId))));
+        // Cleared on the round they forfeited into
+        await guard.EnsureCanDefendAsync(_forfeiterId, new ProblemTarget(_enteredProblemId)));
 
     /// <summary>
-    /// A student who prepares competitions argues an embargoed problem holding no entry, and still counts against
-    /// the daily spend ceiling. Preparing competitions says when a competition may be reached; what a conversation
-    /// costs is the entry's to answer, and they hold none.
+    /// A student who prepares competitions argues an embargoed problem holding no entry, preparing them being what
+    /// opens a competition before its embargo lifts. The refusal of another organization's member is varied from it.
     /// </summary>
     [Fact]
-    public Task A_preparer_argues_an_embargoed_problem_and_still_pays_for_it() => RunTestAsync(
-        async guard =>
-        {
-            // Cleared on a round nobody has entered
-            var holdsEntry = await guard.EnsureCanDefendAsync(
-                _preparerId, new ProblemTarget(_embargoedProblemId));
+    public Task A_preparer_argues_an_embargoed_problem_holding_no_entry() => RunTestAsync(async guard =>
+        // Cleared on a round nobody has entered
+        await guard.EnsureCanDefendAsync(_preparerId, new ProblemTarget(_embargoedProblemId)));
 
-            // And the ceiling still reaches them, an entry being what lifts it
-            Assert.False(holdsEntry);
+    /// <summary>
+    /// A student is competing on a problem while their own clock in its round runs. The case every competing check
+    /// below varies one thing from, so a read that said no to everybody would not pass them.
+    /// </summary>
+    [Fact]
+    public Task A_student_whose_clock_runs_is_competing() => RunTestAsync(async guard =>
+        // Competing, on the three-hour clock the neighbour started in the round as the seed ran
+        Assert.True(await guard.IsCompetingAsync(_neighbourId, new ProblemTarget(_enteredProblemId))));
+
+    /// <summary>
+    /// Once the student's clock has run out they are no longer competing, though the entry still opens the problem.
+    /// A read asking only whether the entry exists would spare a past competition's problems the ceiling forever.
+    /// </summary>
+    [Fact]
+    public Task A_student_whose_clock_ran_out_is_not_competing() => RunTestAsync(async guard =>
+    {
+        // The neighbour's three-hour clock started four hours ago, so it ran out an hour ago
+        await QueryAsync(async context =>
+        {
+            // The neighbour's entry
+            var entry = await context.HostedEntries.SingleAsync(candidate => candidate.UserId == _neighbourId);
+
+            // Its clock started then
+            entry.StartedAt = DateTimeOffset.UtcNow.AddHours(-4);
+
+            // Commit the start
+            await context.SaveChangesAsync();
         });
+
+        // No longer competing
+        Assert.False(await guard.IsCompetingAsync(_neighbourId, new ProblemTarget(_enteredProblemId)));
+    });
+
+    /// <summary>
+    /// An entry given up for the problems ran no clock, so the student is not competing on them.
+    /// </summary>
+    [Fact]
+    public Task A_student_who_gave_their_entry_up_is_not_competing() => RunTestAsync(async guard =>
+        // Not competing, though the forfeiter's entry is into the very round the neighbour competes in
+        Assert.False(await guard.IsCompetingAsync(_forfeiterId, new ProblemTarget(_enteredProblemId))));
+
+    /// <summary>
+    /// A clock counts for the student who started it, and in the round it started in. A read matching any student's
+    /// entry, or an entry into any round, would spare whoever asks next.
+    /// </summary>
+    [Fact]
+    public Task Only_the_students_own_clock_in_the_round_makes_them_competing() => RunTestAsync(async guard =>
+    {
+        // Another student is not competing on the round the neighbour's clock runs in
+        Assert.False(await guard.IsCompetingAsync(_studentId, new ProblemTarget(_enteredProblemId)));
+
+        // Nor is the neighbour on the other round of the same group
+        Assert.False(await guard.IsCompetingAsync(_neighbourId, new ProblemTarget(_embargoedProblemId)));
+    });
+
+    /// <summary>
+    /// A problem no group hosts is nothing anybody competes on, so a preparer arguing a proposal is held to the
+    /// ceiling like anybody practising.
+    /// </summary>
+    [Fact]
+    public Task Nobody_competes_on_a_problem_no_group_hosts() => RunTestAsync(async guard =>
+        // The preparer is not competing on a problem parked among the proposals
+        Assert.False(await guard.IsCompetingAsync(_preparerId, new ProblemTarget(_proposedProblemId))));
 
     /// <summary>
     /// Only MathComps' members prepare the competitions, so a member of another organization holding no entry is held

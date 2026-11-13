@@ -104,7 +104,7 @@ export const UserMenuItem = (props: UserMenuItemProps) => {
   const { signOut } = useClerk()
 
   // A function reading the address of the page being read
-  const getCurrentUrl = useCurrentUrl()
+  const { getCurrentUrl } = useCurrentUrl()
 
   // A function signing the user out and telling the caller
   const handleSignOut = () => {

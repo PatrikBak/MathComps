@@ -1,11 +1,14 @@
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Net.Mime;
 using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Photos;
 using MathComps.Infrastructure.Storage;
+using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -43,22 +46,25 @@ public class DefensePhotoService(
     public async Task<DefensePhotoReadingDto> ReadAsync(
         Guid userId, DefenseTarget target, ReadOnlyMemory<byte> photo, CancellationToken cancellationToken = default)
     {
-        // Refuse a target the student may not argue, and learn whether an entry of theirs exempts it from the ceiling.
-        var holdsHostedEntry = await targetGuard.EnsureCanDefendAsync(userId, target, cancellationToken);
+        // Refuse a target the student may not argue.
+        await targetGuard.EnsureCanDefendAsync(userId, target, cancellationToken);
+
+        // Whether the student is competing on the target right now.
+        var isCompeting = await targetGuard.IsCompetingAsync(userId, target, cancellationToken);
 
         // The operation's database context.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Refuse the reading if the student is already over their spend ceiling and no entry puts them outside it.
-        if (!holdsHostedEntry)
+        // Refuse the reading if the student is already over their spend ceiling, unless they are competing.
+        if (!isCompeting)
             await DefenseSpendLedger.EnsureUnderCeilingAsync(
                 dbContext, userId, _limits.DailySpendCeilingPerUser, cancellationToken);
 
         // Time the reading.
         var stopwatch = Stopwatch.StartNew();
 
-        // Read the page.
-        var reading = await photoReader.ReadAsync(photo, cancellationToken);
+        // Read the page, keeping the upload when the reading fails.
+        var reading = await ReadKeepingFailedUploadAsync(userId, photo, cancellationToken);
 
         // Stop the clock before the storing.
         stopwatch.Stop();
@@ -97,7 +103,7 @@ public class DefensePhotoService(
 
         // Record what the reading cost and how long it ran.
         DefenseSpendLedger.RecordReading(
-            dbContext, userId, reading.Usage, (int)stopwatch.ElapsedMilliseconds, !holdsHostedEntry, stored.Id,
+            dbContext, userId, reading.Usage, (int)stopwatch.ElapsedMilliseconds, !isCompeting, stored.Id,
             stored.CreatedAt);
 
         // Commit the rows and the spend together.
@@ -109,5 +115,69 @@ public class DefensePhotoService(
             photoFiles.PhotoLinkFor(stored.Id),
             reading.Value.Text,
             [.. crops.Select(crop => new DefensePhotoCropDto(crop.Row.Id, crop.Row.Label))]);
+    }
+
+    /// <inheritdoc/>
+    public async Task<ImmutableDictionary<Guid, string>> LinksToUnsentPhotosAsync(
+        Guid userId, IEnumerable<Guid> photoIds, CancellationToken cancellationToken = default)
+    {
+        // The photos named, once each and no more than one message may carry.
+        List<Guid> ids = [.. photoIds.Distinct().Take(_limits.MaxPhotosPerMessage)];
+
+        // The operation's database context.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The student's photos among them that no message carries yet.
+        var unsentIds = await dbContext.DefensePhotos
+            .WhereUnsentOf(userId, ids)
+            .Select(photo => photo.Id)
+            .ToListAsync(cancellationToken);
+
+        // Each one's link to its page.
+        return unsentIds.ToImmutableDictionary(id => id, photoFiles.PhotoLinkFor);
+    }
+
+    /// <summary>
+    /// Reads the page. A reading that fails for any reason but the student leaving keeps the upload as it came in, and
+    /// its failure goes on unchanged but for the log detail it carries: the key the upload is kept under, or why it
+    /// couldn't be kept.
+    /// </summary>
+    /// <param name="userId">The student uploading the photo.</param>
+    /// <param name="photo">The photo file's bytes.</param>
+    /// <param name="cancellationToken">A token to cancel the reading.</param>
+    /// <returns><inheritdoc cref="IPhotoReader.ReadAsync" path="/returns"/></returns>
+    private async Task<ChatCallResult<PhotoReading>> ReadKeepingFailedUploadAsync(
+        Guid userId, ReadOnlyMemory<byte> photo, CancellationToken cancellationToken)
+    {
+        // Read the page, catching any failure that isn't the student leaving.
+        try
+        {
+            // The reading.
+            return await photoReader.ReadAsync(photo, cancellationToken);
+        }
+        catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
+        {
+            // Where the upload is kept.
+            var key = IDefensePhotoFiles.FailedUploadKey(userId, Guid.CreateVersion7());
+
+            // Keep the upload as it came in, even if the student leaves meanwhile.
+            try
+            {
+                // Store the upload.
+                await objectStore.PutAsync(
+                    key, photo.ToArray(), MediaTypeNames.Application.Octet, CancellationToken.None);
+
+                // The failure's log line names where the upload is kept.
+                exception.LogDetail = $"the upload is kept at {key}";
+            }
+            catch (Exception keepFailure)
+            {
+                // The store failed, so the failure's log line says the upload wasn't kept, and why.
+                exception.LogDetail = $"keeping the upload at {key} failed: {keepFailure.Message}";
+            }
+
+            // The reading's own failure goes on, so an unreadable photo is refused as one.
+            throw;
+        }
     }
 }

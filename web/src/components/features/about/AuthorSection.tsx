@@ -1,5 +1,5 @@
 import { type LucideIcon } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 import AnimatedSection from '@/components/shared/components/AnimatedSection'
 import { AppLink } from '@/components/shared/components/AppLink'
@@ -7,6 +7,7 @@ import { GithubIcon, LinkedinIcon } from '@/components/shared/components/brand-i
 import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
 import { AUTHOR_GITHUB_URL, AUTHOR_LINKEDIN_URL, AUTHOR_PHOTO_PATH } from '@/constants/author'
 import { GEOGEN_URL } from '@/constants/links'
+import { ANCHORS, getLocalizedAnchor, type Locale } from '@/i18n/i18n'
 
 import { AboutProse } from './layout/AboutProse'
 import BeatLabel from './layout/BeatLabel'
@@ -46,8 +47,11 @@ export const AuthorSection = () => {
   // Translations for section
   const t = useTranslations('about.author')
 
+  // The reader's language
+  const locale = useLocale() as Locale
+
   return (
-    <AnimatedSection id="aboutAuthor" eager>
+    <AnimatedSection id={getLocalizedAnchor(ANCHORS.ABOUT_AUTHOR, locale)} eager>
       <BeatLabel>{t('title')}</BeatLabel>
       {/* Portrait on one side, bio and links on the other */}
       <div className="mt-6 flex flex-col sm:flex-row items-start gap-6 sm:gap-8">

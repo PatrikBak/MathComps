@@ -449,11 +449,10 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
   `Cors:Origins` is the one a server cannot go without: the base file allows `http://localhost:3000` alone, so
   until the override names the site's real origins the browser is refused on every API call while the API itself
   looks healthy. An entry may carry `*` as a wildcard.
-  `DefenseLimits` holds what bounds the defense feature: a daily spend ceiling in dollars, reckoned **per user**,
-  a message cap on one conversation and a photo cap on one message. See
-  [What the defense ceiling is for](#what-the-defense-ceiling-is-for) for what it does and does not reach. Every cap
-  but the ceiling rides to the browser on every session read, so once the API has restarted on the new value, the UI
-  follows on the next page load with no frontend deploy.
+  `DefenseLimits` holds the defense feature's caps, a daily spend ceiling in dollars among them, reckoned **per
+  user**. See [What the defense ceiling is for](#what-the-defense-ceiling-is-for) for what it does and does not
+  reach. Every cap but the ceiling rides to the browser on every session read, so once the API has restarted on the
+  new value, the UI follows on the next page load with no frontend deploy.
   `RateLimits` holds how many requests one caller, an IPv4 address or an IPv6 /64, may make in a window. Search
   and the routes a page asks every few seconds have counts of their own, the signed-in one counted per account,
   and the other limited routes share the general one.
@@ -504,7 +503,7 @@ dotnet user-secrets set "Mail:RedirectTo" "delivered@resend.dev"
 
 It guards against an honest user running away with the bill. It bounds one account, and sign-up is free, so a determined user opens another.
 
-A defense of a problem whose round the student holds a `HostedEntry` into runs past it entirely. The exemption reads only that the entry row exists, so it outlasts the clock the entry was sat under, and the practice group hands its entry out again and again. Those turns, and the photos read for such a defense, write `defense_spends` rows with `counts_against_ceiling = false`, which is what to sum if it ever starts to matter.
+A turn or photo reading made while the student is competing skips it: from their clock starting to the earlier of the hand-in and the clock running out. Everything else counts: the same problems after the competition, a forfeited entry, which ran no clock, and a practice run, whose group never closes. Skipped work writes `defense_spends` rows with `counts_against_ceiling = false`, which is what to sum if it ever starts to matter.
 
 #### What `deploy.sh` does around compose
 

@@ -37,6 +37,45 @@ test.describe('the competitions list', () => {
     await expect(page.getByRole('dialog')).toHaveCount(0)
   })
 
+  test('signs a reader with no account in with the entry they pressed, the fragment kept', async ({
+    page,
+  }) => {
+    // The competitions surface, on the one state carrying no entry anywhere, read without a session
+    await installHostedBackend(page, 'first-entry')
+
+    // Open the list, its address carrying a fragment
+    await page.goto(`${LIST_PATH}#kept`)
+
+    // The first way in the list offers
+    const enter = page.getByRole('button', { name: areaCopy.enter, exact: true }).first()
+
+    // The way in, drawn once the list has loaded
+    await expect(enter).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Press the way in
+    await enter.click()
+
+    // Sign in from the prompt
+    await page.getByRole('button', { name: authCopy.login }).click()
+
+    // The way back, once the login page carries one
+    await expect
+      .poll(() => addressParams(page).get('returnUrl'), { timeout: SETTLE_TIMEOUT_MS })
+      .not.toBeNull()
+
+    // The login page's way back, resolved on this site
+    const returnUrl = new URL(addressParams(page).get('returnUrl') ?? '', page.url())
+
+    // The list again
+    expect(returnUrl.pathname).toBe(LIST_PATH)
+
+    // The way back names the competition pressed, so its entry opens there
+    expect(returnUrl.searchParams.get('enter')).toMatch(/.+/)
+
+    // The way back keeps the fragment at its end
+    expect(returnUrl.hash).toBe('#kept')
+  })
+
   test('opens a closed competition it offers them to a reader with no account', async ({
     page,
   }) => {

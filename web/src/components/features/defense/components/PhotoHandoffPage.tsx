@@ -158,7 +158,7 @@ function LiveHandoff({ target, photos }: LiveHandoffProps) {
         {/* The problem's photos, then the way to more, started over with the large view shut whenever the code
             moves on */}
         <HandoffPhotoStrip key={defenseTargetKey(toSessionTarget(target))} photos={groups.current}>
-          <DefensePhotoButton variant="page" onPick={photos.addPhotos} />
+          <DefensePhotoButton variant="page" onPick={photos.addPhotos} isFull={false} />
         </HandoffPhotoStrip>
 
         {/* Why any of the problem's photos failed */}

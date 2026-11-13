@@ -82,7 +82,7 @@ export function useEntryGuard({
   const router = useRouter()
 
   // The page to come back to, which the intent is appended to
-  const getCurrentUrl = useCurrentUrl()
+  const { getCurrentUrl } = useCurrentUrl()
 
   // A function which answers one press, given what the reader still owes
   const guard = useCallback(
@@ -93,15 +93,16 @@ export function useEntryGuard({
       switch (blocker) {
         // No account yet, so the press goes to one and brings this same competition back with it
         case 'signIn': {
-          // This page, plus which competition was pressed
-          const [path, search = ''] = getCurrentUrl().split('?')
-          const query = new URLSearchParams(search)
-          query.set(ENTRY_INTENT_PARAM, pending.competition.slug[locale])
+          // This page as it stands, fragment included
+          const returnUrl = new URL(getCurrentUrl(), window.location.origin)
+
+          // The competition pressed, named on the way back
+          returnUrl.searchParams.set(ENTRY_INTENT_PARAM, pending.competition.slug[locale])
 
           // Ask for the account, naming the competition to come back to
           showLoginPrompt({
             reason: t('entryAuthReason'),
-            redirectUrl: `${path}?${query}`,
+            redirectUrl: `${returnUrl.pathname}${returnUrl.search}${returnUrl.hash}`,
           })
 
           // The press is answered on the way back rather than here

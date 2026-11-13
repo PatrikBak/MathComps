@@ -1,6 +1,7 @@
+import type { LinkProps } from 'next/link'
 import type { ReactNode } from 'react'
 
-import { AppLink } from './AppLink'
+import { AppLink, type RouteHref } from './AppLink'
 
 /**
  * An inline text link used inside a sentence of prose, always underlined so it doesn't rely on color
@@ -13,10 +14,12 @@ export const PROSE_LINK_CLASS =
  * Props for the {@link ProseLink} component.
  */
 type ProseLinkProps = {
-  /** The destination URL. */
-  href: string
+  /** Where the link leads, as an address or as a route by name. */
+  href: string | RouteHref
   /** Whether to open the link in a new tab. */
   newTab?: boolean
+  /** Called as a click starts the link's client-side navigation, which it can cancel. */
+  onNavigate?: LinkProps['onNavigate']
   /** The link's visible text. */
   children: ReactNode
 }
@@ -24,9 +27,10 @@ type ProseLinkProps = {
 /**
  * An inline text link for use inside prose.
  */
-export function ProseLink({ href, newTab, children }: ProseLinkProps) {
+export function ProseLink({ href, newTab, onNavigate, children }: ProseLinkProps) {
+  // The link, styled to sit inside a sentence
   return (
-    <AppLink href={href} newTab={newTab} plain className={PROSE_LINK_CLASS}>
+    <AppLink href={href} newTab={newTab} onNavigate={onNavigate} plain className={PROSE_LINK_CLASS}>
       {children}
     </AppLink>
   )

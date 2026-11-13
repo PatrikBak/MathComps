@@ -159,3 +159,22 @@ export function resolveHandoutProblemRef(
         : null,
   }
 }
+
+/**
+ * Lists the anchor of every environment of one handout, as each language spells it.
+ *
+ * @param handoutContentId - The handout's permanent content id.
+ *
+ * @returns Each environment's anchor in every language naming it, none for a handout the index doesn't carry.
+ */
+export function listEnvironmentAnchors(handoutContentId: string): PartialLocalizedString[] {
+  // The handout's environments, each by the anchors its languages give it
+  return Object.values(envIndex[handoutContentId] ?? {}).map((placement) =>
+    Object.fromEntries(
+      Object.entries(placement.slug).map(([locale, slug]) => [
+        locale,
+        buildEnvironmentAnchorId(slug),
+      ])
+    )
+  )
+}

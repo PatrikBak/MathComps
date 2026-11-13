@@ -9,8 +9,9 @@ import { isExternalHref } from '../utils/url-utils'
 
 /**
  * A destination named by its route rather than by a path built out of it, which is the only form a
- * localized route with a dynamic segment can be named in: a built path matches no route, so next-intl
- * carries it through as itself and the reader reaches the localized one by being redirected off it.
+ * localized route with a dynamic segment or a query can be named in: a built path matches no route,
+ * so next-intl carries it through as itself and the reader reaches the localized one by being
+ * redirected off it.
  */
 export type RouteHref = {
   /** The canonical route, dynamic segments and all. */
@@ -27,10 +28,10 @@ export type RouteHref = {
 type AppLinkProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
   /**
    * The destination URL. Can be:
-   * - An internal path (e.g., `/about`, `/problems?category=imo`)
+   * - An internal path (e.g., `/about`)
    * - An external URL (e.g., `https://example.com`)
    * - A hash anchor (e.g., `#section`, `/#hero`)
-   * - A {@link RouteHref}, which is what a localized route with a dynamic segment needs
+   * - A {@link RouteHref}, which is what a localized route with a dynamic segment or a query needs
    */
   href: string | RouteHref
   /**
@@ -40,6 +41,12 @@ type AppLinkProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> 
    * @default true
    */
   prefetch?: LinkProps['prefetch']
+  /**
+   * Called as a click on an internal link starts its client-side navigation, which it can cancel.
+   * A click opening a new tab never reaches it, and neither does one on an external link or a hash
+   * anchor.
+   */
+  onNavigate?: LinkProps['onNavigate']
   /**
    * Force external link behavior (renders `<a>` instead of Next.js `Link`),
    * bypassing the automatic URL detection.
@@ -71,7 +78,7 @@ type AppLinkProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> 
  * Provides consistent styling and security defaults (`rel="noopener noreferrer"` for new tabs).
  */
 export const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(
-  ({ href, className, prefetch, newTab, external, plain, ...rest }, ref) => {
+  ({ href, className, prefetch, onNavigate, newTab, external, plain, ...rest }, ref) => {
     // Apply the default link styling, unless the caller opts out to control appearance itself
     const classes = plain
       ? cn(className)
@@ -107,6 +114,7 @@ export const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(
         ref={ref}
         href={href as ComponentProps<typeof Link>['href']}
         prefetch={prefetch ?? true}
+        onNavigate={onNavigate}
         className={classes}
         target={target}
         rel={rel}

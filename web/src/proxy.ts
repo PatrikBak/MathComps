@@ -3,13 +3,20 @@ import { NextResponse } from 'next/server'
 import createMiddleware from 'next-intl/middleware'
 
 import { REQUEST_URL_HEADER } from '@/constants/auth-constants'
-import { localePrefix, pathnames, SUPPORTED_LOCALES, UNMATCHED_VISITOR_LOCALE } from '@/i18n/i18n'
+import {
+  localeCookie,
+  localePrefix,
+  pathnames,
+  SUPPORTED_LOCALES,
+  UNMATCHED_VISITOR_LOCALE,
+} from '@/i18n/i18n'
 
 /** Handles locale detection, URL rewriting, and localized pathnames. */
 const intlMiddleware = createMiddleware({
   locales: SUPPORTED_LOCALES,
   defaultLocale: UNMATCHED_VISITOR_LOCALE,
   localePrefix,
+  localeCookie,
   pathnames,
   localeDetection: true,
   // Hreflang alternates come from each page's metadata, which knows every locale's slug

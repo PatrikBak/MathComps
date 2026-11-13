@@ -13,8 +13,10 @@ import {
 const COMPETITION: DefenseTarget = {
   kind: 'competition',
   problemId: 'open-intermediate-p2',
-  readerKey: 'user_2abc',
 }
+
+/** The signed-in student writing the drafts. */
+const READER = 'user_2abc'
 
 /** A defense held against one environment of a published handout. */
 const HANDOUT: DefenseTarget = {
@@ -55,33 +57,34 @@ describe('isSubjectReachable', () => {
 })
 
 describe('defenseDraftStorageKey', () => {
-  it('keeps a competition draft under its problem rather than its conversation', () => {
+  it('keeps a draft under what it is written about rather than its conversation', () => {
     // A student starting a second conversation about the same problem is still writing the same solution
-    expect(defenseDraftStorageKey(COMPETITION)).toBe(
-      'defense-draft:competition:user_2abc:open-intermediate-p2'
+    expect(defenseDraftStorageKey(READER, COMPETITION)).toBe(
+      'defense-draft:user_2abc:["problem","open-intermediate-p2"]'
+    )
+  })
+
+  it('keeps a handout draft under the environment it is written about', () => {
+    // A handout problem's chat closes and reopens whenever, and the half-written turn is there each time
+    expect(defenseDraftStorageKey(READER, HANDOUT)).toBe(
+      'defense-draft:user_2abc:["handout","inverses-mod-p","ab12cd34"]'
     )
   })
 
   it("keeps two students on one browser out of one another's drafts", () => {
-    // A school computer, where signing out is the only thing between one entrant and the next
-    const other = defenseDraftStorageKey({ ...COMPETITION, readerKey: 'user_9zzz' })
+    // A school computer, where signing out is the only thing between one student and the next
+    const other = defenseDraftStorageKey('user_9zzz', HANDOUT)
 
     // Different students, different keys, whatever they are both half-way through writing
-    expect(other).not.toBe(defenseDraftStorageKey(COMPETITION))
-  })
-
-  it('keeps no handout draft past the chat closing', () => {
-    // Nothing is at stake in reopening a handout problem, and what is written about one would otherwise
-    // outlive the browser it was written in and greet whoever reads that handout next
-    expect(defenseDraftStorageKey(HANDOUT)).toBeNull()
+    expect(other).not.toBe(defenseDraftStorageKey(READER, HANDOUT))
   })
 })
 
 describe('defenseDraftPhotosStorageKey', () => {
-  it("keeps a competition draft's photos beside its text, under a key of their own", () => {
+  it("keeps a draft's photos beside its text, under a key of their own", () => {
     // Its own prefix, then the same reader and problem the text's key names
-    expect(defenseDraftPhotosStorageKey(COMPETITION)).toBe(
-      'defense-draft-photos:competition:user_2abc:open-intermediate-p2'
+    expect(defenseDraftPhotosStorageKey(READER, COMPETITION)).toBe(
+      'defense-draft-photos:user_2abc:["problem","open-intermediate-p2"]'
     )
   })
 })
@@ -151,11 +154,11 @@ describe('defenseTargetKey', () => {
   })
 
   it('keys two targets alike exactly when the API cannot tell them apart', () => {
-    // Every way one target here differs from another: the reader, the problem, the handout and the
-    // environment within it
+    // Every way one target here differs from another: what the problem is opened as, the problem, the
+    // handout and the environment within it
     const targets: DefenseTarget[] = [
       COMPETITION,
-      { ...COMPETITION, readerKey: null },
+      { kind: 'proposal', problemId: 'open-intermediate-p2' },
       { ...COMPETITION, problemId: 'open-intermediate-p3' },
       HANDOUT,
       {

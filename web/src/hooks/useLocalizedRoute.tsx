@@ -2,17 +2,19 @@
 
 import { createContext, type ReactNode, useContext } from 'react'
 
-import type { Locale, LocalizedString } from '@/i18n/i18n'
+import type { Locale, LocalizedString, PartialLocalizedString } from '@/i18n/i18n'
 
 /**
  * The value of the {@link LocalizedRouteContext}. A route supplies whichever locale-specific URL
- * parts it owns: a slug map (dynamic path segment) and/or a query-string translator.
+ * parts it owns: a slug map (dynamic path segment), a query-string translator and its own anchors.
  */
 type LocalizedRouteContextValue = {
   /** Map of locale to slug for the current content item */
   slugTranslations?: LocalizedString
   /** Re-expresses the query string from one locale's vocabulary into another's */
   translateSearchParams?: (params: URLSearchParams, from: Locale, to: Locale) => string
+  /** The route's own anchors, each by its fragment in every locale carrying it */
+  anchorTranslations?: readonly PartialLocalizedString[]
 }
 
 /**
@@ -48,13 +50,10 @@ export function getTranslatedSlug(
 }
 
 /**
- * Props for the {@link LocalizedRouteProvider} component.
+ * Props for the {@link LocalizedRouteProvider} component: the route's localized URL parts, and the
+ * subtree they reach.
  */
-type LocalizedRouteProviderProps = {
-  /** Slug translations for the current content item */
-  slugTranslations?: LocalizedString
-  /** Re-expresses the query string from one locale's vocabulary into another's */
-  translateSearchParams?: (params: URLSearchParams, from: Locale, to: Locale) => string
+type LocalizedRouteProviderProps = LocalizedRouteContextValue & {
   /** Child components */
   children: ReactNode
 }
@@ -66,11 +65,12 @@ type LocalizedRouteProviderProps = {
 export function LocalizedRouteProvider({
   slugTranslations,
   translateSearchParams,
+  anchorTranslations,
   children,
 }: LocalizedRouteProviderProps) {
   // Provide this route's localized URL parts to the subtree
   return (
-    <LocalizedRouteContext value={{ slugTranslations, translateSearchParams }}>
+    <LocalizedRouteContext value={{ slugTranslations, translateSearchParams, anchorTranslations }}>
       {children}
     </LocalizedRouteContext>
   )

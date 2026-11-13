@@ -3,14 +3,13 @@ using Microsoft.AspNetCore.HttpLogging;
 namespace MathComps.Api.Extensions;
 
 /// <summary>
-/// An <see cref="IHttpLoggingInterceptor"/> putting the caller's Clerk id on the request line, for a caller who
-/// signed in.
+/// An <see cref="IHttpLoggingInterceptor"/> putting the Clerk id of the account a request acts for on its request line.
 /// </summary>
 public sealed class ClerkIdHttpLoggingInterceptor : IHttpLoggingInterceptor
 {
     /// <inheritdoc />
     /// <remarks>
-    /// Adds nothing, since the caller is only known once authentication has run inside the logging.
+    /// Adds nothing, since the caller is only known once authentication and the endpoint have run inside the logging.
     /// </remarks>
     public ValueTask OnRequestAsync(HttpLoggingInterceptorContext logContext) =>
         // The request goes on as it is
@@ -19,8 +18,8 @@ public sealed class ClerkIdHttpLoggingInterceptor : IHttpLoggingInterceptor
     /// <inheritdoc />
     public ValueTask OnResponseAsync(HttpLoggingInterceptorContext logContext)
     {
-        // The caller's Clerk id, which a request without a valid token doesn't carry
-        var clerkId = logContext.HttpContext.User.ClerkId;
+        // The Clerk id of the account the request acted for, which an anonymous request doesn't carry
+        var clerkId = logContext.HttpContext.CallerClerkId;
 
         // Name the caller on the line. An anonymous caller adds nothing, so a route logging no fields writes no line.
         if (clerkId is not null)

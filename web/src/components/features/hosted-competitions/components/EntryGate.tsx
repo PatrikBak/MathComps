@@ -1,7 +1,7 @@
 'use client'
 
 import { X } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { type RichTagsFunction, useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
 import { ProseLink } from '@/components/shared/components/ProseLink'
@@ -89,20 +89,18 @@ export function EntryGate({ blocker, onDismiss }: EntryGateProps) {
   const t = useTranslations('competitions')
 
   // The way to an account, which comes back to this page
-  const { getLoginUrl } = useLoginRedirect()
+  const { loginLink } = useLoginRedirect()
 
-  // Where each step's own word leads
-  const stepHrefs: Record<EntryBlocker, string> = {
-    signIn: getLoginUrl(),
-    profile: ROUTES.PROFILE,
+  // The link each step's own word sits in
+  const stepLinks: Record<EntryBlocker, RichTagsFunction> = {
+    signIn: (chunks) => <ProseLink {...loginLink}>{chunks}</ProseLink>,
+    profile: (chunks) => <ProseLink href={ROUTES.PROFILE}>{chunks}</ProseLink>,
   }
 
   return (
     // The step they are at
     <ReaderPrompt onDismiss={onDismiss}>
-      {t.rich(BLOCKER_MESSAGE_KEY[blocker], {
-        link: (chunks) => <ProseLink href={stepHrefs[blocker]}>{chunks}</ProseLink>,
-      })}
+      {t.rich(BLOCKER_MESSAGE_KEY[blocker], { link: stepLinks[blocker] })}
     </ReaderPrompt>
   )
 }

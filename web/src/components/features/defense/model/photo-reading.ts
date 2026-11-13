@@ -1,3 +1,4 @@
+import { assertNever } from '@/components/shared/utils/assert-never'
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
 import type { ApiResult } from '@/types/api'
 
@@ -142,6 +143,36 @@ export type PickedPhoto<TReading extends DefensePhotoReading> =
  * text is in the message.
  */
 export type DefensePhoto = PickedPhoto<DefensePhotoReading> | InsertedPhoto
+
+/**
+ * Says which kept photo a photo previews from, when it previews from its stored page rather than from the copy on the
+ * student's device.
+ *
+ * @param photo - The photo.
+ *
+ * @returns The kept photo, or null for a photo previewing from the device or with no stored page yet.
+ */
+export function storedPreviewOf(photo: DefensePhoto): string | null {
+  // By where the photo's reading stands
+  switch (photo.kind) {
+    // Its text in the message, previewing from its stored page unless the device's copy is still held
+    case 'inserted':
+      return photo.previewUrl === photo.link ? photo.photoId : null
+
+    // Its text waiting beside it, previewing from its stored page unless the device's copy is still held
+    case 'read':
+      return photo.previewUrl === photo.reading.link ? photo.reading.photoId : null
+
+    // No stored page to preview from
+    case 'reading':
+    case 'failed':
+      return null
+
+    // Every state is handled above
+    default:
+      return assertNever(photo)
+  }
+}
 
 /**
  * A photo on its way to be read.

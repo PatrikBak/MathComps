@@ -8,6 +8,7 @@ using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Photos;
 using MathComps.Infrastructure.Storage;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
+using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -17,8 +18,8 @@ namespace MathComps.Infrastructure.Tests.Defense;
 /// <summary>
 /// Integration tests for <see cref="DefensePhotoService"/> against a real PostgreSQL database, with the reader and the
 /// target guard standing in and the files kept in memory: what a reading keeps, links and bills, the ceiling it is held
-/// to and who an entry exempts, and that a reading the student walked out on is still billed. A reading billed wrong
-/// moves the ceiling silently.
+/// to and that competing spares it, that a reading the student walked out on is still billed, and what a failed
+/// reading keeps. A reading billed wrong moves the ceiling silently.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
@@ -59,8 +60,8 @@ public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
     private readonly Mock<IPhotoReader> _reader = new();
 
     /// <summary>
-    /// The stand-in target guard, letting every target through and finding no entry unless a test sets it up
-    /// otherwise.
+    /// The stand-in target guard, letting every target through and finding the student not competing unless a test
+    /// sets it up otherwise.
     /// </summary>
     private readonly Mock<IDefenseTargetGuard> _guard = new();
 
@@ -77,8 +78,15 @@ public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
     {
-        // A tight ceiling, so a single seeded row meets it.
-        services.Configure<DefenseLimits>(limits => limits.DailySpendCeilingPerUser = 1.00m);
+        // The caps every test runs under.
+        services.Configure<DefenseLimits>(limits =>
+        {
+            // A tight ceiling, so a single seeded row meets it.
+            limits.DailySpendCeilingPerUser = 1.00m;
+
+            // Links to every photo a test names.
+            limits.MaxPhotosPerMessage = 10;
+        });
 
         // The reader, reading every photo as the same page.
         _reader.Setup(reader => reader.ReadAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
@@ -241,15 +249,36 @@ public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A student holding an entry into the round reads past a spent allowance, and the reading is recorded as outside
-    /// the ceiling, so a competition never spends what their handout practice is held to.
+    /// A reading for a target the student may not argue is refused before the model is called, and nothing is kept.
     /// </summary>
     [Fact]
-    public Task An_entrant_reads_past_the_ceiling_and_their_reading_is_not_weighed_against_it() =>
+    public Task A_reading_for_a_target_the_student_may_not_argue_is_refused() => RunTestAsync(async service =>
+    {
+        // The guard refuses the student what they defend.
+        _guard.Setup(guard => guard.EnsureCanDefendAsync(_ownerId, _target, It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new HostedProblemNotFoundException());
+
+        // The reading is refused the same way.
+        await Assert.ThrowsAsync<HostedProblemNotFoundException>(() => service.ReadAsync(_ownerId, _target, _photo));
+
+        // Before the model was asked anything.
+        _reader.Verify(
+            reader => reader.ReadAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()), Times.Never);
+
+        // And with nothing kept.
+        Assert.Empty(_store.Keys);
+    });
+
+    /// <summary>
+    /// A student competing reads past a spent allowance, and the reading is recorded as outside the ceiling, so a
+    /// competition never spends what their practice is held to.
+    /// </summary>
+    [Fact]
+    public Task A_competitor_reads_past_the_ceiling_and_their_reading_is_not_weighed_against_it() =>
         RunTestAsync(async service =>
         {
-            // The student holds an entry into what they defend.
-            _guard.Setup(guard => guard.EnsureCanDefendAsync(_ownerId, _target, It.IsAny<CancellationToken>()))
+            // The student is competing on what they defend.
+            _guard.Setup(guard => guard.IsCompetingAsync(_ownerId, _target, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             // Spend that meets the ceiling, the way a morning on handouts leaves it.
@@ -291,6 +320,151 @@ public class DefensePhotoServicePostgresTests(PostgresContainerFixture fixture)
 
         // And the reading billed.
         Assert.Equal(1, await QueryValueAsync(context => context.DefenseSpends.CountAsync()));
+    });
+
+    /// <summary>
+    /// A reading that fails keeps the upload as it came in, under a key of its own that the failure names for the
+    /// log. That holds whether the decoder couldn't open it or the model timed out on every attempt, and the failure
+    /// goes on as the reader threw it. A reading the student walks out on keeps nothing.
+    /// </summary>
+    [Fact]
+    public Task A_failed_reading_keeps_its_upload_under_the_key_it_names_and_a_cancelled_one_keeps_nothing() =>
+        RunTestAsync(async service =>
+        {
+            // The refusal of a photo the decoder can't open.
+            var unreadable = new UnreadablePhotoException();
+
+            // The reader refuses the photo.
+            _reader.Setup(reader => reader.ReadAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(unreadable);
+
+            // The reading is refused with the reader's own refusal.
+            Assert.Same(unreadable, await Assert.ThrowsAsync<UnreadablePhotoException>(
+                () => service.ReadAsync(_ownerId, _target, _photo)));
+
+            // The one file the refusal kept.
+            var unreadableKey = Assert.Single(_store.Keys);
+
+            // Named in what the refusal adds for the log.
+            Assert.Contains(unreadableKey, unreadable.LogDetail);
+
+            // A model that times out on every attempt, which isn't the student leaving.
+            var timeout = new TaskCanceledException();
+
+            // The reader fails with it.
+            _reader.Setup(reader => reader.ReadAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(timeout);
+
+            // The reading fails with the reader's own failure.
+            Assert.Same(timeout, await Assert.ThrowsAsync<TaskCanceledException>(
+                () => service.ReadAsync(_ownerId, _target, _photo)));
+
+            // The one file the failure kept, beside the first.
+            var timedOutKey = Assert.Single(_store.Keys.Except([unreadableKey]));
+
+            // Named in what the failure adds for the log.
+            Assert.Contains(timedOutKey, timeout.LogDetail);
+
+            // Both files the failures kept.
+            string[] kept = [unreadableKey, timedOutKey];
+
+            // Each one kept as it came in.
+            Assert.All(kept, key =>
+            {
+                // Among the student's failed uploads.
+                Assert.StartsWith($"defense/photos/failed/{_ownerId}/", key);
+
+                // The bytes that came in.
+                Assert.Equal(_photo, _store[key].Content);
+
+                // Typed as bare bytes.
+                Assert.Equal(MediaTypeNames.Application.Octet, _store[key].ContentType);
+            });
+
+            // The student leaves while the model reads.
+            _reader.Setup(reader => reader.ReadAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
+                .Callback(() => _walkOut.Cancel())
+                .ThrowsAsync(new OperationCanceledException(_walkOut.Token));
+
+            // The reading is called off.
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(
+                () => service.ReadAsync(_ownerId, _target, _photo, _walkOut.Token));
+
+            // And nothing more is kept.
+            Assert.Equal(kept.Order(), _store.Keys.Order());
+        });
+
+    /// <summary>
+    /// Links go only to the student's own photos that no message carries yet: a photo of someone else's and one the
+    /// student already sent are left out. A link to the first hands one student's page to another, and the second is
+    /// no longer a draft's to show.
+    /// </summary>
+    [Fact]
+    public Task Links_go_only_to_the_students_own_unsent_photos() => RunTestAsync(async service =>
+    {
+        // A photo of the student's still to send.
+        var unsent = DefenseSeed.NewPhoto(_ownerId, drawings: 0);
+
+        // Another student.
+        var otherId = Guid.CreateVersion7();
+
+        // A photo of the other student's.
+        var others = DefenseSeed.NewPhoto(otherId, drawings: 0);
+
+        // A photo of the student's that already went out.
+        var sent = DefenseSeed.NewPhoto(_ownerId, drawings: 0);
+
+        // The conversation the sent photo went out in, and the message that carried it.
+        var sessionId = Guid.CreateVersion7();
+        var turnId = Guid.CreateVersion7();
+
+        // The other student, the conversation and every photo, kept.
+        await QueryAsync(async context =>
+        {
+            // The other student.
+            context.Users.Add(new User { Id = otherId, ExternalId = "ext-other", Username = "Other" });
+
+            // The student's conversation.
+            context.DefenseSessions.Add(new DefenseSession
+            {
+                Id = sessionId,
+                UserId = _ownerId,
+                TargetKind = DefenseTargetKind.Handout,
+                ProblemStatement = "Statement",
+                ProblemReference = "Reference",
+                ExaminerConfig = "{}",
+                CreatedAt = DateTimeOffset.UtcNow,
+            });
+
+            // The message the sent photo went out with.
+            context.DefenseTurns.Add(new DefenseTurn
+            {
+                Id = turnId,
+                SessionId = sessionId,
+                Role = TranscriptRole.Candidate,
+                Content = "my defense",
+                Sequence = 0,
+                CreatedAt = DateTimeOffset.UtcNow,
+            });
+
+            // The sent photo, carried by the student's message.
+            sent.TurnId = turnId;
+            sent.Position = 0;
+
+            // The photos.
+            context.DefensePhotos.AddRange(unsent, others, sent);
+
+            // Commit the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // Ask for links to every photo kept.
+        var links = await service.LinksToUnsentPhotosAsync(_ownerId, [unsent.Id, others.Id, sent.Id]);
+
+        // Only the unsent one of the student's gets one, reading its page.
+        Assert.Equal(
+            [KeyValuePair.Create(unsent.Id, $"read:defense/photos/{unsent.Id}.jpg")],
+            links);
     });
 
     /// <inheritdoc/>

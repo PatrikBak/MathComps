@@ -18,6 +18,7 @@ import type { UseComposerPhotosResult } from '../hooks/use-composer-photos'
 import { useDefensePhotoViewer } from '../hooks/use-defense-photo-viewer'
 import type { DefensePhoto } from '../model/photo-reading'
 import { DefensePhotoButton } from './DefensePhotoButton'
+import { DefensePhotoCapNote } from './DefensePhotoCapNote'
 import { DefensePhotoFailure } from './DefensePhotoFailure'
 import { DefensePhotoStrip } from './DefensePhotoStrip'
 
@@ -300,6 +301,10 @@ export function DefensePhotoSideBySide({
     (photo) => photo.kind === 'reading' || photo.kind === 'failed'
   )
 
+  // Whether the pages go into the message: read ones are waiting, none is without its text, and they are no more
+  // than one message may carry
+  const canInsert = readCount > 0 && !hasUnreadPage && !photos.isOverFull
+
   // The pages on one side, the text of the one looked at on the other
   return (
     <>
@@ -325,8 +330,16 @@ export function DefensePhotoSideBySide({
                 onRemove: photos.removePhotos,
               }}
             >
-              <DefensePhotoButton variant="page" onPick={onPick} onPhone={onPhone} />
+              <DefensePhotoButton
+                variant="page"
+                onPick={onPick}
+                onPhone={onPhone}
+                isFull={photos.isFull}
+              />
             </DefensePhotoStrip>
+
+            {/* The most pages a message may carry, once the pages reach it */}
+            <DefensePhotoCapNote photos={photos} />
 
             {/* The page looked at, where there is room for it beside its text */}
             <div className="hidden sm:block sm:min-h-0 sm:flex-1 sm:overflow-y-auto">
@@ -360,7 +373,7 @@ export function DefensePhotoSideBySide({
           variant="primary"
           size="sm"
           className="w-full sm:w-auto"
-          disabled={readCount === 0 || hasUnreadPage}
+          disabled={!canInsert}
           onClick={insert}
         >
           {t('insert', { count: readCount })}

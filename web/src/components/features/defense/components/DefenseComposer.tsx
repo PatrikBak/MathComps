@@ -23,6 +23,7 @@ import {
 } from '../model/defense-composer-state'
 import type { DefenseTarget } from '../model/defense-target'
 import { DefensePhotoButton } from './DefensePhotoButton'
+import { DefensePhotoCapNote } from './DefensePhotoCapNote'
 import { DefensePhotoDialog } from './DefensePhotoDialog'
 import { DefensePhotoStrip } from './DefensePhotoStrip'
 import { MathildaConsentGate } from './MathildaConsentGate'
@@ -203,6 +204,9 @@ export function DefenseComposer({
             className="mb-2"
           />
 
+          {/* The most photos a message may carry, once the photos reach it */}
+          <DefensePhotoCapNote photos={photos} className="mb-2" />
+
           {/* The pages beside their text, or the way to send them from the phone */}
           <DefensePhotoDialog
             review={review}
@@ -236,6 +240,7 @@ export function DefenseComposer({
                 variant="compact"
                 onPick={review.pick}
                 onPhone={review.openPhone}
+                isFull={photos.isFull}
               />
             }
             footerMeta={

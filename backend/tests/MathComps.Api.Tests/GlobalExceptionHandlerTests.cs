@@ -1,6 +1,8 @@
 using MathComps.Api.Errors;
 using MathComps.Api.Extensions;
 using MathComps.Infrastructure.Services;
+using MathComps.Infrastructure.Services.Photos;
+using MathComps.Shared.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -12,8 +14,8 @@ namespace MathComps.Api.Tests;
 /// <summary>
 /// Guards that <see cref="GlobalExceptionHandler"/> answers every business exception, meaning every
 /// <see cref="MathCompsException"/>, with a client status and the code named after its type, and logs each at the
-/// level it states. Also guards the one failure that never reaches a service: a request body the framework itself
-/// refused.
+/// level it states. Also guards that a note an exception carries for the log reaches its line and never the response,
+/// and the one failure that never reaches a service: a request body the framework itself refused.
 /// </summary>
 public class GlobalExceptionHandlerTests
 {
@@ -78,6 +80,41 @@ public class GlobalExceptionHandlerTests
 
             // ...carrying the exception itself
             Assert.Same(exception, record.Exception);
+        }
+    }
+
+    /// <summary>
+    /// What an exception adds for the log lands in its one line, a business refusal's and an unexpected fault's alike,
+    /// and never in what the caller is sent.
+    /// </summary>
+    [Fact]
+    public async Task What_an_exception_adds_for_the_log_reaches_its_line_and_not_the_caller()
+    {
+        // The note a failure carries for whoever debugs it
+        const string note = "the upload is kept at defense/photos/failed/x";
+
+        // A refusal the handler answers, and a fault it doesn't recognize
+        Exception[] failures = [new UnreadablePhotoException(), new InvalidOperationException("The reading failed")];
+
+        // Drive each one through the real handler
+        foreach (var failure in failures)
+        {
+            // Put the note on the failure
+            failure.LogDetail = note;
+
+            // Capture what the handler logs and asks to write
+            var logger = new FakeLogger<GlobalExceptionHandler>();
+            var problemDetails = new CapturingProblemDetailsService();
+            var handler = new GlobalExceptionHandler(logger, problemDetails);
+
+            // Handle it as the pipeline would
+            await handler.TryHandleAsync(new DefaultHttpContext(), failure, CancellationToken.None);
+
+            // Its one line carries the note
+            Assert.Contains(note, Assert.Single(logger.Collector.GetSnapshot()).Message);
+
+            // ...and the caller is sent none of it
+            Assert.DoesNotContain(note, problemDetails.Written?.Detail ?? "");
         }
     }
 

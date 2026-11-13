@@ -29,7 +29,7 @@ internal static class DefenseSpendLedger
         // The start of today, in UTC.
         var dayStart = new DateTimeOffset(DateTime.UtcNow.Date, TimeSpan.Zero);
 
-        // Sum the user's spend since then, leaving out a defense they hold an entry into, which is exempt.
+        // Sum the user's spend since then, leaving out what they spent competing, which is exempt.
         var spent = await dbContext.DefenseSpends
             .Where(spend =>
                 spend.UserId == userId && spend.CountsAgainstCeiling && spend.CreatedAt >= dayStart)

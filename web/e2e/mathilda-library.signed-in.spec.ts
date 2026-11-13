@@ -17,7 +17,8 @@ import {
   installHostedBackend,
   UPCOMING_COMPETITION_SLUG,
 } from './support/hosted-backend'
-import { userMenuCopy } from './support/interaction'
+import { SCRIPTED_REPLIES } from './support/hosted-backend-content'
+import { isKeptInStorage, userMenuCopy } from './support/interaction'
 import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 import { recordNotices } from './support/watchers'
 
@@ -253,5 +254,51 @@ test.describe("the student's own list of conversations", () => {
     await expect(transcriptOf(page)).toContainText('Every residue class is hit', {
       timeout: SETTLE_TIMEOUT_MS,
     })
+  })
+
+  test('opens a conversation on the turn its own area left unsent', async ({ page }) => {
+    // One of the accounts that prepare competitions, who holds no entry anywhere
+    await installHostedBackend(page, 'prepares-competitions')
+
+    // Into the area of the competition nobody else can be in yet
+    await page.goto(areaPath(UPCOMING_COMPETITION_SLUG))
+
+    // A conversation about its first problem
+    await page
+      .getByRole('button', { name: areaCopy.startDefense })
+      .first()
+      .click({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Its composer, once it takes text
+    await expect(page.locator('textarea')).toBeEditable({ timeout: SETTLE_TIMEOUT_MS })
+
+    // A first turn, sent
+    await sendTurn(page, 'Every residue class is hit, so the bound is tight')
+
+    // Answered, so the conversation is held and the list has a row for it
+    await expect(transcriptOf(page)).toContainText(SCRIPTED_REPLIES[0]!, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The next turn, half-written
+    const draft = 'And the identity map reaches the bound'
+
+    // Written into the composer and never sent
+    await page.locator('textarea').fill(draft)
+
+    // Kept before the area is left
+    await expect.poll(() => isKeptInStorage(page, draft), { timeout: SETTLE_TIMEOUT_MS }).toBe(true)
+
+    // Out of the competition, back to where the list is reached from
+    await page.goto(LIST_PATH)
+
+    // The list, opened from the user menu
+    const library = await openLibrary(page)
+
+    // The same conversation, the list's most recent row
+    await library.getByRole('button').filter({ hasText: SEASON_YEARS }).first().click()
+
+    // Where the half-written turn is waiting
+    await expect(library.locator('textarea')).toHaveValue(draft, { timeout: SETTLE_TIMEOUT_MS })
   })
 })

@@ -179,6 +179,26 @@ public class DefensePhotoHandoffServicePostgresTests(PostgresContainerFixture fi
     }
 
     /// <summary>
+    /// A live code finds the student it belongs to, never another student who has a code of their own.
+    /// </summary>
+    [Fact]
+    public Task A_live_code_finds_its_own_student() =>
+        RunTestAsync(async service =>
+    {
+        // A code for the owner
+        var owners = await service.PointAsync(_ownerId, _handout);
+
+        // And one for the other student
+        var others = await service.PointAsync(_otherId, _handout);
+
+        // The owner's code finds the owner
+        Assert.Equal("ext-owner", await service.FindStudentAsync(owners.Code));
+
+        // And the other student's finds them
+        Assert.Equal("ext-other", await service.FindStudentAsync(others.Code));
+    });
+
+    /// <summary>
     /// Asking again hands back the code the student already has, so the QR their phone scanned keeps working, and
     /// moves it to the new problem, from a handout environment to an archive problem without keeping both.
     /// </summary>
@@ -580,6 +600,9 @@ public class DefensePhotoHandoffServicePostgresTests(PostgresContainerFixture fi
 
         // And the student is told no code of theirs works
         Assert.False((await service.TakeAsync(_ownerId, _handout)).HasLiveCode);
+
+        // And the code names no student
+        Assert.Null(await service.FindStudentAsync(ExpiredOrUnknownCode));
     });
 
     /// <inheritdoc/>
