@@ -184,6 +184,22 @@ exports[`validate-md fixtures > invalid-list-no-style.md 1`] = `
 }
 `;
 
+exports[`validate-md fixtures > invalid-list-starts-at-zero.md 1`] = `
+{
+  "errorFirstLine": "A :::list numbers its items from 1, but its first item says 0. Indent the text between items under the item before it, so they stay one list.",
+  "stage": "parse",
+  "verdict": "fail",
+}
+`;
+
+exports[`validate-md fixtures > invalid-list-starts-past-one.md 1`] = `
+{
+  "errorFirstLine": "A :::list numbers its items from 1, but its first item says 3. Indent the text between items under the item before it, so they stay one list.",
+  "stage": "parse",
+  "verdict": "fail",
+}
+`;
+
 exports[`validate-md fixtures > invalid-quote-empty.md 1`] = `
 {
   "errorFirstLine": ":quote directive has empty content",
@@ -326,6 +342,12 @@ exports[`validate-md fixtures > valid-list-bullet-explicit.md 1`] = `
 }
 `;
 
+exports[`validate-md fixtures > valid-list-continued-under-an-item.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
 exports[`validate-md fixtures > valid-list-lower-alpha-parens.md 1`] = `
 {
   "verdict": "ok",
@@ -351,6 +373,12 @@ exports[`validate-md fixtures > valid-list-number-parens.md 1`] = `
 `;
 
 exports[`validate-md fixtures > valid-list-numbered.md 1`] = `
+{
+  "verdict": "ok",
+}
+`;
+
+exports[`validate-md fixtures > valid-list-numbered-items.md 1`] = `
 {
   "verdict": "ok",
 }

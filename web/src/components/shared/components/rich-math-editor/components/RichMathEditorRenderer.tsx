@@ -297,8 +297,14 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
             {children}
           </ul>
         ),
-        ol: ({ children, className, node }) => (
-          <ol {...sourceRangeOf(node)} className={resolveListClassName(className, 'list-decimal')}>
+        // A numbered list counts on from the number its first item carries, so a list that a quote or a paragraph
+        // split in two keeps going.
+        ol: ({ children, className, node, start }) => (
+          <ol
+            {...sourceRangeOf(node)}
+            start={start}
+            className={resolveListClassName(className, 'list-decimal')}
+          >
             {children}
           </ol>
         ),

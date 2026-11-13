@@ -508,6 +508,24 @@ test.describe('the preview in place of the text', () => {
     // The composer emptied by the send
     await expect(composer).toHaveValue('')
   })
+
+  test('numbers the half of a list a quote split off from the number written on it', async ({
+    page,
+  }) => {
+    // The composer, open
+    const composer = await openComposer(page)
+
+    // Two numbered points with a quote and a sentence under the first, which split the list in two
+    await composer.fill(
+      '1. The first point.\n> A quoted line.\n\nA sentence about it.\n\n2. The second point.'
+    )
+
+    // The draft read back in its preview
+    await page.getByRole('button', { name: editorCopy.preview, exact: true }).click()
+
+    // The second point numbered 2, as written
+    await expect(page.locator('ol', { hasText: 'The second point.' })).toHaveAttribute('start', '2')
+  })
 })
 
 /**
