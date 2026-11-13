@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { SECOND_MS } from '@/components/shared/utils/time-units'
 import { useApiQuery } from '@/hooks/use-api-query'
 import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
-import { useIsAdmin } from '@/hooks/use-is-admin'
 import { cachePolicy } from '@/lib/query-config'
 
 import type { DefenseTarget } from '../model/defense-target'
@@ -47,7 +46,7 @@ export type UseDefensePhotoHandoffPagesResult = {
  * seconds while the student has a code that works. Each take hands its pages over as it lands, so they keep coming
  * whatever the composer shows. A composer in a background tab asks for nothing.
  *
- * Only a computer takes them, the phone being the computer's camera, and only for an admin until the photos launch.
+ * Only a computer takes them, the phone being the computer's camera.
  *
  * @param options - What the student is defending, and where the pages go.
  *
@@ -59,9 +58,6 @@ export function useDefensePhotoHandoffPages({
 }: UseDefensePhotoHandoffPagesOptions): UseDefensePhotoHandoffPagesResult {
   // Whose pages these are, once Clerk knows
   const { userId, isLoaded: isUserLoaded } = useAuth()
-
-  // Whether the student is an admin, whom the photos are for until they launch
-  const isAdmin = useIsAdmin()
 
   // Whether this is a computer, which the phone hands its photos to
   const { hasFinePointer } = useDeviceCapabilities()
@@ -88,7 +84,7 @@ export function useDefensePhotoHandoffPages({
     // The student's own pages, so they are taken as them
     requireAuth: true,
     // Only once the key's user is settled, and only where the phone hands its photos over
-    enabled: isUserLoaded && isAdmin && hasFinePointer,
+    enabled: isUserLoaded && hasFinePointer,
     // Taken only when asked or on the timer below, the pages being the student's own
     cachePolicy: cachePolicy.onDemand,
     // Taken afresh every time the composer opens, since pages sent meanwhile are waiting
