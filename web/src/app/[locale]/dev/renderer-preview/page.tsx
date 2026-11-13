@@ -70,6 +70,49 @@ A default numbered list:
 2. Second numbered item.
 3. Third numbered item.
 
+## Numbered lists past one
+
+A list split by a quote and a sentence goes on at 2:
+
+1. The first point, about $x$.
+> A quoted line.
+
+A sentence about it.
+
+2. The second point.
+
+A list split by display math goes on at 2:
+
+1. Bound the sum.
+
+$$
+S \\le n^2
+$$
+
+2. Show equality.
+
+A list counting from zero:
+
+0. Base case.
+1. Induction step.
+
+Two-digit markers:
+
+10. Tenth item, long enough to wrap onto a second line, so the indent under a wide marker shows where the text lines up.
+11. Eleventh item.
+
+Three-digit markers:
+
+100. Hundredth item, long enough to wrap onto a second line, so the indent under a wide marker shows where the text lines up.
+101. Hundred-and-first item.
+
+A numbered list under a bullet, starting at 3:
+
+- Cases:
+
+  3. The third case.
+  4. The fourth case.
+
 ## Custom list styles
 
 Number with parentheses — \`(1) (2) (3)\`:

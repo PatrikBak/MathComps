@@ -1,15 +1,8 @@
+import type { List } from 'mdast'
 import type { ContainerDirective } from 'mdast-util-directive'
 import type { Transformer } from 'unified'
 import type { Node } from 'unist'
 import { visit } from 'unist-util-visit'
-
-/** Minimal shape of an mdast `list` node — only the bits this plugin reads. */
-type MdastList = Node & {
-  /** Always 'list' */
-  type: 'list'
-  /** The `<li>` children of this list */
-  children: Node[]
-}
 
 /** The seven list-style identifiers accepted by the `style` attribute. */
 const ALLOWED_STYLES = [
@@ -45,7 +38,7 @@ function isListDirective(node: Node): node is ContainerDirective {
  * @param node - The node to test.
  * @returns `true` when the node is a mdast `list`.
  */
-function isMdastList(node: Node): node is MdastList {
+function isMdastList(node: Node): node is List {
   return node.type === 'list'
 }
 
@@ -53,7 +46,7 @@ function isMdastList(node: Node): node is MdastList {
  * Remark plugin that transforms `:::list{style=<style>}` container directives
  * into native `<ol>` or `<ul>` elements with a `list-style-<style>` className.
  * The inner mdast list is unwrapped so the directive renders as the list itself
- * (no extra wrapper), and the className drives `@counter-style` rules in CSS.
+ * (no extra wrapper), and the className picks the list's markers in CSS.
  *
  * Validation errors are pushed as vfile messages so the headless validator can
  * surface them. The renderer ignores these errors and degrades gracefully.
@@ -95,14 +88,9 @@ export function remarkListStyle(): Transformer<Node> {
         return
       }
 
-      // Cast directive children to plain unist Nodes for the filter predicate to
-      // narrow correctly — ContainerDirective.children's strict type doesn't
-      // overlap with our local MdastList shape
-      const childNodes = node.children as unknown as Node[]
-
       // Locate the single inner mdast list (paragraphs/labels are not allowed inside)
-      const lists = childNodes.filter(isMdastList)
-      const nonLists = childNodes.filter((child) => !isMdastList(child))
+      const lists = node.children.filter(isMdastList)
+      const nonLists = node.children.filter((child) => !isMdastList(child))
 
       // Validate that the directive contains exactly one list
       if (lists.length !== 1 || nonLists.length > 0) {
@@ -113,18 +101,29 @@ export function remarkListStyle(): Transformer<Node> {
         return
       }
 
-      // The validated style and the unwrapped item children
-      const style = styleAttr as ListStyle
+      // The inner list
       const innerList = lists[0]!
-      const items = innerList.children
+
+      // A styled list counts from 1 whatever its first item says, so one starting at any other number is reported,
+      // and drawn all the same
+      if (innerList.ordered && innerList.start !== 1) {
+        file.message(
+          `A :::list numbers its items from 1, but its first item says ${innerList.start}. ` +
+            'Indent the text between items under the item before it, so they stay one list.',
+          node
+        )
+      }
+
+      // The validated style
+      const style = styleAttr as ListStyle
 
       // Set the directive to render as the appropriate native list element
       const data = node.data || (node.data = {})
       data.hName = style !== 'bullet' ? 'ol' : 'ul'
       data.hProperties = { className: `list-style-${style}` }
 
-      // Replace the directive's children with the unwrapped <li> items
-      node.children = items as ContainerDirective['children']
+      // Replace the directive's children with the unwrapped <li> items, which mdast's types allow only under a list
+      node.children = innerList.children as unknown as ContainerDirective['children']
     })
   }
 }
