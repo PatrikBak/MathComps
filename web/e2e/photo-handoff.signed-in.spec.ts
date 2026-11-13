@@ -34,7 +34,7 @@ const FIRST_PROBLEM = namedProblemOf(COMPETITION_SLUG, 1, 'Intermediate')
 const PHOTO_TILE_NAME = new RegExp(`^${photosCopy.photo.replace('{number}', '\\d+')}$`)
 
 /**
- * Opens the chat on a competition's first problem, as an admin on a computer, the phone's pages taken from then on.
+ * Opens the chat on a competition's first problem on a computer, the phone's pages taken from then on.
  *
  * @param page - The page.
  * @param handoff - Where the student's handoff stands as the composer opens.

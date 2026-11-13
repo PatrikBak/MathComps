@@ -13,7 +13,6 @@ import type {
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { CounterBadge } from '@/components/shared/components/rich-math-editor/components/RichMathEditorFooter'
 import { assertNever } from '@/components/shared/utils/assert-never'
-import { useIsAdmin } from '@/hooks/use-is-admin'
 
 import type { UseComposerPhotosResult } from '../hooks/use-composer-photos'
 import { useDefensePhotoReview } from '../hooks/use-defense-photo-review'
@@ -127,9 +126,6 @@ export function DefenseComposer({
   // The dialog lasts only while the composer is open for a turn, and shuts with it
   if (!IS_OPEN_FOR_A_TURN[state.kind] && review.dialog.kind !== 'shut') review.close()
 
-  // Photos are for admins until the rest of the photo flow ships
-  const canAddPhotos = useIsAdmin()
-
   // The editor, or the reason there is nothing to write into
   switch (state.kind) {
     // Nothing to write into yet
@@ -236,13 +232,11 @@ export function DefenseComposer({
             minHeightPx={editorMinHeightPx}
             placeholder={t('placeholder')}
             footerTools={
-              canAddPhotos ? (
-                <DefensePhotoButton
-                  variant="compact"
-                  onPick={review.pick}
-                  onPhone={review.openPhone}
-                />
-              ) : undefined
+              <DefensePhotoButton
+                variant="compact"
+                onPick={review.pick}
+                onPhone={review.openPhone}
+              />
             }
             footerMeta={
               state.messagesLeft !== null && maxMessages !== null ? (
