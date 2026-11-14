@@ -1,6 +1,6 @@
 {
   "defense": {
-    "opener": "Ahoj, som Mathilda. Začni mi vysvetľovať svoje riešenie, alebo aspoň nápad, ktorý zatiaľ máš. Vzorce môžeš písať aj obyčajne, napríklad x^2 alebo odmocnina z 2, pochopím ich. Nad každou odpoveďou chvíľu rozmýšľam, aby som toho neprezradila priveľa alebo nepovedala niečo zle 😇"
+    "opener": "Ahoj, som Mathilda. Ak už máš riešenie, pošli mi ho celé v jednej správe. Ak ešte nie, pokojne začni nápadom, alebo prosbou o radu. Riešenie môžeš napísať aj rukou a odfotiť, hoci aj mobilom. Fotky prepíšem do textu, ktorý si skontroluješ, a obrázky si z nich vystrihnem. Vzorce môžeš písať aj obyčajne, napríklad x^2 alebo odmocnina z 2, pochopím ich. Nad každou odpoveďou chvíľu rozmýšľam, aby som toho neprezradila priveľa alebo nepovedala niečo zle 😇"
   },
   "mail": {
     "about": "O projekte",
