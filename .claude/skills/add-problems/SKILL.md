@@ -90,6 +90,8 @@ Season year is the academic start, not the event year: a March-2026 event ⇒ `y
 
 Each `pN.<lang>.md`: statement (markdown + inline `$…$` / display `$$…$$` TeX), an optional lone `<!-- solution -->` line, then the solution, then optionally one lone `<!-- hint -->` line before each hint, weakest nudge first. Each rung is one concrete step, never a second solution. No frontmatter — metadata lives in `pN.yaml`. Reference images with a **bare** ref — `![alt](images/file.png)` — the only legal query param is `?inline=true` (inline display); `width`/`height`/`scale` on a ref are a preflight error (see "Sizing figures" below). Every `$…$` must render in KaTeX; an odd number of unescaped `$` is an error.
 
+**Grading note:** a lone `<!-- grading -->` line opens what the examiner marks by (what needs a reason, what needs none), never shown to students. One per problem, in any one language file; an empty section clears the stored note on re-import, a body without one leaves it.
+
 **Statement shape:** the closing question/task is the last sentence of the final text paragraph — not a paragraph of its own. Split it off only when it must follow a block (bullet list, figure, or display math), where there's no sentence to attach it to.
 
 **Transcribe math from a render, not from text extraction.** When the source is a PDF, render its pages to images and read the formulas off the render — the text layer mangles fractions, exponents, and multi-line displays (`bc/a` extracts as `bc a`; a `b³` can read as `b3`/`b2`). Zoom the region to confirm any ambiguous sub/superscript before trusting it. Drop competition-admin lines that aren't part of the problem — "write the solution in language X", per-problem time limits, partial-credit grading notes.

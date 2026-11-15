@@ -359,7 +359,58 @@ describe('valid drafts — hints', () => {
   })
 })
 
+describe('valid drafts — grading note', () => {
+  it('carries the note verbatim on the text whose file holds it, and null on the others', async () => {
+    const manifest = await loadFixture('valid-grading-note')
+    const [problem] = manifest.problems
+    const original = problem?.texts.find((text) => text.original)
+    const translation = problem?.texts.find((text) => !text.original)
+    expect(translation?.gradingNote).toBe(
+      '\nNeeds a reason: why $x + y$ is even.\nNeeds none: the arithmetic.\n'
+    )
+    expect(original?.gradingNote).toBeNull()
+
+    // The rung after the note is still a hint of its own
+    expect(translation?.hints).toEqual(['\nTry small cases.\n'])
+  })
+
+  it('carries an empty section as a blank note, which clears the stored one', async () => {
+    const manifest = await loadFixture('valid-grading-note')
+    const emptied = manifest.problems.find((problem) => problem.order === 2)
+    expect(emptied?.texts[0]?.gradingNote).toBe('\n')
+  })
+})
+
 describe('invalid drafts — specific issues', () => {
+  it('flags every language file of a problem carrying a grading note when more than one does', async () => {
+    const manifest = await loadFixture('invalid-grading-note-languages')
+    const files = manifest.verdict.errors
+      .filter((entry) => entry.rule === 'grading-note-languages')
+      .map((entry) => entry.file)
+    expect(files.sort()).toEqual(['p1.en.md', 'p1.sk.md'])
+  })
+
+  it('flags a second grading section in one body', async () => {
+    const manifest = await loadFixture('invalid-grading-note-twice')
+    const error = findError(manifest, (entry) => entry.rule === 'grading-note-twice')
+    expect(error?.file).toBe('p1.sk.md')
+    expect(error?.half).toBe('gradingNote')
+  })
+
+  it('flags a misspelt section line, which would leave its text in the section above', async () => {
+    const manifest = await loadFixture('invalid-unknown-sentinel')
+    const error = findError(manifest, (entry) => entry.rule === 'unknown-sentinel')
+    expect(error?.file).toBe('p1.sk.md')
+    expect(error?.line).toBe(7)
+  })
+
+  it('flags broken math in the grading note, at its line', async () => {
+    const manifest = await loadFixture('invalid-bad-katex-grading-note')
+    const error = findError(manifest, (entry) => entry.half === 'gradingNote')
+    expect(error?.file).toBe('p1.sk.md')
+    expect(error?.line).toBe(9)
+  })
+
   it('flags a language whose hint ladder disagrees with the others', async () => {
     const manifest = await loadFixture('invalid-hint-count-mismatch')
     const error = findError(manifest, (entry) => entry.rule === 'hint-count-mismatch')
@@ -591,6 +642,7 @@ describe('splitOnSentinels', () => {
     expect(result.solution).toBeNull()
     expect(result.solutionBodyLine0).toBeNull()
     expect(result.hints).toEqual([])
+    expect(result.gradingNotes).toEqual([])
   })
 
   it('splits statement and solution on the sentinel', () => {
@@ -620,6 +672,15 @@ describe('splitOnSentinels', () => {
       { markdown: 'first', bodyLine0: 4 },
       { markdown: 'second\nline', bodyLine0: 6 },
     ])
+  })
+
+  it('cuts the grading note at the next sentinel, apart from the solution and the hints', () => {
+    const result = splitOnSentinels(
+      'statement\n<!-- solution -->\nsolution\n<!-- grading -->\nnote\n<!-- hint -->\nnudge'
+    )
+    expect(result.solution).toBe('solution')
+    expect(result.gradingNotes).toEqual([{ markdown: 'note', bodyLine0: 4 }])
+    expect(result.hints).toEqual([{ markdown: 'nudge', bodyLine0: 6 }])
   })
 
   it('reads hints placed before the solution', () => {

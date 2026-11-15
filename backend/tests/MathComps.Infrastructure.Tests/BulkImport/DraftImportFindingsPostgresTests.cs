@@ -909,7 +909,7 @@ public class DraftImportFindingsPostgresTests(PostgresContainerFixture fixture)
     /// <returns>The original text content.</returns>
     private static DraftTextContent Original(
         Language language, string statement = "changed", bool hasSolution = false, params string[] hints) =>
-        new(language, Original: true, statement, hasSolution ? "solution" : null, [.. hints]);
+        new(language, Original: true, statement, hasSolution ? "solution" : null, [.. hints], GradingNote: null);
 
     /// <summary>
     /// Builds a translation text variant. The body defaults to one that differs from the seeded body, so a
@@ -919,7 +919,7 @@ public class DraftImportFindingsPostgresTests(PostgresContainerFixture fixture)
     /// <param name="statement">The statement markdown.</param>
     /// <returns>The translation text content.</returns>
     private static DraftTextContent Translation(Language language, string statement = "changed") =>
-        new(language, Original: false, statement, SolutionMarkdown: null, Hints: []);
+        new(language, Original: false, statement, SolutionMarkdown: null, Hints: [], GradingNote: null);
 
     /// <summary>
     /// Builds a seed <see cref="ProblemText"/> row with the fields the resolution check reads.

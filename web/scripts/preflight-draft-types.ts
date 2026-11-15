@@ -6,8 +6,8 @@
 import type { ProposalArea } from '../src/components/features/problem-selection/model/selection-types'
 import type { Locale } from '../src/i18n/i18n'
 
-/** The parts of a problem body an issue can sit in: the two halves, or one of the author's hints. */
-export type ProblemHalf = 'statement' | 'solution' | 'hint'
+/** The parts of a problem body an issue can sit in: the two halves, one of the author's hints, or the grading note. */
+export type ProblemHalf = 'statement' | 'solution' | 'hint' | 'gradingNote'
 
 /** Whether a verdict entry blocks import (`error`) or is merely advisory (`warning`). */
 export type VerdictSeverity = 'error' | 'warning'
@@ -55,6 +55,11 @@ export type ManifestText = {
   solutionMarkdown: string | null
   /** One entry per hint sentinel, the markdown under it verbatim, in body order; empty when the body has none. */
   hints: string[]
+  /**
+   * The problem's grading note verbatim, or `null` when this text has no grading sentinel. A blank note clears the
+   * stored one, while `null` leaves it as it is.
+   */
+  gradingNote: string | null
 }
 
 /** What a problem of the pool is filed under, from the `proposal:` block of its `pN.yaml`. */

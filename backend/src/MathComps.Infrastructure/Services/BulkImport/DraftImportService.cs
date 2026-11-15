@@ -471,7 +471,8 @@ public class DraftImportService(
         // Each language variant in turn.
         foreach (var text in problem.Texts)
         {
-            // Add every half the variant writes: the statement, plus a solution and hints when the draft carries them.
+            // Add every half the variant writes: the statement, plus a solution, hints and a grading note when the
+            // draft carries them.
             foreach (var (documentType, markdown) in text.HalvesToWrite(replacements))
                 AddText(context, newProblem.Id, documentType, text, markdown);
         }
@@ -587,8 +588,8 @@ public class DraftImportService(
     }
 
     /// <summary>
-    /// Writes one half of a re-import the way its plan says: adds the text, rewrites the stored one in place, or leaves
-    /// it. A second original is refused, so it is left too, and the run that planned it keeps nothing.
+    /// Writes one half of a re-import the way its plan says: adds the text, rewrites the stored one in place, removes
+    /// it, or leaves it. A second original is refused, so it is left too, and the run that planned it keeps nothing.
     /// </summary>
     /// <param name="context">The write context.</param>
     /// <param name="existing">The tracked existing problem, with its texts loaded.</param>
@@ -603,15 +604,22 @@ public class DraftImportService(
                 AddText(context, existing.Id, half.DocumentType, half.Text, half.Markdown);
                 break;
 
-            // The stored text in this language with another body: rewrite it in place.
+            // The stored text the half lands on with another body, or a document kept once in another language: rewrite
+            // it in place.
             case
             {
                 Action: DraftTextAction.OverwriteOriginal or DraftTextAction.OverwriteTranslation,
-                SameLanguageText: { } stored
+                StoredText: { } stored
             }:
-                // The new body, stamped with when it changed.
+                // The new body in the draft text's language, stamped with when it changed.
                 stored.MarkdownText = half.Markdown;
+                stored.Language = half.Text.Language;
                 stored.DateModified = DateTime.UtcNow;
+                break;
+
+            // An empty grading section: take the stored note away.
+            case { Action: DraftTextAction.RemoveGradingNote, StoredText: { } stored }:
+                context.ProblemTexts.Remove(stored);
                 break;
 
             // The stored text already holds this body, or the half is a second original the import refuses: leave it.
@@ -647,13 +655,14 @@ public class DraftImportService(
         DocumentType documentType,
         DraftTextContent text,
         string markdown) =>
-        // Markdown-native imports store only MarkdownText — there's no TeX original, so RawText stays null.
+        // Markdown-native imports store only MarkdownText — there's no TeX original, so RawText stays null. A document
+        // a problem keeps once is its original in whichever language file it came from.
         context.ProblemTexts.Add(new ProblemText
         {
             ProblemId = problemId,
             DocumentType = documentType,
             Language = text.Language,
-            IsOriginal = text.Original,
+            IsOriginal = text.Original || !documentType.HasLanguageVariants,
             MarkdownText = markdown,
             DateModified = DateTime.UtcNow
         });

@@ -6,7 +6,7 @@ namespace MathComps.Infrastructure.Services.BulkImport;
 
 /// <summary>
 /// One language variant a draft problem imports: its language, whether it is the original, and the statement,
-/// solution and hint markdown carried verbatim (still with relative <c>images/…</c> refs).
+/// solution, hint and grading-note markdown carried verbatim (still with relative <c>images/…</c> refs).
 /// </summary>
 /// <param name="Language">The text's language.</param>
 /// <param name="Original">Whether this text is the original (maps 1:1 to
@@ -14,16 +14,27 @@ namespace MathComps.Infrastructure.Services.BulkImport;
 /// <param name="StatementMarkdown">Statement markdown verbatim.</param>
 /// <param name="SolutionMarkdown">Solution markdown verbatim, or null when this text has no solution.</param>
 /// <param name="Hints">The author's hints, weakest nudge first, each verbatim; empty when this text has none.</param>
+/// <param name="GradingNote">
+/// The problem's grading note verbatim, or null when this text has no grading section. A blank note clears the stored
+/// one, while null leaves it as it is.
+/// </param>
 public record DraftTextContent(
     Language Language,
     bool Original,
     string StatementMarkdown,
     string? SolutionMarkdown,
-    ImmutableArray<string> Hints)
+    ImmutableArray<string> Hints,
+    string? GradingNote)
 {
     /// <summary>
-    /// The halves this text writes, each with the markdown stored for it: the statement always, the solution and the
-    /// hints when the draft carries them.
+    /// Whether this text carries an empty grading section, which takes the problem's stored note away.
+    /// </summary>
+    public bool ClearsGradingNote => GradingNote is not null && string.IsNullOrWhiteSpace(GradingNote);
+
+    /// <summary>
+    /// The halves this text writes, each with the markdown stored for it: the statement always, the solution, the
+    /// hints and the grading note when the draft carries them. An empty grading section writes nothing, since it
+    /// clears the note instead.
     /// </summary>
     /// <param name="replacements">The image-ref replacements the bodies are rewritten against.</param>
     /// <returns>Each half's document type and the markdown it stores.</returns>
@@ -40,6 +51,10 @@ public record DraftTextContent(
         // The hints, as the one document they are stored in, only when the draft carries any.
         if (HintsDocument.Join(Hints) is { } hintsDocument)
             yield return (DocumentType.Hints, MarkdownImageRewriter.Rewrite(hintsDocument, replacements));
+
+        // The grading note, trimmed of the blank lines around it, only when the draft carries one with something in it.
+        if (!string.IsNullOrWhiteSpace(GradingNote))
+            yield return (DocumentType.GradingNote, MarkdownImageRewriter.Rewrite(GradingNote.Trim(), replacements));
     }
 }
 

@@ -72,8 +72,8 @@ public record ManifestMeta(
 public record ManifestSeason(int Year);
 
 /// <summary>
-/// One language variant of a problem — the original or a translation, with its statement, solution and hint markdown
-/// carried verbatim.
+/// One language variant of a problem — the original or a translation, with its statement, solution, hint and
+/// grading-note markdown carried verbatim.
 /// </summary>
 /// <param name="Language">The text's language, from its <c>pN.&lt;lang&gt;.md</c> filename.</param>
 /// <param name="Original">
@@ -83,12 +83,14 @@ public record ManifestSeason(int Year);
 /// <param name="StatementMarkdown">Statement markdown verbatim, still carrying relative <c>images/…</c> refs.</param>
 /// <param name="SolutionMarkdown">Solution markdown verbatim, or null when this text has no solution sentinel.</param>
 /// <param name="Hints">One entry per hint sentinel, the markdown under it verbatim; empty when the body has none.</param>
+/// <param name="GradingNote"><inheritdoc cref="DraftTextContent.GradingNote" path="/summary"/></param>
 public record ManifestText(
     Language Language,
     bool Original,
     string StatementMarkdown,
     string? SolutionMarkdown,
-    ImmutableArray<string> Hints);
+    ImmutableArray<string> Hints,
+    string? GradingNote);
 
 /// <summary>
 /// One draft problem: its language-invariant metadata plus one text variant per language (original first).
@@ -135,7 +137,8 @@ public record ManifestProblem(
         Tags,
         Proposal,
         [.. Texts.Select(text => new DraftTextContent(
-            text.Language, text.Original, text.StatementMarkdown, text.SolutionMarkdown, text.Hints))],
+            text.Language, text.Original, text.StatementMarkdown, text.SolutionMarkdown, text.Hints,
+            text.GradingNote))],
         Images);
 }
 
@@ -183,7 +186,11 @@ public enum ProblemHalf
 
     // ReSharper disable once UnusedMember.Global
     /// <summary>One of the author's hints.</summary>
-    Hint
+    Hint,
+
+    // ReSharper disable once UnusedMember.Global
+    /// <summary>The problem's grading note.</summary>
+    GradingNote
 }
 
 /// <summary>

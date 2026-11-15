@@ -191,6 +191,165 @@ public class DraftImportServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// A grading note written in a translation's file lands as the problem's one note: an original row in that file's
+    /// language, its body trimmed, while the translation's statement stays a translation.
+    /// </summary>
+    [Fact]
+    public Task A_grading_note_in_a_translation_lands_as_the_problems_original_note() => RunTestAsync(async service =>
+    {
+        // Import a Slovak original and an English translation carrying the note.
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
+            [Problem(1,
+                Original(Language.SK, "statement", "solution"),
+                Translation(Language.EN, "statement") with { GradingNote = "\nNeeds a reason: the parity.\n" })],
+            Path.GetTempPath());
+
+        // The note is one English original, and the English statement is still a translation.
+        await QueryAsync(async context =>
+        {
+            // Every English row the import wrote.
+            var english = await context.ProblemTexts.Where(text => text.Language == Language.EN).ToListAsync();
+
+            // The note, original and trimmed.
+            var note = english.Single(text => text.DocumentType == DocumentType.GradingNote);
+            Assert.True(note.IsOriginal);
+            Assert.Equal("Needs a reason: the parity.", note.MarkdownText);
+
+            // The statement beside it, a translation.
+            Assert.False(StatementOf(english).IsOriginal);
+        });
+    });
+
+    /// <summary>
+    /// Re-importing the note a problem already holds, blank lines around it included, leaves the problem unchanged.
+    /// </summary>
+    [Fact]
+    public Task Re_importing_the_same_grading_note_changes_nothing() => RunTestAsync(async service =>
+    {
+        // The draft, its note in the English translation with blank lines around it.
+        ImmutableArray<DraftProblemContent> draft =
+            [Problem(1,
+                Original(Language.SK, "statement"),
+                Translation(Language.EN, "statement") with { GradingNote = "\nenglish note\n" })];
+
+        // Import it.
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate, draft, Path.GetTempPath());
+
+        // Import it again.
+        var second = await ImportOpenAsync(service, CsmoTarget(), RoundDate, draft, Path.GetTempPath());
+
+        // The note reads unchanged, and so does the problem.
+        Assert.Equal(DraftTextAction.UnchangedOriginal, second.Findings.TextResolutions
+            .Single(text => text.DocumentType == DocumentType.GradingNote).Action);
+        Assert.Equal(1, CountOf(second, ResolutionAction.Reuse));
+    });
+
+    /// <summary>
+    /// A note moved to another language's file takes the new body and language into the one row the problem keeps,
+    /// rather than leaving the old language's note beside the new one.
+    /// </summary>
+    [Fact]
+    public Task A_grading_note_moved_to_another_language_keeps_one_row() => RunTestAsync(async service =>
+    {
+        // Import the note in the English translation.
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
+            [Problem(1,
+                Original(Language.SK, "statement"),
+                Translation(Language.EN, "statement") with { GradingNote = "english note" })],
+            Path.GetTempPath());
+
+        // Re-import with the note in the Slovak original instead.
+        var second = await ImportOpenAsync(service, CsmoTarget(), RoundDate,
+            [Problem(1,
+                Original(Language.SK, "statement") with { GradingNote = "slovenská poznámka" },
+                Translation(Language.EN, "statement"))],
+            Path.GetTempPath());
+
+        // The note half overwrites the stored one.
+        Assert.Equal(DraftTextAction.OverwriteOriginal, second.Findings.TextResolutions
+            .Single(text => text.DocumentType == DocumentType.GradingNote).Action);
+
+        // One note row, now Slovak with the Slovak body.
+        await QueryAsync(async context =>
+        {
+            // Every grading-note row there is.
+            var notes = await context.ProblemTexts
+                .Where(text => text.DocumentType == DocumentType.GradingNote)
+                .ToListAsync();
+
+            // A single one, in the language and with the body of the file now carrying it.
+            var note = Assert.Single(notes);
+            Assert.Equal(Language.SK, note.Language);
+            Assert.Equal("slovenská poznámka", note.MarkdownText);
+        });
+    });
+
+    /// <summary>
+    /// An empty grading section takes the stored note away, whichever language it was in, and once it is gone the same
+    /// empty section plans nothing more.
+    /// </summary>
+    [Fact]
+    public Task An_empty_grading_section_removes_the_stored_note() => RunTestAsync(async service =>
+    {
+        // Import the note in the English translation.
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
+            [Problem(1,
+                Original(Language.SK, "statement"),
+                Translation(Language.EN, "statement") with { GradingNote = "english note" })],
+            Path.GetTempPath());
+
+        // The draft with an empty grading section in the Slovak original.
+        ImmutableArray<DraftProblemContent> cleared =
+            [Problem(1,
+                Original(Language.SK, "statement") with { GradingNote = "\n\n" },
+                Translation(Language.EN, "statement"))];
+
+        // Re-import it.
+        var second = await ImportOpenAsync(service, CsmoTarget(), RoundDate, cleared, Path.GetTempPath());
+
+        // The note half removes the stored note, and the problem counts as updated.
+        Assert.Equal(DraftTextAction.RemoveGradingNote, second.Findings.TextResolutions
+            .Single(text => text.DocumentType == DocumentType.GradingNote).Action);
+        Assert.Equal(1, CountOf(second, ResolutionAction.Update));
+
+        // No note row is left.
+        Assert.False(await QueryValueAsync(context =>
+            context.ProblemTexts.AnyAsync(text => text.DocumentType == DocumentType.GradingNote)));
+
+        // Re-import the same draft once more.
+        var third = await ImportOpenAsync(service, CsmoTarget(), RoundDate, cleared, Path.GetTempPath());
+
+        // With no note to remove, the section plans nothing and the problem is unchanged.
+        Assert.DoesNotContain(third.Findings.TextResolutions, text => text.DocumentType == DocumentType.GradingNote);
+        Assert.Equal(1, CountOf(third, ResolutionAction.Reuse));
+    });
+
+    /// <summary>
+    /// A draft without a grading section leaves the stored note as it is, the way a draft without hints leaves the
+    /// stored hints.
+    /// </summary>
+    [Fact]
+    public Task A_draft_without_a_grading_section_leaves_the_stored_note() => RunTestAsync(async service =>
+    {
+        // Import the note in the English translation.
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
+            [Problem(1,
+                Original(Language.SK, "statement"),
+                Translation(Language.EN, "statement") with { GradingNote = "english note" })],
+            Path.GetTempPath());
+
+        // Re-import with no grading section anywhere.
+        await ImportOpenAsync(service, CsmoTarget(), RoundDate,
+            [Problem(1, Original(Language.SK, "statement"), Translation(Language.EN, "statement"))],
+            Path.GetTempPath());
+
+        // The stored note is untouched.
+        var note = await QueryValueAsync(context => context.ProblemTexts
+            .SingleAsync(text => text.DocumentType == DocumentType.GradingNote));
+        Assert.Equal("english note", note.MarkdownText);
+    });
+
+    /// <summary>
     /// Re-importing byte-identical content changes nothing: the problem counts as unchanged rather than updated,
     /// every text reports unchanged, and the stored row's modified timestamp isn't bumped.
     /// </summary>
@@ -1968,7 +2127,7 @@ public class DraftImportServicePostgresTests(PostgresContainerFixture fixture)
     /// <returns>The original text content.</returns>
     private static DraftTextContent Original(
         Language language, string statement, string? solution = null, params string[] hints) =>
-        new(language, Original: true, statement, solution, [.. hints]);
+        new(language, Original: true, statement, solution, [.. hints], GradingNote: null);
 
     /// <summary>
     /// Builds a translation text variant.
@@ -1978,7 +2137,7 @@ public class DraftImportServicePostgresTests(PostgresContainerFixture fixture)
     /// <param name="solution">The solution markdown, or null when absent.</param>
     /// <returns>The translation text content.</returns>
     private static DraftTextContent Translation(Language language, string statement, string? solution = null) =>
-        new(language, Original: false, statement, solution, Hints: []);
+        new(language, Original: false, statement, solution, Hints: [], GradingNote: null);
 
     /// <summary>
     /// The statement among a problem's texts.

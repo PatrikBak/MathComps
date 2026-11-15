@@ -44,7 +44,10 @@ public enum DraftTextAction
     /// </summary>
     AddOriginal,
 
-    /// <summary>An original text replaces the existing original in the same language, in place.</summary>
+    /// <summary>
+    /// An original text replaces the existing original in the same language, in place. A document a problem keeps once
+    /// takes the new body and language into its one text, whatever language that was in.
+    /// </summary>
     OverwriteOriginal,
 
     /// <summary>An original text matches the existing same-language original byte-for-byte — importing changes nothing.</summary>
@@ -72,6 +75,11 @@ public enum DraftTextAction
     UnchangedTranslation,
 
     /// <summary>
+    /// An empty grading section takes the problem's stored grading note away, in whatever language it was written.
+    /// </summary>
+    RemoveGradingNote,
+
+    /// <summary>
     /// A problem carries no original-language body and its slug is absent from the DB — importing would insert a
     /// problem whose every text is a translation, leaving it with no canonical original. A hard conflict: a
     /// translation-only drop is only valid onto a problem that already exists.
@@ -91,7 +99,9 @@ public enum DraftTextAction
 /// the DB, or why the import refuses to create the problem it belongs to.
 /// </summary>
 /// <param name="Slug">The would-be problem slug.</param>
-/// <param name="DocumentType">The document half this resolution is about (statement, solution or hints).</param>
+/// <param name="DocumentType">
+/// The document half this resolution is about (statement, solution, hints or grading note).
+/// </param>
 /// <param name="Language">The language of the text variant this resolution is about.</param>
 /// <param name="Action">What the import does to it.</param>
 public record ProblemTextResolution(
@@ -110,7 +120,7 @@ public record ProblemTextResolution(
 
         DraftTextAction.AddOriginal or DraftTextAction.OverwriteOriginal or DraftTextAction.UnchangedOriginal
             or DraftTextAction.AddTranslation or DraftTextAction.OverwriteTranslation
-            or DraftTextAction.UnchangedTranslation => false,
+            or DraftTextAction.UnchangedTranslation or DraftTextAction.RemoveGradingNote => false,
 
         _ => throw new ArgumentOutOfRangeException(nameof(Action), Action, "Unknown text action.")
     };
