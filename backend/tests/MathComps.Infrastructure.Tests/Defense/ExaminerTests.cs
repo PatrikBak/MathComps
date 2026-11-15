@@ -355,12 +355,12 @@ public class ExaminerTests
 
     /// <summary>
     /// A reply that drifted out of the candidate's language regenerates under a note pointing the generator back at
-    /// their latest turn, and the loop stops once the fresh attempt comes back in it. The note withholds the language
-    /// the checker named on purpose: between two close languages that label can be wrong, and feeding a wrong one
-    /// back would push the generator into the very switch the note exists to undo.
+    /// the language the candidate writes in, and the loop stops once the fresh attempt comes back in it. The note
+    /// withholds the language the checker named on purpose: between two close languages that label can be wrong, and
+    /// feeding a wrong one back would push the generator into the very switch the note exists to undo.
     /// </summary>
     [Fact]
-    public async Task A_switched_language_regenerates_under_a_note_pointing_at_the_candidates_latest_turn()
+    public async Task A_switched_language_regenerates_under_a_note_pointing_at_the_candidates_language()
     {
         // Capture each generate call's request as it lands.
         var generateRequests = new List<ChatCallRequest>();
@@ -388,8 +388,8 @@ public class ExaminerTests
         Assert.Equal("a question.", outcome.Shipped.Reply);
         Assert.False(outcome.Shipped.LanguageCheck.SwitchesLanguage);
 
-        // The regenerate's prompt sent it back to the candidate's latest turn for the language...
-        Assert.Contains("the language of their latest turn", generateRequests[1].SystemPrompt);
+        // The regenerate's prompt sent it back to the language the candidate writes in...
+        Assert.Contains("isn't in the language the student is writing in", generateRequests[1].SystemPrompt);
 
         // ...and carried none of the checker's own guess at what that language is.
         Assert.DoesNotContain("Slovak", generateRequests[1].SystemPrompt);
