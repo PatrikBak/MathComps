@@ -45,6 +45,7 @@ public record DefenseAttemptCallDto(
 /// <param name="MathCloses"><inheritdoc cref="DefenseTurnAttempt.MathCloses" path="/summary"/></param>
 /// <param name="MathComplete"><inheritdoc cref="DefenseTurnAttempt.MathComplete" path="/summary"/></param>
 /// <param name="MathOwed"><inheritdoc cref="DefenseTurnAttempt.MathOwed" path="/summary"/></param>
+/// <param name="WithholdsClose"><inheritdoc cref="DefenseTurnAttempt.WithholdsClose" path="/summary"/></param>
 /// <param name="Leaks"><inheritdoc cref="DefenseTurnAttempt.Leaks" path="/summary"/></param>
 /// <param name="WhatLeaked"><inheritdoc cref="DefenseTurnAttempt.WhatLeaked" path="/summary"/></param>
 /// <param name="Established"><inheritdoc cref="DefenseTurnAttempt.Established" path="/summary"/></param>
@@ -69,6 +70,7 @@ public record DefenseTurnAttemptDto(
     bool MathCloses,
     bool MathComplete,
     string MathOwed,
+    bool WithholdsClose,
     bool Leaks,
     string WhatLeaked,
     string Established,

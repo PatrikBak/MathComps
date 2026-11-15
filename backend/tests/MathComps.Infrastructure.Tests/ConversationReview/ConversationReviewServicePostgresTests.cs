@@ -158,6 +158,75 @@ public class ConversationReviewServicePostgresTests(PostgresContainerFixture fix
     });
 
     /// <summary>
+    /// A draft withholds a close only while the examination is still going. A reply that came after an earlier one
+    /// ended it on a complete solution asks for nothing the solution owes, whether it says goodbye or answers a doubt
+    /// raised after the close. Only a close that went out on a complete solution ends the examination, and only for the
+    /// turns after it.
+    /// </summary>
+    [Fact]
+    public Task A_draft_after_the_examination_ended_withholds_no_close() => RunTestAsync(async service =>
+    {
+        // Four replies in a conversation that had only its opener and the student's defense
+        await QueryAsync(async context =>
+        {
+            // The replies
+            var closedEarly = NewTurn(NewerSessionId, TranscriptRole.Examiner, "closed early", 2, Now);
+            var askedOn = NewTurn(NewerSessionId, TranscriptRole.Examiner, "asked on", 4, Now);
+            var closed = NewTurn(NewerSessionId, TranscriptRole.Examiner, "closed", 6, Now);
+            var goodbye = NewTurn(NewerSessionId, TranscriptRole.Examiner, "goodbye", 8, Now);
+
+            // Added with the student's turns between them
+            context.DefenseTurns.AddRange(
+                closedEarly,
+                NewTurn(NewerSessionId, TranscriptRole.Candidate, "the missing step", 3, Now),
+                askedOn,
+                NewTurn(NewerSessionId, TranscriptRole.Candidate, "one more step", 5, Now),
+                closed,
+                NewTurn(NewerSessionId, TranscriptRole.Candidate, "thanks", 7, Now),
+                goodbye);
+
+            // The early close went out with a step still owed
+            context.DefenseTurnAttempts.Add(
+                NewAttempt(NewerSessionId, closedEarly.Id, attemptIndex: 0, "an early close", closesEarly: true));
+
+            // The ask's closing draft was sent back, so what went out asked on over a complete solution
+            context.DefenseTurnAttempts.AddRange(
+                NewAttempt(NewerSessionId, askedOn.Id, attemptIndex: 0, "a sent-back close", closesComplete: true),
+                NewAttempt(NewerSessionId, askedOn.Id, attemptIndex: 1, "an ask that went out",
+                    asksOnComplete: true));
+
+            // The close went out after a draft that asked on
+            context.DefenseTurnAttempts.AddRange(
+                NewAttempt(NewerSessionId, closed.Id, attemptIndex: 0, "an ask before the close",
+                    asksOnComplete: true),
+                NewAttempt(NewerSessionId, closed.Id, attemptIndex: 1, "the close", closesComplete: true));
+
+            // The goodbye went out over the same complete solution
+            context.DefenseTurnAttempts.Add(
+                NewAttempt(NewerSessionId, goodbye.Id, attemptIndex: 0, "the goodbye", asksOnComplete: true));
+
+            // Commit them
+            await context.SaveChangesAsync();
+        });
+
+        // Read the conversation
+        var detail = await service.GetDetailAsync(ReviewerId, NewerSessionId, Language.EN);
+
+        // Each ask before the close went out withholds it, the one sent back from the closing reply too, and the
+        // goodbye after it withholds nothing. Sorted by text, since the drafts' order is pinned elsewhere
+        Assert.Equal(
+            [
+                ("a sent-back close", false),
+                ("an ask before the close", true),
+                ("an ask that went out", true),
+                ("an early close", false),
+                ("the close", false),
+                ("the goodbye", false),
+            ],
+            detail.Attempts.Select(attempt => (attempt.Reply, attempt.WithholdsClose)).Order());
+    });
+
+    /// <summary>
     /// The detail carries what the student held against a reply, standing against that reply.
     /// </summary>
     [Fact]

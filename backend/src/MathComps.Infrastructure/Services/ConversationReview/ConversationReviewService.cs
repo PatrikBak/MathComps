@@ -35,6 +35,9 @@ public class ConversationReviewService(
         var notes = dbContext.AdminNotes;
         var reviews = dbContext.AdminSessionReviews;
 
+        // The drafts that asked on over a complete solution before the examination ended.
+        var withheldCloses = dbContext.DefenseTurnAttempts.Where(DefenseTurnAttempt.WithholdsClose);
+
         // The whole conversation with the photos its messages went out with and the drawings cut out of them,
         // everything the examiner held, and what has been said about it since. Split, because turns, reports and notes
         // are each a collection off one row: joined in a single query the database would return every pairing of
@@ -85,6 +88,7 @@ public class ConversationReviewService(
                         attempt.MathCloses,
                         attempt.MathComplete,
                         attempt.MathOwed,
+                        withheldCloses.Any(caught => caught.Id == attempt.Id),
                         attempt.Leaks,
                         attempt.WhatLeaked,
                         attempt.Established,

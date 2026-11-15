@@ -109,6 +109,7 @@ function draftOf(
     mathCloses: false,
     mathComplete: false,
     mathOwed: 'why the halving terminates',
+    withholdsClose: false,
     leaks,
     whatLeaked: leaks ? 'the halving' : '',
     established: '',
