@@ -180,7 +180,8 @@ function Attempt({ attempt, status, isAddressChecked }: AttemptProps) {
   const format = useFormatter()
 
   // Whether the draft's ending is a flaw: it ended with a step still owed, or asked on over a complete solution
-  const closeIsFlagged = attempt.mathCloses !== attempt.mathComplete
+  // before the examination ended
+  const closeIsFlagged = attempt.withholdsClose || (attempt.mathCloses && !attempt.mathComplete)
 
   // What a flawed ending says: the step still owed, or that the solution was already complete, with the
   // argument the older check summarized where it wrote one
