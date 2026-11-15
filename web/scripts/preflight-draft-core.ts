@@ -17,11 +17,13 @@ import {
   asMessage,
   collectDisallowedImageRefParams,
   collectImageNames,
+  findUnknownSentinels,
   hasLeadingFrontmatter,
   IMAGE_REF_PREFIX,
   IMAGES_DIRNAME,
   MAX_IMAGE_MB,
   parseProblemMeta,
+  SENTINELS,
   splitOnSentinels,
   SUPPORTED_IMAGE_EXTENSIONS,
   toAbsoluteLine,
@@ -336,6 +338,26 @@ async function parseProblem(
       })
   }
 
+  // A problem carries one grading note in whichever language it is written in, so a second language carrying one
+  // leaves the import two notes to choose between
+  const noteLanguages = parsedBodies
+    .filter((entry) => entry.text.gradingNote !== null)
+    .map((entry) => entry.text.language)
+  if (noteLanguages.length > 1) {
+    // Each language file carrying a note is flagged, naming every language that carries one
+    noteLanguages.forEach((language) => {
+      errors.push(
+        problemIssue(
+          `p${group.order}.${language}.md`,
+          'gradingNote',
+          'grading-note-languages',
+          `the problem carries a grading note in ${noteLanguages.join(', ')}; a problem has one note, ` +
+            `written in one language file`
+        )
+      )
+    })
+  }
+
   // Order the variants original-first, then translations in supported-locale order
   const texts = parsedBodies
     .map((entry) => entry.text)
@@ -367,8 +389,9 @@ type ParsedBody = {
 
 /**
  * Parses one body file into a {@link ManifestText}, validating its markdown
- * halves and hints and resolving its image references against disk. Returns `null` when
- * the filename's language token is not a supported locale.
+ * halves, hints and grading note and resolving its image references against
+ * disk. Returns `null` when the filename's language token is not a supported
+ * locale.
  *
  * @param folderPath - Path to the draft folder.
  * @param body - The body file and its raw language token.
@@ -410,8 +433,24 @@ async function parseBody(
     )
   }
 
-  // Split the body into statement, solution and hints
-  const { statement, solution, solutionBodyLine0, hints } = splitOnSentinels(content)
+  // Split the body into statement, solution, hints and grading note
+  const { statement, solution, solutionBodyLine0, hints, gradingNotes } = splitOnSentinels(content)
+
+  // A misspelt sentinel opens no section, so its text stays in the section above: a misspelt grading line would put
+  // its note in what students read
+  findUnknownSentinels(content).forEach((line) => {
+    errors.push({
+      ...problemIssue(
+        body.file,
+        null,
+        'unknown-sentinel',
+        `this comment line is none of ${SENTINELS.join(', ')}; fix its spelling or remove it`
+      ),
+      line,
+    })
+  })
+
+  // A body with nothing before its first sentinel has no statement
   if (statement.trim() === '') {
     errors.push(problemIssue(body.file, 'statement', 'empty-statement', 'statement is empty'))
   }
@@ -433,11 +472,29 @@ async function parseBody(
     await validateHalf(hint.markdown, body.file, 'hint', hint.bodyLine0, errors)
   }
 
+  // A body holds one grading note, so a second section is a mistake
+  if (gradingNotes.length > 1) {
+    errors.push(
+      problemIssue(
+        body.file,
+        'gradingNote',
+        'grading-note-twice',
+        `the body opens ${gradingNotes.length} grading sections; a problem has one note`
+      )
+    )
+  }
+
+  // The grading note gets the checks a half gets, and may be empty, which clears a stored note
+  for (const note of gradingNotes) {
+    await validateHalf(note.markdown, body.file, 'gradingNote', note.bodyLine0, errors)
+  }
+
   // Every piece of markdown the body carries, for the image checks below
   const pieces = [
     statement,
     ...(solution !== null ? [solution] : []),
     ...hints.map((hint) => hint.markdown),
+    ...gradingNotes.map((note) => note.markdown),
   ]
 
   // Gather this body's image references across every piece and validate each — it must exist on disk, be a
@@ -507,13 +564,14 @@ async function parseBody(
     )
   })
 
-  // Assemble the text variant, halves and hints kept verbatim
+  // Assemble the text variant, halves, hints and grading note kept verbatim
   const text: ManifestText = {
     language,
     original: language === originalLanguage,
     statementMarkdown: statement,
     solutionMarkdown: solution,
     hints: hints.map((hint) => hint.markdown),
+    gradingNote: gradingNotes[0]?.markdown ?? null,
   }
 
   // Hand back the variant with its referenced images

@@ -10,18 +10,21 @@ namespace MathComps.Infrastructure.Services.BulkImport;
 /// <summary>
 /// One half a draft text writes onto a problem that already exists, with what writing it does to the stored texts.
 /// </summary>
-/// <param name="DocumentType">The half (statement, solution or hints).</param>
+/// <param name="DocumentType">The half (statement, solution, hints or grading note).</param>
 /// <param name="Text">The draft text the half comes from.</param>
-/// <param name="Markdown">The markdown the half stores, its image refs rewritten.</param>
-/// <param name="SameLanguageText">
-/// The stored text of the half in the draft text's language, or null when the half has none.
+/// <param name="Markdown">
+/// The markdown the half stores, its image refs rewritten; empty for a half that removes the stored text.
+/// </param>
+/// <param name="StoredText">
+/// The stored text the half lands on, or null when there is none: the one in the draft text's language, or for a
+/// document a problem keeps once, its only one in whatever language.
 /// </param>
 /// <param name="Action">What writing the half does to the stored texts.</param>
 public record ReimportedHalf(
     DocumentType DocumentType,
     DraftTextContent Text,
     string Markdown,
-    ProblemText? SameLanguageText,
+    ProblemText? StoredText,
     DraftTextAction Action);
 
 /// <summary>
@@ -94,10 +97,23 @@ public record ProblemReimport(
         IReadOnlyDictionary<string, ResolvedImageRef> replacements)
     {
         // Every half each draft text writes, with what writing it does to the stored texts.
-        var halves = problem.Texts
+        var writtenHalves = problem.Texts
             .SelectMany(text => text.HalvesToWrite(replacements)
-                .Select(half => ClassifyHalf(existing, text, half.DocumentType, half.Markdown)))
-            .ToImmutableArray();
+                .Select(half => ClassifyHalf(existing, text, half.DocumentType, half.Markdown)));
+
+        // The problem's stored grading note, in whatever language it was written.
+        var storedNote = existing.Texts.SingleOrDefault(stored => stored.DocumentType == DocumentType.GradingNote);
+
+        // An empty grading section removing the stored note, when there is one to remove.
+        var removedNote = storedNote is { } note
+            ? problem.Texts
+                .Where(text => text.ClearsGradingNote)
+                .Select(text => new ReimportedHalf(
+                    DocumentType.GradingNote, text, Markdown: "", note, DraftTextAction.RemoveGradingNote))
+            : [];
+
+        // Every half the draft writes or removes.
+        ImmutableArray<ReimportedHalf> halves = [.. writtenHalves, .. removedNote];
 
         // A link other than the stored one.
         var changesLink = problem.SolutionLink is { } solutionLink && solutionLink != existing.SolutionLink;
@@ -126,7 +142,8 @@ public record ProblemReimport(
 
     /// <summary>
     /// Decides what writing one half of a draft text onto the stored problem does, from the text's originality and
-    /// language and whether its body differs from the stored text it lands on.
+    /// language and whether its body differs from the stored text it lands on. A document the problem keeps once
+    /// lands on its stored text in any language.
     /// </summary>
     /// <param name="existing">The stored problem, with its texts.</param>
     /// <param name="text">The draft text the half comes from.</param>
@@ -136,8 +153,21 @@ public record ProblemReimport(
     private static ReimportedHalf ClassifyHalf(
         Problem existing, DraftTextContent text, DocumentType documentType, string markdown)
     {
-        // The stored texts of the half, its original among them, and the one in the draft text's language.
+        // The stored texts of the half.
         var storedHalf = existing.Texts.Where(stored => stored.DocumentType == documentType).ToList();
+
+        // A document kept once per problem lands on its one text, whatever language the draft and that text are in.
+        if (!documentType.HasLanguageVariants)
+        {
+            // The problem's one text of the document, or null when it has none yet.
+            var storedText = storedHalf.SingleOrDefault();
+
+            // The half with its outcome: a first text, the same one, or a new body or language for it.
+            return new ReimportedHalf(
+                documentType, text, markdown, storedText, ClassifySingle(storedText, text, markdown));
+        }
+
+        // The half's stored original, and its stored text in the draft text's language.
         var storedOriginal = storedHalf.FirstOrDefault(stored => stored.IsOriginal);
         var sameLanguageText = storedHalf.FirstOrDefault(stored => stored.Language == text.Language);
 
@@ -177,6 +207,21 @@ public record ProblemReimport(
     }
 
     /// <summary>
+    /// Classifies a half of a document the problem keeps once against its stored text: a first text where none
+    /// exists, an unchanged one where the language and body match, otherwise an in-place overwrite of both.
+    /// </summary>
+    /// <param name="storedText">The problem's one text of the document, or null when it has none.</param>
+    /// <param name="text">The draft text the half comes from.</param>
+    /// <param name="markdown">The markdown the half stores, compared against the stored text's body.</param>
+    /// <returns>What writing the half does.</returns>
+    private static DraftTextAction ClassifySingle(ProblemText? storedText, DraftTextContent text, string markdown) =>
+        // No text yet, the same language and body, or anything else.
+        storedText is null ? DraftTextAction.AddOriginal
+        : storedText.Language == text.Language && storedText.MarkdownText == markdown
+            ? DraftTextAction.UnchangedOriginal
+        : DraftTextAction.OverwriteOriginal;
+
+    /// <summary>
     /// Classifies a translation half against the stored problem: a clean add when this language is new, otherwise an
     /// unchanged or in-place overwrite of the same-language text.
     /// </summary>
@@ -206,6 +251,7 @@ public record ProblemReimport(
         DraftTextAction.UnchangedOriginal or DraftTextAction.UnchangedTranslation => false,
         DraftTextAction.AddOriginal or DraftTextAction.OverwriteOriginal or DraftTextAction.SecondOriginal
             or DraftTextAction.AddTranslation or DraftTextAction.OverwriteTranslation
+            or DraftTextAction.RemoveGradingNote
             or DraftTextAction.NoOriginalForNewProblem or DraftTextAction.NewProblemMissingMetadata => true,
         _ => throw new ArgumentOutOfRangeException(nameof(action), action, "Unknown text action.")
     };

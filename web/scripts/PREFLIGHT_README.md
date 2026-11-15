@@ -67,6 +67,10 @@ Hints are the author's route to the solution, weakest nudge first. The AI examin
 
 The ladder is positional, a rung answering the one before it, so every language that carries the solution carries the same number of hints (`hint-count-mismatch`). A problem nobody wrote hints for is unaffected, and a statement-only translation is exempt.
 
+A `<!-- grading -->` line opens the problem's grading note: what needs a reason in a solution to this problem and what needs none. The AI examiner reads it when checking a solution's math, and students never see it. A problem has one note, written in any one of its language files (`grading-note-languages`), with one section per body (`grading-note-twice`). An empty section clears the stored note on re-import, and a body without the section leaves it as it is.
+
+Any other line holding nothing but an HTML comment is refused (`unknown-sentinel`). A misspelt section line opens no section, so its text stays in the section above, and a misspelt grading line would put its note in what students read.
+
 The problem number and language come from the filename. The file whose `<lang>` matches `_meta.yaml`'s `language` is the **original**; any others (`p1.en.md`, `p1.cs.md`) are **translations**. A translation may be statement-only, but it can only carry a solution if the in-draft original does too.
 
 A draft may **omit the original-language file entirely** and carry only translations — a way to drop, say, `cs`/`en` translations onto a problem that already lives in the DB without re-importing its untouched original. Keep `_meta.yaml`'s `language` set to the problem's **true original language** even when that file is absent; otherwise a translation gets marked as the original and collides with the stored one (a second original is forbidden). With no in-draft original, the "solution only if the original has one" check can't run, so a dropped translated solution is accepted on faith — make sure the stored original already has its own solution, or you'll orphan the translated one.
@@ -125,7 +129,7 @@ A ref is bare except for an optional `?inline=true` (inline display). The import
 
 ## Markdown & math checks
 
-Each half and each hint runs through the same pipeline the site renders with. The preflight reports failures with file and line:
+Each half, each hint and the grading note run through the same pipeline the site renders with. The preflight reports failures with file and line:
 
 - **Math delimiters** — an odd number of unescaped `$` is an error.
 - **Parse** — malformed markdown or directives.

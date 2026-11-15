@@ -43,6 +43,15 @@ const SOLUTION_SENTINEL = '<!-- solution -->'
 /** HTML-comment line that opens one of the author's hints. Each hint has its own. */
 const HINT_SENTINEL = '<!-- hint -->'
 
+/** HTML-comment line that opens the problem's grading note. */
+const GRADING_SENTINEL = '<!-- grading -->'
+
+/** Every line that opens a section of a problem body. */
+export const SENTINELS = [SOLUTION_SENTINEL, HINT_SENTINEL, GRADING_SENTINEL] as const
+
+/** A line holding nothing but an HTML comment, the shape every sentinel takes. */
+const COMMENT_LINE = /^<!--.*-->$/
+
 /** Typed metadata fields from a problem's `pN.yaml`. */
 type ProblemMeta = {
   /** Author display names, or `null` when no `authors:` key is present — kept distinct from `[]` (an explicit clear). */
@@ -82,18 +91,21 @@ type ProblemMetaParse = {
   error: string | null
 }
 
-/** One of the author's hints, tracking where in the body it begins. */
-type SentinelHint = {
-  /** The hint's markdown, everything under its sentinel up to the next one. */
+/** A piece of the body one sentinel opens (a hint or a grading note), tracking where in the body it begins. */
+type SentinelPiece = {
+  /** The piece's markdown, everything under its sentinel up to the next one. */
   markdown: string
-  /** 0-based body-relative line index where the hint starts. */
+  /** 0-based body-relative line index where the piece starts. */
   bodyLine0: number
 }
+
+/** A line that opens a section of a problem body. */
+type Sentinel = (typeof SENTINELS)[number]
 
 /** One section a sentinel opens, as the split finds it: the sentinel's line and the lines under it. */
 type SentinelSection = {
   /** Which sentinel opened it. */
-  sentinel: typeof SOLUTION_SENTINEL | typeof HINT_SENTINEL
+  sentinel: Sentinel
   /** 0-based body-relative line index of the sentinel itself. */
   line0: number
   /** The lines under the sentinel, up to the next one. */
@@ -109,7 +121,9 @@ type SentinelSplit = {
   /** 0-based body-relative line index where the solution half starts, or `null`. */
   solutionBodyLine0: number | null
   /** The author's hints in body order; empty when the body has no hint sentinel. */
-  hints: SentinelHint[]
+  hints: SentinelPiece[]
+  /** Every grading-note section in body order; empty when the body has no grading sentinel. */
+  gradingNotes: SentinelPiece[]
 }
 
 /** Metadata values for a problem whose `pN.yaml` declares none. */
@@ -338,13 +352,15 @@ function narrowProposal(raw: unknown): ProposalParse {
 
 /**
  * Splits a problem body on its sentinels: the statement is everything before the
- * first one, and the solution and each hint are the sections their sentinels
- * open, in whichever order they come. Each section remembers where it begins.
+ * first one, and the solution, each hint and the grading note are the sections
+ * their sentinels open, in whichever order they come. Each section remembers
+ * where it begins.
  *
  * @param body - The body file's full contents.
  *
  * @returns The statement, the solution (or `null` when there is no solution
- *   sentinel) with its 0-based body-relative start line, and the hints.
+ *   sentinel) with its 0-based body-relative start line, the hints and the
+ *   grading-note sections.
  */
 export function splitOnSentinels(body: string): SentinelSplit {
   // Work line by line so every section's start line is exact
@@ -354,7 +370,7 @@ export function splitOnSentinels(body: string): SentinelSplit {
   const sections = lines.reduce<SentinelSection[]>((found, line, index) => {
     // A sentinel is a standalone comment line, and opens a section of its own
     const trimmed = line.trim()
-    if (trimmed === SOLUTION_SENTINEL || trimmed === HINT_SENTINEL) {
+    if (isSentinel(trimmed)) {
       return [...found, { sentinel: trimmed, line0: index, lines: [] }]
     }
 
@@ -373,10 +389,17 @@ export function splitOnSentinels(body: string): SentinelSplit {
   // The first solution sentinel owns the solution; a body carries at most one
   const solutionSection = sections.find((section) => section.sentinel === SOLUTION_SENTINEL)
 
-  // Every hint sentinel is one rung of the ladder, in body order
-  const hints = sections
-    .filter((section) => section.sentinel === HINT_SENTINEL)
-    .map((section) => ({ markdown: section.lines.join('\n'), bodyLine0: section.line0 + 1 }))
+  // A function which reads every section one sentinel opens as a piece, in body order
+  const piecesOf = (sentinel: Sentinel): SentinelPiece[] =>
+    sections
+      .filter((section) => section.sentinel === sentinel)
+      .map((section) => ({ markdown: section.lines.join('\n'), bodyLine0: section.line0 + 1 }))
+
+  // Every hint sentinel is one rung of the ladder
+  const hints = piecesOf(HINT_SENTINEL)
+
+  // Every grading section, though a valid body carries at most one
+  const gradingNotes = piecesOf(GRADING_SENTINEL)
 
   // Each section as the text under its sentinel, starting on the line after it
   return {
@@ -384,7 +407,39 @@ export function splitOnSentinels(body: string): SentinelSplit {
     solution: solutionSection === undefined ? null : solutionSection.lines.join('\n'),
     solutionBodyLine0: solutionSection === undefined ? null : solutionSection.line0 + 1,
     hints,
+    gradingNotes,
   }
+}
+
+/**
+ * Finds every line shaped like a sentinel that is none of the known ones, such as a misspelt grading line, whose
+ * text would stay in the section above it.
+ *
+ * @param body - The body file's full contents.
+ *
+ * @returns The 1-based line of each such line, in body order.
+ */
+export function findUnknownSentinels(body: string): number[] {
+  // Each comment-only line that opens no section
+  return body.split('\n').flatMap((line, index) => {
+    // The line as a sentinel would be compared
+    const trimmed = line.trim()
+
+    // A comment line that is no sentinel, by its 1-based number
+    return COMMENT_LINE.test(trimmed) && !isSentinel(trimmed) ? [index + 1] : []
+  })
+}
+
+/**
+ * Whether a trimmed line is one of the lines that open a section of a problem body.
+ *
+ * @param line - The trimmed line.
+ *
+ * @returns `true` for a sentinel.
+ */
+function isSentinel(line: string): line is Sentinel {
+  // One of the known sentinels, byte for byte
+  return SENTINELS.some((sentinel) => sentinel === line)
 }
 
 /**
