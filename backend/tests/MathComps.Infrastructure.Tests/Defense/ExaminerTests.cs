@@ -898,7 +898,7 @@ public class ExaminerTests
 
         // The reference the site builds for a problem whose author wrote a hint ladder.
         var reference = DefenseReferenceBuilder.BuildReference(
-            new DefenseProblemContent("statement", "reference", ["first stage", "second stage"]));
+            new DefenseProblemContent("statement", "reference", ["first stage", "second stage"], GradingNote: null));
 
         // Run the turn against that reference.
         await RunAsync(caller, reference);
@@ -934,7 +934,7 @@ public class ExaminerTests
 
         // The reference a problem with no hints gets, which the builder hands back untouched.
         var reference = DefenseReferenceBuilder.BuildReference(
-            new DefenseProblemContent("statement", "reference", []));
+            new DefenseProblemContent("statement", "reference", [], GradingNote: null));
 
         // Run the turn against that reference.
         await RunAsync(caller, reference);

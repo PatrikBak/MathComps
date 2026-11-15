@@ -4,7 +4,7 @@ using MathComps.Domain.Localization;
 namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
-/// Represents a text (statement, solution or hints) for a problem in a specific language.
+/// Represents a text (statement, solution, hints or grading note) for a problem in a specific language.
 /// Supports multiple languages and tracks whether the text is original or AI-translated.
 /// </summary>
 public class ProblemText
@@ -25,7 +25,7 @@ public class ProblemText
     public Problem Problem { get; set; } = null!;
 
     /// <summary>
-    /// The type of document (statement, solution or hints).
+    /// The type of document (statement, solution, hints or grading note).
     /// </summary>
     public required DocumentType DocumentType { get; set; }
 

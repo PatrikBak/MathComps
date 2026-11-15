@@ -107,7 +107,7 @@ public sealed class ProblemSelectionService(
                         text.DocumentType, text.Language, text.MarkdownText ?? text.RawText))
                     .ToList(),
                 OriginalLanguage = proposal.Problem.Texts
-                    .Where(text => text.IsOriginal)
+                    .Where(text => text.DocumentType == DocumentType.Statement && text.IsOriginal)
                     .Select(text => (Language?)text.Language)
                     .FirstOrDefault(),
                 Ratings = proposal.Ratings

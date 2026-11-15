@@ -22,8 +22,13 @@ public class ProblemDefenseContentResolverPostgresTests(PostgresContainerFixture
     private const string RawEnglishStatement = "the English statement as raw source";
 
     /// <summary>
+    /// The problem's grading note, written in English alone.
+    /// </summary>
+    private const string EnglishGradingNote = "Needs a reason: the bound. Needs none: the parity.";
+
+    /// <summary>
     /// The problem the tests read most, first written in English as a statement alone and translated into Slovak in
-    /// full.
+    /// full, with a grading note in English.
     /// </summary>
     private Guid _problemId;
 
@@ -53,6 +58,17 @@ public class ProblemDefenseContentResolverPostgresTests(PostgresContainerFixture
             DocumentType = DocumentType.Statement,
             Language = Language.EN,
             RawText = RawEnglishStatement,
+            IsOriginal = true,
+            DateModified = DateTime.UtcNow,
+        });
+
+        // And its grading note, in English alone
+        context.ProblemTexts.Add(new ProblemText
+        {
+            ProblemId = _problemId,
+            DocumentType = DocumentType.GradingNote,
+            Language = Language.EN,
+            MarkdownText = EnglishGradingNote,
             IsOriginal = true,
             DateModified = DateTime.UtcNow,
         });
@@ -91,6 +107,29 @@ public class ProblemDefenseContentResolverPostgresTests(PostgresContainerFixture
         });
 
     /// <summary>
+    /// A problem's grading note reaches the examiner whatever language the rest of it is argued in, since a problem
+    /// carries one note in one language. A problem with no note carries none.
+    /// </summary>
+    [Fact]
+    public Task The_grading_note_is_read_in_its_own_language_whatever_the_students() => RunTestAsync(async resolver =>
+    {
+        // The problem argued in Slovak, its note written in English
+        var noted = await resolver.ResolveAsync(new ProblemTarget(_problemId), Language.SK, CancellationToken.None);
+
+        // The English note beside the Slovak solution
+        Assert.NotNull(noted);
+        Assert.Equal(("Solution 1 in SK", EnglishGradingNote), (noted.Reference, noted.GradingNote));
+
+        // The problem with no note
+        var plain = await resolver.ResolveAsync(
+            new ProblemTarget(_englishProblemId), Language.EN, CancellationToken.None);
+
+        // No note
+        Assert.NotNull(plain);
+        Assert.Null(plain.GradingNote);
+    });
+
+    /// <summary>
     /// A problem solved neither in the student's language nor in the one it was first written in has nothing to argue
     /// from, whatever a third language holds.
     /// </summary>
@@ -117,7 +156,7 @@ public class ProblemDefenseContentResolverPostgresTests(PostgresContainerFixture
         // The problem's statements
         var statements = await resolver.ResolveStatementsAsync(new ProblemTarget(_problemId), CancellationToken.None);
 
-        // The Slovak one and the English one, each under its language, the Slovak solution left out
+        // The Slovak one and the English one, each under its language, the Slovak solution and the note left out
         Assert.Equal(
             new Dictionary<Language, string>
             {
