@@ -4,8 +4,9 @@ using MathComps.Shared.Extensions;
 namespace MathComps.Infrastructure.Services.Defense.Engine;
 
 /// <summary>
-/// Builds the reference the examiner reasons from, folding a problem's author hints into it under
-/// <see cref="Heading"/>: ordered stages of the solution, extra material for the help a stuck candidate gets.
+/// Builds the reference the examiner reasons from, folding in a problem's grading note under a GRADING NOTES heading
+/// and its author hints under <see cref="Heading"/>: ordered stages of the solution, extra material for the help a
+/// stuck candidate gets. The hints always come last.
 /// </summary>
 public static class DefenseReferenceBuilder
 {
@@ -15,31 +16,49 @@ public static class DefenseReferenceBuilder
     public const string Heading = "## AUTHOR'S HINTS";
 
     /// <summary>
-    /// Builds the reference for one problem, appending its author hints under <see cref="Heading"/> so an examiner
-    /// reads them as the problem's staged solution and can pitch earned help at the author's granularity. Returns
-    /// the reference unchanged when the problem carries no hints.
+    /// Builds the reference for one problem: the solution, then its grading note under a GRADING NOTES heading so
+    /// the math check marks the problem the way its author does, then its author hints under <see cref="Heading"/> so
+    /// an examiner reads them as the problem's staged solution and can pitch earned help at the author's granularity.
+    /// Returns the reference unchanged when the problem carries neither, a blank note counting as none.
     /// </summary>
     /// <param name="problem">The problem's resolved content.</param>
     /// <returns>The reference, ready for the examiner to reason from.</returns>
     public static string BuildReference(DefenseProblemContent problem)
     {
-        // No hints: the reference stands as the examiner's only source material.
-        if (problem.Hints.Count == 0)
-            return problem.Reference;
+        // The note section's heading, and the line under it saying whose note it is and what it settles.
+        const string notesHeading = "## GRADING NOTES";
+        const string notesLead =
+            "(From the problem's author, for marking: what needs a reason in a solution to this problem and what "
+            + "needs none.)";
+
+        // The note, framed as the author's word on what needs a reason, when the problem has one that says anything.
+        var notesSection = !string.IsNullOrWhiteSpace(problem.GradingNote)
+            ? $"""
+                {notesHeading}
+                {notesLead}
+
+                {problem.GradingNote.Trim()}
+                """
+            : null;
 
         // Each hint under its own "Hint N" heading.
         var numberedHints = problem.Hints
             .Select((hint, index) => $"### Hint {index + 1}\n{hint}")
             .ToJoinedString("\n\n");
 
-        // The reference followed by the hints, framed as ordered stages of the solution.
-        return $"""
-            {problem.Reference}
+        // The hints, framed as ordered stages of the solution, when the problem has any.
+        var hintsSection = problem.Hints.Count > 0
+            ? $"""
+                {Heading}
+                (Ordered stages of the solution, from first exploration to the key idea.)
 
-            {Heading}
-            (Ordered stages of the solution, from first exploration to the key idea.)
+                {numberedHints}
+                """
+            : null;
 
-            {numberedHints}
-            """;
+        // The reference followed by whichever sections the problem has, the hints last.
+        return new[] { problem.Reference, notesSection, hintsSection }
+            .OfType<string>()
+            .ToJoinedString("\n\n");
     }
 }

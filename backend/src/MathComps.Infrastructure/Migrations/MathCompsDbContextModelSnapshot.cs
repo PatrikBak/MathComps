@@ -32,7 +32,7 @@ namespace MathComps.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "comment_target_type", new[] { "handout", "hosted_grade", "news", "problem", "proposal", "selection_paper" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "defense_outcome", new[] { "confirmed_the_solution", "found_the_mistake", "not_enough_help", "something_else", "was_off" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "defense_report_category", new[] { "gave_away", "missed_the_mistake", "misunderstood", "other", "said_something_wrong", "tone" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "document_type", new[] { "hints", "solution", "statement" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "document_type", new[] { "grading_note", "hints", "solution", "statement" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "examiner_step", new[] { "generate", "language_check", "leak_check", "math_check", "route_check" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "hosted_competition_category", new[] { "advanced", "elementary", "intermediate" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "language", new[] { "cs", "en", "sk" });
