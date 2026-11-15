@@ -151,7 +151,7 @@ Mathilda is the AI examiner a student defends a solution to. The feature lives i
 - **The client names the problem rather than sending it.** A start carries its target (the handout's and environment's ids, or the problem's id); the backend resolves the statement, reference and hints and snapshots them onto the session.
 - **Reading the conversations back is a route:** [`/admin/defenses`](src/app/[locale]/admin/defenses/page.tsx), gated by the Clerk admin role.
 
-A turn is several LLM calls and takes about 40 seconds, so develop against `"Examiner:UseFake": true` in the backend config.
+A turn is several LLM calls and takes ten seconds or more, so develop against `"Examiner:UseFake": true` in the backend config.
 
 ## Webhooks
 

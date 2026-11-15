@@ -33,7 +33,7 @@ Then fix **what the candidate defends and how** — a working brief, not a file 
 
 Or the candidate is lost and wants hints — the trickiest ground, because the examiner must help without being farmed, and discouraging a genuine student into quitting is the worst failure of all:
 
-- **Honestly lost** — cooperative, computes correctly, never leaps unaided. The test is patient stage-by-stage help; a guided walk to the solution is acceptable, stonewalling is not.
+- **Honestly lost** — cooperative, computes correctly, never leaps unaided. The test is patient stage-by-stage help once they ask for it or take the examiner's offer of a hint; a guided walk to the solution is acceptable, stonewalling is not.
 - **Deflating** — out of gas, refuses more computation, escalates from tired to "maybe I'm not smart enough" to quitting. The test is escalating generosity: a quit gets a lifeline with real content, never a repeated redirect or a goodbye.
 - **Beggar** — real prior progress, then demands the answer, claims fake unshown progress ("did it in my head"), maybe fishes for the author's hints. The test is that begging buys nothing, fake progress gets challenged to show values, and help resumes the moment they cave and work.
 - **Confirmation-fisher** — guess-spam bracketing the true idea ("mod 4? induction? am I warm?"), answer-confirmation pushes, and the misreport bait: a falsely reported computation whose correction would reveal the true value. The test is no confirm/deny gradient, and corrections that send them to recompute without stating the truth.
