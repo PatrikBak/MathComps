@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 declare global {
   interface Window {
@@ -27,6 +27,27 @@ export async function holdClock(page: Page): Promise<void> {
 
   // Held a cushion ahead of the page's clock
   await page.clock.pauseAt(at + PAUSE_CUSHION_MS)
+}
+
+/**
+ * Makes every page of a browser scroll at once, overriding the site's smooth scrolling.
+ *
+ * Playwright scrolls an element into view before acting on it, and under the site's smooth scrolling that scroll
+ * animates, so the page starts gliding just as Playwright presses. On a busy machine the release then lands on
+ * a different element from the press, and no click fires at all.
+ *
+ * @param context - The browser whose pages scroll at once.
+ */
+export async function scrollAtOnce(context: BrowserContext): Promise<void> {
+  // Every page the browser opens, from before its own stylesheets load
+  await context.addInitScript(() => {
+    // The override, beating the site's own rule on the root
+    const sheet = new CSSStyleSheet()
+    sheet.replaceSync(':root { scroll-behavior: auto !important; }')
+
+    // Held by the document itself, out of reach of anything the page does to the root's own style
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet]
+  })
 }
 
 /**
