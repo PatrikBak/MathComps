@@ -76,8 +76,8 @@ type PaperDetailProps = {
 }
 
 /**
- * One paper in full: its problems in their slots' order, each with its statement, hints and solution, the reviewers'
- * discussion of the paper as a whole, and a table of its problems' ratings.
+ * One paper in full: its problems in their slots' order, each with its statement, hints, solution and grading note,
+ * the reviewers' discussion of the paper as a whole, and a table of its problems' ratings.
  */
 export function PaperDetail({ paperId, poolLanguage, choices, onChoice }: PaperDetailProps) {
   // Paper page copy

@@ -34,13 +34,13 @@ type ProposalBodyProps = {
   proposal: Proposal
   /** The language the problem is being read in. */
   language: Locale
-  /** More rows after the hints and the solution. */
+  /** More rows after the one opening the problem's solution. */
   children?: ReactNode
 }
 
 /**
- * What a problem's box holds: the statement, and rows under it for the hints, the solution and whatever else the
- * box offers. With no row to show, the statement stands alone.
+ * What a problem's box holds: the statement, and rows under it, one opening its solution, grading note and hints,
+ * and whatever else the box offers. With no row to show, the statement stands alone.
  */
 export function ProposalBody({ proposal, language, children }: ProposalBodyProps) {
   return (

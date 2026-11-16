@@ -89,6 +89,10 @@ export const SLOVAK_STATEMENT =
 /** {@link BILINGUAL}'s hint, in English. */
 export const HINT = 'Pair the numbers up.'
 
+/** The line {@link BILINGUAL}'s grading note is written as. */
+export const NOTE_LINE =
+  'Needs a reason: why every pair is left with a number for the first player to erase.'
+
 /** The paragraph an author adds to a problem's statement in revising it. */
 export const REVISION = 'Revised: the two numbers left must also differ by more than one.'
 
@@ -154,6 +158,7 @@ function proposalNumbered(number: number, distinction: Partial<Proposal> = {}): 
     recommended: ['intermediate'],
     texts: { en: { statement: statementOf(number), solution: null, hints: [] } },
     originalLanguage: 'en',
+    gradingNote: null,
     isSetAside: false,
     isUsed: false,
     ratings: [],
@@ -172,7 +177,7 @@ const OPENED_AT_LENGTH = proposalNumbered(OPENED.number, {
   texts: { en: { statement: longStatementOf(OPENED.number), solution: null, hints: [] } },
 })
 
-/** A problem written in Slovak as well, solved and hinted in English alone. */
+/** A problem written in Slovak as well, solved and hinted in English alone, with a grading note. */
 export const BILINGUAL = proposalNumbered(2, {
   texts: {
     en: {
@@ -182,6 +187,7 @@ export const BILINGUAL = proposalNumbered(2, {
     },
     sk: { statement: SLOVAK_STATEMENT, solution: null, hints: [] },
   },
+  gradingNote: `- ${NOTE_LINE}`,
 })
 
 /** A problem proposed before anybody wrote its statement, in any language. */
