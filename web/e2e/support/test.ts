@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 import { devices, expect, test as base } from '@playwright/test'
 
 import { BACKEND_ORIGIN, serveStoredFiles, stubAmbientReads } from './backend-routes'
+import { scrollAtOnce } from './emulation'
 
 /** The phone a test's student holds beside the computer. */
 const PHONE = devices['iPhone 15']
@@ -47,8 +48,8 @@ async function holdToOwnAnswers(page: Page): Promise<() => void> {
 }
 
 /**
- * The runner every spec builds on, which holds each test to answering its own backend calls, on its phone's page
- * as on its own.
+ * The runner every spec builds on, which holds each test to answering its own backend calls and scrolls its pages
+ * at once ({@link scrollAtOnce}), on its phone's page as on its own.
  *
  * CI has no API behind the app, so a test leaning on one there fails for reasons that have nothing to
  * do with what it is about. The reverse is worse and is what this exists for: a call nobody stood in
@@ -61,7 +62,19 @@ async function holdToOwnAnswers(page: Page): Promise<() => void> {
  * grows endpoints. The one hole it cannot see through is `route.continue()`, which goes to the network
  * rather than to the routes underneath it. Nothing here may use it.
  */
-export const test = base.extend<{ hermeticBackend: void; phone: Page }>({
+export const test = base.extend<{ hermeticBackend: void; instantScroll: void; phone: Page }>({
+  // Every page of the test's browser scrolling at once
+  instantScroll: [
+    async ({ context }, runTest) => {
+      // The browser's pages scrolling at once
+      await scrollAtOnce(context)
+
+      // The test itself
+      await runTest()
+    },
+    { auto: true },
+  ],
+
   hermeticBackend: [
     async ({ page }, runTest) => {
       // The page held to its own answers
@@ -81,6 +94,9 @@ export const test = base.extend<{ hermeticBackend: void; phone: Page }>({
   phone: async ({ browser, baseURL, userAgent }, runTest) => {
     // The phone's browser
     const context = await browser.newContext({ ...PHONE, baseURL, userAgent })
+
+    // Scrolling at once, as the computer's pages do
+    await scrollAtOnce(context)
 
     // Its page
     const page = await context.newPage()
