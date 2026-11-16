@@ -5,7 +5,7 @@ import { OPEN_PROPOSAL_PARAM } from '@/components/features/problem-selection/mod
 import { locationParam } from './support/address'
 import { BACKEND_ORIGIN } from './support/backend-routes'
 import { stubNamedReader } from './support/comments'
-import { actionsCopy, areaCopy, editorCopy, SELECTION_PATH } from './support/competitions'
+import { actionsCopy, editorCopy, SELECTION_PATH } from './support/competitions'
 import { returnToTab, slowDown } from './support/emulation'
 import { pickPillAnswer } from './support/facets'
 import {
@@ -30,12 +30,14 @@ import {
   HINT,
   LANDING_WINDOW_MS,
   LATER_DRAFT,
+  NOTE_LINE,
   ON_OFFER_COUNT,
   OPENED,
   OPENED_ADDRESS,
   openPool,
   pickBoard,
   problemCount,
+  READY,
   rememberedSelection,
   REVISION,
   SELECTION_ENDPOINT,
@@ -687,7 +689,7 @@ test.describe("the selection's address and history", () => {
     ).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
   })
 
-  test("closes a problem's hints when history moves off the pool, however soon it comes back", async ({
+  test("closes a problem's solution when history moves off the pool, however soon it comes back", async ({
     page,
   }) => {
     // A reviewer whose selection holds a pool of problems
@@ -703,8 +705,10 @@ test.describe("the selection's address and history", () => {
     // And Back, so there is a step to go Forward to
     await page.goBack()
 
-    // The hints of another problem, opened on its card
-    await cardOf(page, BILINGUAL).getByRole('button', { name: areaCopy.hints, exact: true }).click()
+    // The solution of another problem, opened on its card
+    await cardOf(page, BILINGUAL)
+      .getByRole('button', { name: selectionCopy.text.reference, exact: true })
+      .click()
 
     // Up over the pool
     await expect(page.getByRole('dialog').getByText(HINT)).toBeVisible()
@@ -724,7 +728,7 @@ test.describe("the selection's address and history", () => {
     // Once the pool has had a moment to bring anything back with it
     await twoFramesLater(page)
 
-    // The hints still closed
+    // The solution still closed
     await expect(page.getByRole('dialog')).toHaveCount(0)
 
     // And every card within reach, nothing laid over them
@@ -839,6 +843,46 @@ test.describe('reading the selection', () => {
 
     // The pool, every card of it
     await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT)
+  })
+
+  test("reads a problem's solution, grading note and hints on one surface, with no note where it has none", async ({
+    page,
+  }) => {
+    // A reviewer whose selection holds a pool of problems
+    await stubSelection(page, 'selection')
+
+    // The pool
+    await openPool(page)
+
+    // The solution of a problem with a grading note, opened on its card
+    await cardOf(page, BILINGUAL)
+      .getByRole('button', { name: selectionCopy.text.reference, exact: true })
+      .click()
+
+    // The surface it opens
+    const surface = page.getByRole('dialog', { name: selectionCopy.text.reference })
+
+    // Its solution, its note and its hint, all on it at once
+    await expect(surface.getByText(BILINGUAL.texts.en!.solution!)).toBeVisible()
+    await expect(surface.getByText(NOTE_LINE)).toBeVisible()
+    await expect(surface.getByText(HINT)).toBeVisible()
+
+    // Closed
+    await page.keyboard.press('Escape')
+
+    // Gone from the screen
+    await expect(surface).toHaveCount(0)
+
+    // The solution of a problem with no note
+    await cardOf(page, READY)
+      .getByRole('button', { name: selectionCopy.text.reference, exact: true })
+      .click()
+
+    // Its solution on the surface
+    await expect(surface.getByText(READY.texts.en!.solution!)).toBeVisible()
+
+    // And no note beside it
+    await expect(surface.getByText(selectionCopy.text.gradingNote)).toHaveCount(0)
   })
 })
 

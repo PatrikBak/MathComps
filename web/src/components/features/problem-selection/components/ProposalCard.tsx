@@ -119,8 +119,8 @@ export function ProposalCard({
         <div className="flex flex-wrap items-center gap-1.5">{details}</div>
       </header>
 
-      {/* The statement, and after the hints and the solution the rows opening the problem's tabs, where the card leads
-          to its page */}
+      {/* The statement, and after the row opening its solution the rows opening the problem's tabs, where the card
+          leads to its page */}
       <ProposalBody proposal={proposal} language={language}>
         {leadsToPage && <ProposalTabRows proposalId={proposal.id} />}
       </ProposalBody>

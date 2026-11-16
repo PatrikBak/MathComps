@@ -44,6 +44,7 @@ function proposal(number: number, changes: Partial<Proposal> = {}): Proposal {
     recommended: [],
     texts: { en: { statement: `Statement ${number}`, solution: null, hints: [] } },
     originalLanguage: 'en',
+    gradingNote: null,
     isSetAside: false,
     isUsed: false,
     ratings: [],

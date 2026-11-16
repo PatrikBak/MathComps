@@ -44,7 +44,7 @@ type ProposalDetailProps = {
 
 /**
  * One problem in full: what it is filed under, its statement in the language being read, and under it the hints, the
- * solution, every conversation reviewers held with Mathilda, and the discussion.
+ * solution, the grading note, every conversation reviewers held with Mathilda, and the discussion.
  */
 export function ProposalDetail({ proposalId, poolLanguage }: ProposalDetailProps) {
   // Problem page copy

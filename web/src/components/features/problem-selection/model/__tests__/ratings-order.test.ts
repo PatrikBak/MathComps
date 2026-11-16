@@ -35,6 +35,7 @@ function proposal(number: number, ratings: ProposalRating[]): Proposal {
     recommended: [],
     texts: {},
     originalLanguage: null,
+    gradingNote: null,
     isSetAside: false,
     isUsed: false,
     ratings,

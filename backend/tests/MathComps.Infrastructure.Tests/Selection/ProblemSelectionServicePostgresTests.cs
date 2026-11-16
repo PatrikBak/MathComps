@@ -172,6 +172,25 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     });
 
     /// <summary>
+    /// A proposal reads with its grading note where its problem carries one, and with none where not. A note is
+    /// written in one language, so a reviewer reading in another still gets it.
+    /// </summary>
+    [Fact]
+    public Task A_proposal_reads_with_its_grading_note() => RunTestAsync(async service =>
+    {
+        // The selection, read in Slovak
+        var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.SK);
+
+        // The first proposal's note, which is written in English
+        Assert.Equal(
+            "GradingNote 1 in EN",
+            selection.Proposals.Single(candidate => candidate.Id == _pool[1]).GradingNote);
+
+        // No note on the second proposal, whose problem carries none
+        Assert.Null(selection.Proposals.Single(candidate => candidate.Id == _pool[2]).GradingNote);
+    });
+
+    /// <summary>
     /// The selection reads MathComps' categories in the order they run, each with the hosted level it is, and every
     /// paper names the category it fills. Another organization's category stays out.
     /// </summary>
@@ -846,7 +865,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
     /// <summary>
     /// Tracks the first proposal: filed under geometry, recommended for two categories, set aside, with an English
-    /// statement, solution and hints, and a Slovak statement alone.
+    /// statement, solution, hints and grading note, and a Slovak statement alone.
     /// </summary>
     /// <param name="context">The seeding context.</param>
     /// <param name="pool">The pool's round.</param>
@@ -863,6 +882,9 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         var hints = SelectionSeed.NewText(problemId, DocumentType.Hints, Language.EN, 1);
         hints.MarkdownText = HintsDocument.Join(["Nudge", "Push"]);
         context.ProblemTexts.Add(hints);
+
+        // An English grading note
+        context.ProblemTexts.Add(SelectionSeed.NewText(problemId, DocumentType.GradingNote, Language.EN, 1));
 
         // Its filing
         var proposal = context.Proposals.Local.Single(candidate => candidate.ProblemId == problemId);
