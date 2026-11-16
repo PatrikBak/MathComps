@@ -148,7 +148,8 @@ public class DefensePhotoHandoffEndpointsTests
     /// <returns>The error, as it leaves.</returns>
     private static SentryEvent ErrorOf(HttpContext request) =>
         // A fresh error, passed through the processor reading the request
-        new ClerkIdSentryEventProcessor(new HttpContextAccessor { HttpContext = request }).Process(new SentryEvent());
+        new RequestContextSentryEventProcessor(new HttpContextAccessor { HttpContext = request })
+            .Process(new SentryEvent());
 
     /// <summary>
     /// Runs a request through the request log's interceptor, as its response is written.

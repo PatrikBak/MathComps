@@ -144,6 +144,9 @@ builder.WebHost.UseSentry(options =>
     // webhook's account data go with it, deliberately. A turn written up to its length cap can pass that size.
     options.MaxRequestBodySize = RequestSize.Medium;
 
+    // Every error is tagged with its caller: the API's own work, unless a request's processor names the sender
+    options.DefaultTags[RequestContextSentryEventProcessor.CallerTag] = CallerKind.Background;
+
     // The last pass over an event before it leaves
     options.SetBeforeSend((sentryEvent, _) =>
     {
@@ -164,8 +167,8 @@ builder.WebHost.UseSentry(options =>
     });
 });
 
-// The caller's Clerk id on each error a request reports
-builder.Services.AddSingleton<ISentryEventProcessor, ClerkIdSentryEventProcessor>();
+// Each error's caller, route and language, and the Clerk id of the account its request acts for
+builder.Services.AddSingleton<ISentryEventProcessor, RequestContextSentryEventProcessor>();
 
 // Drop the body readers UseSentry registered above, one of which reads any body as text, a small uploaded file included
 builder.Services.RemoveAll<IRequestPayloadExtractor>();

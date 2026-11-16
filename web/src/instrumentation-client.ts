@@ -3,11 +3,15 @@ import 'core-js/stable'
 
 import * as Sentry from '@sentry/nextjs'
 
+import { callerKindOf } from '@/lib/error-reporting/caller-kind'
 import { SENTRY_OPTIONS } from '@/lib/error-reporting/sentry-options'
 
 // Browser faults reach Better Stack from the first script on
 Sentry.init({
   ...SENTRY_OPTIONS,
+
+  // Every report says who had the page open: a visitor, a crawler or a script
+  initialScope: { tags: { caller: callerKindOf(navigator.userAgent, navigator.webdriver) } },
 
   // A report's addresses stop at their #, since what follows it is kept from every server
   beforeSend: (event) => {
