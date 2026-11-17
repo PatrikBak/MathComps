@@ -1430,7 +1430,7 @@ test.describe("the pool's discussions", () => {
     ])
   })
 
-  test("runs the threads problem by problem as the problems run, a category's papers first, each heading once, the order kept in the address through a reload and Back from a problem", async ({
+  test("runs the threads problem by problem, the drafts' first, then the pool's, then the finalized board's, each paper's own thread ahead of its problems, each heading once, the order kept in the address through a reload and Back from a problem", async ({
     page,
   }) => {
     // The discussions the filters' cases start with
@@ -1458,25 +1458,25 @@ test.describe("the pool's discussions", () => {
       selectionCopy.pool.commentsOrder.problem
     )
 
-    // The headings problem by problem, as the board on screen runs the pool
+    // The headings problem by problem
     const problemByProblem = [
-      // The elementary papers' threads first: the board on screen's, then the older finalized board's
-      paperHeadingText(ELEMENTARY, DRAFT_BOARD),
-      paperHeadingText(FINALIZED_PAPER, FINALIZED_BOARD),
-      // The first problem, in the elementary paper's slot
-      headingText(FIRST),
-      // The problem on offer and the one the round took, among the intermediate paper's rest by number
-      headingText(OPENED),
-      headingText(USED),
-      // The geometry problem, in the advanced paper, its two threads under one heading
+      // The newest draft's: the geometry problem, in its advanced paper, its two threads under one heading
       headingText(GEOMETRY),
+      // The older draft's: its elementary paper's thread, then the first problem in that paper's slot
+      paperHeadingText(ELEMENTARY, DRAFT_BOARD),
+      headingText(FIRST),
+      // The pool's: the problem on offer
+      headingText(OPENED),
+      // The finalized board's: its paper's thread, then the problem the round took
+      paperHeadingText(FINALIZED_PAPER, FINALIZED_BOARD),
+      headingText(USED),
     ]
 
     // The threads in that order, the geometry problem's second thread without a heading of its own
     await expect(threadHeadings(page)).toHaveText(problemByProblem)
     await expect(page.getByRole('article')).toHaveCount(problemByProblem.length + 1)
-    await expect(page.getByRole('article').last()).toContainText(SECOND_REMARK)
-    await expect(page.getByRole('article').last().getByRole('heading')).toHaveCount(0)
+    await expect(page.getByRole('article').nth(1)).toContainText(SECOND_REMARK)
+    await expect(page.getByRole('article').nth(1).getByRole('heading')).toHaveCount(0)
 
     // The order, in the URL
     await expect.poll(() => locationParam(page, COMMENTS_ORDER_PARAM)).toBe('problem')
@@ -1557,7 +1557,7 @@ test.describe("the pool's discussions", () => {
     )
 
     // The same two still marked new, under their problems, and still counted
-    await expect(threadHeadings(page).first()).toHaveText(paperHeadingText(ELEMENTARY, DRAFT_BOARD))
+    await expect(threadHeadings(page).first()).toHaveText(headingText(GEOMETRY))
     await expect
       .poll(() => newCommentTexts(page, MARKABLE_TEXTS))
       .toEqual([LATE_REPLY, OPENED_COMMENT.content])
@@ -1622,12 +1622,12 @@ test.describe("the pool's discussions", () => {
     // The pool's discussions, problem by problem
     await page.goto(`${COMMENTS_ADDRESS}&${COMMENTS_ORDER_PARAM}=problem`)
 
-    // The paper's thread first, then the problems' as the pool runs them
+    // The newest draft's geometry problem, the older draft's paper and its first problem, then the pool's
     const problemByProblem = [
+      headingText(GEOMETRY),
       paperHeadingText(ELEMENTARY, DRAFT_BOARD),
       headingText(FIRST),
       headingText(OPENED),
-      headingText(GEOMETRY),
     ]
 
     // Once every thread is drawn
@@ -1644,8 +1644,8 @@ test.describe("the pool's discussions", () => {
 
     // The new thread at once, right after the first problem's own, under its heading
     await expect(page.getByRole('article')).toHaveCount(problemByProblem.length + 1)
-    await expect(page.getByRole('article').nth(2)).toContainText(READER_COMMENT)
-    await expect(page.getByRole('article').nth(2).getByRole('heading')).toHaveCount(0)
+    await expect(page.getByRole('article').nth(3)).toContainText(READER_COMMENT)
+    await expect(page.getByRole('article').nth(3).getByRole('heading')).toHaveCount(0)
     await expect(threadHeadings(page)).toHaveText(problemByProblem)
   })
 })
