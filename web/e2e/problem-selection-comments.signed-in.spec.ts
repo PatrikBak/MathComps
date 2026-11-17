@@ -2,6 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
 import {
+  COMMENTS_ORDER_PARAM,
   detailQuery,
   OPEN_PAPER_PARAM,
   OPEN_PROPOSAL_PARAM,
@@ -33,7 +34,13 @@ import {
 import { areaCopy, editorCopy, SELECTION_PATH } from './support/competitions'
 import { stubPageVisibility } from './support/emulation'
 import { pickPillAnswer, pickPillOption } from './support/facets'
-import { isPanelPlaced, openUserMenu, selectedTab } from './support/interaction'
+import {
+  isPanelPlaced,
+  openUserMenu,
+  pickSwitchOption,
+  selectedTab,
+  switchOption,
+} from './support/interaction'
 import {
   ALGEBRA,
   BILINGUAL,
@@ -384,38 +391,6 @@ function addToGeometry(memory: ReturnType<typeof rememberedSelection>, added: Co
   memory.discussions.set(geometryKey, [...(memory.discussions.get(geometryKey) ?? []), added])
 }
 
-/**
- * One layout of the pool, on its switch.
- *
- * @param page - The page.
- * @param name - What the layout is called.
- *
- * @returns The layout's option.
- */
-function poolView(page: Page, name: string): Locator {
-  // The option named so on the pool's switch
-  return page
-    .getByRole('radiogroup', { name: selectionCopy.pool.views.label })
-    .getByRole('radio', { name })
-}
-
-/**
- * Lays the pool out as one of its layouts, returning once the switch has taken it.
- *
- * @param page - The page.
- * @param name - What the layout is called.
- */
-async function showPoolAs(page: Page, name: string): Promise<void> {
-  // The layout's option
-  const option = poolView(page, name)
-
-  // Picked
-  await option.click()
-
-  // Taken by the switch
-  await expect(option).toBeChecked()
-}
-
 test.describe("the pool's discussions", () => {
   test('lays the pool out as its threads, newest activity first, kept in the address so Back from a problem lands on it', async ({
     page,
@@ -430,7 +405,7 @@ test.describe("the pool's discussions", () => {
     const threadReads = recordThreadReads(page)
 
     // The pool laid out as its discussions
-    await showPoolAs(page, selectionCopy.pool.views.comments)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
 
     // Every thread, the one answered last first, the paper's among the problems'
     await expect(threadHeadings(page)).toHaveText([
@@ -588,19 +563,24 @@ test.describe("the pool's discussions", () => {
     await expect(threadHeadings(page)).toHaveCount(4, { timeout: SETTLE_TIMEOUT_MS })
 
     // The discussions' option, as the page holds it
-    const commentsOption = await poolView(page, selectionCopy.pool.views.comments).elementHandle()
+    const commentsOption = await switchOption(
+      page,
+      selectionCopy.pool.views.label,
+      selectionCopy.pool.views.comments
+    ).elementHandle()
 
     // The problems picked, and the discussions straight after, quicker than any hand could press
-    await poolView(page, selectionCopy.pool.views.problems).evaluate(
-      (problemsOption, laterOption) => {
-        // The problems picked
-        problemsOption.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    await switchOption(
+      page,
+      selectionCopy.pool.views.label,
+      selectionCopy.pool.views.problems
+    ).evaluate((problemsOption, laterOption) => {
+      // The problems picked
+      problemsOption.dispatchEvent(new MouseEvent('click', { bubbles: true }))
 
-        // The discussions picked the moment the first press has run its course
-        queueMicrotask(() => laterOption.dispatchEvent(new MouseEvent('click', { bubbles: true })))
-      },
-      commentsOption
-    )
+      // The discussions picked the moment the first press has run its course
+      queueMicrotask(() => laterOption.dispatchEvent(new MouseEvent('click', { bubbles: true })))
+    }, commentsOption)
 
     // The discussions, the last layout picked, named in the address
     await expect
@@ -608,7 +588,9 @@ test.describe("the pool's discussions", () => {
       .toBe('comments')
 
     // And laid out as the discussions
-    await expect(poolView(page, selectionCopy.pool.views.comments)).toBeChecked()
+    await expect(
+      switchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
+    ).toBeChecked()
     await expect(threadHeadings(page)).toHaveCount(4)
   })
 
@@ -634,7 +616,7 @@ test.describe("the pool's discussions", () => {
     await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
 
     // The pool laid out as its problems
-    await showPoolAs(page, selectionCopy.pool.views.problems)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.problems)
 
     // The geometry problem, opened from its card
     await cardOf(page, GEOMETRY).getByRole('link', { name: GEOMETRY.title }).click()
@@ -652,7 +634,9 @@ test.describe("the pool's discussions", () => {
     await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
 
     // The discussions, as the address holds them
-    await expect(poolView(page, selectionCopy.pool.views.comments)).toBeChecked()
+    await expect(
+      switchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
+    ).toBeChecked()
     await expect(threadHeadings(page)).toHaveCount(4)
     expect(await locationParam(page, POOL_VIEW_PARAM)).toBe('comments')
   })
@@ -676,7 +660,7 @@ test.describe("the pool's discussions", () => {
     await expect(search).toHaveValue(READY.title, { timeout: SETTLE_TIMEOUT_MS })
 
     // The pool laid out as its discussions
-    await showPoolAs(page, selectionCopy.pool.views.comments)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
 
     // The search and the layout named in the address
     await expect
@@ -705,11 +689,13 @@ test.describe("the pool's discussions", () => {
     await expect.poll(() => locationParam(page, POOL_VIEW_PARAM)).toBe('comments')
 
     // The pool still laid out as its discussions, searched down to a problem nobody has discussed
-    await expect(poolView(page, selectionCopy.pool.views.comments)).toBeChecked()
+    await expect(
+      switchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
+    ).toBeChecked()
     await expect(page.getByText(selectionCopy.pool.emptyCommentsFiltered)).toBeVisible()
 
     // Laid out as its problems again
-    await showPoolAs(page, selectionCopy.pool.views.problems)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.problems)
 
     // Still searched down to the one problem
     await expect(search).toHaveValue(READY.title)
@@ -734,7 +720,7 @@ test.describe("the pool's discussions", () => {
     await page.getByRole('menuitem', { name: MATHCOMPS.name }).click()
 
     // The pool laid out as its discussions
-    await showPoolAs(page, selectionCopy.pool.views.comments)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
 
     // Once every thread is drawn
     await expect(threadHeadings(page)).toHaveCount(4, { timeout: SETTLE_TIMEOUT_MS })
@@ -749,7 +735,7 @@ test.describe("the pool's discussions", () => {
     await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
 
     // The pool laid out as its ratings
-    await showPoolAs(page, selectionCopy.pool.views.ratings)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.ratings)
 
     // The ratings named in the address
     await expect.poll(() => locationParam(page, POOL_VIEW_PARAM)).toBe('ratings')
@@ -767,7 +753,9 @@ test.describe("the pool's discussions", () => {
     await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
 
     // Laid out as the discussions
-    await expect(poolView(page, selectionCopy.pool.views.comments)).toBeChecked()
+    await expect(
+      switchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
+    ).toBeChecked()
   })
 
   test('says when the discussions could not be read, reads them again on asking, and marks them seen once they show', async ({
@@ -1083,13 +1071,13 @@ test.describe("the pool's discussions", () => {
     await expect(whatsNew).toBeVisible()
 
     // The pool laid out as its problems
-    await showPoolAs(page, selectionCopy.pool.views.problems)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.problems)
 
     // The gate, shut
     const release = gate.hold()
 
     // The pool laid out as its discussions again, their read held at the gate
-    await showPoolAs(page, selectionCopy.pool.views.comments)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
 
     // The threads as they were left, counted, with no button while the read is still out, the read they were left
     // with being an earlier visit's
@@ -1418,10 +1406,10 @@ test.describe("the pool's discussions", () => {
     await expect(page.getByRole('article').last()).toContainText(READER_REPLY)
 
     // The pool laid out as its problems
-    await showPoolAs(page, selectionCopy.pool.views.problems)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.problems)
 
     // The pool laid out as its discussions again
-    await showPoolAs(page, selectionCopy.pool.views.comments)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
 
     // Ordered afresh: the new comment first, then the replied thread
     await expect(page.getByRole('article').first()).toContainText(READER_COMMENT)
@@ -1440,6 +1428,225 @@ test.describe("the pool's discussions", () => {
       headingText(OPENED),
       paperHeadingText(ELEMENTARY, DRAFT_BOARD),
     ])
+  })
+
+  test("runs the threads problem by problem as the problems run, a category's papers first, each heading once, the order kept in the address through a reload and Back from a problem", async ({
+    page,
+  }) => {
+    // The discussions the filters' cases start with
+    const memory = widelyDiscussed()
+
+    // A later thread under the geometry problem
+    addToGeometry(
+      memory,
+      postedComment('c-geometry-later', 'Zuzana', SECOND_REMARK, '2026-09-28T08:00:00.000Z')
+    )
+
+    // Held by the backend
+    await stubSelection(page, 'selection', memory)
+
+    // The pool
+    await openPool(page)
+
+    // The pool laid out as its discussions
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
+
+    // The threads run problem by problem
+    await pickSwitchOption(
+      page,
+      selectionCopy.pool.commentsOrder.label,
+      selectionCopy.pool.commentsOrder.problem
+    )
+
+    // The headings problem by problem, as the board on screen runs the pool
+    const problemByProblem = [
+      // The elementary papers' threads first: the board on screen's, then the older finalized board's
+      paperHeadingText(ELEMENTARY, DRAFT_BOARD),
+      paperHeadingText(FINALIZED_PAPER, FINALIZED_BOARD),
+      // The first problem, in the elementary paper's slot
+      headingText(FIRST),
+      // The problem on offer and the one the round took, among the intermediate paper's rest by number
+      headingText(OPENED),
+      headingText(USED),
+      // The geometry problem, in the advanced paper, its two threads under one heading
+      headingText(GEOMETRY),
+    ]
+
+    // The threads in that order, the geometry problem's second thread without a heading of its own
+    await expect(threadHeadings(page)).toHaveText(problemByProblem)
+    await expect(page.getByRole('article')).toHaveCount(problemByProblem.length + 1)
+    await expect(page.getByRole('article').last()).toContainText(SECOND_REMARK)
+    await expect(page.getByRole('article').last().getByRole('heading')).toHaveCount(0)
+
+    // The order, in the URL
+    await expect.poll(() => locationParam(page, COMMENTS_ORDER_PARAM)).toBe('problem')
+
+    // Reloaded
+    await page.reload()
+
+    // The same threads problem by problem
+    await expect(threadHeadings(page)).toHaveText(problemByProblem, { timeout: SETTLE_TIMEOUT_MS })
+
+    // The first problem, opened from its thread's heading
+    await threadOf(page, FIRST).getByRole('link').first().click()
+
+    // Its own page
+    await expect(headingOf(page, FIRST)).toBeVisible()
+
+    // Back
+    await page.goBack()
+
+    // The threads problem by problem again, the switch saying so
+    await expect(threadHeadings(page)).toHaveText(problemByProblem)
+    await expect(
+      switchOption(
+        page,
+        selectionCopy.pool.commentsOrder.label,
+        selectionCopy.pool.commentsOrder.problem
+      )
+    ).toBeChecked()
+
+    // The pool laid out as its problems
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.problems)
+
+    // No order of comments offered there
+    await expect(
+      page.getByRole('radiogroup', { name: selectionCopy.pool.commentsOrder.label })
+    ).toHaveCount(0)
+
+    // The pool laid out as its discussions again
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
+
+    // Still problem by problem
+    await expect(threadHeadings(page)).toHaveText(problemByProblem)
+
+    // Newest first again
+    await pickSwitchOption(
+      page,
+      selectionCopy.pool.commentsOrder.label,
+      selectionCopy.pool.commentsOrder.newest
+    )
+
+    // The order gone from the URL, and every thread with its own heading again
+    await expect.poll(() => locationParam(page, COMMENTS_ORDER_PARAM)).toBeNull()
+    await expect(threadHeadings(page)).toHaveCount(problemByProblem.length + 1)
+  })
+
+  test('keeps what was new marked as new once the threads run problem by problem', async ({
+    page,
+  }) => {
+    // What the backend keeps, every discussion seen up to the mark
+    const memory = discussedSelection()
+    seeEverything(memory)
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The pool's discussions, newest first
+    await page.goto(COMMENTS_ADDRESS)
+
+    // Two comments new, and the backend told they were seen
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 2), { timeout: SETTLE_TIMEOUT_MS })
+    await expect.poll(() => memory.seen.writes.length).toBe(1)
+
+    // The threads run problem by problem
+    await pickSwitchOption(
+      page,
+      selectionCopy.pool.commentsOrder.label,
+      selectionCopy.pool.commentsOrder.problem
+    )
+
+    // The same two still marked new, under their problems, and still counted
+    await expect(threadHeadings(page).first()).toHaveText(paperHeadingText(ELEMENTARY, DRAFT_BOARD))
+    await expect
+      .poll(() => newCommentTexts(page, MARKABLE_TEXTS))
+      .toEqual([LATE_REPLY, OPENED_COMMENT.content])
+    await expect(countLineOf(page, 5)).toHaveText(lineText(5, 2))
+  })
+
+  test('takes in what waits behind the button as the order changes, the way a filter change does', async ({
+    page,
+  }) => {
+    // What the backend keeps, which the test changes midway
+    const memory = discussedSelection()
+
+    // A selection whose problems and paper are discussed
+    await stubSelection(page, 'selection', memory)
+
+    // The pool's discussions
+    await page.goto(COMMENTS_ADDRESS)
+
+    // Once every thread is drawn
+    await expect(threadHeadings(page)).toHaveCount(4, { timeout: SETTLE_TIMEOUT_MS })
+
+    // Zuzana answering the geometry problem's comment meanwhile
+    answerGeometry(memory)
+
+    // The first problem, opened from its thread's heading
+    await threadOf(page, FIRST).getByRole('link').first().click()
+
+    // The first problem's own page
+    await expect(headingOf(page, FIRST)).toBeVisible()
+
+    // Back to the pool, which reads the discussions again
+    await page.goBack()
+
+    // The button showing what waits
+    const whatsNew = page.getByRole('button', { name: selectionCopy.pool.showWhatsNew })
+
+    // The reply waiting behind it
+    await expect(whatsNew).toBeVisible()
+    await expect(threadOf(page, GEOMETRY)).not.toContainText(COLLEAGUE_REPLY)
+
+    // The threads run problem by problem
+    await pickSwitchOption(
+      page,
+      selectionCopy.pool.commentsOrder.label,
+      selectionCopy.pool.commentsOrder.problem
+    )
+
+    // The reply in, the button gone
+    await expect(threadOf(page, GEOMETRY)).toContainText(COLLEAGUE_REPLY)
+    await expect(whatsNew).toHaveCount(0)
+  })
+
+  test("puts a new thread of the reader's under its problem, as its last, while the threads run problem by problem", async ({
+    page,
+  }) => {
+    // A reviewer with a username, which a comment asks for before it is taken
+    await stubNamedReader(page)
+
+    // Whose selection's problems and paper are discussed
+    await stubSelection(page, 'selection', discussedSelection())
+
+    // The pool's discussions, problem by problem
+    await page.goto(`${COMMENTS_ADDRESS}&${COMMENTS_ORDER_PARAM}=problem`)
+
+    // The paper's thread first, then the problems' as the pool runs them
+    const problemByProblem = [
+      paperHeadingText(ELEMENTARY, DRAFT_BOARD),
+      headingText(FIRST),
+      headingText(OPENED),
+      headingText(GEOMETRY),
+    ]
+
+    // Once every thread is drawn
+    await expect(threadHeadings(page)).toHaveText(problemByProblem, { timeout: SETTLE_TIMEOUT_MS })
+
+    // The first problem, opened from its thread's heading
+    await threadOf(page, FIRST).getByRole('link').first().click()
+
+    // A new comment, sent on the problem's own page
+    await sendComment(page.getByPlaceholder(selectionCopy.comments.placeholder), READER_COMMENT)
+
+    // Back to the pool by the link on the problem's page
+    await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
+
+    // The new thread at once, right after the first problem's own, under its heading
+    await expect(page.getByRole('article')).toHaveCount(problemByProblem.length + 1)
+    await expect(page.getByRole('article').nth(2)).toContainText(READER_COMMENT)
+    await expect(page.getByRole('article').nth(2).getByRole('heading')).toHaveCount(0)
+    await expect(threadHeadings(page)).toHaveText(problemByProblem)
   })
 })
 
@@ -1487,7 +1694,7 @@ test.describe("the pool's discussions under its filters", () => {
     await search.fill(READY.title)
 
     // The pool laid out as its discussions
-    await showPoolAs(page, selectionCopy.pool.views.comments)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
 
     // The search still on, no thread about anything it finds, and the line over the pool counting no comment
     await expect(search).toHaveValue(READY.title)
@@ -1495,7 +1702,9 @@ test.describe("the pool's discussions under its filters", () => {
     await expect(countLineOf(page, 0)).toBeVisible()
 
     // Once the reader's marks are read, every comment new on the pool's switch
-    await expect(poolView(page, selectionCopy.pool.views.comments)).toHaveAccessibleName(
+    await expect(
+      switchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
+    ).toHaveAccessibleName(
       `${selectionCopy.pool.views.comments} ${selectionText('pool.newCount', { count: 8 })}`
     )
 
@@ -1522,13 +1731,13 @@ test.describe("the pool's discussions under its filters", () => {
     await expect(countLineOf(page, 1)).toHaveText(lineText(1, 1))
 
     // The pool laid out as its problems again
-    await showPoolAs(page, selectionCopy.pool.views.problems)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.problems)
 
     // The set-aside problems still shown there
     await expect(cardOf(page, SET_ASIDE)).toBeVisible()
 
     // The pool laid out as its discussions once more
-    await showPoolAs(page, selectionCopy.pool.views.comments)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
 
     // The set-aside problem's comment no longer new, the last visit having seen it once the pill showed it
     await expect(countLineOf(page, 1)).toHaveText(lineText(1, 0), { timeout: SETTLE_TIMEOUT_MS })
@@ -1579,7 +1788,7 @@ test.describe("the pool's discussions under its filters", () => {
     ])
 
     // The pool laid out as its problems
-    await showPoolAs(page, selectionCopy.pool.views.problems)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.problems)
 
     // Every problem on offer, the State pill naming no pick and nothing to clear
     await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT)
@@ -1603,7 +1812,7 @@ test.describe("the pool's discussions under its filters", () => {
     await page.keyboard.press('Escape')
 
     // The pool laid out as its discussions again
-    await showPoolAs(page, selectionCopy.pool.views.comments)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
 
     // The papers' threads still picked
     await expect(threadHeadings(page)).toHaveText([
@@ -1612,13 +1821,13 @@ test.describe("the pool's discussions under its filters", () => {
     ])
 
     // The pool laid out as its problems once more
-    await showPoolAs(page, selectionCopy.pool.views.problems)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.problems)
 
     // Narrowed there to what the board holds, in place of the whole paper
     await pickPillAnswer(page, selectionCopy.filters.state, selectionCopy.filters.selected)
 
     // The pool laid out as its discussions once more
-    await showPoolAs(page, selectionCopy.pool.views.comments)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
 
     // The first problem's thread alone, the one discussed problem the board on screen holds
     await expect(threadHeadings(page)).toHaveText([headingText(FIRST)])
@@ -1723,7 +1932,11 @@ test.describe("the pool's discussions under its filters", () => {
       .toEqual([{ proposals: { [GEOMETRY.id]: '2026-09-10T08:00:00.000Z' }, papers: {} }])
 
     // The way to the discussions on the pool's switch
-    const commentsView = poolView(page, selectionCopy.pool.views.comments)
+    const commentsView = switchOption(
+      page,
+      selectionCopy.pool.views.label,
+      selectionCopy.pool.views.comments
+    )
 
     // The four comments the filter hides still new on the switch
     await expect(commentsView).toHaveAccessibleName(
@@ -2274,10 +2487,10 @@ test.describe("what is new in the pool's discussions", () => {
     await expect(countLineOf(page, 6)).toHaveText(lineText(6, 3))
 
     // The pool laid out as its problems
-    await showPoolAs(page, selectionCopy.pool.views.problems)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.problems)
 
     // The pool laid out as its discussions again
-    await showPoolAs(page, selectionCopy.pool.views.comments)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
 
     // Nothing new any more, the reply shown during the last visit included
     await expect(countLineOf(page, 6)).toHaveText(lineText(6, 0), { timeout: SETTLE_TIMEOUT_MS })
@@ -2308,7 +2521,7 @@ test.describe("what is new in the pool's discussions", () => {
     await expect.poll(() => memory.seen.writes.length).toBe(1)
 
     // The pool laid out as its problems
-    await showPoolAs(page, selectionCopy.pool.views.problems)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.problems)
 
     // Zuzana answering the geometry problem's comment meanwhile
     answerGeometry(memory)
@@ -2317,7 +2530,7 @@ test.describe("what is new in the pool's discussions", () => {
     const release = gate.hold()
 
     // The pool laid out as its discussions again, their read held at the gate
-    await showPoolAs(page, selectionCopy.pool.views.comments)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
 
     // The threads as the last visit left them
     await expect(countLineOf(page, 5)).toBeVisible()
@@ -2381,10 +2594,10 @@ test.describe("what is new in the pool's discussions", () => {
     await sent
 
     // The pool laid out as its problems, the mark still waiting
-    await showPoolAs(page, selectionCopy.pool.views.problems)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.problems)
 
     // The pool laid out as its discussions again
-    await showPoolAs(page, selectionCopy.pool.views.comments)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
 
     // Nothing new, the mark still on its way counted in
     await expect(countLineOf(page, 5)).toHaveText(lineText(5, 0))
@@ -2411,7 +2624,7 @@ test.describe("what is new in the pool's discussions", () => {
     })
 
     // The pool's discussions
-    await showPoolAs(page, selectionCopy.pool.views.comments)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
 
     // Every comment new
     await expect(countLineOf(page, 5)).toHaveText(lineText(5, 5), { timeout: SETTLE_TIMEOUT_MS })
@@ -2440,7 +2653,7 @@ test.describe("what is new in the pool's discussions", () => {
     })
 
     // The pool's problems again
-    await showPoolAs(page, selectionCopy.pool.views.problems)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.problems)
 
     // The first problem's comment count plain
     await expect(tabRowOn(cardOf(page, FIRST), 'comments', 2)).toBeVisible()
@@ -2604,7 +2817,11 @@ test.describe("what is new in the pool's discussions", () => {
     await openPool(page)
 
     // The way to the discussions on the pool's switch
-    const commentsView = poolView(page, selectionCopy.pool.views.comments)
+    const commentsView = switchOption(
+      page,
+      selectionCopy.pool.views.label,
+      selectionCopy.pool.views.comments
+    )
 
     // Both new comments on it, as a screen reader says them
     await expect(commentsView).toHaveAccessibleName(
@@ -2786,7 +3003,7 @@ test.describe("what is new in the pool's discussions", () => {
     const held = page.waitForRequest(DISCUSSIONS_ADDRESS, { timeout: SETTLE_TIMEOUT_MS })
 
     // The pool laid out as its discussions
-    await showPoolAs(page, selectionCopy.pool.views.comments)
+    await pickSwitchOption(page, selectionCopy.pool.views.label, selectionCopy.pool.views.comments)
 
     // The discussions' read out, held at the gate
     await held

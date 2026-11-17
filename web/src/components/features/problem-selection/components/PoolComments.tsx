@@ -34,9 +34,12 @@ import { isNarrowed } from '../model/pool-filters'
 import {
   type DiscussedSubject,
   discussionTargetOf,
+  shareDiscussion,
   threadKeyOf,
 } from '../model/selection-discussions'
+import type { CommentsOrder } from '../model/selection-routes'
 import { categoryHue } from '../model/selection-state'
+import { CommentsOrderSwitch } from './CommentsOrderSwitch'
 import { MarkSeenButton } from './MarkSeenButton'
 import { PoolSkeleton } from './PoolSkeleton'
 import { PoolTools } from './PoolTools'
@@ -45,12 +48,17 @@ import { DetailLink } from './SelectionLinks'
 import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
 import { StatementPreview } from './StatementPreview'
 
+/** Whether each order groups the threads of one problem or paper under a single heading. */
+const GROUPS_BY_SUBJECT: Record<CommentsOrder, boolean> = { newest: false, problem: true }
+
 /**
  * Props for the {@link PoolComments} component.
  */
 type PoolCommentsProps = {
   /** Where the line over the pool says how many comments show, once it is on the page. */
   countSlot: HTMLElement | null
+  /** The slot for the order switch at the right end of the line over the pool, once it is on the page. */
+  orderSlot: HTMLElement | null
   /** The language the problems are read in. */
   language: Locale
   /** Where the pool's search and filters stand, once it is on the page. */
@@ -59,17 +67,19 @@ type PoolCommentsProps = {
 
 /**
  * The reviewers' discussions of everything the selection holds as one list: every top-level comment with its
- * replies, each under a heading opening its problem or paper on the discussion, every thread {@link usePoolThreads}
- * lets through. The pool's search and filters stand over it, their options counting comments, and each change to them
+ * replies, under a heading opening its problem or paper on the discussion, every thread {@link usePoolThreads} lets
+ * through. The pool's search and filters stand over it, their options counting comments, and each change to them
  * lays the list out afresh. A problem's heading previews its statement in the language the problems are read in.
  * Anything new anybody else posts, and any change of theirs to the selection, waits behind a button where it would
  * change the threads the filters let through, so it never moves the list under the reader. The reader's own writes
  * show at once, and so do others' edits, reactions and deletions. A problem opened from the list and closed again
  * finds it as it was left. The line over the pool says how many comments the threads shown hold, that they are on
  * their way, or that they are not to be had. While some comments shown are new to the reader, it says how many, with
- * the eye marking them seen where that stops some comment shown from being new.
+ * the eye marking them seen where that stops some comment shown from being new. The right end of that line holds a
+ * switch between newest first and by problem, and the URL keeps the choice. By problem, all threads of one problem or
+ * paper share one box and one heading.
  */
-export function PoolComments({ countSlot, toolsSlot, language }: PoolCommentsProps) {
+export function PoolComments({ countSlot, orderSlot, toolsSlot, language }: PoolCommentsProps) {
   // Pool copy
   const t = useTranslations('problemSelection.pool')
 
@@ -77,9 +87,20 @@ export function PoolComments({ countSlot, toolsSlot, language }: PoolCommentsPro
   const tPlurals = useTranslations('plurals')
 
   // The threads the filters let through and those they keep out, the counts beside the filters' options, what waits
-  // to be shown, the filters, the key the list is drawn afresh under, and how far the read has got
-  const { threads, hidden, counts, uiState, retry, hasNews, showNews, filters, listKey } =
-    usePoolThreads()
+  // to be shown, the filters, the order the threads run in, the key the list is drawn afresh under, and how far the
+  // read has got
+  const {
+    threads,
+    hidden,
+    counts,
+    uiState,
+    retry,
+    hasNews,
+    showNews,
+    filters,
+    order: { option: order, choose: chooseOrder },
+    listKey,
+  } = usePoolThreads()
 
   // The line over the pool, which takes the focus when whatever held it goes
   const { poolCountRef: countRef } = useSelectionWorkspace()
@@ -128,6 +149,17 @@ export function PoolComments({ countSlot, toolsSlot, language }: PoolCommentsPro
           countSlot
         )
 
+  // The order switch, at the right end of the line over the pool
+  const orderSwitch =
+    orderSlot === null
+      ? null
+      : createPortal(<CommentsOrderSwitch order={order} onChange={chooseOrder} />, orderSlot)
+
+  // A function which says whether a thread goes under the previous thread's heading: by problem, when both are about
+  // the same problem or paper
+  const runsUnder = (before: DrawnThread, thread: DrawnThread) =>
+    GROUPS_BY_SUBJECT[order] && shareDiscussion(before.thread, thread.thread)
+
   // Which comments of the list have their replies folded away
   const collapsed = useCollapsedComments()
 
@@ -145,6 +177,9 @@ export function PoolComments({ countSlot, toolsSlot, language }: PoolCommentsPro
         {/* That the threads are on their way or not to be had, in the line over the pool */}
         {count}
 
+        {/* The order switch, at the right end of the line */}
+        {orderSwitch}
+
         {/* How far the read has got */}
         <ThreadsPlaceholder uiState={uiState} onRetry={retryRead} />
       </div>
@@ -159,6 +194,9 @@ export function PoolComments({ countSlot, toolsSlot, language }: PoolCommentsPro
 
       {/* How many comments show and how many of them are new, in the line over the pool */}
       {count}
+
+      {/* The order switch, at the right end of the line */}
+      {orderSwitch}
 
       {/* What arrived since the threads were shown, waiting to be asked for */}
       <WaitingChangeButton
@@ -179,15 +217,19 @@ export function PoolComments({ countSlot, toolsSlot, language }: PoolCommentsPro
             </p>
           </div>
         ) : (
-          // The threads, only those in or near the window drawn, drawn afresh under each pick of the filters short
-          // of the search, and under each board they follow
+          // The threads, only those near the window drawn. The list starts over on each filter change except the
+          // search, on each order change, and on each board change the threads depend on. A thread joins the next one
+          // when that one shares its heading
           <WindowVirtualList
             key={listKey}
             items={drawn}
             keyOf={(item) => threadKeyOf(item.thread)}
-            renderItem={(item) => (
+            joinsNext={runsUnder}
+            renderItem={(item, joins) => (
               <PoolThread
                 drawn={item}
+                isHeaded={!joins.previous}
+                isContinued={joins.next}
                 collapsed={collapsed}
                 language={language}
                 renderNumberReference={renderNumberReference}
@@ -301,17 +343,22 @@ function NewCommentTools({ count, onMarkSeen, countRef }: NewCommentToolsProps) 
   const t = useTranslations('problemSelection.pool')
 
   return (
-    <span
-      // As tall as the line it sits on, the eye standing out over the line's margins, so the line keeps one height
-      // in every layout of the pool, with the eye or without it
-      className="-my-2 inline-flex items-center gap-0.5"
-    >
-      {/* How many are new */}
-      <span className="mr-1 font-medium text-brand-light">{`, ${t('newCount', { count })}`}</span>
+    <>
+      {/* The comma after the count, which stays with it where a narrow line breaks */}
+      {', '}
 
-      {/* The eye marking the new comments seen */}
-      {onMarkSeen !== null && <MarkSeenButton onPress={onMarkSeen} fallbackRef={countRef} />}
-    </span>
+      <span
+        // As tall as the line it sits on, the eye standing out over the line's margins, so the line keeps one height
+        // in every layout of the pool, with the eye or without it
+        className="-my-2 inline-flex items-center gap-0.5"
+      >
+        {/* How many are new */}
+        <span className="mr-1 font-medium text-brand-light">{t('newCount', { count })}</span>
+
+        {/* The eye marking the new comments seen */}
+        {onMarkSeen !== null && <MarkSeenButton onPress={onMarkSeen} fallbackRef={countRef} />}
+      </span>
+    </>
   )
 }
 
@@ -321,6 +368,10 @@ function NewCommentTools({ count, onMarkSeen, countRef }: NewCommentToolsProps) 
 type PoolThreadProps = {
   /** The thread as the list draws it. */
   drawn: DrawnThread
+  /** Whether the thread shows its own heading, which it skips when it shares the previous thread's. */
+  isHeaded: boolean
+  /** Whether the next thread shares this thread's heading and box. */
+  isContinued: boolean
   /** Which comments of the tab have their replies folded away. */
   collapsed: UseCollapsedCommentsResult
   /** The language the problems are read in. */
@@ -330,11 +381,19 @@ type PoolThreadProps = {
 }
 
 /**
- * One top-level comment with its replies, under a heading naming its problem or paper. It is replied to, edited,
- * deleted and reacted to in place, the way it is on its problem's or paper's own page, the reply shared with every
- * other thread in the tab, and what in it is new to the reader shows as such.
+ * One top-level comment with its replies, under a heading naming its problem or paper. A thread sharing the previous
+ * thread's heading shows none, and the two share one box, spaced as on the problem's own page. A thread is replied
+ * to, edited, deleted and reacted to in place, the way it is on its problem's or paper's own page, the reply shared
+ * with every other thread in the tab, and what in it is new to the reader shows as such.
  */
-function PoolThread({ drawn, collapsed, language, renderNumberReference }: PoolThreadProps) {
+function PoolThread({
+  drawn,
+  isHeaded,
+  isContinued,
+  collapsed,
+  language,
+  renderNumberReference,
+}: PoolThreadProps) {
   // The thread, how the comment components draw it, and how far its discussion is seen
   const { thread, comments, newness } = drawn
 
@@ -345,12 +404,22 @@ function PoolThread({ drawn, collapsed, language, renderNumberReference }: PoolT
   const reply = useCommentReply({ target, comments })
 
   return (
-    <ProposalBox as="article">
-      {/* Where the thread was posted */}
-      <ThreadHeading subject={thread.subject} language={language} />
+    <ProposalBox
+      as="article"
+      // Named after its problem or paper when it shows no heading, so a screen reader still says what it is about
+      aria-label={isHeaded ? undefined : subjectNameOf(thread.subject)}
+      className={cn(
+        // No bottom edge, since the next thread continues the same box
+        isContinued && 'rounded-b-none border-b-0 pb-0',
+        // No top edge, since it continues the box above; the gap matches a problem's own page
+        !isHeaded && 'rounded-t-none border-t-0 pt-0'
+      )}
+    >
+      {/* Where the thread was posted, unless the thread above already shows it */}
+      {isHeaded && <ThreadHeading subject={thread.subject} language={language} />}
 
       {/* The comment and its replies */}
-      <div className="mt-3">
+      <div className={cn(isHeaded && 'mt-3')}>
         <CommentList
           target={target}
           comments={comments}
@@ -364,6 +433,27 @@ function PoolThread({ drawn, collapsed, language, renderNumberReference }: PoolT
       </div>
     </ProposalBox>
   )
+}
+
+/**
+ * The name of the problem or paper a thread is about, as its heading shows it.
+ *
+ * @param subject - The problem or paper the thread is about.
+ *
+ * @returns The problem's number and name, or the paper's name with its board's.
+ */
+function subjectNameOf(subject: DiscussedSubject): string {
+  // By whether it's a problem or a paper
+  switch (subject.kind) {
+    case 'proposal':
+      return `#${subject.proposal.number} ${subject.proposal.title}`
+    case 'paper':
+      return `${subject.paper.name} ${subject.board.name}`
+
+    // Every kind is handled above
+    default:
+      return assertNever(subject)
+  }
 }
 
 /**

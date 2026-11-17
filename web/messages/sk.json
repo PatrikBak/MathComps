@@ -1426,6 +1426,11 @@
     },
     "pool": {
       "commentsFailed": "Komentáre sa nepodarilo načítať.",
+      "commentsOrder": {
+        "label": "Poradie komentárov",
+        "newest": "Najnovšie",
+        "problem": "Podľa úloh"
+      },
       "commentsUnavailable": "Komentáre nie sú dostupné",
       "empty": "Týmto filtrom nezodpovedá žiadna úloha.",
       "emptyComments": "Zatiaľ tu nie sú žiadne komentáre.",

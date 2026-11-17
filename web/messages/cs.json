@@ -1426,6 +1426,11 @@
     },
     "pool": {
       "commentsFailed": "Komentáře se nepodařilo načíst.",
+      "commentsOrder": {
+        "label": "Pořadí komentářů",
+        "newest": "Nejnovější",
+        "problem": "Podle úloh"
+      },
       "commentsUnavailable": "Komentáře nejsou dostupné",
       "empty": "Těmto filtrům neodpovídá žádná úloha.",
       "emptyComments": "Zatím tu nejsou žádné komentáře.",

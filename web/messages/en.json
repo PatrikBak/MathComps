@@ -1426,6 +1426,11 @@
     },
     "pool": {
       "commentsFailed": "The comments could not be loaded.",
+      "commentsOrder": {
+        "label": "Order of comments",
+        "newest": "Newest",
+        "problem": "By problem"
+      },
       "commentsUnavailable": "Comments unavailable",
       "empty": "No problem matches these filters.",
       "emptyComments": "No comments here yet.",

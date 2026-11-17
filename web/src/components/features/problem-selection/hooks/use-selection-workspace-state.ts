@@ -2,10 +2,17 @@
 
 import { useMemo } from 'react'
 
+import { useAddressedChoice, type UseAddressedChoiceResult } from '@/hooks/use-addressed-choice'
 import { useApiQuery } from '@/hooks/use-api-query'
 import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
+import {
+  COMMENTS_ORDER,
+  type CommentsOrder,
+  POOL_VIEW,
+  type PoolViewMode,
+} from '../model/selection-routes'
 import { indexSelection, type SelectionIndex } from '../model/selection-state'
 import type { Board, SelectionData } from '../model/selection-types'
 import { getSelection } from '../services/selection-service'
@@ -14,7 +21,6 @@ import { useSelectionOrganization } from './selection-organization'
 import { useBoardPicking, type UseBoardPickingResult } from './use-board-picking'
 import { useOpenDetail, type UseOpenDetailResult } from './use-open-detail'
 import { usePoolFilters, type UsePoolFiltersResult } from './use-pool-filters'
-import { usePoolViewMode, type UsePoolViewModeResult } from './use-pool-view-mode'
 import { useSeenMarks, type UseSeenMarksResult } from './use-seen-marks'
 import { useIsChangingSlots } from './use-selection-write'
 
@@ -28,8 +34,8 @@ export type LoadedSelection = SelectionIndex & {
 
 /**
  * What every part of the selection shares: the read, whether a write changing its slots is out, the page open in
- * full, what the pool is narrowed to and how it is laid out, the slot waiting for a problem with the ways to move it,
- * and how far the reader has seen the discussions.
+ * full, what the pool is narrowed to and how it is laid out, the order its comments run in, the slot waiting for a
+ * problem with the ways to move it, and how far the reader has seen the discussions.
  */
 export type SelectionWorkspace = UseOpenDetailResult &
   Omit<UseBoardPickingResult, 'activeBoard'> & {
@@ -44,7 +50,9 @@ export type SelectionWorkspace = UseOpenDetailResult &
     /** What the pool is narrowed to, and the ways of changing it. */
     poolFilters: UsePoolFiltersResult
     /** How the pool is laid out, and the way of changing it. */
-    poolView: UsePoolViewModeResult
+    poolView: UseAddressedChoiceResult<PoolViewMode>
+    /** The order the pool's comments run in, and the way of changing it. */
+    commentsOrder: UseAddressedChoiceResult<CommentsOrder>
     /** How far the reader has seen each discussion, and the way to mark some seen. */
     seenMarks: UseSeenMarksResult
   }
@@ -83,7 +91,10 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
   const poolFilters = usePoolFilters(index?.categories ?? null)
 
   // How the pool is laid out, and the way of changing it
-  const poolView = usePoolViewMode()
+  const poolView = useAddressedChoice(POOL_VIEW)
+
+  // The order the pool's comments run in, and the way of changing it
+  const commentsOrder = useAddressedChoice(COMMENTS_ORDER)
 
   // The board being filled, the slot on it waiting for a problem, and the ways to change both
   const { activeBoard, waitingSlot, selectBoard, toggleWaiting, stopWaiting } = useBoardPicking({
@@ -118,6 +129,7 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
       poolCountRef,
       poolFilters,
       poolView,
+      commentsOrder,
       waitingSlot,
       selectBoard,
       toggleWaiting,
@@ -137,6 +149,7 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
       poolCountRef,
       poolFilters,
       poolView,
+      commentsOrder,
       waitingSlot,
       selectBoard,
       toggleWaiting,

@@ -29,6 +29,28 @@ const segmentedSwitchOptionVariants = cva(
 )
 
 /**
+ * The switch's outer box. When it fits a text line, negative margins let it sit on a line of small text without
+ * making that line taller.
+ */
+const segmentedSwitchVariants = cva(
+  'inline-flex shrink-0 rounded-lg border border-foreground/10 p-0.5',
+  {
+    variants: {
+      compactOnPhones: { true: '', false: '' },
+      fitsTextLine: { true: '', false: '' },
+    },
+    compoundVariants: [
+      { fitsTextLine: true, compactOnPhones: true, className: '-my-[5px] sm:-my-[7px]' },
+      { fitsTextLine: true, compactOnPhones: false, className: '-my-[7px]' },
+    ],
+    defaultVariants: {
+      compactOnPhones: false,
+      fitsTextLine: false,
+    },
+  }
+)
+
+/**
  * One option of a {@link SegmentedSwitch}.
  */
 type SegmentedSwitchOption<TValue extends string> = {
@@ -54,6 +76,8 @@ type SegmentedSwitchProps<TValue extends string> = {
   options: readonly SegmentedSwitchOption<TValue>[]
   /** Whether the switch steps down a size below the `sm` breakpoint. */
   compactOnPhones?: boolean
+  /** Whether the switch sits on a line of small text without making the line taller. */
+  fitsTextLine?: boolean
 }
 
 /**
@@ -66,13 +90,14 @@ export function SegmentedSwitch<TValue extends string>({
   ariaLabel,
   options,
   compactOnPhones,
+  fitsTextLine,
 }: SegmentedSwitchProps<TValue>) {
   return (
     <RadioGroup
       value={value}
       onChange={onChange}
       aria-label={ariaLabel}
-      className="inline-flex shrink-0 rounded-lg border border-foreground/10 p-0.5"
+      className={segmentedSwitchVariants({ compactOnPhones, fitsTextLine })}
     >
       {options.map((option) => (
         <Radio

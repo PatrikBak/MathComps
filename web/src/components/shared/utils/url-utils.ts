@@ -1,4 +1,4 @@
-import { namesTheSameItemsInOrder } from '@/components/shared/utils/collection-utils'
+import { namesTheSameItemsInOrder, parseMember } from '@/components/shared/utils/collection-utils'
 import { getRequiredEnv } from '@/components/shared/utils/env-utils'
 
 /**
@@ -184,6 +184,57 @@ export function addressCarries(query: string): boolean {
   return [...new Set(said.keys())].every((param) =>
     namesTheSameItemsInOrder(carried.getAll(param), said.getAll(param))
   )
+}
+
+/**
+ * A setting the URL carries in one query parameter. A URL without the parameter means the first option.
+ *
+ * @template TOption - One of the options.
+ */
+export type AddressedChoice<TOption extends string> = {
+  /** The query parameter's name. */
+  param: string
+  /** The values the setting can take, the first being the default. */
+  options: readonly [TOption, ...TOption[]]
+}
+
+/**
+ * The option a URL picks.
+ *
+ * @template TOption - One of the options.
+ *
+ * @param searchParams - The URL's query parameters.
+ * @param choice - The setting.
+ *
+ * @returns The option the URL names, or the first one when it names none of them.
+ */
+export function addressedOptionOf<TOption extends string>(
+  searchParams: Pick<URLSearchParams, 'get'>,
+  choice: AddressedChoice<TOption>
+): TOption {
+  // The option the URL names, or the first one when it names none of them
+  return parseMember(searchParams.get(choice.param), choice.options) ?? choice.options[0]
+}
+
+/**
+ * The query string for an option.
+ *
+ * @template TOption - One of the options.
+ *
+ * @param choice - The setting.
+ * @param option - The option picked.
+ *
+ * @returns The query string, without its `?`; empty for the first option, which a URL without the parameter means.
+ */
+export function addressedOptionQuery<TOption extends string>(
+  choice: AddressedChoice<TOption>,
+  option: TOption
+): string {
+  // The first option, which a URL without the parameter already means
+  if (option === choice.options[0]) return ''
+
+  // Any other option, named in the URL
+  return new URLSearchParams({ [choice.param]: option }).toString()
 }
 
 /**
