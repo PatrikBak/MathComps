@@ -2,7 +2,7 @@
 
 import { useSignIn, useSignUp, useUser } from '@clerk/nextjs'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useSessionStorage, useWindowEvent } from '@mantine/hooks'
+import { useSessionStorage } from '@mantine/hooks'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
@@ -16,6 +16,7 @@ import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
 import { SECOND_MS } from '@/components/shared/utils/time-units'
 import { RETURN_URL_PARAM } from '@/constants/auth-constants'
 import { AUTH_RETURN_URL_STORAGE_KEY } from '@/constants/local-storage-constants'
+import { useExternalRedirect } from '@/hooks/use-external-redirect'
 import { type Locale, ROUTES } from '@/i18n/i18n'
 import { getPathname } from '@/i18n/navigation'
 
@@ -79,8 +80,8 @@ export default function AuthForm() {
   const [loading, setLoading] = useState(false)
   // State to store the email entered in the initial step
   const [enteredEmail, setEnteredEmail] = useState<string>('')
-  // State to track if we are currently redirecting to an OAuth provider
-  const [isRedirecting, setIsRedirecting] = useState(false)
+  // Whether the browser is on its way to an OAuth provider, and the functions that set it
+  const { isRedirecting, startRedirect, cancelRedirect } = useExternalRedirect()
 
   // Next.js router for navigation
   const router = useRouter()
@@ -104,7 +105,7 @@ export default function AuthForm() {
   const methods = useForm<AuthFormValues>({
     // Hub screen doesn't require validation
     resolver: screen === 'hub' ? undefined : zodResolver(getAuthSchema(authSchemas, screen)),
-    // This will validat on submit and then watch for changes
+    // This will validate on submit and then watch for changes
     mode: 'onSubmit',
   })
 
@@ -128,15 +129,6 @@ export default function AuthForm() {
     // Store in session storage (persists through OAuth redirect cycle)
     setReturnUrl(determinedUrl)
   }, [searchParams, setReturnUrl, locale])
-
-  // Coming back from the OAuth provider via the browser's Back button restores this page from
-  // the back-forward cache with the pre-redirect state still live, so drop the spinner again
-  useWindowEvent('pageshow', (event) => {
-    // Only a bfcache restore revives stale state; a fresh load already starts spinner-off
-    if (event.persisted) {
-      setIsRedirecting(false)
-    }
-  })
 
   // Focus the password field when either email screen opens
   useEffect(() => {
@@ -213,7 +205,7 @@ export default function AuthForm() {
    * @param data - The login form data (email and password)
    */
   const handleLogin = async (data: LoginFormData) => {
-    // I suppose this should never happens
+    // I suppose this should never happen
     if (!signIn) return
 
     // Try to sign in
@@ -258,7 +250,7 @@ export default function AuthForm() {
         // (which will cause a re-render which will cause a redirect)
         await setActiveSignUp({ session: result.createdSessionId })
       }
-      // The backend is setup to have just the email verification strategy
+      // The backend is set up to have just the email verification strategy
       else if (result.status === 'missing_requirements') {
         // With just email missing, we can start the email verification process
         await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
@@ -443,7 +435,7 @@ export default function AuthForm() {
     if (!signIn) return
 
     // Show the loading spinner immediately
-    setIsRedirecting(true)
+    startRedirect()
 
     try {
       // Construct absolute URL for redirectUrlComplete (OAuth requires absolute URLs)
@@ -456,8 +448,10 @@ export default function AuthForm() {
         redirectUrlComplete: absoluteRedirectUrl,
       })
     } catch (error) {
-      // If it fails, stop showing the spinner and show the error
-      setIsRedirecting(false)
+      // The press failed, so drop the spinner
+      cancelRedirect()
+
+      // Show why it failed
       setGlobalError(getClerkErrorMessage(error, tClerkErrors))
     }
   }
@@ -564,6 +558,9 @@ export default function AuthForm() {
                     // Go back to signup if they want to change email or something
                     switchScreen('signup-with-email')
                     break
+
+                  default:
+                    assertNever(screen)
                 }
               }}
             />
