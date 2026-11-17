@@ -174,7 +174,7 @@ export function canPlaceOn(
 
 /**
  * The board to put on screen: the one kept there while the selection still holds it, else the first draft, else
- * the first board there is.
+ * the first board whose rounds are still to open, else the newest board, every one having opened.
  *
  * @param boards - Every board.
  * @param keptBoardId - The board kept on screen, by id; null while none has been shown.
@@ -185,11 +185,13 @@ export function pickActiveBoard(
   boards: readonly Board[],
   keptBoardId: string | null
 ): Board | null {
-  // The board kept on screen, else the first one still being drafted, else the first one there is
+  // The board kept on screen, else the first one still being drafted, else the first one whose rounds are still to
+  // open, else the newest one there is
   return (
     boards.find((board) => board.id === keptBoardId) ??
     boards.find((board) => board.finalization === null) ??
-    boards[0] ??
+    boards.find((board) => board.finalization?.hasOpened === false) ??
+    boards.at(-1) ??
     null
   )
 }

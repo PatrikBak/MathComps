@@ -114,8 +114,12 @@ function finalize(held: HeldSelection, boardId: string, cycleId: string): HeldSe
     refuseWith('SelectionProblemIncomplete')
   }
 
-  // The board tied to the cycle, its slots read off the rounds as they now hold its problems
-  const finalized = { ...board, finalization: { cycleName: cycle.name, opensAt: cycle.opensAt } }
+  // The board tied to the cycle, whose rounds are still to open, its slots read off the rounds as they now hold its
+  // problems
+  const finalized = {
+    ...board,
+    finalization: { cycleName: cycle.name, opensAt: cycle.opensAt, hasOpened: false },
+  }
 
   // Every board, the finalized one in place of the draft and every other draft without its problems
   const boards = emptiedOnDrafts(

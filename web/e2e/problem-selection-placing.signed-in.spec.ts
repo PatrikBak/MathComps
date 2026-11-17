@@ -21,6 +21,7 @@ import {
   FIRST,
   FULL_DRAFT,
   FULL_DRAFT_FINALIZED,
+  FULL_DRAFT_OPENED,
   GEOMETRY,
   headingOf,
   holdReads,
@@ -1430,7 +1431,7 @@ test.describe('a write the backend refuses', () => {
     expect(notices()).toEqual([refusalCopy.SelectionProposalUsed])
   })
 
-  test('refuses a write to a board whose rounds opened meanwhile, which then leaves the page, the focus going to the menu of boards', async ({
+  test('refuses a write to a board whose rounds opened meanwhile, which then stays on screen locked, the focus going to the line saying so', async ({
     page,
   }) => {
     // A reviewer whose first draft is full and ready to be finalized
@@ -1451,11 +1452,17 @@ test.describe('a write the backend refuses', () => {
     // Refused, the reader told why
     await expect.poll(notices).toEqual([refusalCopy.SelectionBoardOpened])
 
-    // And the selection read again, without the board, which puts the later draft on screen
-    await expect(boardPanel(page).getByRole('button', { name: LATER_DRAFT.name })).toBeVisible()
+    // And the selection read again, the board still on screen, saying its rounds have opened
+    await expect(statusLine(page, FULL_DRAFT_OPENED)).toBeVisible()
 
-    // The focus, gone with the board's slots, on the menu of the boards left
-    await expect(boardPanel(page).getByRole('button', { name: LATER_DRAFT.name })).toBeFocused()
+    // The focus, gone with the slot's actions, on that line
+    await expect(statusLine(page, FULL_DRAFT_OPENED)).toBeFocused()
+
+    // The slot, hovered
+    await slotOf(page, 'E1').hover()
+
+    // With no way to replace, move or empty it
+    await expect(slotOf(page, 'E1').getByRole('button')).toHaveCount(0)
 
     // With no other notice raised
     expect(notices()).toEqual([refusalCopy.SelectionBoardOpened])

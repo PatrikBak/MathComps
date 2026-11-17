@@ -7,4 +7,5 @@ namespace MathComps.Domain.Contracts.Selection;
 /// </summary>
 /// <param name="CycleName">The cycle's name, in the language the selection is read in.</param>
 /// <param name="OpensAt"><inheritdoc cref="HostedGroup.OpensAt" path="/summary"/></param>
-public record BoardFinalizationDto(string CycleName, DateTimeOffset OpensAt);
+/// <param name="HasOpened">Whether the cycle has opened to students.</param>
+public record BoardFinalizationDto(string CycleName, DateTimeOffset OpensAt, bool HasOpened);

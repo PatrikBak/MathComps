@@ -101,8 +101,10 @@ export type Paper = {
 type Finalization = {
   /** The name of the cycle whose rounds took the board's papers, in the language the site is read in. */
   cycleName: string
-  /** When the cycle's rounds open, as an ISO-8601 string; the board leaves the selection once they do. */
+  /** When the cycle's rounds open, as an ISO-8601 string. */
   opensAt: string
+  /** Whether the cycle's rounds have opened to students. */
+  hasOpened: boolean
 }
 
 /**
@@ -261,13 +263,16 @@ export type SelectionData = {
   categories: SelectionCategory[]
   /** The names of the categories the reader leads, in the order they run. */
   leadCategories: string[]
-  /** Every proposal still in the selection, the set-aside and used ones included, lowest number first. */
+  /** Every proposal in the selection, the set-aside and used ones included, lowest number first. */
   proposals: Proposal[]
-  /** Every board still in the selection, oldest first. */
+  /** Every board, drafts and finalized ones alike, oldest first. */
   boards: Board[]
   /** The cycles a board can be finalized into, soonest first. */
   cycles: Cycle[]
-  /** Every conversation a reviewer held about a proposal still in the selection, newest first. */
+  /**
+   * Every conversation about a proposal in the selection, newest first: each one started before students were
+   * given the proposal, and after that only the ones the organization's members start.
+   */
   conversations: ReviewConversation[]
   /**
    * Whether its problems need a statement and a solution in every language the site is read in, as a hosted round

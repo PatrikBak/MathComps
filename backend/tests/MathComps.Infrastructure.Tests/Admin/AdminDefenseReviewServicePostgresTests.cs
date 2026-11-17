@@ -938,17 +938,22 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         });
 
     /// <summary>
-    /// A conversation about another organization's proposal stays out of the queue of a reviewer on MathComps' list
-    /// alone until a group that has taken the proposal opens: while it waits in a group still to open, and after it
-    /// is deleted. Once the group opens, the conversation is the admins' like any other.
+    /// A conversation about another organization's proposal, started before a group that has taken the proposal
+    /// opened, stays out of the queue of a reviewer on MathComps' list alone: while the proposal waits in a group
+    /// still to open, once that group has opened, and after the proposal is deleted. A conversation started once the
+    /// group opened is the admins' like any other.
     /// </summary>
-    /// <param name="placement">Where the proposal sits: <c>unopened</c>, <c>opened</c> or <c>deleted</c>.</param>
+    /// <param name="placement">
+    /// Where the proposal sits and when the conversation started: <c>unopened</c>, <c>opened</c>,
+    /// <c>after opening</c> or <c>deleted</c>.
+    /// </param>
     /// <param name="shown">Whether the queue shows the conversation.</param>
     [Theory]
     [InlineData("unopened", false)]
-    [InlineData("opened", true)]
+    [InlineData("opened", false)]
+    [InlineData("after opening", true)]
     [InlineData("deleted", false)]
-    public Task Another_organizations_proposal_conversation_stays_out_of_the_queue_until_its_group_opens(
+    public Task Another_organizations_proposal_conversation_stays_out_of_the_queue_unless_held_once_opened(
         string placement, bool shown) =>
         RunTestAsync(async service =>
         {
@@ -968,7 +973,8 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
                 var round = placement switch
                 {
                     "unopened" => SelectionSeed.NewGroup(context, season, "october", Now.AddDays(7)).Rounds.First(),
-                    "opened" => SelectionSeed.NewGroup(context, season, "november", Now.AddDays(-1)).Rounds.First(),
+                    "opened" or "after opening" =>
+                        SelectionSeed.NewGroup(context, season, "november", Now.AddDays(-1)).Rounds.First(),
                     "deleted" => SelectionSeed.NewProposalsRound(context, season),
                     _ => throw new ArgumentOutOfRangeException(nameof(placement), placement, "Unknown placement."),
                 };
@@ -983,9 +989,13 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
                 // The reviewer, on the list of MathComps alone
                 await JoinAsync(context, SelectionSeed.MathCompsId(context));
 
-                // The conversation
-                context.DefenseSessions.Add(
-                    NewSession(sessionId, StudentId, ExaminerConfig, DefenseTargetKind.Problem));
+                // The conversation, started a month ago
+                var session = NewSession(sessionId, StudentId, ExaminerConfig, DefenseTargetKind.Problem);
+                context.DefenseSessions.Add(session);
+
+                // Started once the group opened, where the case says so
+                if (placement == "after opening")
+                    session.CreatedAt = Now;
 
                 // With the one message the student opened it with
                 context.DefenseTurns.Add(NewTurn(sessionId, TranscriptRole.Candidate, "my defense", 0, Now));

@@ -59,16 +59,17 @@ public sealed class ConversationAccess(
     private async Task<bool> MayReachAsync(
         MathCompsDbContext dbContext, Guid sessionId, ConversationViewer viewer, CancellationToken cancellationToken)
     {
-        // The proposals still their organization's: outside the groups that have opened, deleted or not.
-        var ownedProposals = dbContext.Proposals.WhereOutsideOpenedGroups(DateTimeOffset.UtcNow);
+        // Every proposal, deleted or not.
+        var proposals = dbContext.Proposals;
 
-        // The proposal outside the groups that have opened filing the conversation's problem, where one does: its
+        // The proposal filing the conversation's problem, where one does and its selection keeps the conversation: its
         // organization and whether it is deleted.
-        var proposal = await dbContext.DefenseSessions
+        var proposal = await dbContext.ProblemDefenses
             .AsNoTracking()
-            .Where(session => session.Id == sessionId)
-            .Select(session => ownedProposals
-                .Where(candidate => candidate.ProblemId == session.ProblemTarget!.ProblemId)
+            .Where(defense => defense.DefenseSessionId == sessionId)
+            .WhereKeptBySelection(proposals)
+            .Select(defense => proposals
+                .Where(candidate => candidate.ProblemId == defense.ProblemId)
                 .Select(candidate => new
                 {
                     OrganizationSlug = candidate.Organization.Slug,

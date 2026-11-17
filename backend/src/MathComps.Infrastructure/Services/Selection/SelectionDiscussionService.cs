@@ -111,9 +111,8 @@ public sealed class SelectionDiscussionService(
 
     /// <summary>
     /// Reads everything an organization's selection holds, as a viewer reaches it: every standing proposal of its
-    /// pool that <see cref="SelectionRules.IsInSelection"/> keeps in it, and every paper on one of its boards that
-    /// <see cref="SelectionRules.IsBoardInSelection"/> keeps in it, none of either for a viewer outside the
-    /// organization.
+    /// pool that <see cref="SelectionRules.IsInSelection"/> keeps in it, and every paper on one of its boards, none of
+    /// either for a viewer outside the organization.
     /// </summary>
     /// <param name="organizationSlug">
     /// The <see cref="Organization.Slug"/> of the organization whose selection it is.
@@ -131,41 +130,33 @@ public sealed class SelectionDiscussionService(
         // A fresh context for this read.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // One instant for everything the read weighs against a group opening.
-        var now = DateTimeOffset.UtcNow;
-
-        // Every proposal of the organization's pool not deleted and outside the groups that have opened, with where
-        // its problem sits.
+        // Every proposal of the organization's pool not deleted, with where its problem sits.
         var proposals = await dbContext.Proposals
             .AsNoTracking()
-            .Where(proposal => proposal.Organization.Slug == organizationSlug)
-            .WhereSelectionMayHold(now)
+            .Where(proposal => proposal.Organization.Slug == organizationSlug && proposal.DeletedAt == null)
             .Select(proposal => new
             {
                 proposal.ProblemId,
                 CompetitionPath = proposal.Problem.Round.Competition.Path,
-                GroupOpensAt = (DateTimeOffset?)proposal.Problem.Round.HostedGroup!.OpensAt,
+                IsHosted = proposal.Problem.Round.HostedGroupId != null,
             })
             .ToListAsync(cancellationToken);
 
-        // The proposals the selection still holds, each as the id its discussion goes by.
+        // The proposals the selection holds, each as the id its discussion goes by.
         var proposalIds = proposals
-            .Where(proposal => SelectionRules.IsInSelection(proposal.CompetitionPath, proposal.GroupOpensAt, now))
+            .Where(proposal => SelectionRules.IsInSelection(proposal.CompetitionPath, proposal.IsHosted))
             .Select(proposal => proposal.ProblemId.ToString())
             .ToImmutableList();
 
-        // Every paper on one of the organization's boards, with when the group its board was finalized into opens.
+        // Every paper on one of the organization's boards.
         var papers = await dbContext.SelectionPapers
             .AsNoTracking()
             .Where(paper => paper.Board.Organization.Slug == organizationSlug)
-            .Select(paper => new { paper.Id, GroupOpensAt = (DateTimeOffset?)paper.Board.HostedGroup!.OpensAt })
+            .Select(paper => paper.Id)
             .ToListAsync(cancellationToken);
 
-        // The papers on a board the selection still holds, each as the id its discussion goes by.
-        var paperIds = papers
-            .Where(paper => SelectionRules.IsBoardInSelection(paper.GroupOpensAt, now))
-            .Select(paper => paper.Id.ToString())
-            .ToImmutableList();
+        // The papers, each as the id its discussion goes by.
+        var paperIds = papers.Select(paperId => paperId.ToString()).ToImmutableList();
 
         // Both, each as the ids their discussions go by
         return new HeldSubjects(proposalIds, paperIds);

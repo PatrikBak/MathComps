@@ -46,8 +46,7 @@ public class AdminNoteService(
         var organizationIds = await members.GetOrganizationIdsAsync(reviewerId, cancellationToken);
 
         // The conversations the reviewer reads, short of the ones belonging to an organization they are no member of.
-        var reachableSessions = dbContext.DefenseSessions.WhereReachableByAdmin(
-            dbContext.Proposals, organizationIds, DateTimeOffset.UtcNow);
+        var reachableSessions = dbContext.DefenseSessions.WhereReachableByAdmin(dbContext, organizationIds);
 
         // Every note on a conversation the reviewer reads, save the ones whose conversation has lost its problem:
         // the queue and the conversation itself both require one, so surfacing it here would offer a way into a

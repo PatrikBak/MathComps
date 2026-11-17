@@ -38,9 +38,9 @@ export type UseBoardPickingResult = {
 
 /**
  * Which board the reader is filling, and which of its slots waits for a problem from the pool. The board on
- * screen stays there until the reader picks another or it leaves the selection, so finalizing it, by this
- * reader or another, never puts a different board in its place. A slot waiting on it when it is finalized is
- * let go, a finalized board taking no placement. A slot shows as waiting only while the reader leads its paper.
+ * screen stays there until the reader picks another, so finalizing it, by this reader or another, or its rounds
+ * opening, never puts a different board in its place. A slot waiting on it when it is finalized is let go, a
+ * finalized board taking no placement. A slot shows as waiting only while the reader leads its paper.
  *
  * @param options - The boards and the reader's lead categories.
  *
