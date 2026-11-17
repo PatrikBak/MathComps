@@ -67,6 +67,7 @@ import {
   SET_ASIDE,
   stubSelection,
   tabRowOn,
+  untilSelectionReadAgain,
   USED,
 } from './support/problem-selection'
 import { MATHCOMPS_ORGANIZATION_SLUG } from './support/selection-writes'
@@ -2305,8 +2306,8 @@ test.describe("what is new in the pool's discussions", () => {
     // A later read, in which another reviewer has set the first problem aside
     answerSelectionWith('later')
 
-    // Long enough for the selection to be read again
-    await page.clock.fastForward('00:31')
+    // The selection, read again once marking the threads seen has stopped holding the read back
+    await untilSelectionReadAgain(page)
 
     // The button showing what waits
     const whatsNew = page.getByRole('button', { name: selectionCopy.pool.showWhatsNew })
