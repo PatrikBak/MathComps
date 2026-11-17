@@ -122,7 +122,11 @@ test.describe("the student's own list of conversations", () => {
 
     // What the student argues, which is what the conversation is saved under
     await sendTurn(page, 'Every residue class is hit, so the bound is tight')
-    await expect(transcriptOf(page)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Answered, so the conversation is held and the list has a row for it
+    await expect(transcriptOf(page)).toContainText(SCRIPTED_REPLIES[0]!, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
 
     // Out of the competition, back to where the list is reached from
     await page.goto(LIST_PATH)
@@ -235,7 +239,11 @@ test.describe("the student's own list of conversations", () => {
 
     // What they argue, which is what the conversation is saved under
     await sendTurn(page, 'Every residue class is hit, so the bound is tight')
-    await expect(transcriptOf(page)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Answered, so the conversation is held and the list has a row for it
+    await expect(transcriptOf(page)).toContainText(SCRIPTED_REPLIES[0]!, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
 
     // Out of the competition, back to where the list is reached from
     await page.goto(LIST_PATH)
