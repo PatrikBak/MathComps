@@ -1,6 +1,14 @@
 'use client'
 
-import { ArrowDown, ArrowLeftRight, ArrowUp, ChevronDown, X } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowLeftRight,
+  ArrowUp,
+  ChevronDown,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  X,
+} from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 import { type ReactNode, type Ref, useId, useState } from 'react'
 
@@ -92,63 +100,63 @@ export function BoardPanel() {
 
   return (
     <SurfacePanel as="section" radius="xl" aria-label={t('label')}>
-      {/* Which board, and how full */}
-      <div className="flex items-center gap-2 border-b border-foreground/10 px-4 py-3">
-        {/* The board on screen, and the switch to any other */}
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className={cn(
-              'inline-flex min-w-0 items-center gap-1.5 rounded-md text-base font-semibold text-foreground',
-              FOCUS_RING_CLASS
-            )}
+      {/* Which board, how full, and the rounds a finalized one went into */}
+      <div className="border-b border-foreground/10 px-4 py-3">
+        {/* The board's name and how full it is */}
+        <div className="flex items-center gap-2">
+          {/* The board on screen, and the switch to any other */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={cn(
+                'inline-flex min-w-0 items-center gap-1.5 rounded-md text-base font-semibold text-foreground',
+                FOCUS_RING_CLASS
+              )}
+            >
+              <span className="truncate">{activeBoard.name}</span>
+              <ChevronDown size={16} className="shrink-0 text-muted" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="min-w-56">
+              {boards.map((board) => (
+                <DropdownMenuCheckboxItem
+                  key={board.id}
+                  checked={board.id === activeBoard.id}
+                  onCheckedChange={() => selectBoard(board.id)}
+                  className="justify-between gap-4"
+                >
+                  {/* The board's name */}
+                  <span>{board.name}</span>
+
+                  {/* The board's stage: a draft until finalized */}
+                  <span className="text-xs text-muted">
+                    {board.finalization === null ? t('draft') : t('finalized')}
+                  </span>
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* How full the board is, on a wide screen */}
+          <span className="ml-auto hidden shrink-0 text-sm tabular-nums text-muted lg:inline">
+            {t('progress', { filled, total: slots.length })}
+          </span>
+
+          {/* How full the board is, as the way to fold the papers away and back, on a narrow screen */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-auto shrink-0 gap-1.5 px-2 font-normal tabular-nums text-muted lg:hidden"
+            aria-expanded={isUnfolded}
+            onClick={toggleFold}
           >
-            <span className="truncate">{activeBoard.name}</span>
-            <ChevronDown size={16} className="shrink-0 text-muted" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="min-w-56">
-            {boards.map((board) => (
-              <DropdownMenuCheckboxItem
-                key={board.id}
-                checked={board.id === activeBoard.id}
-                onCheckedChange={() => selectBoard(board.id)}
-                className="justify-between gap-4"
-              >
-                {/* The board's name */}
-                <span>{board.name}</span>
+            {t('progress', { filled, total: slots.length })}
+            <span className="sr-only">{isUnfolded ? t('fold') : t('unfold')}</span>
+            {isUnfolded ? <ChevronsDownUp size={16} /> : <ChevronsUpDown size={16} />}
+          </Button>
+        </div>
 
-                {/* The board's stage: a draft until finalized */}
-                <span className="text-xs text-muted">
-                  {board.finalization === null ? t('draft') : t('finalized')}
-                </span>
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {/* How full the board is, on a wide screen */}
-        <span className="ml-auto hidden shrink-0 text-sm tabular-nums text-muted lg:inline">
-          {t('progress', { filled, total: slots.length })}
-        </span>
-
-        {/* How full the board is, as the way to fold the papers away and back, on a narrow screen */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="ml-auto shrink-0 gap-1.5 px-2 font-normal tabular-nums text-muted lg:hidden"
-          aria-expanded={isUnfolded}
-          onClick={toggleFold}
-        >
-          {t('progress', { filled, total: slots.length })}
-          <span className="sr-only">{isUnfolded ? t('fold') : t('unfold')}</span>
-          <ChevronDown
-            size={16}
-            className={cn('transition-transform', isUnfolded && 'rotate-180')}
-          />
-        </Button>
+        {/* The status line, for a finalized board, shown folded or not */}
+        <BoardStatus board={activeBoard} ref={statusRef} />
       </div>
-
-      {/* The status line, for a finalized board, shown folded or not */}
-      <BoardStatus board={activeBoard} ref={statusRef} />
 
       {/* The papers and what stands between them and the rounds, hidden on a narrow screen until unfolded */}
       <div className={cn(!isUnfolded && 'hidden', 'lg:block')}>
@@ -209,7 +217,7 @@ function BoardStatus({ board, ref }: BoardStatusProps) {
       ref={ref}
       // Focused when a read finalizes the board under a control it takes away
       tabIndex={-1}
-      className="px-4 pt-3 text-xs text-muted focus:outline-none"
+      className="mt-0.5 text-xs text-muted focus:outline-none"
     >
       {t(statusKey, { cycle: board.finalization.cycleName, date: opens })}
     </p>
