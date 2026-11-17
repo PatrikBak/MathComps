@@ -239,8 +239,11 @@ test.describe("the selection's address and history", () => {
     // The clock under the test's hand, so the next read comes when the test says
     await page.clock.install()
 
+    // What the backend keeps, the opened problem's comment not seen yet
+    const memory = rememberedSelection(null)
+
     // A reviewer whose selection holds a pool of problems
-    const answerSelectionWith = await stubSelection(page, 'selection')
+    const answerSelectionWith = await stubSelection(page, 'selection', memory)
 
     // The pool
     await page.goto(SELECTION_PATH)
@@ -267,6 +270,9 @@ test.describe("the selection's address and history", () => {
 
     // Its page
     await expect(headingOf(page, OPENED)).toBeVisible()
+
+    // The backend told the discussion it opens on was seen, a write the selection's own reads wait out
+    await expect.poll(() => memory.seen.writes.length).toBe(1)
 
     // A later read, which revises the problem and sets aside the pool's first one
     answerSelectionWith('later')

@@ -38,7 +38,7 @@ export const DETAIL_PARAMS = [
 ] as const
 
 /** The tabs of a problem's page, the first being the one a problem opens on by default. */
-export const PROPOSAL_TABS = ['conversations', 'comments'] as const
+export const PROPOSAL_TABS = ['comments', 'conversations'] as const
 
 /** One tab of a problem's page. */
 export type ProposalTab = (typeof PROPOSAL_TABS)[number]
