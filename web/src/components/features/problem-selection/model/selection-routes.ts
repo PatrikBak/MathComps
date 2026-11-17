@@ -37,8 +37,8 @@ export const POOL_VIEW: AddressedChoice<PoolViewMode> = {
 export const COMMENTS_ORDER_PARAM = 'order'
 
 /**
- * The orders the pool's comments can come in, the first being the default: newest activity first, or by problem in
- * the order the pool lists its problems.
+ * The orders the pool's comments can come in, the first being the default: newest activity first, or by problem, the
+ * drafts' first, then the pool's, then the finalized boards'.
  */
 export const COMMENTS_ORDERS = ['newest', 'problem'] as const
 

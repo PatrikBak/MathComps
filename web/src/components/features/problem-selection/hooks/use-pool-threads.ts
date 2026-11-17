@@ -61,14 +61,10 @@ type UsePoolThreadsResult = Pick<UseSelectionDiscussionsResult, 'uiState' | 'ret
   order: UseAddressedChoiceResult<CommentsOrder>
   /**
    * The key the list is redrawn under. It changes with every filter change except the search, with the order, and with
-   * the board on screen while the filter or the order depends on it. A search keeps the list, so typing never redraws
-   * it.
+   * the board on screen while the filter depends on it. A search keeps the list, so typing never redraws it.
    */
   listKey: string
 }
-
-/** Whether each order depends on the board on screen, so a board change lays the threads out again. */
-const ORDER_FOLLOWS_BOARD: Record<CommentsOrder, boolean> = { newest: false, problem: true }
 
 /** Where a thread arriving after the layout goes in each order: on top, or into its place in the order. */
 const NEWCOMER_PLACES: Record<CommentsOrder, NewcomerPlace> = { newest: 'top', problem: 'inPlace' }
@@ -81,14 +77,15 @@ const NEWCOMER_PLACES: Record<CommentsOrder, NewcomerPlace> = { newest: 'top', p
  * They then keep their places until the next layout, so nothing moves under the reader. A new thread goes on top when
  * newest first, and into its place when by problem. The threads are laid out again when the discussions are shown
  * again, when the filters change, when the order changes, and when the board on screen changes while a State answer on
- * or off the board is picked or the order is by problem. They are let through and sorted against the selection and
- * the discussions as they stood then, so between layouts an edit or a deletion never moves a thread in or out under a
- * search. What a later read brings counts as news where it would change the threads the filters let through, and so
- * does a change another reviewer makes to the selection, a problem set aside or placed on the board among them. The
- * reader's own writes to the selection show at once. News stays news through the reader's own writes to comments,
- * which leave it untold for a moment. Asking for it takes it into the discussions of the threads let through and of
- * those the read would let through, or into every discussion while the read can't be told, lays the threads out
- * against the selection as it now stands, and tells the server what they then show was seen. The filters and the order handed back work as {@link usePoolThreadFilters} tells.
+ * or off the board is picked. They are let through and sorted against the selection and the discussions as they stood
+ * then, so between layouts an edit or a deletion never moves a thread in or out under a search. What a later read
+ * brings counts as news where it would change the threads the filters let through, and so does a change another
+ * reviewer makes to the selection, a problem set aside or placed on the board among them. The reader's own writes to
+ * the selection show at once. News stays news through the reader's own writes to comments, which leave it untold for a
+ * moment. Asking for it takes it into the discussions of the threads let through and of those the read would let
+ * through, or into every discussion while the read can't be told, lays the threads out against the selection as it now
+ * stands, and tells the server what they then show was seen. The filters and the order handed back work as
+ * {@link usePoolThreadFilters} tells.
  *
  * @returns The threads let through and those kept out, what waits to be shown, the counts, the filters, the order,
  * the list's key, and the state of the read.
@@ -122,29 +119,23 @@ export function usePoolThreads(): UsePoolThreadsResult {
   // The key of what the threads are narrowed to: the filter, with the board while they follow it
   const filterKey = poolFilterKey(filter, followedBoard)
 
-  // The board on screen while the order depends on it; null otherwise
-  const orderedOnBoard = ORDER_FOLLOWS_BOARD[order] ? activeBoard : null
-
-  // The key of the order, with the board while the order depends on it
-  const orderKey = JSON.stringify([order, orderedOnBoard?.id ?? null])
-
   // The key the threads are laid out again under: it changes with each showing, each filter change and each order
   // change
-  const layoutKey = `${shown?.showings ?? 0}:${filterKey}:${orderKey}`
+  const layoutKey = `${shown?.showings ?? 0}:${filterKey}:${order}`
 
   // Whether a write of the reader's to the selection is out, the read it waits for included
   const isWritingSelection = useIsWritingSelection()
 
-  // The subjects and the board on screen as they stand
-  const asTheyStand = { subjects, board: activeBoard }
+  // The subjects, the board on screen and the selection's boards as they stand
+  const asTheyStand = { subjects, board: activeBoard, boards: selection.boards }
 
-  // The subjects and the board as the threads were last laid out afresh, taken afresh too as the reader's writes to
+  // The subjects and the boards as the threads were last laid out afresh, taken afresh too as the reader's writes to
   // the selection settle
   const [laidOut] = useKeyedState(`${layoutKey}:${isWritingSelection}`, asTheyStand)
 
-  // The subjects and the board the threads are let through against: as last laid out, so a change another reviewer
-  // makes to the selection waits behind the news, as a new comment does; as they stand while the reader's own write is
-  // out, so that shows at once
+  // The subjects and the boards the threads are let through and sorted against: as last laid out, so a change another
+  // reviewer makes to the selection waits behind the news, as a new comment does; as they stand while the reader's own
+  // write is out, so that shows at once
   const against = isWritingSelection ? asTheyStand : laidOut
 
   // The board the threads are let through against: the one laid out against while they follow it, else the board on
@@ -167,12 +158,12 @@ export function usePoolThreads(): UsePoolThreadsResult {
           laidOutDiscussions
         )
 
-  // The threads let through, sorted against the board they were laid out with, so a new thread lands next to the
-  // neighbours the list shows; none until the first read has landed
+  // The names of the selection's categories, in the order they run
+  const categoryNames = categories.map(({ name }) => name)
+
+  // The threads let through, in the order picked; none until the first read has landed
   const ordered =
-    matches === null
-      ? []
-      : threadsInOrder(matches.shown, order, against.board, filter.categories, selection.boards)
+    matches === null ? [] : threadsInOrder(matches.shown, order, against.boards, categoryNames)
 
   // The threads let through, held where they stood as they were last laid out afresh
   const held = useFirstSeenOrder({
@@ -229,7 +220,7 @@ export function usePoolThreads(): UsePoolThreadsResult {
   })
 
   // The key the list is redrawn under: the filter without the search, and the order
-  const listKey = `${poolFilterKey({ ...filter, query: '' }, followedBoard)}:${orderKey}`
+  const listKey = `${poolFilterKey({ ...filter, query: '' }, followedBoard)}:${order}`
 
   // The threads let through and those kept out, what waits to be shown, the counts, the filters, the order, the
   // list's key, and the state of the read

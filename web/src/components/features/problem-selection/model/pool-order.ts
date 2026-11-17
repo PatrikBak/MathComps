@@ -1,63 +1,44 @@
 import { assertNever } from '@/components/shared/utils/assert-never'
 
-import {
-  type DiscussedSubject,
-  discussionTargetOf,
-  type DiscussionThread,
-} from './selection-discussions'
+import type { DiscussedSubject, DiscussionThread } from './selection-discussions'
 import type { CommentsOrder } from './selection-routes'
 import { type Board, type Paper, type Proposal, PROPOSAL_AREAS } from './selection-types'
 
 /**
- * The groups under each paper in the pool's order, in turn: threads about whole papers of its category, the problems
- * in its own slots, problems other papers hold, then the rest. Only threads go in the first group.
+ * The groups under each paper in the pool's order, in turn: the problems in its own slots, problems other papers hold,
+ * then the rest.
  */
-const PAPER_RUNS = ['papers', 'ownSlots', 'otherPapers', 'rest'] as const
+const PAPER_RUNS = ['ownSlots', 'otherPapers', 'rest'] as const
 
 /** One of {@link PAPER_RUNS}. */
 type PaperRun = (typeof PAPER_RUNS)[number]
 
 /**
- * Where a problem or a thread sits in the pool's order.
+ * Where a problem sits in the pool's order.
  */
 type PoolPlace = {
-  /**
-   * The paper it sits under, by position on the board. One past the last paper for a problem no paper takes, two past
-   * it for a thread about a paper whose category has no running paper.
-   */
+  /** The paper it sits under, by position on the board; one past the last paper for a problem no paper takes. */
   paperIndex: number
   /** The group it sits in under that paper. */
   run: PaperRun
-  /**
-   * For a problem, its slot's position on the board, counting through the papers in order, or 0 when the board doesn't
-   * hold it. For a thread about a paper, its board's position among the selection's boards, newest first.
-   */
+  /** Its slot's position on the board, counting through the papers in order, or 0 when the board doesn't hold it. */
   spot: number
 }
 
 /**
- * How a board orders the pool under the categories picked.
- */
-type BoardRunner = {
-  /** The board's papers in the order it sets them out, none without a board. */
-  papers: readonly Paper[]
-  /** Whether a paper runs: no category is picked, or its category is. */
-  runs: (paper: Paper) => boolean
-  /** Where a problem sits. */
-  placeOf: (problem: Proposal) => PoolPlace
-}
-
-/**
- * The order a board runs the pool in. Under a Category filter only the papers of the categories picked run. A
- * problem a running paper holds runs at its slot; any other runs under the first running paper of a category it is
- * recommended for, what the board holds before the rest, and a problem no paper takes runs after every paper.
+ * Says where a board runs each problem of the pool. Under a Category filter only the papers of the categories picked
+ * run. A problem a running paper holds runs at its slot; any other runs under the first running paper of a category it
+ * is recommended for, what the board holds before the rest, and a problem no paper takes runs after every paper.
  *
  * @param board - The board on screen; null when there is none.
  * @param categories - The categories whose papers run, by name; empty for every paper.
  *
- * @returns The papers, which of them run, and where a problem runs.
+ * @returns A function which says where a problem runs.
  */
-function boardRunnerOf(board: Board | null, categories: readonly string[]): BoardRunner {
+function poolPlacerOf(
+  board: Board | null,
+  categories: readonly string[]
+): (problem: Proposal) => PoolPlace {
   // The board's papers in the order it sets them out, none without a board
   const papers = board?.papers ?? []
 
@@ -81,7 +62,7 @@ function boardRunnerOf(board: Board | null, categories: readonly string[]): Boar
 
   // A function which says where a problem runs: at its slot where a running paper holds it, else under the first
   // paper taking it, else after every paper
-  const placeOf = (problem: Proposal): PoolPlace => {
+  return (problem) => {
     // The slot holding it on the board, if any
     const placed = placedAt.get(problem.id)
 
@@ -101,13 +82,10 @@ function boardRunnerOf(board: Board | null, categories: readonly string[]): Boar
       spot: placed?.spot ?? 0,
     }
   }
-
-  // The papers, which of them run, and where a problem runs
-  return { papers, runs, placeOf }
 }
 
 /**
- * Compares where two things run in the pool's order.
+ * Compares where two problems run in the pool's order.
  *
  * @param first - Where the first runs.
  * @param second - Where the second runs.
@@ -141,29 +119,155 @@ function compareProblems(first: Proposal, second: Proposal): number {
 }
 
 /**
+ * The groups under a paper in the comments' order by problem, in turn: threads about the paper itself, then threads
+ * about the problems in its slots.
+ */
+const PAPER_PARTS = ['paper', 'slots'] as const
+
+/** One of {@link PAPER_PARTS}. */
+type PaperPart = (typeof PAPER_PARTS)[number]
+
+/**
+ * Where a thread's subject sits in the comments' order by problem. The drafts come first, newest first, then the pool,
+ * then the boards finalized into rounds, newest first. The pool runs like one more board whose papers are the
+ * categories.
+ */
+type CommentPlace = {
+  /** Its board's position among the drafts, the pool and the finalized boards, in that order. */
+  rank: number
+  /**
+   * Its paper's position on its board. In the pool, the position of the first category it is recommended for, one
+   * past the last category for a problem recommended for none.
+   */
+  group: number
+  /** The group it sits in under that paper; the slots for every problem in the pool. */
+  part: PaperPart
+  /** Its slot's position in its paper, 0 for a thread about the paper; in the pool, the problem's number. */
+  spot: number
+}
+
+/**
+ * Compares where two threads' subjects sit in the comments' order by problem.
+ *
+ * @param first - Where the first sits.
+ * @param second - Where the second sits.
+ *
+ * @returns Negative where the first runs earlier, positive where later, 0 where they share a place.
+ */
+function compareCommentPlaces(first: CommentPlace, second: CommentPlace): number {
+  // The earlier board, then the earlier paper, then the paper's own threads, then the earlier spot
+  return (
+    first.rank - second.rank ||
+    first.group - second.group ||
+    PAPER_PARTS.indexOf(first.part) - PAPER_PARTS.indexOf(second.part) ||
+    first.spot - second.spot
+  )
+}
+
+/**
+ * Says where a thread's subject sits in the comments' order by problem, against the selection's boards. A problem
+ * several boards hold sits under the first of them in that order.
+ *
+ * @param boards - The selection's boards, oldest first.
+ * @param categories - The selection's categories, by name, in the order they run.
+ *
+ * @returns A function which says where a subject sits.
+ */
+function commentPlacerOf(
+  boards: readonly Board[],
+  categories: readonly string[]
+): (subject: DiscussedSubject) => CommentPlace {
+  // The boards newest first
+  const newestFirst = [...boards].reverse()
+
+  // The drafts, newest first
+  const drafts = newestFirst.filter((board) => board.finalization === null)
+
+  // The boards finalized into rounds, opened or not, newest first
+  const finalized = newestFirst.filter((board) => board.finalization !== null)
+
+  // Each board's rank by id: the drafts, one rank left for the pool, then the finalized boards
+  const rankById = new Map([
+    ...drafts.map(({ id }, index): [string, number] => [id, index]),
+    ...finalized.map(({ id }, index): [string, number] => [id, drafts.length + 1 + index]),
+  ])
+
+  // The rank after every board, for a board missing from the boards given
+  const goneRank = drafts.length + 1 + finalized.length
+
+  // A function which says a board's rank by its id
+  const rankOf = (boardId: string) => rankById.get(boardId) ?? goneRank
+
+  // Where each problem on a board sits, by id, under the first board holding it: the map keeps the last of each id,
+  // so the slots go in from the last board to the first
+  const slotPlaces = new Map(
+    [...drafts, ...finalized]
+      .flatMap((board) =>
+        board.papers.flatMap((paper, group) =>
+          paper.slots.flatMap((slot, spot): [string, CommentPlace][] =>
+            slot === null ? [] : [[slot, { rank: rankOf(board.id), group, part: 'slots', spot }]]
+          )
+        )
+      )
+      .reverse()
+  )
+
+  // A function which says where a subject sits
+  return (subject) => {
+    // By what the thread hangs off
+    switch (subject.kind) {
+      case 'proposal': {
+        // The first category in the order they run that the problem is recommended for, -1 where none
+        const category = categories.findIndex((name) => subject.proposal.recommended.includes(name))
+
+        // At its slot where a board holds it, else in the pool under that category, by number
+        return (
+          slotPlaces.get(subject.proposal.id) ?? {
+            rank: drafts.length,
+            group: category === -1 ? categories.length : category,
+            part: 'slots',
+            spot: subject.proposal.number,
+          }
+        )
+      }
+      case 'paper':
+        // At the head of its paper on its board
+        return {
+          rank: rankOf(subject.board.id),
+          group: subject.board.papers.findIndex(({ id }) => id === subject.paper.id),
+          part: 'paper',
+          spot: 0,
+        }
+
+      // Every kind is handled above
+      default:
+        return assertNever(subject)
+    }
+  }
+}
+
+/**
  * Sorts the threads the filters let through into the chosen order.
  *
  * @param threads - The threads, newest activity first.
  * @param order - The chosen order.
- * @param board - The board on screen; null when there is none.
- * @param categories - The categories picked, by name; empty for none.
  * @param boards - The selection's boards, oldest first.
+ * @param categories - The selection's categories, by name, in the order they run.
  *
  * @returns The threads as given for newest first, or sorted by problem as {@link inProblemOrder} sorts them.
  */
 export function threadsInOrder(
   threads: readonly DiscussionThread<DiscussedSubject>[],
   order: CommentsOrder,
-  board: Board | null,
-  categories: readonly string[],
-  boards: readonly Board[]
+  boards: readonly Board[],
+  categories: readonly string[]
 ): DiscussionThread<DiscussedSubject>[] {
   // By the order asked for
   switch (order) {
     case 'newest':
       return [...threads]
     case 'problem':
-      return inProblemOrder(threads, board, categories, boards)
+      return inProblemOrder(threads, boards, categories)
 
     // Every order is handled above
     default:
@@ -172,77 +276,29 @@ export function threadsInOrder(
 }
 
 /**
- * Sorts threads by problem, in the order {@link inBoardOrder} gives the problems, used problems included. Threads about
- * a whole paper come first under the board's paper of the same category, whichever board their own paper is on, the
- * newest board's first. When no paper of their category runs, they go last. Within one problem or paper, the oldest
- * thread comes first.
+ * Sorts threads by problem. The drafts come first, the newest first, then the pool, then the boards finalized into
+ * rounds, the newest first. A board runs paper by paper, each paper's own threads first, then its problems in slot
+ * order. The pool runs its problems by the first category each is recommended for, in the order the categories run,
+ * then by number. Within one problem or paper, the oldest thread comes first.
  *
  * @param threads - The threads.
- * @param board - The board on screen; null when there is none.
- * @param categories - The categories whose papers run, by name; empty for every paper.
  * @param boards - The selection's boards, oldest first.
+ * @param categories - The selection's categories, by name, in the order they run.
  *
  * @returns The threads in that order.
  */
 function inProblemOrder(
   threads: readonly DiscussionThread<DiscussedSubject>[],
-  board: Board | null,
-  categories: readonly string[],
-  boards: readonly Board[]
+  boards: readonly Board[],
+  categories: readonly string[]
 ): DiscussionThread<DiscussedSubject>[] {
-  // The board's papers, which of them run, and where a problem runs
-  const { papers, runs, placeOf } = boardRunnerOf(board, categories)
+  // A function which says where a thread's subject sits
+  const placeOf = commentPlacerOf(boards, categories)
 
-  // A function which says where a thread's subject runs
-  const subjectPlaceOf = (subject: DiscussedSubject): PoolPlace => {
-    // By what the thread hangs off
-    switch (subject.kind) {
-      case 'proposal':
-        return placeOf(subject.proposal)
-      case 'paper': {
-        // The running paper of the paper's category, -1 where none runs
-        const headed = papers.findIndex(
-          (paper) => runs(paper) && paper.category === subject.paper.category
-        )
-
-        // The paper's board's place among the boards, the newest first
-        const newness = boards.length - 1 - boards.findIndex(({ id }) => id === subject.board.id)
-
-        // At the head of that paper's run, or after everything where none runs
-        return {
-          paperIndex: headed === -1 ? papers.length + 1 : headed,
-          run: 'papers',
-          spot: newness,
-        }
-      }
-
-      // Every kind is handled above
-      default:
-        return assertNever(subject)
-    }
-  }
-
-  // A function which compares two subjects sharing a place, which only two problems or two papers do: two problems
-  // by area and number, two papers by id
-  const compareSubjects = (first: DiscussedSubject, second: DiscussedSubject) => {
-    // By what the first hangs off
-    switch (first.kind) {
-      case 'proposal':
-        return second.kind === 'proposal' ? compareProblems(first.proposal, second.proposal) : 0
-      case 'paper':
-        return discussionTargetOf(first).targetId.localeCompare(discussionTargetOf(second).targetId)
-
-      // Every kind is handled above
-      default:
-        return assertNever(first)
-    }
-  }
-
-  // The threads by where their subjects run, then each subject's oldest first
+  // The threads by where their subjects sit, then each subject's oldest first
   return [...threads].sort(
     (first, second) =>
-      comparePlaces(subjectPlaceOf(first.subject), subjectPlaceOf(second.subject)) ||
-      compareSubjects(first.subject, second.subject) ||
+      compareCommentPlaces(placeOf(first.subject), placeOf(second.subject)) ||
       Date.parse(first.comment.createdAt) - Date.parse(second.comment.createdAt) ||
       first.comment.id.localeCompare(second.comment.id)
   )
@@ -266,8 +322,8 @@ export function inBoardOrder(
   board: Board | null,
   categories: readonly string[]
 ): Proposal[] {
-  // Where each problem runs on the board
-  const { placeOf } = boardRunnerOf(board, categories)
+  // A function which says where a problem runs on the board
+  const placeOf = poolPlacerOf(board, categories)
 
   // The problems by where they run, then by area and number
   return [...problems].sort(

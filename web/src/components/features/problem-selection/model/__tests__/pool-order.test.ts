@@ -44,26 +44,45 @@ function threadIds(threads: DiscussionThread<DiscussedSubject>[]): string[] {
   return threads.map((thread) => thread.comment.id)
 }
 
-/** An olympiad board named November, problems 1 and 2 in its C paper, problem 3 in its B paper. */
-const NOVEMBER: Board = {
-  id: 'november',
-  name: 'November',
+/** The categories the olympiad runs, in the order they run. */
+const CATEGORIES = ['A', 'B', 'C']
+
+/** The newest draft, January: problems 1 and 2 in its C paper, problem 3 in its B paper. */
+const JANUARY: Board = {
+  id: 'january',
+  name: 'January',
   papers: [
-    { id: 'november-c', name: 'C', category: 'C', slots: ['p1', 'p2'] },
-    { id: 'november-b', name: 'B', category: 'B', slots: ['p3'] },
+    { id: 'january-c', name: 'C', category: 'C', slots: ['p1', 'p2'] },
+    { id: 'january-b', name: 'B', category: 'B', slots: ['p3'] },
   ],
   finalization: null,
 }
 
-/** An older olympiad board named October, with a C paper and an A paper, which November has none of. */
+/** An older draft, December: problem 4 in its C paper, problem 1, which January holds too, and 5 in its B paper. */
+const DECEMBER: Board = {
+  id: 'december',
+  name: 'December',
+  papers: [
+    { id: 'december-c', name: 'C', category: 'C', slots: ['p4'] },
+    { id: 'december-b', name: 'B', category: 'B', slots: ['p1', 'p5'] },
+  ],
+  finalization: null,
+}
+
+/** A board finalized into October's rounds, still to open, problem 6 in its C paper. */
 const OCTOBER: Board = {
   id: 'october',
   name: 'October',
-  papers: [
-    { id: 'october-c', name: 'C', category: 'C', slots: [null] },
-    { id: 'october-a', name: 'A', category: 'A', slots: [null] },
-  ],
-  finalization: null,
+  papers: [{ id: 'october-c', name: 'C', category: 'C', slots: ['p6'] }],
+  finalization: { cycleName: 'October', opensAt: '2026-10-25T08:00:00.000Z', hasOpened: false },
+}
+
+/** The oldest board, finalized into September's rounds, which have opened, problem 7 in its A paper. */
+const SEPTEMBER: Board = {
+  id: 'september',
+  name: 'September',
+  papers: [{ id: 'september-a', name: 'A', category: 'A', slots: ['p7'] }],
+  finalization: { cycleName: 'September', opensAt: '2026-09-25T08:00:00.000Z', hasOpened: true },
 }
 
 /**
@@ -85,53 +104,78 @@ function thread(
 }
 
 describe('threadsInOrder', () => {
-  it("runs the threads problem by problem as the board on screen runs the pool, each category's papers first, the newest board's first, each subject's oldest first", () => {
-    // November's C problems, its B problem, the rest of C (a geometry problem, an algebra one and a taken one), and a
-    // problem no paper takes
-    const [first, second, third, geometry, algebra, taken, nowhere] = [
-      proposal(1, { recommended: ['C'] }),
-      proposal(2, { recommended: ['C'] }),
-      proposal(3, { recommended: ['B'] }),
-      proposal(4, { area: 'geometry', recommended: ['C'] }),
-      proposal(5, { recommended: ['C'] }),
-      proposal(6, { area: 'geometry', recommended: ['C'], isUsed: true }),
-      proposal(7),
+  it("runs the threads by problem: the drafts newest first, the pool by category and number, then the finalized boards newest first, each paper's own threads ahead of its slots, each subject's oldest first", () => {
+    // The boards' problems, then the pool's: one for B and C, one for C, one for A, one for nothing and another for C
+    const [p1, p2, p3, p4, p5, p6, p7, forBAndC, forC, forA, forNothing, laterForC] = [
+      ...[1, 2, 3, 4, 5, 6, 7].map((number) => proposal(number)),
+      proposal(8, { recommended: ['B', 'C'] }),
+      proposal(9, { recommended: ['C'] }),
+      proposal(10, { recommended: ['A'] }),
+      proposal(11),
+      proposal(12, { recommended: ['C'] }),
     ].map((problem): DiscussedSubject => ({ kind: 'proposal', proposal: problem }))
 
-    // The threads newest activity first, as the filters let them through, problem 1 and November's C paper with two
+    // A function which says the subject of a paper's discussion
+    const paper = (board: Board, index: number): DiscussedSubject => ({
+      kind: 'paper',
+      paper: board.papers[index],
+      board,
+    })
+
+    // The threads newest activity first, as the filters let them through, problem 1 and January's C paper with two,
+    // the later one's id sorting first
     const threads = [
-      thread('nowhere', 20, nowhere),
-      thread('october a', 19, { kind: 'paper', paper: OCTOBER.papers[1], board: OCTOBER }),
-      thread('first later', 18, first),
-      thread('taken', 17, taken),
-      thread('november c later', 16, { kind: 'paper', paper: NOVEMBER.papers[0], board: NOVEMBER }),
-      thread('october c', 15, { kind: 'paper', paper: OCTOBER.papers[0], board: OCTOBER }),
-      thread('third', 14, third),
-      thread('geometry', 13, geometry),
-      thread('algebra', 12, algebra),
-      thread('second', 11, second),
-      thread('november c', 10, { kind: 'paper', paper: NOVEMBER.papers[0], board: NOVEMBER }),
-      thread('first', 9, first),
+      thread('september a', 30, paper(SEPTEMBER, 0)),
+      thread('p1 again', 29, p1),
+      thread('for nothing', 28, forNothing),
+      thread('p7', 27, p7),
+      thread('january c again', 26, paper(JANUARY, 0)),
+      thread('later for c', 25, laterForC),
+      thread('p5', 24, p5),
+      thread('october c', 23, paper(OCTOBER, 0)),
+      thread('for a', 22, forA),
+      thread('p3', 21, p3),
+      thread('december c', 20, paper(DECEMBER, 0)),
+      thread('for c', 19, forC),
+      thread('p6', 18, p6),
+      thread('january b', 17, paper(JANUARY, 1)),
+      thread('for b and c', 16, forBAndC),
+      thread('p4', 15, p4),
+      thread('p2', 14, p2),
+      thread('january c first', 13, paper(JANUARY, 0)),
+      thread('p1 first', 12, p1),
     ]
 
-    // The threads problem by problem, November on screen, no category picked
-    const ordered = threadsInOrder(threads, 'problem', NOVEMBER, [], [OCTOBER, NOVEMBER])
+    // The threads by problem, against the boards oldest first
+    const ordered = threadsInOrder(
+      threads,
+      'problem',
+      [SEPTEMBER, OCTOBER, DECEMBER, JANUARY],
+      CATEGORIES
+    )
 
-    // C's papers, November's first, then C1 and C2, the rest of C by area and number, the taken problem among them,
-    // then B, the problem no paper takes, and last the A paper, which no paper of November runs
+    // January paper by paper, problem 1 there rather than in December, then December, the pool by its first category
+    // in the order they run and then by number, the problem recommended for nothing last, then October and September
     expect(threadIds(ordered)).toEqual([
-      'november c',
-      'november c later',
+      'january c first',
+      'january c again',
+      'p1 first',
+      'p1 again',
+      'p2',
+      'january b',
+      'p3',
+      'december c',
+      'p4',
+      'p5',
+      'for a',
+      'for b and c',
+      'for c',
+      'later for c',
+      'for nothing',
       'october c',
-      'first',
-      'first later',
-      'second',
-      'algebra',
-      'geometry',
-      'taken',
-      'third',
-      'nowhere',
-      'october a',
+      'p6',
+      'september a',
+      'p7',
     ])
   })
 })
