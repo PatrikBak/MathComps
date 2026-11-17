@@ -50,6 +50,7 @@ import {
   SLOVAK_STATEMENT,
   stubSelection,
   switchElementaryOn,
+  untilSelectionReadAgain,
   UNWRITTEN,
   USED,
 } from './support/problem-selection'
@@ -277,8 +278,8 @@ test.describe("the selection's address and history", () => {
     // A later read, which revises the problem and sets aside the pool's first one
     answerSelectionWith('later')
 
-    // Long enough for the selection to be read again
-    await page.clock.fastForward('00:31')
+    // The selection, read again
+    await untilSelectionReadAgain(page)
 
     // Once the read has landed, which the revision on the problem's page shows
     await expect(page.getByRole('article').getByText(REVISION)).toBeVisible({
@@ -541,8 +542,8 @@ test.describe("the selection's address and history", () => {
     // The problem's author revising it meanwhile
     answerSelectionWith('later')
 
-    // Long enough for the selection to be read again
-    await page.clock.fastForward('00:31')
+    // The selection, read again once marking the problem's discussion seen has stopped holding the read back
+    await untilSelectionReadAgain(page)
 
     // The revision on the problem's page, which the read again brought
     await expect(page.getByRole('article').getByText(REVISION)).toBeVisible({
