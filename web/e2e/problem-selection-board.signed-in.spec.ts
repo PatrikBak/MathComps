@@ -592,13 +592,13 @@ test.describe('the filter in the address', () => {
       .poll(() => addressParams(page).toString())
       .toBe(`area=algebra&problem=${ALGEBRA.id}`)
 
-    // Its comments, opened
-    await page.getByRole('tab', { name: selectionCopy.detail.commentsTab }).click()
+    // Its conversations, opened
+    await page.getByRole('tab', { name: selectionCopy.detail.conversationsTab }).click()
 
     // Named in the address too, the filter still beside them
     await expect
       .poll(() => addressParams(page).toString())
-      .toBe(`area=algebra&problem=${ALGEBRA.id}&tab=comments`)
+      .toBe(`area=algebra&problem=${ALGEBRA.id}&tab=conversations`)
 
     // Back to the pool by the link on the problem's page
     await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()

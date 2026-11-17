@@ -186,7 +186,7 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
         className="mt-4"
       />
 
-      {/* Conversations and discussion */}
+      {/* Discussion and conversations */}
       <div className="mt-6">
         <Tabs
           ariaLabel={t('tabsLabel')}
