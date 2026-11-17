@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+
 namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
@@ -12,6 +14,25 @@ namespace MathComps.Domain.EfCoreEntities;
 /// </remarks>
 public class DefenseTurnAttempt
 {
+    /// <summary>
+    /// Whether the reply asked on over a complete solution while the examination was still going. A reply after an
+    /// earlier one ended the examination on a complete solution withholds nothing: a goodbye, or an answer to a doubt
+    /// raised after the close, asks for nothing the solution still owes.
+    /// </summary>
+    /// <remarks>
+    /// Only the reply a turn sent ends the examination, which is its last attempt: a closing draft a guard sent back
+    /// was never read.
+    /// </remarks>
+    public static readonly Expression<Func<DefenseTurnAttempt, bool>> WithholdsClose = attempt =>
+        attempt.MathComplete
+        && !attempt.MathCloses
+        && !attempt.Session.Turns.Any(earlier =>
+            earlier.Sequence < attempt.Turn.Sequence
+            && earlier.Attempts.Any(sent =>
+                sent.MathCloses
+                && sent.MathComplete
+                && !earlier.Attempts.Any(later => later.AttemptIndex > sent.AttemptIndex)));
+
     /// <summary>
     /// Primary key (Guid v7).
     /// </summary>
@@ -80,8 +101,7 @@ public class DefenseTurnAttempt
     /// </summary>
     /// <remarks>
     /// On an attempt recorded before the math check judged completeness, true only where the leak check found the
-    /// reply withholding the close. Together with <see cref="MathCloses"/> it is the withheld-close verdict on every
-    /// attempt: complete, and the reply asked on.
+    /// reply withholding the close. <see cref="WithholdsClose"/> reads it together with <see cref="MathCloses"/>.
     /// </remarks>
     public required bool MathComplete { get; set; }
 

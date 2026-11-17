@@ -2849,7 +2849,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
             // Otherwise the same fixed problem, whatever was asked for
             return Task.FromResult<DefenseProblemContent?>(
-                new DefenseProblemContent(Statement, Reference, []));
+                new DefenseProblemContent(Statement, Reference, [], GradingNote: null));
         }
 
         /// <inheritdoc/>

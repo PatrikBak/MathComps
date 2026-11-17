@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MathComps.Cli.BulkImport.Manifest;
 using MathComps.Cli.BulkImport.Validation;
 using MathComps.Infrastructure.Services.BulkImport;
@@ -157,8 +158,8 @@ public static class ImportReport
             if (LineFor(resolution.Action) is not { } line)
                 continue;
 
-            // The half the text lands on and its language, lower-cased.
-            var half = resolution.DocumentType.ToString().ToLowerInvariant();
+            // The half the text lands on, in kebab case, and its language, lower-cased.
+            var half = JsonNamingPolicy.KebabCaseLower.ConvertName(resolution.DocumentType.ToString());
             var language = resolution.Language.ToString().ToLowerInvariant();
 
             // Log the text's line: its slug, half and language.
@@ -199,8 +200,8 @@ public static class ImportReport
 
     /// <summary>
     /// The label and level of a text's own line in the database block: a refused second original logs as a warning,
-    /// an in-place overwrite and a clean add as information. An unchanged text gets none, since the block counts those
-    /// instead, and neither does a create the import refuses, which the issues report.
+    /// an in-place overwrite, a clean add and a removal as information. An unchanged text gets none, since the block
+    /// counts those instead, and neither does a create the import refuses, which the issues report.
     /// </summary>
     /// <param name="action">The resolution action.</param>
     /// <returns>The label and the level, or null when the text gets no line.</returns>
@@ -211,6 +212,7 @@ public static class ImportReport
         DraftTextAction.SecondOriginal => ("second original", LogLevel.Warning),
         DraftTextAction.AddTranslation => ("add translation", LogLevel.Information),
         DraftTextAction.OverwriteTranslation => ("overwrite translation", LogLevel.Information),
+        DraftTextAction.RemoveGradingNote => ("remove", LogLevel.Information),
         DraftTextAction.UnchangedOriginal or DraftTextAction.UnchangedTranslation
             or DraftTextAction.NoOriginalForNewProblem or DraftTextAction.NewProblemMissingMetadata => null,
         _ => throw new ArgumentOutOfRangeException(nameof(action), action, "Unknown text action.")
@@ -243,7 +245,9 @@ public static class ImportReport
             foreach (var issue in fileGroup)
             {
                 // The half and line:col coordinates, when the issue carries them.
-                var half = issue.Half is { } problemHalf ? $" {problemHalf.ToString().ToLowerInvariant()}" : "";
+                var half = issue.Half is { } problemHalf
+                    ? $" {JsonNamingPolicy.KebabCaseLower.ConvertName(problemHalf.ToString())}"
+                    : "";
                 var position = issue.Line is { } line ? $" {line}:{issue.Col?.ToString() ?? "?"}" : "";
 
                 // The severity tag with its location.

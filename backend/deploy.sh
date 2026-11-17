@@ -73,6 +73,12 @@ if [[ ! -f "$ENV_FILE" ]]; then
     exit 1
 fi
 
+# The last commit to touch this directory, which is the image's build context, so each error the API reports
+# names the code that raised it. A merge elsewhere leaves it unchanged, and up -d leaves the API running. Two
+# statements, so set -e stops here when git fails, where `export VAR=$(...)` would swallow the failure.
+SENTRY_RELEASE=$(git log -1 --format=%H -- .)
+export SENTRY_RELEASE
+
 # Ensure traefik-public network exists
 if ! docker network inspect traefik-public >/dev/null 2>&1; then
     echo "==> Creating traefik-public network" >&2

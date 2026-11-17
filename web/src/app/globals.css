@@ -573,6 +573,15 @@ html {
   margin: 0.8em 0 0.8em 1.25em;
 }
 
+/* A text made of a list sets it at the text's own edge: the indent that sets a list off from the prose around
+   it has no prose to set it off from. The markers hang in a gutter wide enough for a two-digit number, the same
+   for bullets so that two such texts line up. */
+.math-typography.math-flush-lists > ol,
+.math-typography.math-flush-lists > ul {
+  margin-left: 0;
+  padding-left: 1.6em;
+}
+
 /* Inline math runs slightly larger than body text for legibility */
 .math-typography .katex,
 .math-typography math {

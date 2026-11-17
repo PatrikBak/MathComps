@@ -130,6 +130,11 @@ export type DefenseTurnAttempt = {
    * owed, and on a draft made before the math check judged completeness.
    */
   mathOwed: string
+  /**
+   * Whether the reply asked on over a complete solution while the examination was still going. A reply after an
+   * earlier one ended the examination on a complete solution withholds nothing.
+   */
+  withholdsClose: boolean
   /** Whether the reply handed over unearned progress. */
   leaks: boolean
   /** The step or idea given away; empty when nothing was. */

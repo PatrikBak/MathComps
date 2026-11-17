@@ -107,7 +107,7 @@ public sealed class ProblemSelectionService(
                         text.DocumentType, text.Language, text.MarkdownText ?? text.RawText))
                     .ToList(),
                 OriginalLanguage = proposal.Problem.Texts
-                    .Where(text => text.IsOriginal)
+                    .Where(text => text.DocumentType == DocumentType.Statement && text.IsOriginal)
                     .Select(text => (Language?)text.Language)
                     .FirstOrDefault(),
                 Ratings = proposal.Ratings
@@ -244,6 +244,8 @@ public sealed class ProblemSelectionService(
                     proposal.Recommended,
                     TextsOf(proposal.Texts),
                     proposal.OriginalLanguage,
+                    // The problem's one grading note, whichever language it is written in
+                    proposal.Texts.FirstOrDefault(body => body.DocumentType == DocumentType.GradingNote)?.Body,
                     proposal.IsSetAside,
                     IsUsed: !SelectionRules.IsInPool(proposal.CompetitionPath),
                     proposal.Ratings)),

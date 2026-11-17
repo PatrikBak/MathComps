@@ -552,8 +552,8 @@ public class AdminDefenseReviewService(
         // An early close is a reply that ended the examination over an incomplete solution.
         ExaminerFlaw.EarlyClose => attempt => attempt.MathCloses && !attempt.MathComplete,
 
-        // A withheld close is a reply that asked on over a complete solution.
-        ExaminerFlaw.WithheldClose => attempt => attempt.MathComplete && !attempt.MathCloses,
+        // A withheld close is a reply that asked on over a complete solution before the examination ended.
+        ExaminerFlaw.WithheldClose => DefenseTurnAttempt.WithholdsClose,
 
         // Every other flaw is a flag its guard raises.
         ExaminerFlaw.Leak => attempt => attempt.Leaks,

@@ -84,7 +84,7 @@ Files people upload into the editor go through the API, which keeps them in the 
 
 #### Error Reporting (Better Stack)
 
-`NEXT_PUBLIC_SENTRY_DSN` sends the site's errors, from the browser and the server, to a Better Stack Errors application over the Sentry protocol, the same way the API's `SENTRY_DSN` does. The browser posts through the site's own `/api/relay` route, since content blockers refuse Better Stack's domain. A browser error once Clerk has loaded, and one a route handler reports, name a signed-in user by Clerk id alone, the id the API's events carry, so one student's errors match between the website and the API. A page render's or a server action's names nobody. Unset, the SDK stays off. On Vercel it is set for Production only, and it is baked into the build, so a change takes a redeploy.
+`NEXT_PUBLIC_SENTRY_DSN` sends the site's errors, from the browser and the server, to a Better Stack Errors application over the Sentry protocol, the same way the API's `SENTRY_DSN` does. The browser posts through the site's own `/api/relay` route, since content blockers refuse Better Stack's domain. A browser error once Clerk has loaded, and one a route handler reports, name a signed-in user by Clerk id alone, the id the API's events carry, so one student's errors match between the website and the API. A page render's or a server action's names nobody. Each error carries the `caller` tag the API's errors carry: `browser`, `webhook`, `crawler`, `script` for a tool or a browser a script drives, or `background` for a server fault no request names, a route handler's own report included. Unset, the SDK stays off. On Vercel it is set for Production only, and it is baked into the build, so a change takes a redeploy.
 
 **Other available variables (have good defaults):**
 
@@ -151,7 +151,7 @@ Mathilda is the AI examiner a student defends a solution to. The feature lives i
 - **The client names the problem rather than sending it.** A start carries its target (the handout's and environment's ids, or the problem's id); the backend resolves the statement, reference and hints and snapshots them onto the session.
 - **Reading the conversations back is a route:** [`/admin/defenses`](src/app/[locale]/admin/defenses/page.tsx), gated by the Clerk admin role.
 
-A turn is several LLM calls and takes about 40 seconds, so develop against `"Examiner:UseFake": true` in the backend config.
+A turn is several LLM calls and takes ten seconds or more, so develop against `"Examiner:UseFake": true` in the backend config.
 
 ## Webhooks
 

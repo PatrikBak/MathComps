@@ -80,6 +80,67 @@ test.describe('a comment thread, read by a visitor', () => {
     await expect(page.getByText('A parity argument is shorter.')).toBeVisible()
   })
 
+  test('leaves the same space after a thread ending three replies deep as after one ending a reply deep', async ({
+    page,
+  }) => {
+    // A comment with one reply under it
+    const shallow = {
+      ...commentFrom('user_zuzana', 'Zuzana', 'Try small cases first.'),
+      replies: [commentFrom('user_martin', 'Martin', 'Three cases are enough.')],
+    }
+
+    // A comment whose replies run three deep
+    const deep = {
+      ...commentFrom('user_peter', 'Peter', 'The bound looks loose.'),
+      replies: [
+        {
+          ...commentFrom('user_jana', 'Jana', 'It is tight at four.'),
+          replies: [
+            {
+              ...commentFrom('user_eva', 'Eva', 'Only for even counts.'),
+              replies: [commentFrom('user_ivan', 'Ivan', 'Odd counts reduce to even.')],
+            },
+          ],
+        },
+      ],
+    }
+
+    // A comment after the deep one
+    const afterDeep = commentFrom('user_lucia', 'Lucia', 'A cleaner proof exists.')
+
+    // The thread
+    await stubPageThread(page, [shallow, deep, afterDeep])
+
+    // The page holding it
+    await page.goto(threadPage())
+
+    // Once the deepest reply is shown
+    await expect(page.getByText('Odd counts reduce to even.')).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // A function which measures the space between the bottom of one text and the top of the next
+    const spaceBetween = async (above: string, below: string) => {
+      // Both texts' boxes
+      const [aboveBox, belowBox] = await Promise.all([
+        page.getByText(above).boundingBox(),
+        page.getByText(below).boundingBox(),
+      ])
+
+      // The distance between them
+      return belowBox!.y - (aboveBox!.y + aboveBox!.height)
+    }
+
+    // The space after the thread ending a reply deep, and after the one ending three deep
+    const [afterShallowSpace, afterDeepSpace] = await Promise.all([
+      spaceBetween('Three cases are enough.', 'The bound looks loose.'),
+      spaceBetween('Odd counts reduce to even.', 'A cleaner proof exists.'),
+    ])
+
+    // The two threads followed by the same space
+    expect(afterDeepSpace).toBeCloseTo(afterShallowSpace, 0)
+  })
+
   test('names who gave each reaction, oldest first, counting the ones with no name', async ({
     page,
   }) => {

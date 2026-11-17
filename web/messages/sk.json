@@ -1472,8 +1472,10 @@
     },
     "text": {
       "fallback": "Zatiaľ chýba {missing}, zobrazuje sa {shown}.",
+      "gradingNote": "Poznámka pre Mathildu",
       "none": "Zatiaľ bez textu.",
-      "preview": "Zobraziť zadanie"
+      "preview": "Zobraziť zadanie",
+      "reference": "Riešenie"
     },
     "writes": {
       "authReason": "úpravu výberu úloh",

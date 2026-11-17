@@ -22,7 +22,7 @@ What ships when the cap runs out depends on the flag. A wrong claim, a leak or a
 
 Each step sets its own `Model`, `FallbackModels`, `ReasoningEffort` and `MaxOutputTokens` in `appsettings.examiner.json`, so you tune one without touching the others. `MaxOutputTokens` bounds a runaway generation, and on a budget-based thinking model it also caps how deep the step thinks.
 
-Every step runs at `medium` effort except the math check, which runs a stronger model at `low`. At `high` a check can take over a minute, and a turn waits for its slowest check.
+Every step runs at `medium` effort except the math check, which runs a stronger model at `low`. A higher effort makes a step slower, and a turn waits for its slowest check.
 
 `FallbackModels` is the chain the provider walks when the primary never answers, which is the one failure the retry cannot cover. Make every hop a different vendor that takes a JSON schema and a system message. A sibling model shares the primary's outage, and a model the provider will not carry a system message to answers with the persona missing and calls it a success.
 
@@ -64,7 +64,7 @@ A mid-conversation rewind keeps the examiner turns written before any prompt cha
 `read-photo` runs the photo reader (`Services/Photos`) on local files. Each photo's reading goes to a `<name>-reading` folder beside it: the text as `text.md`, the page the model read as `page.jpg`, and each drawing as a JPEG named after its label (`Figure 2` is `figure-2.jpg`), replacing what an earlier run wrote. It prints each photo's figure count, the model that answered, the cost and the time, then what the run spent. The prompt is [`Prompts/read-photo.txt`](../MathComps.Infrastructure/Prompts/read-photo.txt), sent as the user message beside the page. To try another model or prompt, override the config from the environment:
 
 ```bash
-PhotoReader__Reading__Model=google/gemini-3.8-flash PhotoReader__Reading__Prompt=/abs/path/prompt.txt \
+PhotoReader__Reading__Model=google/gemini-4-hydrogen PhotoReader__Reading__Prompt=/abs/path/prompt.txt \
   dotnet run --project backend/src/MathComps.Cli.Examiner -- read-photo ~/photos/*.jpg
 ```
 

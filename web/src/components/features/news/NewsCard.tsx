@@ -38,9 +38,9 @@ const cardMdxComponents = {
     )
   },
 
-  // Bold
+  // Bold, never hyphenated, since posts bold the names that must stay whole
   strong: (props: React.HTMLAttributes<HTMLElement>) => (
-    <strong className="text-foreground font-semibold" {...props} />
+    <strong className="text-foreground font-semibold hyphens-none" {...props} />
   ),
   // Italic
   em: (props: React.HTMLAttributes<HTMLElement>) => <em className="italic" {...props} />,

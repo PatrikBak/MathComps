@@ -82,8 +82,16 @@ type CompetitionProblemSurfaceProps = {
   onClose: () => void
   /** How many things are on the surface, said on the row; null where the row counts nothing. */
   count: number | null
-  /** Whether the surface fills the screen's height, for one that is written in rather than only read. */
+  /**
+   * Whether the surface fills the screen's height, for one that is written in or read in parts that scroll on their
+   * own.
+   */
   isTall: boolean
+  /**
+   * Whether what is read on the surface lays itself out in parts that each scroll on their own, for a surface that
+   * fills the screen's height; otherwise it is one padded column that scrolls as a whole.
+   */
+  scrollsInParts?: boolean
   /** What is read on the surface. */
   children: React.ReactNode
 }
@@ -105,6 +113,7 @@ export function CompetitionProblemSurface({
   onClose,
   count,
   isTall,
+  scrollsInParts = false,
   children,
 }: CompetitionProblemSurfaceProps) {
   // Shared modal chrome copy
@@ -158,12 +167,17 @@ export function CompetitionProblemSurface({
               it stands at its own height */}
           <ProblemBand statement={statement} height="own" />
 
-          {/* And the thing itself, which scrolls in its own right once it outgrows the screen */}
+          {/* And the thing itself, which scrolls in its own right once it outgrows the screen, or in parts it
+              lays out itself */}
           <div
-            className={cn(
-              'scrollbar-visible min-h-0 overflow-y-auto overscroll-contain px-4 py-3 sm:px-5',
-              isTall && 'flex-1'
-            )}
+            className={
+              scrollsInParts
+                ? 'flex min-h-0 flex-1 flex-col'
+                : cn(
+                    'scrollbar-visible min-h-0 overflow-y-auto overscroll-contain px-4 py-3 sm:px-5',
+                    isTall && 'flex-1'
+                  )
+            }
           >
             {children}
           </div>

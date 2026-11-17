@@ -89,6 +89,7 @@ function proposal(texts: Proposal['texts'], originalLanguage: Locale | null = nu
     recommended: [],
     texts,
     originalLanguage,
+    gradingNote: null,
     isSetAside: false,
     isUsed: false,
     ratings: [],

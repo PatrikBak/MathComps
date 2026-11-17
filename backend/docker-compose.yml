@@ -69,6 +69,9 @@ services:
       Clerk__WebhookSecret: ${CLERK_WEBHOOK_SECRET:?set it in .env}
       Llm__ApiKey: ${LLM_API_KEY:?set it in .env}
       Sentry__Dsn: ${SENTRY_DSN:-}
+      # The commit deploy.sh stamps on each error. Empty, from a compose run that bypasses it, leaves the SDK's
+      # assembly version.
+      SENTRY_RELEASE: ${SENTRY_RELEASE:-}
       Mail__ResendApiKey: ${RESEND_API_KEY:-}
       # The private bucket the handouts CLI publishes the examiner's problem content to, with a key scoped to that
       # bucket alone.

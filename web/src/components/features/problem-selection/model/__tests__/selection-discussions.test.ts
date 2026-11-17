@@ -221,6 +221,7 @@ function discussedProblem(id: string, changes: Partial<Proposal> = {}): Discusse
       recommended: [],
       texts: {},
       originalLanguage: null,
+      gradingNote: null,
       isSetAside: false,
       isUsed: false,
       ratings: [],

@@ -540,7 +540,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             // a woman, before the draft that went out ended the examination
             context.DefenseTurnAttempts.AddRange(
                 NewAttempt(OldestSessionId, oldestReply.Id, attemptIndex: 0, "keep going",
-                    withholdsClose: true, switchesLanguage: true, gendersTheReader: true),
+                    asksOnComplete: true, switchesLanguage: true, gendersTheReader: true),
                 NewAttempt(OldestSessionId, oldestReply.Id, attemptIndex: 1, "a closing reply",
                     closesComplete: true));
 
@@ -558,6 +558,18 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
                 NewAttempt(NewestSessionId, newestReply.Id, attemptIndex: 0, "follow my way",
                     gendersTheReader: true, takesOver: true),
                 NewAttempt(NewestSessionId, newestReply.Id, attemptIndex: 1, "a last reply", closesComplete: true));
+
+            // Then the student thanked her and she said goodbye
+            var thanks = NewTurn(NewestSessionId, TranscriptRole.Candidate, "thanks", 5, DateTimeOffset.UtcNow);
+            var goodbye = NewTurn(NewestSessionId, TranscriptRole.Examiner, "goodbye", 6, DateTimeOffset.UtcNow);
+
+            // Both added to the newest conversation
+            context.DefenseTurns.AddRange(thanks, goodbye);
+
+            // Her goodbye's one draft, over the same complete solution, which withholds nothing once the examination
+            // has ended
+            context.DefenseTurnAttempts.Add(
+                NewAttempt(NewestSessionId, goodbye.Id, attemptIndex: 0, "goodbye", asksOnComplete: true));
 
             // The competition one drifted out of the student's language, and its rewrite took over their route and
             // went out anyway once the revisions ran out, so its takeover sits on no draft that was sent back
@@ -606,7 +618,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
                 new AdminDefenseQueueFilter(CaughtFlaws: [ExaminerFlaw.Leak]), 2, "newest, newer"),
             ("an early close in one, the seed's own sent-back draft, though another closed too",
                 new AdminDefenseQueueFilter(CaughtFlaws: [ExaminerFlaw.EarlyClose]), 1, "newest"),
-            ("a withheld close in one, though another's solution was complete too",
+            ("a withheld close in one, though another's solution was complete too, and its goodbye after the close",
                 new AdminDefenseQueueFilter(CaughtFlaws: [ExaminerFlaw.WithheldClose]), 1, "oldest"),
             ("a switched language in three",
                 new AdminDefenseQueueFilter(CaughtFlaws: [ExaminerFlaw.LanguageSwitch]), 3,

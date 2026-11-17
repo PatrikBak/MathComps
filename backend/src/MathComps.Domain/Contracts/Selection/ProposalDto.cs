@@ -18,8 +18,12 @@ namespace MathComps.Domain.Contracts.Selection;
 /// Its text in every language it has a statement in, keyed by that language.
 /// </param>
 /// <param name="OriginalLanguage">
-/// The language it was first written in, which its other texts translate; null where none of its texts is marked
-/// <see cref="ProblemText.IsOriginal"/>.
+/// The language it was first written in, which its other texts translate; null where none of its statements is
+/// marked <see cref="ProblemText.IsOriginal"/>.
+/// </param>
+/// <param name="GradingNote">
+/// Its <see cref="DocumentType.GradingNote"/> as markdown, in the one language it is written in; null where it has
+/// none.
 /// </param>
 /// <param name="IsSetAside"><inheritdoc cref="Proposal.IsSetAside" path="/summary"/></param>
 /// <param name="IsUsed">Whether a paper has taken it.</param>
@@ -34,6 +38,7 @@ public record ProposalDto(
     IReadOnlyList<string> Recommended,
     IReadOnlyDictionary<Language, ProposalTextDto> Texts,
     Language? OriginalLanguage,
+    string? GradingNote,
     bool IsSetAside,
     bool IsUsed,
     IReadOnlyList<ProposalRatingDto> Ratings);

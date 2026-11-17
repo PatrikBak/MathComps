@@ -348,7 +348,7 @@ public static class ConversationReviewSeed
     /// <param name="durationMs">How long the draft took end to end.</param>
     /// <param name="mathHolds"><inheritdoc cref="DefenseTurnAttempt.MathHolds" path="/summary"/></param>
     /// <param name="leaks"><inheritdoc cref="DefenseTurnAttempt.Leaks" path="/summary"/></param>
-    /// <param name="withholdsClose">Whether the draft asked on over a solution that was already complete.</param>
+    /// <param name="asksOnComplete">Whether the draft asked on over a solution that was already complete.</param>
     /// <param name="switchesLanguage"><inheritdoc cref="DefenseTurnAttempt.SwitchesLanguage" path="/summary"/></param>
     /// <param name="gendersTheReader"><inheritdoc cref="DefenseTurnAttempt.GendersTheReader" path="/summary"/></param>
     /// <param name="takesOver"><inheritdoc cref="DefenseTurnAttempt.TakesOver" path="/summary"/></param>
@@ -358,7 +358,7 @@ public static class ConversationReviewSeed
     /// <returns>The draft, ready to add.</returns>
     public static DefenseTurnAttempt NewAttempt(
         Guid sessionId, Guid turnId, int attemptIndex, string reply, int durationMs = 0, bool mathHolds = true,
-        bool leaks = false, bool withholdsClose = false, bool switchesLanguage = false, bool gendersTheReader = false,
+        bool leaks = false, bool asksOnComplete = false, bool switchesLanguage = false, bool gendersTheReader = false,
         bool takesOver = false, bool closesComplete = false, bool closesEarly = false)
     {
         // The draft and every verdict passed on it, clean but for the flaws the test names.
@@ -372,11 +372,11 @@ public static class ConversationReviewSeed
             MathHolds = mathHolds,
             MathCorrection = mathHolds ? "" : "the sum is even",
             MathCloses = closesComplete || closesEarly,
-            MathComplete = withholdsClose || closesComplete,
+            MathComplete = asksOnComplete || closesComplete,
             MathOwed = closesEarly ? "the base case" : "",
             Leaks = leaks,
             WhatLeaked = leaks ? "the counterexample" : "",
-            Established = withholdsClose ? "the whole proof" : "",
+            Established = asksOnComplete ? "the whole proof" : "",
             SwitchesLanguage = switchesLanguage,
             CandidateLanguage = "English",
             GendersTheReader = gendersTheReader,

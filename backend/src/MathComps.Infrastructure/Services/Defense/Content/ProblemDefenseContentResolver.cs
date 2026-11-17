@@ -15,7 +15,8 @@ namespace MathComps.Infrastructure.Services.Defense.Content;
 /// <remarks>
 /// A problem resolves to content only in a language holding both its statement and its solution: the student's
 /// language where it holds both, and otherwise the language the problem was first written in. A statement with no
-/// solution beside it still counts among the statements it has.
+/// solution beside it still counts among the statements it has. The grading note is read in whichever language it
+/// was written, whatever the language the rest resolved in.
 /// </remarks>
 /// <param name="dbContextFactory">Creates the contexts the lookups run on.</param>
 public sealed class ProblemDefenseContentResolver(IDbContextFactory<MathCompsDbContext> dbContextFactory)
@@ -29,8 +30,16 @@ public sealed class ProblemDefenseContentResolver(IDbContextFactory<MathCompsDbC
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         // The problem in the student's language, or else in the language it was first written in.
-        return await ContentAsync(dbContext, target.ProblemId, text => text.Language == language, cancellationToken)
+        var content =
+            await ContentAsync(dbContext, target.ProblemId, text => text.Language == language, cancellationToken)
             ?? await ContentAsync(dbContext, target.ProblemId, text => text.IsOriginal, cancellationToken);
+
+        // Nothing to defend means no note to read either.
+        if (content is null)
+            return null;
+
+        // The problem's content with the author's grading note beside it.
+        return content with { GradingNote = await GradingNoteAsync(dbContext, target.ProblemId, cancellationToken) };
     }
 
     /// <inheritdoc/>
@@ -90,7 +99,23 @@ public sealed class ProblemDefenseContentResolver(IDbContextFactory<MathCompsDbC
         var hints = HintsDocument.Split(texts
             .FirstOrDefault(text => text.DocumentType == DocumentType.Hints)?.Body);
 
-        // Everything the examiner reads about the problem.
-        return new DefenseProblemContent(statement, reference, hints);
+        // Everything the examiner reads about the problem in this language, its note read apart in any language.
+        return new DefenseProblemContent(statement, reference, hints, GradingNote: null);
     }
+
+    /// <summary>
+    /// Reads the author's grading note for a problem in whichever language it was written.
+    /// </summary>
+    /// <param name="dbContext">The context the lookup runs on.</param>
+    /// <param name="problemId">The problem.</param>
+    /// <param name="cancellationToken">Cancels the lookup.</param>
+    /// <returns>The note, or null where the problem has none.</returns>
+    private static Task<string?> GradingNoteAsync(
+        MathCompsDbContext dbContext, Guid problemId, CancellationToken cancellationToken) =>
+        // The problem's one note, in whatever language it is written in.
+        dbContext.ProblemTexts
+            .AsNoTracking()
+            .Where(text => text.ProblemId == problemId && text.DocumentType == DocumentType.GradingNote)
+            .Select(text => text.MarkdownText ?? text.RawText)
+            .FirstOrDefaultAsync(cancellationToken);
 }

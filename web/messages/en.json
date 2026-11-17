@@ -1472,8 +1472,10 @@
     },
     "text": {
       "fallback": "Not in {missing} yet, showing {shown}.",
+      "gradingNote": "Note for Mathilda",
       "none": "No text yet.",
-      "preview": "Show the statement"
+      "preview": "Show the statement",
+      "reference": "Solution"
     },
     "writes": {
       "authReason": "change the selection",

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using MathComps.Cli.BulkImport.Manifest;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Services.BulkImport;
@@ -90,15 +91,15 @@ public static class ImportIssues
     /// <summary>
     /// Turns one per-text resolution into an issue, or null when the outcome is routine. The blocking outcomes are a
     /// second original (a forbidden different-language original), a translation-only drop onto a missing problem, and
-    /// a fresh problem with no metadata sidecar; adds, unchanged re-imports and intentional in-place overwrites are
-    /// routine outcomes the report records without alarm.
+    /// a fresh problem with no metadata sidecar; adds, unchanged re-imports, intentional in-place overwrites and
+    /// removals are routine outcomes the report records without alarm.
     /// </summary>
     /// <param name="resolution">What the import does to one text.</param>
     /// <returns>The blocking issue, or null for a routine outcome.</returns>
     private static VerdictError? IssueFor(ProblemTextResolution resolution)
     {
-        // The half, lower-cased to match the rest of the report.
-        var half = resolution.DocumentType.ToString().ToLowerInvariant();
+        // The half, in the kebab case the rest of the report uses.
+        var half = JsonNamingPolicy.KebabCaseLower.ConvertName(resolution.DocumentType.ToString());
         var slug = resolution.Slug;
 
         // The create-conflict outcomes block; everything else is a routine outcome the report already records.
@@ -116,10 +117,11 @@ public static class ImportIssues
                 $"problem '{slug}' would be created but carries no pN.yaml metadata file — a fresh problem must "
                 + "declare its metadata (only a re-import onto an existing problem may omit it)"),
 
-            // Adds, unchanged re-imports and intentional in-place overwrites are all expected — nothing to flag.
+            // Adds, unchanged re-imports, in-place overwrites and removals are all expected: nothing to flag.
             DraftTextAction.AddOriginal or DraftTextAction.AddTranslation
                 or DraftTextAction.UnchangedOriginal or DraftTextAction.UnchangedTranslation
-                or DraftTextAction.OverwriteOriginal or DraftTextAction.OverwriteTranslation => null,
+                or DraftTextAction.OverwriteOriginal or DraftTextAction.OverwriteTranslation
+                or DraftTextAction.RemoveGradingNote => null,
 
             // Unhandled cases.
             _ => throw new ArgumentOutOfRangeException(nameof(resolution), resolution.Action, null)

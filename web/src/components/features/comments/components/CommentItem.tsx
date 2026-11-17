@@ -412,14 +412,15 @@ export function CommentItem({
         </div>
       </div>
 
-      {/* Comment replies */}
+      {/* Comment replies, spaced below by a margin that merges with those of the threads closing around it, so a
+          thread ends with one gap at any depth and its line stops at its last reply */}
       {(replyCount > 0 || replyInputNode) && (
         <div
           className="relative"
           style={{
             marginLeft: `${AVATAR_SIZE / 2 + 20}px`,
             paddingTop: areRepliesShown ? '8px' : '0',
-            paddingBottom: areRepliesShown ? '8px' : '0',
+            marginBottom: areRepliesShown ? '8px' : '0',
           }}
         >
           {/* While collapsed, a button saying how many replies are hidden */}
