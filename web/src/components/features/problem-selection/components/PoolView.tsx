@@ -103,7 +103,7 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
   const {
     selection,
     poolFilters: filters,
-    poolView: { mode, showMode },
+    poolView: { option: mode, choose: showMode },
     poolCountRef: countRef,
     waitingSlot,
   } = useSelectionWorkspace()
@@ -174,6 +174,9 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
   // a page, and the ref handing it over
   const [commentCountSlot, keepCommentCountSlot] = useLastElement<HTMLSpanElement>()
 
+  // The slot for the comments order switch, kept while a page covers the pool, and the ref that sets it
+  const [commentOrderSlot, keepCommentOrderSlot] = useLastElement<HTMLDivElement>()
+
   // Where a layout drawing its own search and filters puts them, once it is on the page, kept while the pool hides
   // behind a page, and the ref handing it over
   const [toolsSlot, keepToolsSlot] = useLastElement<HTMLDivElement>()
@@ -233,22 +236,28 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
         </>
       )}
 
-      {/* How many problems or comments show, with how many comments are new, or a loading line */}
-      <p
-        ref={countRef}
-        // Takes the focus when whatever held it goes with nothing in its place, so a reader's next Tab goes on from
-        // here
-        tabIndex={-1}
-        className="mt-4 mb-3 text-sm text-muted focus:outline-none"
-      >
-        {countLine}
-        <span
-          // Filled in by the discussions, which count their own comments
-          ref={keepCommentCountSlot}
-          // Laid out as part of the line
-          className="contents"
-        />
-      </p>
+      {/* The line over the pool. The comments order switch stays at its right end while a phone wraps the count */}
+      <div className="mt-4 mb-3 flex items-center gap-x-3">
+        {/* How many problems or comments show, with how many comments are new, or a loading line */}
+        <p
+          ref={countRef}
+          // Takes the focus when whatever held it goes with nothing in its place, so a reader's next Tab goes on from
+          // here
+          tabIndex={-1}
+          className="min-w-0 flex-1 text-sm text-muted focus:outline-none"
+        >
+          {countLine}
+          <span
+            // Filled in by the discussions, which count their own comments
+            ref={keepCommentCountSlot}
+            // Laid out as part of the line
+            className="contents"
+          />
+        </p>
+
+        {/* The slot for the comments order switch */}
+        <div ref={keepCommentOrderSlot} className="contents" />
+      </div>
 
       {/* The problems or the discussions, or whatever stands in for them */}
       {selection === null ? (
@@ -274,6 +283,7 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
             language={language}
             countRef={countRef}
             commentCountSlot={commentCountSlot}
+            commentOrderSlot={commentOrderSlot}
             toolsSlot={toolsSlot}
             emptyLine={emptyLine}
             ratingsSort={ratingsSort}
@@ -299,6 +309,8 @@ type PoolLayoutProps = {
   countRef: RefObject<HTMLParagraphElement | null>
   /** Where the discussions say how many comments they show, once it is on the page. */
   commentCountSlot: HTMLElement | null
+  /** The slot for the comments order switch, once it is on the page. */
+  commentOrderSlot: HTMLElement | null
   /** Where the discussions draw their search and filters, once it is on the page. */
   toolsSlot: HTMLElement | null
   /** Why no problem shows, when none does. */
@@ -321,6 +333,7 @@ function PoolLayout({
   language,
   countRef,
   commentCountSlot,
+  commentOrderSlot,
   toolsSlot,
   emptyLine,
   ratingsSort,
@@ -364,7 +377,14 @@ function PoolLayout({
 
     // The threads of the problems' and the papers' discussions the filters let through
     case 'comments':
-      return <PoolComments countSlot={commentCountSlot} toolsSlot={toolsSlot} language={language} />
+      return (
+        <PoolComments
+          countSlot={commentCountSlot}
+          orderSlot={commentOrderSlot}
+          toolsSlot={toolsSlot}
+          language={language}
+        />
+      )
 
     // Every layout is handled above
     default:

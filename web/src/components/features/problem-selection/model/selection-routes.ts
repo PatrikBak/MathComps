@@ -1,5 +1,6 @@
 import type { RouteHref } from '@/components/shared/components/AppLink'
 import { parseMember } from '@/components/shared/utils/collection-utils'
+import type { AddressedChoice } from '@/components/shared/utils/url-utils'
 import { ROUTES } from '@/i18n/i18n'
 
 /** The query parameter naming the problem open in full. */
@@ -26,8 +27,29 @@ export const POOL_VIEWS = ['problems', 'ratings', 'comments'] as const
 /** One way the pool can be laid out. */
 export type PoolViewMode = (typeof POOL_VIEWS)[number]
 
-/** Every query parameter the pool's layout owns. */
-export const POOL_VIEW_PARAMS = [POOL_VIEW_PARAM] as const
+/** How the pool is laid out, as the URL carries it. */
+export const POOL_VIEW: AddressedChoice<PoolViewMode> = {
+  param: POOL_VIEW_PARAM,
+  options: POOL_VIEWS,
+}
+
+/** The query parameter holding the comments order. */
+export const COMMENTS_ORDER_PARAM = 'order'
+
+/**
+ * The orders the pool's comments can come in, the first being the default: newest activity first, or by problem in
+ * the order the pool lists its problems.
+ */
+export const COMMENTS_ORDERS = ['newest', 'problem'] as const
+
+/** One order the pool's comments can come in. */
+export type CommentsOrder = (typeof COMMENTS_ORDERS)[number]
+
+/** The comments order, as the URL carries it. */
+export const COMMENTS_ORDER: AddressedChoice<CommentsOrder> = {
+  param: COMMENTS_ORDER_PARAM,
+  options: COMMENTS_ORDERS,
+}
 
 /** Every query parameter the page open over the pool owns. */
 export const DETAIL_PARAMS = [
@@ -203,33 +225,6 @@ export function detailOf(searchParams: URLSearchParams): OpenDetail | null {
 
   // A paper's page, or the pool alone when the address names no paper either
   return paperId === null ? null : { kind: 'paper', id: paperId }
-}
-
-/**
- * How an address lays the pool out.
- *
- * @param searchParams - The address's query parameters.
- *
- * @returns The layout the address names, or the first one when it names none the pool has.
- */
-export function poolViewOf(searchParams: URLSearchParams): PoolViewMode {
-  // The layout the address names, or the first one when it names none the pool has
-  return parseMember(searchParams.get(POOL_VIEW_PARAM), POOL_VIEWS) ?? POOL_VIEWS[0]
-}
-
-/**
- * The query string carrying how the pool is laid out.
- *
- * @param mode - How the pool is laid out.
- *
- * @returns The query string, without its `?`; empty for the first layout, which an address naming none opens on.
- */
-export function poolViewQuery(mode: PoolViewMode): string {
-  // The first layout, which the bare address already opens on
-  if (mode === POOL_VIEWS[0]) return ''
-
-  // Any other layout, named
-  return new URLSearchParams({ [POOL_VIEW_PARAM]: mode }).toString()
 }
 
 /**

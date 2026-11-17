@@ -200,7 +200,7 @@ function SelectionContent() {
   const {
     detail,
     selection,
-    poolView: { mode: poolMode },
+    poolView: { option: poolMode },
   } = useSelectionWorkspace()
 
   // Where the pool's Comments tab stands

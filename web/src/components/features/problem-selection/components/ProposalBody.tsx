@@ -13,14 +13,27 @@ import { ProposalSurfaces } from './ProposalSurfaces'
 /**
  * Props for the {@link ProposalBox} component.
  */
-type ProposalBoxProps = Pick<ComponentProps<typeof SurfacePanel>, 'as' | 'className' | 'children'>
+type ProposalBoxProps = Pick<
+  ComponentProps<typeof SurfacePanel>,
+  'as' | 'aria-label' | 'className' | 'children'
+>
 
 /**
  * The box a problem stands in, wherever it stands, so every problem's box has the same edges.
  */
-export function ProposalBox({ as, className, children }: ProposalBoxProps) {
+export function ProposalBox({
+  as,
+  'aria-label': ariaLabel,
+  className,
+  children,
+}: ProposalBoxProps) {
   return (
-    <SurfacePanel as={as} radius="xl" className={cn('px-4 py-4 sm:px-5', className)}>
+    <SurfacePanel
+      as={as}
+      aria-label={ariaLabel}
+      radius="xl"
+      className={cn('px-4 py-4 sm:px-5', className)}
+    >
       {children}
     </SurfacePanel>
   )

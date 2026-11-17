@@ -4,6 +4,8 @@ import { useAuth } from '@clerk/nextjs'
 import { useDebouncedCallback, usePrevious } from '@mantine/hooks'
 import { useEffect, useRef } from 'react'
 
+import type { UseAddressedChoiceResult } from '@/hooks/use-addressed-choice'
+
 import { useSelectionWorkspace } from '../components/SelectionWorkspaceProvider'
 import { discussionPartsIn } from '../model/seen-marks'
 import {
@@ -11,6 +13,7 @@ import {
   type DiscussionThread,
   revealedIn,
 } from '../model/selection-discussions'
+import type { CommentsOrder } from '../model/selection-routes'
 import type { UsePoolFiltersResult } from './use-pool-filters'
 import type { UseSelectionDiscussionsResult } from './use-selection-discussions'
 
@@ -35,22 +38,32 @@ type UsePoolThreadFiltersOptions = {
 }
 
 /**
- * The pool's filters as its threads are narrowed through them. A change made through them takes everything waiting
- * into every discussion. Once what the threads are narrowed to rests, however it changed, the server is told what it
- * shows afresh was seen, as {@link revealedIn} reads it.
+ * What {@link usePoolThreadFilters} hands back.
+ */
+type UsePoolThreadFiltersResult = {
+  /** The filter and the ways to change it. Each change first shows everything waiting. */
+  filters: UsePoolFiltersResult
+  /** The order of the threads and the way to change it. A change first shows everything waiting. */
+  order: UseAddressedChoiceResult<CommentsOrder>
+}
+
+/**
+ * The pool's filters and the order of its threads. Any change through them first shows everything waiting, in every
+ * discussion. Once the filter settles, and whenever the order changes, the server is told which newly shown comments
+ * were seen, as {@link revealedIn} decides.
  *
  * @param options - The threads, what they are narrowed to, and the way to show what waits.
  *
- * @returns The filter, and the ways of changing it.
+ * @returns The filter and the order, and the ways of changing them.
  */
 export function usePoolThreadFilters({
   threads,
   hidden,
   filterKey,
   showLatest,
-}: UsePoolThreadFiltersOptions): UsePoolFiltersResult {
-  // What the pool is narrowed to with the ways of changing it, and what the reader has seen
-  const { poolFilters, seenMarks } = useSelectionWorkspace()
+}: UsePoolThreadFiltersOptions): UsePoolThreadFiltersResult {
+  // The pool's filter and the comments order with the ways to change them, and what the reader has seen
+  const { poolFilters, commentsOrder, seenMarks } = useSelectionWorkspace()
 
   // The reader
   const { userId } = useAuth()
@@ -139,9 +152,24 @@ export function usePoolThreadFilters({
     poolFilters.clearAll()
   }
 
+  // A function which changes the order, first showing everything waiting
+  const chooseOrder = (order: CommentsOrder) => {
+    // Everything waiting, shown
+    takeIn()
+
+    // The new order
+    commentsOrder.choose(order)
+  }
+
   // What the threads are narrowed to
   const { filter } = poolFilters
 
-  // The filter and the ways of changing it, each change taking in everything waiting first
-  return { filter, setField, clearAll }
+  // The filter and the ways to change it, each change first showing everything waiting
+  const filters = { filter, setField, clearAll }
+
+  // The order and the way to change it, which first shows everything waiting
+  const order = { option: commentsOrder.option, choose: chooseOrder }
+
+  // The filter and the order
+  return { filters, order }
 }

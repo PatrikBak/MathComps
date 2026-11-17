@@ -104,6 +104,42 @@ export function selectedTab(page: Page, tabsLabel: string) {
 }
 
 /**
+ * One option of a switch between a few options.
+ *
+ * @param page - The page.
+ * @param switchLabel - What the switch is called.
+ * @param name - What the option is called.
+ *
+ * @returns The option.
+ */
+export function switchOption(page: Page, switchLabel: string, name: string): Locator {
+  // The named option on the named switch
+  return page.getByRole('radiogroup', { name: switchLabel }).getByRole('radio', { name })
+}
+
+/**
+ * Picks one option of a switch between a few options, returning once the switch has taken it.
+ *
+ * @param page - The page.
+ * @param switchLabel - What the switch is called.
+ * @param name - What the option is called.
+ */
+export async function pickSwitchOption(
+  page: Page,
+  switchLabel: string,
+  name: string
+): Promise<void> {
+  // The option
+  const option = switchOption(page, switchLabel, name)
+
+  // Picked
+  await option.click()
+
+  // Taken by the switch
+  await expect(option).toBeChecked()
+}
+
+/**
  * How far down the window is scrolled.
  *
  * @param page - The page.

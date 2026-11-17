@@ -106,6 +106,25 @@ export function discussionTargetOf(subject: DiscussedSubject): DiscussionTarget 
 }
 
 /**
+ * Whether two threads were posted in the same discussion.
+ *
+ * @param first - The first thread.
+ * @param second - The second thread.
+ *
+ * @returns True where both hang off the same problem or the same paper.
+ */
+export function shareDiscussion(
+  first: DiscussionThread<DiscussedSubject>,
+  second: DiscussionThread<DiscussedSubject>
+): boolean {
+  // The same discussion's key for both
+  return (
+    discussionKeyOf(discussionTargetOf(first.subject)) ===
+    discussionKeyOf(discussionTargetOf(second.subject))
+  )
+}
+
+/**
  * The key a discussion goes by.
  *
  * @param target - The comment target the discussion is held under.
