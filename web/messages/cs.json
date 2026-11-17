@@ -1353,6 +1353,7 @@
       "ready": "Všechna místa jsou obsazená a každá úloha má zadání i řešení ve všech třech jazycích.",
       "replace": "Vyměnit",
       "status": "Kola: {cycle}, otevírají se {date}.",
+      "statusOpened": "Kola: {cycle}, otevřela se {date}.",
       "unfold": "Rozbalit sestavu"
     },
     "comments": {

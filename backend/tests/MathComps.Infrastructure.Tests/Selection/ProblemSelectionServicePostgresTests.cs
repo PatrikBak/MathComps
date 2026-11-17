@@ -25,8 +25,9 @@ namespace MathComps.Infrastructure.Tests.Selection;
 /// <remarks>
 /// The seed is a pool of three proposals with a draft holding one. The October group has not opened and its
 /// rounds are empty. The November group has not opened either, and has a board finalized into it. The September
-/// group has opened, with a board finalized into it too. Each finalized board's problems sit in its group's rounds.
-/// One problem sits in a December round no group runs any more, the way a corrected manifest leaves one. The
+/// group has opened, with a board finalized into it too, and its problem has a reviewer's conversation from before
+/// the opening, another from after it, and a student's from after it. Each finalized board's problems sit in its
+/// group's rounds. One problem sits in a December round no group runs any more, the way a corrected manifest leaves one. The
 /// olympiad lists a category of its own and has a proposal of its own in the pool, under a number MathComps' pool
 /// uses too, on a board of its own, with its commissioner's conversation about it. One comment stands in the
 /// discussion of the first proposal, the first November problem, the September problem, the December problem, the
@@ -62,6 +63,11 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     private readonly Guid _commissionerId = Guid.CreateVersion7();
 
     /// <summary>
+    /// A student, who talked to the examiner about the September problem once its group opened.
+    /// </summary>
+    private readonly Guid _studentId = Guid.CreateVersion7();
+
+    /// <summary>
     /// The pool's proposals by their number. The first is filed, set aside, written in two languages, talked about
     /// and rated; the third is deleted.
     /// </summary>
@@ -73,9 +79,15 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     private readonly List<Guid> _november = [];
 
     /// <summary>
-    /// A problem of the opened September group, with a conversation of its own.
+    /// A problem of the opened September group, with a reviewer's conversations from before the opening and from
+    /// after it, and a student's from after it.
     /// </summary>
     private Guid _openedId;
+
+    /// <summary>
+    /// The board finalized into the opened September group.
+    /// </summary>
+    private Guid _septemberBoardId;
 
     /// <summary>
     /// A problem of a December round no group runs any more, discussed.
@@ -254,9 +266,9 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
     /// <summary>
     /// A finalized board whose group has not opened reads its slots off the group's rounds, in round order, and
-    /// its problems count as used, the only ones: the December problem, outside the proposals in a round no group
-    /// runs, has left the selection. A finalized board keeps no slot rows, so a read that took its slots from them
-    /// would show it empty.
+    /// its problems count as used, as the opened September problem does: the December problem, outside the proposals
+    /// in a round no group runs, has left the selection. A finalized board keeps no slot rows, so a read that took
+    /// its slots from them would show it empty.
     /// </summary>
     [Fact]
     public Task A_finalized_board_reads_its_slots_off_its_rounds() => RunTestAsync(async service =>
@@ -272,33 +284,44 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             _november.Select(problemId => (Guid?)problemId),
             board.Papers.SelectMany(paper => paper.Slots));
 
-        // Read as finalized
-        Assert.NotNull(board.Finalization);
+        // Read as finalized into a cycle still to open
+        Assert.False(board.Finalization?.HasOpened);
 
-        // And its problems are still in the selection, the only ones used
+        // And its problems are in the selection, used beside the September one alone
         Assert.Equal(
-            _november.Order(),
+            _november.Append(_openedId).Order(),
             selection.Proposals.Where(proposal => proposal.IsUsed).Select(proposal => proposal.Id).Order());
     });
 
     /// <summary>
-    /// Once a group opens, the board finalized into it leaves the selection, and its problems leave with
-    /// everything said about them.
+    /// Once a group opens, the board finalized into it stays in the selection, read as opened, with its slots off the
+    /// group's rounds, and its problems stay too. Of the conversations about them, the reviewer's stay, from before
+    /// the opening and after it alike, and the student's from after it stays out.
     /// </summary>
     [Fact]
-    public Task An_opened_board_leaves_the_selection_with_its_problems() => RunTestAsync(async service =>
+    public Task An_opened_board_stays_with_its_problems() => RunTestAsync(async service =>
     {
         // The selection
         var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
 
-        // Two boards left: the November one and the draft
-        Assert.Equal(2, selection.Boards.Count);
+        // The September board
+        var board = selection.Boards.Single(candidate => candidate.Id == _septemberBoardId);
 
-        // The September problem gone from the proposals
-        Assert.DoesNotContain(selection.Proposals, proposal => proposal.Id == _openedId);
+        // Read as finalized into a cycle that has opened
+        Assert.True(board.Finalization?.HasOpened);
 
-        // The September problem's conversation is gone with it
-        Assert.DoesNotContain(selection.Conversations, conversation => conversation.ProposalId == _openedId);
+        // Its papers holding the September problem
+        Assert.Contains(_openedId, board.Papers.SelectMany(paper => paper.Slots));
+
+        // The September problem still among the proposals
+        Assert.Contains(selection.Proposals, proposal => proposal.Id == _openedId);
+
+        // With the reviewer's conversations alone, the one from after the opening first
+        Assert.Equal(
+            [_reviewerId, _reviewerId],
+            selection.Conversations
+                .Where(conversation => conversation.ProposalId == _openedId)
+                .Select(conversation => conversation.Author.Id));
     });
 
     /// <summary>
@@ -316,11 +339,10 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     });
 
     /// <summary>
-    /// The discussions read holds what is said about the proposals still in the selection, a problem the November
-    /// board took among them, and about the papers on its boards: the draft and the one finalized into a group still
-    /// to open. What is said about the opened group's problem, the paper on the board filling that group and the
-    /// December problem, in a round no group runs, stays out, and so does what is said about the olympiad's proposal
-    /// and paper. The second proposal, which nobody discusses, gets no entry.
+    /// The discussions read holds what is said about the proposals in the selection, the problems the November and
+    /// September boards took among them, and about the papers on its boards, the one finalized into the opened group
+    /// included. What is said about the December problem, in a round no group runs, stays out, and so does what is
+    /// said about the olympiad's proposal and paper. The second proposal, which nobody discusses, gets no entry.
     /// </summary>
     [Fact]
     public Task The_discussions_are_those_of_what_the_selection_holds() =>
@@ -330,22 +352,26 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             var discussions = await discussionService.GetDiscussionsAsync(
                 Organization.MathCompsSlug, new CommentViewer(_reviewerId, IsAdmin: false));
 
-            // The first proposal's and the November problem's discussions alone, each holding its one comment
+            // The first proposal's, the November problem's and the September problem's discussions alone, each
+            // holding its one comment
             Assert.Equivalent(
                 new Dictionary<string, string>
                 {
                     [_pool[1].ToString()] = $"On {_pool[1]}",
                     [_november[0].ToString()] = $"On {_november[0]}",
+                    [_openedId.ToString()] = $"On {_openedId}",
                 },
                 discussions.Proposals.ToDictionary(thread => thread.Key, thread => Assert.Single(thread.Value).Content),
                 strict: true);
 
-            // The draft paper's and the November paper's discussions alone, each holding its one comment
+            // The draft paper's, the November paper's and the September paper's discussions alone, each holding its
+            // one comment
             Assert.Equivalent(
                 new Dictionary<string, string>
                 {
                     [_draftPaperId.ToString()] = $"On {_draftPaperId}",
                     [_novemberPaperId.ToString()] = $"On {_novemberPaperId}",
+                    [_septemberPaperId.ToString()] = $"On {_septemberPaperId}",
                 },
                 discussions.Papers.ToDictionary(thread => thread.Key, thread => Assert.Single(thread.Value).Content),
                 strict: true);
@@ -353,7 +379,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
     /// <summary>
     /// A mark lands on the discussions the selection holds, each at its own moment, one nobody has posted in included,
-    /// and passes over the opened group's problem and the paper on its board. Its answer names each discussion marked
+    /// and passes over the December problem and the olympiad's paper. Its answer names each discussion marked
     /// with that moment, and the read then finds the moment beside the seeded comments posted after it, a comment
     /// posted within the millisecond the moment names seen, and a discussion left unmarked carrying its comment alone.
     /// A later mark moves the moment on, a moment yet to come held to now, while a discussion it leaves out keeps the
@@ -385,8 +411,8 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             // An hour before the draft paper's comment was posted, so the comment stays new
             var paperSeenUpTo = postedAt[_draftPaperId.ToString()].AddHours(-1);
 
-            // The second reviewer marks what they saw, each discussion up to its own moment, the opened group's
-            // problem and the September paper among them
+            // The second reviewer marks what they saw, each discussion up to its own moment, the December problem
+            // and the olympiad's paper among them
             var marked = await discussionService.MarkDiscussionsSeenAsync(
                 Organization.MathCompsSlug,
                 secondReviewer,
@@ -394,15 +420,15 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
                 {
                     [_pool[1]] = firstSeenUpTo,
                     [_pool[2]] = now,
-                    [_openedId] = now,
+                    [_releasedId] = now,
                 }.ToImmutableDictionary(),
                 new Dictionary<Guid, DateTimeOffset>
                 {
                     [_draftPaperId] = paperSeenUpTo,
-                    [_septemberPaperId] = now,
+                    [_olympiadPaperId] = now,
                 }.ToImmutableDictionary());
 
-            // The proposals still in the selection marked, each at its own moment
+            // The proposals in the selection marked, each at its own moment
             Assert.Equal(
                 ImmutableDictionary.CreateRange(
                 [
@@ -416,10 +442,10 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
                 ImmutableDictionary.CreateRange([KeyValuePair.Create(_draftPaperId.ToString(), paperSeenUpTo)]),
                 marked.Papers);
 
-            // The opened group's problem and the September paper, which the selection does not hold
-            List<string> passedOver = [_openedId.ToString(), _septemberPaperId.ToString()];
+            // The December problem and the olympiad's paper, which MathComps' selection does not hold
+            List<string> passedOver = [_releasedId.ToString(), _olympiadPaperId.ToString()];
 
-            // No mark written on the opened group's problem or the September paper
+            // No mark written on the December problem or the olympiad's paper
             Assert.False(await context.CommentSeenMarks.AnyAsync(mark => passedOver.Contains(mark.TargetId)));
 
             // How far the second reviewer has seen the discussions
@@ -429,24 +455,25 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             static bool IsTouched(CommentThreadSeenDto discussion) =>
                 discussion.SeenUpTo is not null || !discussion.NewPostedAt.IsEmpty;
 
-            // Past the untouched ones, the marked proposals still in the selection and the November problem nobody
-            // marked
+            // Past the untouched ones, the marked proposals and the November and September problems nobody marked
             Assert.Equivalent(
                 new Dictionary<string, CommentThreadSeenDto>
                 {
                     [_pool[1].ToString()] = new(firstSeenUpTo, []),
                     [_pool[2].ToString()] = new(now, []),
                     [_november[0].ToString()] = new(null, [postedAt[_november[0].ToString()]]),
+                    [_openedId.ToString()] = new(null, [postedAt[_openedId.ToString()]]),
                 },
                 seen.Proposals.Where(entry => IsTouched(entry.Value)).ToDictionary(),
                 strict: true);
 
-            // Past the untouched ones, the marked draft paper and the November paper nobody marked
+            // Past the untouched ones, the marked draft paper and the November and September papers nobody marked
             Assert.Equivalent(
                 new Dictionary<string, CommentThreadSeenDto>
                 {
                     [_draftPaperId.ToString()] = new(paperSeenUpTo, [postedAt[_draftPaperId.ToString()]]),
                     [_novemberPaperId.ToString()] = new(null, [postedAt[_novemberPaperId.ToString()]]),
+                    [_septemberPaperId.ToString()] = new(null, [postedAt[_septemberPaperId.ToString()]]),
                 },
                 seen.Papers.Where(entry => IsTouched(entry.Value)).ToDictionary(),
                 strict: true);
@@ -769,11 +796,23 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // One problem in September's first round
         _openedId = SelectionSeed.NewProposal(context, september.Rounds.First(), 200, 1);
 
-        // A board finalized into September, and its first paper
-        _septemberPaperId = FirstPaperOf(context, SeedFinalizedBoard(context, september));
+        // A board finalized into September
+        _septemberBoardId = SeedFinalizedBoard(context, september);
 
-        // A conversation about the September problem
-        SeedConversation(context, _openedId, _reviewerId, "Statement", now, "Turn");
+        // The September board's first paper
+        _septemberPaperId = FirstPaperOf(context, _septemberBoardId);
+
+        // The reviewer's conversation about the September problem, from before its group opened
+        SeedConversation(context, _openedId, _reviewerId, "Statement", now.AddDays(-2), "Turn");
+
+        // The reviewer's second conversation about it, once its group opened
+        SeedConversation(context, _openedId, _reviewerId, "Statement", now.AddHours(-1), "Turn");
+
+        // The student
+        context.Users.Add(HostedSeed.NewUser(_studentId, "Student"));
+
+        // The student's conversation about the September problem, once its group opened
+        SeedConversation(context, _openedId, _studentId, "Statement", now, "Turn");
 
         // A December round its group let go of
         var released = new Round

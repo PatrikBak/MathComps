@@ -52,11 +52,8 @@ export function BoardPanel() {
   // whenever the open page changes, closing included, so the page a slot or a paper opens is what the screen shows
   const [isUnfolded, setIsUnfolded] = useKeyedState(detail?.id ?? null, false)
 
-  // Where the focus goes when a read changes the board on screen under it
-  const { menuRef, statusRef } = useBoardFocusKeeper(
-    selection?.boards ?? [],
-    selection?.activeBoard ?? null
-  )
+  // Where the focus goes when a read finalizes the board on screen under it
+  const { statusRef } = useBoardFocusKeeper(selection?.activeBoard ?? null)
 
   // The board the finalize dialog asks about, by id; null while the dialog is closed
   const [finalizingBoardId, setFinalizingBoardId] = useState<string | null>(null)
@@ -100,7 +97,6 @@ export function BoardPanel() {
         {/* The board on screen, and the switch to any other */}
         <DropdownMenu>
           <DropdownMenuTrigger
-            ref={menuRef}
             className={cn(
               'inline-flex min-w-0 items-center gap-1.5 rounded-md text-base font-semibold text-foreground',
               FOCUS_RING_CLASS
@@ -120,8 +116,7 @@ export function BoardPanel() {
                 {/* The board's name */}
                 <span>{board.name}</span>
 
-                {/* The board's stage: a draft until finalized, since a board whose rounds have opened has
-                    left the selection */}
+                {/* The board's stage: a draft until finalized */}
                 <span className="text-xs text-muted">
                   {board.finalization === null ? t('draft') : t('finalized')}
                 </span>
@@ -188,7 +183,7 @@ type BoardStatusProps = {
 }
 
 /**
- * The rounds a finalized board went into, and the day they open, in one line.
+ * The rounds a finalized board went into, and the day they open or opened, in one line.
  */
 function BoardStatus({ board, ref }: BoardStatusProps) {
   // Board copy
@@ -206,6 +201,9 @@ function BoardStatus({ board, ref }: BoardStatusProps) {
     month: 'long',
   })
 
+  // The line's copy, in the past once the rounds have opened
+  const statusKey = board.finalization.hasOpened ? 'statusOpened' : 'status'
+
   return (
     <p
       ref={ref}
@@ -213,7 +211,7 @@ function BoardStatus({ board, ref }: BoardStatusProps) {
       tabIndex={-1}
       className="px-4 pt-3 text-xs text-muted focus:outline-none"
     >
-      {t('status', { cycle: board.finalization.cycleName, date: opens })}
+      {t(statusKey, { cycle: board.finalization.cycleName, date: opens })}
     </p>
   )
 }

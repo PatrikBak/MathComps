@@ -865,7 +865,7 @@ test.describe('finalizing a board', () => {
     // The board as Winter's rounds take it
     const finalized: Board = {
       ...FULL_DRAFT,
-      finalization: { cycleName: WINTER.name, opensAt: WINTER.opensAt },
+      finalization: { cycleName: WINTER.name, opensAt: WINTER.opensAt, hasOpened: false },
     }
 
     // The board in its rounds

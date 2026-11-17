@@ -425,7 +425,7 @@ const FINALIZED: Board = {
   id: 'finalized',
   name: 'October',
   papers: [{ id: 'advanced-paper', name: 'A', category: 'advanced', slots: ['p7'] }],
-  finalization: { cycleName: 'October', opensAt: '2026-10-20T08:00:00.000Z' },
+  finalization: { cycleName: 'October', opensAt: '2026-10-20T08:00:00.000Z', hasOpened: false },
 }
 
 /**

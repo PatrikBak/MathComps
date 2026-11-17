@@ -5,11 +5,13 @@ namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
 /// Settles who reaches one defense conversation, or a note on one. A conversation about a proposal belongs to the
-/// proposal's organization until a hosted group holding the proposal opens, and one about a deleted proposal stays
-/// its organization's. Only that organization's members reach such a conversation, whoever held it: an admin among
-/// them every one, anybody else the ones about a proposal that is not deleted. Every other conversation, such as one
-/// about a handout, reaches the admins alone. The admins' lists of conversations leave out the ones an admin may not
-/// reach (<see cref="SelectionRules.WhereReachableByAdmin"/>).
+/// proposal's organization when its selection keeps it (<see cref="SelectionRules.WhereKeptBySelection"/>): any
+/// conversation started before a hosted group holding the proposal opens, and one started after only when a member
+/// of the organization starts it. One about a deleted proposal stays its organization's. Only that organization's members reach such a
+/// conversation, whoever held it: an admin among them every one, anybody else the ones about a proposal that is not
+/// deleted. Every other conversation, such as a student's or one about a handout, reaches the admins alone. The
+/// admins' lists of conversations leave out the ones an admin may not reach
+/// (<see cref="SelectionRules.WhereReachableByAdmin"/>).
 /// </summary>
 public interface IConversationAccess
 {

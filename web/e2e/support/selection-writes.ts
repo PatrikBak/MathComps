@@ -74,15 +74,15 @@ export type HeldSelection = {
 }
 
 /**
- * Whether a board's rounds have opened, which the read leaves out and every write refuses.
+ * Whether a board's rounds have opened, which every write to it refuses.
  *
  * @param board - The board.
  *
- * @returns True for a finalized board whose rounds' opening has passed.
+ * @returns True for a finalized board whose rounds have opened.
  */
-export function hasOpened(board: Board): boolean {
+function hasOpened(board: Board): boolean {
   // Finalized, into rounds already open
-  return board.finalization !== null && Date.parse(board.finalization.opensAt) <= Date.now()
+  return board.finalization?.hasOpened === true
 }
 
 /**

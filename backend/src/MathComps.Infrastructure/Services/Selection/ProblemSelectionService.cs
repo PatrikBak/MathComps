@@ -15,8 +15,9 @@ namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
 /// Implements <see cref="IProblemSelectionService"/> over the database, the reader's lead categories through the
-/// member service. The selection read takes in every hosted group that has not opened, since a finalized board's
-/// slots read off its group's rounds and the cycles are the groups still taking a board.
+/// member service. The selection read takes in every hosted group that has not opened and every one a board was
+/// finalized into, since a finalized board's slots read off its group's rounds and the cycles are the groups still
+/// taking a board.
 /// </summary>
 /// <param name="dbContextFactory">Creates the context each read runs on.</param>
 /// <param name="localization">The names the taxonomy gives the groups' nodes.</param>
@@ -52,10 +53,16 @@ public sealed class ProblemSelectionService(
         // One instant for everything the read weighs against a group opening.
         var now = DateTimeOffset.UtcNow;
 
-        // Every group that has not opened, soonest first, its rounds in the taxonomy's order with what each holds.
+        // The groups the organization's finalized boards went into.
+        var finalizedIntoIds = dbContext.SelectionBoards
+            .Where(board => board.Organization.Slug == organizationSlug && board.HostedGroupId != null)
+            .Select(board => board.HostedGroupId!.Value);
+
+        // Every group that has not opened, and every one a board of the organization was finalized into, soonest
+        // first, its rounds in the taxonomy's order with what each holds.
         var groups = await dbContext.HostedGroups
             .AsNoTracking()
-            .Where(group => group.OpensAt > now)
+            .Where(group => group.OpensAt > now || finalizedIntoIds.Contains(group.Id))
             .OrderBy(group => group.OpensAt)
             .Select(group => new
             {
@@ -77,17 +84,15 @@ public sealed class ProblemSelectionService(
             })
             .ToListAsync(cancellationToken);
 
-        // Every proposal of the organization's pool not deleted and outside the groups that have opened, lowest
-        // number first, with where its problem sits, the categories it is recommended for in the order they run,
-        // every text it carries, the language it was first written in, and every rating it was given, by the raters'
-        // usernames with a rater showing none last. Split, because its recommendations, texts and ratings are each a
-        // collection off one row: joined in a single query the database would return every pairing of them, each
-        // repeating the text.
+        // Every proposal of the organization's pool not deleted, lowest number first, with where its problem sits,
+        // the categories it is recommended for in the order they run, every text it carries, the language it was
+        // first written in, and every rating it was given, by the raters' usernames with a rater showing none last.
+        // Split, because its recommendations, texts and ratings are each a collection off one row: joined in a
+        // single query the database would return every pairing of them, each repeating the text.
         var proposals = await dbContext.Proposals
             .AsNoTracking()
             .AsSplitQuery()
-            .Where(proposal => proposal.Organization.Slug == organizationSlug)
-            .WhereSelectionMayHold(now)
+            .Where(proposal => proposal.Organization.Slug == organizationSlug && proposal.DeletedAt == null)
             .OrderBy(proposal => proposal.Number)
             .Select(proposal => new
             {
@@ -101,7 +106,7 @@ public sealed class ProblemSelectionService(
                     .ToList(),
                 proposal.IsSetAside,
                 CompetitionPath = proposal.Problem.Round.Competition.Path,
-                GroupOpensAt = (DateTimeOffset?)proposal.Problem.Round.HostedGroup!.OpensAt,
+                IsHosted = proposal.Problem.Round.HostedGroupId != null,
                 Texts = proposal.Problem.Texts
                     .Select(text => new ProblemBody(
                         text.DocumentType, text.Language, text.MarkdownText ?? text.RawText))
@@ -128,19 +133,20 @@ public sealed class ProblemSelectionService(
             group => group.Id,
             group => HostedGroupName.Of(localization, group.Rounds.FirstOrDefault()?.CompetitionPath)[language]);
 
-        // The proposals still in the selection.
+        // The proposals in the selection.
         var selected = proposals
-            .Where(proposal => SelectionRules.IsInSelection(proposal.CompetitionPath, proposal.GroupOpensAt, now))
+            .Where(proposal => SelectionRules.IsInSelection(proposal.CompetitionPath, proposal.IsHosted))
             .ToList();
 
         // The selected proposals' ids.
         var selectedIds = selected.Select(proposal => proposal.ProblemId).ToList();
 
-        // Every conversation held about a selected proposal, newest first, with how much was said and whether the
-        // statement it was argued against is one the problem still has in some language.
+        // Every conversation about a selected proposal that the selection keeps, newest first, with how much was said
+        // and whether the statement it was argued against is one the problem still has in some language.
         var conversations = await dbContext.ProblemDefenses
             .AsNoTracking()
             .Where(defense => selectedIds.Contains(defense.ProblemId))
+            .WhereKeptBySelection(dbContext.Proposals)
             .OrderByDescending(defense => defense.DefenseSession.CreatedAt)
             .Select(defense => new ReviewConversationDto(
                 defense.DefenseSessionId,
@@ -165,7 +171,6 @@ public sealed class ProblemSelectionService(
                 board.Id,
                 board.Name,
                 board.HostedGroupId,
-                GroupOpensAt = (DateTimeOffset?)board.HostedGroup!.OpensAt,
                 Papers = board.Papers
                     .OrderBy(paper => paper.Position)
                     .Select(paper => new
@@ -181,7 +186,7 @@ public sealed class ProblemSelectionService(
             })
             .ToListAsync(cancellationToken);
 
-        // The groups that have not opened, by id.
+        // The groups read, by id.
         var groupsById = groups.ToDictionary(group => group.Id);
 
         // The organization's categories, in the order they run.
@@ -251,36 +256,38 @@ public sealed class ProblemSelectionService(
                     proposal.Ratings)),
             ],
             [
-                // Drafts, and the boards finalized into a group that has not opened
-                .. boards
-                    .Where(board => SelectionRules.IsBoardInSelection(board.GroupOpensAt, now))
-                    .Select(board => new SelectionBoardDto(
-                        board.Id,
-                        board.Name,
-                        [
-                            .. board.Papers.Select(paper => new SelectionPaperDto(
-                                paper.Id,
-                                paper.Name,
-                                paper.Category,
-                                // The paper's slots, by whether its board has been finalized
-                                board.HostedGroupId is { } groupId
-                                    // A finalized paper's slots are its group's round of the hosted level its
-                                    // category is, empty where the group runs none
-                                    ? groupsById[groupId].Rounds
-                                        .FirstOrDefault(round =>
-                                            SelectionRules.IsRoundFor(round.CompetitionPath, paper.HostedCategory))
-                                        ?.Problems.Select(problemId => (Guid?)problemId).ToList()
-                                    ?? [.. Enumerable.Repeat<Guid?>(null, paper.SlotCount)]
-                                    // A draft paper's slots are its slot rows, an empty slot holding none
-                                    : [
-                                        .. Enumerable.Range(0, paper.SlotCount).Select(index => paper.Slots
-                                            .FirstOrDefault(slot => slot.Position == index)?.ProblemId),
-                                    ])),
-                        ],
-                        // The group the board filled, named the way the cycles are; none on a draft
-                        board.HostedGroupId is { } finalizedInto
-                            ? new BoardFinalizationDto(groupNames[finalizedInto], groupsById[finalizedInto].OpensAt)
-                            : null)),
+                // Every board, drafts and finalized ones alike
+                .. boards.Select(board => new SelectionBoardDto(
+                    board.Id,
+                    board.Name,
+                    [
+                        .. board.Papers.Select(paper => new SelectionPaperDto(
+                            paper.Id,
+                            paper.Name,
+                            paper.Category,
+                            // The paper's slots, by whether its board has been finalized
+                            board.HostedGroupId is { } groupId
+                                // A finalized paper's slots are its group's round of the hosted level its
+                                // category is, empty where the group runs none
+                                ? groupsById[groupId].Rounds
+                                    .FirstOrDefault(round =>
+                                        SelectionRules.IsRoundFor(round.CompetitionPath, paper.HostedCategory))
+                                    ?.Problems.Select(problemId => (Guid?)problemId).ToList()
+                                ?? [.. Enumerable.Repeat<Guid?>(null, paper.SlotCount)]
+                                // A draft paper's slots are its slot rows, an empty slot holding none
+                                : [
+                                    .. Enumerable.Range(0, paper.SlotCount).Select(index => paper.Slots
+                                        .FirstOrDefault(slot => slot.Position == index)?.ProblemId),
+                                ])),
+                    ],
+                    // The group the board filled, named the way the cycles are, and whether it has opened; none on
+                    // a draft
+                    board.HostedGroupId is { } finalizedInto
+                        ? new BoardFinalizationDto(
+                            groupNames[finalizedInto],
+                            groupsById[finalizedInto].OpensAt,
+                            groupsById[finalizedInto].OpensAt <= now)
+                        : null)),
             ],
             cycles,
             conversations,

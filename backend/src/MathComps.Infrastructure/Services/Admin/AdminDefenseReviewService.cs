@@ -398,7 +398,7 @@ public class AdminDefenseReviewService(
         dbContext.DefenseSessions
             .AsNoTracking()
             .Where(session => session.EnvironmentTarget != null || session.ProblemTarget != null)
-            .WhereReachableByAdmin(dbContext.Proposals, organizationIds, DateTimeOffset.UtcNow);
+            .WhereReachableByAdmin(dbContext, organizationIds);
 
     /// <summary>
     /// Narrows the conversations to those the database can pick out from what is stored against them, which is

@@ -41,9 +41,19 @@ public class ConversationAccessPostgresTests(PostgresContainerFixture fixture)
     private const string Handout = "handout";
 
     /// <summary>
-    /// The case of the reviewer's conversation about a proposal taken by a group that has opened.
+    /// The case of the reviewer's conversation about a proposal taken by a group that has opened since.
     /// </summary>
     private const string OpenedGroup = "opened group";
+
+    /// <summary>
+    /// The case of the reviewer's conversation about a proposal taken by a group, started once the group opened.
+    /// </summary>
+    private const string AfterOpening = "after opening";
+
+    /// <summary>
+    /// The case of a student's conversation about a proposal taken by a group, started once the group opened.
+    /// </summary>
+    private const string StudentAfterOpening = "student after opening";
 
     /// <summary>
     /// The case of the reviewer's conversation about a deleted proposal.
@@ -102,6 +112,11 @@ public class ConversationAccessPostgresTests(PostgresContainerFixture fixture)
     private readonly Guid _outsideAdminId = Guid.CreateVersion7();
 
     /// <summary>
+    /// A student, on no organization's list.
+    /// </summary>
+    private readonly Guid _studentId = Guid.CreateVersion7();
+
+    /// <summary>
     /// Each case's conversation, by the case's name.
     /// </summary>
     private readonly Dictionary<string, Guid> _conversations = [];
@@ -118,11 +133,12 @@ public class ConversationAccessPostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// Each viewer reaches exactly the conversations open to them, and the notes on those. A member reaches the
-    /// conversations about their organization's proposals the selection holds, whoever held them, and nothing about
-    /// another organization's, and an admin on no organization's list nothing about any. A deleted proposal's
-    /// conversations stay its organization's, reaching the admins among its members alone. An admin reaches every
-    /// conversation about a problem no organization holds, and no member who is no admin does. Whatever is refused
-    /// answers as though it were not there.
+    /// conversations about their organization's proposals the selection holds, whoever held them, and once a group
+    /// holding the proposal has opened, the ones members start. They reach nothing about another organization's, and
+    /// an admin on no organization's list nothing about any. A deleted proposal's conversations stay its
+    /// organization's, reaching the admins among its members alone. An admin reaches every conversation about a
+    /// problem no organization holds, a student's once its group opened among them, and no member who is no admin
+    /// does. Whatever is refused answers as though it were not there.
     /// </summary>
     /// <param name="viewer">Who reads.</param>
     /// <param name="conversation">The case.</param>
@@ -132,7 +148,9 @@ public class ConversationAccessPostgresTests(PostgresContainerFixture fixture)
     [InlineData(ReviewerViewer, UnopenedGroup, true)]
     [InlineData(ReviewerViewer, Archive, false)]
     [InlineData(ReviewerViewer, Handout, false)]
-    [InlineData(ReviewerViewer, OpenedGroup, false)]
+    [InlineData(ReviewerViewer, OpenedGroup, true)]
+    [InlineData(ReviewerViewer, AfterOpening, true)]
+    [InlineData(ReviewerViewer, StudentAfterOpening, false)]
     [InlineData(ReviewerViewer, DeletedProposal, false)]
     [InlineData(ReviewerViewer, FormerMember, true)]
     [InlineData(ReviewerViewer, Olympiad, false)]
@@ -146,7 +164,9 @@ public class ConversationAccessPostgresTests(PostgresContainerFixture fixture)
     [InlineData(OutsideAdminViewer, DeletedProposal, false)]
     [InlineData(OutsideAdminViewer, Archive, true)]
     [InlineData(OutsideAdminViewer, Handout, true)]
-    [InlineData(OutsideAdminViewer, OpenedGroup, true)]
+    [InlineData(OutsideAdminViewer, OpenedGroup, false)]
+    [InlineData(OutsideAdminViewer, AfterOpening, false)]
+    [InlineData(OutsideAdminViewer, StudentAfterOpening, true)]
     [InlineData(CommissionerViewer, Olympiad, true)]
     [InlineData(CommissionerViewer, Pool, false)]
     public Task A_conversation_reaches_its_viewers_alone(string viewer, string conversation, bool reaches) =>
@@ -208,12 +228,13 @@ public class ConversationAccessPostgresTests(PostgresContainerFixture fixture)
         // The instant every conversation and membership is dated from
         var now = DateTimeOffset.UtcNow;
 
-        // The reviewer, the former reviewer, the commissioner and the admin on no list
+        // The reviewer, the former reviewer, the commissioner, the admin on no list and the student
         context.Users.AddRange(
             HostedSeed.NewUser(_reviewerId, "Reviewer"),
             HostedSeed.NewUser(_formerMemberId, "Former"),
             HostedSeed.NewUser(_commissionerId, "Commissioner"),
-            HostedSeed.NewUser(_outsideAdminId, "Admin"));
+            HostedSeed.NewUser(_outsideAdminId, "Admin"),
+            HostedSeed.NewUser(_studentId, "Student"));
 
         // The reviewer on the MathComps organization's list for a month
         SelectionSeed.NewMember(context, "reviewer@example.com", now.AddDays(-30));
@@ -272,6 +293,8 @@ public class ConversationAccessPostgresTests(PostgresContainerFixture fixture)
         SeedConversation(context, UnopenedGroup, _reviewerId, unopened, now.AddDays(-2));
         SeedConversation(context, Archive, _reviewerId, archiveProblemId, now.AddDays(-2));
         SeedConversation(context, OpenedGroup, _reviewerId, opened, now.AddDays(-2));
+        SeedConversation(context, AfterOpening, _reviewerId, opened, now);
+        SeedConversation(context, StudentAfterOpening, _studentId, opened, now);
         SeedConversation(context, DeletedProposal, _reviewerId, deleted, now.AddDays(-2));
         SeedConversation(context, FormerMember, _formerMemberId, pooled, now.AddDays(-2));
         SeedConversation(context, Olympiad, _commissionerId, olympiadProposal, now.AddDays(-2));

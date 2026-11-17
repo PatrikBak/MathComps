@@ -59,7 +59,7 @@ public static class NamedDefenseTargets
 
     /// <summary>
     /// Reads the proposals among some defense problems, each as the target that names it. A problem counts as one
-    /// while the selection holds it (<see cref="SelectionRules.IsInSelection"/>), deleted proposals included, since a
+    /// until students are given it (<see cref="SelectionRules.IsUnopened"/>), deleted proposals included, since a
     /// deleted one keeps its row and its name.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
@@ -99,9 +99,9 @@ public static class NamedDefenseTargets
             })
             .ToListAsync(cancellationToken);
 
-        // The ones the selection still holds, by the problem each one files
+        // The ones no student has been given yet, by the problem each one files
         return proposals
-            .Where(proposal => SelectionRules.IsInSelection(proposal.CompetitionPath, proposal.GroupOpensAt, now))
+            .Where(proposal => SelectionRules.IsUnopened(proposal.CompetitionPath, proposal.GroupOpensAt, now))
             .ToDictionary(
                 proposal => proposal.ProblemId,
                 proposal => new NamedProposalTarget(
@@ -127,7 +127,7 @@ public static class NamedDefenseTargets
         if (columns is { HandoutContentId: { } handoutContentId, EnvironmentId: { } environmentId })
             return new NamedHandoutTarget(handoutContentId, environmentId);
 
-        // A proposal the selection still holds, which goes by what the reviewers quote it by.
+        // A proposal no student has been given yet, which goes by what the reviewers quote it by.
         if (columns.ProblemId is { } proposedProblemId && proposals.TryGetValue(proposedProblemId, out var proposal))
             return proposal;
 

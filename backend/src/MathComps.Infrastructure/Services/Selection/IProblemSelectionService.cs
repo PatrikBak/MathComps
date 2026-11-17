@@ -6,7 +6,7 @@ namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
 /// Reads everything an organization's problem selection holds, every proposal and board in it the organization's
-/// own. A board finalized into a group leaves the selection once the group opens, and its problems with it.
+/// own. A board finalized into a group stays in it once the group opens, locked, and its problems with it.
 /// </summary>
 public interface IProblemSelectionService
 {

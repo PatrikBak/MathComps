@@ -1353,6 +1353,7 @@
       "ready": "Every slot is filled, and every problem has a statement and a solution in all three languages.",
       "replace": "Replace",
       "status": "In the {cycle} rounds, which open on {date}.",
+      "statusOpened": "In the {cycle} rounds, which opened on {date}.",
       "unfold": "Unfold the board"
     },
     "comments": {

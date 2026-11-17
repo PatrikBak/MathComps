@@ -36,7 +36,6 @@ import { FINALIZATION_PATH, finalizationWrite } from './selection-finalization'
 import { PROPOSAL_WRITE_PATH, proposalWrite, READER } from './selection-proposal-writes'
 import { SLOT_WRITE_PATH, slotWrite } from './selection-slot-writes'
 import {
-  hasOpened,
   type HeldCycle,
   type HeldSelection,
   MATHCOMPS_ORGANIZATION_SLUG,
@@ -413,7 +412,7 @@ export const FINALIZED_BOARD: Board = {
   id: '00000000-0000-4000-8000-b00000000001',
   name: 'October 2026',
   papers: [paperOf(1, 'Elementary', 'elementary', [USED])],
-  finalization: { cycleName: OCTOBER.name, opensAt: OCTOBER.opensAt },
+  finalization: { cycleName: OCTOBER.name, opensAt: OCTOBER.opensAt, hasOpened: false },
 }
 
 /** The first draft: {@link FIRST} in E1, {@link READY} in I2, and the advanced paper still empty. */
@@ -459,7 +458,7 @@ export const FULL_DRAFT: Board = {
  */
 export const FULL_DRAFT_FINALIZED: Board = {
   ...FULL_DRAFT,
-  finalization: { cycleName: NOVEMBER.name, opensAt: NOVEMBER.opensAt },
+  finalization: { cycleName: NOVEMBER.name, opensAt: NOVEMBER.opensAt, hasOpened: false },
 }
 
 /** {@link NOVEMBER} once {@link FULL_DRAFT} has filled it and its rounds have opened since. */
@@ -470,9 +469,13 @@ const NOVEMBER_OPENED: HeldCycle = {
 }
 
 /** {@link FULL_DRAFT} finalized into {@link NOVEMBER}'s rounds, which have opened since. */
-const FULL_DRAFT_OPENED: Board = {
+export const FULL_DRAFT_OPENED: Board = {
   ...FULL_DRAFT,
-  finalization: { cycleName: NOVEMBER_OPENED.name, opensAt: NOVEMBER_OPENED.opensAt },
+  finalization: {
+    cycleName: NOVEMBER_OPENED.name,
+    opensAt: NOVEMBER_OPENED.opensAt,
+    hasOpened: true,
+  },
 }
 
 /** {@link LATER_DRAFT} once {@link FULL_DRAFT}'s round has taken {@link READY}, which leaves every draft it stood on. */
@@ -867,10 +870,7 @@ type SelectionReply =
   | 'fullDraft'
   /** With {@link FULL_DRAFT} finalized meanwhile, its round having taken {@link READY}. */
   | 'fullDraftFinalized'
-  /**
-   * With {@link FULL_DRAFT} finalized meanwhile and its rounds opened since, which takes the board and the problem
-   * they hold out of the selection.
-   */
+  /** With {@link FULL_DRAFT} finalized meanwhile and its rounds opened since. */
   | 'fullDraftOpened'
   /** As {@link FULL_DRAFT} first reads, but for {@link READY}'s Czech solution, taken away meanwhile. */
   | 'fullDraftIncomplete'
@@ -971,7 +971,7 @@ function selectionHeldAt(reply: SelectionReply): HeldSelection {
         cycles: withFilled(NOVEMBER),
       }
 
-    // The full draft finalized and its rounds opened, though the read leaves the board and the ready problem out
+    // The full draft finalized and its rounds opened
     case 'fullDraftOpened':
       return {
         ...selectionHeldAt('fullDraftFinalized'),
@@ -991,25 +991,13 @@ function selectionHeldAt(reply: SelectionReply): HeldSelection {
 type ReadableSelection = Pick<SelectionData, 'proposals' | 'boards' | 'cycles'>
 
 /**
- * The selection as its read has it: every board but the opened ones, every problem but those standing on an
- * opened board, whose rounds are what students now sit, and every cycle still taking a board.
+ * The selection as its read has it: every board and every problem, and every cycle still taking a board.
  *
  * @param held - What the backend holds.
  *
  * @returns The problems, the boards and the cycles the read answers with.
  */
 function readableSelection(held: HeldSelection): ReadableSelection {
-  // The boards whose rounds are yet to open
-  const boards = held.boards.filter((board) => !hasOpened(board))
-
-  // Every problem an opened board's rounds hold
-  const inOpenedRounds = new Set(
-    held.boards.filter(hasOpened).flatMap((board) => board.papers.flatMap((paper) => paper.slots))
-  )
-
-  // The problems anywhere else
-  const proposals = held.proposals.filter((proposal) => !inOpenedRounds.has(proposal.id))
-
   // The cycles still taking a board, in the shape the read sends them
   const cycles = held.cycles.filter(takesBoard).map(
     ({ id, name, opensAt, categories, problemCount }): Cycle => ({
@@ -1022,7 +1010,7 @@ function readableSelection(held: HeldSelection): ReadableSelection {
   )
 
   // The problems, the boards and the cycles, as the read has them
-  return { proposals, boards, cycles }
+  return { proposals: held.proposals, boards: held.boards, cycles }
 }
 
 /**
@@ -1429,7 +1417,7 @@ export async function pickBoard(page: Page, from: Board, to: Board): Promise<voi
 }
 
 /**
- * The line naming the rounds a finalized board went into, and the day they open.
+ * The line naming the rounds a finalized board went into, and the day they open or opened.
  *
  * @param page - The page.
  * @param board - The finalized board.
@@ -1444,9 +1432,12 @@ export function statusLine(page: Page, board: Board): Locator {
     timeZone: 'Europe/Bratislava',
   }).format(new Date(board.finalization!.opensAt))
 
+  // The line's copy, in the past once the rounds have opened
+  const key = board.finalization!.hasOpened ? 'board.statusOpened' : 'board.status'
+
   // The line naming the rounds and the day
   return boardPanel(page).getByText(
-    selectionText('board.status', { cycle: board.finalization!.cycleName, date })
+    selectionText(key, { cycle: board.finalization!.cycleName, date })
   )
 }
 

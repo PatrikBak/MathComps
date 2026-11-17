@@ -53,22 +53,27 @@ function paper(name: string, category: Paper['category'], length = 4): Paper {
   return { id: name, name, category, slots: Array.from({ length }, () => null) }
 }
 
+/** Where a board stands: a draft, finalized into rounds still to open, or into rounds that have opened. */
+type BoardStage = 'draft' | 'finalized' | 'opened'
+
+/** A board's finalization at each stage: none on a draft, into October's rounds otherwise. */
+const FINALIZATION_AT: Record<BoardStage, Board['finalization']> = {
+  draft: null,
+  finalized: { cycleName: 'October', opensAt: OCTOBER.opensAt, hasOpened: false },
+  opened: { cycleName: 'October', opensAt: OCTOBER.opensAt, hasOpened: true },
+}
+
 /**
  * A board holding no papers.
  *
  * @param id - The board's id, doubling as its name.
- * @param isFinalized - Whether it has been finalized into a cycle's rounds.
+ * @param stage - Where the board stands.
  *
  * @returns The board.
  */
-function board(id: string, isFinalized = false): Board {
-  // The board, finalized into October's rounds when asked
-  return {
-    id,
-    name: id,
-    papers: [],
-    finalization: isFinalized ? { cycleName: 'October', opensAt: OCTOBER.opensAt } : null,
-  }
+function board(id: string, stage: BoardStage = 'draft'): Board {
+  // The board, finalized as its stage says
+  return { id, name: id, papers: [], finalization: FINALIZATION_AT[stage] }
 }
 
 /**
@@ -393,7 +398,7 @@ describe('arguedText', () => {
 describe('pickActiveBoard', () => {
   it('keeps the picked board on screen over a draft', () => {
     // A finalized board ahead of a draft
-    const boards = [board('round', true), board('draft')]
+    const boards = [board('round', 'finalized'), board('draft')]
 
     // The finalized board picked
     const active = pickActiveBoard(boards, 'round')
@@ -404,7 +409,7 @@ describe('pickActiveBoard', () => {
 
   it('falls back to the first draft once the picked board is gone', () => {
     // A finalized board ahead of a draft
-    const boards = [board('round', true), board('draft')]
+    const boards = [board('round', 'finalized'), board('draft')]
 
     // Picked a board the selection no longer holds
     const active = pickActiveBoard(boards, 'gone')
@@ -413,14 +418,29 @@ describe('pickActiveBoard', () => {
     expect(active?.id).toBe('draft')
   })
 
-  it('takes the first board when every board is finalized', () => {
-    // Every board finalized
-    const boards = [board('first', true), board('second', true)]
+  it('takes the first board still to open when every board is finalized', () => {
+    // An opened board, then two still to open
+    const boards = [
+      board('opened', 'opened'),
+      board('first', 'finalized'),
+      board('second', 'finalized'),
+    ]
 
     // Nothing picked
     const active = pickActiveBoard(boards, null)
 
-    // The first one goes on screen
+    // The first one still to open goes on screen
     expect(active?.id).toBe('first')
+  })
+
+  it('takes the newest board when every board has opened', () => {
+    // Every board opened, oldest first
+    const boards = [board('older', 'opened'), board('newer', 'opened')]
+
+    // Nothing picked
+    const active = pickActiveBoard(boards, null)
+
+    // The newest one goes on screen
+    expect(active?.id).toBe('newer')
   })
 })
