@@ -303,7 +303,7 @@ test.describe('what reviewers said about a problem', () => {
     )
   })
 
-  test('opens a problem on its conversations, and names a tab picked in the address without a step of its own', async ({
+  test('opens a problem on its discussion, and names a tab picked in the address without a step of its own', async ({
     page,
   }) => {
     // A reviewer whose selection holds a pool of problems
@@ -315,16 +315,16 @@ test.describe('what reviewers said about a problem', () => {
     // A problem, opened by its name
     await cardOf(page, OPENED).getByRole('link', { name: OPENED.title }).click()
 
-    // On its conversations
+    // On its discussion
     await expect(selectedTab(page, selectionCopy.detail.tabsLabel)).toContainText(
-      selectionCopy.detail.conversationsTab
+      selectionCopy.detail.commentsTab
     )
 
-    // Its discussion, picked
-    await page.getByRole('tab', { name: selectionCopy.detail.commentsTab }).click()
+    // Its conversations, picked
+    await page.getByRole('tab', { name: selectionCopy.detail.conversationsTab }).click()
 
     // Named in the address, so a link copied now opens on it
-    await expect(page).toHaveURL(`${OPENED_ADDRESS}&tab=comments`)
+    await expect(page).toHaveURL(`${OPENED_ADDRESS}&tab=conversations`)
 
     // Back
     await page.goBack()
@@ -335,24 +335,22 @@ test.describe('what reviewers said about a problem', () => {
     // Forward
     await page.goForward()
 
-    // Onto the problem's discussion again
+    // Onto the problem's conversations again
     await expect(selectedTab(page, selectionCopy.detail.tabsLabel)).toContainText(
-      selectionCopy.detail.commentsTab
+      selectionCopy.detail.conversationsTab
     )
   })
 
-  test('opens a link naming a tab the page does not have on the conversations', async ({
-    page,
-  }) => {
+  test('opens a link naming a tab the page does not have on the discussion', async ({ page }) => {
     // A reviewer whose selection holds a pool of problems
     await stubSelection(page, 'selection')
 
     // A link naming a tab the page does not have
     await page.goto(`${OPENED_ADDRESS}&tab=history`)
 
-    // Opened on the conversations
+    // Opened on the discussion
     await expect(selectedTab(page, selectionCopy.detail.tabsLabel)).toContainText(
-      selectionCopy.detail.conversationsTab,
+      selectionCopy.detail.commentsTab,
       { timeout: SETTLE_TIMEOUT_MS }
     )
   })
@@ -419,14 +417,14 @@ test.describe('what reviewers said about a problem', () => {
     // A reviewer whose selection holds a pool of problems, one of them argued twice
     await stubSelection(page, 'selection')
 
-    // A link to the reviewer's first conversation, which the backend doesn't keep
-    await page.goto(`${OPENED_ADDRESS}&conversation=${FIRST_OF_TWO.id}`)
+    // A link over the problem's conversations to the reviewer's first one, which the backend doesn't keep
+    await page.goto(`${OPENED_ADDRESS}&tab=conversations&conversation=${FIRST_OF_TWO.id}`)
 
     // The problem's conversations, listed
     await expect(conversationRows(page)).toHaveCount(2, { timeout: SETTLE_TIMEOUT_MS })
 
     // The address, the conversation dropped
-    await expect(page).toHaveURL(OPENED_ADDRESS)
+    await expect(page).toHaveURL(`${OPENED_ADDRESS}&tab=conversations`)
 
     // And no dialog, not even for a moment
     expect(dialogs()).toBe(0)
@@ -444,11 +442,14 @@ test.describe('what reviewers said about a problem', () => {
     // A problem, opened by its name
     await cardOf(page, OPENED).getByRole('link', { name: OPENED.title }).click()
 
+    // Its conversations, picked
+    await page.getByRole('tab', { name: selectionCopy.detail.conversationsTab }).click()
+
     // Its most recent conversation, opened from its row
     await conversationRows(page).nth(0).click()
 
     // Named in the address, so a link copied now opens it
-    await expect(page).toHaveURL(`${OPENED_ADDRESS}&conversation=${RECENT.id}`)
+    await expect(page).toHaveURL(`${OPENED_ADDRESS}&tab=conversations&conversation=${RECENT.id}`)
 
     // Back
     await page.goBack()
@@ -484,8 +485,8 @@ test.describe('what reviewers said about a problem', () => {
       if (request.method() === 'GET' && request.url().startsWith(CONVERSATION_ENDPOINT)) reads++
     })
 
-    // The problem argued three times
-    await page.goto(OPENED_ADDRESS)
+    // The problem argued three times, on its conversations
+    await page.goto(`${OPENED_ADDRESS}&tab=conversations`)
 
     // The conversation rows
     const rows = conversationRows(page)
@@ -568,8 +569,8 @@ test.describe('what reviewers said about a problem', () => {
     // A reviewer whose selection holds a pool of problems, one of them argued before and after a revision
     await stubSelection(page, 'selection')
 
-    // The problem
-    await page.goto(OPENED_ADDRESS)
+    // The problem, on its conversations
+    await page.goto(`${OPENED_ADDRESS}&tab=conversations`)
 
     // The conversation rows
     const rows = conversationRows(page)
@@ -591,8 +592,8 @@ test.describe('what reviewers said about a problem', () => {
     // A reviewer whose selection holds a pool of problems, one of them argued twice
     await stubSelection(page, 'selection', memory)
 
-    // The problem
-    await page.goto(OPENED_ADDRESS)
+    // The problem, on its conversations
+    await page.goto(`${OPENED_ADDRESS}&tab=conversations`)
 
     // The conversation rows
     const rows = conversationRows(page)
@@ -646,8 +647,8 @@ test.describe('what reviewers said about a problem', () => {
     // A reviewer whose selection holds a pool of problems, one of them argued twice
     await stubSelection(page, 'selection', memory)
 
-    // The problem
-    await page.goto(OPENED_ADDRESS)
+    // The problem, on its conversations
+    await page.goto(`${OPENED_ADDRESS}&tab=conversations`)
 
     // The most recent conversation, opened
     await conversationRows(page).nth(0).click()
@@ -686,8 +687,8 @@ test.describe('what reviewers said about a problem', () => {
     // Offering no conversation, Mathilda having no solution to reason from
     await expect(page.getByRole('button', { name: MATHILDA_NAME, exact: true })).toHaveCount(0)
 
-    // A problem solved in English, which the site is read in
-    await page.goto(`${SELECTION_PATH}?problem=${BILINGUAL.id}`)
+    // A problem solved in English, which the site is read in, on its conversations
+    await page.goto(`${SELECTION_PATH}?problem=${BILINGUAL.id}&tab=conversations`)
 
     // Nobody having talked to her about it yet
     await expect(page.getByRole('tabpanel')).toContainText(selectionCopy.conversations.empty, {
