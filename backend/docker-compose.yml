@@ -139,6 +139,28 @@ services:
       - -c
       - while true; do find /var/log/mathcomps -mindepth 1 -maxdepth 1 -type d -mtime +30 -exec rm -rf {} +; sleep 86400; done
 
+  # A read-only entry point to the database, which lets in the read-only role and no one else. See
+  # pgbouncer/pgbouncer.ini.
+  readonly-gate:
+    image: edoburu/pgbouncer:v1.26.1-p0
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      # The image's entrypoint writes this user into the gate's auth_file, the only login it accepts
+      DB_USER: ${READONLY_DB_USER:?set it in .env}
+      DB_PASSWORD: ${READONLY_DB_PASSWORD:?set it in .env}
+
+      # Has the entrypoint store the password as given. Its default is an md5 hash, which SCRAM logins can't use.
+      AUTH_TYPE: scram-sha-256
+    volumes:
+      # Just the config file, so the entrypoint writes auth_file, password included, inside the container
+      - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+
 networks:
   internal:
     driver: bridge
