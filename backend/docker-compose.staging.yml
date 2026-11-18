@@ -34,10 +34,12 @@ services:
       - "traefik.docker.network=traefik-public"
 
   # Production's Vector already reads every container on the box and the host itself, and its log-cleanup prunes
-  # the same folder, so staging runs neither
+  # the same folder, so staging runs neither. The read-only gate is for production's database alone.
   vector:
     profiles: [disabled]
   log-cleanup:
+    profiles: [disabled]
+  readonly-gate:
     profiles: [disabled]
 
 volumes:
