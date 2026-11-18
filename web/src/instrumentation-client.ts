@@ -13,8 +13,22 @@ Sentry.init({
   // Every report says who had the page open: a visitor, a crawler or a script
   initialScope: { tags: { caller: callerKindOf(navigator.userAgent, navigator.webdriver) } },
 
-  // A report's addresses stop at their #, since what follows it is kept from every server
-  beforeSend: (event) => {
+  // A report of a section that lost its stylesheets is dropped. Every other report's addresses stop at
+  // their #, since what follows it is kept from every server.
+  beforeSend: (event, { originalException }) => {
+    // The fault's digest, a code React and Next.js give some of the faults they raise
+    const digest =
+      originalException instanceof Error && 'digest' in originalException
+        ? originalException.digest
+        : undefined
+
+    // React's digest on a section whose stylesheets never loaded in the visitor's browser
+    const cssFailedDigest = 'CSS failed to load'
+
+    // A section that lost its stylesheets files nothing, since a blocker, a bad network or a crawler cut
+    // them off. React renders that section again in the browser and raises #419.
+    if (digest === cssFailedDigest) return null
+
     // A function which cuts an address at its #
     const withoutFragment = (address: string | undefined) => address?.split('#')[0]
 
