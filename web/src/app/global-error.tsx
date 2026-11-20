@@ -12,6 +12,7 @@ import { useEffect } from 'react'
 
 import { buttonVariants } from '@/components/shared/components/Button'
 import { cn } from '@/components/shared/utils/css-utils'
+import { useChunkLoadReload } from '@/hooks/use-chunk-load-reload'
 import { type Locale, SUPPORTED_LOCALES, UNMATCHED_VISITOR_LOCALE } from '@/i18n/i18n'
 
 /**
@@ -66,6 +67,10 @@ const COPY: Record<Locale, GlobalErrorCopy> = {
 /**
  * The page shown when rendering fails anywhere, in place of the whole site. It reports a fault the
  * browser threw, since defining this page stops Next.js from passing such faults on.
+ *
+ * A page kept open past a deploy can hit a chunk that failed to load. That reloads the page instead, once,
+ * and the page stays blank meanwhile and reports nothing. Only a chunk still failing after the reload shows
+ * here.
  */
 export default function GlobalError({ error, retry }: ErrorInfo) {
   // The reader's language, from the address, which always starts with one
@@ -75,13 +80,28 @@ export default function GlobalError({ error, retry }: ErrorInfo) {
   // The copy in that language
   const copy = COPY[locale]
 
+  // Whether the page is reloading itself over a chunk that failed to load
+  const isReloading = useChunkLoadReload(error)
+
   // Report the fault the page is showing
   useEffect(() => {
+    // A page reloading itself reports nothing
+    if (isReloading) return
+
     // A server fault carries the digest Next.js gave it, and was reported where it happened
     if (!(error instanceof Error && 'digest' in error)) {
       Sentry.captureException(error)
     }
-  }, [error])
+  }, [error, isReloading])
+
+  // An empty page on the site's background while the fresh one loads
+  if (isReloading) {
+    return (
+      <html lang={locale}>
+        <body />
+      </html>
+    )
+  }
 
   // The page replaces the root layout, so it carries its own document
   return (

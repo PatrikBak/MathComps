@@ -14,6 +14,10 @@ declare global {
     reportAnnouncement: (text: string) => void
     /** Whether this document's status regions are already being watched. */
     isWatchingAnnouncements?: boolean
+    /** Hands the test run each text the page's main heading shows. */
+    reportHeading: (text: string) => void
+    /** Whether this document's main heading is already being watched. */
+    isWatchingHeadings?: boolean
     /** How many elements matching the watched selector have left this document. */
     removedCount?: number
   }
@@ -22,7 +26,7 @@ declare global {
 /**
  * A function on the page's window that a watcher hands each text back to the test run through.
  */
-type TextChannel = 'reportNotice' | 'reportAnnouncement'
+type TextChannel = 'reportNotice' | 'reportAnnouncement' | 'reportHeading'
 
 /**
  * Records every text a watcher run in the page hands back, for as long as the test runs.
@@ -167,6 +171,83 @@ export async function countDialogs(page: Page): Promise<() => number> {
 
   // Hand back the count on each read
   return () => dialogs
+}
+
+/**
+ * Counts the documents the page finishes loading from now on, a first visit and every reload alike. A page that
+ * reloaded looks the same afterwards as one that never did, so the reloads are counted as they happen.
+ *
+ * @param page - The page to watch.
+ *
+ * @returns How many documents have loaded so far.
+ */
+export function countPageLoads(page: Page): () => number {
+  // Every document that finished loading
+  let loads = 0
+
+  // One more each time a document finishes loading
+  page.on('load', () => {
+    loads += 1
+  })
+
+  // Hand back the count on each read
+  return () => loads
+}
+
+/**
+ * Watches the document's main heading and hands over each text it shows, once per document, as
+ * {@link recordHandedBack} installs it.
+ */
+function watchForHeadings(): void {
+  // This document is already accounted for
+  if (window.isWatchingHeadings) return
+
+  // This document is watched from here on
+  window.isWatchingHeadings = true
+
+  // The text last handed over, so a heading that stays up is handed over once
+  let lastShown = ''
+
+  // A function which hands over what the main heading shows, whenever it shows something new
+  const reportNewHeading = () => {
+    // The heading on screen, leaving out a copy a streaming page parks out of sight
+    const heading = [...document.querySelectorAll('h1')].find((candidate) =>
+      candidate.checkVisibility()
+    )
+
+    // What it shows now
+    const text = heading?.textContent?.trim() ?? ''
+
+    // Nothing new shown
+    if (text === lastShown) return
+
+    // Remembered, so the same text is handed over once each time it arrives
+    lastShown = text
+
+    // Handed to the test run, where the page shows a heading at all
+    if (text !== '') window.reportHeading(text)
+  }
+
+  // Every change to the document, text arriving counting as much as a node arriving
+  new MutationObserver(reportNewHeading).observe(document, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  })
+}
+
+/**
+ * Records every text the page's main heading shows, on every document it loads, for as long as the test runs. A
+ * heading shown for a moment and replaced leaves nothing behind for a later check, so this is what tells a heading
+ * that never showed from one that showed and went.
+ *
+ * @param page - The page to watch.
+ *
+ * @returns Every heading text shown so far, oldest first, repeats included.
+ */
+export async function recordHeadings(page: Page): Promise<() => string[]> {
+  // Every heading text shown, in the order it appeared
+  return recordHandedBack(page, 'reportHeading', watchForHeadings)
 }
 
 /**
