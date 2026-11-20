@@ -225,7 +225,20 @@ bucket and the examiner's content to the private one; the API reads only the pri
 pass the API's values as `R2_ACCOUNT_ID` and the `R2_PRIVATE_*` variables in `.env` (see
 [Setting up a new server](#setting-up-a-new-server)).
 
-### 7. Run the API
+### 7. Set the site's mail address
+
+The API sends its mail from this address, and every response names it in a header. The API refuses to start until it is set.
+
+```bash
+# From the API directory
+cd backend/src/MathComps.Api
+
+dotnet user-secrets set "Site:ContactAddress" "contact@yourdomain.com"
+```
+
+Deployments pass it as `SITE_CONTACT_ADDRESS` in `.env`.
+
+### 8. Run the API
 
 See the [API README](src/MathComps.Api/README.md) for running instructions.
 
@@ -491,7 +504,7 @@ grep '"level":"error"' "/var/log/mathcomps/$(date -u +%F)/mathcomps-prod-api-1.l
 
 #### Mail
 
-Every mail the API sends waits in `outgoing_mails` until a background loop sends it, and stays there as the record of it. A failed mail is tried again on the schedule in the `MailOutbox` section of `appsettings.json`. Students and graders are mailed about new messages in grade conversations, one mail per person once a quiet while passes with nothing new for them, and never two in quick succession, timed by the `GradeMessageMail` section. Mail goes out from `Site:ContactAddress` in `appsettings.json`, through Resend wherever `RESEND_API_KEY` is set. On the server only `.env.prod` sets it. Without a key every mail goes to the log, so an API running on a copy of prod data mails nobody. To try Resend for real outside prod, set the key with a redirect, and the API refuses to start outside Production with a key alone:
+Every mail the API sends waits in `outgoing_mails` until a background loop sends it, and stays there as the record of it. A failed mail is tried again on the schedule in the `MailOutbox` section of `appsettings.json`. Students and graders are mailed about new messages in grade conversations, one mail per person once a quiet while passes with nothing new for them, and never two in quick succession, timed by the `GradeMessageMail` section. Mail goes out from `Site:ContactAddress` (`SITE_CONTACT_ADDRESS` on a server), through Resend wherever `RESEND_API_KEY` is set. On the server only `.env.prod` sets the key. Without a key every mail goes to the log, so an API running on a copy of prod data mails nobody. To try Resend for real outside prod, set the key with a redirect, and the API refuses to start outside Production with a key alone:
 
 ```bash
 # On your machine, from backend/src/MathComps.Api

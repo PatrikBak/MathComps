@@ -17,7 +17,7 @@ vi.mock('@sentry/nextjs', () => ({
  */
 function openPage(isOnline: boolean) {
   // The page the requests leave from, which a relative address resolves against
-  vi.stubGlobal('window', { location: { href: 'https://mathcomps.fun/sk/materialy' } })
+  vi.stubGlobal('window', { location: { href: 'https://mathcomps.test/sk/materialy' } })
 
   // The browser's own view of its network
   vi.stubGlobal('navigator', { onLine: isOnline })
@@ -54,7 +54,7 @@ describe('reportUnansweredRequest', () => {
 
     // Each failure reaches the reporter
     reportUnansweredRequest('/api/contact', first)
-    reportUnansweredRequest('https://mathcomps.fun/api/relay', second)
+    reportUnansweredRequest('https://mathcomps.test/api/relay', second)
     reportUnansweredRequest('https://cdn.example.test/figures/a.png', third)
 
     // One report per host, so a visitor's bad connection files a single event
