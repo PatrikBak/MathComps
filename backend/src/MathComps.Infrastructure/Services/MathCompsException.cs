@@ -17,8 +17,10 @@ public abstract class MathCompsException(string message, RefusalKind kind, LogLe
 
     /// <summary>
     /// The level the failure is logged at: <see cref="LogLevel.Error"/> when only a bug can cause it (broken content
-    /// or configuration, or a request our own screens never send), <see cref="LogLevel.Information"/> when a rule is
-    /// doing its job, such as refusing a page that went out of date while someone else acted or a clock ran out.
+    /// or configuration, or a request our own screens never send), <see cref="LogLevel.Warning"/> when a service the
+    /// request waits on let it down, such as a model not answering in time, and <see cref="LogLevel.Information"/>
+    /// when a rule is doing its job, such as refusing a page that went out of date while someone else acted or a
+    /// clock ran out.
     /// </summary>
     public LogLevel LogLevel { get; } = logLevel;
 }

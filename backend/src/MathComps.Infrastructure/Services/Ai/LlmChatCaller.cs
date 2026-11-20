@@ -17,8 +17,9 @@ namespace MathComps.Infrastructure.Services.Ai;
 /// OpenAI-compatible endpoint. Derives a model-bound client per call, sets the reasoning level on the request, patches
 /// the fallback chain onto its raw body, and retries a configured number of times because the endpoint occasionally
 /// hands back an unusable response, so a retry draws a fresh one. A reply that hit the output-token cap is retried the
-/// same way. Each reply's billed cost is folded into the spend tally as it lands, retries included, and each attempt
-/// is logged with its step, its model and how long it took.
+/// same way. A call that outlasts <see cref="LlmSettings.RequestTimeout"/> comes out as a
+/// <see cref="ModelTimeoutException"/>. Each reply's billed cost is folded into the spend tally as it lands, retries
+/// included, and each attempt is logged with its step, its model and how long it took.
 /// </summary>
 /// <remarks>
 /// The retry and the fallback chain cover different failures: a retry re-draws when a reply came back unusable,
@@ -217,6 +218,12 @@ public class LlmChatCaller(
                     throw;
                 }
             }, cancellationToken);
+        }
+        // A cancellation the caller didn't ask for is the request timeout running out.
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            // The endpoint didn't answer in time.
+            throw new ModelTimeoutException();
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {

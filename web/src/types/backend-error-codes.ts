@@ -45,6 +45,7 @@ export const BACKEND_ERROR_CODES = [
   'ListReorderMismatch',
   'MalformedRequest',
   'MarkStatusRequiresAuthentication',
+  'ModelTimeout',
   'NotCommentAuthor',
   'NotReviewNoteAuthor',
   'ProblemNotFound',

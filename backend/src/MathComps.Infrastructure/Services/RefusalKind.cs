@@ -1,8 +1,8 @@
 namespace MathComps.Infrastructure.Services;
 
 /// <summary>
-/// What kind of refusal a business failure is, seen from whoever asked. Each member is one of HTTP's client-error
-/// statuses under a plain name, so picking a kind picks the status the request answers with.
+/// What kind of refusal a business failure is, seen from whoever asked. Each member is one of HTTP's error statuses
+/// under a plain name, so picking a kind picks the status the request answers with.
 /// </summary>
 public enum RefusalKind
 {
@@ -45,4 +45,10 @@ public enum RefusalKind
     /// HTTP 429 Too Many Requests. The caller hit a cap that lifts with time, so the same request works later.
     /// </summary>
     Throttled,
+
+    /// <summary>
+    /// HTTP 504 Gateway Timeout. A service the request waits on didn't answer in time, so the same request may work
+    /// when sent again.
+    /// </summary>
+    UpstreamTimeout,
 }

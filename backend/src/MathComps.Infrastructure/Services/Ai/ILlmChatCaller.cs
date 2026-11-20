@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+
 namespace MathComps.Infrastructure.Services.Ai;
 
 /// <summary>
@@ -18,6 +20,7 @@ public interface ILlmChatCaller
     /// <param name="request">The call's messages, the model it routes to, and its limits.</param>
     /// <param name="cancellationToken">A token to cancel the call.</param>
     /// <returns>The bound reply together with the call's billed cost and token usage.</returns>
+    /// <exception cref="ModelTimeoutException">Thrown when the endpoint doesn't answer in time.</exception>
     Task<ChatCallResult<TResponse>> CompleteAsync<TResponse>(
         ChatCallRequest request, CancellationToken cancellationToken = default);
 
@@ -35,6 +38,17 @@ public interface ILlmChatCaller
     /// <param name="request">The call's messages, the model it routes to, and its limits.</param>
     /// <param name="cancellationToken">A token to cancel the call.</param>
     /// <returns>The reply's text together with the call's billed cost and token usage.</returns>
+    /// <exception cref="ModelTimeoutException">Thrown when the endpoint doesn't answer in time.</exception>
     Task<ChatCallResult<string>> CompleteTextAsync(
         ChatCallRequest request, CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// Thrown when the chat endpoint doesn't answer a call within the request timeout. The call isn't retried, since each
+/// retry would wait out the whole timeout again.
+/// </summary>
+public sealed class ModelTimeoutException()
+    : MathCompsException(
+        "The model didn't answer in time. Try again.",
+        RefusalKind.UpstreamTimeout,
+        LogLevel.Warning);

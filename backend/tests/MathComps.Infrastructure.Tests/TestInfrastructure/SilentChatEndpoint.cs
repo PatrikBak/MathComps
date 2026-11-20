@@ -1,0 +1,136 @@
+using System.Globalization;
+using System.Net;
+using System.Net.Sockets;
+using MathComps.Infrastructure.Extensions;
+using MathComps.Infrastructure.Options;
+using MathComps.Infrastructure.Services.Ai;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace MathComps.Infrastructure.Tests.TestInfrastructure;
+
+/// <summary>
+/// A stand-in for a chat endpoint that takes every connection on a loopback port and never answers on it. The chat
+/// caller is registered against it the way the hosts register theirs, so its SDK client is configured as production's
+/// is. The caller retries failures, and each attempt opens a connection of its own.
+/// </summary>
+public sealed class SilentChatEndpoint : IAsyncDisposable
+{
+    /// <summary>
+    /// The port the caller connects to.
+    /// </summary>
+    private readonly TcpListener _listener = new(IPAddress.Loopback, 0);
+
+    /// <summary>
+    /// Every connection taken so far, held open so the caller keeps waiting on each.
+    /// </summary>
+    private readonly List<TcpClient> _connections = [];
+
+    /// <summary>
+    /// Guards <see cref="_connections"/>, which the accepting loop adds to while a test reads it.
+    /// </summary>
+    private readonly Lock _gate = new();
+
+    /// <summary>
+    /// The loop taking connections until the endpoint is disposed.
+    /// </summary>
+    private readonly Task _accepting;
+
+    /// <summary>
+    /// The registration the caller comes from.
+    /// </summary>
+    private readonly ServiceProvider _provider;
+
+    /// <summary>
+    /// Opens the port and registers the chat caller against it, with retries on.
+    /// </summary>
+    /// <param name="requestTimeout"><inheritdoc cref="LlmSettings.RequestTimeout" path="/summary"/></param>
+    public SilentChatEndpoint(TimeSpan requestTimeout)
+    {
+        // Open the port.
+        _listener.Start();
+
+        // Take every connection that arrives from here on.
+        _accepting = AcceptAsync();
+
+        // The connection settings, pointed at the port, with retries on so a retried attempt shows as a second
+        // connection.
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Llm:BaseUrl"] = $"http://{_listener.LocalEndpoint}/v3",
+                ["Llm:ApiKey"] = "test-key",
+                ["Llm:MaxRetries"] = "2",
+                ["Llm:RetryDelay"] = "00:00:00",
+                ["Llm:RequestTimeout"] = requestTimeout.ToString("c", CultureInfo.InvariantCulture),
+            })
+            .Build();
+
+        // The chat stack as the hosts register it.
+        _provider = new ServiceCollection().AddLlmChat(configuration).BuildServiceProvider();
+
+        // The caller out of it.
+        Caller = _provider.GetRequiredService<ILlmChatCaller>();
+    }
+
+    /// <summary>
+    /// The caller whose requests reach this endpoint.
+    /// </summary>
+    public ILlmChatCaller Caller { get; }
+
+    /// <summary>
+    /// How many connections the caller has opened, one per attempt.
+    /// </summary>
+    public int Connections
+    {
+        get
+        {
+            // The count of connections taken so far.
+            lock (_gate)
+                return _connections.Count;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        // Close the port.
+        _listener.Stop();
+
+        // Let the accepting loop see it closed and end.
+        await _accepting;
+
+        // Drop every connection taken.
+        lock (_gate)
+            _connections.ForEach(connection => connection.Dispose());
+
+        // Shut down the chat stack registered for the test.
+        await _provider.DisposeAsync();
+    }
+
+    /// <summary>
+    /// Takes connections until the port closes.
+    /// </summary>
+    /// <returns>A task that completes once the port is closed.</returns>
+    private async Task AcceptAsync()
+    {
+        // Take connections until closing the port ends the wait.
+        try
+        {
+            // One connection at a time, for as long as the port is open.
+            while (true)
+            {
+                // The next connection the caller opens.
+                var connection = await _listener.AcceptTcpClientAsync();
+
+                // Hold it, never reading or answering.
+                lock (_gate)
+                    _connections.Add(connection);
+            }
+        }
+        catch (Exception exception) when (exception is SocketException or ObjectDisposedException)
+        {
+            // The port was closed.
+        }
+    }
+}

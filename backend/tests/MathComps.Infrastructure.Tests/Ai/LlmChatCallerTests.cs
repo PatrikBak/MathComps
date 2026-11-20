@@ -8,8 +8,9 @@ namespace MathComps.Infrastructure.Tests.Ai;
 /// <summary>
 /// Tests the parts of <see cref="LlmChatCaller"/> that fail silently when dropped or misnamed: the messages and request
 /// fields the endpoint reads (the instructions, an image's part, the order of the user message's parts, the reasoning
-/// level and the fallback chain), and the model read back off the reply. A fake HTTP transport stands in for the
-/// endpoint, so the body is inspected as sent and the reply is canned.
+/// level and the fallback chain), the model read back off the reply, and how a call the endpoint never answers ends.
+/// A fake HTTP transport stands in for the endpoint, so the body is inspected as sent and the reply is canned. A
+/// loopback port that never answers stands in for a hung endpoint, behind the caller as the hosts register it.
 /// </summary>
 public class LlmChatCallerTests
 {
@@ -197,6 +198,47 @@ public class LlmChatCallerTests
         // Each text part carries its own text.
         Assert.Equal("Their message.", parts[0].GetProperty("text").GetString());
         Assert.Equal("The reply to judge.", parts[2].GetProperty("text").GetString());
+    }
+
+    /// <summary>
+    /// A call the endpoint never answers ends as a model timeout once the request timeout runs out, after its one
+    /// attempt. Left as a bare cancellation, it would reach whoever waited on it as an unexpected fault. Retried, it
+    /// would keep them waiting the whole timeout again.
+    /// </summary>
+    [Fact]
+    public async Task A_call_the_endpoint_never_answers_ends_as_one_model_timeout()
+    {
+        // An endpoint that never answers, behind a short request timeout.
+        await using var endpoint = new SilentChatEndpoint(requestTimeout: TimeSpan.FromMilliseconds(200));
+
+        // Make a call nobody calls off.
+        var call = endpoint.Caller.CompleteTextAsync(Request([], reasoningEffort: "low"));
+
+        // It ends as a model timeout.
+        await Assert.ThrowsAsync<ModelTimeoutException>(() => call);
+
+        // And it was attempted once, though the caller retries other failures.
+        Assert.Equal(1, endpoint.Connections);
+    }
+
+    /// <summary>
+    /// A call its caller calls off ends as a cancellation, even while the endpoint keeps it waiting. Read as a model
+    /// timeout instead, a caller leaving would be logged as though the model had let it down.
+    /// </summary>
+    [Fact]
+    public async Task A_call_its_caller_calls_off_ends_as_a_cancellation()
+    {
+        // An endpoint that never answers, behind a request timeout far longer than the test.
+        await using var endpoint = new SilentChatEndpoint(requestTimeout: TimeSpan.FromMinutes(5));
+
+        // The caller's token, called off shortly after the call goes out.
+        using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(200));
+
+        // Make the call under that token.
+        var call = endpoint.Caller.CompleteTextAsync(Request([], reasoningEffort: "low"), cancellation.Token);
+
+        // It ends as the cancellation its caller asked for.
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => call);
     }
 
     /// <summary>
