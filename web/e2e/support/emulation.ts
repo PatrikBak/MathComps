@@ -127,6 +127,31 @@ export async function stubPageVisibility(
 }
 
 /**
+ * Makes the tab's session storage refuse every write while reading as usual, as a full one does, on every document
+ * from the next one on. Every other storage writes as usual.
+ *
+ * @param page - The page whose tab it is, before the document under test loads.
+ */
+export async function fillSessionStorage(page: Page): Promise<void> {
+  // Every document from the next one on, before any of its scripts run
+  await page.addInitScript(() => {
+    // The browser's own write
+    const setItem = Storage.prototype.setItem
+
+    // The same write, refused for the tab's session storage
+    Storage.prototype.setItem = function (this: Storage, key: string, value: string) {
+      // The refusal a full storage gives
+      if (this === window.sessionStorage) {
+        throw new DOMException('The quota has been exceeded.', 'QuotaExceededError')
+      }
+
+      // Any other storage, written as asked
+      setItem.call(this, key, value)
+    }
+  })
+}
+
+/**
  * Cuts the browser's own offline signal, which is what tells React Query to hold requests back.
  *
  * Taking the network itself away would also take the page's own server with it, so a step that

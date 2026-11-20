@@ -62,3 +62,9 @@ export const DEFENSE_DRAFT_PHOTOS_STORAGE_PREFIX = 'defense-draft-photos'
  * costs it.
  */
 export const COMMENT_DRAFT_STORAGE_PREFIX = 'comment-draft'
+
+/**
+ * Key used to store which deployment's page last reloaded itself over a chunk that failed to load, and when.
+ * Note: This is used with sessionStorage.
+ */
+export const CHUNK_LOAD_RELOAD_STORAGE_KEY = 'chunk-load-reload'
