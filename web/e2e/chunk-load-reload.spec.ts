@@ -26,8 +26,53 @@ const copy = {
 } as const
 
 /**
+ * Finds the address of the contact form's chunk. The page opens the form once, and of the scripts it then
+ * holds, the chunk is the one carrying the form's marker. Each script is read straight from the server, so
+ * no page is loading it while it is read.
+ *
+ * @param page - The page that opens the form.
+ *
+ * @returns The chunk's address.
+ */
+async function findContactFormChunk(page: Page): Promise<string> {
+  // The handouts page
+  await page.goto(HANDOUTS_PATH)
+
+  // The form, opened
+  await page.getByRole('button', { name: copy.open }).click()
+
+  // With its chunk loaded
+  await expect(page.getByLabel(copy.formField)).toBeVisible()
+
+  // Every script the page downloaded
+  const scripts = await page.evaluate(() =>
+    performance
+      .getEntriesByType('resource')
+      .map((entry) => entry.name)
+      .filter((address) => new URL(address).pathname.endsWith('.js'))
+  )
+
+  // Each script's text, as the server sends it
+  const bodies = await Promise.all(
+    scripts.map(async (address) => ({
+      address,
+      text: await (await page.request.get(address)).text(),
+    }))
+  )
+
+  // The script holding the form
+  const chunk = bodies.find(({ text }) => text.includes(CONTACT_FORM_MARKER))
+
+  // A build that moved the form's marker out of its chunk leaves nothing to fail
+  if (chunk === undefined) throw new Error(`No script holds ${CONTACT_FORM_MARKER}`)
+
+  // The chunk's address
+  return chunk.address
+}
+
+/**
  * Answers every download of the contact form's chunk with the 410 a deployment gone past skew protection
- * gives, until told to stop. Every other script arrives as the server sent it.
+ * gives, until told to stop. The page is left on the handouts page, with the form open.
  *
  * @param page - The page that downloads the chunk.
  *
@@ -35,26 +80,24 @@ const copy = {
  * deployment.
  */
 async function failContactFormChunk(page: Page): Promise<() => void> {
+  // The chunk's address
+  const chunkAddress = await findContactFormChunk(page)
+
   // Whether the chunk's downloads still fail
   let isFailing = true
 
-  // Every script the app serves, read before it is handed over
+  // The chunk's downloads, refused while they fail
   await page.route(
-    (url) => url.pathname.startsWith('/_next/static/') && url.pathname.endsWith('.js'),
+    (url) => url.href === chunkAddress,
     async (route) => {
-      // The script as the server sent it
-      const response = await route.fetch()
-      const body = await response.text()
-
-      // The form's chunk while it fails
-      if (isFailing && body.includes(CONTACT_FORM_MARKER)) {
-        // Gone, as an expired deployment answers
+      // Gone, as an expired deployment answers
+      if (isFailing) {
         await route.fulfill({ status: 410 })
         return
       }
 
-      // Any other script, or the form's once it arrives again
-      await route.fulfill({ response, body })
+      // From the server once it arrives again
+      await route.fallback()
     }
   )
 
@@ -69,13 +112,13 @@ test.describe('a chunk that fails to load', () => {
     // Every heading the page shows
     const headings = await recordHeadings(page)
 
-    // Every document the page loads
-    const pageLoads = countPageLoads(page)
-
     // The form's chunk gone, as for a page kept open past a deploy
     const letChunkArrive = await failContactFormChunk(page)
 
-    // The handouts page
+    // Every document the page loads from here on
+    const pageLoads = countPageLoads(page)
+
+    // The handouts page, fresh
     await page.goto(HANDOUTS_PATH)
 
     // The reload, awaited from before the click that causes it
@@ -104,13 +147,13 @@ test.describe('a chunk that fails to load', () => {
   })
 
   test('shows the error page once it still fails after the reload', async ({ page }) => {
-    // Every document the page loads
-    const pageLoads = countPageLoads(page)
-
     // The form's chunk gone for good
     await failContactFormChunk(page)
 
-    // The handouts page
+    // Every document the page loads from here on
+    const pageLoads = countPageLoads(page)
+
+    // The handouts page, fresh
     await page.goto(HANDOUTS_PATH)
 
     // The reload, awaited from before the click that causes it
@@ -135,16 +178,16 @@ test.describe('a chunk that fails to load', () => {
   test('shows the error page without reloading in a tab that cannot record the reload', async ({
     page,
   }) => {
-    // Every document the page loads
-    const pageLoads = countPageLoads(page)
-
     // A tab whose session storage is full
     await fillSessionStorage(page)
 
     // The form's chunk gone for good
     await failContactFormChunk(page)
 
-    // The handouts page
+    // Every document the page loads from here on
+    const pageLoads = countPageLoads(page)
+
+    // The handouts page, fresh
     await page.goto(HANDOUTS_PATH)
 
     // The form asked for, whose chunk fails
