@@ -17,6 +17,27 @@ const ENTER_ANIMATION =
   'animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] transition-none motion-reduce:animate-none'
 
 /**
+ * How a panel is placed for one alignment.
+ */
+type AlignLayout = {
+  /** The classes of the container placing the panel. */
+  containerClass: string
+  /** The classes the alignment adds to the panel itself. */
+  panelClass: string
+}
+
+/**
+ * How a panel is placed for each alignment. A tall panel is 94svh high, so centered it sits 3svh below the top; a
+ * tall-top panel keeps 3svh above it and below it, and never grows past a tall panel's height. The small viewport's
+ * height is the one a touch browser shows with its toolbar out, so the panel stays on screen either way.
+ */
+const ALIGN_LAYOUTS: Record<NonNullable<ModalProps['align']>, AlignLayout> = {
+  center: { containerClass: 'items-center', panelClass: '' },
+  top: { containerClass: 'items-start sm:pt-16', panelClass: '' },
+  tallTop: { containerClass: 'items-start sm:py-[3svh]', panelClass: 'sm:max-h-[94svh]' },
+}
+
+/**
  * Props for the {@link Modal} component.
  */
 type ModalProps = {
@@ -32,8 +53,11 @@ type ModalProps = {
   showCloseButton: boolean
   /** Additional className for the panel */
   className?: string
-  /** Vertical alignment: 'center' (default) or 'top' (prevents layout shifts) */
-  align?: 'center' | 'top'
+  /**
+   * Vertical alignment: 'center', 'top' (prevents layout shifts), or 'tallTop', which hangs the panel from the top edge
+   * a centered tall panel has, so a panel that grows and shrinks keeps that edge
+   */
+  align?: 'center' | 'top' | 'tallTop'
   /** Whether the panel carries its own inner padding; false lets content own its layout edge-to-edge */
   padded?: boolean
   /**
@@ -124,7 +148,7 @@ export function Modal({
         <div
           className={cn(
             'flex min-h-full justify-center text-center p-0 sm:p-4',
-            align === 'center' ? 'items-center' : 'items-start sm:pt-16'
+            ALIGN_LAYOUTS[align].containerClass
           )}
         >
           <DialogPanel
@@ -135,7 +159,8 @@ export function Modal({
               'zoom-in-95',
               ENTER_ANIMATION,
               padded && 'p-3 sm:p-6',
-              tall && 'flex h-[100dvh] flex-col sm:h-[94vh] sm:max-w-4xl',
+              tall && 'flex h-[100dvh] flex-col sm:h-[94svh] sm:max-w-4xl',
+              ALIGN_LAYOUTS[align].panelClass,
               focusPanelOnOpen && 'focus:outline-none',
               className
             )}

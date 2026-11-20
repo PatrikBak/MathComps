@@ -9,6 +9,42 @@ import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
 import { cn } from '@/components/shared/utils/css-utils'
 
+/**
+ * How much of the screen a surface takes. Every size hangs from the same top edge, so folding the statement away never
+ * moves a surface's header.
+ */
+export type SurfaceSize =
+  /** The screen's height, for a surface written in or read in parts that scroll on their own. */
+  | 'screen'
+  /**
+   * One column of text at a reading width, as tall as the text up to the height a screen-high surface has. On a phone
+   * it takes the whole screen.
+   */
+  | 'text'
+
+/**
+ * How the modal is set up for one size of surface.
+ */
+type SurfaceLayout = {
+  /** Whether the modal fills the screen's height. */
+  tall: boolean
+  /** The panel's height and width. */
+  panelClass: string
+}
+
+/**
+ * How the modal is set up for each size of surface.
+ */
+const SURFACE_LAYOUTS: Record<SurfaceSize, SurfaceLayout> = {
+  screen: { tall: true, panelClass: 'sm:max-w-5xl' },
+  // Below the small breakpoint it takes the whole screen. Above it, it is 51rem wide: a 48rem column of text, with
+  // the padding and the scrollbar's gutter beside it
+  text: {
+    tall: false,
+    panelClass: 'h-[100dvh] max-w-none sm:h-auto sm:max-w-[51rem]',
+  },
+}
+
 /** How a row under a problem is drawn, whatever it opens. */
 export const PROBLEM_ROW_CLASS = cn(
   'flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-foreground/5',
@@ -82,14 +118,11 @@ type CompetitionProblemSurfaceProps = {
   onClose: () => void
   /** How many things are on the surface, said on the row; null where the row counts nothing. */
   count: number | null
+  /** How much of the screen the surface takes. */
+  size: SurfaceSize
   /**
-   * Whether the surface fills the screen's height, for one that is written in or read in parts that scroll on their
-   * own.
-   */
-  isTall: boolean
-  /**
-   * Whether what is read on the surface lays itself out in parts that each scroll on their own, for a surface that
-   * fills the screen's height; otherwise it is one padded column that scrolls as a whole.
+   * Whether what is read on the surface lays itself out in parts that each scroll on their own; otherwise it is one
+   * padded column that scrolls as a whole.
    */
   scrollsInParts?: boolean
   /** What is read on the surface. */
@@ -112,7 +145,7 @@ export function CompetitionProblemSurface({
   onOpen,
   onClose,
   count,
-  isTall,
+  size,
   scrollsInParts = false,
   children,
 }: CompetitionProblemSurfaceProps) {
@@ -122,6 +155,9 @@ export function CompetitionProblemSurface({
   // Competitions copy
   const t = useTranslations('competitions')
 
+  // How the modal is set up for the surface's size
+  const layout = SURFACE_LAYOUTS[size]
+
   return (
     <>
       {/* The row */}
@@ -129,8 +165,7 @@ export function CompetitionProblemSurface({
         <ProblemRowLabel label={label} icon={icon} count={count} />
       </button>
 
-      {/* Sized to the argument, up to nearly the whole screen: what is read here runs from three lines to
-          three pages */}
+      {/* The surface, up to nearly the whole screen: what is read here runs from three lines to three pages */}
       {isOpen && (
         <Modal
           isOpen
@@ -138,8 +173,9 @@ export function CompetitionProblemSurface({
           showCloseButton={false}
           padded={false}
           ariaLabel={label}
-          className="flex max-h-[100dvh] flex-col sm:max-h-[94vh] sm:max-w-5xl"
-          tall={isTall}
+          className={cn('flex flex-col', layout.panelClass)}
+          tall={layout.tall}
+          align="tallTop"
         >
           {/* Which of the surfaces this is, the problem it is about, and the way out of it */}
           <div className="flex shrink-0 items-center gap-3 border-b border-foreground/10 px-4 py-2 sm:px-5">
@@ -173,10 +209,7 @@ export function CompetitionProblemSurface({
             className={
               scrollsInParts
                 ? 'flex min-h-0 flex-1 flex-col'
-                : cn(
-                    'scrollbar-visible min-h-0 overflow-y-auto overscroll-contain px-4 py-3 sm:px-5',
-                    isTall && 'flex-1'
-                  )
+                : 'scrollbar-visible min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3 sm:px-5'
             }
           >
             {children}

@@ -5,7 +5,13 @@ import { OPEN_PROPOSAL_PARAM } from '@/components/features/problem-selection/mod
 import { locationParam } from './support/address'
 import { BACKEND_ORIGIN } from './support/backend-routes'
 import { stubNamedReader } from './support/comments'
-import { actionsCopy, editorCopy, SELECTION_PATH } from './support/competitions'
+import {
+  actionsCopy,
+  chatCopy,
+  editorCopy,
+  modalCopy,
+  SELECTION_PATH,
+} from './support/competitions'
 import { returnToTab, slowDown } from './support/emulation'
 import { pickPillAnswer } from './support/facets'
 import {
@@ -890,6 +896,64 @@ test.describe('reading the selection', () => {
 
     // And no note beside it
     await expect(surface.getByText(selectionCopy.text.gradingNote)).toHaveCount(0)
+  })
+
+  test('sizes the surface of a problem with nothing but a solution to its text, so folding the statement away leaves its top where it stands', async ({
+    page,
+  }) => {
+    // A reviewer whose selection holds a pool of problems
+    await stubSelection(page, 'selection')
+
+    // The pool
+    await openPool(page)
+
+    // The solution of a problem with nothing else to read, opened on its card
+    await cardOf(page, READY)
+      .getByRole('button', { name: selectionCopy.text.reference, exact: true })
+      .click()
+
+    // The surface it opens
+    const surface = page.getByRole('dialog', { name: selectionCopy.text.reference })
+
+    // The surface standing still once it has finished coming in
+    await surface.evaluate((dialog) =>
+      Promise.all(dialog.getAnimations({ subtree: true }).map((animation) => animation.finished))
+    )
+
+    // The surface's way out, at its top
+    const close = surface.getByRole('button', { name: modalCopy.close })
+
+    // The solution, which runs down to the surface's bottom
+    const solution = surface.getByRole('region', { name: selectionCopy.text.reference })
+
+    // Where the way out stands with the statement showing
+    const closeBefore = (await close.boundingBox())!
+
+    // And where the solution stands
+    const solutionBefore = (await solution.boundingBox())!
+
+    // The control folding the statement away
+    const fold = surface.getByRole('button', { name: chatCopy.problemStrip })
+
+    // Pressed
+    await fold.click()
+
+    // The statement folded away
+    await expect(fold).toHaveAttribute('aria-expanded', 'false')
+
+    // Where the way out stands now
+    const closeAfter = (await close.boundingBox())!
+
+    // And where the solution stands now
+    const solutionAfter = (await solution.boundingBox())!
+
+    // The top where it stood
+    expect(closeAfter.y).toBe(closeBefore.y)
+
+    // And the bottom risen by what the statement took, the surface no taller than its text
+    expect(solutionAfter.y + solutionAfter.height).toBeLessThan(
+      solutionBefore.y + solutionBefore.height
+    )
   })
 })
 

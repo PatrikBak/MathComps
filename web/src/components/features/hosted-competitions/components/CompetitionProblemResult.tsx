@@ -120,7 +120,7 @@ export function GradeComments({
       onOpen={onOpen}
       onClose={closeThread}
       count={conversation.messageCount}
-      isTall
+      size="screen"
     >
       <CommentSection
         variant="inline"
