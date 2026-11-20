@@ -448,16 +448,36 @@ export async function swipeDownByTouch(
   // Where the element sits
   const box = (await target.boundingBox())!
 
+  // Where the finger lands, the element's middle
+  const x = box.x + box.width / 2
+  const y = box.y + box.height / 2
+
   // The browser's own touch input, the only way to drag a finger
   const touch = await page.context().newCDPSession(page)
 
-  // A finger landing on the element's middle and dragged down, the whole gesture played out before this returns
-  await touch.send('Input.synthesizeScrollGesture', {
-    x: box.x + box.width / 2,
-    y: box.y + box.height / 2,
-    yDistance: distance,
-    gestureSourceType: 'touch',
-  })
+  // A finger put down on the element's middle
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] })
+
+  // How many moves the finger makes on its way down
+  const steps = 10
+
+  // How long the finger rests between moves, one frame, in milliseconds
+  const frameMs = 16
+
+  // The finger dragged down in even steps, a frame apart
+  for (let step = 1; step <= steps; step++) {
+    // One step further down
+    await touch.send('Input.dispatchTouchEvent', {
+      type: 'touchMove',
+      touchPoints: [{ x, y: y + (distance * step) / steps }],
+    })
+
+    // A frame for the page to follow the finger
+    await page.waitForTimeout(frameMs)
+  }
+
+  // And lifted
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
 }
 
 /**
