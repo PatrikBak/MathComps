@@ -1,13 +1,17 @@
 'use client'
 
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
 import { LOCALE_TO_COUNTRY } from '@/components/features/guide/content/guide-content-types'
 import { FlagIcon } from '@/components/features/guide/layout/FlagIcon'
-import { DropdownMenuContent } from '@/components/shared/components/DropdownMenu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/shared/components/DropdownMenu'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { ACCENT_COLOR_MAP } from '@/components/shared/utils/accent-colors'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -36,9 +40,9 @@ export function LanguageSwitcher() {
   const currentCountry = LOCALE_TO_COUNTRY[currentLocale]
 
   return (
-    <DropdownMenu.Root modal={false}>
+    <DropdownMenu modal={false}>
       {/* Trigger Button */}
-      <DropdownMenu.Trigger
+      <DropdownMenuTrigger
         className={cn(
           'flex items-center gap-1.5 px-2 py-1.5 rounded-lg outline-none',
           'text-sm font-medium text-foreground',
@@ -62,7 +66,7 @@ export function LanguageSwitcher() {
           )}
           aria-hidden="true"
         />
-      </DropdownMenu.Trigger>
+      </DropdownMenuTrigger>
 
       {/* Dropdown Content, its rows running the full width of the panel */}
       <DropdownMenuContent className="min-w-[140px] p-0 py-1.5" sideOffset={8} align="end">
@@ -74,7 +78,7 @@ export function LanguageSwitcher() {
           const country = LOCALE_TO_COUNTRY[locale]
 
           return (
-            <DropdownMenu.Item
+            <DropdownMenuPrimitive.Item
               key={locale}
               className={cn(
                 'flex items-center gap-2.5 px-3 py-2 text-sm',
@@ -93,10 +97,10 @@ export function LanguageSwitcher() {
               <FlagIcon country={country} flagHeight={14} flagWidth={20} />
               <span>{LOCALE_NAMES[locale]}</span>
               {isActive && <span className="ml-auto text-brand-light text-xs">✓</span>}
-            </DropdownMenu.Item>
+            </DropdownMenuPrimitive.Item>
           )
         })}
       </DropdownMenuContent>
-    </DropdownMenu.Root>
+    </DropdownMenu>
   )
 }

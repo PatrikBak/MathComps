@@ -310,6 +310,37 @@ export async function hearLoad(element: Locator): Promise<() => Promise<void>> {
 }
 
 /**
+ * Counts every change to one attribute of an element from now on. An attribute that changed and changed back reads
+ * the same afterwards as one that never moved, so the changes are counted as they happen.
+ *
+ * @param element - The element to watch.
+ * @param attribute - The attribute's name.
+ *
+ * @returns A function reading how many times the attribute has changed so far.
+ */
+export async function countAttributeChanges(
+  element: Locator,
+  attribute: string
+): Promise<() => Promise<number>> {
+  // The count, kept in the page where the observer adds to it
+  const changes = await element.evaluateHandle((target, name) => {
+    // No change seen yet
+    const counter = { count: 0 }
+
+    // Each change counted as the observer sees it, several in one batch included
+    new MutationObserver((records) => {
+      counter.count += records.length
+    }).observe(target, { attributes: true, attributeFilter: [name] })
+
+    // The count the observer fills
+    return counter
+  }, attribute)
+
+  // A function which reads the count
+  return () => changes.evaluate((counter) => counter.count)
+}
+
+/**
  * Records every call the page's own code makes that can scroll it, and the first scroll that takes it off the top,
  * in every document from the next one on.
  *
