@@ -671,9 +671,8 @@ public class DefenseSessionService(
                 dbContext, userId, outcome.Usage, (int)stopwatch.ElapsedMilliseconds, outcome.Revisions,
                 countsAgainstCeiling, repliedAt);
         }
-        // Only our own token firing is a client abort. An upstream HTTP/LLM timeout also throws
-        // OperationCanceledException (as TaskCanceledException, off an internal token), but that's our fault, not the
-        // user's, so it falls through this catch and propagates unrecorded.
+        // Only our own token firing is a client abort. Every other failure is our fault, not the user's, so it
+        // propagates unrecorded: a model that didn't answer in time, or a cancellation off another token.
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             // The client aborted the turn, but its completed calls already cost us.

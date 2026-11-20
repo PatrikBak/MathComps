@@ -170,6 +170,7 @@
     "ListReorderMismatch": "Zoznam sa medzičasom zmenil. Obnov stránku a skús to znova.",
     "MalformedRequest": "Požiadavku sa nepodarilo prečítať. Obnov stránku a skús to znova.",
     "MarkStatusRequiresAuthentication": "Ak chceš filtrovať podľa svojho pokroku, prihlás sa.",
+    "ModelTimeout": "Mathilda neodpovedala včas. Skús to poslať znova.",
     "NotCommentAuthor": "Upravovať alebo mazať môžeš len vlastné komentáre.",
     "NotReviewNoteAuthor": "Upravovať alebo mazať môžeš len vlastné poznámky.",
     "ProblemNotFound": "Úloha nebola nájdená.",

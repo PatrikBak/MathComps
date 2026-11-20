@@ -13,7 +13,7 @@ namespace MathComps.Api.Tests;
 
 /// <summary>
 /// Guards that <see cref="GlobalExceptionHandler"/> answers every business exception, meaning every
-/// <see cref="MathCompsException"/>, with a client status and the code named after its type, and logs each at the
+/// <see cref="MathCompsException"/>, with its own status and the code named after its type, and logs each at the
 /// level it states. Also guards that a note an exception carries for the log reaches its line and never the response,
 /// and the one failure that never reaches a service: a request body the framework itself refused.
 /// </summary>
@@ -26,10 +26,10 @@ public class GlobalExceptionHandlerTests
         [.. BusinessExceptions.Types.Select(CreateException)];
 
     /// <summary>
-    /// Every business exception maps to a client status (not a 500) and stamps its wire code.
+    /// Every business exception maps to its own status, never the unexpected-fault 500, and stamps its wire code.
     /// </summary>
     [Fact]
-    public async Task Every_business_exception_maps_to_a_client_status_and_code()
+    public async Task Every_business_exception_maps_to_its_status_and_code()
     {
         // Drive each one through the real handler
         foreach (var exception in _businessExceptions)
@@ -42,7 +42,7 @@ public class GlobalExceptionHandlerTests
             // Handle the exception as the pipeline would when it escapes an endpoint
             await handler.TryHandleAsync(httpContext, exception, CancellationToken.None);
 
-            // A recognized failure maps to a client status, never the unexpected-fault 500
+            // A recognized failure maps to its own status, never the unexpected-fault 500
             Assert.True(
                 httpContext.Response.StatusCode != StatusCodes.Status500InternalServerError,
                 $"{exception.GetType().Name} reaches the client as a 500, the way an unexpected fault does.");

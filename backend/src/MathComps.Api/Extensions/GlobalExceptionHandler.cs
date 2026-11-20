@@ -110,6 +110,7 @@ public sealed class GlobalExceptionHandler(
         RefusalKind.Conflict => StatusCodes.Status409Conflict,
         RefusalKind.PreconditionUnmet => StatusCodes.Status422UnprocessableEntity,
         RefusalKind.Throttled => StatusCodes.Status429TooManyRequests,
+        RefusalKind.UpstreamTimeout => StatusCodes.Status504GatewayTimeout,
         _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unknown refusal kind"),
     };
 }
