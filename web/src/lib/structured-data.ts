@@ -54,7 +54,7 @@ export function buildSiteJsonLd({
   const organizationId = getCanonicalUrl('/#organization')
   const personId = getCanonicalUrl('/#person')
 
-  // Home URL for this locale (e.g. https://mathcomps.fun/sk)
+  // Home URL for this locale
   const homeUrl = getCanonicalUrl(`/${locale}`)
 
   // Localized About path, where the author's bio lives (/o-projekte, /o-projektu, /about)

@@ -73,6 +73,8 @@ services:
       # assembly version.
       SENTRY_RELEASE: ${SENTRY_RELEASE:-}
       Mail__ResendApiKey: ${RESEND_API_KEY:-}
+      Site__Url: ${SITE_URL:?set it in .env}
+      Site__ContactAddress: ${SITE_CONTACT_ADDRESS:?set it in .env}
       # The private bucket the handouts CLI publishes the examiner's problem content to, with a key scoped to that
       # bucket alone.
       CloudflareR2__AccountId: ${R2_ACCOUNT_ID:?set it in .env}

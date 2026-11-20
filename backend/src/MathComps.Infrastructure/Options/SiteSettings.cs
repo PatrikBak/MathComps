@@ -13,14 +13,14 @@ public class SiteSettings
     public const string SectionName = "Site";
 
     /// <summary>
-    /// The site's public address, which every link out to it starts with (e.g. <c>https://mathcomps.fun</c>).
+    /// The site's public address, which every link out to it starts with.
     /// </summary>
     [Required]
     [Url]
     public required string Url { get; set; }
 
     /// <summary>
-    /// The site's own mail address (e.g. <c>contact@mathcomps.fun</c>).
+    /// The site's own mail address.
     /// </summary>
     [Required]
     [EmailAddress]

@@ -6,7 +6,7 @@ import { generatePageMetadata } from '@/lib/metadata'
 /**
  * Mock NEXT_PUBLIC_SITE_URL used in canonical URL and OG image generation.
  */
-const TEST_SITE_URL = 'https://mathcomps.fun'
+const TEST_SITE_URL = 'https://mathcomps.test'
 
 /**
  * Mock the env-utils module so getRequiredEnv always returns the test site URL.

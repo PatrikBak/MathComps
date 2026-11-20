@@ -1,6 +1,6 @@
 # MathComps
 
-The repository behind https://mathcomps.fun, a non-profit platform built for students and teachers. Browse and search mathematical competition problems, read study handouts, and defend a solution to an AI examiner. Next.js and .NET.
+The repository behind https://mathcomps.org, a non-profit platform built for students and teachers. Browse and search mathematical competition problems, read study handouts, and defend a solution to an AI examiner. Next.js and .NET.
 
 ## Building it
 
