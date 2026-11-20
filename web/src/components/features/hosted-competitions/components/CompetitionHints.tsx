@@ -48,7 +48,7 @@ export function CompetitionHints({
       onOpen={onOpen}
       onClose={onClose}
       count={null}
-      isTall={false}
+      size="text"
     >
       <HintLadder hints={hints} />
     </CompetitionProblemSurface>

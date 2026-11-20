@@ -49,7 +49,7 @@ export function CompetitionSolution({
       onOpen={onOpen}
       onClose={onClose}
       count={null}
-      isTall={false}
+      size="text"
     >
       <div className="math-typography math-reference">
         <RichMathEditorRenderer content={solution} imageContext="problems" />

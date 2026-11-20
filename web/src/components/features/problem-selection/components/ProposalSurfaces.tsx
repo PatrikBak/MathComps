@@ -4,11 +4,15 @@ import { BookOpen } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 import { type ReactNode, useEffect, useState } from 'react'
 
-import { CompetitionProblemSurface } from '@/components/features/hosted-competitions/components/CompetitionProblemSurface'
+import {
+  CompetitionProblemSurface,
+  type SurfaceSize,
+} from '@/components/features/hosted-competitions/components/CompetitionProblemSurface'
 import { LabelledSection } from '@/components/shared/components/LabelledSection'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { ScrollRegion } from '@/components/shared/components/ScrollRegion'
 import { Tabs } from '@/components/shared/components/Tabs'
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useMinWidth } from '@/hooks/use-breakpoint'
 import type { Locale } from '@/i18n/i18n'
@@ -58,22 +62,91 @@ function ReadingPane({ label, className, children }: ReadingPaneProps) {
 }
 
 /**
+ * The solution in a pane of its own, with everything read against it in a narrower pane beside it.
+ */
+type SideBySideLayout = {
+  /** Which layout it is. */
+  kind: 'sideBySide'
+  /** The solution. */
+  solution: ReferencePart
+  /** Everything read against the solution. */
+  others: readonly ReferencePart[]
+}
+
+/**
+ * Every text in one pane.
+ */
+type OnePaneLayout = {
+  /** Which layout it is. */
+  kind: 'onePane'
+}
+
+/**
+ * Each text a tab.
+ */
+type TabsLayout = {
+  /** Which layout it is. */
+  kind: 'tabs'
+}
+
+/**
+ * How the texts a problem is judged against are laid out.
+ */
+type ReferenceLayout = SideBySideLayout | OnePaneLayout | TabsLayout
+
+/**
+ * How much of the screen the surface takes for each layout. One pane is a single column of text, so the surface wraps
+ * it; the other layouts hold parts that scroll on their own, so it takes the screen's height.
+ */
+const SURFACE_SIZE: Record<ReferenceLayout['kind'], SurfaceSize> = {
+  sideBySide: 'screen',
+  onePane: 'text',
+  tabs: 'screen',
+}
+
+/**
+ * The layout the texts take, by the room the screen gives. Where there is room, the solution stands in a pane of its
+ * own with the rest beside it, so whatever is being checked against the solution stays in view however long the
+ * solution runs.
+ *
+ * @param parts - The texts the problem has, the solution first.
+ * @param isWide - Whether there is room for two panes side by side.
+ * @returns How the texts are laid out.
+ */
+function referenceLayoutOf(parts: readonly ReferencePart[], isWide: boolean): ReferenceLayout {
+  // The solution
+  const solution = parts.find((part) => part.id === 'solution')
+
+  // Everything read against the solution
+  const others = parts.filter((part) => part.id !== 'solution')
+
+  // The solution beside everything read against it, where there is room for both
+  if (isWide && solution !== undefined && others.length > 0) {
+    return { kind: 'sideBySide', solution, others }
+  }
+
+  // A single text, or room for two panes but no solution to fill one, so every text in one pane
+  if (parts.length === 1 || (isWide && solution === undefined)) return { kind: 'onePane' }
+
+  // Each text a tab
+  return { kind: 'tabs' }
+}
+
+/**
  * Props for the {@link ReferenceParts} component.
  */
 type ReferencePartsProps = {
   /** The texts the problem has, the solution first. */
   parts: readonly ReferencePart[]
-  /** Whether there is room for two panes side by side. */
-  isWide: boolean
+  /** How the texts are laid out. */
+  layout: ReferenceLayout
 }
 
 /**
- * The texts a problem is judged against, laid out by the room the screen gives. Where there is room, the solution
- * stands in a pane of its own with the rest in a narrower pane beside it, each scrolling on its own, so whatever is
- * being checked against the solution stays in view however long the solution runs. Where there is not, each text is
- * a tab.
+ * The texts a problem is judged against, in the layout {@link referenceLayoutOf} picks. Side by side, each pane
+ * scrolls on its own.
  */
-function ReferenceParts({ parts, isWide }: ReferencePartsProps) {
+function ReferenceParts({ parts, layout }: ReferencePartsProps) {
   // Copy for the problem's texts
   const t = useTranslations('problemSelection.text')
 
@@ -93,12 +166,6 @@ function ReferenceParts({ parts, isWide }: ReferencePartsProps) {
     hints: tCompetitions('hints'),
   }
 
-  // The solution
-  const solution = parts.find((part) => part.id === 'solution')
-
-  // Everything read against it
-  const others = parts.filter((part) => part.id !== 'solution')
-
   // A function which sets each of the texts under its name
   const sections = (shown: readonly ReferencePart[]) =>
     shown.map((part) => (
@@ -107,43 +174,48 @@ function ReferenceParts({ parts, isWide }: ReferencePartsProps) {
       </LabelledSection>
     ))
 
-  // The solution beside everything read against it, where there is room for both
-  if (isWide && solution !== undefined && others.length > 0) {
-    return (
-      <div className="flex min-h-0 flex-1">
-        {/* The solution */}
-        <ReadingPane label={labels.solution}>{sections([solution])}</ReadingPane>
+  switch (layout.kind) {
+    // The solution beside everything read against it
+    case 'sideBySide':
+      return (
+        <div className="flex min-h-0 flex-1">
+          {/* The solution */}
+          <ReadingPane label={labels.solution}>{sections([layout.solution])}</ReadingPane>
 
-        {/* Everything read against it */}
-        <ReadingPane
-          label={format.list(others.map((part) => labels[part.id]))}
-          className="w-[24rem] flex-none border-l border-foreground/10"
-        >
-          {sections(others)}
-        </ReadingPane>
-      </div>
-    )
+          {/* Everything read against the solution */}
+          <ReadingPane
+            label={format.list(layout.others.map((part) => labels[part.id]))}
+            className="w-[24rem] flex-none border-l border-foreground/10"
+          >
+            {sections(layout.others)}
+          </ReadingPane>
+        </div>
+      )
+
+    // Every text in one pane
+    case 'onePane':
+      return <ReadingPane label={t('reference')}>{sections(parts)}</ReadingPane>
+
+    // Each text a tab, named by it
+    case 'tabs':
+      return (
+        <Tabs
+          ariaLabel={t('reference')}
+          selectedId={tab}
+          onSelect={setTab}
+          items={parts.map((part) => ({
+            id: part.id,
+            label: labels[part.id],
+            count: null,
+            panel: <ReadingPane label={labels[part.id]}>{part.body}</ReadingPane>,
+          }))}
+        />
+      )
+
+    // No other layout exists
+    default:
+      return assertNever(layout)
   }
-
-  // A single text, or room for two panes but no solution to fill one, so every text in one pane
-  if (parts.length === 1 || (isWide && solution === undefined)) {
-    return <ReadingPane label={t('reference')}>{sections(parts)}</ReadingPane>
-  }
-
-  // Each text a tab, named by it
-  return (
-    <Tabs
-      ariaLabel={t('reference')}
-      selectedId={tab}
-      onSelect={setTab}
-      items={parts.map((part) => ({
-        id: part.id,
-        label: labels[part.id],
-        count: null,
-        panel: <ReadingPane label={labels[part.id]}>{part.body}</ReadingPane>,
-      }))}
-    />
-  )
 }
 
 /**
@@ -161,8 +233,6 @@ type ProposalSurfacesProps = {
  * laid out by {@link ReferenceParts}. The solution and the hints are in the language being read, or the one
  * {@link resolveText} falls back to, and the note is in the one language it is written in. A problem with none of
  * them leaves no row at all.
- *
- * The surface fills the screen's height, so folding its statement away leaves it where it stands.
  */
 export function ProposalSurfaces({ proposal, language }: ProposalSurfacesProps) {
   // Copy for the problem's texts
@@ -245,6 +315,9 @@ export function ProposalSurfaces({ proposal, language }: ProposalSurfacesProps) 
   // Nothing to judge the problem against, so no row
   if (parts.length === 0) return null
 
+  // How the texts are laid out on the surface
+  const layout = referenceLayoutOf(parts, isWide)
+
   return (
     <CompetitionProblemSurface
       label={t('reference')}
@@ -255,10 +328,10 @@ export function ProposalSurfaces({ proposal, language }: ProposalSurfacesProps) 
       onOpen={() => setIsOpen(true)}
       onClose={() => setIsOpen(false)}
       count={null}
-      isTall
+      size={SURFACE_SIZE[layout.kind]}
       scrollsInParts
     >
-      <ReferenceParts parts={parts} isWide={isWide} />
+      <ReferenceParts parts={parts} layout={layout} />
     </CompetitionProblemSurface>
   )
 }
