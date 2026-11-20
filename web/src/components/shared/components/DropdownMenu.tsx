@@ -1,6 +1,9 @@
+import { useUncontrolled } from '@mantine/hooks'
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { Check } from 'lucide-react'
 import * as React from 'react'
+
+import { useTapToggle } from '@/hooks/use-tap-toggle'
 
 import { cn } from '../utils/css-utils'
 import { focusForReader, latestPointerPressTarget } from '../utils/focus-utils'
@@ -60,11 +63,91 @@ export const FLOATING_PANEL_MOTION_CLASS = cn(
 /** The room a panel keeps clear between itself and the window's edges, in pixels. */
 export const WINDOW_EDGE_CLEARANCE_PX = 8
 
-/** Root component that manages open/close state of the dropdown. */
-export const DropdownMenu = DropdownMenuPrimitive.Root
+/** A function which opens a menu when it is shut and shuts it when it is open; null outside a menu. */
+const MenuToggleContext = React.createContext<(() => void) | null>(null)
 
-/** Button (or custom element via `asChild`) that toggles the dropdown. */
-export const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
+/**
+ * Root component that manages open/close state of the dropdown. It holds that state itself when the caller leaves
+ * it uncontrolled, so that its trigger can toggle the menu on a tap.
+ */
+export function DropdownMenu({
+  open,
+  defaultOpen,
+  onOpenChange,
+  ...props
+}: DropdownMenuPrimitive.DropdownMenuProps) {
+  // Whether the menu is open, held by the caller when it passes the state in
+  const [isOpen, setIsOpen] = useUncontrolled({
+    value: open,
+    defaultValue: defaultOpen,
+    finalValue: false,
+    onChange: onOpenChange,
+  })
+
+  // A function which opens the menu when it is shut and shuts it when it is open
+  const toggle = () => setIsOpen(!isOpen)
+
+  // The menu, its toggle within reach of its trigger
+  return (
+    <MenuToggleContext value={toggle}>
+      <DropdownMenuPrimitive.Root open={isOpen} onOpenChange={setIsOpen} {...props} />
+    </MenuToggleContext>
+  )
+}
+
+/**
+ * Reads the toggle of the menu around the caller. Throws outside a {@link DropdownMenu}.
+ *
+ * @returns A function which opens the menu when it is shut and shuts it when it is open.
+ */
+function useMenuToggle(): () => void {
+  // The toggle of the nearest menu
+  const toggle = React.use(MenuToggleContext)
+
+  // Read outside a menu, which is a bug in the tree
+  if (toggle === null) throw new Error('useMenuToggle outside DropdownMenu')
+
+  // The menu's toggle
+  return toggle
+}
+
+/**
+ * Button (or custom element via `asChild`) that toggles the dropdown. A mouse opens the menu on press, and a finger
+ * or a pen on the tap, so that a scroll can start on the button.
+ */
+export const DropdownMenuTrigger = React.forwardRef<
+  React.ComponentRef<typeof DropdownMenuPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Trigger>
+>(({ onPointerDown, onPointerUp, ...props }, ref) => {
+  // The toggle of the menu around the trigger
+  const toggle = useMenuToggle()
+
+  // The press handlers moving a finger's toggle from the press to the tap
+  const tap = useTapToggle(toggle)
+
+  // The trigger, a press the caller turns away opening nothing
+  return (
+    <DropdownMenuPrimitive.Trigger
+      ref={ref}
+      onPointerDown={(event) => {
+        // The caller's own handler first
+        onPointerDown?.(event)
+
+        // Then the tap's, unless the trigger is off. Radix's own open on press skips the press it cancels
+        if (!props.disabled) tap.onPointerDown(event)
+      }}
+      onPointerUp={(event) => {
+        // The caller's own handler first
+        onPointerUp?.(event)
+
+        // Then the tap's
+        tap.onPointerUp(event)
+      }}
+      {...props}
+    />
+  )
+})
+DropdownMenuTrigger.displayName = DropdownMenuPrimitive.Trigger.displayName
 
 /** Rows that belong together, named as one by the label its `aria-labelledby` points at. */
 export const DropdownMenuGroup = DropdownMenuPrimitive.Group

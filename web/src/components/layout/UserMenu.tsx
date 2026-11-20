@@ -1,7 +1,6 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { ComponentPropsWithoutRef } from 'react'
@@ -9,7 +8,11 @@ import { forwardRef, useEffect, useState } from 'react'
 
 import { useOwnOrganizations } from '@/components/features/problem-selection/hooks/use-own-organizations'
 import { LoginNavItem } from '@/components/login/LoginNavItem'
-import { DropdownMenuContent } from '@/components/shared/components/DropdownMenu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/shared/components/DropdownMenu'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useIsAdmin } from '@/hooks/use-is-admin'
 import { ROUTES } from '@/i18n/i18n'
@@ -102,9 +105,9 @@ export default function UserMenu({ onOpenDefenses, onPrepareDefenses }: UserMenu
   }
 
   return (
-    <DropdownMenu.Root modal={false} onOpenChange={handleMenuOpenChange}>
+    <DropdownMenu modal={false} onOpenChange={handleMenuOpenChange}>
       {/* Trigger button */}
-      <DropdownMenu.Trigger asChild>
+      <DropdownMenuTrigger asChild>
         <UserMenuTrigger aria-label={tUserMenu('label')}>
           <UserAvatarImage
             imageUrl={user.imageUrl}
@@ -120,7 +123,7 @@ export default function UserMenu({ onOpenDefenses, onPrepareDefenses }: UserMenu
             aria-hidden="true"
           />
         </UserMenuTrigger>
-      </DropdownMenu.Trigger>
+      </DropdownMenuTrigger>
 
       {/* Dropdown content, laid out edge to edge so its divider spans the panel */}
       <DropdownMenuContent className="w-full p-0" sideOffset={16} align="end">
@@ -147,6 +150,6 @@ export default function UserMenu({ onOpenDefenses, onPrepareDefenses }: UserMenu
           <UserMenuItem type="signOut" variant="dropdown" />
         </div>
       </DropdownMenuContent>
-    </DropdownMenu.Root>
+    </DropdownMenu>
   )
 }

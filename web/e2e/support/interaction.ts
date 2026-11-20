@@ -434,6 +434,33 @@ export async function longPressByTouch(page: Page, target: Locator): Promise<voi
 }
 
 /**
+ * Puts a finger down on an element and drags it down the screen, which scrolls the page up, then lifts it.
+ *
+ * @param page - The page.
+ * @param target - What the finger lands on.
+ * @param distance - How far the finger travels, in pixels.
+ */
+export async function swipeDownByTouch(
+  page: Page,
+  target: Locator,
+  distance: number
+): Promise<void> {
+  // Where the element sits
+  const box = (await target.boundingBox())!
+
+  // The browser's own touch input, the only way to drag a finger
+  const touch = await page.context().newCDPSession(page)
+
+  // A finger landing on the element's middle and dragged down, the whole gesture played out before this returns
+  await touch.send('Input.synthesizeScrollGesture', {
+    x: box.x + box.width / 2,
+    y: box.y + box.height / 2,
+    yDistance: distance,
+    gestureSourceType: 'touch',
+  })
+}
+
+/**
  * Has the page draw a blank PNG, which every browser decodes.
  *
  * @param page - The page drawing the image.
