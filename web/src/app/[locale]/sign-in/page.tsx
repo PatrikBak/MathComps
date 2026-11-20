@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
-import AuthForm from '@/components/features/auth/AuthForm'
+import AuthFormGate from '@/components/features/auth/AuthFormGate'
 import Layout from '@/components/layout/Layout'
 import type { Locale } from '@/i18n/i18n'
 import { ROUTES } from '@/i18n/i18n'
@@ -36,7 +36,7 @@ export default withLocale(async function AuthPage() {
   return (
     <Layout centerMidscreen>
       <Suspense>
-        <AuthForm />
+        <AuthFormGate />
       </Suspense>
     </Layout>
   )

@@ -1,10 +1,9 @@
 'use client'
 
-import { useSignIn, useSignUp, useUser } from '@clerk/nextjs'
+import { useSignIn, useSignUp } from '@clerk/nextjs'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useSessionStorage } from '@mantine/hooks'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
@@ -14,11 +13,9 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import { delay } from '@/components/shared/utils/async-utils'
 import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
 import { SECOND_MS } from '@/components/shared/utils/time-units'
-import { RETURN_URL_PARAM } from '@/constants/auth-constants'
 import { AUTH_RETURN_URL_STORAGE_KEY } from '@/constants/local-storage-constants'
 import { useExternalRedirect } from '@/hooks/use-external-redirect'
-import { type Locale, ROUTES } from '@/i18n/i18n'
-import { getPathname } from '@/i18n/navigation'
+import { ROUTES } from '@/i18n/i18n'
 
 import { checkEmailExists } from './actions'
 import AuthFormActions from './AuthFormActions'
@@ -58,10 +55,18 @@ export type AuthScreen =
 export type AuthScreenWithValidation = Exclude<AuthScreen, 'hub'>
 
 /**
+ * Props for the {@link AuthForm} component.
+ */
+type AuthFormProps = {
+  /** The locale-prefixed path the reader lands on once signed in */
+  returnUrl: string
+}
+
+/**
  * Main authentication form component handling the new hub-based flow.
  * Flow: Hub -> Email Entry -> Login/Signup (determined by email check)
  */
-export default function AuthForm() {
+export default function AuthForm({ returnUrl }: AuthFormProps) {
   // Get the translations
   const tAuth = useTranslations('auth')
   const tValidation = useTranslations('validation')
@@ -83,20 +88,12 @@ export default function AuthForm() {
   // Whether the browser is on its way to an OAuth provider, and the functions that set it
   const { isRedirecting, startRedirect, cancelRedirect } = useExternalRedirect()
 
-  // Next.js router for navigation
-  const router = useRouter()
-  // The active locale
-  const locale = useLocale() as Locale
-  // Search params to get return URL from query string
-  const searchParams = useSearchParams()
   // Clerk hook for sign-in operations
   const { signIn, setActive: setActiveSignIn } = useSignIn()
   // Clerk hook for sign-up operations
   const { signUp, setActive: setActiveSignUp } = useSignUp()
-  // Clerk hook to get current user data
-  const { user, isLoaded: isUserLoaded } = useUser()
-  // Session storage for preserving return URL (persists through OAuth redirect cycle)
-  const [returnUrl, setReturnUrl] = useSessionStorage<string | null>({
+  // The return URL as session storage holds it, which outlives the trip to an OAuth provider
+  const [, setStoredReturnUrl] = useSessionStorage<string | null>({
     key: AUTH_RETURN_URL_STORAGE_KEY,
     defaultValue: null,
   })
@@ -109,27 +106,6 @@ export default function AuthForm() {
     mode: 'onSubmit',
   })
 
-  // Redirect logged-in users to the return URL or the profile page
-  useEffect(() => {
-    if (isUserLoaded && user) {
-      // The stored URL is a raw locale-prefixed path, so push it through the plain router;
-      // only the canonical profile fallback needs the locale added
-      router.push(returnUrl || getPathname({ href: ROUTES.PROFILE, locale }))
-    }
-  }, [isUserLoaded, user, router, returnUrl, locale])
-
-  // Capture return URL on mount and persist in session storage for OAuth flows
-  useEffect(() => {
-    // Get return URL from query param
-    const urlParam = searchParams.get(RETURN_URL_PARAM)
-
-    // Use query param if available, otherwise the locale-prefixed profile page
-    const determinedUrl = urlParam || getPathname({ href: ROUTES.PROFILE, locale })
-
-    // Store in session storage (persists through OAuth redirect cycle)
-    setReturnUrl(determinedUrl)
-  }, [searchParams, setReturnUrl, locale])
-
   // Focus the password field when either email screen opens
   useEffect(() => {
     if (screen === 'login-with-email' || screen === 'signup-with-email') {
@@ -138,9 +114,8 @@ export default function AuthForm() {
     }
   }, [screen, methods])
 
-  // Don't render form if user is already logged in (they'll be redirected)
-  // or if we are currently redirecting to an OAuth provider
-  if (user || isRedirecting) {
+  // Don't render form if we are currently redirecting to an OAuth provider
+  if (isRedirecting) {
     return (
       <div className="flex justify-center p-8">
         <LoadingSpinner />
@@ -436,6 +411,9 @@ export default function AuthForm() {
 
     // Show the loading spinner immediately
     startRedirect()
+
+    // The return URL kept for the page the provider sends the browser back to
+    setStoredReturnUrl(returnUrl)
 
     try {
       // Construct absolute URL for redirectUrlComplete (OAuth requires absolute URLs)
