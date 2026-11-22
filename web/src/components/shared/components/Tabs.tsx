@@ -65,7 +65,7 @@ export function Tabs<TId extends string>({
   const selectedTabRef = useRef<HTMLButtonElement>(null)
 
   // Whichever edge of the strip still hides tabs, faded so the strip reads as one that scrolls
-  const { ref: fadeRef, maskStyle } = useScrollFade<HTMLDivElement>()
+  const { ref: fadeRef, maskStyle } = useScrollFade<HTMLDivElement>('x')
 
   // The strip, handed to every ref that reads it
   const setStrip = useMergedRef(stripRef, fadeRef)

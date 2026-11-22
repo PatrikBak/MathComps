@@ -12,23 +12,27 @@ import { cn } from '@/components/shared/utils/css-utils'
 export type FacetTriggerVariant = 'stacked' | 'pill'
 
 /**
- * What every facet control shares at rest, whichever shape it takes. Its border colour and fill are not
- * among them: those come with the shape, since the two shapes stand on different surfaces.
+ * The edge of a light control, filled only under the pointer, so whatever it stands on shows through it.
+ */
+export const LIGHT_CONTROL_SURFACE_CLASS = cn(
+  'border-foreground/10 bg-transparent',
+  'hover:border-foreground/25 hover:bg-foreground/[0.04]'
+)
+
+/**
+ * What every facet control shares, whichever shape it takes, its light edge included.
  */
 export const FACET_CONTROL_CLASS = cn(
-  'flex items-center gap-2 border text-xs sm:text-sm text-muted-foreground transition-all focus-visible:border-focus/60',
+  'flex items-center gap-2 border text-xs sm:text-sm text-muted-foreground transition-all',
+  'focus-visible:border-focus/60',
+  LIGHT_CONTROL_SURFACE_CLASS,
   FOCUS_RING_CLASS
 )
 
 /**
  * The pill shape, exported so a plain toggle standing in the same row can't drift away from the facets beside it.
- *
- * It sits on the page itself, so it is drawn lighter than the panel-weight edge a stacked control carries.
  */
-export const FACET_PILL_CLASS = cn(
-  'w-auto shrink-0 rounded-full border-foreground/10 bg-foreground/[0.03] px-3 py-1.5',
-  'hover:border-foreground/25 hover:bg-foreground/[0.07]'
-)
+export const FACET_PILL_CLASS = 'w-auto shrink-0 rounded-full px-3 py-1.5'
 
 /**
  * How a pill reads once it is narrowing something: tinted in the focus hue, hover included, so it stays
@@ -53,10 +57,7 @@ type FacetTriggerShape = {
 /** How each variant sits on the page. */
 const FACET_TRIGGER_SHAPES: Record<FacetTriggerVariant, FacetTriggerShape> = {
   stacked: {
-    shapeClass: cn(
-      'w-full justify-between rounded-lg border-muted/30 bg-surface/95 px-2.5 py-2 sm:px-3 sm:py-2.5',
-      'hover:border-muted/60'
-    ),
+    shapeClass: 'w-full justify-between rounded-lg px-2.5 py-2 sm:px-3 sm:py-2.5',
     isSelfNaming: false,
   },
   pill: { shapeClass: FACET_PILL_CLASS, isSelfNaming: true },
@@ -144,7 +145,10 @@ export function FacetTrigger({
         <span className="truncate">{isSelfNaming ? (selectedLabel ?? title) : closedLabel}</span>
         {showCount && (
           <span
-            className="shrink-0 rounded-full bg-foreground/10 px-1 sm:px-1.5 py-0.5 text-[10px] sm:text-[11px] leading-none"
+            className={cn(
+              'shrink-0 rounded-full bg-foreground/10 px-1 sm:px-1.5 py-0.5',
+              'text-[10px] sm:text-[11px] leading-none'
+            )}
             aria-label={tFilters('selectedCount', { count })}
           >
             {count}

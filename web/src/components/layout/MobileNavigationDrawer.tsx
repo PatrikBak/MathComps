@@ -1,10 +1,8 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
-import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react'
-import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import { useOwnOrganizations } from '@/components/features/problem-selection/hooks/use-own-organizations'
 import MathCompsLogo from '@/components/layout/MathCompsLogo'
@@ -13,8 +11,9 @@ import { UserInfoHeader } from '@/components/layout/UserInfoHeader'
 import { UserMenuItem } from '@/components/layout/UserMenuItem'
 import { UserMenuSelections } from '@/components/layout/UserMenuSelections'
 import { LoginNavItem } from '@/components/login/LoginNavItem'
-import { Button, buttonVariants } from '@/components/shared/components/Button'
+import { buttonVariants } from '@/components/shared/components/Button'
 import { NavLink } from '@/components/shared/components/NavLink'
+import { TopSheet } from '@/components/shared/components/TopSheet'
 import { useIsAdmin } from '@/hooks/use-is-admin'
 import { usePathname } from '@/i18n/navigation'
 
@@ -68,7 +67,7 @@ function MobileLink({ href, onClick, children }: MobileLinkProps) {
 
 /**
  * The navigation a phone or tablet gets in place of the header's links and user menu: the site's pages, the account's
- * items, and the language switcher, in a Headless UI dialog sliding down from the top.
+ * items, and the language switcher, in a sheet sliding down from the top.
  */
 export const MobileNavigationDrawer = ({
   isOpen,
@@ -97,127 +96,86 @@ export const MobileNavigationDrawer = ({
   const tNav = useTranslations('navigation')
 
   return (
-    <Transition show={isOpen} as={Fragment}>
-      <Dialog onClose={onClose} className="relative z-overlay lg:hidden">
-        {/* Backdrop */}
-        <TransitionChild
-          as={Fragment}
-          enter="transition-opacity ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="transition-opacity ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-background/30" aria-hidden="true" />
-        </TransitionChild>
+    <TopSheet
+      isOpen={isOpen}
+      onClose={onClose}
+      title={<MathCompsLogo />}
+      closeLabel={tNav('menuClose')}
+      keepsContentMounted={false}
+      footer={null}
+    >
+      <div className="flex flex-col gap-4 px-6 pt-1">
+        {/* Who is signed in */}
+        {isLoaded && user && (
+          <div className="mt-4 p-4 rounded-xl bg-foreground/5 border border-foreground/5">
+            <UserInfoHeader user={user} size="md" />
+          </div>
+        )}
 
-        {/* Drawer panel */}
-        <TransitionChild
-          as={Fragment}
-          enter="transition-transform ease-out duration-300"
-          enterFrom="-translate-y-full"
-          enterTo="translate-y-0"
-          leave="transition-transform ease-in duration-200"
-          leaveFrom="translate-y-0"
-          leaveTo="-translate-y-full"
-        >
-          <DialogPanel className="fixed inset-x-0 top-0 max-h-[100dvh] w-full bg-surface/40 backdrop-blur-xl shadow-2xl rounded-b-2xl flex flex-col">
-            {/* Header with logo and close button */}
-            <div className="flex items-center justify-between px-6 py-4 flex-shrink-0 border-b border-foreground/10">
-              <MathCompsLogo />
-              <Button
-                variant="ghost"
-                onClick={onClose}
-                aria-label={tNav('menuClose')}
-                className="h-10 w-10 p-0 rounded-full bg-foreground/5 hover:bg-foreground/10"
-              >
-                <X className="h-6 w-6" />
-              </Button>
-            </div>
+        {/* Main navigation */}
+        <nav className="flex flex-col">
+          {NAVIGATION_ITEMS.map((item) => (
+            <MobileLink key={item.href} href={item.href} onClick={onClose}>
+              {tNav(item.labelKey)}
+            </MobileLink>
+          ))}
+        </nav>
 
-            {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="flex flex-col gap-4 px-6 pt-1">
-                {/* Who is signed in */}
-                {isLoaded && user && (
-                  <div className="mt-4 p-4 rounded-xl bg-foreground/5 border border-foreground/5">
-                    <UserInfoHeader user={user} size="md" />
-                  </div>
+        {/* Separator, for a signed-in user */}
+        {isLoaded && user && <div className="-mx-6 -mt-2 border-t border-foreground/10" />}
+
+        {/* Auth actions */}
+        {isLoaded && (
+          <div>
+            {user ? (
+              <div className="flex flex-col -my-2">
+                {/* The user's defenses */}
+                <UserMenuItem type="mathilda" variant="mobile" onClick={handleOpenDefenses} />
+
+                {/* Everyone's defenses */}
+                {isAdmin && (
+                  <UserMenuItem type="defenseReview" variant="mobile" onClick={onClose} />
                 )}
 
-                {/* Main navigation */}
-                <nav className="flex flex-col">
-                  {NAVIGATION_ITEMS.map((item) => (
-                    <MobileLink key={item.href} href={item.href} onClick={onClose}>
-                      {tNav(item.labelKey)}
-                    </MobileLink>
-                  ))}
-                </nav>
+                {/* The selections they pick problems in */}
+                <UserMenuSelections
+                  organizations={organizations}
+                  variant="mobile"
+                  onClick={onClose}
+                />
 
-                {/* Separator, for a signed-in user */}
-                {isLoaded && user && <div className="-mx-6 -mt-2 border-t border-foreground/10" />}
+                {/* Their profile */}
+                <UserMenuItem type="profile" variant="mobile" onClick={onClose} />
 
-                {/* Auth actions */}
-                {isLoaded && (
-                  <div>
-                    {user ? (
-                      <div className="flex flex-col -my-2">
-                        {/* The user's defenses */}
-                        <UserMenuItem
-                          type="mathilda"
-                          variant="mobile"
-                          onClick={handleOpenDefenses}
-                        />
-
-                        {/* Everyone's defenses */}
-                        {isAdmin && (
-                          <UserMenuItem type="defenseReview" variant="mobile" onClick={onClose} />
-                        )}
-
-                        {/* The selections they pick problems in */}
-                        <UserMenuSelections
-                          organizations={organizations}
-                          variant="mobile"
-                          onClick={onClose}
-                        />
-
-                        {/* Their profile */}
-                        <UserMenuItem type="profile" variant="mobile" onClick={onClose} />
-
-                        {/* And the way out */}
-                        <UserMenuItem type="signOut" variant="mobile" onClick={onClose} />
-                      </div>
-                    ) : (
-                      <div className="pb-4 flex">
-                        <LoginNavItem
-                          className={cn(
-                            buttonVariants({
-                              variant: 'primary',
-                              shape: 'pill',
-                              fullWidth: true,
-                            }),
-                            'max-w-xs'
-                          )}
-                          onClick={onClose}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Separator, for a signed-in user */}
-                {isLoaded && user && <div className="-mx-6 border-t border-foreground/10" />}
-
-                {/* Language switcher */}
-                <div className="flex justify-center pb-4">
-                  <MobileLanguageSwitcher onSelect={onClose} />
-                </div>
+                {/* And the way out */}
+                <UserMenuItem type="signOut" variant="mobile" onClick={onClose} />
               </div>
-            </div>
-          </DialogPanel>
-        </TransitionChild>
-      </Dialog>
-    </Transition>
+            ) : (
+              <div className="pb-4 flex">
+                <LoginNavItem
+                  className={cn(
+                    buttonVariants({
+                      variant: 'primary',
+                      shape: 'pill',
+                      fullWidth: true,
+                    }),
+                    'max-w-xs'
+                  )}
+                  onClick={onClose}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Separator, for a signed-in user */}
+        {isLoaded && user && <div className="-mx-6 border-t border-foreground/10" />}
+
+        {/* Language switcher */}
+        <div className="flex justify-center pb-4">
+          <MobileLanguageSwitcher onSelect={onClose} />
+        </div>
+      </div>
+    </TopSheet>
   )
 }

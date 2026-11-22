@@ -8,22 +8,66 @@ import {
 } from 'react'
 
 /**
- * Whether a horizontally-scrollable element still hides content past each edge.
+ * The direction a container scrolls in: across, or down.
+ */
+type ScrollAxis = 'x' | 'y'
+
+/**
+ * Whether a scroll container still hides content past each of its edges along the axis it scrolls in.
  */
 type ScrollFadeEdges = {
-  /** More content sits past the left edge (the element is scrolled right). */
-  left: boolean
-  /** More content sits past the right edge (there is still room to scroll). */
-  right: boolean
+  /** More content sits before the first edge, left or top, so the container is scrolled off its start. */
+  start: boolean
+  /** More content sits past the far edge, right or bottom, so there is still room to scroll. */
+  end: boolean
 }
 
-/** Both edges flush — the server snapshot and the resting default before measurement. */
-const NO_FADE: ScrollFadeEdges = { left: false, right: false }
+/**
+ * Where a scroll container stands along the axis it scrolls in.
+ */
+type ScrollPosition = {
+  /** How far the container is scrolled from its start. */
+  offset: number
+  /** How much of the container's content shows at once. */
+  visible: number
+  /** How long the container's content is. */
+  total: number
+}
 
-/** How far the fade gradient reaches in from an overflowing edge, in px. */
-const FADE_SIZE_PX = 64
+/**
+ * Both edges flush: the server's reading, and the one before anything was measured.
+ */
+const NO_FADE: ScrollFadeEdges = { start: false, end: false }
 
-/** Result returned by {@link useScrollFade}. */
+/**
+ * How far the fade reaches in from an edge hiding content, in pixels, for each axis.
+ */
+const FADE_SIZES_PX: Record<ScrollAxis, number> = { x: 64, y: 32 }
+
+/**
+ * The way a fade's gradient runs, from the start edge to the far one, for each axis.
+ */
+const GRADIENT_DIRECTIONS: Record<ScrollAxis, string> = { x: 'to right', y: 'to bottom' }
+
+/**
+ * How to read where a scroll container stands, for each axis.
+ */
+const POSITION_READERS: Record<ScrollAxis, (element: HTMLElement) => ScrollPosition> = {
+  x: (element) => ({
+    offset: element.scrollLeft,
+    visible: element.clientWidth,
+    total: element.scrollWidth,
+  }),
+  y: (element) => ({
+    offset: element.scrollTop,
+    visible: element.clientHeight,
+    total: element.scrollHeight,
+  }),
+}
+
+/**
+ * Result returned by {@link useScrollFade}.
+ */
 export type UseScrollFadeResult<T extends HTMLElement> = {
   /** Callback ref to attach to the scroll container being tracked. */
   ref: (element: T | null) => void
@@ -32,31 +76,48 @@ export type UseScrollFadeResult<T extends HTMLElement> = {
 }
 
 /**
- * Tracks a scroll container's horizontal overflow at each edge so a caller can fade whichever edge
- * still hides content. Subscribes to scroll + resize through {@link useSyncExternalStore} (so it stays
- * correct under concurrent rendering and renders flush on the server). Attach the returned callback
- * ref to the scroller.
+ * Tracks whether a scroll container hides content past each edge along the axis it scrolls in, so that a caller can
+ * fade whichever edge does. Subscribes to scrolling, resizing and changes in what the scroller holds through
+ * {@link useSyncExternalStore}, so it stays correct under concurrent rendering and renders flush on the server.
+ * Attach the returned callback ref to the scroller.
+ *
+ * @param axis - The direction the container scrolls in.
+ * @returns The scroller's callback ref, and the mask fading its hidden edges.
  */
-export function useScrollFade<T extends HTMLElement>(): UseScrollFadeResult<T> {
+export function useScrollFade<T extends HTMLElement>(axis: ScrollAxis): UseScrollFadeResult<T> {
   // The scroller, captured via a callback ref so the subscription re-binds when it mounts
   const [element, setElement] = useState<T | null>(null)
+
   // The last published edges, reused while unchanged to keep the snapshot referentially stable
   const edgesRef = useRef<ScrollFadeEdges>(NO_FADE)
 
-  // Re-read whenever something that can move the edges happens: scrolling or resizing
+  // Re-read whenever something can move the edges: scrolling, resizing, or a change in what the scroller holds
   const subscribe = useCallback(
     (onStoreChange: () => void) => {
       // Nothing to watch until the scroller mounts
       if (!element) return () => {}
-      // Re-read on scroll (passive — the listener never blocks it)
+
+      // Re-read on scroll, through a passive listener, which never holds the scrolling up
       element.addEventListener('scroll', onStoreChange, { passive: true })
-      // Re-read on size/content changes that shift the overflow
-      const observer = new ResizeObserver(onStoreChange)
-      observer.observe(element)
-      // Drop both subscriptions on teardown
+
+      // Re-read on size changes that shift the overflow
+      const resizeObserver = new ResizeObserver(onStoreChange)
+      resizeObserver.observe(element)
+
+      // Re-read when what the scroller holds grows or shrinks inside a box that keeps its size
+      const mutationObserver = new MutationObserver(onStoreChange)
+      mutationObserver.observe(element, { childList: true, subtree: true, characterData: true })
+
+      // Drop every subscription on teardown
       return () => {
+        // Stop listening for scrolling
         element.removeEventListener('scroll', onStoreChange)
-        observer.disconnect()
+
+        // Stop watching the scroller's size
+        resizeObserver.disconnect()
+
+        // Stop watching what the scroller holds
+        mutationObserver.disconnect()
       }
     },
     [element]
@@ -64,38 +125,56 @@ export function useScrollFade<T extends HTMLElement>(): UseScrollFadeResult<T> {
 
   // Compute the live edges, returning the cached object when nothing changed
   const getSnapshot = useCallback((): ScrollFadeEdges => {
-    // No element yet — nothing overflows
+    // No element yet, so nothing overflows
     if (!element) return NO_FADE
-    // Hidden to the left once scrolled off the start
-    const left = element.scrollLeft > 1
-    // Hidden to the right while the end isn't yet in view
-    const right = element.scrollLeft + element.clientWidth < element.scrollWidth - 1
-    // Grab the last published edges
+
+    // Where the scroller stands
+    const { offset, visible, total } = POSITION_READERS[axis](element)
+
+    // Content hidden before the start, once the scroller is scrolled off it
+    const start = offset > 1
+
+    // Content hidden past the far edge, while the end isn't in view yet
+    const end = offset + visible < total - 1
+
+    // The last published edges
     const previous = edgesRef.current
-    // Reuse them while unchanged so the snapshot stays referentially stable
-    if (previous.left === left && previous.right === right) return previous
+
+    // While the edges are unchanged, the same object again, so the snapshot stays stable
+    if (previous.start === start && previous.end === end) return previous
+
     // Publish the new edges
-    edgesRef.current = { left, right }
+    edgesRef.current = { start, end }
+
+    // And hand them back
     return edgesRef.current
-  }, [element])
+  }, [element, axis])
 
   // Subscribe; on the server there is no element, so the edges read flush
   const edges = useSyncExternalStore(subscribe, getSnapshot, () => NO_FADE)
 
-  // The edge-fade mask: a horizontal gradient transparent at whichever edge still hides content,
-  // opaque across the middle, and undefined when nothing overflows (so no mask is painted)
+  // The edge-fade mask: a gradient transparent at whichever edge still hides content, opaque across the middle, and
+  // undefined when nothing is hidden, so that no mask is painted
   const maskStyle = useMemo<CSSProperties | undefined>(() => {
-    // Nothing hidden either side → no mask
-    if (!edges.left && !edges.right) return undefined
-    // Fade width on the left, full size when that edge overflows, zero when it's flush
-    const left = edges.left ? `${FADE_SIZE_PX}px` : '0px'
-    // Same on the right
-    const right = edges.right ? `${FADE_SIZE_PX}px` : '0px'
-    // Transparent at each end, opaque from the fade width inward across the middle
-    const gradient = `linear-gradient(to right, transparent, #000 ${left}, #000 calc(100% - ${right}), transparent)`
+    // Nothing hidden at either edge, so no mask
+    if (!edges.start && !edges.end) return undefined
+
+    // How far the fade reaches in on this axis
+    const fadeSize = `${FADE_SIZES_PX[axis]}px`
+
+    // How far it reaches in at each edge: all the way where the edge hides content, not at all where it's flush
+    const start = edges.start ? fadeSize : '0px'
+    const end = edges.end ? fadeSize : '0px'
+
+    // The way the gradient runs on this axis
+    const direction = GRADIENT_DIRECTIONS[axis]
+
+    // Transparent at each end, opaque from the fade's reach inward across the middle
+    const gradient = `linear-gradient(${direction}, transparent, #000 ${start}, #000 calc(100% - ${end}), transparent)`
+
     // Both the standard and the -webkit- property, for Safari
     return { maskImage: gradient, WebkitMaskImage: gradient }
-  }, [edges])
+  }, [edges, axis])
 
   // Hand back the callback ref and the ready fade mask
   return { ref: setElement, maskStyle }

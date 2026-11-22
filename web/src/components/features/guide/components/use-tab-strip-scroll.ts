@@ -29,7 +29,7 @@ export function useTabStripScroll(selectedIndex: number): TabStripScroll {
   // The active tab, kept centered within the strip as pages change
   const activeTabRef = useRef<HTMLButtonElement | null>(null)
   // Edge-overflow tracking plus the ready fade mask, attached straight to the scroller
-  const { ref: scrollerRef, maskStyle } = useScrollFade<HTMLDivElement>()
+  const { ref: scrollerRef, maskStyle } = useScrollFade<HTMLDivElement>('x')
 
   // Keep the active tab centered within the strip as the page changes
   useEffect(() => {

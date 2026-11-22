@@ -6,11 +6,8 @@ import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import type { ComponentProps } from 'react'
 
-import {
-  PROBLEM_ROW_CLASS,
-  ProblemRowLabel,
-} from '@/components/features/hosted-competitions/components/CompetitionProblemSurface'
 import { AppLink } from '@/components/shared/components/AppLink'
+import { PROBLEM_ROW_CLASS, ProblemRowLabel } from '@/components/shared/components/ProblemRow'
 import { countOpenDialogs, isInArrowKeyWidget } from '@/components/shared/utils/dom-utils'
 import { isPlainClick } from '@/components/shared/utils/event-utils'
 
@@ -267,8 +264,7 @@ export function ProposalTabRows({ proposalId }: ProposalTabRowsProps) {
       <ProblemRowLabel
         label={labels[tab]}
         icon={TAB_ICONS[tab]}
-        count={counts[tab]}
-        hasNews={news[tab]}
+        count={{ value: counts[tab], hasNews: news[tab] }}
       />
     </DetailLink>
   ))
