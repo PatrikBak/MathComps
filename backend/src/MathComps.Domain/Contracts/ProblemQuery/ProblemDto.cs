@@ -9,6 +9,8 @@ namespace MathComps.Domain.Contracts.ProblemQuery;
 /// <param name="Slug">URL-safe unique identifier for the problem.</param>
 /// <param name="StatementMarkdown">Problem statement as a Markdown+TeX string, in the requested language
 /// where a translation exists and in the original otherwise.</param>
+/// <param name="SolutionMarkdown">Problem solution as a Markdown+TeX string, in the requested language where a
+/// translation exists and in the original otherwise. Null when the problem has no solution in Markdown.</param>
 /// <param name="Source"><inheritdoc cref="ProblemSource" path="/summary"/></param>
 /// <param name="Tags">Associated tags with type categorization.</param>
 /// <param name="Authors">Associated authors.</param>
@@ -22,6 +24,7 @@ namespace MathComps.Domain.Contracts.ProblemQuery;
 public record ProblemDto(
     string Slug,
     string StatementMarkdown,
+    string? SolutionMarkdown,
     ProblemSource Source,
     ImmutableList<TagDto> Tags,
     ImmutableList<LabeledSlug> Authors,

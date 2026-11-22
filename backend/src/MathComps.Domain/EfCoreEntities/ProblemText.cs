@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 using MathComps.Domain.Localization;
 
 namespace MathComps.Domain.EfCoreEntities;
@@ -9,6 +10,16 @@ namespace MathComps.Domain.EfCoreEntities;
 /// </summary>
 public class ProblemText
 {
+    /// <summary>
+    /// Ranks a problem's texts for one reader: a text in their language first, then the original, then any other
+    /// translation. The first text of a document type in this order is the one the reader is served.
+    /// </summary>
+    /// <param name="readerLanguage">The language the reader asked for.</param>
+    /// <returns>The rank, lowest first.</returns>
+    public static Expression<Func<ProblemText, int>> ReadersLanguageThenOriginal(Language readerLanguage) =>
+        // The reader's language, then the one the problem was written in, then any other
+        text => text.Language == readerLanguage ? 0 : text.IsOriginal ? 1 : 2;
+
     /// <summary>
     /// Primary key.
     /// </summary>
