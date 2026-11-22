@@ -2,11 +2,8 @@ import { Inbox, SearchX } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/shared/components/Button'
+import { COMPACT_PANEL_CLASS, EmptyState } from '@/components/shared/components/EmptyState'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
-import {
-  COMPACT_PANEL_CLASS,
-  FilterEmptyState,
-} from '@/components/shared/components/FilterEmptyState'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 /**
@@ -46,10 +43,10 @@ export function DefenseReviewPlaceholder({
       // Nothing matched, which the reader can do something about only when they narrowed it themselves
       empty={
         isFiltered ? (
-          <FilterEmptyState
+          <EmptyState
             message={t('emptyFiltered')}
-            resetLabel={t('clearFilters')}
-            onReset={onClearFilters}
+            actionLabel={t('clearFilters')}
+            onAction={onClearFilters}
             icon={SearchX}
             compact
           />

@@ -1,5 +1,7 @@
 import { useCallback, useRef } from 'react'
 
+import type { FloatingPanelSurface } from '@/components/shared/components/DropdownMenu'
+
 import { useFacetGroups } from '../hooks/use-facet-groups'
 import { useFacetOptionRows } from '../hooks/use-facet-option-rows'
 import { type FacetPopoverWidth, resetFacet, useFacetPopover } from '../hooks/use-facet-popover'
@@ -95,6 +97,8 @@ type MultiSelectFacetProps = {
   variant?: FacetTriggerVariant
   /** How many options may stand at once; many unless the facet's field only holds one. */
   selectionMode?: FacetSelectionMode
+  /** What the facet's panel opens over, which picks its fill. */
+  opensOver?: FloatingPanelSurface
 }
 
 /**
@@ -114,6 +118,7 @@ export function MultiSelectFacet({
   grouping,
   variant = 'stacked',
   selectionMode = 'multiple',
+  opensOver = 'page',
 }: MultiSelectFacetProps) {
   // How this facet's shape lays itself out
   const { popoverWidth, widthClass, hasHeadingAbove } = FACET_VARIANT_LAYOUTS[variant]
@@ -182,7 +187,7 @@ export function MultiSelectFacet({
   // A function which resets the facet
   const clearAll = () => resetFacet({ selected, onChange, popover: facet, list })
 
-  // The one option standing, where exactly one is
+  // The name of the one option standing, where exactly one is
   const selectedLabel = soleSelectionLabel(selected, options, title)
 
   return (
@@ -220,7 +225,7 @@ export function MultiSelectFacet({
         getFloatingProps={facet.getFloatingProps}
         popoverId={facet.popoverId}
         labelId={facet.labelId}
-        variant={variant}
+        opensOver={opensOver}
         initialFocus={facet.initialFocus}
         onKeyDown={list.onListKeyDown}
       >

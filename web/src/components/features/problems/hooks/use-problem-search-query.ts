@@ -37,10 +37,12 @@ export type ProblemSearchInfiniteData = {
   updatedOptions: FilterOptionsWithCounts | null
   /** When filtering by a list, the display name of that list. Null otherwise. */
   listName: string | null
+  /** The filters the page answers. */
+  filters: SearchFiltersState
 }
 
 /**
- * The return type of the `useSingleProblem` hook.
+ * The return type of the {@link useSingleProblem} hook.
  */
 type UseSingleProblemReturn = {
   /**
@@ -55,13 +57,15 @@ type UseSingleProblemReturn = {
 }
 
 /**
- * The return type of the `useProblemSearchInfinite` hook.
+ * The return type of the {@link useProblemSearchInfinite} hook.
  */
 type UseProblemSearchInfiniteReturn = {
   /** The infinite data structure containing pages of results. */
   data: InfiniteData<ProblemSearchInfiniteData> | undefined
   /** Whether the query is currently loading (initial fetch). */
   isLoading: boolean
+  /** Whether the pages are an earlier search's, held while this one is on its way. */
+  isPlaceholderData: boolean
   /** Whether the query is currently fetching (initial or background). */
   isFetching: boolean
   /** Whether the next page is currently being fetched. */
@@ -134,7 +138,7 @@ export function searchFiltersOf(queryKey: readonly unknown[]): SearchFiltersStat
 }
 
 /**
- * Every option the library offers, which is where the search bar's rows come from.
+ * Every option the library offers.
  *
  * Nothing fetches these on their own: they ride along with the first answer the archive gives, and
  * whichever query receives them parks them here for the rest of the session. They are keyed by
@@ -210,8 +214,8 @@ export function useSingleProblem(
     // Narrow to the ready caller
     const apiCall = readyApiCall(api)
 
-    // Fetch the problem details from the server, asking for the library's options only when the
-    // reader arrived here cold rather than clicking through an archive that already holds them
+    // Fetch the problem details from the server, asking for the library's options when none are
+    // held yet or what is held has gone stale
     const data = unwrap(
       await getProblemBySlug(apiCall, slug, shouldAskForBaseOptions(queryClient, locale))
     )
@@ -326,15 +330,19 @@ function useProblemSearchInfinite(
     // just return the slugs (problems have been added to the global store)
     const { items: problems, ...rest } = page.problems
 
-    // On the result, replace the problems with slugs
+    // On the result, replace the problems with slugs, and say which filters they answer
     return {
       ...page,
       problems: {
         ...rest,
         slugs: problems.map((problem) => problem.slug),
       },
+      filters: searchFilters,
     }
   }
+
+  // Whether a search failed since the last answer, so the screen shows the failure and that answer is not held again
+  const hasFailedSinceAnswerRef = useRef(false)
 
   // Construct the React Query
   const query = useInfiniteQuery({
@@ -359,17 +367,38 @@ function useProblemSearchInfinite(
     // Only an import or an admin edit moves the problems a search finds
     ...cachePolicy.content,
 
+    // A new search holds the last answer on screen until its own arrives, so the list changes once. After a failure
+    // the screen shows the failure, so the answer before it is not held again
+    placeholderData: (previousData) => (hasFailedSinceAnswerRef.current ? undefined : previousData),
+
     // Only run when enabled and the API client is ready
     enabled: enabled && api.state === 'ready',
   })
 
-  // Reduce the raw flags to the one state that describes this fetch
-  const uiState = useQueryUiState(query)
+  // A failure stops the last answer from being held, and a search answered on its own lets its answer be held again
+  if (query.status === 'error') hasFailedSinceAnswerRef.current = true
+  else if (query.status === 'success' && !query.isPlaceholderData)
+    hasFailedSinceAnswerRef.current = false
+
+  // Reduce the raw flags to the one state that describes this fetch. An earlier answer held on screen is not this
+  // search's, so until its own arrives the state reads as pending
+  const uiState = useQueryUiState({
+    status: query.isPlaceholderData ? 'pending' : query.status,
+    fetchStatus: query.fetchStatus,
+    failureCount: query.failureCount,
+    errorUpdateCount: query.errorUpdateCount,
+    error: query.error,
+  })
+
+  // A search waiting for the connection may never be sent, so the answer it holds would stand beside filters it
+  // never answered, saying nothing of why. Without it the list says the connection is down.
+  const isHeldOffline = query.isPlaceholderData && uiState.kind === 'offline'
 
   // Return just the data we need
   return {
-    data: query.data,
+    data: isHeldOffline ? undefined : query.data,
     isLoading: query.isLoading,
+    isPlaceholderData: query.isPlaceholderData && !isHeldOffline,
     isFetching: query.isFetching,
     isFetchingNextPage: query.isFetchingNextPage,
     hasNextPage: query.hasNextPage,
@@ -391,14 +420,24 @@ type UseProblemSearchQueryReturn = {
   totalCount: number
   /** Whether there are more pages available to load. */
   hasMore: boolean
-  /** True ONLY when a query is loading and there is zero cached data. This typically happens when the user clicks a totally new filter combination. */
+  /**
+   * True ONLY when a query is loading with no problems of any search to show: the library's first search, or any
+   * search after one that failed.
+   */
   isPending: boolean
-  /** True anytime a network request is currently active (excluding pagination). This includes both initial loads, filter changes, and background invalidation syncs. */
+  /** Whether the problems shown are an earlier search's, held on screen while the current one is on its way. */
+  isShowingPreviousSearch: boolean
+  /**
+   * True anytime a network request is in flight, pagination aside: an initial load, a filter change or a background
+   * refresh.
+   */
   isFetching: boolean
   /** True only when scrolling and infinite-fetching the subsequent page. */
   isFetchingNextPage: boolean
   /** When filtering by a list, the display name of that list. Null otherwise. */
   listName: string | null
+  /** The filters the answer on screen ran under, null while there is no answer. */
+  answeredFilters: SearchFiltersState | null
   /** The state of the fetch. */
   uiState: QueryUiState
   /** Runs the search again after it failed. */
@@ -436,8 +475,11 @@ export function useProblemSearchQuery(
 
   // The problems to display
   const finalProblems = useMemo(() => {
-    // Flatten the results from all pages
-    const newProblems = infiniteQuery.data?.pages.flatMap((page) => page.problems.slugs) ?? []
+    // The results from all pages, each problem once, since an import between two pages' reads can shift a
+    // problem across the boundary and onto both
+    const newProblems = [
+      ...new Set(infiniteQuery.data?.pages.flatMap((page) => page.problems.slugs) ?? []),
+    ]
 
     // Get the old currently visible problems
     const previousProblems = previousProblemsRef.current
@@ -446,7 +488,7 @@ export function useProblemSearchQuery(
     if (
       // First compare lengths
       newProblems.length === previousProblems.length &&
-      // Otherwise we need order-dependent comparison: check if all problems are equal in order and slug
+      // Then the same slugs in the same order
       newProblems.every((slug, index) => slug === previousProblems[index])
     ) {
       // Same problems (same slugs, same order), return previous reference to prevent re-render
@@ -461,10 +503,13 @@ export function useProblemSearchQuery(
   }, [infiniteQuery.data?.pages])
 
   // The counts this search narrows to, which the archive sends with the first page alone since every
-  // page behind it narrows to the very same set
+  // page behind it narrows to the very same set. A held answer's counts are another search's.
   const filterOptions = useMemo(
-    () => infiniteQuery.data?.pages[0]?.updatedOptions ?? null,
-    [infiniteQuery.data]
+    () =>
+      infiniteQuery.isPlaceholderData
+        ? null
+        : (infiniteQuery.data?.pages[0]?.updatedOptions ?? null),
+    [infiniteQuery.data, infiniteQuery.isPlaceholderData]
   )
 
   // The counts of the last search that had any, kept so the sidebar has numbers to show while the
@@ -477,7 +522,7 @@ export function useProblemSearchQuery(
   }
   // A search that narrows nothing is answered with no counts of its own, and holding on to an older
   // search's would show them beside the next set of filters entirely
-  else if (infiniteQuery.data) {
+  else if (infiniteQuery.data && !infiniteQuery.isPlaceholderData) {
     stableFilterOptionsRef.current = null
   }
 
@@ -503,10 +548,13 @@ export function useProblemSearchQuery(
     [infiniteQuery.data]
   )
 
+  // The filters the problems on screen answer, which while an earlier answer is held are that answer's
+  const answeredFilters = infiniteQuery.data?.pages[0]?.filters ?? null
+
   // Check if there are more pages to load for infinite scroll
   const hasMore = infiniteQuery.hasNextPage
 
-  // Function to load the next page when user scrolls near the bottom
+  // A function which loads the next page
   const loadMore = useCallback(() => {
     // Guard against duplicate requests while already loading. A page that failed also stops the
     // scroll from asking again, or every further scroll would spend a fresh burst of retries on a
@@ -524,9 +572,11 @@ export function useProblemSearchQuery(
     totalCount,
     hasMore,
     listName,
+    answeredFilters,
 
-    // Loading states mapped to strict React Query terminology
+    // Loading states
     isPending: infiniteQuery.isLoading,
+    isShowingPreviousSearch: infiniteQuery.isPlaceholderData,
     isFetching: infiniteQuery.isFetching && !infiniteQuery.isFetchingNextPage,
     isFetchingNextPage: infiniteQuery.isFetchingNextPage,
 

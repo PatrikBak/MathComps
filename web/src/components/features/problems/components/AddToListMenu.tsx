@@ -1,12 +1,11 @@
 'use client'
 
 import { useAuth } from '@clerk/nextjs'
-import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useRef, useState } from 'react'
+import { type ReactNode, useRef, useState } from 'react'
 
+import { Button } from '@/components/shared/components/Button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/shared/components/Popover'
-import { cn } from '@/components/shared/utils/css-utils'
 import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
 
 import { ManageListsModal, type ManageListsModalRef } from './ManageListsModal'
@@ -18,74 +17,75 @@ import { UserListMenuItems } from './UserListMenuItems'
 type AddToListMenuProps = {
   /** The slug of the problem to manage list membership for */
   problemSlug: string
+  /** The button's icon. */
+  icon: ReactNode
   /** Callback when a list is selected for viewing (filter navigation) */
   onSelectList: (contentId: string) => void
 }
 
 /**
- * "+" button dropdown on problem cards for adding/removing problems from lists.
- * Auth-gated: unauthenticated users get a login prompt on click.
- * Uses {@link UserListMenuItems} in membership mode.
+ * A button on a problem's card opening a menu that puts the problem on the reader's lists and takes it off them. A
+ * signed-out reader gets a sign-in prompt instead.
  */
-export function AddToListMenu({ problemSlug, onSelectList }: AddToListMenuProps) {
-  // Auth state
+export function AddToListMenu({ problemSlug, icon, onSelectList }: AddToListMenuProps) {
+  // Whether auth has settled, and whether anyone is signed in
   const { isLoaded, isSignedIn } = useAuth()
 
-  // Login prompt
+  // A function which asks the reader to sign in
   const showLoginPrompt = useLoginPromptToast()
 
-  // Translations
+  // Problems library translations
   const t = useTranslations('problems')
 
-  // Dropdown open state
+  // Whether the menu is open
   const [open, setOpen] = useState(false)
 
-  // Ref for the manage lists modal
+  // The list manager
   const manageRef = useRef<ManageListsModalRef>(null)
 
-  // Open manage modal (close dropdown first)
+  // A function which opens the list manager
   const handleManage = () => {
+    // The menu goes first, so it isn't left behind the manager
     setOpen(false)
+
+    // The list manager, opened
     manageRef.current?.open()
   }
 
-  // Handle trigger click with auth gating
+  // A function which answers a press on the button
   const handleTriggerClick = () => {
-    // Wait for auth to load
+    // Nothing to decide until auth settles
     if (!isLoaded) return
 
-    // Show login prompt for unauthenticated users
+    // A signed-out reader is asked to sign in instead
     if (!isSignedIn) {
+      // The prompt, saying what the account is for
       showLoginPrompt({ reason: t('addToListAuthReason') })
+
+      // The menu stays shut
       return
     }
 
-    // Signed in: toggle dropdown
-    setOpen((prev) => !prev)
+    // Signed in: the menu opens, or closes
+    setOpen((wasOpen) => !wasOpen)
   }
 
   return (
     <div>
+      {/* Lists menu */}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <button
-            onClick={handleTriggerClick}
-            className={cn(
-              '-ml-2 -mr-3 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-all duration-200 rounded-md hover:bg-foreground/5',
-              'text-muted hover:text-foreground'
-            )}
-            title={t('addToList')}
-          >
-            <Plus size={14} />
-          </button>
+          <Button variant="ghost" size="icon" onClick={handleTriggerClick} title={t('addToList')}>
+            {icon}
+          </Button>
         </PopoverTrigger>
 
-        <PopoverContent align="end" opensOver="card" className="min-w-48 !animate-none">
+        <PopoverContent align="end" className="min-w-48 !animate-none">
           <UserListMenuItems mode="membership" problemSlug={problemSlug} onManage={handleManage} />
         </PopoverContent>
       </Popover>
 
-      {/* Manage Lists Modal */}
+      {/* List manager */}
       <ManageListsModal ref={manageRef} onSelectList={onSelectList} />
     </div>
   )

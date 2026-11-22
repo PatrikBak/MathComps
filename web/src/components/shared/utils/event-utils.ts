@@ -1,7 +1,7 @@
 /**
  * Whether an event asks for the option it lands on and nothing else, which is what holding the
  * modifier through a click or a keypress means. A touchscreen has no modifier to hold, so a long
- * press stands in for it and is recognised at the press.
+ * press stands in for it as {@link EXCLUSIVE_LONG_PRESS}.
  *
  * @param event - The click, tap or keypress to read, as React or the browser hands it over.
  * @returns True when the modifier was down.
@@ -12,6 +12,12 @@ export function isExclusiveSelection(
   // Ctrl on Windows and Linux, Cmd on macOS
   return event.ctrlKey || event.metaKey
 }
+
+/**
+ * The click a long press stands in for on a touchscreen: one with the modifier held. It carries only the keys
+ * {@link isExclusiveSelection} reads.
+ */
+export const EXCLUSIVE_LONG_PRESS = { ctrlKey: true, metaKey: false } as React.MouseEvent
 
 /**
  * Whether a click on a link means follow it here, with no modifier or other button asking the browser for

@@ -12,23 +12,13 @@ import type { CSSProperties, KeyboardEvent, ReactNode } from 'react'
 import {
   FLOATING_PANEL_FILL_CLASS,
   FLOATING_PANEL_FILLS,
+  type FloatingPanelSurface,
 } from '@/components/shared/components/DropdownMenu'
 import { cn } from '@/components/shared/utils/css-utils'
 import { preventFocusLoss } from '@/components/shared/utils/dom-utils'
 
-import type { FacetTriggerVariant } from './FacetTrigger'
-
 /**
- * The fill each shape's panel takes, following the surface it floats over: a stacked facet opens inside the
- * panel its column sits in, a pill opens over the page itself.
- */
-const FACET_POPOVER_SURFACES: Record<FacetTriggerVariant, string> = {
-  stacked: FLOATING_PANEL_FILLS.card,
-  pill: FLOATING_PANEL_FILLS.page,
-}
-
-/**
- * The panel itself.
+ * The panel's fill, and its text set without hyphenation.
  */
 const FACET_PANEL_CLASS = cn(
   FLOATING_PANEL_FILL_CLASS,
@@ -54,8 +44,8 @@ type FacetPopoverProps = {
   popoverId: string
   /** Id of the heading that names the popover. */
   labelId: string
-  /** How the trigger that opens it sits on the page, which decides what the panel floats over. */
-  variant?: FacetTriggerVariant
+  /** What the panel opens over, which picks its fill. */
+  opensOver: FloatingPanelSurface
   /** Where focus lands as the panel opens. */
   initialFocus: FloatingFocusManagerProps['initialFocus']
   /** Handles the navigation keys, wherever inside the panel they are pressed. */
@@ -84,7 +74,7 @@ export function FacetPopover({
   getFloatingProps,
   popoverId,
   labelId,
-  variant = 'stacked',
+  opensOver,
   initialFocus,
   onKeyDown,
   children,
@@ -112,7 +102,7 @@ export function FacetPopover({
             // draws no ring: the mark belongs on whichever row the arrows move to from there
             'focus:outline-none',
             'z-floating flex flex-col overflow-hidden rounded-lg border border-foreground/10 shadow-2xl',
-            FACET_POPOVER_SURFACES[variant],
+            FLOATING_PANEL_FILLS[opensOver],
             FACET_PANEL_CLASS
           )}
         >

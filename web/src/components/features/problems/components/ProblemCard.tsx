@@ -1,114 +1,65 @@
-import {
-  Check,
-  ChevronDown,
-  ExternalLink,
-  Eye,
-  EyeOff,
-  Heart,
-  Link,
-  MessageSquare,
-  User,
-} from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
-import * as React from 'react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ExternalLink, Eye, EyeOff } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useMemo, useState } from 'react'
 
 import { CommentModal } from '@/components/features/comments/components/CommentModal'
-import { usePendingCommentTarget } from '@/components/features/comments/hooks/use-pending-comment-target'
+import { useCommentModal } from '@/components/features/comments/hooks/use-comment-modal'
 import { AppLink } from '@/components/shared/components/AppLink'
-import { Button } from '@/components/shared/components/Button'
-import { CountBadge } from '@/components/shared/components/CountBadge'
+import { PROBLEM_ROW_CLASS, ProblemRowLabel } from '@/components/shared/components/ProblemRow'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
+import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
 import { cn } from '@/components/shared/utils/css-utils'
-import { useSmartLongPress } from '@/hooks/use-smart-long-press'
 import { useProblem } from '@/stores/problem-store'
 
-import { useProblemPermalink } from '../hooks/use-problem-permalink'
-import { useToggleProblemLike } from '../hooks/use-toggle-problem-like'
-import { useToggleProblemMark } from '../hooks/use-toggle-problem-mark'
-import { sortTagsByCategory } from '../utils/tag-utils'
-import { AddToListMenu } from './AddToListMenu'
-import Chip from './Chip'
-import type { SimilarProblemViewMode } from './SimilarProblemView'
+import { PROBLEM_CARD_LAYOUTS } from '../constants/problem-card-layouts'
+import { PROBLEM_CARD_ATTRIBUTE } from '../constants/problem-list-attributes'
+import type {
+  AuthorClickHandler,
+  ProblemCardView,
+  TagClickHandler,
+} from '../types/problem-card-types'
+import { ProblemAuthorCredit } from './ProblemAuthorCredit'
+import { ProblemCardActions } from './ProblemCardActions'
+import { ProblemTagLine } from './ProblemTagLine'
 import { SimilarProblemView } from './SimilarProblemView'
 
 /**
  * Props for the {@link ProblemCard} component.
  */
 export type ProblemCardProps = {
-  /** The slug of the problem to display */
+  /** The slug of the problem the card shows. */
   problemSlug: string
-  /** Sequential number to display in the card header */
+  /** The card's place in the list, counting from one. */
   ordinalNumber: number
-  /** Whether solution techniques should be shown globally across all cards */
+  /** How the card is drawn. */
+  view: ProblemCardView
+  /** Whether technique tags show on every card. */
   areTechniquesGloballyVisible: boolean
-  /** Callback when a tag is clicked for filtering */
-  onTagClick: (tag: { displayName: string; slug: string }, event: React.MouseEvent) => void
-  /** Set of currently selected tag slugs for highlighting */
+  /** {@link TagClickHandler}. */
+  onTagClick: TagClickHandler
+  /** The slugs of the tags filtered on. */
   selectedTagSlugs: Set<string>
-  /**
-   * Set of technique tag slugs that are actively being filtered
-   * (useful when technique tags are hidden in general - these should not be hidden though)
-   */
+  /** The slugs of the technique tags filtered on, which show even while techniques are hidden. */
   activeTechniqueFilterSlugs: Set<string>
-  /** Callback when an author name is clicked for filtering */
-  onAuthorClick: (author: { displayName: string; slug: string }, event: React.MouseEvent) => void
-  /** Set of currently selected author slugs for highlighting */
+  /** {@link AuthorClickHandler}. */
+  onAuthorClick: AuthorClickHandler
+  /** The slugs of the authors filtered on. */
   selectedAuthorSlugs: Set<string>
-  /** Callback when a list is selected for viewing (filter navigation) */
+  /** Shows the problems of one of the reader's lists, by the list's content id. */
   onSelectList: (contentId: string) => void
 }
 
 /**
- * Author button component that can use hooks for long-press
- */
-const AuthorButton = React.memo(function AuthorButton({
-  author,
-  isSelected,
-  onAuthorClick,
-}: {
-  author: { displayName: string; slug: string }
-  isSelected: boolean
-  onAuthorClick: (author: { displayName: string; slug: string }, event: React.MouseEvent) => void
-}) {
-  const tProblems = useTranslations('problems')
-  return (
-    <button
-      onClick={(event) => onAuthorClick(author, event)}
-      // Long-press handler for exclusive selection
-      {...useSmartLongPress(() => {
-        onAuthorClick(author, {
-          ctrlKey: true,
-          metaKey: false,
-        } as React.MouseEvent)
-      })}
-      className={cn(
-        'text-xs sm:text-sm transition-colors duration-200 hover:underline select-none',
-        isSelected ? 'text-foreground font-medium' : 'text-muted hover:text-foreground'
-      )}
-      title={tProblems('filterByAuthor', { name: author.displayName })}
-    >
-      {author.displayName}
-    </button>
-  )
-})
-
-/**
- * Renders a problem card with interactive features for filtering, permalink sharing, and technique visibility.
+ * A problem's card in the library: its number and name, what can be done to it, the statement closed by its authors,
+ * its tags, and the rows opening its solution and the problems similar to it. A click on a tag or an author hands it to
+ * the filters.
  *
- * The card displays the problem statement, metadata (authors, tags), and provides controls for:
- * - Revealing/hiding solution techniques
- * - Filtering by tags and authors
- * - Sharing permalinks
- * - Viewing similar problems
- * - Toggling likes
- *
- * @param props - The component props containing problem data and interaction handlers
- * @returns JSX element representing the problem card
+ * Drawn compact, the card keeps only its number, the problem's name and the statement.
  */
 export function ProblemCard({
   problemSlug,
   ordinalNumber,
+  view,
   areTechniquesGloballyVisible,
   onTagClick,
   selectedTagSlugs,
@@ -117,366 +68,156 @@ export function ProblemCard({
   selectedAuthorSlugs,
   onSelectList,
 }: ProblemCardProps) {
-  // Get the problem data from the global store
+  // The problem, once it has loaded
   const problem = useProblem(problemSlug)
 
-  // Stores if the similar problems view is expanded
-  const [expandedView, setExpandedView] = useState<SimilarProblemViewMode>(null)
-
-  // Stores if the techniques are locally visible (in this card
-  // (even when they are globally hidden, we can show them per card basis)
-  const [areTechniquesLocallyVisible, setAreTechniquesLocallyVisible] = useState(false)
-
-  // Whether the comments modal is open
-  const [isCommentsOpen, setIsCommentsOpen] = useState(false)
-
-  // Function for copying permalinks on problems
-  const copyPermalink = useProblemPermalink()
-
-  // The hook to toggle likes
-  const toggleLike = useToggleProblemLike()
-
-  // The hook to toggle mark status
-  const toggleMark = useToggleProblemMark()
-
-  // Get translations for the component
+  // Problems library translations
   const tProblems = useTranslations('problems')
 
-  // Get the current locale (for sorting)
-  const locale = useLocale()
+  // Whether the reader opened the similar problems under the statement
+  const [isSimilarOpen, setIsSimilarOpen] = useState(false)
 
-  /**
-   * Toggles the expanded view for similar problems section.
-   *
-   * @param view - The view mode to toggle (null to collapse)
-   */
-  const toggleView = (view: SimilarProblemViewMode) => {
-    setExpandedView((currentView) => (currentView === view ? null : view))
-  }
+  // The problem's comments modal
+  const commentModal = useCommentModal({ targetType: 'Problem', targetId: problemSlug })
 
-  /**
-   * Handles copying the permalink for the current problem to clipboard.
-   */
-  const handlePermalinkCopy = useCallback(() => {
-    if (problem) {
-      copyPermalink(problem.slug)
-    }
-  }, [problem, copyPermalink])
+  // How the card is laid out in the view it is drawn in
+  const layout = PROBLEM_CARD_LAYOUTS[view]
 
-  // Reset local reveal state when global techniques are hidden
-  useEffect(() => {
-    if (!areTechniquesGloballyVisible) {
-      setAreTechniquesLocallyVisible(false)
-    }
-  }, [areTechniquesGloballyVisible])
+  // The problem's authors, once it has loaded
+  const authors = problem?.authors
 
-  // Hook for restoring comment modal state
-  const { pendingTarget, clearPendingTarget } = usePendingCommentTarget()
+  // The authors closing the statement, none in a compact card or for a problem nobody is credited with. Kept the same
+  // element while nothing it shows changes, since a new one draws the whole statement again
+  const authorCredit = useMemo(
+    () =>
+      layout.hasDetails && authors !== undefined && authors.length > 0 ? (
+        <ProblemAuthorCredit
+          authors={authors}
+          selectedAuthorSlugs={selectedAuthorSlugs}
+          onAuthorClick={onAuthorClick}
+        />
+      ) : undefined,
+    [layout.hasDetails, authors, selectedAuthorSlugs, onAuthorClick]
+  )
 
-  // Check for pending comment target on mount (after login redirect)
-  useEffect(() => {
-    // If this problem has a pending comment target
-    if (
-      problem &&
-      pendingTarget &&
-      pendingTarget.targetType === 'Problem' &&
-      pendingTarget.targetId === problem.slug
-    ) {
-      // Open the comments modal
-      setIsCommentsOpen(true)
-    }
-  }, [problem, pendingTarget])
-
-  // Calculate technique tag visibility based on global settings and active filters
-  const { hiddenTechniqueCount, hasVisibleTechniques } = useMemo(() => {
-    // We need to have a problem to return something meaningful
-    if (!problem) {
-      return {
-        hiddenTechniqueCount: 0,
-        hasVisibleTechniques: false,
-      }
-    }
-
-    // Get all technique tags
-    const allTechniqueTags = problem.tags.filter((tag) => tag.tagType === 'technique')
-
-    // Get technique tags that are part of an active filter
-    const visibleDueToFilter = allTechniqueTags.filter((tag) =>
-      activeTechniqueFilterSlugs.has(tag.slug)
-    )
-
-    // Technique tags are hidden if they're not part of an active filter
-    const hiddenCount = allTechniqueTags.length - visibleDueToFilter.length
-
-    // Return the number of hidden technique tags and whether any are visible
-    return {
-      hiddenTechniqueCount: hiddenCount,
-      hasVisibleTechniques: visibleDueToFilter.length > 0,
-    }
-  }, [problem, activeTechniqueFilterSlugs])
-
-  // Determine if the "reveal techniques" chip should be shown
-  // Only show when techniques are globally hidden, locally revealed, and there are hidden techniques
-  const showRevealChip =
-    !areTechniquesGloballyVisible && !areTechniquesLocallyVisible && hiddenTechniqueCount > 0
-
-  // If problem hasn't loaded yet, nothing to render or do
+  // A problem still on its way has no card yet
   if (!problem) {
     return null
   }
 
+  // Whether any similar problem was found
+  const hasSimilarProblems = problem.similarProblems.length > 0
+
+  // Whether the card has a row to offer under its statement
+  const hasRows = problem.solutionLink !== null || hasSimilarProblems
+
+  // Whether the similar problems show: opened, on a card with room for them
+  const areSimilarShown = layout.hasDetails && isSimilarOpen
+
   return (
-    <div
-      data-problem-slug={problem.slug}
-      className={cn(
-        'bg-surface border rounded-lg shadow-lg overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-focus/10 hover:border-muted/80',
-        // Highlight border when similar problems section is expanded
-        expandedView !== null ? 'border-focus' : 'border-foreground/10',
-        // Dim marked cards for a "dealt with" feel
-        problem.marked && 'opacity-50'
-      )}
-    >
-      {/* Card Header — slug left, action icons right */}
-      <div className="flex items-center justify-between px-2.5 py-1.5 sm:px-4 sm:py-3 lg:px-6 lg:py-4 border-b border-foreground/10">
-        {/* Problem identity */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          <span className="text-muted text-xs sm:text-sm font-medium">#{ordinalNumber}</span>
-          <h2 className="text-sm sm:text-base font-medium text-foreground">
-            {problem.slug.toUpperCase()}
+    // The card, stating which problem it is so it can be found among the rest
+    <div {...PROBLEM_CARD_ATTRIBUTE.stamp(problem.slug)}>
+      {/* The card itself */}
+      <SurfacePanel
+        as="article"
+        radius="xl"
+        className={cn(
+          'transition-[border-color,opacity] duration-300',
+          layout.paddingClass,
+          // Edged in the focus hue while its similar problems are open
+          areSimilarShown && 'border-focus/40',
+          // Dimmed once marked as dealt with
+          problem.marked && 'opacity-50'
+        )}
+      >
+        {/* Header: the number and the problem's name, then what can be done to it */}
+        <header className="flex items-start gap-3">
+          <h2 className="min-w-0 flex-1 text-sm text-foreground hyphens-none sm:text-base">
+            <span className="mr-1 text-xs tabular-nums text-muted sm:text-sm">{`#${ordinalNumber}`}</span>{' '}
+            <span className="font-medium">{problem.slug.toUpperCase()}</span>
           </h2>
-        </div>
 
-        {/* Action icons */}
-        <div className="flex items-center gap-1 sm:gap-2">
-          {/* Mark toggle button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => toggleMark(problem.slug)}
-            title={problem.marked ? tProblems('marks.unmark') : tProblems('marks.mark')}
-          >
-            <Check
-              size={14}
-              className={cn(
-                'sm:!w-[18px] sm:!h-[18px] transition-all duration-500',
-                problem.marked ? 'text-success' : 'text-muted'
-              )}
-              strokeWidth={problem.marked ? 3 : 2}
+          {layout.hasDetails && (
+            <ProblemCardActions
+              problem={problem}
+              onOpenComments={commentModal.open}
+              onSelectList={onSelectList}
             />
-          </Button>
-
-          {/* Like button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="pr-1 sm:pr-1.5"
-            onClick={() => toggleLike(problem.slug)}
-            title={problem.liked ? tProblems('unlike') : tProblems('like')}
-          >
-            <CountBadge count={problem.likeCount} color="red" isHighlighted={problem.liked}>
-              <Heart
-                size={14}
-                className={cn(
-                  'sm:!w-[18px] sm:!h-[18px] transition-all duration-200',
-                  problem.liked && 'fill-current'
-                )}
-              />
-            </CountBadge>
-          </Button>
-
-          {/* Comments button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="pr-1 sm:pr-1.5"
-            onClick={() => setIsCommentsOpen(true)}
-            title={tProblems('commentsButton')}
-          >
-            <CountBadge
-              count={problem.commentCount}
-              color="indigo"
-              isHighlighted={problem.commentCount > 0}
-            >
-              <MessageSquare size={14} className="sm:!w-[18px] sm:!h-[18px]" />
-            </CountBadge>
-          </Button>
-
-          {/* Add to list */}
-          <AddToListMenu problemSlug={problem.slug} onSelectList={onSelectList} />
-
-          {/* Permalink sharing button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handlePermalinkCopy}
-            title={tProblems('share')}
-          >
-            <Link size={14} className="sm:!w-[18px] sm:!h-[18px]" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Problem statement content with math rendering */}
-      <div className="px-2.5 py-2 sm:px-4 sm:py-4 lg:px-6 lg:py-5 leading-relaxed text-muted-foreground text-[14px] sm:text-base">
-        <div className="math-typography">
-          <RichMathEditorRenderer content={problem.statementMarkdown} imageContext="problems" />
-        </div>
-      </div>
-
-      {/* Footer row — authors left, solution link right */}
-      {(problem.authors.length > 0 || problem.solutionLink) && (
-        <div className="flex items-center justify-between gap-3 px-2.5 pb-2 sm:gap-4 sm:px-4 sm:pb-3 lg:px-6 lg:pb-4">
-          {/* Authors */}
-          {problem.authors.length > 0 ? (
-            <div className="flex items-center gap-1 sm:gap-1.5 italic text-muted text-xs sm:text-sm min-w-0">
-              <User size={12} className="shrink-0 sm:!w-[14px] sm:!h-[14px]" />
-              <div className="flex flex-wrap items-center gap-1 min-w-0">
-                {problem.authors.map((author, authorIndex) => (
-                  <span key={author.slug} className="flex items-center">
-                    <AuthorButton
-                      author={author}
-                      isSelected={selectedAuthorSlugs.has(author.slug)}
-                      onAuthorClick={onAuthorClick}
-                    />
-                    {authorIndex < problem.authors.length - 1 && (
-                      <span className="mx-1 text-muted">,</span>
-                    )}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div />
           )}
+        </header>
 
-          {/* Solution link */}
-          {problem.solutionLink && (
-            <AppLink
-              href={problem.solutionLink}
-              newTab
-              className="flex items-center gap-1 sm:gap-1.5 shrink-0 text-xs sm:text-sm text-muted hover:text-foreground transition-colors duration-200"
-              title={tProblems('solutionLink')}
-            >
-              <span>{tProblems('solution')}</span>
-              <ExternalLink size={12} className="sm:!w-[14px] sm:!h-[14px]" />
-            </AppLink>
+        {/* Statement */}
+        <div
+          className={cn(
+            'leading-relaxed text-muted-foreground text-[14px] sm:text-base',
+            layout.statementGapClass
           )}
-        </div>
-      )}
-
-      {/* Tag display with technique visibility controls */}
-      {problem.tags.length > 0 && (
-        <div className="border-t bg-surface/50 border-foreground/10">
-          <div className="px-2.5 py-1.5 sm:px-4 sm:py-3 lg:px-6 lg:py-4">
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              {/* Render tags sorted by category with technique visibility logic */}
-              {sortTagsByCategory(problem.tags, locale)
-                .filter((tag) => {
-                  if (tag.tagType !== 'technique') {
-                    return true // Always show non-technique tags
-                  }
-                  // Show technique tags if globally visible, locally revealed, or part of an active filter
-                  return (
-                    areTechniquesGloballyVisible ||
-                    areTechniquesLocallyVisible ||
-                    activeTechniqueFilterSlugs.has(tag.slug)
-                  )
-                })
-                .map((tag) => (
-                  <Chip
-                    key={tag.slug}
-                    onClick={(event) =>
-                      onTagClick({ displayName: tag.displayName, slug: tag.slug }, event)
-                    }
-                    clickable={true}
-                    isSelected={selectedTagSlugs.has(tag.slug)}
-                  >
-                    {tag.displayName}
-                  </Chip>
-                ))}
-              {/* Special chip to reveal hidden technique tags */}
-              {showRevealChip && (
-                <Chip
-                  onClick={() => setAreTechniquesLocallyVisible(true)}
-                  clickable={true}
-                  className="bg-brand/40 text-foreground/85 hover:bg-brand/50"
-                  title={tProblems('showHiddenTechniques')}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <Eye className="h-3.5 w-3.5" />
-                    <span>
-                      {hasVisibleTechniques
-                        ? tProblems('showMoreTechniques')
-                        : tProblems('showTechniques')}
-                    </span>
-                    {/* Badge showing count of hidden techniques */}
-                    <span className="inline-flex items-center justify-center w-4 h-4 text-xs font-medium text-foreground/85 bg-brand/50 rounded-full">
-                      {hiddenTechniqueCount}
-                    </span>
-                  </div>
-                </Chip>
-              )}
-            </div>
+        >
+          <div className="math-typography math-trim-edges">
+            <RichMathEditorRenderer
+              content={problem.statementMarkdown}
+              imageContext="problems"
+              closing={authorCredit}
+            />
           </div>
-
-          {/* Expandable section for similar problems */}
-          {problem.similarProblems && problem.similarProblems.length > 0 && (
-            <button
-              onClick={() => toggleView('similar')}
-              className={cn(
-                'w-full px-2.5 py-1.5 sm:px-4 sm:py-3 lg:px-6 flex items-center justify-center border-t border-foreground/10 transition-all duration-200',
-                expandedView === 'similar'
-                  ? 'bg-focus/10 hover:bg-focus/15'
-                  : 'hover:bg-foreground/5'
-              )}
-              title={tProblems('toggleSimilar')}
-            >
-              <div className="flex items-center gap-2">
-                {/* Toggle between eye and eye-off icons based on expansion state */}
-                {expandedView === 'similar' ? (
-                  <EyeOff size={15} className="text-muted sm:!w-[18px] sm:!h-[18px]" />
-                ) : (
-                  <Eye size={15} className="text-muted sm:!w-[18px] sm:!h-[18px]" />
-                )}
-                <span className="text-xs sm:text-sm font-medium text-foreground">
-                  {tProblems('similarProblems')}
-                </span>
-                {/* Badge showing count of similar problems */}
-                <span className="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5 text-xs font-semibold text-focus/80 bg-focus/30 rounded-full border border-focus/30">
-                  {problem.similarProblems.length}
-                </span>
-                {/* Chevron that rotates when expanded */}
-                <ChevronDown
-                  size={18}
-                  className={cn(
-                    'text-muted transition-transform duration-200 ml-1',
-                    expandedView === 'similar' && 'rotate-180'
-                  )}
-                />
-              </div>
-            </button>
-          )}
         </div>
-      )}
 
-      {/* Render expanded content when similar problems section is opened */}
-      <SimilarProblemView view={expandedView} problem={problem} />
+        {/* Tags */}
+        {layout.hasDetails && (
+          <ProblemTagLine
+            tags={problem.tags}
+            areTechniquesGloballyVisible={areTechniquesGloballyVisible}
+            activeTechniqueFilterSlugs={activeTechniqueFilterSlugs}
+            selectedTagSlugs={selectedTagSlugs}
+            onTagClick={onTagClick}
+          />
+        )}
 
-      {/* Comments Modal */}
+        {/* Rows opening the solution and the similar problems, pulled out by their padding so what a row says starts
+            on the statement's left edge */}
+        {layout.hasDetails && hasRows && (
+          <div className="-mx-3 mt-2 flex flex-wrap gap-1">
+            {/* Solution, opening in a new tab */}
+            {problem.solutionLink !== null && (
+              <AppLink
+                href={problem.solutionLink}
+                newTab
+                plain
+                className={PROBLEM_ROW_CLASS}
+                title={tProblems('solutionLink')}
+              >
+                <ProblemRowLabel label={tProblems('solution')} icon={ExternalLink} count={null} />
+              </AppLink>
+            )}
+
+            {/* Similar problems, opening under the statement */}
+            {hasSimilarProblems && (
+              <button
+                type="button"
+                onClick={() => setIsSimilarOpen(!isSimilarOpen)}
+                aria-expanded={isSimilarOpen}
+                className={cn(PROBLEM_ROW_CLASS, isSimilarOpen && 'bg-foreground/5')}
+              >
+                <ProblemRowLabel
+                  label={tProblems('similarProblems')}
+                  icon={isSimilarOpen ? EyeOff : Eye}
+                  count={{ value: problem.similarProblems.length }}
+                />
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Similar problems, once opened */}
+        {areSimilarShown && <SimilarProblemView similarProblems={problem.similarProblems} />}
+      </SurfacePanel>
+
+      {/* Comments */}
       <CommentModal
-        isOpen={isCommentsOpen}
-        onClose={() => {
-          // Close the modal
-          setIsCommentsOpen(false)
-
-          // No more pending target in case we wanna log in from this comment section
-          clearPendingTarget()
-        }}
+        isOpen={commentModal.isOpen}
+        onClose={commentModal.close}
         title={problem.slug.toUpperCase()}
-        target={{
-          targetType: 'Problem',
-          targetId: problem.slug,
-        }}
+        target={{ targetType: 'Problem', targetId: problem.slug }}
       />
     </div>
   )

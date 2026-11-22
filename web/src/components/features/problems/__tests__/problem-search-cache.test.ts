@@ -34,14 +34,16 @@ const EDITED = 'problem'
  * @returns The search as the cache holds it.
  */
 function searchOf(pages: string[][]): InfiniteData<ProblemSearchInfiniteData> {
-  // One page per answer, each carrying its slugs and the totals they were counted under
+  // One page per answer, each carrying its slugs, the totals they were counted under, and the unfiltered library as the
+  // filters it answers
   return {
     pages: pages.map((slugs, index) => ({
       problems: { slugs, page: index + 1, pageSize: 10, totalCount: 42 },
       updatedOptions: null,
       listName: null,
+      filters: noFilters,
     })),
-    pageParams: pages.map((_, index) => index + 1),
+    pageParams: pages.map((_page, index) => index + 1),
   }
 }
 

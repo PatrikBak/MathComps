@@ -6,6 +6,7 @@ import {
   serializeFilters,
   spellTheSameUrl,
 } from '../utils/search-url-serialization'
+import { createDefaultFilters } from '../utils/url-initialization'
 
 /**
  * Builds a {@link SearchFiltersState} with nothing filtered on beyond the given overrides.
@@ -14,25 +15,14 @@ import {
  * @returns The filter state.
  */
 const createFilters = (overrides: Partial<SearchFiltersState>): SearchFiltersState => ({
-  searchText: '',
-  searchInSolution: false,
-  seasons: [],
-  problemNumbers: [],
-  tags: [],
-  tagLogic: 'or',
-  authors: [],
-  authorLogic: 'or',
-  competitionSelection: [],
-  favoritesOnly: false,
-  markStatus: null,
-  listContentId: null,
+  ...createDefaultFilters(),
   ...overrides,
 })
 
 describe('Search URL Serialization', () => {
   describe('The filters a URL carries', () => {
-    it('should serialize and deserialize all filter types', () => {
-      // Every filter set at once, so none of them can hide behind a default
+    it('should serialize and deserialize many filters at once', () => {
+      // Most filters set at once, each away from its default
       const filters = createFilters({
         searchText: 'algebra',
         searchInSolution: true,
@@ -54,7 +44,7 @@ describe('Search URL Serialization', () => {
       // And that same string read straight back
       const deserialized = deserializeFilters(serialized)
 
-      // Each filter in the query string under its own key
+      // A filter of each kind in the query string under its own key
       expect(serialized).toContain('q=algebra')
       expect(serialized).toContain('searchInSolution=true')
       expect(serialized).toContain('tags=combinatorics,geometry')
@@ -62,7 +52,7 @@ describe('Search URL Serialization', () => {
       expect(serialized).toContain('competitions=imo-a-finals')
       expect(serialized).toContain('favoritesOnly=true')
 
-      // And every one of them understood on the way back
+      // And the term, the tags and the competition read back as they went in
       expect(deserialized).not.toBeNull()
       expect(deserialized?.searchText).toBe('algebra')
       expect(deserialized?.tags.map((tag) => tag.slug)).toEqual(['combinatorics', 'geometry'])
@@ -135,7 +125,7 @@ describe('Search URL Serialization', () => {
     })
 
     it('should deserialize mixed depths without interpreting them', () => {
-      // The same three depths read back out of a query string
+      // Three depths of competition path read back out of a query string
       const deserialized = deserializeFilters('competitions=imo,imo-a,imo-a-i-navodne-x')
 
       // Each path carried through whole, with nothing read into how deep it runs
@@ -197,6 +187,14 @@ describe('Search URL Serialization', () => {
       // A link to one problem rather than to a filtered library
       expect(deserializeFilters('id=75-a-i-5')).toBeNull()
     })
+
+    it('keeps the filters of a URL that also says how the library is drawn', () => {
+      // A tag filtered on, with the cards drawn compact and the competition browser open
+      const filters = deserializeFilters('tags=algebra&view=compact&browseCompetitions=true')
+
+      // The tag stands, the view and browser keys accepted as the library's own
+      expect(filters?.tags.map((tag) => tag.slug)).toEqual(['algebra'])
+    })
   })
 
   describe('Mark status serialization', () => {
@@ -254,7 +252,7 @@ describe('Search URL Serialization', () => {
       // A hand-edited list with a stray comma in it
       const deserialized = deserializeFilters('problemNumbers=1,,2')
 
-      // An empty segment names no position, so it is dropped like the word above
+      // An empty segment names no position, so it is dropped
       expect(deserialized?.problemNumbers).toEqual([1, 2])
     })
 

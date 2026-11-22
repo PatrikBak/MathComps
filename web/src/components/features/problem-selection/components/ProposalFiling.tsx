@@ -106,7 +106,7 @@ export function AreaChip({ area }: AreaChipProps) {
   const areaName = useAreaName()
 
   // The area's name, as a chip
-  return <Chip className="border-transparent py-px leading-4 sm:py-px">{areaName(area)}</Chip>
+  return <Chip className="py-px leading-4 sm:py-px">{areaName(area)}</Chip>
 }
 
 /**

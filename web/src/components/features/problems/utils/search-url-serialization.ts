@@ -1,4 +1,7 @@
+import type { AddressedChoice } from '@/components/shared/utils/url-utils'
+
 import type { LabeledSlug, MarkStatusFilter } from '../types/problem-api-types'
+import { PROBLEM_CARD_VIEWS, type ProblemCardView } from '../types/problem-card-types'
 import type { SearchFiltersState, UrlQueryState } from '../types/problem-library-types'
 
 /**
@@ -20,11 +23,13 @@ const FILTER_PARAMS = {
 } as const
 
 /**
- * The keys the library's chrome is written under in the URL, apart from the filters.
+ * The keys saying how the library is drawn, written in the URL apart from the filters.
  */
 const UI_STATE_PARAMS = {
   /** The key the open competition browser is recorded under. */
   BROWSE_COMPETITIONS: 'browseCompetitions',
+  /** The key the card view is recorded under. */
+  CARD_VIEW: 'view',
 } as const
 
 /**
@@ -34,6 +39,14 @@ export const URL_PARAMS = {
   ...FILTER_PARAMS,
   ...UI_STATE_PARAMS,
 } as const
+
+/**
+ * How the cards are drawn, as the URL carries it, the full cards being the default it leaves unnamed.
+ */
+export const PROBLEM_CARD_VIEW_CHOICE: AddressedChoice<ProblemCardView> = {
+  param: URL_PARAMS.CARD_VIEW,
+  options: PROBLEM_CARD_VIEWS,
+}
 
 /**
  * The separators the URL's list and path values are read and written with.
@@ -57,8 +70,10 @@ export const serializeFilters = (filters: SearchFiltersState): string => {
     // One key=value pair per filter that is set
     const params: string[] = []
 
-    // The term, when the user typed one, without the padding that is not part of it
+    // The term, without the padding that is not part of it
     const searchText = filters.searchText.trim()
+
+    // Written only when the user typed one
     if (searchText) {
       params.push(`${URL_PARAMS.SEARCH_TEXT}=${encodeURIComponent(searchText)}`)
     }
@@ -70,19 +85,28 @@ export const serializeFilters = (filters: SearchFiltersState): string => {
 
     // The school years, by slug
     if (filters.seasons.length > 0) {
+      // Their slugs, joined
       const seasonsValue = filters.seasons.map((season) => season.slug).join(SEPARATORS.LIST)
+
+      // Written under their key
       params.push(`${URL_PARAMS.SEASONS}=${seasonsValue}`)
     }
 
     // The positions within a round
     if (filters.problemNumbers.length > 0) {
+      // The numbers, joined
       const numbersValue = filters.problemNumbers.join(SEPARATORS.LIST)
+
+      // Written under their key
       params.push(`${URL_PARAMS.PROBLEM_NUMBERS}=${numbersValue}`)
     }
 
     // The tags, by slug
     if (filters.tags.length > 0) {
+      // Their slugs, joined
       const tagsValue = filters.tags.map((tag) => tag.slug).join(SEPARATORS.LIST)
+
+      // Written under their key
       params.push(`${URL_PARAMS.TAGS}=${tagsValue}`)
 
       // The mode only says something once a second tag is in play
@@ -93,10 +117,13 @@ export const serializeFilters = (filters: SearchFiltersState): string => {
 
     // The authors, by slug
     if (filters.authors.length > 0) {
+      // Their slugs, joined
       const authorsValue = filters.authors.map((author) => author.slug).join(SEPARATORS.LIST)
+
+      // Written under their key
       params.push(`${URL_PARAMS.AUTHORS}=${authorsValue}`)
 
-      // The same for authors
+      // The mode only says something once a second author is in play
       if (filters.authors.length > 1 && filters.authorLogic !== 'or') {
         params.push(`${URL_PARAMS.AUTHOR_LOGIC}=${filters.authorLogic}`)
       }
@@ -104,7 +131,10 @@ export const serializeFilters = (filters: SearchFiltersState): string => {
 
     // The competitions, each as the path of the node it names
     if (filters.competitionSelection.length > 0) {
+      // Their paths, joined
       const selectionsValue = filters.competitionSelection.join(SEPARATORS.LIST)
+
+      // Written under their key
       params.push(`${URL_PARAMS.COMPETITIONS}=${selectionsValue}`)
     }
 
@@ -126,8 +156,10 @@ export const serializeFilters = (filters: SearchFiltersState): string => {
     // The pairs, joined as a query string
     return params.join('&')
   } catch (error) {
-    // A term that cannot be encoded costs the whole query string
+    // Report the term that could not be encoded
     console.error('Failed to serialize filters:', error)
+
+    // A term that cannot be encoded costs the whole query string
     return ''
   }
 }
@@ -140,7 +172,7 @@ export const serializeFilters = (filters: SearchFiltersState): string => {
  * spelling one query string therefore ask the archive the same question.
  *
  * @param first - One of the two states.
- * @param second - The state to hold it against.
+ * @param second - The other of the two states.
  *
  * @returns True when both produce the same query string.
  */

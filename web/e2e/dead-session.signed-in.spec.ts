@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 
+import { PROBLEM_CARD_ATTRIBUTE } from '@/components/features/problems/constants/problem-list-attributes'
 import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import messages from '../messages/en.json'
@@ -131,7 +132,7 @@ test.describe('a reader whose session died under them', () => {
     await page.goto(`${PROBLEMS_PATH}?favoritesOnly=true`)
 
     // A row to act on
-    const row = page.locator(`[data-problem-slug="${EDITED}"]`)
+    const row = page.locator(`[${PROBLEM_CARD_ATTRIBUTE.name}="${EDITED}"]`)
     await expect(row).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
     // Every notice the reader is shown from here on

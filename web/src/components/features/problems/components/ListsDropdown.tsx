@@ -5,6 +5,8 @@ import { ChevronDown, Heart, List, Share2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useRef, useState } from 'react'
 
+import type { FloatingPanelSurface } from '@/components/shared/components/DropdownMenu'
+import { LIGHT_CONTROL_SURFACE_CLASS } from '@/components/shared/components/facets/components/FacetTrigger'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import {
   Popover,
@@ -30,23 +32,27 @@ type ListsDropdownProps = {
   /** Applies a change the user made in the dropdown. */
   onFiltersChange: (filters: SearchFiltersState) => void
   /** When filtering by a shared list, the display name of that list. Null otherwise. */
-  sharedListName?: string | null
+  sharedListName: string | null
   /** Called once the user has settled on a body of problems. */
   onListPicked?: () => void
+  /** What the picker's panel opens over, which picks its fill. */
+  opensOver: FloatingPanelSurface
 }
 
 /**
  * Picks which body of problems the library is showing: everything, the ones the user has
  * liked, or one of their lists.
  *
- * Everything but the first needs an account, so a signed-out user gets a sign-in prompt
- * that carries the choice they were making, and lands back on it afterwards.
+ * The liked problems need an account, so a signed-out user picking them gets a sign-in prompt
+ * that carries the choice, and lands back on it afterwards. The user's lists show once they are
+ * signed in.
  */
 export function ListsDropdown({
   filters,
   onFiltersChange,
   sharedListName,
   onListPicked,
+  opensOver,
 }: ListsDropdownProps) {
   // Translations for the filter sidebar
   const t = useTranslations('problems.filters')
@@ -66,12 +72,15 @@ export function ListsDropdown({
   // The user's own lists, which only exist once they are signed in
   const { lists, likedCount, isLoading: isListsLoading } = useUserLists()
 
-  // The modal for renaming and deleting lists
+  // The modal managing the user's lists
   const manageRef = useRef<ManageListsModalRef>(null)
 
   // A function which puts away the dropdown and whatever holds it, the choice having been made
   const dismissAfterChoice = () => {
+    // The dropdown shuts
     setOpen(false)
+
+    // Whatever holds it hears the choice is made
     onListPicked?.()
   }
 
@@ -80,16 +89,14 @@ export function ListsDropdown({
     // The dropdown goes first, so it isn't left hanging behind the modal
     setOpen(false)
 
-    // Then the modal itself
+    // The manage-lists modal, opened
     manageRef.current?.open()
   }
 
-  // What the trigger reads, left blank until the lists it may name have arrived
-  const currentLabel = isListsLoading
-    ? ''
-    : getCurrentLabel(filters, lists ?? [], sharedListName, t)
+  // What the trigger reads, which for a list holds only once the lists have arrived
+  const currentLabel = getCurrentLabel(filters, lists ?? [], sharedListName, t)
 
-  // A list the user is browsing but does not own, which someone shared with them
+  // Whether the list being browsed is one someone shared, not one of the user's own
   const isSharedList =
     !!filters.listContentId && !lists?.some((list) => list.contentId === filters.listContentId)
 
@@ -98,7 +105,7 @@ export function ListsDropdown({
 
   // A function which goes back to showing the whole library
   const handleSelectAll = () => {
-    // Both of the narrowing filters go, since neither applies to the whole library
+    // The liked filter and the list filter go
     onFiltersChange({ ...filters, favoritesOnly: false, listContentId: null })
 
     // Nothing is left hanging open behind the choice
@@ -108,7 +115,7 @@ export function ListsDropdown({
   // A function which shows only the problems the user has liked
   const handleSelectLiked = () => {
     // Liking is the user's own, so a signed-out one is asked to sign in and brought back to this
-    // same choice. Any list filter gives way to it either way, since the two narrow differently.
+    // same choice. Any list filter gives way to it either way.
     const wasAnswered = applyOrPrompt(
       { ...filters, favoritesOnly: true, listContentId: null },
       t('viewFavoritesAuthReason')
@@ -120,30 +127,31 @@ export function ListsDropdown({
 
   // A function which shows only the problems on one of the user's lists
   const handleSelectList = (contentId: string) => {
-    // The liked filter gives way, since the two narrow the library differently
+    // The liked filter gives way to the list
     onFiltersChange({ ...filters, favoritesOnly: false, listContentId: contentId })
 
     // Nothing is left hanging open behind the choice
     dismissAfterChoice()
   }
 
-  // Whether the whole library is showing, which is what neither filter being set means
+  // Whether the whole library is showing, with no liked or list filter set
   const isAllActive = !filters.favoritesOnly && !filters.listContentId
 
-  // The trigger can only name a list once the lists have arrived, so until then it waits
-  const isTriggerLoading = isListsLoading && (filters.favoritesOnly || !!filters.listContentId)
+  // The trigger can only name a list once the lists have arrived, so until then it waits. The whole library and the
+  // liked problems read under fixed names, which need no lists
+  const isTriggerLoading = isListsLoading && !!filters.listContentId
 
   return (
     <>
+      {/* Lists dropdown */}
       <Popover open={open} onOpenChange={setOpen}>
         {/* Trigger button */}
         <PopoverTrigger asChild>
           <button
             className={cn(
               'flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all duration-200',
-              'border-foreground/10 bg-surface/60 text-foreground',
-              'hover:bg-foreground/5 hover:border-muted/50',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus'
+              'text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+              LIGHT_CONTROL_SURFACE_CLASS
             )}
           >
             <div className="flex items-center gap-2 min-w-0">
@@ -168,7 +176,7 @@ export function ListsDropdown({
         {/* Popover content */}
         <PopoverContent
           align="start"
-          opensOver="card"
+          opensOver={opensOver}
           className="w-[var(--radix-popover-trigger-width)]"
           onEscapeKeyDown={(event) => {
             // While a list is being named, Escape belongs to that field, which cancels it itself
@@ -179,10 +187,10 @@ export function ListsDropdown({
           <PopoverItem
             disabled={isCreating}
             onClick={handleSelectAll}
-            className={cn(isAllActive && 'text-focus-light')}
+            className={cn(isAllActive && 'text-brand-light')}
           >
             <div className="flex w-full items-center gap-2">
-              <List className={cn('h-4 w-4', isAllActive ? 'text-focus' : 'text-muted')} />
+              <List className={cn('h-4 w-4', isAllActive ? 'text-brand-light' : 'text-muted')} />
               <span>{t('allProblems')}</span>
             </div>
           </PopoverItem>
@@ -191,11 +199,16 @@ export function ListsDropdown({
           <PopoverItem
             disabled={isCreating}
             onClick={handleSelectLiked}
-            className={cn(filters.favoritesOnly && 'text-focus-light')}
+            className={cn(filters.favoritesOnly && 'text-brand-light')}
           >
             <div className="flex w-full items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Heart className="h-4 w-4 text-muted" />
+                <Heart
+                  className={cn(
+                    'h-4 w-4',
+                    filters.favoritesOnly ? 'text-brand-light' : 'text-muted'
+                  )}
+                />
                 <span>{t('myFavorites')}</span>
               </div>
               {isSignedIn && likedCount !== undefined && (
@@ -234,7 +247,7 @@ export function ListsDropdown({
 function getCurrentLabel(
   filters: SearchFiltersState,
   lists: UserListDto[],
-  sharedListName: string | null | undefined,
+  sharedListName: string | null,
   t: ReturnType<typeof useTranslations<'problems.filters'>>
 ): string {
   // The liked view reads under a fixed name
@@ -242,15 +255,16 @@ function getCurrentLabel(
 
   // A list narrows the library, and carries its own name
   if (filters.listContentId) {
-    const list = lists.find((list) => list.contentId === filters.listContentId)
+    // The list among the user's own, if it is one of them
+    const ownList = lists.find((list) => list.contentId === filters.listContentId)
 
     // One of the user's own lists
-    if (list) return list.name
+    if (ownList) return ownList.name
 
     // A list someone shared, which carries its own name
     if (sharedListName) return sharedListName
 
-    // Neither set knows the list, so it reads as a shared one
+    // A list that isn't the user's and has no name to show reads as a shared one
     return t('sharedListLabel')
   }
 

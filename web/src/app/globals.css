@@ -611,6 +611,14 @@ html {
   margin: 0.8em 0 0.8em 1.25em;
 }
 
+/* A text whose first and last blocks drop their outer margins, so the space around it is its container's alone. */
+.math-typography.math-trim-edges > :first-child {
+  margin-top: 0;
+}
+.math-typography.math-trim-edges > :last-child {
+  margin-bottom: 0;
+}
+
 /* A text made of a list sets it at the text's own edge: the indent that sets a list off from the prose around
    it has no prose to set it off from. The markers hang in a gutter wide enough for a two-digit number, the same
    for bullets so that two such texts line up. */
@@ -798,23 +806,6 @@ html {
 */
 .math-typography .ui-text .footnote-ref {
   color: inherit;
-}
-
-/* Mobile filter drawer: override SearchFilters fixed positioning and styling */
-.mobile-filter-wrapper > div {
-  position: static !important;
-  width: 100% !important;
-  top: auto !important;
-  bottom: auto !important;
-  height: auto !important;
-  max-height: none !important;
-  /* Remove card styling to blend with drawer */
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  /* Ensure smooth transitions */
-  transition: none !important;
 }
 
 /*  Sonner Toast Customization */

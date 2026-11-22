@@ -1144,13 +1144,20 @@
     "addToList": "Add to list",
     "addToListAuthReason": "add problems to lists",
     "addToListError": "Failed to update list",
+    "cardView": {
+      "compact": "Compact",
+      "full": "Detailed",
+      "label": "View"
+    },
     "commentsButton": "Comments",
     "competitionsOverview": "Competitions overview",
     "connectionFailed": "Connection failed",
     "connectionFailedHint": "Could not reach the server.",
     "emptyState": {
-      "description": "Try adjusting the filters and searching again.",
-      "title": "Nothing found"
+      "favorites": "No favorites yet. Like a problem and it shows up here.",
+      "filters": "No problems match these filters.",
+      "list": "This list has no problems yet.",
+      "showAll": "Show all problems"
     },
     "errors": {
       "connectionProblem": "Connection problem. Retrying...",
@@ -1292,7 +1299,6 @@
     },
     "moreActions": "More actions",
     "noCompetitions": "No competitions",
-    "noSimilarProblems": "No similar problems with sufficient relevance were found.",
     "offlineHint": "Loading will continue once you're back online.",
     "offlineTitle": "You're offline",
     "relevance": "Relevance: {percentage}%",
@@ -1309,7 +1315,6 @@
     "techniquesHelpLabel": "Techniques",
     "techniquesHelpTooltip": "Controls visibility of tags marking solution techniques (e.g., substitution, factoring, expression manipulation). These tags help identify mathematical methods used in problems.",
     "title": "Problems",
-    "toggleSimilar": "Show/hide similar problems",
     "tryingToConnect": "Trying to connect...",
     "unlike": "Unlike problem"
   },

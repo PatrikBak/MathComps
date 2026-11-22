@@ -13,7 +13,7 @@ import { CommentModal } from '@/components/features/comments/components/CommentM
 import { usePendingCommentTarget } from '@/components/features/comments/hooks/use-pending-comment-target'
 import { Button } from '@/components/shared/components/Button'
 import { CountBadge } from '@/components/shared/components/CountBadge'
-import { FilterEmptyState } from '@/components/shared/components/FilterEmptyState'
+import { EmptyState } from '@/components/shared/components/EmptyState'
 import { parseMember } from '@/components/shared/utils/collection-utils'
 import { cn } from '@/components/shared/utils/css-utils'
 import { ROUTES } from '@/i18n/i18n'
@@ -270,10 +270,10 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
           )}
         </CommentCountProvider>
       ) : (
-        <FilterEmptyState
+        <EmptyState
           message={t('emptyState')}
-          resetLabel={t('clearFilter')}
-          onReset={clearFilter}
+          actionLabel={t('clearFilter')}
+          onAction={clearFilter}
         />
       )}
 

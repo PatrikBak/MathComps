@@ -1,5 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { PROBLEM_CARD_ATTRIBUTE } from '@/components/features/problems/constants/problem-list-attributes'
+
 import messages from '../messages/en.json'
 import { filtersCopy } from './support/archive-filters'
 import { PROBLEMS_PATH, stubUserLists } from './support/backend-routes'
@@ -45,8 +47,11 @@ const LIST_NAME = 'Study group'
 async function rowsOn(page: Page): Promise<string[]> {
   // Each row states which problem it is, which is what the list amounts to for these tests
   return page
-    .locator('[data-problem-slug]')
-    .evaluateAll((rows) => rows.map((row) => row.getAttribute('data-problem-slug') ?? ''))
+    .locator(PROBLEM_CARD_ATTRIBUTE.anySelector)
+    .evaluateAll(
+      (rows, name) => rows.map((row) => row.getAttribute(name) ?? ''),
+      PROBLEM_CARD_ATTRIBUTE.name
+    )
 }
 
 /**
@@ -59,7 +64,7 @@ async function rowsOn(page: Page): Promise<string[]> {
  */
 function rowFor(page: Page, slug: string): Locator {
   // A row states which problem it is, which is the only handle these tests need on it
-  return page.locator(`[data-problem-slug="${slug}"]`)
+  return page.locator(`[${PROBLEM_CARD_ATTRIBUTE.name}="${slug}"]`)
 }
 
 /**
@@ -88,17 +93,17 @@ async function openListsMenu(page: Page, currentLabel: string): Promise<void> {
 }
 
 /**
- * Picks a mark status from the toolbar's dropdown.
+ * Picks a mark status from the status menu on the bar over the list.
  *
  * @param page - The page to pick it on.
  * @param label - The status to pick.
  */
 async function pickMarkStatus(page: Page, label: string): Promise<void> {
-  // The trigger reads under the status it currently holds, so it is addressed by its fixed title
-  await page.locator(`button[title="${filtersCopy.markStatus}"]`).click()
+  // Open the status menu
+  await page.getByRole('button', { name: filtersCopy.markStatus, exact: true }).click()
 
   // Every status is a row of the menu, matched whole because one of them is a word inside another
-  await page.getByRole('menuitem', { name: label, exact: true }).click()
+  await page.getByRole('menuitemradio', { name: label, exact: true }).click()
 }
 
 test.describe('acting on a problem while a filter holds it on screen', () => {
@@ -499,7 +504,7 @@ test.describe('acting on a problem the screen has no opinion about', () => {
     await page.goto(`${PROBLEMS_PATH}?markStatus=marked`)
 
     // So the screen says as much
-    await expect(page.getByText(problemsCopy.emptyState.title)).toBeVisible({
+    await expect(page.getByText(problemsCopy.emptyState.filters)).toBeVisible({
       timeout: SETTLE_TIMEOUT_MS,
     })
 

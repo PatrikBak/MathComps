@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl'
 import React from 'react'
 
-import { FilterEmptyState } from '@/components/shared/components/FilterEmptyState'
+import { EmptyState } from '@/components/shared/components/EmptyState'
 
 import { type FilterPillGroup } from '../components/guide-filter-model'
 import { GuideFilterBar } from '../components/GuideFilterBar'
@@ -51,10 +51,10 @@ export function FilteredDeckPage({
 
       {/* Nothing matches? the empty state, otherwise the body */}
       {isEmpty ? (
-        <FilterEmptyState
+        <EmptyState
           message={tDeck('emptyState')}
-          resetLabel={tDeck('clearFilters')}
-          onReset={onReset}
+          actionLabel={tDeck('clearFilters')}
+          onAction={onReset}
         />
       ) : (
         children

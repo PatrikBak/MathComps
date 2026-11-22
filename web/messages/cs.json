@@ -1144,13 +1144,20 @@
     "addToList": "Přidat do seznamu",
     "addToListAuthReason": "přidávání úloh do seznamů",
     "addToListError": "Nepodařilo se aktualizovat seznam",
+    "cardView": {
+      "compact": "Kompaktně",
+      "full": "Podrobně",
+      "label": "Zobrazení"
+    },
     "commentsButton": "Komentáře",
     "competitionsOverview": "Přehled soutěží",
     "connectionFailed": "Připojení selhalo",
     "connectionFailedHint": "Nepodařilo se spojit se serverem.",
     "emptyState": {
-      "description": "Zkus upravit filtry a vyhledat znovu.",
-      "title": "Nic se nenašlo"
+      "favorites": "Zatím tu nejsou žádné oblíbené úlohy. Lajkni úlohu a objeví se tu.",
+      "filters": "Těmto filtrům neodpovídá žádná úloha.",
+      "list": "V tomto seznamu zatím nejsou žádné úlohy.",
+      "showAll": "Zobrazit všechny úlohy"
     },
     "errors": {
       "connectionProblem": "Problém s připojením. Zkouším znovu...",
@@ -1292,7 +1299,6 @@
     },
     "moreActions": "Další akce",
     "noCompetitions": "Žádné soutěže",
-    "noSimilarProblems": "Nenašly se žádné podobné úlohy s dostatečnou relevancí.",
     "offlineHint": "Načítání bude pokračovat, až se připojíš.",
     "offlineTitle": "Jsi offline",
     "relevance": "Relevance: {percentage}%",
@@ -1309,7 +1315,6 @@
     "techniquesHelpLabel": "Techniky",
     "techniquesHelpTooltip": "Ovládá viditelnost tagů označujících techniky řešení (např. substituce, rozklad, úprava výrazu). Tyto tagy pomáhají identifikovat matematické metody použité v úlohách.",
     "title": "Úlohy",
-    "toggleSimilar": "Zobrazit/skrýt podobné úlohy",
     "tryingToConnect": "Pokouším se připojit...",
     "unlike": "Zrušit lajk"
   },

@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { type ReactNode, type RefObject, useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
-import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
+import { COMPACT_PANEL_CLASS } from '@/components/shared/components/EmptyState'
 import { SegmentedSwitch } from '@/components/shared/components/SegmentedSwitch'
 import { WaitingChangeButton } from '@/components/shared/components/WaitingChangeButton'
 import { WindowVirtualList } from '@/components/shared/components/WindowVirtualList'

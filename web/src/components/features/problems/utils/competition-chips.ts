@@ -2,23 +2,10 @@ import type * as React from 'react'
 
 import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
 
+import type { ChipData } from '../types/filter-chip-types'
 import type { SearchFiltersState } from '../types/problem-library-types'
 import { foldPickedPaths } from './competition-selection-fold'
 import type { CompetitionTree } from './competition-tree'
-
-/**
- * One competition filter, as the chip standing for it.
- */
-type CompetitionChip = {
-  /** The node the chip stands for, as the slugs leading down to it, e.g. `csmo-a-i`. */
-  id: string
-  /** Every ancestor's label and the node's own, joined, e.g. "SKMO - Kategória A - Školské kolo". */
-  displayName: string
-  /** The node's own name in full. */
-  fullName?: string
-  /** Removes the selection, or narrows the filter to it alone under a modifier. */
-  onClick: (event: React.MouseEvent) => void
-}
 
 /**
  * Whether a selection sits at or below a node.
@@ -49,7 +36,7 @@ export function generateCompetitionChips(
   filters: SearchFiltersState,
   competitionTree: CompetitionTree,
   onFiltersChange: (newFilters: SearchFiltersState) => void
-): CompetitionChip[] {
+): ChipData[] {
   // No competition is filtered on
   if (filters.competitionSelection.length === 0) {
     // Nothing to stand a chip for
