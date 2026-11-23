@@ -22,6 +22,12 @@ import { hasUnbalancedDollars } from './math-delimiters'
 import { preprocessDisplayMath } from './preprocessors'
 
 /**
+ * What the sanitizer writes before every id the content carries, so an id in the content can't shadow one of the
+ * page's own. A link within the content names its target's id without it.
+ */
+export const SANITIZED_ID_PREFIX = 'user-content-'
+
+/**
  * Custom sanitization schema extending the default GitHub schema.
  * Allows our `<spoiler>` and `#N` reference elements and KaTeX MathML output while blocking
  * XSS vectors like `<script>`, event handlers, and CSS defacement via `style`.
@@ -30,6 +36,8 @@ import { preprocessDisplayMath } from './preprocessors'
  */
 const sanitizeSchema: SanitizeOptions = {
   ...defaultSchema,
+  // The prefix every id in the content gets
+  clobberPrefix: SANITIZED_ID_PREFIX,
   tagNames: [
     ...(defaultSchema.tagNames ?? []),
     // Custom element for spoilers

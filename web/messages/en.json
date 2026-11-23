@@ -1583,6 +1583,8 @@
       "expandedEditor": "Expanded editor",
       "expandEditor": "Expand editor with preview",
       "fileTooLarge": "File is too large. Maximum: {max} MB",
+      "footnoteBack": "Back to reference {reference}",
+      "footnotes": "Footnotes",
       "heading": "Heading",
       "headingPlaceholder": "Heading",
       "hiddenContentPlaceholder": "hidden content",
