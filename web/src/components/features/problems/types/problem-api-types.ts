@@ -104,8 +104,11 @@ export type Problem = {
    * translation, and in the original otherwise.
    */
   statementMarkdown: string
-  /** The key of its published solution, null while none has been published. */
-  solutionLink: string | null
+  /**
+   * The solution, as Markdown with TeX in it. Served in the requested language when there is a
+   * translation, and in the original otherwise; null for a problem with no solution text.
+   */
+  solutionMarkdown: string | null
   /** Where it comes from. */
   source: ProblemSource
   /** What it is about, and how it is solved. */

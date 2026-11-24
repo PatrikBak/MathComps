@@ -201,8 +201,6 @@ public class ProblemFilterService(
                     // Evaluate
                     .ToImmutableList(),
 
-                data.problem.SolutionLink,
-
                 // Liked
                 userId != null && data.problem.Likes.Any(like => like.UserId == userId),
 

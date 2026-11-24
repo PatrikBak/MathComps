@@ -4,10 +4,8 @@ import { BookOpen } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 import { type ReactNode, useEffect, useState } from 'react'
 
-import {
-  CompetitionProblemSurface,
-  type SurfaceSize,
-} from '@/components/features/hosted-competitions/components/CompetitionProblemSurface'
+import { ProblemSurface } from '@/components/domain/problem/ProblemSurface'
+import type { SurfaceSize } from '@/components/domain/problem/ProblemSurfaceModal'
 import { LabelledSection } from '@/components/shared/components/LabelledSection'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { ScrollRegion } from '@/components/shared/components/ScrollRegion'
@@ -319,7 +317,7 @@ export function ProposalSurfaces({ proposal, language }: ProposalSurfacesProps) 
   const layout = referenceLayoutOf(parts, isWide)
 
   return (
-    <CompetitionProblemSurface
+    <ProblemSurface
       label={t('reference')}
       icon={BookOpen}
       position={proposal.number}
@@ -332,6 +330,6 @@ export function ProposalSurfaces({ proposal, language }: ProposalSurfacesProps) 
       scrollsInParts
     >
       <ReferenceParts parts={parts} layout={layout} />
-    </CompetitionProblemSurface>
+    </ProblemSurface>
   )
 }

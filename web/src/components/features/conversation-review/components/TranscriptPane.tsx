@@ -3,8 +3,8 @@
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
+import { ProblemBand } from '@/components/domain/problem/ProblemBand'
 import { DefenseTranscript } from '@/components/features/defense/components/DefenseTranscript'
-import { ProblemBand } from '@/components/features/defense/components/ProblemBand'
 import { findFirstUncountedTurnId } from '@/components/features/defense/hooks/use-defense-competition-mode'
 import { MATHILDA_NAME } from '@/constants/mathilda'
 

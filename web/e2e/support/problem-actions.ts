@@ -5,20 +5,57 @@ import {
   PROBLEM_COUNT_ATTRIBUTE,
 } from '@/components/features/problems/constants/problem-list-attributes'
 import type { FilterQuery, Problem } from '@/components/features/problems/types/problem-api-types'
+import type {
+  FilterOptionsWithCounts,
+  FilterResult,
+  SingleProblemResponse,
+} from '@/components/features/problems/types/problem-library-types'
 
 import searchFixture from '../fixtures/problem-filter-response.json'
-import { BACKEND_ORIGIN, SEARCH_PATH } from './backend-routes'
+import { BACKEND_ORIGIN, refuse, SEARCH_PATH } from './backend-routes'
 
 /**
- * The reader's own state on a problem, which is what every action here moves.
+ * How a problem served here differs from the one the fixture carries.
  */
-export type ProblemReaderState = {
+export type ProblemTraits = {
   /** Whether the reader has liked it. */
   liked?: boolean
   /** Whether the reader has marked it. */
   marked?: boolean
   /** The reader's lists holding it, by content id. */
   listContentIds?: string[]
+  /** Its solution as Markdown, null for a problem with none. */
+  solutionMarkdown?: string | null
+  /** Its tags. */
+  tags?: Problem['tags']
+}
+
+/**
+ * One problem as the archive serves it, a copy of the one the fixture carries under another slug.
+ *
+ * @param slug - The slug it is given.
+ * @param traits - How it differs from the fixture's problem.
+ *
+ * @returns The problem, as the archive puts it on the wire.
+ */
+function problemFromFixture(slug: string, traits: ProblemTraits): Problem {
+  // The one problem the fixture carries, safe to edit
+  const [template] = structuredClone(searchFixture).filterResult.problems
+    .items as unknown as Problem[]
+
+  // A fixture with no problem in it leaves nothing to copy
+  if (template === undefined) throw new Error('The search fixture carries no problem')
+
+  // The copy, carrying none of the reader's own state and no solution unless the traits give it one
+  return {
+    ...template,
+    slug,
+    liked: false,
+    marked: false,
+    listContentIds: [],
+    solutionMarkdown: null,
+    ...traits,
+  }
 }
 
 /**
@@ -33,35 +70,28 @@ export const ACTION_DELAY_MS = 1500
 /**
  * Builds a search answer carrying the given problems, out of one the archive really gave.
  *
- * Only the reader's own state on each problem is varied. Everything else, the statements, the counts,
+ * Only the {@link ProblemTraits} of each problem are varied. Everything else, the statements, the counts,
  * the options the sidebar draws, is the fixture's, so a page built from this renders exactly as the
  * archive's own answer does.
  *
- * @param readerStates - The problems to answer with, keyed by the slug each is given.
+ * @param problemTraits - How each problem answered with differs from the fixture's, keyed by the slug
+ *   it is given.
  * @param totalCount - How many the narrowing matches in all, defaulting to the ones served here.
  *   Anything above that is what tells the library another page is waiting behind this one.
  *
  * @returns The answer, as the search endpoint puts it on the wire.
  */
 export function searchAnswerWith(
-  readerStates: Record<string, ProblemReaderState>,
+  problemTraits: Record<string, ProblemTraits>,
   totalCount?: number
 ): unknown {
   // The answer as it came back from the archive, safe to edit
   const answer = structuredClone(searchFixture)
 
-  // The one problem the fixture carries, which every problem below is a copy of
-  const [template] = answer.filterResult.problems.items as unknown as Problem[]
-
-  // One problem per slug asked for, each carrying the reader's state that slug is given
-  const items = Object.entries(readerStates).map(([slug, state]) => ({
-    ...template,
-    slug,
-    liked: false,
-    marked: false,
-    listContentIds: [],
-    ...state,
-  }))
+  // One problem per slug asked for, each carrying the traits that slug is given
+  const items = Object.entries(problemTraits).map(([slug, traits]) =>
+    problemFromFixture(slug, traits)
+  )
 
   // The page they make up, which the library reads its rows and its total off
   answer.filterResult.problems = {
@@ -87,7 +117,7 @@ export function searchAnswerWithMoreToCome(): unknown {
   // A page as full as the archive itself serves them
   const { pageSize } = searchFixture.filterResult.problems
 
-  // The problems filling it, which are there to be scrolled past rather than looked at
+  // The problems filling it, there to fill the page rather than to be read
   const rows = Object.fromEntries(
     Array.from({ length: pageSize }, (_unused, index) => [`filler-problem-${index + 1}`, {}])
   )
@@ -145,6 +175,90 @@ export async function stubSearchAnswer(page: Page, answer: unknown): Promise<() 
 
   // How many were sent, which is all this one's callers read of them
   return () => searches().length
+}
+
+/**
+ * A test for whether a request reads one problem by its slug, its query string aside, in any case the
+ * slug is asked in, as the archive reads it.
+ *
+ * @param slug - The problem's slug.
+ *
+ * @returns The test a request's address is put to.
+ */
+function isReadOf(slug: string): (url: URL) => boolean {
+  // Where the problem is read from
+  const readUrl = `${BACKEND_ORIGIN}/problems/${encodeURIComponent(slug)}`.toLowerCase()
+
+  // That address, whatever its case
+  return (url) => `${url.origin}${url.pathname}`.toLowerCase() === readUrl
+}
+
+/**
+ * Stands in for the endpoint one problem is read from by its slug, answering with a copy of the
+ * fixture's problem under that slug.
+ *
+ * @param page - The page to intercept the read on.
+ * @param slug - The slug of the problem the endpoint answers for.
+ * @param traits - How that problem differs from the fixture's problem.
+ */
+export async function stubSingleProblem(
+  page: Page,
+  slug: string,
+  traits: ProblemTraits
+): Promise<void> {
+  // The page holding the one problem, with the options the fixture carries
+  const filterResult: FilterResult = {
+    problems: { items: [problemFromFixture(slug, traits)], page: 1, pageSize: 1, totalCount: 1 },
+    baseOptions: searchFixture.filterResult.baseOptions as unknown as FilterOptionsWithCounts,
+    updatedOptions: searchFixture.filterResult.updatedOptions as unknown as FilterOptionsWithCounts,
+  }
+
+  // The answer, placing the problem where the fixture's own problem sits
+  const answer: SingleProblemResponse = {
+    filterResult,
+    filters: { season: 67, competitionPath: 'tst-d3', problemNumber: 1 },
+  }
+
+  // Stand in for that read alone
+  await page.route(isReadOf(slug), (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(answer) })
+  )
+}
+
+/**
+ * Stands in for the endpoint one problem is read from by its slug, answering the way the archive
+ * answers a slug no problem goes by.
+ *
+ * @param page - The page to intercept the read on.
+ * @param slug - The slug no problem goes by.
+ */
+export async function stubMissingProblem(page: Page, slug: string): Promise<void> {
+  // Refuse that read, naming the problem as missing
+  await page.route(isReadOf(slug), (route) => refuse(route, 404, 'ProblemNotFound'))
+}
+
+/**
+ * Breaks the endpoint one problem is read from by its slug, the server failing every read, until the
+ * returned function mends it and the reads go on to whatever stands in for the endpoint underneath.
+ *
+ * @param page - The page to intercept the read on.
+ * @param slug - The slug whose read fails.
+ *
+ * @returns A function which mends the read.
+ */
+export async function breakProblemRead(page: Page, slug: string): Promise<() => void> {
+  // Whether the read still fails
+  let isBroken = true
+
+  // Fail that read while it is broken, and hand it on once mended
+  await page.route(isReadOf(slug), (route) =>
+    isBroken ? refuse(route, 503, undefined) : route.fallback()
+  )
+
+  // A function which mends the read
+  return () => {
+    isBroken = false
+  }
 }
 
 /**

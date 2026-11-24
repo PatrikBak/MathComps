@@ -456,6 +456,11 @@ async function parseBody(
     errors.push(problemIssue(body.file, 'statement', 'empty-statement', 'statement is empty'))
   }
 
+  // A solution sentinel with nothing under it is a solution nobody wrote
+  if (solution !== null && solution.trim() === '') {
+    errors.push(problemIssue(body.file, 'solution', 'empty-solution', 'solution is empty'))
+  }
+
   // Validate each half, mapping positions back to the body file (no frontmatter, so it starts at line 0)
   await validateHalf(statement, body.file, 'statement', 0, errors)
   if (solution !== null) {

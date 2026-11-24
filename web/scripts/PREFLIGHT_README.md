@@ -63,7 +63,7 @@ What does the inequality say when $x = y$?
 Expand $(x - y)^2 \ge 0$.
 ```
 
-Hints are the author's route to the solution, weakest nudge first. The AI examiner works from them in a defense, and a student reads them in the competition area on the same terms as the official solution. A hint sentinel with nothing under it is refused (`empty-hint`), a hint may carry figures like either half, and the solution and the hints may come in either order after the statement.
+Hints are the author's route to the solution, weakest nudge first. The AI examiner works from them in a defense, and a student reads them in the competition area on the same terms as the official solution. A solution or hint sentinel with nothing under it is refused (`empty-solution`, `empty-hint`). A hint may carry figures like either half, and the solution and the hints may come in either order after the statement.
 
 The ladder is positional, a rung answering the one before it, so every language that carries the solution carries the same number of hints (`hint-count-mismatch`). A problem nobody wrote hints for is unaffected, and a statement-only translation is exempt.
 

@@ -1,5 +1,20 @@
 [
   {
+    "id": "nzfAuELbcdN4AzbmX9svQ",
+    "slug": "archive-solutions",
+    "title": {
+      "sk": "Nový archív s riešeniami",
+      "cs": "Nový archiv s řešeními",
+      "en": "A new archive with solutions"
+    },
+    "date": "2026-11-22",
+    "category": "archive",
+    "cover": {
+      "kind": "icon",
+      "name": "book-open"
+    }
+  },
+  {
     "id": "vEV9KB6zjNoOzpxKotpmb",
     "slug": "mathilding-round-2-results",
     "title": {

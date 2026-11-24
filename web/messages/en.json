@@ -390,7 +390,6 @@
     "practiceNote": "A practice competition with easy problems, for trying out how the whole thing works.",
     "previousHint": "Previous hint",
     "problemCount": "{count, plural, one {# problem} other {# problems}}",
-    "problemHeading": "Problem {position}",
     "problems": "Problems",
     "readiness": {
       "dismiss": "Hide",
@@ -708,7 +707,6 @@
       "reviewTitle": "Check the transcription"
     },
     "placeholder": "Explain your thinking…",
-    "problemStrip": "Statement",
     "removeFeedbackMessage": "Your answer for this conversation will be permanently removed.",
     "removeFeedbackTitle": "Remove this answer?",
     "removeReportMessage": "Your feedback on this reply will be permanently removed.",
@@ -1169,6 +1167,7 @@
       "problemNotFound": "Problem \"{problemId}\" was not found",
       "searchFailed": "Failed to load problems",
       "searchFailedHint": "The server did not respond.",
+      "solutionLoadFailed": "Failed to load the solution",
       "unexpectedError": "An unexpected error occurred.",
       "urlFiltersIgnored": "Some URL parameters were ignored",
       "urlTooManyFilters": "URL contains too many filters (maximum {max})"
@@ -1311,7 +1310,6 @@
     "showTechniques": "Show techniques",
     "similarProblems": "Similar problems",
     "solution": "Solution",
-    "solutionLink": "Link to solution (opens in new window)",
     "techniquesHelpLabel": "Techniques",
     "techniquesHelpTooltip": "Controls visibility of tags marking solution techniques (e.g., substitution, factoring, expression manipulation). These tags help identify mathematical methods used in problems.",
     "title": "Problems",
@@ -1561,7 +1559,9 @@
     },
     "content": {
       "imageMissing": "Image missing",
-      "includingNew": "including new ones"
+      "includingNew": "including new ones",
+      "problemHeading": "Problem {position}",
+      "statement": "Statement"
     },
     "editor": {
       "attachment": "Attachment (PDF, TXT, MD)",

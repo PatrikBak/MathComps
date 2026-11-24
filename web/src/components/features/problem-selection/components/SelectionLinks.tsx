@@ -6,8 +6,8 @@ import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import type { ComponentProps } from 'react'
 
+import { PROBLEM_ROW_CLASS, ProblemRowLabel } from '@/components/domain/problem/ProblemRow'
 import { AppLink } from '@/components/shared/components/AppLink'
-import { PROBLEM_ROW_CLASS, ProblemRowLabel } from '@/components/shared/components/ProblemRow'
 import { countOpenDialogs, isInArrowKeyWidget } from '@/components/shared/utils/dom-utils'
 import { isPlainClick } from '@/components/shared/utils/event-utils'
 

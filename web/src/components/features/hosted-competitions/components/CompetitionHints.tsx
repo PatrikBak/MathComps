@@ -3,7 +3,8 @@
 import { Lightbulb } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { CompetitionProblemSurface } from './CompetitionProblemSurface'
+import { ProblemSurface } from '@/components/domain/problem/ProblemSurface'
+
 import { HintLadder } from './HintLadder'
 
 /**
@@ -39,7 +40,7 @@ export function CompetitionHints({
   const t = useTranslations('competitions')
 
   return (
-    <CompetitionProblemSurface
+    <ProblemSurface
       label={t('hints')}
       icon={Lightbulb}
       position={position}
@@ -51,6 +52,6 @@ export function CompetitionHints({
       size="text"
     >
       <HintLadder hints={hints} />
-    </CompetitionProblemSurface>
+    </ProblemSurface>
   )
 }

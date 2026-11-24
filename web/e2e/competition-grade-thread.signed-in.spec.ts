@@ -1,3 +1,4 @@
+import messages from '../messages/en.json'
 import { areaCopy, areaPath } from './support/competitions'
 import { installHostedBackend, problemIdOf } from './support/hosted-backend'
 import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
@@ -25,7 +26,9 @@ test.describe('the conversation with the graders', () => {
 
     // Open, on that problem
     await expect(
-      thread.getByText(areaCopy.problemHeading.replace('{position}', '2'), { exact: true })
+      thread.getByText(messages.ui.content.problemHeading.replace('{position}', '2'), {
+        exact: true,
+      })
     ).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
     // The thread closed
