@@ -32,6 +32,11 @@ public sealed class SilentChatEndpoint : IAsyncDisposable
     private readonly Lock _gate = new();
 
     /// <summary>
+    /// Completes once the first connection is taken.
+    /// </summary>
+    private readonly TaskCompletionSource _firstConnection = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    /// <summary>
     /// The loop taking connections until the endpoint is disposed.
     /// </summary>
     private readonly Task _accepting;
@@ -79,7 +84,8 @@ public sealed class SilentChatEndpoint : IAsyncDisposable
     public ILlmChatCaller Caller { get; }
 
     /// <summary>
-    /// How many connections the caller has opened, one per attempt.
+    /// How many connections the caller has opened, one per attempt. Read it once <see cref="FirstConnection"/>
+    /// completes.
     /// </summary>
     public int Connections
     {
@@ -90,6 +96,13 @@ public sealed class SilentChatEndpoint : IAsyncDisposable
                 return _connections.Count;
         }
     }
+
+    /// <summary>
+    /// Completes once the caller's first connection is taken. Under load that can be after the call has ended. The
+    /// request timeout also covers opening the connection, and HttpClient goes on opening it after the request is
+    /// cancelled.
+    /// </summary>
+    public Task FirstConnection => _firstConnection.Task;
 
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
@@ -126,6 +139,9 @@ public sealed class SilentChatEndpoint : IAsyncDisposable
                 // Hold it, never reading or answering.
                 lock (_gate)
                     _connections.Add(connection);
+
+                // Mark the first connection as taken.
+                _firstConnection.TrySetResult();
             }
         }
         catch (Exception exception) when (exception is SocketException or ObjectDisposedException)
