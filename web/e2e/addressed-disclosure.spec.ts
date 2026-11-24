@@ -121,4 +121,48 @@ test.describe('an open thing the address names', () => {
     // The letter still the one open
     await expect(statusOf(page, LETTERS)).toHaveText(HARNESS_COPY.opened('a'))
   })
+
+  test('opens what the address names after a step back', async ({ page }) => {
+    // The page
+    await page.goto(HARNESS_PATH)
+
+    // A letter, opened
+    await press(page, LETTERS, HARNESS_COPY.open('a'))
+
+    // The letter named in the address
+    await expect.poll(() => locationParam(page, LETTERS.param)).toBe('a')
+
+    // How many steps history holds before the link is taken
+    const steps = await page.evaluate(() => window.history.length)
+
+    // The page's link to itself, whose address names nothing
+    await page.getByRole('link', { name: HARNESS_COPY.thisPage }).click()
+
+    // The link taken, a new step in history
+    await expect
+      .poll(() => page.evaluate(() => window.history.length), { timeout: SETTLE_TIMEOUT_MS })
+      .toBe(steps + 1)
+
+    // The letter put back on the new step's address
+    await expect
+      .poll(() => locationParam(page, LETTERS.param), { timeout: SETTLE_TIMEOUT_MS })
+      .toBe('a')
+
+    // Another letter, opened on the new step
+    await press(page, LETTERS, HARNESS_COPY.open('b'))
+
+    // The other letter named in the address
+    await expect.poll(() => locationParam(page, LETTERS.param)).toBe('b')
+
+    // A step back, to the address naming the first letter
+    await page.goBack()
+
+    // The first letter open again
+    await expect(statusOf(page, LETTERS)).toHaveText(HARNESS_COPY.opened('a'), {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // And the address still naming the first letter
+    expect(await locationParam(page, LETTERS.param)).toBe('a')
+  })
 })
