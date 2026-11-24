@@ -217,6 +217,9 @@ public class LlmChatCallerTests
         // It ends as a model timeout.
         await Assert.ThrowsAsync<ModelTimeoutException>(() => call);
 
+        // Wait for the endpoint to take the attempt's connection.
+        await endpoint.FirstConnection.WaitAsync(TimeSpan.FromSeconds(10));
+
         // And it was attempted once, though the caller retries other failures.
         Assert.Equal(1, endpoint.Connections);
     }
