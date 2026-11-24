@@ -8,13 +8,14 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { SHOW_TECHNIQUE_TAGS_STORAGE_KEY } from '@/constants/local-storage-constants'
 import { useAddressedChoice } from '@/hooks/use-addressed-choice'
+import { useAddressedDisclosure } from '@/hooks/use-addressed-disclosure'
 
 import { useCardFilterClicks } from '../hooks/use-card-filter-clicks'
 import { usePendingProblemLike } from '../hooks/use-pending-problem-like'
 import { usePendingProblemMark } from '../hooks/use-pending-problem-mark'
 import { useProblemListScroll } from '../hooks/use-problem-list-scroll'
 import { useProblemSearch } from '../hooks/use-problem-search'
-import { PROBLEM_CARD_VIEW_CHOICE } from '../utils/search-url-serialization'
+import { PROBLEM_CARD_VIEW_CHOICE, URL_PARAMS } from '../utils/search-url-serialization'
 import { ActiveFilterBar } from './ActiveFilterBar'
 import { ConnectionStatePanel } from './ConnectionStatePanel'
 import { EmptyResultsState } from './EmptyResultsState'
@@ -23,6 +24,7 @@ import { PaginationFooter, type PaginationFooterState } from './PaginationFooter
 import { ProblemListItem } from './ProblemListItem'
 import { LibraryColumns, LibraryFrame } from './ProblemsLibraryLayout'
 import { ActiveFilterBarSkeleton, CardSkeletons, FilterSkeleton } from './ProblemsLibrarySkeletons'
+import { ProblemSolutionDialog } from './ProblemSolutionDialog'
 import { SearchFilters } from './SearchFilters'
 
 /**
@@ -90,6 +92,10 @@ export default function ProblemsLibrary() {
 
   // How the reader wants the cards drawn, carried in the URL so a reload or a copied address keeps it
   const { option: cardView, choose: setCardView } = useAddressedChoice(PROBLEM_CARD_VIEW_CHOICE)
+
+  // The problem whose solution is open, and the ways to open and close it, carried in the URL so a copied address
+  // opens it again
+  const openedSolution = useAddressedDisclosure(URL_PARAMS.OPEN_SOLUTION)
 
   // Whether the filter drawer is open, and the ways to open and close it, for a viewport with no room for the sidebar
   const [isMobileFilterOpen, mobileFilter] = useDisclosure(false)
@@ -218,6 +224,7 @@ export default function ProblemsLibrary() {
             onAuthorClick={toggleAuthor}
             selectedAuthorSlugs={selectedAuthorSlugs}
             onSelectList={showList}
+            onOpenSolution={openedSolution.open}
           />
         )}
       />
@@ -285,6 +292,14 @@ export default function ProblemsLibrary() {
           filterOptions={filterOptions}
           baseOptions={baseOptions ?? filterOptions}
           sharedListName={listName}
+        />
+      )}
+
+      {/* The open solution, over the list */}
+      {openedSolution.openedValue !== null && (
+        <ProblemSolutionDialog
+          problemSlug={openedSolution.openedValue}
+          onClose={openedSolution.close}
         />
       )}
     </LibraryFrame>

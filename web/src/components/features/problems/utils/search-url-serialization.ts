@@ -30,6 +30,8 @@ const UI_STATE_PARAMS = {
   BROWSE_COMPETITIONS: 'browseCompetitions',
   /** The key the card view is recorded under. */
   CARD_VIEW: 'view',
+  /** The key the open solution is recorded under, by its problem's slug. */
+  OPEN_SOLUTION: 'solution',
 } as const
 
 /**

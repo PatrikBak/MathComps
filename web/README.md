@@ -9,7 +9,8 @@ A Next.js application for browsing and searching mathematical competition proble
   - `api/` – API routes (contact form, error relay, webhooks)
 - **`src/components/`** – React components organized by purpose
   - `features/` – Page-specific feature components (problems, handouts, defense, contact, etc.)
-  - `shared/` – Reusable components and utilities
+  - `domain/` – Pieces several features share that know MathComps' own concepts, one folder per concept
+  - `shared/` – Generic components and utilities
   - `layout/` – Header, footer, navigation
   - `math/` – KaTeX rendering and math utilities
   - `login/` – Authentication UI components
@@ -25,7 +26,7 @@ A Next.js application for browsing and searching mathematical competition proble
 - **`messages/`** – Locale JSON files (cs.json, en.json, sk.json)
 - **`scripts/`** – Build-time validators and generators, plus the [draft-format spec](scripts/PREFLIGHT_README.md) the bulk importer reads
 
-Anything one feature owns lives with that feature under `src/components/features/`, hooks and types included. The top-level folders are for what several features share.
+Anything one feature owns lives with that feature under `src/components/features/`, hooks and types included. The top-level folders are for what several features share. The rule for imports: a feature imports from `domain/` and `shared/`, `domain/` from `shared/`, and nothing imports from another feature's folder.
 
 ## Getting Started
 

@@ -37,7 +37,7 @@ function apiCallReturning(
   const problem: Problem = {
     slug: 'a-problem',
     statementMarkdown: '',
-    solutionLink: null,
+    solutionMarkdown: null,
     source: {
       season: { slug: '2023', displayName: '2023', fullName: null },
       startYear: 2023,

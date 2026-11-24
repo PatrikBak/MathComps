@@ -5,6 +5,7 @@ import { Plus, X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useMemo } from 'react'
 
+import { ProblemBand } from '@/components/domain/problem/ProblemBand'
 import { CompetitionClock } from '@/components/features/hosted-competitions/components/CompetitionClock'
 import type { AreaEntry } from '@/components/features/hosted-competitions/model/hosted-competition-state'
 import { Button } from '@/components/shared/components/Button'
@@ -28,7 +29,6 @@ import { DefenseFeedbackPrompt } from './DefenseFeedbackPrompt'
 import { DefenseHistoryMenu } from './DefenseHistoryMenu'
 import { DefenseTranscript } from './DefenseTranscript'
 import { EditedSinceNote } from './EditedSinceNote'
-import { ProblemBand } from './ProblemBand'
 
 /**
  * Props for the {@link DefenseConversation}.

@@ -390,7 +390,6 @@
     "practiceNote": "Skúšobná súťaž s jednoduchými úlohami na vyskúšanie si súťažného prostredia.",
     "previousHint": "Predchádzajúca nápoveda",
     "problemCount": "{count, plural, one {# úloha} few {# úlohy} other {# úloh}}",
-    "problemHeading": "Úloha {position}",
     "problems": "Úlohy",
     "readiness": {
       "dismiss": "Skryť",
@@ -708,7 +707,6 @@
       "reviewTitle": "Skontroluj prepis"
     },
     "placeholder": "Rozpíš sa…",
-    "problemStrip": "Zadanie",
     "removeFeedbackMessage": "Tvoja odpoveď na túto konverzáciu sa natrvalo odstráni.",
     "removeFeedbackTitle": "Odstrániť túto odpoveď?",
     "removeReportMessage": "Tvoja spätná väzba k tejto odpovedi sa natrvalo odstráni.",
@@ -1169,6 +1167,7 @@
       "problemNotFound": "Úloha \"{problemId}\" nebola nájdená",
       "searchFailed": "Nepodarilo sa načítať úlohy",
       "searchFailedHint": "Server neodpovedal.",
+      "solutionLoadFailed": "Nepodarilo sa načítať riešenie",
       "unexpectedError": "Vyskytla sa neočakávaná chyba.",
       "urlFiltersIgnored": "Niektoré parametre v URL boli ignorované",
       "urlTooManyFilters": "URL obsahuje príliš veľa filtrov (maximálne {max})"
@@ -1311,7 +1310,6 @@
     "showTechniques": "Zobraziť techniky",
     "similarProblems": "Podobné úlohy",
     "solution": "Riešenie",
-    "solutionLink": "Odkaz na riešenie (otvorí sa v novom okne)",
     "techniquesHelpLabel": "Techniky",
     "techniquesHelpTooltip": "Ovláda viditeľnosť tagov označujúcich techniky riešenia (napr. substitúcia, rozklad, úprava výrazu). Tieto tagy pomáhajú identifikovať matematické metódy použité v úlohách.",
     "title": "Úlohy",
@@ -1561,7 +1559,9 @@
     },
     "content": {
       "imageMissing": "Obrázok sa stratil",
-      "includingNew": "vrátane nových"
+      "includingNew": "vrátane nových",
+      "problemHeading": "Úloha {position}",
+      "statement": "Zadanie"
     },
     "editor": {
       "attachment": "Príloha (PDF, TXT, MD)",

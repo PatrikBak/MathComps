@@ -36,16 +36,14 @@ type ProblemBandProps = {
 
 /**
  * The problem statement at the head of a surface, at its own height up to whatever the surface can spare.
- * A statement past that height scrolls, so what it costs everything under it is the same whatever problem
- * is being read.
+ * A longer statement scrolls, so what sits under it gets the same room whatever the problem.
  *
- * Folding it away costs a row only while it is folded, where the row is the whole of what is left to
- * unfold it by. Open, the control sits in a gutter of the statement's own space. It is one control either
- * way, so folding and unfolding leaves the keyboard where it was.
+ * Folded, the statement leaves one row that unfolds it. Open, the same control sits in a gutter beside the
+ * statement. It stays one control, so folding and unfolding keeps the keyboard focus where it was.
  */
 export function ProblemBand({ statement, height }: ProblemBandProps) {
-  // Defense copy
-  const t = useTranslations('defense')
+  // Shared content copy
+  const tContent = useTranslations('ui.content')
 
   // Whether the statement is showing
   const [isOpen, setIsOpen] = useState(true)
@@ -66,13 +64,12 @@ export function ProblemBand({ statement, height }: ProblemBandProps) {
         </div>
       )}
 
-      {/* Fold the statement away, and bring it back. Open, it hangs in the gutter the statement leaves
-          for it; folded, it is the row itself and carries the name of what it opens */}
+      {/* The fold toggle */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
-        aria-label={isOpen ? t('problemStrip') : undefined}
+        aria-label={isOpen ? tContent('statement') : undefined}
         className={cn(
           'flex items-center gap-1.5 text-muted/60 hover:text-foreground',
           isOpen
@@ -81,7 +78,7 @@ export function ProblemBand({ statement, height }: ProblemBandProps) {
         )}
       >
         {isOpen ? <ChevronUp size={14} /> : <ChevronDown className="size-3.5" />}
-        {!isOpen && t('problemStrip')}
+        {!isOpen && tContent('statement')}
       </button>
     </div>
   )

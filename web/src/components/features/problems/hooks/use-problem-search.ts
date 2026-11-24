@@ -24,11 +24,9 @@ import {
   initializeFiltersFromUrlOrDefaults,
   namesOnlyKnownCompetitions,
 } from '../utils/url-initialization'
+import { useProblemNotFoundNotice } from './use-problem-not-found-notice'
 import { useBaseOptions, useProblemSearchQuery, useSingleProblem } from './use-problem-search-query'
 import { useRefusedFilters } from './use-refused-filters'
-
-/** How much of a slug a notice can carry. */
-const MAX_NOTICE_SLUG_LENGTH = 20
 
 /**
  * Refuses the filters that only mean something to a signed-in reader.
@@ -197,22 +195,28 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     return withoutRefusedFilters(namedFilters, isSignedOut)
   }, [urlParsingResult, namesAGoneCompetition, isSignedOut])
 
-  // Say so when the URL asked for filters that could not be honoured
-  useEffect(() => {
-    // The URL has yet to be read
-    if (!urlParsingResult) return
+  // Whether the URL's filters were dropped: the URL could not be read, or it named a competition the
+  // taxonomy has since dropped
+  const isUrlIgnored =
+    urlParsingResult !== null && (urlParsingResult.hasInvalidParams || namesAGoneCompetition)
 
-    // The URL could not be read, or named a competition the taxonomy has since dropped
-    if (urlParsingResult.hasInvalidParams || namesAGoneCompetition) {
+  // Whether the URL named more filters than are allowed
+  const hasTooManyUrlFilters = urlParsingResult?.hasTooManyFilters ?? false
+
+  // Say so when the URL asked for filters that could not be honoured, once per outcome: an address that
+  // changes without changing whether its filters held warns no second time
+  useEffect(() => {
+    // The URL's filters were dropped
+    if (isUrlIgnored) {
       // Warn that the URL's filters were dropped
       toast.warning(tErrors('urlFiltersIgnored'))
     }
     // The URL named more filters than are allowed
-    else if (urlParsingResult.hasTooManyFilters) {
+    else if (hasTooManyUrlFilters) {
       // Warn that the limit is what dropped them
       toast.warning(tErrors('urlTooManyFilters', { max: ACTIVE_FILTERS_CONSTANTS.maxFilterLimit }))
     }
-  }, [urlParsingResult, namesAGoneCompetition, tErrors])
+  }, [isUrlIgnored, hasTooManyUrlFilters, tErrors])
 
   // A function which answers a filter this reader turns out not to be able to have
   const { dropAndExplain } = useRefusedFilters({
@@ -373,6 +377,9 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     return localFilters
   }, [problemId, singleProblemQuery.data?.filters, localFilters])
 
+  // A function which tells the reader no problem goes by a slug
+  const notifyProblemNotFound = useProblemNotFoundNotice()
+
   // A problem asked for by ID that turns out not to exist is worth saying out loud, because the
   // answer is to leave the page rather than to try again. Every other failure keeps the reader here,
   // where the page itself explains it.
@@ -386,18 +393,12 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     // Only a missing problem is handled here
     if (errorCodeOf(singleProblemState.error) !== 'ProblemNotFound') return
 
-    // The slug, cut short when it runs past what a notice can carry
-    const truncatedId =
-      problemId.length > MAX_NOTICE_SLUG_LENGTH
-        ? `${problemId.slice(0, MAX_NOTICE_SLUG_LENGTH)}...`
-        : problemId
-
     // Name the problem that is gone
-    toast.error(tErrors('problemNotFound', { problemId: truncatedId }))
+    notifyProblemNotFound(problemId)
 
     // Return to the list it should have been in
     router.replace(ROUTES.PROBLEMS, { scroll: false })
-  }, [problemId, singleProblemQuery.uiState, router, tErrors])
+  }, [problemId, singleProblemQuery.uiState, router, notifyProblemNotFound])
 
   // A function which runs the search again
   const retrySearch = searchQuery.retry

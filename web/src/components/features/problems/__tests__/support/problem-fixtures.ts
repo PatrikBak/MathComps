@@ -20,7 +20,7 @@ export function problemWith(state: Partial<Problem> = {}): Problem {
   return {
     slug: 'problem',
     statementMarkdown: '',
-    solutionLink: null,
+    solutionMarkdown: null,
     source: {
       season: { slug: '75', displayName: '75', fullName: null },
       startYear: 2025,

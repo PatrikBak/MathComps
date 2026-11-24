@@ -5,10 +5,10 @@ import { MessageSquare, Plus } from 'lucide-react'
 import { useFormatter, useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
+import { PROBLEM_ROW_CLASS, ProblemRowLabel } from '@/components/domain/problem/ProblemRow'
 import { DefenseConversation } from '@/components/features/defense/components/DefenseConversation'
 import { Button } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
-import { PROBLEM_ROW_CLASS, ProblemRowLabel } from '@/components/shared/components/ProblemRow'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
 import { MATHILDA_NAME } from '@/constants/mathilda'
@@ -61,6 +61,9 @@ export function CompetitionProblemPanel({
   // Competitions copy
   const t = useTranslations('competitions')
 
+  // Shared content copy
+  const tContent = useTranslations('ui.content')
+
   // The active locale
   const locale = useLocale() as Locale
 
@@ -84,7 +87,7 @@ export function CompetitionProblemPanel({
       {/* Which of the set this is, and how the reader did on it once the marks are in */}
       <div className="mb-3 flex items-start justify-between gap-4">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
-          {t('problemHeading', { position: problem.position })}
+          {tContent('problemHeading', { position: problem.position })}
         </h2>
 
         {problem.result !== null && <ProblemScore result={problem.result} />}

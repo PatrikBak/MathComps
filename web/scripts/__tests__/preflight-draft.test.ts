@@ -433,6 +433,13 @@ describe('invalid drafts — specific issues', () => {
     expect(error?.half).toBe('hint')
   })
 
+  it('flags an empty solution', async () => {
+    const manifest = await loadFixture('invalid-empty-solution')
+    const error = findError(manifest, (entry) => entry.rule === 'empty-solution')
+    expect(error?.severity).toBe('error')
+    expect(error?.half).toBe('solution')
+  })
+
   it('flags an unsupported image format', async () => {
     const manifest = await loadFixture('invalid-unsupported-image')
     const error = findError(manifest, (entry) => entry.rule === 'unsupported-image-format')

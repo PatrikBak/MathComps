@@ -390,7 +390,6 @@
     "practiceNote": "Zkušební soutěž s jednoduchými úlohami na vyzkoušení soutěžního prostředí.",
     "previousHint": "Předchozí nápověda",
     "problemCount": "{count, plural, one {# úloha} few {# úlohy} other {# úloh}}",
-    "problemHeading": "Úloha {position}",
     "problems": "Úlohy",
     "readiness": {
       "dismiss": "Skrýt",
@@ -708,7 +707,6 @@
       "reviewTitle": "Zkontroluj přepis"
     },
     "placeholder": "Rozepiš se…",
-    "problemStrip": "Zadání",
     "removeFeedbackMessage": "Tvoje odpověď na tuto konverzaci se trvale odstraní.",
     "removeFeedbackTitle": "Odebrat tuto odpověď?",
     "removeReportMessage": "Tvoje zpětná vazba k této odpovědi se trvale odstraní.",
@@ -1169,6 +1167,7 @@
       "problemNotFound": "Úloha \"{problemId}\" nebyla nalezena",
       "searchFailed": "Nepodařilo se načíst úlohy",
       "searchFailedHint": "Server neodpověděl.",
+      "solutionLoadFailed": "Nepodařilo se načíst řešení",
       "unexpectedError": "Došlo k neočekávané chybě.",
       "urlFiltersIgnored": "Některé parametry v URL byly ignorovány",
       "urlTooManyFilters": "URL obsahuje příliš mnoho filtrů (maximálně {max})"
@@ -1311,7 +1310,6 @@
     "showTechniques": "Zobrazit techniky",
     "similarProblems": "Podobné úlohy",
     "solution": "Řešení",
-    "solutionLink": "Odkaz na řešení (otevře se v novém okně)",
     "techniquesHelpLabel": "Techniky",
     "techniquesHelpTooltip": "Ovládá viditelnost tagů označujících techniky řešení (např. substituce, rozklad, úprava výrazu). Tyto tagy pomáhají identifikovat matematické metody použité v úlohách.",
     "title": "Úlohy",
@@ -1561,7 +1559,9 @@
     },
     "content": {
       "imageMissing": "Obrázek se ztratil",
-      "includingNew": "včetně nových"
+      "includingNew": "včetně nových",
+      "problemHeading": "Úloha {position}",
+      "statement": "Zadání"
     },
     "editor": {
       "attachment": "Příloha (PDF, TXT, MD)",

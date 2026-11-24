@@ -3,9 +3,8 @@
 import { BookOpen } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { ProblemSurface } from '@/components/domain/problem/ProblemSurface'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
-
-import { CompetitionProblemSurface } from './CompetitionProblemSurface'
 
 /**
  * Props for the {@link CompetitionSolution} component.
@@ -40,7 +39,7 @@ export function CompetitionSolution({
   const t = useTranslations('competitions')
 
   return (
-    <CompetitionProblemSurface
+    <ProblemSurface
       label={t('officialSolution')}
       icon={BookOpen}
       position={position}
@@ -54,6 +53,6 @@ export function CompetitionSolution({
       <div className="math-typography math-reference">
         <RichMathEditorRenderer content={solution} imageContext="problems" />
       </div>
-    </CompetitionProblemSurface>
+    </ProblemSurface>
   )
 }

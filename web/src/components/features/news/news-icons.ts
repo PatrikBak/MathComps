@@ -1,5 +1,6 @@
 import {
   ArrowDownUp,
+  BookOpen,
   Bot,
   Camera,
   Languages,
@@ -34,6 +35,7 @@ export type NewsIconName =
   | 'messages-square'
   | 'bot'
   | 'camera'
+  | 'book-open'
 
 /**
  * Maps each {@link NewsIconName} to its Lucide component.
@@ -53,4 +55,5 @@ export const NEWS_ICONS: Record<NewsIconName, LucideIcon> = {
   'messages-square': MessagesSquare,
   bot: Bot,
   camera: Camera,
+  'book-open': BookOpen,
 }

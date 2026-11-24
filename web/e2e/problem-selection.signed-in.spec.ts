@@ -2,16 +2,11 @@ import type { Page } from '@playwright/test'
 
 import { OPEN_PROPOSAL_PARAM } from '@/components/features/problem-selection/model/selection-routes'
 
+import messages from '../messages/en.json'
 import { locationParam } from './support/address'
 import { BACKEND_ORIGIN } from './support/backend-routes'
 import { stubNamedReader } from './support/comments'
-import {
-  actionsCopy,
-  chatCopy,
-  editorCopy,
-  modalCopy,
-  SELECTION_PATH,
-} from './support/competitions'
+import { actionsCopy, editorCopy, modalCopy, SELECTION_PATH } from './support/competitions'
 import { returnToTab, slowDown } from './support/emulation'
 import { pickPillAnswer } from './support/facets'
 import {
@@ -933,7 +928,7 @@ test.describe('reading the selection', () => {
     const solutionBefore = (await solution.boundingBox())!
 
     // The control folding the statement away
-    const fold = surface.getByRole('button', { name: chatCopy.problemStrip })
+    const fold = surface.getByRole('button', { name: messages.ui.content.statement })
 
     // Pressed
     await fold.click()

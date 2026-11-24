@@ -1,11 +1,11 @@
-import { ExternalLink, Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
+import { PROBLEM_ROW_CLASS, ProblemRowLabel } from '@/components/domain/problem/ProblemRow'
 import { CommentModal } from '@/components/features/comments/components/CommentModal'
 import { useCommentModal } from '@/components/features/comments/hooks/use-comment-modal'
-import { AppLink } from '@/components/shared/components/AppLink'
-import { PROBLEM_ROW_CLASS, ProblemRowLabel } from '@/components/shared/components/ProblemRow'
+import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -47,12 +47,14 @@ export type ProblemCardProps = {
   selectedAuthorSlugs: Set<string>
   /** Shows the problems of one of the reader's lists, by the list's content id. */
   onSelectList: (contentId: string) => void
+  /** Opens the solution of a problem, by the problem's slug. */
+  onOpenSolution: (problemSlug: string) => void
 }
 
 /**
  * A problem's card in the library: its number and name, what can be done to it, the statement closed by its authors,
- * its tags, and the rows opening its solution and the problems similar to it. A click on a tag or an author hands it to
- * the filters.
+ * its tags with the way to its solution at their right end, and the row opening the problems similar to it. A click
+ * on a tag or an author hands it to the filters.
  *
  * Drawn compact, the card keeps only its number, the problem's name and the statement.
  */
@@ -67,6 +69,7 @@ export function ProblemCard({
   onAuthorClick,
   selectedAuthorSlugs,
   onSelectList,
+  onOpenSolution,
 }: ProblemCardProps) {
   // The problem, once it has loaded
   const problem = useProblem(problemSlug)
@@ -108,11 +111,26 @@ export function ProblemCard({
   // Whether any similar problem was found
   const hasSimilarProblems = problem.similarProblems.length > 0
 
-  // Whether the card has a row to offer under its statement
-  const hasRows = problem.solutionLink !== null || hasSimilarProblems
-
   // Whether the similar problems show: opened, on a card with room for them
   const areSimilarShown = layout.hasDetails && isSimilarOpen
+
+  // The button opening the problem's solution, for a problem with one
+  const solutionButton =
+    problem.solutionMarkdown !== null ? (
+      <button
+        type="button"
+        onClick={() => onOpenSolution(problem.slug)}
+        className={cn(
+          'whitespace-nowrap rounded-sm text-[11px] font-semibold uppercase sm:text-[11.5px]',
+          'tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground',
+          // Pulled out by the spacing after its last letter, so that letter ends on the statement's right edge
+          '-mr-[0.14em]',
+          FOCUS_RING_CLASS
+        )}
+      >
+        {tProblems('solution')}
+      </button>
+    ) : undefined
 
   return (
     // The card, stating which problem it is so it can be found among the rest
@@ -162,7 +180,7 @@ export function ProblemCard({
           </div>
         </div>
 
-        {/* Tags */}
+        {/* Tags, and on their right the solution */}
         {layout.hasDetails && (
           <ProblemTagLine
             tags={problem.tags}
@@ -170,41 +188,26 @@ export function ProblemCard({
             activeTechniqueFilterSlugs={activeTechniqueFilterSlugs}
             selectedTagSlugs={selectedTagSlugs}
             onTagClick={onTagClick}
+            end={solutionButton}
           />
         )}
 
-        {/* Rows opening the solution and the similar problems, pulled out by their padding so what a row says starts
-            on the statement's left edge */}
-        {layout.hasDetails && hasRows && (
+        {/* Row opening the similar problems, pulled out by its padding so what it says starts on the statement's left
+            edge */}
+        {layout.hasDetails && hasSimilarProblems && (
           <div className="-mx-3 mt-2 flex flex-wrap gap-1">
-            {/* Solution, opening in a new tab */}
-            {problem.solutionLink !== null && (
-              <AppLink
-                href={problem.solutionLink}
-                newTab
-                plain
-                className={PROBLEM_ROW_CLASS}
-                title={tProblems('solutionLink')}
-              >
-                <ProblemRowLabel label={tProblems('solution')} icon={ExternalLink} count={null} />
-              </AppLink>
-            )}
-
-            {/* Similar problems, opening under the statement */}
-            {hasSimilarProblems && (
-              <button
-                type="button"
-                onClick={() => setIsSimilarOpen(!isSimilarOpen)}
-                aria-expanded={isSimilarOpen}
-                className={cn(PROBLEM_ROW_CLASS, isSimilarOpen && 'bg-foreground/5')}
-              >
-                <ProblemRowLabel
-                  label={tProblems('similarProblems')}
-                  icon={isSimilarOpen ? EyeOff : Eye}
-                  count={{ value: problem.similarProblems.length }}
-                />
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => setIsSimilarOpen(!isSimilarOpen)}
+              aria-expanded={isSimilarOpen}
+              className={cn(PROBLEM_ROW_CLASS, isSimilarOpen && 'bg-foreground/5')}
+            >
+              <ProblemRowLabel
+                label={tProblems('similarProblems')}
+                icon={isSimilarOpen ? EyeOff : Eye}
+                count={{ value: problem.similarProblems.length }}
+              />
+            </button>
           </div>
         )}
 
