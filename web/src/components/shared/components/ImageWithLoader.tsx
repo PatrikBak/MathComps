@@ -150,20 +150,20 @@ export function ImageWithLoader(props: ImageWithLoaderProps) {
         style: { width: 'auto', height: 'auto', ...(scale !== 1 && { zoom: scale }) },
       }
 
-  // Block mode uses width: 100% + max-width + aspect-ratio so the wrapper
-  // shrinks proportionally in both axes when its parent is narrower than the
-  // declared width — fixing width + height alone leaves flex-shrink trimming
-  // the width while the height stays locked, opening asymmetric whitespace
-  // when the image hits Tailwind preflight's max-width: 100% / height: auto.
-  // Inline mode keeps explicit dimensions because the wrapper sits inside a
-  // line of text and we want exact reserved space, not responsive scaling.
+  // Block mode reserves the declared width, capped at the parent's, with the
+  // height following from the aspect ratio. So the wrapper shrinks
+  // proportionally in both axes when its parent is narrower, and keeps its size
+  // before the image loads where the parent takes its width from its content,
+  // as a picture in a row of pictures does. Inline mode keeps explicit
+  // dimensions because the wrapper sits inside a line of text and we want exact
+  // reserved space, not responsive scaling.
   const sizeStyle =
     hasIntrinsicSize &&
     (inline
       ? { width: scaledWidth, height: scaledHeight }
       : {
-          width: '100%',
-          maxWidth: scaledWidth,
+          width: scaledWidth,
+          maxWidth: '100%',
           aspectRatio: `${scaledWidth} / ${scaledHeight}`,
         })
 
