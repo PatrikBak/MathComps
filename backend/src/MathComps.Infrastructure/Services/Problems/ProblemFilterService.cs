@@ -94,20 +94,29 @@ public class ProblemFilterService(
             .OrderByDefaultProblemSort()
             // Split query to avoid Cartesian explosion when accessing multiple collections
             .AsSplitQuery()
-            // Get the statement
+            // Get the statement and the solution
             .Select(problem => new
             {
                 // The original problem instance
                 problem,
 
                 // Language-aware statement selection: prefer requested language, fallback to original
-                Statement = problem.Texts
+                Statement = problem.Texts.AsQueryable()
                     .Where(text =>
                         text.DocumentType == DocumentType.Statement &&
                         text.MarkdownText != null)
-                    .OrderBy(text => text.Language == language ? 0 : (text.IsOriginal ? 1 : 2))
+                    .OrderBy(ProblemText.ReadersLanguageThenOriginal(language))
                     .Select(text => text.MarkdownText!)
-                    .First()
+                    .First(),
+
+                // The Markdown solution in the reader's language, else the original, null when there is none
+                Solution = problem.Texts.AsQueryable()
+                    .Where(text =>
+                        text.DocumentType == DocumentType.Solution &&
+                        text.MarkdownText != null)
+                    .OrderBy(ProblemText.ReadersLanguageThenOriginal(language))
+                    .Select(text => text.MarkdownText)
+                    .FirstOrDefault()
             })
             // Build the DTO from it
             .Select(data => new ProblemDto(
@@ -116,6 +125,9 @@ public class ProblemFilterService(
 
                 // What it asks
                 data.Statement,
+
+                // How it is solved
+                data.Solution,
 
                 // Problem Source
                 ProblemSources.Build(
@@ -176,11 +188,11 @@ public class ProblemFilterService(
                             language),
 
                         // Language-aware statement selection for similar problem
-                        similarProblem.SimilarProblem.Texts
+                        similarProblem.SimilarProblem.Texts.AsQueryable()
                             .Where(text =>
                                 text.DocumentType == DocumentType.Statement &&
                                 text.MarkdownText != null)
-                            .OrderBy(text => text.Language == language ? 0 : (text.IsOriginal ? 1 : 2))
+                            .OrderBy(ProblemText.ReadersLanguageThenOriginal(language))
                             .Select(text => text.MarkdownText!)
                             .First(),
 

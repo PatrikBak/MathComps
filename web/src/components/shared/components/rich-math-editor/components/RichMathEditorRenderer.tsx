@@ -1,6 +1,16 @@
+import type { Element } from 'hast'
 import { useTranslations } from 'next-intl'
-import { createContext, memo, type PropsWithChildren, type ReactNode, use, useMemo } from 'react'
+import {
+  createContext,
+  memo,
+  type PropsWithChildren,
+  type ReactNode,
+  use,
+  useId,
+  useMemo,
+} from 'react'
 import Markdown, { type Components, type ExtraProps, type UrlTransform } from 'react-markdown'
+import type { Options as RemarkRehypeOptions } from 'remark-rehype'
 import type { PluggableList } from 'unified'
 
 import { AppLink } from '@/components/shared/components/AppLink'
@@ -26,6 +36,7 @@ import {
   remarkPlugins as sharedRemarkPlugins,
 } from '../utils/markdown-pipeline'
 import { preprocessDisplayMath } from '../utils/preprocessors'
+import { RichMathEditorInPageLink } from './RichMathEditorInPageLink'
 import { RichMathEditorSpoiler } from './RichMathEditorSpoiler'
 
 /**
@@ -66,6 +77,9 @@ const LIGHT_IMAGE_BACKGROUND: Record<ImageContext, boolean> = {
   handouts: true,
   userUploads: false,
 }
+
+/** How a link in the content looks, whether it leaves the page or stays on it. */
+const LINK_CLASS = 'text-link hover:text-link-hover underline'
 
 /**
  * Props for the {@link AttachmentBadge} component.
@@ -163,17 +177,8 @@ function holdsBlockElement(node: ExtraProps['node']): boolean {
       // Spoilers and explicit divs always are
       if (child.tagName === 'spoiler' || child.tagName === 'div') return true
 
-      // Images are, unless they carry ?inline=true
-      if (child.tagName === 'img') {
-        // The image's address, which carries the inline flag
-        const src = child.properties?.src
-
-        // One with no address stays block-level
-        if (typeof src !== 'string') return true
-
-        // Block-level unless it asks to sit inline
-        return !parseImageUrl(src).params.inline
-      }
+      // Images are, unless they ask to sit inline
+      if (child.tagName === 'img') return isBlockImage(child)
 
       // Everything else stays inside a `p`
       return false
@@ -216,6 +221,41 @@ function resolveListClassName(className: string | undefined, defaultMarker: stri
   // Combine the marker class with the shared list layout classes. A list nested in an item gets its own indent and
   // the same gap as between items.
   return `${markerClass} list-inside my-2 space-y-1 [li>&]:my-1 [li>&]:pl-[1.25em]`
+}
+
+/**
+ * Whether an image is drawn as a block of its own, which every image is unless its address asks to sit inline.
+ *
+ * @param image - The image's element in the rendered tree.
+ * @returns Whether the image is drawn as a block.
+ */
+function isBlockImage(image: Element): boolean {
+  // The image's address, which carries the inline flag
+  const src = image.properties.src
+
+  // One with no address stays a block, as does any not asking to sit inline
+  return typeof src !== 'string' || !parseImageUrl(src).params.inline
+}
+
+/**
+ * Whether a paragraph is a row of pictures: two or more block images, with nothing beside them but inline content
+ * such as an arrow between two panels. Pictures written on consecutive lines sit side by side.
+ *
+ * @param node - The paragraph's element in the rendered tree.
+ * @returns Whether the paragraph is such a row.
+ */
+function holdsImageRow(node: Element | undefined): boolean {
+  // The paragraph's elements, its text left out
+  const elements = node?.children.filter((child) => child.type === 'element') ?? []
+
+  // The pictures among them drawn as blocks
+  const blockImages = elements.filter((child) => child.tagName === 'img' && isBlockImage(child))
+
+  // Two or more pictures, and no spoiler or other block beside them
+  return (
+    blockImages.length > 1 &&
+    !elements.some((child) => child.tagName === 'spoiler' || child.tagName === 'div')
+  )
 }
 
 /**
@@ -281,6 +321,18 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
     () =>
       ({
         p: ({ children, node }) => {
+          // A row of pictures, side by side and wrapping onto more rows where the column is narrow
+          if (holdsImageRow(node)) {
+            return (
+              <div
+                {...sourceRangeOf(node)}
+                className="my-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 last:mb-0 *:my-0 [&>br]:hidden"
+              >
+                {children}
+              </div>
+            )
+          }
+
           // The paragraph's spacing, holding the floated closing within its own height where it carries one
           const className = cn('mb-2 last:mb-0', holdsClosing(node) && 'flow-root')
 
@@ -300,8 +352,10 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
             </p>
           )
         },
-        h2: ({ children, node }) => (
+        // A heading keeps its id, so the footnote marks can point at the footnotes' heading
+        h2: ({ children, id, node }) => (
           <h2
+            id={id}
             {...sourceRangeOf(node)}
             className="text-[1.25em] font-semibold text-foreground mt-5 mb-2 first:mt-0"
           >
@@ -362,7 +416,20 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
           </ol>
         ),
         del: ({ children }) => <del className="line-through text-muted">{children}</del>,
-        a: ({ href, children }) => {
+        a: ({ href, children, node: _node, ...attributes }) => {
+          // A link within the content, such as a footnote mark, keeps the reader on the page
+          if (href?.startsWith('#')) {
+            return (
+              <RichMathEditorInPageLink
+                href={href}
+                {...attributes}
+                className={cn(LINK_CLASS, attributes.className)}
+              >
+                {children}
+              </RichMathEditorInPageLink>
+            )
+          }
+
           // Whether the link is to an attached file
           const isAttachment = String(children).startsWith('📎')
 
@@ -402,13 +469,7 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
 
           // Any other link, in a new tab
           return (
-            <AppLink
-              href={normalizedHref}
-              external
-              newTab
-              plain
-              className="text-link hover:text-link-hover underline"
-            >
+            <AppLink href={normalizedHref} external newTab plain className={LINK_CLASS}>
               {children}
             </AppLink>
           )
@@ -484,12 +545,50 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
             {children}
           </RichMathEditorSpoiler>
         ),
+        figure: ({ children, node }) => (
+          <figure {...sourceRangeOf(node)} className="mt-2 mb-3">
+            {children}
+          </figure>
+        ),
+        // The caption is pulled up into the bottom margin of what the figure shows, so it sits closer to its
+        // figure than to the text after it
+        figcaption: ({ children, node }) => (
+          <figcaption
+            {...sourceRangeOf(node)}
+            className="-mt-1 text-center text-sm text-balance text-muted"
+          >
+            {children}
+          </figcaption>
+        ),
         [NUMBER_REFERENCE_TAG]: ({ children, node }) =>
           // What the caller draws for the number, or the `#N` as written where it draws nothing
           renderNumberReference?.(Number(node?.properties[NUMBER_REFERENCE_NUMBER])) ?? children,
         [CLOSING_TAG]: ClosingSlot,
       }) as CustomComponents,
     [fileLinks, imageContext, lightImageBackground, renderNumberReference, t]
+  )
+
+  // This renderer's own id, unique on the page
+  const instanceId = useId()
+
+  // How the content's footnotes come out: ids no other content on the page shares, and their heading and back links
+  // named in the reader's language
+  const remarkRehypeOptions = useMemo<RemarkRehypeOptions>(
+    () => ({
+      clobberPrefix: `${instanceId}-`,
+      footnoteLabel: t('footnotes'),
+      footnoteBackLabel: (referenceIndex, rereferenceIndex) => {
+        // The footnote's number
+        const number = referenceIndex + 1
+
+        // The number, with which of the footnote's marks the back link returns to when it has several
+        const reference = rereferenceIndex > 1 ? `${number}-${rereferenceIndex}` : `${number}`
+
+        // The back link's name
+        return t('footnoteBack', { reference })
+      },
+    }),
+    [instanceId, t]
   )
 
   // Preprocess display math before parsing, keeping the way back to the content as written
@@ -522,6 +621,8 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
         // Pipeline: the shared rehype plugins in their own order, then where asked the source ranges and the
         // closing's mark
         rehypePlugins={rehypePlugins}
+        // How the footnotes come out
+        remarkRehypeOptions={remarkRehypeOptions}
         // URL sanitization: allow-list safe schemes, explicitly block dangerous ones
         urlTransform={urlTransform}
         components={components}

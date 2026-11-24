@@ -12,6 +12,7 @@ import type { PluggableList } from 'unified'
 import { unified } from 'unified'
 
 import { rehypeMathNowrap } from '../plugins/rehype-math-nowrap'
+import { remarkFigure } from '../plugins/remark-figure'
 import { remarkImageParams } from '../plugins/remark-image-params'
 import { remarkInlineQuote } from '../plugins/remark-inline-quote'
 import { remarkListStyle } from '../plugins/remark-list-style'
@@ -22,18 +23,29 @@ import { hasUnbalancedDollars } from './math-delimiters'
 import { preprocessDisplayMath } from './preprocessors'
 
 /**
+ * What the sanitizer writes before every id the content carries, so an id in the content can't shadow one of the
+ * page's own. A link within the content names its target's id without it.
+ */
+export const SANITIZED_ID_PREFIX = 'user-content-'
+
+/**
  * Custom sanitization schema extending the default GitHub schema.
- * Allows our `<spoiler>` and `#N` reference elements and KaTeX MathML output while blocking
+ * Allows our `<spoiler>`, figure and `#N` reference elements and KaTeX MathML output while blocking
  * XSS vectors like `<script>`, event handlers, and CSS defacement via `style`.
  *
  * The sanitizer runs BEFORE KaTeX, so KaTeX-generated styles are unaffected.
  */
 const sanitizeSchema: SanitizeOptions = {
   ...defaultSchema,
+  // The prefix every id in the content gets
+  clobberPrefix: SANITIZED_ID_PREFIX,
   tagNames: [
     ...(defaultSchema.tagNames ?? []),
     // Custom element for spoilers
     'spoiler',
+    // A figure and the caption under it
+    'figure',
+    'figcaption',
     // Custom element for a `#N` in the text
     NUMBER_REFERENCE_TAG,
     // MathML tags for accessibility (KaTeX can output these)
@@ -71,16 +83,17 @@ const sanitizeSchema: SanitizeOptions = {
 
 /**
  * Remark plugins shared by `<Markdown>` (react-markdown) and the headless
- * validator. Order is significant: directive must run before the directive-
- * consuming plugins (spoiler, list-style, inline-quote) so each `:::name` and
- * `:name[…]` shape has its directive node ready to transform.
- * {@link remarkUnclaimedTextDirectives} runs after them, so it puts back as
- * text only the `:word` none of them claimed.
+ * validator. Order is significant: directive must run before the
+ * directive-consuming plugins (spoiler, figure, list-style, inline-quote) so
+ * each `:::name` and `:name[…]` shape has its directive node ready to
+ * transform. {@link remarkUnclaimedTextDirectives} runs after them, so it puts
+ * back as text only the `:word` none of them claimed.
  */
 export const remarkPlugins: PluggableList = [
   remarkGfm,
   remarkDirective,
   remarkSpoiler,
+  remarkFigure,
   remarkListStyle,
   remarkInlineQuote,
   remarkUnclaimedTextDirectives,

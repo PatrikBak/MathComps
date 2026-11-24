@@ -1388,6 +1388,159 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
     #endregion
 
+    #region Solution Selection Tests
+
+    /// <summary>
+    /// A solution comes in the reader's language where it was translated into it and in the original otherwise,
+    /// the same rule the statement follows.
+    /// </summary>
+    [Fact]
+    public async Task FilterServesTheSolutionInTheReadersLanguageElseTheOriginal()
+    {
+        // Arrange - add a problem solved in Slovak and translated into Czech
+        await QueryAsync(async context =>
+        {
+            // Any seeded round satisfies the foreign key
+            var roundId = (await context.Rounds.FirstAsync()).Id;
+
+            // The problem carrying the two solutions
+            var problem = new Problem
+            {
+                Id = Guid.NewGuid(),
+                Slug = "solution-language-1",
+                RoundId = roundId,
+                Number = 9
+            };
+
+            // The problem's statement, which every archive problem has
+            problem.Texts.Add(new ProblemText
+            {
+                Id = Guid.NewGuid(),
+                ProblemId = problem.Id,
+                DocumentType = DocumentType.Statement,
+                MarkdownText = "Zadanie s preloženým riešením.",
+                Language = Language.SK,
+                DateModified = DateTime.UtcNow,
+                IsOriginal = true
+            });
+
+            // The solution in the language the problem was written in
+            problem.Texts.Add(new ProblemText
+            {
+                Id = Guid.NewGuid(),
+                ProblemId = problem.Id,
+                DocumentType = DocumentType.Solution,
+                MarkdownText = "Riešenie v slovenčine.",
+                Language = Language.SK,
+                DateModified = DateTime.UtcNow,
+                IsOriginal = true
+            });
+
+            // The solution's Czech translation
+            problem.Texts.Add(new ProblemText
+            {
+                Id = Guid.NewGuid(),
+                ProblemId = problem.Id,
+                DocumentType = DocumentType.Solution,
+                MarkdownText = "Řešení v češtině.",
+                Language = Language.CS,
+                DateModified = DateTime.UtcNow,
+                IsOriginal = false
+            });
+
+            // Commit the problem so the service under test sees it
+            context.Problems.Add(problem);
+            await context.SaveChangesAsync();
+        });
+
+        // Read the problem back through the service under test
+        await RunTestAsync(async service =>
+        {
+            // Act - read the library as an English reader, whose language has no solution translation
+            var (englishResult, _) = await service.FilterAsync(EverythingQuery() with { Language = Language.EN });
+
+            // Act - read it again as a Czech reader, whose language has one
+            var (czechResult, _) = await service.FilterAsync(EverythingQuery() with { Language = Language.CS });
+
+            // The problem as each reader got it
+            var englishProblem = englishResult.Problems.Items.Single(problem => problem.Slug == "solution-language-1");
+            var czechProblem = czechResult.Problems.Items.Single(problem => problem.Slug == "solution-language-1");
+
+            // Assert - the English reader falls back to the original
+            Assert.Equal("Riešenie v slovenčine.", englishProblem.SolutionMarkdown);
+
+            // Assert - the Czech reader gets their own language
+            Assert.Equal("Řešení v češtině.", czechProblem.SolutionMarkdown);
+        });
+    }
+
+    /// <summary>
+    /// A solution kept only as raw TeX counts as no solution, and so does having no solution row at all.
+    /// </summary>
+    [Fact]
+    public async Task FilterServesNoSolutionWhereNoneIsInMarkdown()
+    {
+        // Arrange - add a problem whose only solution is raw TeX
+        await QueryAsync(async context =>
+        {
+            // Any seeded round satisfies the foreign key
+            var roundId = (await context.Rounds.FirstAsync()).Id;
+
+            // The problem carrying the raw solution
+            var problem = new Problem
+            {
+                Id = Guid.NewGuid(),
+                Slug = "raw-solution-1",
+                RoundId = roundId,
+                Number = 9
+            };
+
+            // The problem's statement, which every archive problem has
+            problem.Texts.Add(new ProblemText
+            {
+                Id = Guid.NewGuid(),
+                ProblemId = problem.Id,
+                DocumentType = DocumentType.Statement,
+                MarkdownText = "Zadanie s riešením len v TeXu.",
+                Language = Language.SK,
+                DateModified = DateTime.UtcNow,
+                IsOriginal = true
+            });
+
+            // The solution stored only as legacy TeX raw text
+            problem.Texts.Add(new ProblemText
+            {
+                Id = Guid.NewGuid(),
+                ProblemId = problem.Id,
+                DocumentType = DocumentType.Solution,
+                RawText = "Riešenie len v \\TeX{}u.",
+                MarkdownText = null,
+                Language = Language.SK,
+                DateModified = DateTime.UtcNow,
+                IsOriginal = true
+            });
+
+            // Commit the problem so the service under test sees it
+            context.Problems.Add(problem);
+            await context.SaveChangesAsync();
+        });
+
+        // Read the problem back through the service under test
+        await RunTestAsync(async service =>
+        {
+            // Act - read the whole library
+            var (result, _) = await service.FilterAsync(EverythingQuery());
+
+            // Assert - the problem with the raw solution is on the page
+            Assert.Contains(result.Problems.Items, problem => problem.Slug == "raw-solution-1");
+
+            // Assert - no problem on the page carries a solution, the raw one and the seeded ones alike
+            Assert.All(result.Problems.Items, problem => Assert.Null(problem.SolutionMarkdown));
+        });
+    }
+
+    #endregion
+
     #region ListContentId Filtering Tests
 
     /// <summary>
