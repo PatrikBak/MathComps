@@ -3,6 +3,7 @@
 import { Search } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { LIGHT_CONTROL_SURFACE_CLASS } from '@/components/shared/components/facets/components/FacetTrigger'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import type { UsePoolFiltersResult } from '../hooks/use-pool-filters'
@@ -46,8 +47,8 @@ export function PoolTools({ mode, filters, counts }: PoolToolsProps) {
           placeholder={t('searchPlaceholder')}
           // Drawn as light and as tall as the facet pills below, since it sits on the page itself
           className={cn(
-            'form-input border-foreground/10 bg-foreground/[0.03] py-1.5 pl-9 placeholder:text-muted',
-            'hover:border-foreground/25 hover:bg-foreground/[0.07] focus-visible:border-focus/70'
+            'form-input py-1.5 pl-9 placeholder:text-muted focus-visible:border-focus/70',
+            LIGHT_CONTROL_SURFACE_CLASS
           )}
         />
       </label>

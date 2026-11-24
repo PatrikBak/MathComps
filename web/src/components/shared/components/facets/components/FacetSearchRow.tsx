@@ -5,6 +5,8 @@ import { type RefObject, useCallback } from 'react'
 import { FLOATING_PANEL_FILL_CLASS } from '@/components/shared/components/DropdownMenu'
 import { cn } from '@/components/shared/utils/css-utils'
 
+import { LIGHT_CONTROL_SURFACE_CLASS } from './FacetTrigger'
+
 /** How many options a facet has to offer before searching them is worth the row it costs. */
 export const SEARCH_THRESHOLD = 12
 
@@ -80,7 +82,9 @@ export function FacetSearchRow({
           aria-label={tFilters('searchIn', { name: title.toLowerCase() })}
           placeholder={placeholder}
           className={cn(
-            'h-8 sm:h-9 w-full rounded-md border border-foreground/10 bg-surface-inset/40 px-2.5 sm:px-3 text-xs sm:text-sm text-foreground placeholder-muted focus:border-focus/50 focus:outline-none focus-visible:ring-1 focus-visible:ring-focus/70',
+            'h-8 sm:h-9 w-full rounded-md border px-2.5 sm:px-3 text-xs sm:text-sm text-foreground placeholder-muted',
+            'focus:border-focus/50 focus:outline-none focus-visible:ring-1 focus-visible:ring-focus/70',
+            LIGHT_CONTROL_SURFACE_CLASS,
             query.length > 0 && 'pr-8 sm:pr-9'
           )}
         />
@@ -88,7 +92,10 @@ export function FacetSearchRow({
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 rounded text-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus transition-colors"
+            className={cn(
+              'absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 rounded text-muted hover:text-foreground',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus transition-colors'
+            )}
             aria-label={tFilters('clearSearch', { name: title.toLowerCase() })}
             title={tFilters('clear')}
           >

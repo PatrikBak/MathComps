@@ -213,7 +213,11 @@ export function Tooltip({ children, content, placement, className = '' }: Toolti
                 // `duration-150` and `ease-out` feed the enter animation through `--tw-duration` and
                 // `--tw-ease`, but they also emit the transition longhands, and `transition-property`
                 // defaults to `all`. Without `transition-none` the popover animates `top`/`left` from 0,0.
-                className: `z-tooltip max-h-48 animate-in overflow-y-auto rounded-lg bg-surface/95 px-3 py-1.5 text-sm text-foreground shadow-lg backdrop-blur-sm duration-150 ease-out fade-in zoom-in-95 transition-none motion-reduce:animate-none ${className}`,
+                className:
+                  'z-tooltip max-h-48 overflow-y-auto rounded-lg border border-foreground/10 bg-surface-raised/95 ' +
+                  'px-3 py-1.5 text-sm text-foreground shadow-lg backdrop-blur-sm ' +
+                  'animate-in duration-150 ease-out fade-in zoom-in-95 ' +
+                  `transition-none motion-reduce:animate-none ${className}`,
                 style: {
                   position: context.strategy,
                   top: y ?? 0,

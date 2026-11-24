@@ -305,27 +305,65 @@ html {
     @apply bg-surface/30 cursor-not-allowed opacity-60;
   }
 
-  /* Form Checkbox */
-  .form-checkbox {
-    @apply h-4 w-4 rounded border-muted/60 bg-surface/60 accent-focus text-focus transition-colors duration-0;
-  }
-
-  .form-checkbox:disabled {
-    @apply cursor-default opacity-50;
-  }
-
-  /* Form Radio */
+  /* Form checkbox and radio, drawn from the palette. Unpicked, a faint box the surface shows through; picked,
+     filled in the focus hue with its mark in white. */
+  .form-checkbox,
   .form-radio {
-    @apply h-4 w-4 border-muted/60 bg-surface/60 accent-focus text-focus transition-colors duration-0;
+    @apply h-4 w-4 shrink-0 appearance-none border border-muted/60 bg-foreground/[0.03] transition-colors duration-0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
   }
 
+  .form-checkbox {
+    @apply rounded;
+  }
+
+  .form-radio {
+    @apply rounded-full;
+  }
+
+  /* Under the pointer an unpicked box's edge firms up, while a picked one keeps its edge in the focus hue */
+  .form-checkbox:hover:not(:disabled, :checked, :indeterminate),
+  .form-radio:hover:not(:disabled, :checked) {
+    @apply border-muted;
+  }
+
+  .form-checkbox:checked,
+  .form-checkbox:indeterminate,
+  .form-radio:checked {
+    @apply border-focus bg-focus;
+  }
+
+  .form-checkbox:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5'/%3E%3C/svg%3E");
+  }
+
+  /* A tree node with only part of its branch picked */
+  .form-checkbox:indeterminate {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4.5 8h7'/%3E%3C/svg%3E");
+  }
+
+  .form-radio:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='3' fill='white'/%3E%3C/svg%3E");
+  }
+
+  .form-checkbox:disabled,
   .form-radio:disabled {
     @apply cursor-default opacity-50;
   }
 
-  /* Keyboard focus on a control the browser draws itself, marked with an outline rather than a ring:
-     a ring is a box-shadow, and WebKit paints none at all on a native checkbox or radio, while an
-     outline is painted by every engine.
+  /* A forced-colors theme paints every fill in its own colours, which leaves a picked box drawn the same as an
+     unpicked one, so there the system draws the boxes itself */
+  @media (forced-colors: active) {
+    .form-checkbox,
+    .form-radio {
+      appearance: auto;
+    }
+  }
+
+  /* Keyboard focus on a checkbox or radio, marked with an outline rather than a ring: a ring is a box-shadow,
+     which WebKit never paints on a box the browser draws itself, while every engine paints an outline.
      It lives in this layer so a utility can still lift it off a control whose row carries the mark. */
   input[type='checkbox']:focus-visible,
   input[type='radio']:focus-visible {
