@@ -1,9 +1,8 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
-import { replaceQuery } from '@/components/shared/utils/url-utils'
-
+import { useAddressSync } from './use-address-sync'
 import { useInitialUrlState } from './use-initial-url-state'
 
 /**
@@ -25,9 +24,8 @@ export type AddressedDisclosure = {
  * Hold it above every thing that shares the parameter rather than inside each of them: one opening has to
  * close the last, and per-thing copies of the same parameter would each keep their own answer.
  *
- * The address is written straight to history rather than routed. The page has already answered for
- * everything the parameter names, so a route would refetch it to change nothing the reader can see, and a
- * pushed entry would make the back button walk the openings instead of leaving the page.
+ * {@link useAddressSync} keeps the address. An opening replaces it in place, and a navigation that drops the
+ * parameter leaves the thing open and puts the parameter back.
  *
  * @param param - The query parameter that names the open thing.
  *
@@ -40,40 +38,20 @@ export function useAddressedDisclosure(param: string): AddressedDisclosure {
   // What is open now
   const [openedValue, setOpenedValue] = useState(initialValue)
 
-  // A function which puts the opening on the address, keeping every other parameter as it stands. It reads
-  // the live address, so an opening lands on top of whatever else has written to it since this render
-  const publish = useCallback(
-    (value: string | null) => {
-      // The query as it stands
-      const query = new URLSearchParams(window.location.search)
+  // The one query parameter this disclosure owns on the address
+  const ownedParams = useMemo(() => [param], [param])
 
-      // Say what is open, or stop saying anything
-      if (value === null) {
-        query.delete(param)
-      } else {
-        query.set(param, value)
-      }
+  // What is open, as the address should say it, or nothing while none is
+  const query = openedValue === null ? '' : new URLSearchParams({ [param]: openedValue }).toString()
 
-      // And put it back, leaving the page where it stands
-      replaceQuery(query.toString())
-    },
-    [param]
-  )
+  // The address kept saying what is open, every other parameter left as it stands
+  useAddressSync(query, ownedParams)
 
   // A function which opens the thing a value names
-  const open = useCallback(
-    (value: string) => {
-      setOpenedValue(value)
-      publish(value)
-    },
-    [publish]
-  )
+  const open = useCallback((value: string) => setOpenedValue(value), [])
 
   // A function which closes whatever is open
-  const close = useCallback(() => {
-    setOpenedValue(null)
-    publish(null)
-  }, [publish])
+  const close = useCallback(() => setOpenedValue(null), [])
 
   // What is open, and the two ways to change it
   return { openedValue, open, close }

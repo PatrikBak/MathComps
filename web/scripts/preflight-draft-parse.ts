@@ -5,6 +5,8 @@
  * directly with inline inputs.
  */
 
+import type { Paragraph } from 'mdast'
+import remarkDirective from 'remark-directive'
 import remarkParse from 'remark-parse'
 import { unified } from 'unified'
 import { visit } from 'unist-util-visit'
@@ -36,6 +38,13 @@ export const MAX_IMAGE_MB = 2
  * param is an authoring error.
  */
 const ALLOWED_IMAGE_REF_PARAMS = ['inline']
+
+/**
+ * The start of a paragraph written as a figure's caption: a figure label in any of the draft languages and its
+ * number, then the end of the paragraph or the caption's own words.
+ */
+const FIGURE_CAPTION_START =
+  /^(?:Obr\.|Obrázok|Obrázek|Rys\.|Fig\.|Figure)\s*\d+[a-z]?(?:$|\.$|[.:]\s)/
 
 /** HTML-comment line that separates a problem's statement from its solution. */
 const SOLUTION_SENTINEL = '<!-- solution -->'
@@ -137,12 +146,23 @@ const EMPTY_PROBLEM_META: ProblemMeta = {
 /** A processor used only to parse markdown into an mdast tree for image discovery. */
 const imageRefProcessor = unified().use(remarkParse)
 
+/** A processor parsing markdown with its directives, so a figure's own caption reads as its directive's label. */
+const directiveProcessor = unified().use(remarkParse).use(remarkDirective)
+
 /** A draft-local image ref that carries a query param the author isn't allowed to write. */
 export type DisallowedImageRefParams = {
   /** The image ref exactly as written, e.g. `images/fig.svg?width=400&height=300`. */
   ref: string
   /** The disallowed query param names found on it (everything but `inline`), in first-seen order. */
   params: string[]
+}
+
+/** A figure's caption written as a paragraph of its own, outside the label of its `:::figure`. */
+export type LooseFigureCaption = {
+  /** The 1-based line the caption starts on in the markdown scanned, or `null` when the parser placed it nowhere. */
+  line: number | null
+  /** The caption's opening words, as written. */
+  text: string
 }
 
 /**
@@ -521,4 +541,49 @@ export function collectDisallowedImageRefParams(markdown: string): DisallowedIma
 
   // The offending refs in first-seen order
   return offending
+}
+
+/**
+ * The opening words of a paragraph written as a figure's caption.
+ *
+ * @param paragraph - The paragraph to read.
+ * @returns The paragraph's opening text when it opens with a figure label and its number, otherwise null.
+ */
+function captionOpening(paragraph: Paragraph): string | null {
+  // The paragraph's opening text
+  const opening = paragraph.children[0]
+
+  // That text, when it opens like a caption
+  return opening?.type === 'text' && FIGURE_CAPTION_START.test(opening.value) ? opening.value : null
+}
+
+/**
+ * Collects every figure caption written as a paragraph of its own, which the site draws as plain text wherever it
+ * sits. A caption belongs in its figure's `:::figure[…]` label, which is never collected.
+ *
+ * @param markdown - The markdown half to scan.
+ *
+ * @returns One entry per loose caption, in document order.
+ */
+export function collectLooseFigureCaptions(markdown: string): LooseFigureCaption[] {
+  // The markdown as a tree, its directives parsed
+  const tree = directiveProcessor.parse(markdown)
+
+  // The loose captions found so far
+  const captions: LooseFigureCaption[] = []
+
+  // Each paragraph opening like a caption
+  visit(tree, 'paragraph', (paragraph) => {
+    // The paragraph's opening words where it reads as a caption
+    const opening = captionOpening(paragraph)
+
+    // Only one outside a directive's label is loose
+    if (opening === null || paragraph.data?.directiveLabel === true) return
+
+    // The caption, where it starts and how it opens
+    captions.push({ line: paragraph.position?.start.line ?? null, text: opening })
+  })
+
+  // The loose captions in document order
+  return captions
 }

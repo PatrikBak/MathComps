@@ -17,6 +17,7 @@ import {
   asMessage,
   collectDisallowedImageRefParams,
   collectImageNames,
+  collectLooseFigureCaptions,
   findUnknownSentinels,
   hasLeadingFrontmatter,
   IMAGE_REF_PREFIX,
@@ -593,8 +594,9 @@ function textRank(text: ManifestText, originalLanguage: Locale): number {
 }
 
 /**
- * Validates one markdown half and, on failure, records the issue with its
- * position mapped back to the source file.
+ * Validates one markdown half and records each issue with its position mapped
+ * back to the source file: a failure of the site's pipeline, and every figure
+ * caption written outside its figure.
  *
  * @param text - The half's markdown.
  * @param file - The problem filename the half belongs to.
@@ -625,6 +627,21 @@ async function validateHalf(
       severity: 'error',
     })
   }
+
+  // A caption written as a paragraph of its own, which the site draws as plain text
+  collectLooseFigureCaptions(text).forEach((caption) => {
+    errors.push({
+      file,
+      half,
+      line: toAbsoluteLine(halfStartLine0, caption.line),
+      col: null,
+      rule: 'loose-figure-caption',
+      message:
+        `the caption "${caption.text.trim()}" is a paragraph of its own; move it into its figure's label: a ` +
+        `:::figure[caption] line above the picture or table and a ::: line under it`,
+      severity: 'error',
+    })
+  })
 }
 
 /**

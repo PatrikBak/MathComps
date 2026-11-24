@@ -1583,6 +1583,8 @@
       "expandedEditor": "Rozšířený editor",
       "expandEditor": "Rozšířit editor s náhledem",
       "fileTooLarge": "Soubor je příliš velký. Maximum: {max} MB",
+      "footnoteBack": "Zpět na odkaz {reference}",
+      "footnotes": "Poznámky pod čarou",
       "heading": "Nadpis",
       "headingPlaceholder": "Nadpis",
       "hiddenContentPlaceholder": "skrytý obsah",
