@@ -135,6 +135,7 @@ Each half, each hint and the grading note run through the same pipeline the site
 - **Parse** — malformed markdown or directives.
 - **KaTeX** — every `$…$` / `$$…$$` must render.
 - **Images** — every `images/…` reference must resolve, be a supported format (SVG/PNG/JPEG/WebP), stay under 2 MB, and carry no query param other than `?inline=` (`width`/`height`/`scale` are rejected).
+- **Figure captions** — a caption goes in the figure's label: `:::figure[Obr. 1: …]`, the image on its own line (several panels on consecutive lines), a closing `:::` line. A paragraph of its own opening with a figure label and its number (`Obr. 1`, `Fig. 2a`, `Figure 3: …`), under an image or a table, is an error (`loose-figure-caption`), since the site would draw it as a stray paragraph.
 
 ## Running the check
 

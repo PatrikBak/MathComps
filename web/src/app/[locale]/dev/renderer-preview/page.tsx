@@ -207,6 +207,24 @@ A block image with only \`?scale=50\`: sized from the source at runtime, then ha
 
 An inline image with \`?scale=150\` — flows inside this sentence ![scaled inline](/dev-placeholders/inline-1.svg?inline=true&width=24&height=24&scale=150) at 1.5× the declared 24×24.
 
+## Figure
+
+A figure with its caption, math in it, the text after it going on as usual:
+
+:::figure[Obr. 1: The point $Q$ on the line $AB$]
+![Block scaled](/dev-placeholders/block.svg?width=800&height=400&scale=50)
+:::
+
+A figure of two panels written on consecutive lines, an arrow between them, sitting side by side:
+
+:::figure[Obr. 2]
+![Left panel](/dev-placeholders/block.svg?width=800&height=400&scale=25)
+$\\longrightarrow$
+![Right panel](/dev-placeholders/block.svg?width=800&height=400&scale=25)
+:::
+
+The text after the figures.
+
 ## Compositions
 
 Inline quote inside a custom-marker list:
