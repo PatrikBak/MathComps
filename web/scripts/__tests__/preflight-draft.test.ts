@@ -20,6 +20,7 @@ import { narrowMeta } from '../preflight-draft-meta'
 import {
   collectDisallowedImageRefParams,
   collectImageNames,
+  collectLooseFigureCaptions,
   hasLeadingFrontmatter,
   parseProblemMeta,
   splitOnSentinels,
@@ -469,6 +470,18 @@ describe('invalid drafts — specific issues', () => {
     expect(error?.message).toContain('width')
     expect(error?.message).toContain('height')
     expect(error?.message).toContain('bare')
+  })
+
+  it('flags a figure caption written under its image outside a figure', async () => {
+    // A solution whose figure is captioned by the paragraph after it
+    const manifest = await loadFixture('invalid-loose-figure-caption')
+
+    // The caption's error
+    const error = findError(manifest, (entry) => entry.rule === 'loose-figure-caption')
+
+    // Flagged on the caption's own line of the solution
+    expect(error?.half).toBe('solution')
+    expect(error?.line).toBe(8)
   })
 
   it('flags broken math in the statement half', async () => {
@@ -1079,5 +1092,26 @@ describe('collectDisallowedImageRefParams', () => {
 
     // The import never stamps external images, and a fenced ref isn't a real image node
     expect(collectDisallowedImageRefParams(markdown)).toEqual([])
+  })
+})
+
+describe('collectLooseFigureCaptions', () => {
+  it.each(['Fig. 2a', 'Obrázek 1.', 'Rys. 2', 'Figure 3: The three circles meet at one point.'])(
+    'flags the caption %j under its image',
+    (caption) => {
+      // The caption written as a paragraph of its own under the image
+      const markdown = `![](images/a.svg)\n\n${caption}`
+
+      // The caption flagged on the line it starts on
+      expect(collectLooseFigureCaptions(markdown)).toEqual([{ line: 3, text: caption }])
+    }
+  )
+
+  it('flags a caption under a table written as display math', () => {
+    // A table, then its caption as a paragraph of its own
+    const markdown = '$$\\begin{array}{|c|}\\hline a \\\\ \\hline\\end{array}$$\n\nObr. 1'
+
+    // The caption flagged on the line it starts on
+    expect(collectLooseFigureCaptions(markdown)).toEqual([{ line: 3, text: 'Obr. 1' }])
   })
 })

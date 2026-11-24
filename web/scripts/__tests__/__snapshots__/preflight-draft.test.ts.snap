@@ -330,6 +330,29 @@ exports[`preflight-draft fixtures (verdict + snapshot) > invalid-image-ref-param
 }
 `;
 
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-loose-figure-caption 1`] = `
+{
+  "errors": [
+    {
+      "file": "p1.sk.md",
+      "half": "solution",
+      "rule": "loose-figure-caption",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemLanguages": [
+    [
+      "sk",
+    ],
+  ],
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
 exports[`preflight-draft fixtures (verdict + snapshot) > invalid-malformed-meta 1`] = `
 {
   "errors": [
@@ -670,6 +693,22 @@ exports[`preflight-draft fixtures (verdict + snapshot) > valid-deep-competition 
 `;
 
 exports[`preflight-draft fixtures (verdict + snapshot) > valid-external-image 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 1,
+  "problemLanguages": [
+    [
+      "sk",
+    ],
+  ],
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-figure-caption 1`] = `
 {
   "errors": [],
   "ok": true,

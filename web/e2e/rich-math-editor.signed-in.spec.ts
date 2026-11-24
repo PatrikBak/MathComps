@@ -527,6 +527,56 @@ test.describe('the preview in place of the text', () => {
     // The second point numbered 2, as written
     await expect(page.locator('ol', { hasText: 'The second point.' })).toHaveAttribute('start', '2')
   })
+
+  test('sets pictures written on consecutive lines side by side, each keeping its size before it loads', async ({
+    page,
+  }) => {
+    // A small blank picture
+    const picture = await blankPng(page, 120, 90)
+
+    // Answered for both addresses the draft names
+    await page.route('**/row-panel-*.png', (route) =>
+      route.fulfill({ body: picture, contentType: 'image/png' })
+    )
+
+    // Both pictures held back, so the preview is read before either arrives
+    const releaseLeft = (await gateReads(page, '**/row-panel-1.png')).hold()
+    const releaseRight = (await gateReads(page, '**/row-panel-2.png')).hold()
+
+    // The composer, open
+    const composer = await openComposer(page)
+
+    // Two pictures of a declared size, on consecutive lines
+    await composer.fill(
+      '![left](/row-panel-1.png?width=120&height=90)\n![right](/row-panel-2.png?width=120&height=90)'
+    )
+
+    // The draft read back in its preview
+    await page.getByRole('button', { name: editorCopy.preview, exact: true }).click()
+
+    // The box each picture keeps around its image
+    const left = page.getByAltText('left').locator('..')
+    const right = page.getByAltText('right').locator('..')
+
+    // Each as wide as its picture is declared, with neither image in yet
+    await expect(left).toHaveCSS('width', '120px')
+    await expect(right).toHaveCSS('width', '120px')
+
+    // Where the two boxes stand
+    const leftBox = await left.boundingBox()
+    const rightBox = await right.boundingBox()
+
+    // Both laid out
+    if (!leftBox || !rightBox) throw new Error('The pictures are not laid out')
+
+    // On one line, the second to the right of the first
+    expect(rightBox.y).toBe(leftBox.y)
+    expect(rightBox.x).toBeGreaterThan(leftBox.x + leftBox.width)
+
+    // Both pictures let through
+    releaseLeft()
+    releaseRight()
+  })
 })
 
 /**
