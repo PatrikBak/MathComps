@@ -1,5 +1,6 @@
 'use client'
 
+import { useWindowEvent } from '@mantine/hooks'
 import { useCallback, useMemo, useState } from 'react'
 
 import { useAddressSync } from './use-address-sync'
@@ -25,7 +26,8 @@ export type AddressedDisclosure = {
  * close the last, and per-thing copies of the same parameter would each keep their own answer.
  *
  * {@link useAddressSync} keeps the address. An opening replaces it in place, and a navigation that drops the
- * parameter leaves the thing open and puts the parameter back.
+ * parameter leaves the thing open and puts the parameter back. A step back or forward through history opens
+ * what that step's address names, and closes the open thing when the address names none.
  *
  * @param param - The query parameter that names the open thing.
  *
@@ -52,6 +54,15 @@ export function useAddressedDisclosure(param: string): AddressedDisclosure {
 
   // A function which closes whatever is open
   const close = useCallback(() => setOpenedValue(null), [])
+
+  // A function which opens what the address names, or closes whatever is open when it names nothing
+  const followAddress = useCallback(
+    () => setOpenedValue(new URLSearchParams(window.location.search).get(param)),
+    [param]
+  )
+
+  // What the address names, open after every step back or forward through history
+  useWindowEvent('popstate', followAddress)
 
   // What is open, and the two ways to change it
   return { openedValue, open, close }
