@@ -460,7 +460,9 @@ test.describe('problem library filters across a sign-in change', () => {
       .click({ timeout: SETTLE_TIMEOUT_MS })
 
     // Reach for the problems the reader has marked
-    await page.getByRole('menuitem', { name: filtersCopy.markStatusMarked, exact: true }).click()
+    await page
+      .getByRole('menuitemradio', { name: filtersCopy.markStatusMarked, exact: true })
+      .click()
 
     // The reader is asked to sign in, and told what for, instead of watching the filter undo itself
     await expect(page.getByText(loginPromptFor(filtersCopy.markStatusAuthReason))).toBeVisible()

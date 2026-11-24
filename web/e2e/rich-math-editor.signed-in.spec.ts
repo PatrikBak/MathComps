@@ -1,5 +1,6 @@
 import type { FileChooser, Locator, Page, Request } from '@playwright/test'
 
+import { PROBLEM_CARD_ATTRIBUTE } from '@/components/features/problems/constants/problem-list-attributes'
 import type { UserProfile } from '@/components/features/profile/model/profile-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 
@@ -1117,7 +1118,7 @@ async function openDiscussion(page: Page): Promise<Locator> {
   await page.goto(PROBLEMS_PATH)
 
   // The problem's row
-  const row = page.locator(`[data-problem-slug="${DISCUSSED_PROBLEM}"]`)
+  const row = page.locator(`[${PROBLEM_CARD_ATTRIBUTE.name}="${DISCUSSED_PROBLEM}"]`)
 
   // Drawn once the library has settled
   await expect(row).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })

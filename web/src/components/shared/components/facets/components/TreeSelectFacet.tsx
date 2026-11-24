@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 
+import type { FloatingPanelSurface } from '@/components/shared/components/DropdownMenu'
+
 import { resetFacet, useFacetPopover } from '../hooks/use-facet-popover'
 import { useFacetRowNavigation } from '../hooks/use-facet-row-navigation'
 import { useRevealSelectedOption } from '../hooks/use-reveal-selected-option'
@@ -33,6 +35,8 @@ type TreeSelectFacetProps = {
   closedLabel: string
   /** Nodes to start open, ignored for any that have no children. */
   defaultExpandedIds: string[]
+  /** What the facet's panel opens over, which picks its fill. */
+  opensOver: FloatingPanelSurface
 }
 
 /**
@@ -47,6 +51,7 @@ export function TreeSelectFacet({
   search,
   closedLabel,
   defaultExpandedIds,
+  opensOver,
 }: TreeSelectFacetProps) {
   // The popover and the search term the tree is narrowed by
   const facet = useFacetPopover({ options, width: 'trigger' })
@@ -119,6 +124,7 @@ export function TreeSelectFacet({
         getFloatingProps={facet.getFloatingProps}
         popoverId={facet.popoverId}
         labelId={facet.labelId}
+        opensOver={opensOver}
         initialFocus={facet.initialFocus}
         onKeyDown={list.onListKeyDown}
       >

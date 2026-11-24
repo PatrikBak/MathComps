@@ -1,96 +1,58 @@
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-import { cn } from '../../../shared/utils/css-utils'
-import { CHIP_CONSTANTS } from '../constants/filter-constants'
+import { cn } from '@/components/shared/utils/css-utils'
+
+import { CHIP_CONSTANTS, OPPOSITE_LOGIC } from '../constants/filter-constants'
+import type { ChipData, ChipGroupLogic } from '../types/filter-chip-types'
+import type { LogicToggle } from '../types/problem-api-types'
 import Chip from './Chip'
 
 /**
- * Represents a single chip's data structure, used within {@link CollapsibleChipGroup}
+ * The mark joining two chips of a group, for each way the group's values combine.
  */
-export type ChipData = {
-  /** Unique identifier for the chip; used as React key and for tracking */
-  id: string
-  /** Short display text shown on the chip */
-  displayName: string
-  /** Optional full name displayed in tooltip when hovering over the chip */
-  fullName?: string
-  /** Callback invoked when user clicks the chip */
-  onClick: (event: React.MouseEvent) => void
-  /** Whether this chip is currently selected */
-  isSelected?: boolean
+const LOGIC_SYMBOLS: Record<LogicToggle, string> = {
+  and: '∧',
+  or: '∨',
 }
 
 /**
- * Config for {@link CollapsibleChipGroup}
- */
-type LogicalChipsProps = {
-  /** Logical mode determining which joiner symbol to display between chips */
-  mode: 'and' | 'or'
-  /** Callback invoked when user clicks on a joiner to toggle the logic mode */
-  onModeToggle: () => void
-}
-
-/**
- * Props for the {@link CollapsibleChipGroup} component
+ * Props for the {@link CollapsibleChipGroup} component.
  */
 type CollapsibleChipGroupProps = {
-  /** Array of chip data to display in this group */
+  /** The group's chips, in the order they read. */
   chips: ChipData[]
-  /** Binary logic mode and toggle callback for filters where this makes sense
-   * (e.g. tag/author combinations) */
-  logicalChipsProps?: LogicalChipsProps
+  /** How the group's values combine, drawn as a toggle between each two chips; null for a group with no choice. */
+  logic: ChipGroupLogic | null
 }
 
 /**
- * Renders a group of chips with automatic collapse/expand functionality.
- * When the number of chips exceeds {@link CHIP_CONSTANTS.collapseThreshold}, it shows only
- * the first few chips plus a "... and X more" button.
+ * A group of chips folding itself up past {@link CHIP_CONSTANTS.collapseThreshold} chips, showing the first few and
+ * the way to see the rest.
  */
-export function CollapsibleChipGroup({ chips, logicalChipsProps }: CollapsibleChipGroupProps) {
-  // Are chips currently expnanded? Initially no
+export function CollapsibleChipGroup({ chips, logic }: CollapsibleChipGroupProps) {
+  // Whether the reader asked to see every chip
   const [isExpanded, setIsExpanded] = useState(false)
 
-  // Should we offer an option to collapse?
+  // Whether there are more chips than the group shows folded
   const shouldCollapse = chips.length > CHIP_CONSTANTS.collapseThreshold
 
-  // Which chips are currntly displayed...Either only at most the limit
-  // or we have expanded them and we're getting all of them
+  // The chips on show: the first few while folded, and all of them otherwise
   const visibleChips =
     shouldCollapse && !isExpanded ? chips.slice(0, CHIP_CONSTANTS.collapseThreshold) : chips
 
-  // How many hidden chips?
+  // How many chips the folding hides
   const hiddenCount = chips.length - CHIP_CONSTANTS.collapseThreshold
 
   return (
     <div className="min-w-0">
       <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5">
-        {visibleChips.length >= 2 ? (
-          // More than 1 chip
-          <JoinedChips items={visibleChips} logicalChipsProps={logicalChipsProps} />
-        ) : (
-          // 0 or 1 chip
-          visibleChips.map((chip) => (
-            <Chip
-              key={chip.id}
-              onClick={chip.onClick}
-              clickable={true}
-              isSelected={chip.isSelected}
-              title={
-                // Tooltip text, only if different from display name and given by fullName
-                'fullName' in chip && chip.fullName && chip.fullName !== chip.displayName
-                  ? (chip as { fullName: string }).fullName
-                  : undefined
-              }
-            >
-              {chip.displayName}
-            </Chip>
-          ))
-        )}
+        {/* The chips, joined by the way the group combines them */}
+        <JoinedChips chips={visibleChips} logic={logic} />
 
-        {/* Show the collapse button if we have hidden chips */}
+        {/* The way to see the rest, or to fold them back */}
         {shouldCollapse && (
-          <span className="inline-flex items-center flex-shrink-0">
+          <span className="inline-flex flex-shrink-0 items-center">
             <ExpandCollapseButton
               isExpanded={isExpanded}
               hiddenCount={hiddenCount}
@@ -107,39 +69,37 @@ export function CollapsibleChipGroup({ chips, logicalChipsProps }: CollapsibleCh
  * Props for the {@link ExpandCollapseButton} component.
  */
 type ExpandCollapseButtonProps = {
-  /** Current expansion state; true when showing all chips, false when collapsed */
+  /** Whether every chip is showing. */
   isExpanded: boolean
-  /** Number of chips currently hidden from view when collapsed */
+  /** How many chips the folding hides. */
   hiddenCount: number
-  /** Callback invoked when user clicks the expand/collapse button */
+  /** Folds the group, or unfolds it. */
   onToggle: () => void
 }
 
 /**
- * Button that toggles between "show more" and "show less" states.
- * Displays the count of hidden items when collapsed.
+ * The button folding a group of chips, reading how many it hides while folded.
  */
 function ExpandCollapseButton({ isExpanded, hiddenCount, onToggle }: ExpandCollapseButtonProps) {
-  // Get translations
+  // Translations for the shared actions
   const tActions = useTranslations('ui.actions')
+
+  // What the button reads: the way back while unfolded, and how many more there are while folded
+  const label = isExpanded ? tActions('showLess') : tActions('showCount', { count: hiddenCount })
 
   return (
     <button
-      onClick={onToggle}
-      className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium 
-        text-focus/80 hover:bg-focus/10 hover:text-focus/70
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-focus
-        transition-colors whitespace-nowrap"
-      aria-label={isExpanded ? tActions('showLess') : tActions('showCount', { count: hiddenCount })}
       type="button"
-    >
-      {isExpanded ? (
-        tActions('showLess')
-      ) : (
-        <>
-          <span>... {tActions('showCount', { count: hiddenCount }).toLowerCase()}</span>
-        </>
+      onClick={onToggle}
+      className={cn(
+        'inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium whitespace-nowrap',
+        'text-focus/80 transition-colors hover:bg-focus/10 hover:text-focus/70',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus'
       )}
+      aria-label={label}
+    >
+      {/* Folded, the count trails the chips as a lowercase aside */}
+      {isExpanded ? label : <span>... {label.toLowerCase()}</span>}
     </button>
   )
 }
@@ -148,72 +108,63 @@ function ExpandCollapseButton({ isExpanded, hiddenCount, onToggle }: ExpandColla
  * Props for the {@link JoinedChips} component.
  */
 type JoinedChipsProps = {
-  /** Array of chip data to display */
-  items: ChipData[]
-  /** Optional logical mode config for AND/OR toggling */
-  logicalChipsProps?: LogicalChipsProps
+  /** The chips, in the order they read. */
+  chips: ChipData[]
+  /** How the chips' values combine; null for a group with no choice. */
+  logic: ChipGroupLogic | null
 }
 
 /**
- * Helper component for rendering chips, optionally with math joiners (∧ for AND, ∨ for OR).
-
-*/
-function JoinedChips({ items, logicalChipsProps }: JoinedChipsProps) {
-  // Get translations for logic mode labels
+ * Chips side by side, each two joined by the mark of how their values combine (∧ for every one, ∨ for any) where the
+ * group has that choice. Each mark is a button flipping it.
+ */
+function JoinedChips({ chips, logic }: JoinedChipsProps) {
+  // Translations for the logic modes
   const tLogic = useTranslations('problems.filters.facets.logic')
 
-  // Mode config - only used when we want to toggle between AND and OR logic
-  const MODE_CONFIG = {
-    and: {
-      symbol: '∧',
-      currentLabel: tLogic('andFull'),
-      nextLabel: tLogic('orFull'),
-    },
-    or: {
-      symbol: '∨',
-      currentLabel: tLogic('orFull'),
-      nextLabel: tLogic('andFull'),
-    },
-  } as const
+  // Each way of combining, named in full
+  const logicNames: Record<LogicToggle, string> = {
+    and: tLogic('andFull'),
+    or: tLogic('orFull'),
+  }
 
-  // Only compute labels when we have logical props
-  const modeConfig = logicalChipsProps ? MODE_CONFIG[logicalChipsProps.mode] : undefined
+  // What the joining mark says it does, in a group that has the choice
+  const switchCopy = logic && {
+    mode: logicNames[logic.mode],
+    nextMode: logicNames[OPPOSITE_LOGIC[logic.mode]],
+  }
 
   return (
     <>
-      {items.map((item, index) => (
-        <span key={item.id} className="inline-flex items-center">
+      {chips.map((chip, index) => (
+        <span key={chip.id} className="inline-flex min-w-0 max-w-full items-center">
+          {/* The chip, offering its full name where that says more than the chip does, and cut short where its
+              row runs out of room */}
           <Chip
-            onClick={item.onClick}
-            clickable={true}
-            isSelected={item.isSelected}
-            title={item.fullName && item.fullName !== item.displayName ? item.fullName : undefined}
+            className="min-w-0"
+            onClick={chip.onClick}
+            title={chip.fullName && chip.fullName !== chip.displayName ? chip.fullName : undefined}
           >
-            {item.displayName}
+            {chip.displayName}
           </Chip>
-          {/* Only render joiner when logical mode is configured */}
-          {index < items.length - 1 && logicalChipsProps && modeConfig && (
+
+          {/* The joining mark, between two chips of a group that has the choice */}
+          {index < chips.length - 1 && logic && switchCopy && (
             <button
-              onClick={logicalChipsProps.onModeToggle}
-              className="cursor-pointer"
-              title={tLogic('currentLogic', {
-                mode: modeConfig.currentLabel,
-                nextMode: modeConfig.nextLabel,
-              })}
-              aria-label={tLogic('switchLogic', {
-                mode: modeConfig.currentLabel,
-                nextMode: modeConfig.nextLabel,
-              })}
               type="button"
+              onClick={logic.onModeToggle}
+              className="cursor-pointer"
+              title={tLogic('currentLogic', switchCopy)}
+              aria-label={tLogic('switchLogic', switchCopy)}
             >
               <span
                 className={cn(
-                  'inline-flex items-center justify-center mx-1.5 px-1.5 py-0.5',
-                  'text-focus/80 text-[11px] font-medium leading-none',
-                  'hover:text-focus/70 hover:bg-focus/10 rounded transition-colors'
+                  'mx-1.5 inline-flex items-center justify-center px-1.5 py-0.5',
+                  'text-[11px] leading-none font-medium text-focus/80',
+                  'rounded transition-colors hover:bg-focus/10 hover:text-focus/70'
                 )}
               >
-                {modeConfig.symbol}
+                {LOGIC_SYMBOLS[logic.mode]}
               </span>
             </button>
           )}

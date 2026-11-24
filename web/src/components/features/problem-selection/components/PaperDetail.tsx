@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl'
 import { useRef } from 'react'
 
 import { CommentSection } from '@/components/features/comments/components/CommentSection'
-import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
+import { COMPACT_PANEL_CLASS } from '@/components/shared/components/EmptyState'
 import { Tabs } from '@/components/shared/components/Tabs'
 import { cn } from '@/components/shared/utils/css-utils'
 import { hueTextStyle } from '@/components/shared/utils/hue-colors'

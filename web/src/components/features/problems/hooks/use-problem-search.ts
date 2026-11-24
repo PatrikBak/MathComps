@@ -53,17 +53,21 @@ function withoutRefusedFilters(
 }
 
 /**
- * The problem search state: loading flags, active filters, and the current result page.
+ * The problem search state: loading flags, active filters, and the problems loaded so far.
  */
 type ProblemSearchState = {
   /** Whether a search is happening in the background (e.g., while typing or filtering). */
   isActiveSearchFetching: boolean
-  /** Whether a search with genuinely new filters is in progress (first fetch, no cached data). */
+  /** Whether a search is in progress with no problems of any search to show: the first, or one after a failure. */
   isBlankSlateLoading: boolean
+  /** Whether the problems shown are an earlier search's, held on screen while the current one is on its way. */
+  isShowingPreviousSearch: boolean
   /** Whether more results are being loaded (infinite scroll). */
   isPaginationLoading: boolean
   /** The current active filters. */
   filters: SearchFiltersState | null
+  /** The filters the problems shown answer, which trail the current ones until the search for those answers. */
+  answeredFilters: SearchFiltersState | null
   /** The available options for filtering. */
   filterOptions: FilterOptionsWithCounts | null
   /** Every option the library can ever offer, whatever is filtered. */
@@ -74,7 +78,10 @@ type ProblemSearchState = {
   totalCount: number
   /** Whether there are more pages of results available. */
   hasMore: boolean
-  /** The state of the filter-options fetch, which the page cannot render without. */
+  /**
+   * The state of the answer carrying the filter options, which the page cannot render without: the archive's first
+   * search, or the single problem's fetch.
+   */
   pageState: QueryUiState
   /** The state of the result fetch. */
   searchState: QueryUiState
@@ -298,8 +305,8 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     [queryFilters, isSignedOut]
   )
 
-  // The fetch of the problems the filters ask for. It waits on the options, the filters and the
-  // reader all being known, and stands down entirely when the URL singles out one problem.
+  // The fetch of the problems the filters ask for. It waits on the filters and the reader being
+  // known, and stands down entirely when the URL singles out one problem.
   const searchQuery = useProblemSearchQuery(
     locale,
     fetchedFilters,
@@ -542,6 +549,9 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   // Are we waiting on a search with nothing on screen yet?
   const isBlankSlateLoading = !problemId && searchQuery.isPending
 
+  // Are the problems on screen an earlier search's, while the current one is on its way?
+  const isShowingPreviousSearch = !problemId && searchQuery.isShowingPreviousSearch
+
   // Is any search running at all?
   const isActiveSearchFetching = !problemId && searchQuery.isFetching
 
@@ -550,6 +560,9 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
 
   // The problems on screen: the one the URL names, or whatever the search returned
   const problems = problemId ? [problemId] : searchQuery.problems
+
+  // The filters those problems answer, which for the problem the URL names are the ones resolving to it
+  const answeredFilters = problemId ? displayFilters : searchQuery.answeredFilters
 
   // How many problems match, which the problem the URL names answers on its own
   const totalCount = problemId ? 1 : searchQuery.totalCount
@@ -562,8 +575,10 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     state: {
       isActiveSearchFetching,
       isBlankSlateLoading,
+      isShowingPreviousSearch,
       isPaginationLoading,
       filters: displayFilters,
+      answeredFilters,
       filterOptions,
       baseOptions,
       problems,

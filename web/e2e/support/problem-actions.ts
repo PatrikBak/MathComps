@@ -1,5 +1,9 @@
 import type { Page, Route } from '@playwright/test'
 
+import {
+  PROBLEM_CARD_ATTRIBUTE,
+  PROBLEM_COUNT_ATTRIBUTE,
+} from '@/components/features/problems/constants/problem-list-attributes'
 import type { FilterQuery, Problem } from '@/components/features/problems/types/problem-api-types'
 
 import searchFixture from '../fixtures/problem-filter-response.json'
@@ -225,6 +229,23 @@ declare global {
 }
 
 /**
+ * The names of the attributes a reading of the list is taken from, handed into the page, since a script
+ * running there cannot see the test's own imports.
+ */
+type ListAttributeNames = {
+  /** The attribute each problem's card carries its slug under. */
+  card: string
+  /** The attribute the bar carries how many problems the search matched under. */
+  count: string
+}
+
+/** The names of the card and count attributes, as the app declares them. */
+const LIST_ATTRIBUTE_NAMES: ListAttributeNames = {
+  card: PROBLEM_CARD_ATTRIBUTE.name,
+  count: PROBLEM_COUNT_ATTRIBUTE.name,
+}
+
+/**
  * Reads the list of problems on every frame the browser paints, handing over each reading that
  * differs from the one before it.
  *
@@ -232,7 +253,7 @@ declare global {
  * watching: two watchers would hand the same reading over twice, and each would then read as a row
  * that went and came back.
  */
-function watchList(): void {
+function watchList({ card, count }: ListAttributeNames): void {
   // This document is already accounted for
   if (window.isWatchingList) return
 
@@ -250,14 +271,12 @@ function watchList(): void {
   // A function which reads the list as it stands and hands over anything that has moved
   const readList = () => {
     // Every problem on screen, in the order the list draws them
-    const slugs = [...document.querySelectorAll('[data-problem-slug]')].map(
-      (row) => row.getAttribute('data-problem-slug') ?? ''
+    const slugs = [...document.querySelectorAll(`[${card}]`)].map(
+      (row) => row.getAttribute(card) ?? ''
     )
 
     // What the screen says the search matches, which a search in flight takes off the screen
-    const counted = document
-      .querySelector('[data-problem-count]')
-      ?.getAttribute('data-problem-count')
+    const counted = document.querySelector(`[${count}]`)?.getAttribute(count)
 
     // The list as this frame drew it
     const reading: ListReading = {
@@ -309,10 +328,10 @@ export async function recordListReadings(page: Page): Promise<() => ListReading[
   })
 
   // Every document from the next one on, since the rows are drawn long before a test can look
-  await page.addInitScript(watchList)
+  await page.addInitScript(watchList, LIST_ATTRIBUTE_NAMES)
 
   // And the document already open, so that calling this after a page has loaded records that page
-  await page.evaluate(watchList)
+  await page.evaluate(watchList, LIST_ATTRIBUTE_NAMES)
 
   // Hand back a snapshot on each read, so a list cannot grow underneath an assertion mid-check
   return () => [...readings]

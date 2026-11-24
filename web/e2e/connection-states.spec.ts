@@ -1,5 +1,7 @@
 import type { Page } from '@playwright/test'
 
+import { PROBLEM_CARD_ATTRIBUTE } from '@/components/features/problems/constants/problem-list-attributes'
+
 import messages from '../messages/en.json'
 import {
   BACKEND_ORIGIN,
@@ -10,6 +12,7 @@ import {
 } from './support/backend-routes'
 import { goOffline, returnToTab } from './support/emulation'
 import {
+  recordListReadings,
   searchAnswerWith,
   searchAnswerWithMoreToCome,
   stubSearchRule,
@@ -25,6 +28,12 @@ const { problems: problemsCopy, ui: uiCopy } = messages
 /** A word no problem carries, which is how a search is made to come back with nothing. */
 const NOTHING_MATCHES = 'qwertyuiopasdfgh'
 
+/** A search term sent once the archive is back after an outage, which only {@link RECOVERED_PROBLEM} matches. */
+const AFTER_THE_OUTAGE = 'after the outage'
+
+/** The one problem the archive finds for {@link AFTER_THE_OUTAGE}. */
+const RECOVERED_PROBLEM = 'recovered-problem'
+
 /**
  * Stands in for the archive, answering searches until the test takes it away.
  *
@@ -37,28 +46,47 @@ const NOTHING_MATCHES = 'qwertyuiopasdfgh'
  * @returns A function which takes the archive away, from the next search on.
  */
 async function stubArchiveUntilBroken(page: Page): Promise<() => void> {
-  // Whether the archive is still answering
-  let isBroken = false
-
   // The answer it gives while it is up
   await stubSearchRule(page, () => searchAnswerWithMoreToCome())
 
-  // And the outage, which overrides that answer once it starts: a later route is the one Playwright
-  // tries first, and falling back reaches the one above while there is nothing wrong
+  // The switch taking it down and up
+  const setArchiveDown = await stubArchiveOutage(page)
+
+  // Hand back the way to take it away
+  return () => setArchiveDown(true)
+}
+
+/**
+ * Takes the archive down and brings it back up on the test's word, over whatever answer the searches are stubbed with:
+ * a later route is the one Playwright tries first, and falling back reaches the answer underneath while the archive is
+ * up.
+ *
+ * @param page - The page to intercept searches on.
+ *
+ * @returns A function which takes the archive down, or brings it back up, from the next search on.
+ */
+async function stubArchiveOutage(page: Page): Promise<(isDown: boolean) => void> {
+  // Whether the archive is down
+  let isArchiveDown = false
+
+  // The outage, which overrides the answer underneath while it lasts
   await page.route(`${BACKEND_ORIGIN}${SEARCH_PATH}`, async (route) => {
-    // Nothing lands once the archive has gone
-    if (isBroken) {
+    // Nothing lands while the archive is down
+    if (isArchiveDown) {
+      // The request refused at the connection
       await route.abort('connectionrefused')
+
+      // With nothing underneath to fall back to
       return
     }
 
-    // Until then, the answer underneath this one
+    // Otherwise the answer underneath this one
     await route.fallback()
   })
 
   // Hand back the switch
-  return () => {
-    isBroken = true
+  return (isDown) => {
+    isArchiveDown = isDown
   }
 }
 
@@ -78,7 +106,7 @@ test.describe('problems page with the API down', () => {
     // And offers the only thing that will change it
     await expect(page.getByRole('button', { name: uiCopy.actions.retry })).toBeVisible()
 
-    // The heart of the fix: nothing is in flight, so nothing may claim to be trying
+    // Nothing is in flight, so nothing may claim to be trying
     await expect(page.getByText(problemsCopy.tryingToConnect)).toBeHidden()
   })
 
@@ -279,14 +307,22 @@ test.describe('problems page with only some calls failing', () => {
 
     // Watch the range across the whole retry, since a wobble lasts only as long as the request
     let smallestRange = rangeWithReport
+
+    // Sample the range through the retry
     for (let sample = 0; sample < 30; sample++) {
+      // The range now
       const range = await scroller.evaluate((element) => element.scrollHeight)
+
+      // The shortest it has been
       smallestRange = Math.min(smallestRange, range)
+
+      // Wait for the next sample
       await page.waitForTimeout(200)
     }
 
-    // Every state the end of the list can be in is one line tall, so a reader parked down there is
-    // not dragged back up by the browser clamping their scroll to a range that just got shorter
+    // Every state the end of the list passes through while a failed page retries is one line tall, so a
+    // reader parked down there is not dragged back up by the browser clamping their scroll to a range
+    // that just got shorter
     expect(smallestRange).toBe(rangeWithReport)
   })
 
@@ -297,9 +333,8 @@ test.describe('problems page with only some calls failing', () => {
     // Load the page
     await page.goto(PROBLEMS_PATH)
 
-    // Wait for rows. The page's filters ride back on the same answer as its first rows, so until it
-    // has come up there is no distinction left between the archive being down and the filters
-    // matching nothing.
+    // Wait for rows. The page's filter options ride back on the same answer as its first rows, so
+    // until it has come up a failure takes the whole page rather than the list.
     await page.getByTestId('virtuoso-scroller').waitFor({ timeout: SETTLE_TIMEOUT_MS })
 
     // Now take the archive away
@@ -316,7 +351,7 @@ test.describe('problems page with only some calls failing', () => {
     })
 
     // Saying otherwise would blame the reader's filters for an outage
-    await expect(page.getByText(problemsCopy.emptyState.title)).toBeHidden()
+    await expect(page.getByText(problemsCopy.emptyState.filters)).toBeHidden()
   })
 
   test('blames the connection rather than the filters when a search is held back', async ({
@@ -331,6 +366,8 @@ test.describe('problems page with only some calls failing', () => {
 
     // Load the page with everything working, so there are filters to search with
     await page.goto(PROBLEMS_PATH)
+
+    // Wait for its rows
     await page.getByTestId('virtuoso-scroller').waitFor({ timeout: SETTLE_TIMEOUT_MS })
 
     // The search box in the sidebar, the mobile drawer's copy of it never showing at this width
@@ -338,11 +375,11 @@ test.describe('problems page with only some calls failing', () => {
       .getByPlaceholder(problemsCopy.filters.search.placeholder)
       .filter({ visible: true })
 
-    // Search for something no problem contains, which clears the rows out of the way. They have to
-    // be gone already for the next search to have nothing to hide behind, since rows from an earlier
-    // search survive one that never runs.
+    // Search for something no problem contains
     await searchBox.fill(NOTHING_MATCHES)
-    await expect(page.getByText(problemsCopy.emptyState.title)).toBeVisible({
+
+    // Its empty answer lands, for the next search to stand in front of
+    await expect(page.getByText(problemsCopy.emptyState.filters)).toBeVisible({
       timeout: SETTLE_TIMEOUT_MS,
     })
 
@@ -359,7 +396,106 @@ test.describe('problems page with only some calls failing', () => {
     })
 
     // Blaming the filters here would be the same lie as blaming them for an outage
-    await expect(page.getByText(problemsCopy.emptyState.title)).toBeHidden()
+    await expect(page.getByText(problemsCopy.emptyState.filters)).toBeHidden()
+  })
+
+  test('says a search is held back even while the rows of an earlier one are on screen', async ({
+    page,
+  }) => {
+    // The archive, matching everything
+    await stubSearchRule(page, () => searchAnswerWithMoreToCome())
+
+    // Load the page with everything working, so there are rows on screen
+    await page.goto(PROBLEMS_PATH)
+
+    // Wait for its rows
+    await page.getByTestId('virtuoso-scroller').waitFor({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Go offline, which holds the next search back rather than failing it
+    await goOffline(page)
+
+    // Search for something, which the connection holds back
+    await page
+      .getByPlaceholder(problemsCopy.filters.search.placeholder)
+      .filter({ visible: true })
+      .fill('held back')
+
+    // The list says what became of the search
+    await expect(page.getByRole('heading', { name: problemsCopy.offlineTitle })).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The earlier rows no longer stand as its answer
+    await expect(page.locator(PROBLEM_CARD_ATTRIBUTE.anySelector)).toHaveCount(0)
+  })
+
+  test('never brings back the rows a failed search took off the screen', async ({ page }) => {
+    // The archive, matching everything, and one problem alone for the search sent after it recovers
+    await stubSearchRule(page, (query) =>
+      query.parameters.searchText === AFTER_THE_OUTAGE
+        ? searchAnswerWith({ [RECOVERED_PROBLEM]: {} })
+        : searchAnswerWithMoreToCome()
+    )
+
+    // The way to take the archive down and bring it back
+    const setArchiveDown = await stubArchiveOutage(page)
+
+    // Load the page with everything working, so there are rows on screen
+    await page.goto(PROBLEMS_PATH)
+
+    // Wait for its rows
+    await page.getByTestId('virtuoso-scroller').waitFor({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The slugs of the rows on screen before the outage
+    const firstRows = await page
+      .locator(PROBLEM_CARD_ATTRIBUTE.anySelector)
+      .evaluateAll(
+        (rows, name) => rows.map((row) => row.getAttribute(name)),
+        PROBLEM_CARD_ATTRIBUTE.name
+      )
+
+    // Every reading the list takes from here on
+    const readings = await recordListReadings(page)
+
+    // Take the archive away
+    setArchiveDown(true)
+
+    // The sidebar's search box
+    const searchBox = page.getByRole('textbox', { name: problemsCopy.filters.search.label })
+
+    // A search sent into the outage
+    await searchBox.fill('nothing listening')
+
+    // The search fails, which takes the rows off the screen
+    await expect(page.getByText(problemsCopy.errors.searchFailed)).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Where the failure stands among the readings
+    const readingsBeforeRecovery = readings().length
+
+    // Bring the archive back
+    setArchiveDown(false)
+
+    // Another search, sent once it is back
+    await searchBox.fill(AFTER_THE_OUTAGE)
+
+    // Its answer arrives
+    await expect(
+      page.locator(`[${PROBLEM_CARD_ATTRIBUTE.name}="${RECOVERED_PROBLEM}"]`)
+    ).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The readings taken since the recovering search was sent
+    const readingsSinceRecovery = readings().slice(readingsBeforeRecovery)
+
+    // None of them holds a row from before the failure
+    expect(
+      readingsSinceRecovery.filter((reading) =>
+        reading.slugs.some((slug) => firstRows.includes(slug))
+      )
+    ).toEqual([])
   })
 })
 
@@ -367,7 +503,7 @@ test.describe('problems page refused by the API', () => {
   test('says the request was refused rather than unreachable, and lets it lie', async ({
     page,
   }) => {
-    // A rate limiter is the likeliest refusal here: problem search allows 20 requests a minute
+    // A rate limiter is the likeliest refusal here, since problem search has a limit of its own
     const attempts = await refuseEveryBackendCall(page, 429)
 
     // Load the page
@@ -382,7 +518,7 @@ test.describe('problems page refused by the API', () => {
     await expect(page.getByText(problemsCopy.connectionFailedHint)).toBeHidden()
     await expect(page.getByRole('heading', { name: problemsCopy.connectionFailed })).toBeHidden()
 
-    // A refusal is not retried, so the burst is a single request rather than four
+    // A refusal is not retried, so the burst is a single request rather than one per retry
     expect(attempts()).toBe(1)
 
     // Where the traffic stood once it settled

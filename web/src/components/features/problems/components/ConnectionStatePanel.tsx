@@ -1,14 +1,15 @@
 'use client'
 
-import { Loader2, WifiOff } from 'lucide-react'
+import { Loader2, ServerCrash, WifiOff } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/shared/components/Button'
+import { ResultsPlaceholder } from '@/components/shared/components/ResultsPlaceholder'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 /**
- * The states this panel exists for: the page has nothing to show, and the connection is why.
+ * The states this panel exists for: the page has nothing to show, and the fetch behind it is why.
  */
 type ConnectionState = Extract<QueryUiState, { kind: 'failed' | 'offline' | 'retrying' }>
 
@@ -23,7 +24,7 @@ type ConnectionStatePanelProps = {
 }
 
 /**
- * Explains why the page has nothing to show, for the states where the reason is the connection
+ * Explains why the page has nothing to show, for the states where the reason is the fetch
  * rather than the content.
  *
  * The spinner belongs to the retrying state alone: a settled failure gets a button instead, because
@@ -44,63 +45,36 @@ export function ConnectionStatePanel({ state, onRetry }: ConnectionStatePanelPro
     // A request really is in flight after an earlier attempt failed
     case 'retrying':
       return (
-        <PanelShell title={t('connectionFailed')}>
-          <div className="flex items-center justify-center gap-3 text-muted">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            <span className="text-sm">{t('tryingToConnect')}</span>
-          </div>
-        </PanelShell>
+        <ResultsPlaceholder
+          icon={WifiOff}
+          title={t('connectionFailed')}
+          hint={t('tryingToConnect')}
+        >
+          <Loader2 className="mt-4 h-5 w-5 animate-spin text-muted" />
+        </ResultsPlaceholder>
       )
 
     // Every attempt is spent, so the next one has to be asked for. A server that answered and
-    // refused is not an unreachable one, so neither the headline nor the hint may describe it as one
+    // refused is not an unreachable one, so nothing in the panel may describe it as one
     case 'failed':
       return (
-        <PanelShell title={state.isPermanent ? tErrors('searchFailed') : t('connectionFailed')}>
-          <p className="text-sm text-muted">
-            {state.isPermanent ? tErrors('unexpectedError') : t('connectionFailedHint')}
-          </p>
-          <Button variant="secondary" size="sm" className="mt-4" onClick={onRetry}>
+        <ResultsPlaceholder
+          icon={state.isPermanent ? ServerCrash : WifiOff}
+          title={state.isPermanent ? tErrors('searchFailed') : t('connectionFailed')}
+          hint={state.isPermanent ? tErrors('unexpectedError') : t('connectionFailedHint')}
+        >
+          <Button variant="secondary" size="sm" shape="pill" className="mt-4" onClick={onRetry}>
             {tActions('retry')}
           </Button>
-        </PanelShell>
+        </ResultsPlaceholder>
       )
 
     // The request is held back until the connection returns, which it does by itself
     case 'offline':
-      return (
-        <PanelShell title={t('offlineTitle')}>
-          <p className="text-sm text-muted">{t('offlineHint')}</p>
-        </PanelShell>
-      )
+      return <ResultsPlaceholder icon={WifiOff} title={t('offlineTitle')} hint={t('offlineHint')} />
 
     // Every state is handled above
     default:
       return assertNever(state)
   }
-}
-
-/**
- * The props of {@link PanelShell}.
- */
-type PanelShellProps = {
-  /** The headline naming what went wrong. */
-  title: string
-  /** The explanation and any way out. */
-  children: React.ReactNode
-}
-
-/**
- * The icon, headline, and centering shared by every state the panel renders.
- */
-function PanelShell({ title, children }: PanelShellProps) {
-  return (
-    <div className="flex h-full items-center justify-center">
-      <div className="flex flex-col items-center text-center">
-        <WifiOff className="mb-4 h-16 w-16 text-error/60" />
-        <h2 className="mb-2 text-2xl font-bold text-foreground">{title}</h2>
-        {children}
-      </div>
-    </div>
-  )
 }

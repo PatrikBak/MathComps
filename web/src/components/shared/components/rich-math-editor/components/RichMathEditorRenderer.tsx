@@ -1,6 +1,14 @@
 import type { Element } from 'hast'
 import { useTranslations } from 'next-intl'
-import { memo, type PropsWithChildren, type ReactNode, useId, useMemo } from 'react'
+import {
+  createContext,
+  memo,
+  type PropsWithChildren,
+  type ReactNode,
+  use,
+  useId,
+  useMemo,
+} from 'react'
 import Markdown, { type Components, type ExtraProps, type UrlTransform } from 'react-markdown'
 import type { Options as RemarkRehypeOptions } from 'remark-rehype'
 import type { PluggableList } from 'unified'
@@ -15,6 +23,7 @@ import {
   resolveUserUploadMediaUrl,
 } from '@/components/shared/utils/media-utils'
 
+import { CLOSING_TAG, rehypeClosing } from '../plugins/rehype-closing'
 import { rehypeSourceRanges, sourceRangeOf } from '../plugins/rehype-source-ranges'
 import {
   NUMBER_REFERENCE_NUMBER,
@@ -52,6 +61,11 @@ type RichMathEditorRendererProps = {
   renderNumberReference?: NumberReferenceRenderer
   /** Whether the rendered elements are stamped with where they stand in the content. */
   marksSourceRanges?: boolean
+  /**
+   * What closes the text, set flush right: on the last line of a text ending in a paragraph where that line has room,
+   * and on a line of its own otherwise. Nothing closes the text without it.
+   */
+  closing?: ReactNode
 }
 
 /**
@@ -117,13 +131,73 @@ type SpoilerTagProps = PropsWithChildren<ExtraProps> & {
 }
 
 /**
- * The markdown components, plus the custom tags for spoilers and `#N` references.
+ * The markdown components, plus one for each custom tag the plugins add.
  */
 type CustomComponents = Components & {
   /** Custom component for spoilers */
   spoiler?: ({ children, label, node }: SpoilerTagProps) => ReactNode
   /** Custom component for a `#N` in the text */
   [NUMBER_REFERENCE_TAG]?: ({ children, node }: PropsWithChildren<ExtraProps>) => ReactNode
+  /** Custom component for what closes the text */
+  [CLOSING_TAG]?: () => ReactNode
+}
+
+/**
+ * What closes the text being rendered. Read through a context, so a new closing leaves the components, and every
+ * image drawn by them, as they were.
+ */
+const ClosingContext = createContext<ReactNode>(null)
+
+/**
+ * The text's closing, floated to the right edge of the last paragraph: it shares that paragraph's last line where the
+ * line has room, and drops to a line of its own where it hasn't.
+ */
+function ClosingSlot() {
+  // What closes the text
+  const closing = use(ClosingContext)
+
+  // The closing, kept a word's width from the text it follows
+  return <span className="float-right ml-4">{closing}</span>
+}
+
+/**
+ * Whether a paragraph holds an element that can't sit inside a `p`: a spoiler, a div, or an image that doesn't ask
+ * to sit inline.
+ *
+ * @param node - The paragraph's element in the rendered tree.
+ * @returns Whether a block-level element is among its children.
+ */
+function holdsBlockElement(node: ExtraProps['node']): boolean {
+  // Any child that is such an element
+  return (
+    node?.children.some((child) => {
+      // Text and the rest never are
+      if (child.type !== 'element') return false
+
+      // Spoilers and explicit divs always are
+      if (child.tagName === 'spoiler' || child.tagName === 'div') return true
+
+      // Images are, unless they ask to sit inline
+      if (child.tagName === 'img') return isBlockImage(child)
+
+      // Everything else stays inside a `p`
+      return false
+    }) ?? false
+  )
+}
+
+/**
+ * Whether a paragraph holds the text's closing.
+ *
+ * @param node - The paragraph's element in the rendered tree.
+ * @returns Whether the closing is among its children.
+ */
+function holdsClosing(node: ExtraProps['node']): boolean {
+  // The closing's mark among the paragraph's children
+  return (
+    node?.children.some((child) => child.type === 'element' && child.tagName === CLOSING_TAG) ??
+    false
+  )
 }
 
 /** The shared remark plugins with each `#N` in the text turned into a reference. */
@@ -133,8 +207,8 @@ const remarkPluginsWithNumberReferences = [...sharedRemarkPlugins, remarkNumberR
  * Resolves the className for a list element, honoring custom marker styles passed via the `list-style-<style>`
  * className convention.
  *
- * @param className - Optional className forwarded from react-markdown
- * @param defaultMarker - Default Tailwind marker class applied when no custom style is set
+ * @param className - The list's className, which may name a custom marker style.
+ * @param defaultMarker - The marker class for a list with no custom style.
  * @returns Resolved className string for the list element
  */
 function resolveListClassName(className: string | undefined, defaultMarker: string): string {
@@ -188,7 +262,7 @@ function holdsImageRow(node: Element | undefined): boolean {
  * A function which keeps a URL that is safe to link or load and drops any other.
  */
 const urlTransform: UrlTransform = (url) => {
-  // Normalize URL to lowercase for case-insensitive comparison
+  // The URL lowercased, so a scheme written in capitals is caught too
   const lowerUrl = url.toLowerCase()
 
   // Explicitly block dangerous schemes
@@ -222,8 +296,7 @@ const urlTransform: UrlTransform = (url) => {
 }
 
 /**
- * Renders markdown content with LaTeX math support and spoiler support, and where asked a `#N` as whatever the caller
- * draws for N.
+ * Renders markdown content with LaTeX math and spoiler support, plus the extras its props ask for.
  *
  * Wrapped in {@link memo} so a parent re-render with unchanged props skips parsing the markdown again. The components
  * each tag is drawn with stay the same functions while the content changes, since a new function is a new element
@@ -235,6 +308,7 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
   fileLinks,
   renderNumberReference,
   marksSourceRanges,
+  closing,
 }: RichMathEditorRendererProps) {
   // Editor translations
   const t = useTranslations('ui.editor')
@@ -259,34 +333,21 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
             )
           }
 
-          // Check if paragraph contains block-level elements (like spoiler) to avoid invalid HTML nesting (div
-          // inside p)
-          const hasBlockElement = node?.children?.some((child) => {
-            // Non-element children never trigger a wrapper change
-            if (child.type !== 'element') return false
+          // The paragraph's spacing, holding the floated closing within its own height where it carries one
+          const className = cn('mb-2 last:mb-0', holdsClosing(node) && 'flow-root')
 
-            // Spoilers and explicit divs are always block-level
-            if (child.tagName === 'spoiler' || child.tagName === 'div') return true
-
-            // Images count as block-level UNLESS they carry ?inline=true
-            if (child.tagName === 'img') return isBlockImage(child)
-
-            // Everything else stays inside <p>
-            return false
-          })
-
-          // If paragraph contains block-level elements, wrap in div
-          if (hasBlockElement) {
+          // A paragraph holding a block-level element is drawn as a div, since a div can't sit inside a `p`
+          if (holdsBlockElement(node)) {
             return (
-              <div {...sourceRangeOf(node)} className="mb-2 last:mb-0">
+              <div {...sourceRangeOf(node)} className={className}>
                 {children}
               </div>
             )
           }
 
-          // Otherwise, render as paragraph
+          // Any other one, as a paragraph
           return (
-            <p {...sourceRangeOf(node)} className="mb-2 last:mb-0">
+            <p {...sourceRangeOf(node)} className={className}>
               {children}
             </p>
           )
@@ -414,8 +475,8 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
           )
         },
         img: ({ src, alt }) => {
-          // The src split into its recognised query parameters (width/height/inline/scale) and the URL without
-          // them, read before the src resolves, since an uploaded file's signed link carries none of ours
+          // The src split into the query parameters the renderer recognises and the URL without them, read before
+          // the src resolves, since an uploaded file's signed link carries none of ours
           const parsedSrc = typeof src === 'string' ? parseImageUrl(src) : null
 
           // The address the image loads from, resolved in this renderer's context
@@ -502,6 +563,7 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
         [NUMBER_REFERENCE_TAG]: ({ children, node }) =>
           // What the caller draws for the number, or the `#N` as written where it draws nothing
           renderNumberReference?.(Number(node?.properties[NUMBER_REFERENCE_NUMBER])) ?? children,
+        [CLOSING_TAG]: ClosingSlot,
       }) as CustomComponents,
     [fileLinks, imageContext, lightImageBackground, renderNumberReference, t]
   )
@@ -536,25 +598,37 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
   const remarkPlugins =
     renderNumberReference === undefined ? sharedRemarkPlugins : remarkPluginsWithNumberReferences
 
-  // The rehype plugins, stamping the rendered elements with where they stand in the content when asked
-  const rehypePlugins: PluggableList = marksSourceRanges
-    ? [...sharedRehypePlugins, [rehypeSourceRanges, { toSourceOffset }]]
-    : sharedRehypePlugins
+  // The rehype plugin stamping the rendered elements with where they stand in the content, when asked
+  const sourceRangePlugins: PluggableList = marksSourceRanges
+    ? [[rehypeSourceRanges, { toSourceOffset }]]
+    : []
+
+  // The rehype plugin marking where the closing goes, where there is one
+  const closingPlugins: PluggableList = closing === undefined ? [] : [rehypeClosing]
+
+  // Every rehype plugin, the shared ones first
+  const rehypePlugins: PluggableList = [
+    ...sharedRehypePlugins,
+    ...sourceRangePlugins,
+    ...closingPlugins,
+  ]
 
   return (
-    <Markdown
-      // Pipeline: the shared remark plugins in their own order, then where asked the `#N` references
-      remarkPlugins={remarkPlugins}
-      // Pipeline: rehype-raw parses HTML -> rehype-sanitize removes XSS -> rehype-katex renders math ->
-      // rehype-math-nowrap keeps inline math with its punctuation, then where asked the source ranges
-      rehypePlugins={rehypePlugins}
-      // How the footnotes come out
-      remarkRehypeOptions={remarkRehypeOptions}
-      // URL sanitization: allow-list safe schemes, explicitly block dangerous ones
-      urlTransform={urlTransform}
-      components={components}
-    >
-      {processedContent}
-    </Markdown>
+    <ClosingContext value={closing}>
+      <Markdown
+        // Pipeline: the shared remark plugins in their own order, then where asked the `#N` references
+        remarkPlugins={remarkPlugins}
+        // Pipeline: the shared rehype plugins in their own order, then where asked the source ranges and the
+        // closing's mark
+        rehypePlugins={rehypePlugins}
+        // How the footnotes come out
+        remarkRehypeOptions={remarkRehypeOptions}
+        // URL sanitization: allow-list safe schemes, explicitly block dangerous ones
+        urlTransform={urlTransform}
+        components={components}
+      >
+        {processedContent}
+      </Markdown>
+    </ClosingContext>
   )
 })

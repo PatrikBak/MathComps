@@ -1,5 +1,6 @@
 import type { Page, Response } from '@playwright/test'
 
+import { PROBLEM_CARD_ATTRIBUTE } from '@/components/features/problems/constants/problem-list-attributes'
 import type {
   FilterParameters,
   FilterQuery,
@@ -8,7 +9,8 @@ import { URL_PARAMS } from '@/components/features/problems/utils/search-url-seri
 import { FACET_ROW_ATTRIBUTE } from '@/components/shared/components/facets/hooks/use-facet-row-navigation'
 
 import messages from '../../messages/en.json'
-import { SEARCH_PATH } from './backend-routes'
+import { PROBLEMS_PATH, SEARCH_PATH, stubProblemSearch } from './backend-routes'
+import { expect, SETTLE_TIMEOUT_MS } from './test'
 
 /**
  * The copy the assertions match on, taken from the app's own English messages: what each of them
@@ -33,6 +35,14 @@ export const SHORT_WINDOW = { width: 1280, height: 720 }
 
 /** A window tall enough that a facet near the top of the archive's filters opens its panel below its trigger. */
 export const TALL_WINDOW = { width: 1280, height: 1000 }
+
+/** A window wide enough that the bar over the archive's problems has room for every action beside the filters. */
+export const WIDE_BAR_WINDOW = { width: 1440, height: 900 }
+
+/**
+ * A window so narrow that the bar over the archive's problems leaves every action but the reset to its overflow menu.
+ */
+export const NARROW_BAR_WINDOW = { width: 320, height: 700 }
 
 /**
  * The key {@link KEPT_FILTER} is written under, taken from the library's own spelling of it. A
@@ -163,4 +173,22 @@ export async function recordTreeReadings(page: Page): Promise<() => string[]> {
 
   // Hand back a snapshot on each read, so a list cannot grow underneath an assertion mid-check
   return () => [...readings]
+}
+
+/**
+ * Opens the archive, its page of problems served by the fixture, and waits until its first card is drawn.
+ *
+ * @param page - The page to open the archive on.
+ */
+export async function openArchive(page: Page): Promise<void> {
+  // Every search answered with the fixture's page of problems, none refused
+  await stubProblemSearch(page, () => null)
+
+  // Open the archive
+  await page.goto(PROBLEMS_PATH)
+
+  // Settled once its first card is drawn
+  await expect(page.locator(PROBLEM_CARD_ATTRIBUTE.anySelector).first()).toBeVisible({
+    timeout: SETTLE_TIMEOUT_MS,
+  })
 }

@@ -19,7 +19,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/shared/components/DropdownMenu'
-import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
+import { COMPACT_PANEL_CLASS } from '@/components/shared/components/EmptyState'
 import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
 import { cn } from '@/components/shared/utils/css-utils'
 import { focusForReader } from '@/components/shared/utils/focus-utils'

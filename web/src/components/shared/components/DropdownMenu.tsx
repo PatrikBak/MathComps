@@ -292,6 +292,70 @@ export const DropdownMenuCheckboxItem = React.forwardRef<
 ))
 DropdownMenuCheckboxItem.displayName = DropdownMenuPrimitive.CheckboxItem.displayName
 
+/**
+ * The props of {@link DropdownMenuItemIcon}.
+ */
+type DropdownMenuItemIconProps = {
+  /** The row's icon. */
+  children: React.ReactNode
+}
+
+/**
+ * The slot a row's icon sits in at the row's start, one width for every row, so the rows' text lines up whether the
+ * slot holds an icon or stands empty.
+ */
+export function DropdownMenuItemIcon({ children }: DropdownMenuItemIconProps) {
+  return <span className="mr-2 flex w-5 shrink-0 items-center justify-center">{children}</span>
+}
+
+/**
+ * A group of rows of which exactly one is picked, such as how something is sorted or drawn.
+ */
+export const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup
+
+/**
+ * One row of a {@link DropdownMenuRadioGroup}, checked and read in the brand's violet while it is the one picked. The
+ * check stands in the {@link DropdownMenuItemIcon} slot.
+ */
+export const DropdownMenuRadioItem = React.forwardRef<
+  React.ComponentRef<typeof DropdownMenuPrimitive.RadioItem>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.RadioItem>
+>(({ className, children, ...props }, ref) => (
+  <DropdownMenuPrimitive.RadioItem
+    ref={ref}
+    className={cn(
+      'flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors',
+      'focus:bg-foreground/5 data-[state=checked]:text-brand-light',
+      'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      className
+    )}
+    {...props}
+  >
+    <DropdownMenuItemIcon>
+      <DropdownMenuPrimitive.ItemIndicator>
+        <Check className="h-4 w-4" />
+      </DropdownMenuPrimitive.ItemIndicator>
+    </DropdownMenuItemIcon>
+    {children}
+  </DropdownMenuPrimitive.RadioItem>
+))
+DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName
+
+/**
+ * A heading over a group of rows, naming the group.
+ */
+export const DropdownMenuLabel = React.forwardRef<
+  React.ComponentRef<typeof DropdownMenuPrimitive.Label>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label>
+>(({ className, ...props }, ref) => (
+  <DropdownMenuPrimitive.Label
+    ref={ref}
+    className={cn('px-2 pb-1 pt-1.5 text-xs font-medium text-muted', className)}
+    {...props}
+  />
+))
+DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName
+
 /** Horizontal divider between groups of menu items. */
 export const DropdownMenuSeparator = React.forwardRef<
   React.ComponentRef<typeof DropdownMenuPrimitive.Separator>,
