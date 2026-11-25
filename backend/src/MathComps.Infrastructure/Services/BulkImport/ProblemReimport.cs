@@ -61,11 +61,13 @@ public record ProblemReimport(
     /// <param name="problems">The problems to read.</param>
     /// <returns>The same problems, carrying their stored content.</returns>
     public static IQueryable<Problem> IncludeStoredContent(IQueryable<Problem> problems) =>
-        // The texts, the credited authors and the tags
+        // The texts, the credited authors and the tags. Split, because each is a collection off the problem: in one
+        // joined query, each text would come back once for every pair of an author and a tag.
         problems
             .Include(problem => problem.Texts)
             .Include(problem => problem.ProblemAuthors).ThenInclude(problemAuthor => problemAuthor.Author)
-            .Include(problem => problem.ProblemTagsAll).ThenInclude(problemTag => problemTag.Tag);
+            .Include(problem => problem.ProblemTagsAll).ThenInclude(problemTag => problemTag.Tag)
+            .AsSplitQuery();
 
     /// <summary>
     /// Makes a proposals query load what a plan compares a draft's block against beyond the proposal's own fields:
