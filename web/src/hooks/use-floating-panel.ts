@@ -3,6 +3,7 @@
 import {
   autoUpdate,
   flip,
+  type Middleware,
   offset,
   type Placement,
   shift,
@@ -41,6 +42,37 @@ type FloatingPanelOptions = Omit<
   padding: number
   /** The panel's own sizing rule. */
   applySize: ApplyPanelSize
+}
+
+/**
+ * A positioning rule which has a panel measured at its whole content's height before a side is picked
+ * for it. Each sizing caps the panel to the room on the side it is on, and the panel keeps that cap, so
+ * measured as it stands it always fits there. Content that grows while the panel is open, like an image
+ * loading late, would then stay cut short on that side even when the other one has room for all of it.
+ */
+const MEASURED_WHOLE: Middleware = {
+  name: 'measuredWhole',
+  fn({ rects, elements, middlewareData }) {
+    // Measured already in this positioning, whose sizing has capped the panel again since
+    if (middlewareData.measuredWhole !== undefined) return {}
+
+    // How much of the panel's content its cap hides
+    const hiddenHeight = elements.floating.scrollHeight - elements.floating.clientHeight
+
+    // Whole as it stands, so measured as it is, and marked as measured
+    if (hiddenHeight <= 0) return { data: {} }
+
+    // Measured with the hidden part added back, and marked as measured
+    return {
+      data: {},
+      reset: {
+        rects: {
+          reference: rects.reference,
+          floating: { ...rects.floating, height: rects.floating.height + hiddenHeight },
+        },
+      },
+    }
+  },
 }
 
 /**
@@ -90,11 +122,11 @@ export function useFloatingPanel({
       // Clear of the trigger
       offset(gap),
 
-      // Onto whichever side has room, until one is settled on. Dropping the rule outright is what makes
-      // the pin hold: floating-ui keeps the chain it was first given and only replaces it once a new one
-      // differs, comparing each rule's function by its source text, which two closures spelled the same
-      // way never do. A shorter chain is the difference it does notice.
-      ...(pinnedPlacement === null ? [flip({ fallbackPlacements, padding })] : []),
+      // Onto whichever side has room for all of it, until one is settled on. Dropping the rules outright
+      // is what makes the pin hold: floating-ui keeps the chain it was first given and only replaces it
+      // once a new one differs, comparing each rule's function by its source text, which two closures
+      // spelled the same way never do. A shorter chain is the difference it does notice.
+      ...(pinnedPlacement === null ? [MEASURED_WHOLE, flip({ fallbackPlacements, padding })] : []),
 
       // Nudged along the viewport rather than allowed to hang off its edge
       shift({ padding }),
