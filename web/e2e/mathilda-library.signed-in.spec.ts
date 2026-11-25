@@ -216,9 +216,22 @@ test.describe("the student's own list of conversations", () => {
     // Which reads under the same clock the area reads it under
     await expect(library.getByText(/\d+ min/)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
-    // And offers nothing that could rewrite what was argued
-    await expect(library.getByRole('button', { name: chatCopy.newDefense })).toHaveCount(0)
-    await expect(library.getByRole('button', { name: chatCopy.deleteSession })).toHaveCount(0)
+    // The conversation open on what was argued, once its replies can be reported
+    await expect(library.getByRole('button', { name: chatCopy.report }).first()).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // And no way to take back a turn of what was argued
+    await expect(library.getByRole('button', { name: chatCopy.rewind })).toHaveCount(0)
+
+    // Open the list of this problem's conversations
+    await library.getByRole('button', { name: chatCopy.history }).click()
+
+    // Which holds the graded conversation alone
+    await expect(page.getByRole('menuitem')).toHaveCount(1)
+
+    // And no way to drop the graded conversation
+    await expect(page.getByRole('button', { name: chatCopy.deleteSession })).toHaveCount(0)
   })
 
   test('opens a conversation held before its competition opened, without an entry', async ({
