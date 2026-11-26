@@ -82,7 +82,8 @@ type HostedCompetitionGroupPanelProps = {
  *
  * The header carries everything the group's competitions share, the facts on the left and where things stand
  * on the right: the entry window beside how long is left, or how marking stands once it is over, then the
- * problem count and the clock. Each row under it carries one competition's category, standing and action.
+ * problem count and the clock, then what the contest is, for a group whose name does not say it all. Each row
+ * under it carries one competition's category, standing and action.
  *
  * A group holding a single competition has no rows, and its standing and action close the header, under how
  * long is left.
@@ -188,6 +189,9 @@ export function HostedCompetitionGroupPanel({
   // How long is left, or how marking stands once it is over, where there is anything to say
   const countdown = renderCountdown()
 
+  // What the group's contest is, where its name does not say it all
+  const description = group.description?.[locale]
+
   return (
     <SurfacePanel radius="xl" className={cn('overflow-hidden', PHASE_PANEL_CLASS[phase])}>
       {/* What the group's competitions share */}
@@ -251,6 +255,9 @@ export function HostedCompetitionGroupPanel({
             </div>
           )}
         </div>
+
+        {/* What its contest is */}
+        {description !== undefined && <p className="text-foreground/70">{description}</p>}
       </div>
 
       {/* And the competitions themselves, one per category, sharing their columns on a wider screen so

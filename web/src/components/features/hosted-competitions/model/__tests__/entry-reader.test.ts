@@ -16,6 +16,7 @@ function groupOf(closesAt: string | null): HostedCompetitionGroup {
     id: 'group',
     slug: 'group',
     name: { sk: 'Skupina', cs: 'Skupina', en: 'Group' },
+    description: null,
     problemCount: 3,
     clockMinutes: 120,
     opensAt: '2026-09-01T00:00:00Z',

@@ -89,20 +89,17 @@ public class MetadataLocalizationService : IMetadataLocalizationService
 
     /// <inheritdoc />
     public string GetNodeShortName(Language language, string path) =>
-        GetMetadata(language).GetNodeNames(path)?.ShortName
+        GetMetadata(language).GetNode(path)?.ShortName
             ?? throw MissingLocalization("competition", path, language);
 
     /// <inheritdoc />
     public string GetNodeFullName(Language language, string path) =>
-        GetMetadata(language).GetNodeNames(path)?.FullName
+        GetMetadata(language).GetNode(path)?.FullName
             ?? throw MissingLocalization("competition", path, language);
 
     /// <inheritdoc />
     public IReadOnlyDictionary<Language, string> GetNodeUrlSlugs(string path) =>
-        Enum.GetValues<Language>().ToDictionary(
-            language => language,
-            language => GetMetadata(language).GetNodeNames(path)?.UrlSlug
-                ?? throw MissingLocalization("competition URL name", path, language));
+        InEveryLanguage(path, node => node.UrlSlug, "competition URL name");
 
     /// <inheritdoc />
     public string? FindNodePathByUrlSlug(string urlSlug) =>
@@ -111,7 +108,17 @@ public class MetadataLocalizationService : IMetadataLocalizationService
     /// <inheritdoc />
     public IReadOnlyList<Language> LocalesMissingUrlSlug(string path) =>
         // A name the JSON omits deserializes to null, which no key check would catch.
-        LocalesMissing(metadata => metadata.GetNodeNames(path) is { UrlSlug.Length: > 0 });
+        LocalesMissing(metadata => metadata.GetNode(path) is { UrlSlug.Length: > 0 });
+
+    /// <inheritdoc />
+    public IReadOnlyDictionary<Language, string>? GetNodeDescriptions(string path) =>
+        // Whether no language describes the node at all
+        LocalesMissing(metadata => metadata.GetNode(path) is { Description.Length: > 0 }).Length
+            == Enum.GetValues<Language>().Length
+            // A node no language describes says nothing beyond its name
+            ? null
+            // Any other node is described in every language, or the one leaving it out throws
+            : InEveryLanguage(path, node => node.Description, "competition description");
 
     /// <inheritdoc />
     public string GetTagName(Language language, string slug) =>
@@ -164,6 +171,23 @@ public class MetadataLocalizationService : IMetadataLocalizationService
     }
 
     /// <summary>
+    /// Reads one of a competition node's texts, such as its URL name, in every language.
+    /// </summary>
+    /// <param name="path">The node's path.</param>
+    /// <param name="select">Picks the text out of what one language says about the node.</param>
+    /// <param name="entityType">What the text is called in the error, e.g. "competition URL name".</param>
+    /// <returns>The text in each language.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if any language leaves the node or the text out.</exception>
+    private Dictionary<Language, string> InEveryLanguage(
+        string path, Func<LocalizedNode, string?> select, string entityType) =>
+        // Each language's text, throwing on the first language that leaves the node or the text out
+        Enum.GetValues<Language>().ToDictionary(
+            language => language,
+            language => GetMetadata(language).GetNode(path) is { } node && select(node) is { Length: > 0 } value
+                ? value
+                : throw MissingLocalization(entityType, path, language));
+
+    /// <summary>
     /// Whether a locale names a node at all — both names, since a reader asks for either one and an
     /// entry carrying only a short name resolves right up until something reads the full one.
     /// </summary>
@@ -172,7 +196,7 @@ public class MetadataLocalizationService : IMetadataLocalizationService
     /// <returns>True when the locale carries both names for it.</returns>
     private static bool HasBothNames(PerLocaleMetadata metadata, string path) =>
         // A name the JSON omits deserializes to null, which no key check would catch.
-        metadata.GetNodeNames(path) is { ShortName.Length: > 0, FullName.Length: > 0 };
+        metadata.GetNode(path) is { ShortName.Length: > 0, FullName.Length: > 0 };
 
     /// <summary>
     /// Returns the locales a slug is missing from — those whose loaded metadata fails the given presence

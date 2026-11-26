@@ -252,7 +252,8 @@
     "mathcomps-special-school_a": {
       "shortName": "Příprava na školní A",
       "fullName": "Příprava na školní A",
-      "urlSlug": "priprava-skolni-a"
+      "urlSlug": "priprava-skolni-a",
+      "description": "Školní kolo MO kategorie A nanečisto, týden před tím ostrým 8. prosince. Úlohy jsou na jeho úrovni, Mathilda ti během soutěže dává zpětnou vazbu a body ti udělí člověk jako v ostatních soutěžích."
     },
     "mathcomps-elementary": {
       "shortName": "Základní",

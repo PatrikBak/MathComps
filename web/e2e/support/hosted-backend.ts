@@ -46,6 +46,7 @@ import {
   buildView,
   COMPETITION_SLUG,
   type HostedState,
+  PREPARATION_DESCRIPTION,
   PROBLEMS_PER_COMPETITION,
   UPCOMING_COMPETITION_SLUG,
 } from './hosted-backend-world'
@@ -64,7 +65,15 @@ import {
  */
 
 // Re-exported so a spec reads them off the module it installs the fake from
-export { COMPETITION_SLUG, LIMITS, namedProblemOf, OPENER, problemIdOf, UPCOMING_COMPETITION_SLUG }
+export {
+  COMPETITION_SLUG,
+  LIMITS,
+  namedProblemOf,
+  OPENER,
+  PREPARATION_DESCRIPTION,
+  problemIdOf,
+  UPCOMING_COMPETITION_SLUG,
+}
 
 /** {@link PROBLEMS_PER_COMPETITION}, as the specs read it. */
 export const PROBLEM_COUNT = PROBLEMS_PER_COMPETITION

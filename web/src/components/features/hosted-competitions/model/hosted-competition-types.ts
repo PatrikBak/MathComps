@@ -331,6 +331,11 @@ export type HostedCompetitionGroup = {
   slug: string
   /** What a heading calls it, in every language the site is read in. */
   name: LocalizedString
+  /**
+   * What its contest is, in a sentence or two, in every language the site is read in; null for a group whose
+   * name says it all, as a month's does.
+   */
+  description: LocalizedString | null
   /** How many problems each of its competitions asks, announced rather than counted. */
   problemCount: number
   /** How long a student's own clock runs, in minutes. */

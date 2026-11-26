@@ -74,6 +74,16 @@ public interface IMetadataLocalizationService
     IReadOnlyList<Language> LocalesMissingUrlSlug(string path);
 
     /// <summary>
+    /// Gets the description of a competition node in every language (see <see cref="LocalizedNode.Description"/>).
+    /// </summary>
+    /// <param name="path">The node's path (e.g. "mathcomps-special-school_a").</param>
+    /// <returns>The description in each language, or null when no language describes the node.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if some language describes the node and another does not.
+    /// </exception>
+    IReadOnlyDictionary<Language, string>? GetNodeDescriptions(string path);
+
+    /// <summary>
     /// Gets the localized name for a tag.
     /// </summary>
     /// <param name="lang">The language to get the name for.</param>
