@@ -57,7 +57,7 @@ Decide the shape. The tree nests as deep as the competition really does — thre
 - **Rounds** (`i`,`ii`,`iii`, `d1`…) → the `children` of whatever they hang under, which is the category when there is one and the competition otherwise. **Each parent lists only the rounds it actually runs**, so CSMO's Z4 carries just `i`, `ii` while its A carries `i`, `s`, `ii`, `iii`.
 - **One flat sitting** — a competition with no sub-rounds (IMO/EGMO) omits `children` entirely; its problems hang off the competition itself, and its own `nodes` entry is the only name needed.
 
-Every slug is lowercase alphanumeric with **no hyphen in it** — a hyphen is what joins a slug to its parent's path, so one inside a slug would make the path ambiguous. Path composition throws on it, and a check constraint refuses the row underneath.
+Every slug is lowercase alphanumeric with **no hyphen in it** — a hyphen is what joins a slug to its parent's path, so one inside a slug would make the path ambiguous. Path composition throws on it, and a check constraint refuses the row underneath. A slug of several words joins them with single underscores instead (`school_a`).
 
 **A problem belonging to no competition goes under `mathcomps-proposals`** — a candidate in an organization's pool, which the problem selection picks from. It is registered already, so a draft just names it as its `competition`. Give that draft `visibleSince: 9999-01-01T00:00:00Z`, the embargo that hides the pool from students; the import refuses any other (`proposals-embargo`). It also names the organization whose pool it fills, `organization: mathcomps` for MathComps' own; the import refuses a pool draft naming no organization that exists, and any other draft naming one (`proposals-organization`).
 

@@ -73,6 +73,10 @@
       "children": [
         { "slug": "practice" },
         {
+          "slug": "special",
+          "children": [{ "slug": "school_a" }]
+        },
+        {
           "slug": "elementary",
           "children": [{ "slug": "september" }, { "slug": "october" }, { "slug": "november" }]
         },

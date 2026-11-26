@@ -38,7 +38,7 @@ public class TaxonomySlugsTests
         Assert.Throws<InvalidOperationException>(() => TaxonomySlugs.ComposePath("csmo", "a-b"));
 
     /// <summary>
-    /// The canonical slug alphabet is lowercase letters and digits, and nothing else is one segment.
+    /// Only words of lowercase letters and digits, joined by single underscores, make a single path segment.
     /// </summary>
     /// <param name="slug">The slug under test.</param>
     /// <param name="expected">Whether it is a single path segment.</param>
@@ -46,11 +46,15 @@ public class TaxonomySlugsTests
     [InlineData("csmo", true)]
     [InlineData("z9", true)]
     [InlineData("d1", true)]
+    [InlineData("school_a", true)]
     [InlineData("a-b", false)]
     [InlineData("", false)]
     [InlineData("A", false)]
     [InlineData("a b", false)]
-    public void Path_segments_are_lowercase_alphanumeric(string slug, bool expected) =>
+    [InlineData("_a", false)]
+    [InlineData("a_", false)]
+    [InlineData("a__b", false)]
+    public void Path_segments_are_lowercase_words_joined_by_underscores(string slug, bool expected) =>
         Assert.Equal(expected, TaxonomySlugs.IsPathSegment(slug));
 
     /// <summary>

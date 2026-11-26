@@ -17,10 +17,13 @@ export const META_FILENAME = '_meta.yaml'
 const COMPETITION_FIELD = 'competition'
 
 /**
- * Lowercase alphanumeric segments joined by hyphens: the only shape a competition is addressed in, and the shape
- * of an organization's slug.
+ * The only shape a competition is addressed in: segments joined by hyphens, each made of lowercase alphanumeric
+ * words joined by single underscores (e.g. `csmo-a-iii`, `mathcomps-special-school_a`).
  */
-const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/
+const COMPETITION_PATH_PATTERN = /^[a-z0-9]+(_[a-z0-9]+)*(-[a-z0-9]+(_[a-z0-9]+)*)*$/
+
+/** The shape of an organization's slug: lowercase alphanumeric segments joined by hyphens. */
+const ORGANIZATION_SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/
 
 /** Meta values substituted for any field that can't be read. */
 export const FALLBACK_META: ManifestMeta = {
@@ -102,12 +105,12 @@ export function narrowMeta(parsed: unknown): MetaResult {
  */
 function requireCompetitionPath(value: unknown, errors: VerdictError[]): string {
   // A string whose every segment is drawn from the slug alphabet addresses a competition
-  if (typeof value === 'string' && SLUG_PATTERN.test(value)) return value
+  if (typeof value === 'string' && COMPETITION_PATH_PATTERN.test(value)) return value
 
   // Anything else is missing or malformed
   errors.push(
     metaIssue(
-      `${COMPETITION_FIELD} is required and must be a path of lowercase alphanumeric segments joined by "-" (e.g. csmo-a-iii)`
+      `${COMPETITION_FIELD} is required and must be a path of segments joined by "-", each made of lowercase alphanumeric words joined by "_" (e.g. csmo-a-iii)`
     )
   )
 
@@ -202,7 +205,7 @@ function narrowOrganization(value: unknown, errors: VerdictError[]): string | nu
   if (value === undefined || value === null) return null
 
   // A slug names an organization
-  if (typeof value === 'string' && SLUG_PATTERN.test(value)) return value
+  if (typeof value === 'string' && ORGANIZATION_SLUG_PATTERN.test(value)) return value
 
   // Present but unusable
   errors.push(

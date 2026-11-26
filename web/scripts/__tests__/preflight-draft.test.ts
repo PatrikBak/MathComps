@@ -920,7 +920,7 @@ describe('narrowMeta', () => {
     expect(errors.some((error) => error.message.includes('visibleSince'))).toBe(true)
   })
 
-  it.each(['imo', 'imo-i', 'deep-mid-low-round', 'csmo-z10-ii'])(
+  it.each(['imo', 'imo-i', 'deep-mid-low-round', 'csmo-z10-ii', 'mathcomps-special-school_a'])(
     'accepts the competition path %s at whatever depth it sits',
     (competition) => {
       const { meta, errors } = narrowMeta({
@@ -943,7 +943,7 @@ describe('narrowMeta', () => {
     expect(errors.some((error) => error.message.includes('competition'))).toBe(true)
   })
 
-  it.each(['CSMO-A', 'csmo--a', '-csmo', 'csmo-', 'csmo a', 'csmo/a', ''])(
+  it.each(['CSMO-A', 'csmo--a', '-csmo', 'csmo-', 'csmo a', 'csmo/a', 'csmo-a__b', 'csmo-_a', ''])(
     'errors on the malformed competition path %j',
     (competition) => {
       const { meta, errors } = narrowMeta({

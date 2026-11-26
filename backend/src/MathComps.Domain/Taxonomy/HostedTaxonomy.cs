@@ -13,10 +13,12 @@ public static class HostedTaxonomy
     /// The root node every hosted competition hangs off.
     /// </summary>
     /// <remarks>
-    /// Below it sits one node per category, and below each of those one node per group the site runs. A group
-    /// node is shared across every season it runs in, so its registered name has to be season-independent:
-    /// <c>November</c>, never <c>November 2026</c>. Which year a group ran in is its round's season, and a name
-    /// carrying a year would be wrong for every season but the first.
+    /// Below it sits one node per category, and below each of those one node per group the site runs. Beside them
+    /// sit the one-offs: the practice node, and under <c>special</c> every other group of a single competition
+    /// (<c>mathcomps-special-school_a</c>). A group is called by its node's short name, so a one-off's node needs
+    /// a name that reads on its own. A group node is shared across every season it runs in, so its registered
+    /// name has to be season-independent: <c>November</c>, never <c>November 2026</c>. Which year a group ran in
+    /// is its round's season, and a name carrying a year would be wrong for every season but the first.
     /// </remarks>
     public const string RootSlug = "mathcomps";
 
