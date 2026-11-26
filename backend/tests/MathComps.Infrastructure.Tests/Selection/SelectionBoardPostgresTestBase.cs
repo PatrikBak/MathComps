@@ -16,10 +16,11 @@ namespace MathComps.Infrastructure.Tests.Selection;
 /// <remarks>
 /// The seed is sixteen of MathComps' proposals, the October and November groups not yet open with empty rounds, a
 /// September group already open, the full October board picking for October and a part-filled spare one picking
-/// for November, sharing problem 1 with it. Problem 15 is written in English alone, and problem 16 sits in a
-/// September round rather than in the pool. The olympiad has one proposal of its own in the same pool, on a board
-/// of its own picking for no group. Three accounts sit on MathComps' list: a lead of every one of its categories,
-/// a lead of the elementary one alone, and a member leading none.
+/// for November, sharing problem 1 with it. A school group not yet open runs one empty round at no level, and an
+/// empty board picks for it with one paper of no category. Problem 15 is written in English alone, and problem 16
+/// sits in a September round rather than in the pool. The olympiad has one proposal of its own in the same pool,
+/// on a board of its own picking for no group. Three accounts sit on MathComps' list: a lead of every one of its
+/// categories, a lead of the elementary one alone, and a member leading none.
 /// </remarks>
 /// <typeparam name="TService">The service the derived suite tests.</typeparam>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
@@ -91,6 +92,17 @@ public abstract class SelectionBoardPostgresTestBase<TService>(PostgresContainer
     /// empty.
     /// </summary>
     protected Guid SpareBoardId { get; private set; }
+
+    /// <summary>
+    /// The school board, picking for the school group, whose one competition runs at no level: one paper of no
+    /// category, its slots empty.
+    /// </summary>
+    protected Guid SchoolBoardId { get; private set; }
+
+    /// <summary>
+    /// The school board's one paper, which fills no category.
+    /// </summary>
+    protected Guid SchoolPaperId { get; private set; }
 
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services) =>
@@ -164,6 +176,16 @@ public abstract class SelectionBoardPostgresTestBase<TService>(PostgresContainer
         // The spare board, picking for November, sharing problem 1
         SpareBoardId = SelectionSeed.NewBoard(context, november, "Spare", Proposals[1], Proposals[13]).Id;
 
+        // The school group, its one competition at no level
+        var school = SelectionSeed.NewGroup(
+            context, season, "mc-school", now.AddDays(20), ["mathcomps-special-school_a"]);
+
+        // The school board, picking for it, empty
+        SchoolBoardId = SelectionSeed.NewBoardWithoutCategory(context, school, "School").Id;
+
+        // The school board's one paper
+        SchoolPaperId = context.SelectionPapers.Local.Single(paper => paper.BoardId == SchoolBoardId).Id;
+
         // Written
         await context.SaveChangesAsync();
     }
@@ -188,7 +210,7 @@ public abstract class SelectionBoardPostgresTestBase<TService>(PostgresContainer
     protected Task<Guid> PaperIdAsync(Guid boardId, HostedCompetitionCategory level) =>
         // The board's one paper of a category at that level
         QueryValueAsync(context => context.SelectionPapers
-            .Where(paper => paper.BoardId == boardId && paper.Category.HostedCategory == level)
+            .Where(paper => paper.BoardId == boardId && paper.Category!.HostedCategory == level)
             .Select(paper => paper.Id)
             .SingleAsync());
 
@@ -198,11 +220,17 @@ public abstract class SelectionBoardPostgresTestBase<TService>(PostgresContainer
     /// <param name="boardId">The board.</param>
     /// <param name="level">The hosted level the paper's category is.</param>
     /// <returns>The problem in each slot, null where it stands empty.</returns>
-    protected async Task<IReadOnlyList<Guid?>> DraftSlotsAsync(Guid boardId, HostedCompetitionCategory level)
-    {
-        // The board's paper at that level
-        var paperId = await PaperIdAsync(boardId, level);
+    protected async Task<IReadOnlyList<Guid?>> DraftSlotsAsync(Guid boardId, HostedCompetitionCategory level) =>
+        // The slots of the board's paper at that level
+        await DraftSlotsAsync(await PaperIdAsync(boardId, level));
 
+    /// <summary>
+    /// Reads what stands in each slot of a draft's paper.
+    /// </summary>
+    /// <param name="paperId">The paper.</param>
+    /// <returns>The problem in each slot, null where it stands empty.</returns>
+    protected async Task<IReadOnlyList<Guid?>> DraftSlotsAsync(Guid paperId)
+    {
         // The paper's slot rows
         var rows = await QueryValueAsync(context => context.SelectionSlots
             .Where(slot => slot.PaperId == paperId)

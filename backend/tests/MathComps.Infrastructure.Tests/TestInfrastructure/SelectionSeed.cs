@@ -269,16 +269,34 @@ public static class SelectionSeed
     /// <param name="opensAt"><inheritdoc cref="HostedGroup.OpensAt" path="/summary"/></param>
     /// <returns>The group, its rounds tracked beside it.</returns>
     public static HostedGroup NewGroup(
-        MathCompsDbContext context, Season season, string month, DateTimeOffset opensAt)
+        MathCompsDbContext context, Season season, string month, DateTimeOffset opensAt) =>
+        // One round per hosted level, each under the month's node
+        NewGroup(context, season, $"mc-{month}", opensAt, RoundPaths(month));
+
+    /// <summary>
+    /// Tracks a hosted group of four problems a paper, with one empty round per competition given.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="season">The season its rounds sit in.</param>
+    /// <param name="slug"><inheritdoc cref="HostedGroup.Slug" path="/summary"/></param>
+    /// <param name="opensAt"><inheritdoc cref="HostedGroup.OpensAt" path="/summary"/></param>
+    /// <param name="roundPaths">The paths of the competitions its rounds hang off.</param>
+    /// <returns>The group, its rounds tracked beside it.</returns>
+    public static HostedGroup NewGroup(
+        MathCompsDbContext context,
+        Season season,
+        string slug,
+        DateTimeOffset opensAt,
+        IReadOnlyList<string> roundPaths)
     {
         // The group, closing a fortnight after it opens
-        var group = HostedSeed.NewGroup(context, $"mc-{month}", opensAt, opensAt.AddDays(14));
+        var group = HostedSeed.NewGroup(context, slug, opensAt, opensAt.AddDays(14));
 
         // Four problems a round, as many as a seeded board's papers have slots
         group.ProblemCount = 4;
 
-        // One empty round per hosted level
-        foreach (var path in RoundPaths(month))
+        // One empty round per competition
+        foreach (var path in roundPaths)
             HostedSeed.NewRound(context, season, group, Guid.CreateVersion7(), path);
 
         // The tracked group
@@ -321,6 +339,69 @@ public static class SelectionSeed
     public static SelectionBoard NewBoard(
         MathCompsDbContext context, Guid organizationId, HostedGroup? group, string name, params Guid?[] slots)
     {
+        // The organization's categories already written, tracked beside any the seed has yet to write
+        context.OrganizationCategories.Where(category => category.OrganizationId == organizationId).Load();
+
+        // All of them, in the order they run
+        var categories = context.OrganizationCategories.Local
+            .Where(category => category.OrganizationId == organizationId)
+            .OrderBy(category => category.Position)
+            .ToList();
+
+        // One paper per category, named after it
+        return NewBoard(
+            context,
+            organizationId,
+            group,
+            name,
+            [.. categories.Select(category => (category.Name, (Guid?)category.Id))],
+            slots);
+    }
+
+    /// <summary>
+    /// Tracks a draft board of the MathComps organization with one paper of no category, named like the board, its
+    /// four slots filled from the ids given.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="group">
+    /// <inheritdoc cref="NewBoard(MathCompsDbContext, Guid, HostedGroup?, string, Guid?[])"
+    /// path="/param[@name='group']"/>
+    /// </param>
+    /// <param name="name"><inheritdoc cref="SelectionBoard.Name" path="/summary"/></param>
+    /// <param name="slots">What stands in each slot; null for an empty slot. Missing trailing entries stand empty.</param>
+    /// <returns>The board, its paper tracked beside it.</returns>
+    public static SelectionBoard NewBoardWithoutCategory(
+        MathCompsDbContext context, HostedGroup? group, string name, params Guid?[] slots) =>
+        // MathComps' own, its one paper of no category
+        NewBoard(context, MathCompsId(context), group, name, [(name, null)], slots);
+
+    /// <summary>
+    /// Tracks a draft board of an organization with the papers given, each of four slots, filled from the ids given.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="organizationId">
+    /// <inheritdoc cref="NewBoard(MathCompsDbContext, Guid, HostedGroup?, string, Guid?[])"
+    /// path="/param[@name='organizationId']"/>
+    /// </param>
+    /// <param name="group">
+    /// <inheritdoc cref="NewBoard(MathCompsDbContext, Guid, HostedGroup?, string, Guid?[])"
+    /// path="/param[@name='group']"/>
+    /// </param>
+    /// <param name="name"><inheritdoc cref="SelectionBoard.Name" path="/summary"/></param>
+    /// <param name="papers">Each paper's name and the category it fills, null for none, in board order.</param>
+    /// <param name="slots">
+    /// What stands in each slot, paper after paper in board order; null for an empty slot. Missing trailing entries
+    /// stand empty.
+    /// </param>
+    /// <returns>The board, its papers tracked beside it.</returns>
+    private static SelectionBoard NewBoard(
+        MathCompsDbContext context,
+        Guid organizationId,
+        HostedGroup? group,
+        string name,
+        IReadOnlyList<(string Name, Guid? CategoryId)> papers,
+        Guid?[] slots)
+    {
         // The board, the organization's own, picking for the group given
         var board = new SelectionBoard
         {
@@ -332,26 +413,17 @@ public static class SelectionSeed
         };
         context.SelectionBoards.Add(board);
 
-        // The organization's categories already written, tracked beside any the seed has yet to write
-        context.OrganizationCategories.Where(category => category.OrganizationId == organizationId).Load();
-
-        // All of them, in the order they run
-        var categories = context.OrganizationCategories.Local
-            .Where(category => category.OrganizationId == organizationId)
-            .OrderBy(category => category.Position)
-            .ToList();
-
-        // One paper per category
-        foreach (var position in Enumerable.Range(0, categories.Count))
+        // Each paper given, in board order
+        foreach (var position in Enumerable.Range(0, papers.Count))
         {
-            // The paper, named after its category
+            // The paper, with the name and the category given
             var paper = new SelectionPaper
             {
                 Id = Guid.CreateVersion7(),
                 BoardId = board.Id,
                 Position = position,
-                Name = categories[position].Name,
-                CategoryId = categories[position].Id,
+                Name = papers[position].Name,
+                CategoryId = papers[position].CategoryId,
                 SlotCount = 4,
             };
             context.SelectionPapers.Add(paper);

@@ -143,7 +143,7 @@ public sealed class BoardFinalizationService(IDbContextFactory<MathCompsDbContex
                 group.ClosesAt,
                 group.ProblemCount,
                 [.. rounds.Select(round => (round.Competition.Path, round.Problems.Count))],
-                [.. board.Papers.Select(paper => (paper.Category.HostedCategory, paper.SlotCount))],
+                [.. board.Papers.Select(paper => (paper.Category, paper.SlotCount))],
                 now))
             throw new SelectionFinalizeBlockedException();
 
@@ -151,13 +151,12 @@ public sealed class BoardFinalizationService(IDbContextFactory<MathCompsDbContex
         if (board.Papers.Any(paper => paper.Slots.Count != paper.SlotCount))
             throw new SelectionFinalizeBlockedException();
 
-        // Each paper with the round of its category's hosted level
+        // Each paper with the round of its category's hosted level, or the round at no level for a paper with none
         return
         [
             .. board.Papers.Select(paper => (
                 paper,
-                rounds.Single(round =>
-                    SelectionRules.IsRoundFor(round.Competition.Path, paper.Category.HostedCategory)))),
+                rounds.Single(round => SelectionRules.IsRoundFor(round.Competition.Path, paper.Category)))),
         ];
     }
 }

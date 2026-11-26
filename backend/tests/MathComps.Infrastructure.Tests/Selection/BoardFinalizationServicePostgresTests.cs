@@ -60,6 +60,43 @@ public class BoardFinalizationServicePostgresTests(PostgresContainerFixture fixt
     });
 
     /// <summary>
+    /// A paper with no category fills the round of its group's one competition, which runs at no level, so finalizing
+    /// moves its problems there in slot order.
+    /// </summary>
+    [Fact]
+    public Task Finalizing_moves_a_paper_with_no_category_into_the_competition_with_no_level() => RunTestAsync(
+        async service =>
+        {
+            // The school paper filled with problems 1 to 4
+            await QueryAsync(async context =>
+            {
+                // A slot row per problem, in order
+                context.SelectionSlots.AddRange(Enumerable.Range(0, 4).Select(index => new SelectionSlot
+                {
+                    PaperId = SchoolPaperId,
+                    Position = index,
+                    ProblemId = Proposals[index + 1],
+                }));
+
+                // Written
+                await context.SaveChangesAsync();
+            });
+
+            // The school board, into the school group it picks for
+            await service.FinalizeAsync(Organization.MathCompsSlug, SchoolBoardId);
+
+            // The first problem sits first in the school round
+            Assert.Equal(
+                ("mathcomps-special-school_a", 1, "76-mathcomps-special-school_a-1"),
+                await PositionOfAsync(Proposals[1]));
+
+            // And the last one last
+            Assert.Equal(
+                ("mathcomps-special-school_a", 4, "76-mathcomps-special-school_a-4"),
+                await PositionOfAsync(Proposals[4]));
+        });
+
+    /// <summary>
     /// A round is either empty or full, so a board with one slot emptied cannot be finalized.
     /// </summary>
     [Fact]

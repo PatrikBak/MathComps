@@ -174,8 +174,7 @@ public sealed class ProblemSelectionService(
                     {
                         paper.Id,
                         paper.Name,
-                        Category = paper.Category.Name,
-                        paper.Category.HostedCategory,
+                        paper.Category,
                         paper.SlotCount,
                         Slots = paper.Slots.Select(slot => new { slot.Position, slot.ProblemId }).ToList(),
                     })
@@ -237,7 +236,7 @@ public sealed class ProblemSelectionService(
                     group.ClosesAt,
                     group.ProblemCount,
                     [.. group.Rounds.Select(round => (round.CompetitionPath, round.Problems.Count))],
-                    [.. board.Papers.Select(paper => (paper.HostedCategory, paper.SlotCount))],
+                    [.. board.Papers.Select(paper => (paper.Category, paper.SlotCount))],
                     now);
 
                 // A draft, finalizable or not
@@ -275,14 +274,14 @@ public sealed class ProblemSelectionService(
                         .. board.Papers.Select(paper => new SelectionPaperDto(
                             paper.Id,
                             paper.Name,
-                            paper.Category,
+                            paper.Category?.Name,
                             // The paper's slots, by whether its board has been finalized
                             board is { IsFinalized: true, HostedGroupId: { } groupId }
-                                // A finalized paper's slots are its group's round of the hosted level its
-                                // category is, empty where the group runs none
+                                // A finalized paper's slots hold the problems of its group's round it fills, all
+                                // empty where the group runs no such round
                                 ? groupsById[groupId].Rounds
                                     .FirstOrDefault(round =>
-                                        SelectionRules.IsRoundFor(round.CompetitionPath, paper.HostedCategory))
+                                        SelectionRules.IsRoundFor(round.CompetitionPath, paper.Category))
                                     ?.Problems.Select(problemId => (Guid?)problemId).ToList()
                                 ?? [.. Enumerable.Repeat<Guid?>(null, paper.SlotCount)]
                                 // A draft paper's slots are its slot rows, an empty slot holding none

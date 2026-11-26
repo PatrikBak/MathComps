@@ -324,12 +324,17 @@ export const ON_OFFER_COUNT = ON_OFFER.length
  *
  * @param index - Which of the fake's papers it is, which its id is built from.
  * @param name - What the paper is called.
- * @param category - The category it fills, by name.
+ * @param category - The category it fills, by name; null for none.
  * @param slots - The problem in each slot, null where the slot stands empty.
  *
  * @returns The paper.
  */
-function paperOf(index: number, name: string, category: string, slots: (Proposal | null)[]): Paper {
+function paperOf(
+  index: number,
+  name: string,
+  category: string | null,
+  slots: (Proposal | null)[]
+): Paper {
   // The paper, its id built from its index so every paper gets its own
   return {
     id: `00000000-0000-4000-8000-a${String(index).padStart(11, '0')}`,
@@ -430,6 +435,17 @@ export const FULL_DRAFT_FINALIZED: BoardPickingForCycle = {
 export const FULL_DRAFT_OPENED: BoardPickingForCycle = {
   ...FULL_DRAFT,
   cycle: { ...NOVEMBER, opensAt: new Date(Date.now() - DAY_MS).toISOString(), stage: 'opened' },
+}
+
+/**
+ * A draft picking for a cycle whose one competition runs at no level, so its one paper fills no category, its three
+ * slots empty.
+ */
+const SCHOOL_DRAFT: BoardPickingForCycle = {
+  id: '00000000-0000-4000-8000-b00000000005',
+  name: 'School 2026',
+  papers: [paperOf(9, 'School A', null, [null, null, null])],
+  cycle: cycleOf('School A', 5, 'finalizable'),
 }
 
 /** {@link LATER_DRAFT} once {@link FULL_DRAFT}'s round has taken {@link READY}, which leaves every draft it stood on. */
@@ -830,6 +846,8 @@ type SelectionReply =
   | 'openedDeleted'
   /** With every problem in the selection and {@link SLOVAK_ALONE}. */
   | 'slovakAlone'
+  /** With every problem in the selection, and {@link SCHOOL_DRAFT} as the only board. */
+  | 'schoolDraft'
   /** Refused with the code an account off the MathComps organization's list earns. */
   | 'forbidden'
   /** Refused for good with no code at all, as an address the backend does not serve is. */
@@ -894,6 +912,10 @@ function selectionHeldAt(reply: SelectionReply): HeldSelection {
     // Every problem as first read, and the one written in Slovak alone
     case 'slovakAlone':
       return { proposals: [...SELECTION, SLOVAK_ALONE], boards: BOARDS }
+
+    // Every problem, and the draft whose one paper has no category as the only board
+    case 'schoolDraft':
+      return { proposals: SELECTION, boards: [SCHOOL_DRAFT] }
 
     // Every problem as first read but the deleted one, which no board held
     case 'openedDeleted':
@@ -986,6 +1008,7 @@ export async function stubSelection(
       case 'novemberFilled':
       case 'openedDeleted':
       case 'slovakAlone':
+      case 'schoolDraft':
         return answerJson(route, 200, read())
 
       // Refused, in the shape the backend writes an authorization failure as

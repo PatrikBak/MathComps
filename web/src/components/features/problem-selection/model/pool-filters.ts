@@ -361,7 +361,8 @@ export function matchDiscussions(
         }
       case 'paper':
         return {
-          categories: [subject.paper.category],
+          // The paper's category, none for a paper filling a competition with no level
+          categories: subject.paper.category === null ? [] : [subject.paper.category],
           problem: null,
           // The paper's name and its board's, and what the comments say, folded like the search
           searchText: normalizeForSearch(

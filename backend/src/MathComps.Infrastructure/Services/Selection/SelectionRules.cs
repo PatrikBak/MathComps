@@ -1,4 +1,3 @@
-using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
@@ -219,16 +218,26 @@ internal static class SelectionRules
 
     /// <summary>
     /// Whether a round is the one a paper fills once its board is finalized into the round's group: the round runs at
-    /// the hosted level the paper's category is.
+    /// the hosted level the paper's category is, or at no level for a paper with no category.
     /// </summary>
     /// <param name="competitionPath">The path of the competition the round hangs off.</param>
-    /// <param name="hostedCategory">
-    /// The hosted level the paper's category is; null for one no hosted round runs, which fills no round.
+    /// <param name="category">
+    /// The paper's category; null for a paper with none. A category at no hosted level fills no round.
     /// </param>
     /// <returns>Whether the paper fills the round.</returns>
-    public static bool IsRoundFor(string competitionPath, HostedCompetitionCategory? hostedCategory) =>
-        // The paper's category at a hosted level, and the round's level that one
-        hostedCategory is { } level && HostedTaxonomy.CategoryOf(competitionPath) == level;
+    public static bool IsRoundFor(string competitionPath, OrganizationCategory? category) =>
+        // The round's level read against the paper's category
+        category switch
+        {
+            // A paper with no category fills the round of the competition with no level
+            null => HostedTaxonomy.CategoryOf(competitionPath) is null,
+
+            // A category at a hosted level fills the round at that level
+            { HostedCategory: { } level } => HostedTaxonomy.CategoryOf(competitionPath) == level,
+
+            // A category at no hosted level fills none
+            { HostedCategory: null } => false,
+        };
 
     /// <summary>
     /// Whether a draft's papers can be finalized into its hosted group, whatever its slots hold: the group has not
@@ -244,7 +253,8 @@ internal static class SelectionRules
     /// Each of the group's rounds, by the path of the competition it hangs off, with how many problems it holds.
     /// </param>
     /// <param name="papers">
-    /// Each of the board's papers, by the hosted level its category is, with how many slots it has.
+    /// Each of the board's papers, by its category and how many slots it has; the category is null for a paper with
+    /// none.
     /// </param>
     /// <param name="now">The instant the group's opening is read against.</param>
     /// <returns>Whether the board can be finalized into the group.</returns>
@@ -253,7 +263,7 @@ internal static class SelectionRules
         DateTimeOffset? closesAt,
         int problemCount,
         IReadOnlyList<(string CompetitionPath, int ProblemsHeld)> rounds,
-        IReadOnlyList<(HostedCompetitionCategory? Level, int SlotCount)> papers,
+        IReadOnlyList<(OrganizationCategory? Category, int SlotCount)> papers,
         DateTimeOffset now) =>
         // Not yet open, closing at some point, with rounds that are all still empty
         opensAt > now
@@ -262,8 +272,8 @@ internal static class SelectionRules
         && rounds.All(round => round.ProblemsHeld == 0)
         // Each paper with as many slots as the group's competitions have problems, filling exactly one round
         && papers.All(paper => paper.SlotCount == problemCount
-            && rounds.Count(round => IsRoundFor(round.CompetitionPath, paper.Level)) == 1)
+            && rounds.Count(round => IsRoundFor(round.CompetitionPath, paper.Category)) == 1)
         // And each round filled by exactly one paper
-        && rounds.All(round => papers.Count(paper => IsRoundFor(round.CompetitionPath, paper.Level)) == 1);
+        && rounds.All(round => papers.Count(paper => IsRoundFor(round.CompetitionPath, paper.Category)) == 1);
 
 }
