@@ -428,6 +428,7 @@
       "contact": "Anything unclear? <link>Write to us</link> rather than guessing.",
       "lines": [
         "No other AI, no outside help of any kind. These competitions train you to solve problems, not to have them solved for you.",
+        "Your phone is for photographing your own solution and figures for Mathilda, nothing else.",
         "One person, one account, please. We are trusting you here.",
         "The clock covers solving and writing to Mathilda both. Expect her to take her time: she goes for accuracy over speed.",
         "Talk to Mathilda as long as you like, though the number of messages and the length of one message are limited, for reasons you can guess.",
@@ -445,6 +446,7 @@
     "selfAssessmentNote": "The person who grades this problem reads it. You can edit it while your clock is running, and for half an hour after it stops.",
     "selfAssessmentPracticeNote": "In a real competition a grader reads this. You can edit a note like this while your clock is running, and for half an hour after it stops.",
     "selfAssessmentPrompt": "Leave a comment on your solution if you like 😀",
+    "solutionInput": "Type your solution in here, or photograph it, figures and all. On a computer, a QR code lets you send the photos from your phone. Check the text read from a photo before you send it.",
     "standing": {
       "running": "competing, {clock} left"
     },
@@ -457,8 +459,7 @@
       "primarySchool": "grade {year}"
     },
     "try": "Try it",
-    "tryAgain": "Take it again",
-    "typedSolutionsOnly": "You type your solution in here, photos of handwritten work we would rather not support, AI reads handwriting fairly inaccurately."
+    "tryAgain": "Take it again"
   },
   "contact": {
     "email": "Email",

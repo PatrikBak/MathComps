@@ -91,8 +91,8 @@ export function HostedCompetitionEntryDialog({
   // there is nothing to spend
   const canForfeit = !isPracticeGroup(group)
 
-  // The lines the student is shown before every entry, not just their first
-  const reminders = tRules.raw('lines') as string[]
+  // The rules, one line each
+  const ruleLines = tRules.raw('lines') as string[]
 
   // Nothing to press until, on a first entry ever, the rules are accepted
   const isBlocked = needsRulesAccept && !hasAccepted
@@ -152,8 +152,8 @@ export function HostedCompetitionEntryDialog({
             {isPracticeGroup(group) ? t('dialog.consequencePractice') : t('dialog.consequence')}
           </p>
 
-          {/* What it will ask of them */}
-          <p className="mt-2 text-sm leading-relaxed text-muted">{t('typedSolutionsOnly')}</p>
+          {/* How a solution gets in */}
+          <p className="mt-2 text-sm leading-relaxed text-muted">{t('solutionInput')}</p>
 
           {/* The rules, in plain sight on the one entry that accepts them. Every later entry reaches
               them from the page header instead */}
@@ -161,14 +161,14 @@ export function HostedCompetitionEntryDialog({
             <section className="mt-4 rounded-lg bg-foreground/5 p-4">
               <h3 className="text-sm font-semibold text-foreground">{tRules('title')}</h3>
               <ul className="mt-2 list-outside list-disc space-y-1.5 pl-4 text-sm leading-relaxed text-muted-foreground marker:text-muted/60">
-                {reminders.map((line, index) => (
+                {ruleLines.map((line, index) => (
                   <li key={index}>{line}</li>
                 ))}
               </ul>
             </section>
           )}
 
-          {/* Accepting them, which is asked once ever */}
+          {/* Accepting the rules, which is asked once ever */}
           {needsRulesAccept && (
             <label className="mt-4 flex cursor-pointer items-start gap-2.5 text-sm text-foreground/80">
               <input

@@ -428,6 +428,7 @@
       "contact": "Nie je niečo jasné? <link>Napíš nám</link>, radšej sa opýtaj vopred.",
       "lines": [
         "Použitie inej AI alebo akejkoľvek externej pomoci a komunikácie je zakázané. Naše súťaže sú tréningom riešenia úloh, a nie tréningom toho, ako si ich nechať vyriešiť od niekoho iného.",
+        "Mobil smieš použiť len na fotenie svojho riešenia a obrázkov pre Mathildu.",
         "Jeden človek by mal súťažiť len s jedným účtom, prosíme o férovosť.",
         "Časomiera pokrýva aj riešenie, aj písanie si s Mathildou. Rátaj s tým, že sa snaží o presnosť na úkor rýchlosti.",
         "S Mathildou sa môžeš rozprávať dlho, ale počet správ aj dĺžka jednej správy sú z pochopiteľných dôvodov obmedzené.",
@@ -445,6 +446,7 @@
     "selfAssessmentNote": "Číta to človek, ktorý bude úlohu hodnotiť. Upravovať sa dá, kým ti beží čas, a ešte pol hodiny po jeho skončení.",
     "selfAssessmentPracticeNote": "V skutočnej súťaži toto bude čítať hodnotiteľ. Takéto poznámky sa dajú upravovať, kým ti beží čas, a ešte pol hodiny po jeho skončení.",
     "selfAssessmentPrompt": "Ak chceš, nechaj nám komentár k svojmu riešeniu 😀",
+    "solutionInput": "Riešenie môžeš napísať sem, alebo ho aj s obrázkami odfotiť. Na počítači si fotky pošleš z mobilu cez QR kód. Text prečítaný z fotky si pred odoslaním skontroluj.",
     "standing": {
       "running": "súťažíš, ostáva {clock}"
     },
@@ -457,8 +459,7 @@
       "primarySchool": "{year}. ročník ZŠ"
     },
     "try": "Vyskúšať",
-    "tryAgain": "Skúsiť znova",
-    "typedSolutionsOnly": "Riešenie píšeš priamo tu, fotky ručne písaného riešenia radšej nepodporujeme, AI je v čítaní ručne písaného textu pomerne nepresná."
+    "tryAgain": "Skúsiť znova"
   },
   "contact": {
     "email": "Email",
