@@ -245,6 +245,15 @@
       "fullName": "Zkušební soutěž",
       "urlSlug": "zkusebni"
     },
+    "mathcomps-special": {
+      "shortName": "Speciální soutěže",
+      "fullName": "Speciální soutěže"
+    },
+    "mathcomps-special-school_a": {
+      "shortName": "Příprava na školní A",
+      "fullName": "Příprava na školní A",
+      "urlSlug": "priprava-skolni-a"
+    },
     "mathcomps-elementary": {
       "shortName": "Základní",
       "fullName": "Základní kategorie"

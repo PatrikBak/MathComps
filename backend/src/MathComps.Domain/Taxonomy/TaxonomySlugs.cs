@@ -30,7 +30,8 @@ public static class TaxonomySlugs
         // A slug carrying the separator would make the path it lands in ambiguous, so refuse it at the source.
         if (!IsPathSegment(slug))
             throw new InvalidOperationException(
-                $"Taxonomy slug '{slug}' is not a single path segment (lowercase letters and digits only).");
+                $"Taxonomy slug '{slug}' is not a single path segment " +
+                "(lowercase letters and digits, words joined by '_').");
 
         // A root has nothing above it to join to.
         return parentPath is null ? slug : $"{parentPath}-{slug}";
@@ -49,13 +50,15 @@ public static class TaxonomySlugs
         path == branchPath || path.StartsWith($"{branchPath}-", StringComparison.Ordinal);
 
     /// <summary>
-    /// Whether a slug is a single path segment, i.e. lowercase alphanumeric with no separator in it. A segment
-    /// carrying the separator would collide with the branch its prefix names: <c>a-b</c> under <c>csmo</c>
-    /// reads as a node of the <c>csmo-a</c> branch.
+    /// Whether a slug is a single path segment: words of lowercase letters and digits joined by single
+    /// underscores (<c>school_a</c>), with no separator in it. A segment carrying the separator would collide
+    /// with the branch its prefix names: <c>a-b</c> under <c>csmo</c> reads as a node of the <c>csmo-a</c> branch.
     /// </summary>
     /// <param name="slug">The slug to check.</param>
     /// <returns>True when the slug is a single segment.</returns>
     public static bool IsPathSegment(string slug) =>
-        // Non-empty, and every character drawn from the canonical slug alphabet minus the separator.
-        slug.Length > 0 && slug.All(character => character is (>= 'a' and <= 'z') or (>= '0' and <= '9'));
+        // Each word is lowercase letters and digits, and never empty. An empty slug, an underscore at either end
+        // and two in a row each leave an empty word.
+        slug.Split('_').All(word =>
+            word.Length > 0 && word.All(character => character is (>= 'a' and <= 'z') or (>= '0' and <= '9')));
 }

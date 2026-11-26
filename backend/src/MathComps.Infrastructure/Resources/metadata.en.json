@@ -245,6 +245,15 @@
       "fullName": "Practice competition",
       "urlSlug": "practice"
     },
+    "mathcomps-special": {
+      "shortName": "Special competitions",
+      "fullName": "Special competitions"
+    },
+    "mathcomps-special-school_a": {
+      "shortName": "School round A warm-up",
+      "fullName": "School round A warm-up",
+      "urlSlug": "school-round-a-warm-up"
+    },
     "mathcomps-elementary": {
       "shortName": "Elementary",
       "fullName": "Elementary category"
