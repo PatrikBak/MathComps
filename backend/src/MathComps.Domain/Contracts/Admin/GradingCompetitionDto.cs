@@ -6,7 +6,7 @@ namespace MathComps.Domain.Contracts.Admin;
 /// One competition of a group with its entrants and their grade on every problem.
 /// </summary>
 /// <param name="RoundId">The round that is the competition.</param>
-/// <param name="Category">Which level it runs at.</param>
+/// <param name="Category"><inheritdoc cref="HostedCompetitionDto" path="/param[@name='Category']"/></param>
 /// <param name="Problems">Its problems in order.</param>
 /// <param name="Entrants">
 /// Everyone graded in it who spoke about any of its problems while their entry counted, ordered by username.
@@ -14,7 +14,7 @@ namespace MathComps.Domain.Contracts.Admin;
 /// <param name="Grades">Every entrant's grade on every problem.</param>
 public record GradingCompetitionDto(
     Guid RoundId,
-    HostedCompetitionCategory Category,
+    HostedCompetitionCategory? Category,
     IReadOnlyList<GradingProblemDto> Problems,
     IReadOnlyList<GradingEntrantDto> Entrants,
     IReadOnlyList<GradeSummaryDto> Grades);

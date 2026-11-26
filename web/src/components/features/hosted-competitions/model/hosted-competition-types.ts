@@ -1,7 +1,7 @@
 import type { Locale, LocalizedString } from '@/i18n/i18n'
 
 /**
- * One competition: one category, one problem set, one clock.
+ * One competition: one problem set, one clock, at one level or at none.
  */
 export type HostedCompetition = {
   /**
@@ -10,7 +10,10 @@ export type HostedCompetition = {
    * One name per language the site is read in, any of which addresses it.
    */
   slug: LocalizedString
-  /** Which level it runs at, or null for the practice one, which sits outside the levels entirely. */
+  /**
+   * Which level it runs at, or null for a group's sole competition, which needs no level to tell it
+   * apart.
+   */
   category: HostedCompetitionCategory | null
   /** The student's entry, or null while they have not taken it. */
   entry: HostedCompetitionEntry | null
@@ -315,7 +318,8 @@ export type PendingEntry = {
 }
 
 /**
- * The batch of competitions that open and close together, one per category.
+ * The batch of competitions that open and close together, one per category or a single one at no
+ * level.
  *
  * Usually a month of the program, sometimes something named in its own right, so the name is a field
  * rather than something worked out from the dates.

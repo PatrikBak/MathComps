@@ -88,7 +88,7 @@ public class SiteLinksParityTests
 
     /// <summary>
     /// A link into a conversation asks for it by the query names the page reads: the competition's page by the
-    /// problem, the board by the level, the student, the problem and the conversation's tab.
+    /// problem, the board by the level where there is one, the student, the problem and the conversation's tab.
     /// </summary>
     [Fact]
     public void A_link_into_a_conversation_asks_by_the_names_the_page_reads()
@@ -110,6 +110,16 @@ public class SiteLinksParityTests
                 (ReadTsString(GradingUrlPath, "TAB_PARAM"), ReadTsString(GradingUrlPath, "FEEDBACK_TAB")),
             ],
             QueryOf(links.GraderThread("group-slug", HostedCompetitionCategory.Advanced, _studentId, _problemId)));
+
+        // The board of a group's sole competition, asked for the same with no level, which the board reads as its
+        // first competition
+        Assert.Equal(
+            [
+                (ReadTsString(GradingUrlPath, "STUDENT_PARAM"), _studentId.ToString()),
+                (ReadTsString(GradingUrlPath, "PROBLEM_PARAM"), _problemId.ToString()),
+                (ReadTsString(GradingUrlPath, "TAB_PARAM"), ReadTsString(GradingUrlPath, "FEEDBACK_TAB")),
+            ],
+            QueryOf(links.GraderThread("group-slug", category: null, _studentId, _problemId)));
     }
 
     /// <summary>

@@ -83,25 +83,32 @@ public sealed record SiteLinks(string SiteUrl, Language Language)
     /// problem at the conversation with them.
     /// </summary>
     /// <param name="groupSlug">What addresses the group the student entered.</param>
-    /// <param name="category">The level the student competed at, which the board has to show to open them.</param>
+    /// <param name="category">
+    /// The level the student competed at, which the board has to show to open them, or null for a group's sole
+    /// competition, which a board shows when its address names no level.
+    /// </param>
     /// <param name="studentId">The student.</param>
     /// <param name="problemId">The problem.</param>
     /// <returns>The address.</returns>
     public string GraderThread(
-        string groupSlug, HostedCompetitionCategory category, Guid studentId, Guid problemId)
+        string groupSlug, HostedCompetitionCategory? category, Guid studentId, Guid problemId)
     {
-        // How the board names the level in its address
+        // How the board names the level in its address, none for a competition at no level
         var level = category switch
         {
+            null => null,
             HostedCompetitionCategory.Elementary => "elementary",
             HostedCompetitionCategory.Intermediate => "intermediate",
             HostedCompetitionCategory.Advanced => "advanced",
             _ => throw new ArgumentOutOfRangeException(nameof(category), category, "Unknown category")
         };
 
+        // The level's part of the query, left out where there is no level to name
+        var levelQuery = level is null ? string.Empty : $"category={level}&";
+
         // The group's board, asked to open the student's grade on its conversation
         return $"{Home}/admin/{GradingSegment}/{Uri.EscapeDataString(groupSlug)}"
-            + $"?category={level}&student={studentId}&problem={problemId}&tab=feedback";
+            + $"?{levelQuery}student={studentId}&problem={problemId}&tab=feedback";
     }
 
     /// <summary>

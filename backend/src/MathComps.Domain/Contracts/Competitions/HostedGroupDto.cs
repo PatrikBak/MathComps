@@ -3,7 +3,7 @@ using MathComps.Domain.Localization;
 namespace MathComps.Domain.Contracts.Competitions;
 
 /// <summary>
-/// The batch of competitions that open and close together, one per category.
+/// The batch of competitions that open and close together, one per category or a single one at no level.
 /// </summary>
 /// <param name="Id">The group's identifier.</param>
 /// <param name="Slug">What addresses the group (e.g. <c>mc-2026-3</c>).</param>

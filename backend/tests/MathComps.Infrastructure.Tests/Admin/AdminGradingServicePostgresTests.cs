@@ -321,6 +321,54 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// A graded group whose only competition runs at no level has a board all the same, the competition on it
+    /// naming no level, since there is no sibling to tell it apart from.
+    /// </summary>
+    [Fact]
+    public Task A_groups_sole_competition_is_graded_at_no_level() => RunTestAsync(async service =>
+    {
+        // The round of a closed group of one competition, sitting outside the levels
+        var roundId = Guid.CreateVersion7();
+
+        // The round's one problem
+        var problemId = Guid.CreateVersion7();
+
+        // Bob's entry and conversation in that round, in a group of its own
+        await QueryAsync(async context =>
+        {
+            // A season of its own, since the seeded one already holds the practice node's round
+            var season = new Season { Id = Guid.NewGuid(), StartYear = 2027, EditionNumber = 77 };
+            context.Seasons.Add(season);
+
+            // The group, closed like the graded one
+            var group = NewGroup(context, "mc-sole", _startedAt.AddDays(-5), _closesAt);
+
+            // Its one round, under a node at no level
+            NewRound(context, season, group, roundId, "mathcomps-practice", problemId);
+
+            // Bob sat it
+            context.HostedEntries.Add(NewEntry(_bobId, roundId, _startedAt));
+
+            // Bob arguing its problem inside his clock
+            NewConversation(context, Guid.CreateVersion7(), _bobId, problemId, _startedAt.AddMinutes(20));
+
+            // Save the group, its round, the entry and the conversation
+            await context.SaveChangesAsync();
+        });
+
+        // Read the group's board
+        var board = await service.GetBoardAsync("mc-sole");
+
+        // One competition, the round, at no level
+        var competition = Assert.Single(board.Competitions);
+        Assert.Equal(roundId, competition.RoundId);
+        Assert.Null(competition.Category);
+
+        // Grading Bob, who spoke in it
+        Assert.Equal(_bobId, Assert.Single(competition.Entrants).User.Id);
+    });
+
+    /// <summary>
     /// A slug naming no graded group has no board: the practice group never closes and grades nobody, and a slug
     /// naming nothing names nothing.
     /// </summary>
