@@ -3,6 +3,7 @@ using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.BulkImport;
 using MathComps.Infrastructure.Services.Localization;
+using MathComps.Infrastructure.Services.Problems;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.Services.Competitions;
@@ -50,6 +51,10 @@ public sealed class HostedGroupService(
         // otherwise fire over rows already written. Nothing is committed until the very end, and a dry run never
         // commits at all.
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        // Wait for every selection write to finish, so a board finalized into the group meanwhile is seen below and
+        // no finalize moves problems into a round this declaration is releasing.
+        await ProblemPositions.LockAsync(dbContext, cancellationToken);
 
         // The rounds the manifest names, and how many of them are still to be filled.
         var rounds = new List<Round>();
@@ -176,9 +181,10 @@ public sealed class HostedGroupService(
         var groupId = group?.Id;
 
         // A group a selection board was finalized into holds the papers the reviewers picked, and the board reads
-        // its slots off the group's rounds, so no manifest touches it again.
+        // its slots off the group's rounds, so no manifest touches it again. A draft picking for it leaves it free.
         if (groupId is not null
-            && await dbContext.SelectionBoards.AnyAsync(board => board.HostedGroupId == groupId, cancellationToken))
+            && await dbContext.SelectionBoards.AnyAsync(
+                board => board.HostedGroupId == groupId && board.IsFinalized, cancellationToken))
             throw new HostedGroupManifestException(
                 $"A selection board was finalized into '{manifest.Slug}', so it can no longer be declared.");
 

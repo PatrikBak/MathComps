@@ -4,12 +4,13 @@ import { createTranslator } from 'next-intl'
 import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
 import type { ConversationDetail } from '@/components/features/conversation-review/model/conversation-detail'
 import type { StoredTurn } from '@/components/features/defense/model/defense-types'
-import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import { DETAIL_HEADING_ATTRIBUTE } from '@/components/features/problem-selection/hooks/use-open-detail'
 import type { ProposalTab } from '@/components/features/problem-selection/model/selection-routes'
 import {
   type Board,
-  type Cycle,
+  type BoardCycle,
+  type BoardPickingForCycle,
+  type BoardStage,
   type Paper,
   type Proposal,
   type ProposalRating,
@@ -36,14 +37,12 @@ import { FINALIZATION_PATH, finalizationWrite } from './selection-finalization'
 import { PROPOSAL_WRITE_PATH, proposalWrite, READER } from './selection-proposal-writes'
 import { SLOT_WRITE_PATH, slotWrite } from './selection-slot-writes'
 import {
-  type HeldCycle,
   type HeldSelection,
   MATHCOMPS_ORGANIZATION_SLUG,
   SELECTION_API_PATH,
   SELECTION_CATEGORIES,
   SELECTION_WRITE_REFUSALS,
   SelectionWriteRefused,
-  takesBoard,
 } from './selection-writes'
 import { expect, SETTLE_TIMEOUT_MS } from './test'
 
@@ -341,82 +340,38 @@ function paperOf(index: number, name: string, category: string, slots: (Proposal
 }
 
 /**
- * A cycle whose rounds open the given number of days after the test runs.
+ * A cycle whose rounds open the given number of days after the test runs, with where a board stands against it.
  *
- * @param index - Which of the fake's cycles it is, which its id is built from.
  * @param name - What it is called.
  * @param days - How many days from now its rounds open.
- * @param categories - The hosted levels of its rounds.
- * @param problemCount - How many problems each of its rounds takes.
+ * @param stage - Where the board stands against it.
  *
- * @returns The cycle, its rounds still empty.
+ * @returns The cycle.
  */
-function cycleOf(
-  index: number,
-  name: string,
-  days: number,
-  categories: HostedCompetitionCategory[],
-  problemCount: number
-): HeldCycle {
-  // The cycle, its id built from its index so every cycle gets its own
-  return {
-    id: `00000000-0000-4000-8000-e${String(index).padStart(11, '0')}`,
-    name,
-    opensAt: new Date(Date.now() + days * DAY_MS).toISOString(),
-    categories,
-    problemCount,
-    isFilled: false,
-  }
+function cycleOf(name: string, days: number, stage: BoardStage): BoardCycle {
+  // The cycle, opening that many days on
+  return { name, opensAt: new Date(Date.now() + days * DAY_MS).toISOString(), stage }
 }
 
-/** October's cycle, one elementary round of one problem opening in a week, which {@link FINALIZED_BOARD} filled. */
-const OCTOBER: HeldCycle = { ...cycleOf(1, 'October', 7, ['elementary'], 1), isFilled: true }
-
-/** November's cycle, one elementary round of one problem opening in five weeks, which {@link FULL_DRAFT} fits. */
-export const NOVEMBER = cycleOf(2, 'November', 35, ['elementary'], 1)
+/** November's cycle, opening in five weeks, which {@link FULL_DRAFT} can be finalized into. */
+export const NOVEMBER = cycleOf('November', 35, 'finalizable')
 
 /**
- * December's cycle, a round in every category, three problems each, opening in nine weeks, which
- * {@link DRAFT_BOARD} fits.
- */
-export const DECEMBER = cycleOf(3, 'December', 63, ['elementary', 'intermediate', 'advanced'], 3)
-
-/** Every cycle the backend holds in most replies, soonest first. */
-const CYCLES: HeldCycle[] = [OCTOBER, NOVEMBER, DECEMBER]
-
-/**
- * Winter's cycle, one elementary round of one problem opening in seven weeks, which {@link FULL_DRAFT} fits as well
- * as it fits {@link NOVEMBER}.
- */
-export const WINTER = cycleOf(4, 'Winter', 49, ['elementary'], 1)
-
-/**
- * {@link CYCLES} with one of them filled, a board or an import having put problems into its rounds.
- *
- * @param cycle - The cycle filled.
- *
- * @returns The cycles.
- */
-function withFilled(cycle: HeldCycle): HeldCycle[] {
-  // That cycle filled, every other one as it was
-  return CYCLES.map((candidate) =>
-    candidate.id === cycle.id ? { ...candidate, isFilled: true } : candidate
-  )
-}
-
-/**
- * A board finalized into {@link OCTOBER}'s rounds, the oldest one. Its paper's slots are what the round took, so
+ * The oldest board, finalized into October's rounds. Its paper's slots are what the round took, so
  * {@link USED} is there and no slot stands empty, the way the backend reads a finalized board off its rounds.
  */
-export const FINALIZED_BOARD: Board = {
+export const FINALIZED_BOARD: BoardPickingForCycle = {
   id: '00000000-0000-4000-8000-b00000000001',
   name: 'October 2026',
   papers: [paperOf(1, 'Elementary', 'elementary', [USED])],
-  finalization: { cycleName: OCTOBER.name, opensAt: OCTOBER.opensAt, hasOpened: false },
+  cycle: cycleOf('October', 7, 'finalized'),
 }
 
-/** The first draft: {@link FIRST} in E1, {@link READY} in I2, and the advanced paper still empty. */
-export const DRAFT_BOARD: Board = {
+/**
+ * The first draft, picking for December's cycle and finalizable into it: {@link FIRST} in E1, {@link READY} in I2,
+ * and the advanced paper still empty.
+ */
+export const DRAFT_BOARD: BoardPickingForCycle = {
   id: '00000000-0000-4000-8000-b00000000002',
   name: 'November 2026',
   papers: [
@@ -424,14 +379,15 @@ export const DRAFT_BOARD: Board = {
     paperOf(3, 'Intermediate', 'intermediate', [null, READY, null]),
     paperOf(4, 'Advanced', 'advanced', [null, null, null]),
   ],
-  finalization: null,
+  cycle: cycleOf('December', 63, 'finalizable'),
 }
 
 /**
  * A draft after {@link DRAFT_BOARD}: {@link READY}, which that board holds too, {@link GEOMETRY}, and
- * {@link SET_ASIDE} in a C paper, which no hosted round takes.
+ * {@link SET_ASIDE} in a C paper, whose category no hosted round runs. So the draft can't be finalized into the
+ * Winter cycle it picks for.
  */
-export const LATER_DRAFT: Board = {
+export const LATER_DRAFT: BoardPickingForCycle = {
   id: '00000000-0000-4000-8000-b00000000003',
   name: 'December 2026',
   papers: [
@@ -439,43 +395,41 @@ export const LATER_DRAFT: Board = {
     paperOf(6, 'Advanced', 'advanced', [GEOMETRY, null]),
     paperOf(7, 'Spare', 'C', [null, SET_ASIDE]),
   ],
-  finalization: null,
+  cycle: cycleOf('Winter', 49, 'unfinalizable'),
 }
 
 /** The boards most replies hold, oldest first as the backend sends them, the finalized one ahead of the drafts. */
 const BOARDS: Board[] = [FINALIZED_BOARD, DRAFT_BOARD, LATER_DRAFT]
 
-/** A draft older than {@link LATER_DRAFT} whose one paper is full, {@link READY} in it, ready to be finalized. */
-export const FULL_DRAFT: Board = {
+/**
+ * A draft older than {@link LATER_DRAFT} whose one paper is full, {@link READY} in it, ready to be finalized into
+ * {@link NOVEMBER}'s rounds.
+ */
+export const FULL_DRAFT: BoardPickingForCycle = {
   id: '00000000-0000-4000-8000-b00000000004',
   name: 'Autumn 2026',
   papers: [paperOf(8, 'Elementary', 'elementary', [READY])],
-  finalization: null,
+  cycle: NOVEMBER,
+}
+
+/** {@link FULL_DRAFT} once an import filled {@link NOVEMBER}'s rounds, so it can no longer be finalized. */
+const FULL_DRAFT_UNFINALIZABLE: BoardPickingForCycle = {
+  ...FULL_DRAFT,
+  cycle: { ...NOVEMBER, stage: 'unfinalizable' },
 }
 
 /**
  * {@link FULL_DRAFT} finalized into {@link NOVEMBER}'s rounds, its slot now the round's problem.
  */
-export const FULL_DRAFT_FINALIZED: Board = {
+export const FULL_DRAFT_FINALIZED: BoardPickingForCycle = {
   ...FULL_DRAFT,
-  finalization: { cycleName: NOVEMBER.name, opensAt: NOVEMBER.opensAt, hasOpened: false },
-}
-
-/** {@link NOVEMBER} once {@link FULL_DRAFT} has filled it and its rounds have opened since. */
-const NOVEMBER_OPENED: HeldCycle = {
-  ...NOVEMBER,
-  opensAt: new Date(Date.now() - DAY_MS).toISOString(),
-  isFilled: true,
+  cycle: { ...NOVEMBER, stage: 'finalized' },
 }
 
 /** {@link FULL_DRAFT} finalized into {@link NOVEMBER}'s rounds, which have opened since. */
-export const FULL_DRAFT_OPENED: Board = {
+export const FULL_DRAFT_OPENED: BoardPickingForCycle = {
   ...FULL_DRAFT,
-  finalization: {
-    cycleName: NOVEMBER_OPENED.name,
-    opensAt: NOVEMBER_OPENED.opensAt,
-    hasOpened: true,
-  },
+  cycle: { ...NOVEMBER, opensAt: new Date(Date.now() - DAY_MS).toISOString(), stage: 'opened' },
 }
 
 /** {@link LATER_DRAFT} once {@link FULL_DRAFT}'s round has taken {@link READY}, which leaves every draft it stood on. */
@@ -732,18 +686,15 @@ function heldConversations(memory: SelectionMemory, proposals: Proposal[]): Held
 
 /**
  * The selection as the backend reads it: the organization's categories, the ones the reader leads, the
- * problems, the boards, the cycles a board can go into, every conversation held about the problems in the shape the
- * list of them takes, and the languages the problems need.
+ * problems, the boards, every conversation held about the problems in the shape the list of them takes, and the
+ * languages the problems need.
  *
  * @param memory - What the backend keeps.
- * @param readable - The problems, the boards and the cycles the read shows.
+ * @param held - The problems and the boards the backend holds.
  *
  * @returns The selection.
  */
-function selectionOf(
-  memory: SelectionMemory,
-  { proposals, boards, cycles }: ReadableSelection
-): SelectionData {
+function selectionOf(memory: SelectionMemory, { proposals, boards }: HeldSelection): SelectionData {
   // Each conversation listed, with how much was said and whether the statement it was argued against is
   // gone from the problem in every language
   const conversations = heldConversations(memory, proposals).map(
@@ -763,14 +714,13 @@ function selectionOf(
     })
   )
 
-  // The categories, the reader's lead categories, the problems, the boards, the cycles, the conversations newest
-  // first, and the languages the problems need
+  // The categories, the reader's lead categories, the problems, the boards, the conversations newest first, and
+  // the languages the problems need
   return {
     categories: SELECTION_CATEGORIES,
     leadCategories: memory.leadCategories,
     proposals,
     boards,
-    cycles,
     conversations: conversations.sort((first, second) =>
       second.startedAt.localeCompare(first.startedAt)
     ),
@@ -876,8 +826,6 @@ type SelectionReply =
   | 'fullDraftIncomplete'
   /** As {@link FULL_DRAFT} first reads, but for {@link NOVEMBER}'s rounds, which an import filled meanwhile. */
   | 'novemberFilled'
-  /** As {@link FULL_DRAFT} first reads, with {@link WINTER} on offer too. */
-  | 'winterOnOffer'
   /** With every problem in the selection but {@link OPENED}, which another reviewer deleted meanwhile. */
   | 'openedDeleted'
   /** With every problem in the selection and {@link SLOVAK_ALONE}. */
@@ -896,23 +844,22 @@ type SelectionReply =
  */
 function selectionHeldAt(reply: SelectionReply): HeldSelection {
   switch (reply) {
-    // Every problem, board and cycle as first read, which a refusal or a failure of the read leaves as it stands
+    // Every problem and board as first read, which a refusal or a failure of the read leaves as it stands
     case 'selection':
     case 'forbidden':
     case 'failure':
-      return { proposals: SELECTION, boards: BOARDS, cycles: CYCLES }
+      return { proposals: SELECTION, boards: BOARDS }
 
     // Every problem as first read, but for the one written out at length
     case 'openedAtLength':
       return {
         proposals: SELECTION.map((proposal) => (proposal === OPENED ? OPENED_AT_LENGTH : proposal)),
         boards: BOARDS,
-        cycles: CYCLES,
       }
 
     // Every problem as a later read finds them, one revised and another set aside
     case 'later':
-      return { proposals: LATER_SELECTION, boards: BOARDS, cycles: CYCLES }
+      return { proposals: LATER_SELECTION, boards: BOARDS }
 
     // Every problem as first read, but for the one revised in English
     case 'revisedInEnglish':
@@ -921,16 +868,15 @@ function selectionHeldAt(reply: SelectionReply): HeldSelection {
           proposal === BILINGUAL ? BILINGUAL_REVISED : proposal
         ),
         boards: BOARDS,
-        cycles: CYCLES,
       }
 
     // Every problem as first read, but for the ratings given since
     case 'rated':
-      return { proposals: RATED_SELECTION, boards: BOARDS, cycles: CYCLES }
+      return { proposals: RATED_SELECTION, boards: BOARDS }
 
     // Every problem as first read, and the full draft ahead of the later one
     case 'fullDraft':
-      return { proposals: SELECTION, boards: [FULL_DRAFT, LATER_DRAFT], cycles: CYCLES }
+      return { proposals: SELECTION, boards: [FULL_DRAFT, LATER_DRAFT] }
 
     // The full draft as first read, its ready problem lacking a Czech solution since
     case 'fullDraftIncomplete':
@@ -941,24 +887,19 @@ function selectionHeldAt(reply: SelectionReply): HeldSelection {
         ),
       }
 
-    // The full draft as first read, the cycle it fits filled since
+    // The full draft as first read, the cycle it picks for filled since
     case 'novemberFilled':
-      return { ...selectionHeldAt('fullDraft'), cycles: withFilled(NOVEMBER) }
-
-    // The full draft as first read, a second cycle it fits on offer
-    case 'winterOnOffer':
-      return { ...selectionHeldAt('fullDraft'), cycles: [OCTOBER, NOVEMBER, WINTER, DECEMBER] }
+      return { proposals: SELECTION, boards: [FULL_DRAFT_UNFINALIZABLE, LATER_DRAFT] }
 
     // Every problem as first read, and the one written in Slovak alone
     case 'slovakAlone':
-      return { proposals: [...SELECTION, SLOVAK_ALONE], boards: BOARDS, cycles: CYCLES }
+      return { proposals: [...SELECTION, SLOVAK_ALONE], boards: BOARDS }
 
     // Every problem as first read but the deleted one, which no board held
     case 'openedDeleted':
       return {
         proposals: SELECTION.filter((proposal) => proposal !== OPENED),
         boards: BOARDS,
-        cycles: CYCLES,
       }
 
     // The full draft finalized, its round having taken the ready problem, which has left the later draft
@@ -968,7 +909,6 @@ function selectionHeldAt(reply: SelectionReply): HeldSelection {
           proposal === READY ? { ...READY, isUsed: true } : proposal
         ),
         boards: [FULL_DRAFT_FINALIZED, LATER_DRAFT_WITHOUT_READY],
-        cycles: withFilled(NOVEMBER),
       }
 
     // The full draft finalized and its rounds opened
@@ -976,41 +916,12 @@ function selectionHeldAt(reply: SelectionReply): HeldSelection {
       return {
         ...selectionHeldAt('fullDraftFinalized'),
         boards: [FULL_DRAFT_OPENED, LATER_DRAFT_WITHOUT_READY],
-        cycles: CYCLES.map((cycle) => (cycle.id === NOVEMBER.id ? NOVEMBER_OPENED : cycle)),
       }
 
     // Every reply is handled above
     default:
       return assertNever(reply)
   }
-}
-
-/**
- * What the read shows of the selection the backend holds.
- */
-type ReadableSelection = Pick<SelectionData, 'proposals' | 'boards' | 'cycles'>
-
-/**
- * The selection as its read has it: every board and every problem, and every cycle still taking a board.
- *
- * @param held - What the backend holds.
- *
- * @returns The problems, the boards and the cycles the read answers with.
- */
-function readableSelection(held: HeldSelection): ReadableSelection {
-  // The cycles still taking a board, in the shape the read sends them
-  const cycles = held.cycles.filter(takesBoard).map(
-    ({ id, name, opensAt, categories, problemCount }): Cycle => ({
-      id,
-      name,
-      opensAt,
-      categories,
-      problemCount,
-    })
-  )
-
-  // The problems, the boards and the cycles, as the read has them
-  return { proposals: held.proposals, boards: held.boards, cycles }
 }
 
 /**
@@ -1048,9 +959,7 @@ export async function stubSelection(
   // The chat reading each problem's statements as the backend holds them right now, so a revision reaches it too
   memory.chat?.statementsFrom((problemId) => {
     // The problem, absent where the selection does not hold it
-    const proposal = readableSelection(stored).proposals.find(
-      (candidate) => candidate.id === problemId
-    )
+    const proposal = stored.proposals.find((candidate) => candidate.id === problemId)
 
     // The problem's statement in each language it is written in
     return Object.fromEntries(
@@ -1075,7 +984,6 @@ export async function stubSelection(
       case 'fullDraftOpened':
       case 'fullDraftIncomplete':
       case 'novemberFilled':
-      case 'winterOnOffer':
       case 'openedDeleted':
       case 'slovakAlone':
         return answerJson(route, 200, read())
@@ -1094,10 +1002,10 @@ export async function stubSelection(
     }
   }
 
-  // Stand in for the read: every problem, board and cycle the backend holds that the read shows, with the
-  // conversations held about the problems
+  // Stand in for the read: every problem and board the backend holds, with the conversations held about the
+  // problems
   await page.route(SELECTION_ENDPOINT, (route) =>
-    answerRead(route, () => selectionOf(memory, readableSelection(stored)))
+    answerRead(route, () => selectionOf(memory, stored))
   )
 
   // Each conversation in full, which is read only once somebody opens it, as long as the selection still holds its
@@ -1106,7 +1014,7 @@ export async function stubSelection(
     page,
     () => {
       // The problems the selection holds
-      const { proposals } = readableSelection(stored)
+      const { proposals } = stored
 
       // Every conversation about one of them, in full
       return heldConversations(memory, proposals).map((held) =>
@@ -1117,14 +1025,7 @@ export async function stubSelection(
   )
 
   // The selection's discussions, their counts, and how far the reader has seen them
-  await stubSelectionComments(
-    page,
-    memory.discussions,
-    memory.seen,
-    () => stored,
-    () => readableSelection(stored),
-    answerRead
-  )
+  await stubSelectionComments(page, memory.discussions, memory.seen, () => stored, answerRead)
 
   // A function which saves a write as the backend does, answering it with nothing to say or with the refusal
   const answerWrite = async (route: Route, write: (held: HeldSelection) => HeldSelection) => {
@@ -1190,7 +1091,7 @@ export async function stubSelection(
     )
   })
 
-  // A board finalized into a cycle's rounds
+  // A board finalized into the rounds of the cycle it picks for
   await page.route(isFinalization, async (route) => {
     // The call as it went out
     const request = route.request()
@@ -1199,9 +1100,7 @@ export async function stubSelection(
     const [, boardId = ''] = FINALIZATION_PATH.exec(new URL(request.url()).pathname) ?? []
 
     // Saved or refused
-    return answerWrite(route, (held) =>
-      finalizationWrite(held, request.method(), boardId, request.postData())
-    )
+    return answerWrite(route, (held) => finalizationWrite(held, request.method(), boardId))
   })
 
   // The way to change the reply
@@ -1399,6 +1298,19 @@ export async function openPool(page: Page): Promise<void> {
 }
 
 /**
+ * The switch to another board: the button naming the board on screen, which opens the menu of boards.
+ *
+ * @param page - The page.
+ * @param board - The board on screen.
+ *
+ * @returns The switch.
+ */
+export function boardMenu(page: Page, board: Board): Locator {
+  // The board panel's button naming the board
+  return boardPanel(page).getByRole('button', { name: board.name })
+}
+
+/**
  * Puts another board on screen through the menu of boards.
  *
  * @param page - The page.
@@ -1407,38 +1319,75 @@ export async function openPool(page: Page): Promise<void> {
  */
 export async function pickBoard(page: Page, from: Board, to: Board): Promise<void> {
   // The menu of boards, opened from the board on screen
-  await boardPanel(page).getByRole('button', { name: from.name }).click()
+  await boardMenu(page, from).click()
 
   // The other board, picked
   await page.getByRole('menuitemcheckbox', { name: to.name }).click()
 
   // On screen
-  await expect(boardPanel(page).getByRole('button', { name: to.name })).toBeVisible()
+  await expect(boardMenu(page, to)).toBeVisible()
 }
 
 /**
- * The line naming the rounds a finalized board went into, and the day they open or opened.
+ * The day a cycle's rounds open, as the page writes it in the site's time zone.
  *
- * @param page - The page.
- * @param board - The finalized board.
+ * @param cycle - The cycle.
  *
- * @returns The line.
+ * @returns The day and the month.
  */
-export function statusLine(page: Page, board: Board): Locator {
-  // The day its rounds open, as the page writes it in the site's time zone
-  const date = new Intl.DateTimeFormat('en', {
+export function cycleDate(cycle: BoardCycle): string {
+  // The day, in the site's time zone
+  return new Intl.DateTimeFormat('en', {
     day: 'numeric',
     month: 'long',
     timeZone: 'Europe/Bratislava',
-  }).format(new Date(board.finalization!.opensAt))
+  }).format(new Date(cycle.opensAt))
+}
 
-  // The line's copy, in the past once the rounds have opened
-  const key = board.finalization!.hasOpened ? 'board.statusOpened' : 'board.status'
+/**
+ * The line naming the rounds a board picks for or went into, and the day they open or opened.
+ *
+ * @param page - The page.
+ * @param board - The board, picking for a cycle.
+ *
+ * @returns The line.
+ */
+export function statusLine(page: Page, board: BoardPickingForCycle): Locator {
+  // The day its rounds open
+  const date = cycleDate(board.cycle)
+
+  // The line's copy, by where the board stands against its cycle
+  const key = statusKeyOf(board.cycle.stage)
 
   // The line naming the rounds and the day
-  return boardPanel(page).getByText(
-    selectionText(key, { cycle: board.finalization!.cycleName, date })
-  )
+  return boardPanel(page).getByText(selectionText(key, { cycle: board.cycle.name, date }))
+}
+
+/**
+ * The copy of the line naming a board's rounds: the ones a draft picks for, or the ones a finalized board went
+ * into, in the past once they have opened.
+ *
+ * @param stage - Where the board stands against its cycle.
+ *
+ * @returns The copy's key.
+ */
+function statusKeyOf(
+  stage: BoardStage
+): 'board.statusDraft' | 'board.statusFinalized' | 'board.statusOpened' {
+  // The copy by where the board stands
+  switch (stage) {
+    case 'finalizable':
+    case 'unfinalizable':
+      return 'board.statusDraft'
+    case 'finalized':
+      return 'board.statusFinalized'
+    case 'opened':
+      return 'board.statusOpened'
+
+    // Every stage is handled above
+    default:
+      return assertNever(stage)
+  }
 }
 
 /**

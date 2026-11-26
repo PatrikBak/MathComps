@@ -9,23 +9,23 @@ using Microsoft.EntityFrameworkCore;
 namespace MathComps.Infrastructure.Tests.Selection;
 
 /// <summary>
-/// Covers <see cref="BoardFinalizationService"/>: moving a board's papers into a hosted group's rounds, refusing a
-/// board or a problem that cannot go in, and keeping every other organization's board out of the groups.
+/// Covers <see cref="BoardFinalizationService"/>: moving a board's papers into the rounds of the hosted group it
+/// picks for, and refusing a board or a problem that cannot go in.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class BoardFinalizationServicePostgresTests(PostgresContainerFixture fixture)
     : SelectionBoardPostgresTestBase<IBoardFinalizationService>(fixture)
 {
     /// <summary>
-    /// Finalizing moves each paper's problems into the round of its category's hosted level, in slot order and with
-    /// the slugs those positions call for. The board is then tied to the group, its slot rows gone, and the problems
-    /// leave every draft they still stood on.
+    /// Finalizing moves each paper's problems into the round of its category's hosted level in the board's own
+    /// group, in slot order and with the slugs those positions call for. The board is then finalized, its slot rows
+    /// gone, and the problems leave every draft they still stood on.
     /// </summary>
     [Fact]
     public Task Finalizing_moves_the_papers_into_the_cycles_rounds() => RunTestAsync(async service =>
     {
-        // The October board into the October group
-        await service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId, OctoberId);
+        // The October board, into the October group it picks for
+        await service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId);
 
         // The first elementary problem sits first in the elementary round, on the slug that position calls for
         Assert.Equal(
@@ -37,18 +37,18 @@ public class BoardFinalizationServicePostgresTests(PostgresContainerFixture fixt
             ("mathcomps-advanced-october", 4, "76-mathcomps-advanced-october-4"),
             await PositionOfAsync(Proposals[12]));
 
-        // The board's group, and how many slot rows its papers still hold
+        // Whether the board is finalized, and how many slot rows its papers still hold
         var board = await QueryValueAsync(context => context.SelectionBoards
             .Where(candidate => candidate.Id == OctoberBoardId)
             .Select(candidate => new
             {
-                candidate.HostedGroupId,
+                candidate.IsFinalized,
                 Slots = candidate.Papers.SelectMany(paper => paper.Slots).Count(),
             })
             .SingleAsync());
 
-        // Tied to the October group
-        Assert.Equal(OctoberId, board.HostedGroupId);
+        // Finalized
+        Assert.True(board.IsFinalized);
 
         // With no slot rows left
         Assert.Equal(0, board.Slots);
@@ -79,28 +79,29 @@ public class BoardFinalizationServicePostgresTests(PostgresContainerFixture fixt
 
         // So the board no longer fills the group
         await Assert.ThrowsAsync<SelectionFinalizeBlockedException>(
-            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId, OctoberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId));
 
         // And nothing moved
         Assert.Equal(ProposalsRoundId, await RoundOfAsync(Proposals[1]));
     });
 
     /// <summary>
-    /// A group that has opened is being sat, so no board goes into it, even one whose rounds nothing filled.
+    /// A group that has opened is being sat, so no board goes into it, even one whose rounds nothing filled. The
+    /// board picking for it stays a draft.
     /// </summary>
     [Fact]
     public Task Finalizing_into_an_opened_cycle_is_refused() => RunTestAsync(async service =>
     {
-        // The November group opened an hour ago, its rounds still empty
+        // The October group opened an hour ago, its rounds still empty
         await QueryAsync(async context =>
             await context.HostedGroups
-                .Where(group => group.Id == NovemberId)
+                .Where(group => group.Id == OctoberId)
                 .ExecuteUpdateAsync(setters => setters.SetProperty(
                     group => group.OpensAt, DateTimeOffset.UtcNow.AddHours(-1))));
 
         // The full October board into it
         await Assert.ThrowsAsync<SelectionFinalizeBlockedException>(
-            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId, NovemberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId));
 
         // And nothing moved
         Assert.Equal(ProposalsRoundId, await RoundOfAsync(Proposals[1]));
@@ -122,7 +123,7 @@ public class BoardFinalizationServicePostgresTests(PostgresContainerFixture fixt
 
         // So it pairs with no round
         await Assert.ThrowsAsync<SelectionFinalizeBlockedException>(
-            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId, OctoberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId));
     });
 
     /// <summary>
@@ -153,7 +154,29 @@ public class BoardFinalizationServicePostgresTests(PostgresContainerFixture fixt
 
         // Refused
         await Assert.ThrowsAsync<SelectionFinalizeBlockedException>(
-            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId, OctoberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId));
+    });
+
+    /// <summary>
+    /// Every round of the group is filled by exactly one paper, so a board with no paper at one round's level would
+    /// leave that round empty once the group opens.
+    /// </summary>
+    [Fact]
+    public Task Finalizing_a_board_leaving_a_round_unfilled_is_refused() => RunTestAsync(async service =>
+    {
+        // The October board's advanced paper
+        var paperId = await PaperIdAsync(OctoberBoardId, HostedCompetitionCategory.Advanced);
+
+        // Gone, so no paper fills the advanced round
+        await QueryAsync(async context =>
+            await context.SelectionPapers.Where(paper => paper.Id == paperId).ExecuteDeleteAsync());
+
+        // Refused
+        await Assert.ThrowsAsync<SelectionFinalizeBlockedException>(
+            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId));
+
+        // With nothing moved
+        Assert.Equal(ProposalsRoundId, await RoundOfAsync(Proposals[1]));
     });
 
     /// <summary>
@@ -167,7 +190,7 @@ public class BoardFinalizationServicePostgresTests(PostgresContainerFixture fixt
 
         // Refused
         await Assert.ThrowsAsync<SelectionProblemIncompleteException>(
-            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId, OctoberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId));
 
         // With nothing moved
         Assert.Equal(ProposalsRoundId, await RoundOfAsync(Proposals[1]));
@@ -192,7 +215,7 @@ public class BoardFinalizationServicePostgresTests(PostgresContainerFixture fixt
 
         // Refused like a missing one
         await Assert.ThrowsAsync<SelectionProblemIncompleteException>(
-            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId, OctoberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId));
     });
 
     /// <summary>
@@ -206,7 +229,7 @@ public class BoardFinalizationServicePostgresTests(PostgresContainerFixture fixt
 
         // Refused
         await Assert.ThrowsAsync<SelectionProposalUsedException>(
-            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId, OctoberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId));
     });
 
     /// <summary>
@@ -226,26 +249,26 @@ public class BoardFinalizationServicePostgresTests(PostgresContainerFixture fixt
 
         // The October board, whose first elementary problem needs that slug
         await Assert.ThrowsAsync<ProblemSlugTakenException>(
-            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId, OctoberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId));
 
         // With nothing moved
         Assert.Equal(ProposalsRoundId, await RoundOfAsync(Proposals[1]));
     });
 
     /// <summary>
-    /// The hosted groups take MathComps' boards alone, so another organization finalizes no board, its own or
-    /// MathComps'. Either is refused like a board that is not there, and nothing moves.
+    /// A board picking for no group has no rounds to go into, so finalizing it is refused, and another
+    /// organization's board is refused like one that is not there. Nothing moves either way.
     /// </summary>
     [Fact]
-    public Task Another_organization_finalizes_no_board() => RunTestAsync(async service =>
+    public Task A_board_picking_for_no_cycle_finalizes_nowhere() => RunTestAsync(async service =>
     {
-        // The olympiad's own board into the October group, refused
-        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
-            () => service.FinalizeAsync(OlympiadSlug, OlympiadBoardId, OctoberId));
+        // The olympiad's own board, picking for no group, refused
+        await Assert.ThrowsAsync<SelectionFinalizeBlockedException>(
+            () => service.FinalizeAsync(OlympiadSlug, OlympiadBoardId));
 
-        // MathComps' October board through the olympiad, refused too
+        // MathComps' October board through the olympiad, refused as not there
         await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
-            () => service.FinalizeAsync(OlympiadSlug, OctoberBoardId, OctoberId));
+            () => service.FinalizeAsync(OlympiadSlug, OctoberBoardId));
 
         // The olympiad's proposal still in the pool
         Assert.Equal(ProposalsRoundId, await RoundOfAsync(OlympiadProposalId));
@@ -255,19 +278,18 @@ public class BoardFinalizationServicePostgresTests(PostgresContainerFixture fixt
     });
 
     /// <summary>
-    /// A finalized board's papers are its group's rounds already, so it cannot be finalized again, into that group
-    /// or any other. Let through, it would be refused as a board short of problems, which tells the reviewer to
-    /// fill slots that no longer exist.
+    /// A finalized board's papers are its group's rounds already, so it cannot be finalized again. Let through, it
+    /// would be refused as a board short of problems, which tells the reviewer to fill slots that no longer exist.
     /// </summary>
     [Fact]
     public Task Finalizing_a_finalized_board_again_is_refused() => RunTestAsync(async service =>
     {
         // The October board finalized
-        await service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId, OctoberId);
+        await service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId);
 
-        // Finalizing the October board into the November group, refused
+        // Finalizing it again, refused
         await Assert.ThrowsAsync<SelectionBoardFinalizedException>(
-            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId, NovemberId));
+            () => service.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId));
     });
 
     /// <summary>

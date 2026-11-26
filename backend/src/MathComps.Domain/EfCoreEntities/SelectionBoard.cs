@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations;
 namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
-/// One board of the selection: a named set of papers whose slots are filled from the proposals. A board touches
-/// real rounds only when it is finalized into a hosted group, and until then it is a draft nothing outside the
-/// selection reads.
+/// One board of the selection: a named set of papers whose slots are filled from the proposals, picked for one
+/// hosted group or for none. A board touches real rounds only when it is finalized into its group, and until then
+/// it is a draft nothing outside the selection reads.
 /// </summary>
 public class SelectionBoard
 {
@@ -36,15 +36,20 @@ public class SelectionBoard
     public required DateTimeOffset CreatedAt { get; set; }
 
     /// <summary>
-    /// FK to the hosted group the board was finalized into, or null while it is a draft. Once set, the board's
-    /// slots are the group's rounds.
+    /// FK to the hosted group the board picks papers for, or null for a board picking for no group, which never
+    /// finalizes.
     /// </summary>
     public Guid? HostedGroupId { get; set; }
 
     /// <summary>
-    /// Navigation to the hosted group, null on a draft.
+    /// Navigation to the hosted group, null on a board picking for no group.
     /// </summary>
     public HostedGroup? HostedGroup { get; set; }
+
+    /// <summary>
+    /// Whether the board has been finalized into its group. From then on its slots are the group's rounds.
+    /// </summary>
+    public bool IsFinalized { get; set; }
 
     /// <summary>
     /// Its papers.

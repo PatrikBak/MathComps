@@ -28,8 +28,12 @@ public interface ISelectionBoardService
     /// <exception cref="SelectionTargetNotFoundException">
     /// Thrown when the slot or a live proposal of the organization's pool is not there.
     /// </exception>
-    /// <exception cref="SelectionBoardOpenedException">Thrown when the board's group has opened.</exception>
-    /// <exception cref="SelectionBoardFinalizedException">Thrown when the board is finalized.</exception>
+    /// <exception cref="SelectionBoardOpenedException">
+    /// Thrown when the board is finalized and its group has opened.
+    /// </exception>
+    /// <exception cref="SelectionBoardFinalizedException">
+    /// Thrown when the board is finalized and its group is still to open.
+    /// </exception>
     /// <exception cref="SelectionProposalUsedException">Thrown when a paper has taken the proposal.</exception>
     /// <exception cref="SelectionNotLeadException">
     /// Thrown when the account does not lead the category of a paper the change touches.
@@ -49,8 +53,12 @@ public interface ISelectionBoardService
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the change is saved.</returns>
     /// <exception cref="SelectionTargetNotFoundException">Thrown when the slot is not there.</exception>
-    /// <exception cref="SelectionBoardOpenedException">Thrown when the board's group has opened.</exception>
-    /// <exception cref="SelectionBoardFinalizedException">Thrown when the board is finalized.</exception>
+    /// <exception cref="SelectionBoardOpenedException">
+    /// Thrown when the board is finalized and its group has opened.
+    /// </exception>
+    /// <exception cref="SelectionBoardFinalizedException">
+    /// Thrown when the board is finalized and its group is still to open.
+    /// </exception>
     /// <exception cref="SelectionNotLeadException">
     /// Thrown when the account does not lead the category of a paper the change touches.
     /// </exception>
@@ -69,8 +77,12 @@ public interface ISelectionBoardService
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the change is saved.</returns>
     /// <exception cref="SelectionTargetNotFoundException">Thrown when either slot is not there.</exception>
-    /// <exception cref="SelectionBoardOpenedException">Thrown when the board's group has opened.</exception>
-    /// <exception cref="SelectionBoardFinalizedException">Thrown when the board is finalized.</exception>
+    /// <exception cref="SelectionBoardOpenedException">
+    /// Thrown when the board is finalized and its group has opened.
+    /// </exception>
+    /// <exception cref="SelectionBoardFinalizedException">
+    /// Thrown when the board is finalized and its group is still to open.
+    /// </exception>
     /// <exception cref="SelectionNotLeadException">
     /// Thrown when the account does not lead the category of a paper the change touches.
     /// </exception>

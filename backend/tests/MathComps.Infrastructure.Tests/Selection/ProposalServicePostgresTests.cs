@@ -346,7 +346,7 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
         _usedId = SelectionSeed.NewProposal(context, october.Rounds.First(), 2, 1);
 
         // A draft board the pooled proposal stands on
-        SelectionSeed.NewBoard(context, "Draft", _pooledId);
+        SelectionSeed.NewBoard(context, null, "Draft", _pooledId);
 
         // The reviewers rating the pooled proposal
         context.Users.AddRange(HostedSeed.NewUser(_raterId, "Rater"), HostedSeed.NewUser(_otherRaterId, "Other"));

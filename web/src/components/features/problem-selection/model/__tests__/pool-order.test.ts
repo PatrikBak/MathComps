@@ -47,7 +47,9 @@ function threadIds(threads: DiscussionThread<DiscussedSubject>[]): string[] {
 /** The categories the olympiad runs, in the order they run. */
 const CATEGORIES = ['A', 'B', 'C']
 
-/** The newest draft, January: problems 1 and 2 in its C paper, problem 3 in its B paper. */
+/**
+ * The newest draft, January, finalizable: problems 1 and 2 in its C paper, problem 3 in its B paper.
+ */
 const JANUARY: Board = {
   id: 'january',
   name: 'January',
@@ -55,10 +57,13 @@ const JANUARY: Board = {
     { id: 'january-c', name: 'C', category: 'C', slots: ['p1', 'p2'] },
     { id: 'january-b', name: 'B', category: 'B', slots: ['p3'] },
   ],
-  finalization: null,
+  cycle: { name: 'January', opensAt: '2027-01-25T08:00:00.000Z', stage: 'finalizable' },
 }
 
-/** An older draft, December: problem 4 in its C paper, problem 1, which January holds too, and 5 in its B paper. */
+/**
+ * An older draft, December, no longer finalizable: problem 4 in its C paper, problem 1, which January holds too,
+ * and 5 in its B paper.
+ */
 const DECEMBER: Board = {
   id: 'december',
   name: 'December',
@@ -66,7 +71,7 @@ const DECEMBER: Board = {
     { id: 'december-c', name: 'C', category: 'C', slots: ['p4'] },
     { id: 'december-b', name: 'B', category: 'B', slots: ['p1', 'p5'] },
   ],
-  finalization: null,
+  cycle: { name: 'December', opensAt: '2026-12-01T08:00:00.000Z', stage: 'unfinalizable' },
 }
 
 /** A board finalized into October's rounds, still to open, problem 6 in its C paper. */
@@ -74,7 +79,7 @@ const OCTOBER: Board = {
   id: 'october',
   name: 'October',
   papers: [{ id: 'october-c', name: 'C', category: 'C', slots: ['p6'] }],
-  finalization: { cycleName: 'October', opensAt: '2026-10-25T08:00:00.000Z', hasOpened: false },
+  cycle: { name: 'October', opensAt: '2026-10-25T08:00:00.000Z', stage: 'finalized' },
 }
 
 /** The oldest board, finalized into September's rounds, which have opened, problem 7 in its A paper. */
@@ -82,7 +87,7 @@ const SEPTEMBER: Board = {
   id: 'september',
   name: 'September',
   papers: [{ id: 'september-a', name: 'A', category: 'A', slots: ['p7'] }],
-  finalization: { cycleName: 'September', opensAt: '2026-09-25T08:00:00.000Z', hasOpened: true },
+  cycle: { name: 'September', opensAt: '2026-09-25T08:00:00.000Z', stage: 'opened' },
 }
 
 /**

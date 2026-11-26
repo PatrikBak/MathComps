@@ -6,38 +6,12 @@ import {
   arguedText,
   averageScore,
   canPlaceOn,
-  cycleMisfit,
-  mapsToRounds,
   pickActiveBoard,
   resolveText,
   unreadyLanguages,
   unwrittenAcross,
 } from '../selection-state'
-import type { Board, Cycle, Paper, Proposal, SelectionCategory } from '../selection-types'
-
-/** MathComps' categories, each a hosted level, and the olympiad's C, which no hosted round runs. */
-const CATEGORIES: SelectionCategory[] = [
-  { name: 'elementary', hostedCategory: 'elementary' },
-  { name: 'intermediate', hostedCategory: 'intermediate' },
-  { name: 'advanced', hostedCategory: 'advanced' },
-  { name: 'C', hostedCategory: null },
-]
-
-/** The categories of an organization calling the elementary level Junior. */
-const JUNIOR_CATEGORIES: SelectionCategory[] = [
-  { name: 'Junior', hostedCategory: 'elementary' },
-  { name: 'intermediate', hostedCategory: 'intermediate' },
-  { name: 'advanced', hostedCategory: 'advanced' },
-]
-
-/** The October cycle: one round per hosted level, four problems each. */
-const OCTOBER: Cycle = {
-  id: 'october',
-  name: 'October',
-  opensAt: '2026-10-18T22:00:00Z',
-  categories: ['elementary', 'intermediate', 'advanced'],
-  problemCount: 4,
-}
+import type { Board, BoardStage, Paper, Proposal } from '../selection-types'
 
 /**
  * A paper of the given category and length.
@@ -53,27 +27,22 @@ function paper(name: string, category: Paper['category'], length = 4): Paper {
   return { id: name, name, category, slots: Array.from({ length }, () => null) }
 }
 
-/** Where a board stands: a draft, finalized into rounds still to open, or into rounds that have opened. */
-type BoardStage = 'draft' | 'finalized' | 'opened'
-
-/** A board's finalization at each stage: none on a draft, into October's rounds otherwise. */
-const FINALIZATION_AT: Record<BoardStage, Board['finalization']> = {
-  draft: null,
-  finalized: { cycleName: 'October', opensAt: OCTOBER.opensAt, hasOpened: false },
-  opened: { cycleName: 'October', opensAt: OCTOBER.opensAt, hasOpened: true },
-}
-
 /**
- * A board holding no papers.
+ * A board holding no papers, picking for October's cycle or for none.
  *
  * @param id - The board's id, doubling as its name.
- * @param stage - Where the board stands.
+ * @param stage - Where the board stands against October's cycle; null for a board picking for no cycle.
  *
  * @returns The board.
  */
-function board(id: string, stage: BoardStage = 'draft'): Board {
-  // The board, finalized as its stage says
-  return { id, name: id, papers: [], finalization: FINALIZATION_AT[stage] }
+function board(id: string, stage: BoardStage | null = 'finalizable'): Board {
+  // The board, standing against October's cycle as given, or picking for none
+  return {
+    id,
+    name: id,
+    papers: [],
+    cycle: stage === null ? null : { name: 'October', opensAt: '2026-10-18T22:00:00Z', stage },
+  }
 }
 
 /**
@@ -121,83 +90,6 @@ describe('averageScore', () => {
   })
 })
 
-describe('cycleMisfit', () => {
-  it('names a paper no round is left for, and the round no paper fills', () => {
-    // A second elementary paper, and one of a category no round runs
-    const second = paper('E2', 'elementary')
-    const olympiad = paper('C', 'C')
-
-    // What keeps a board of E, E2 and C from pairing up with October's rounds
-    const misfit = cycleMisfit(
-      { ...board('board'), papers: [paper('E', 'elementary'), second, olympiad] },
-      OCTOBER,
-      CATEGORIES
-    )
-
-    // The second elementary paper and the C paper have no round
-    expect(misfit.unmatched).toEqual([second, olympiad])
-
-    // And no paper stands for the intermediate round or the advanced one
-    expect(misfit.uncovered).toEqual(['intermediate', 'advanced'])
-  })
-
-  it('names a paper of a category the cycle runs no round in', () => {
-    // An intermediate paper, and a cycle with no intermediate round
-    const intermediate = paper('I', 'intermediate')
-    const twoRounds: Cycle = { ...OCTOBER, categories: ['elementary', 'advanced'] }
-
-    // What keeps a board of E, I and A from pairing up with the two rounds
-    const misfit = cycleMisfit(
-      {
-        ...board('board'),
-        papers: [paper('E', 'elementary'), intermediate, paper('A', 'advanced')],
-      },
-      twoRounds,
-      CATEGORIES
-    )
-
-    // The intermediate paper has no round
-    expect(misfit.unmatched).toEqual([intermediate])
-
-    // And both rounds have their paper
-    expect(misfit.uncovered).toEqual([])
-  })
-
-  it("pairs a paper with the round of its category's level, whatever the category is called", () => {
-    // A board of a Junior paper, then the intermediate and advanced ones
-    const misfit = cycleMisfit(
-      {
-        ...board('board'),
-        papers: [paper('J', 'Junior'), paper('I', 'intermediate'), paper('A', 'advanced')],
-      },
-      OCTOBER,
-      JUNIOR_CATEGORIES
-    )
-
-    // Junior fills the elementary round, so everything pairs up
-    expect(misfit).toEqual({ unmatched: [], wrongSize: [], uncovered: [] })
-  })
-
-  it('names a paper whose length differs from what the rounds take', () => {
-    // Advanced has five slots where every round takes four
-    const long = paper('A', 'advanced', 5)
-
-    // What keeps a board of E, I and the long A from pairing up with October's rounds
-    const misfit = cycleMisfit(
-      { ...board('board'), papers: [paper('E', 'elementary'), paper('I', 'intermediate'), long] },
-      OCTOBER,
-      CATEGORIES
-    )
-
-    // The advanced paper is named for its length
-    expect(misfit.wrongSize).toEqual([long])
-
-    // And nothing else stands in the way
-    expect(misfit.unmatched).toEqual([])
-    expect(misfit.uncovered).toEqual([])
-  })
-})
-
 describe('canPlaceOn', () => {
   it('places a problem from the pool for a reader leading any paper on the board, and for no one else', () => {
     // A draft with an elementary and an intermediate paper
@@ -229,26 +121,23 @@ describe('canPlaceOn', () => {
     expect(canPlaceOn(draft, held, ['elementary'])).toBe(false)
     expect(canPlaceOn(draft, held, ['elementary', 'intermediate'])).toBe(true)
   })
-})
 
-describe('mapsToRounds', () => {
-  it('holds once every paper fills a category that is a hosted level', () => {
-    // MathComps' three papers
-    const mathcomps = {
-      ...board('mathcomps'),
-      papers: [paper('E', 'elementary'), paper('I', 'intermediate'), paper('A', 'advanced')],
-    }
+  it("places on a draft that can't be finalized and on one picking for no cycle, but on no finalized board", () => {
+    // A function which builds a board with an elementary paper, standing as given against its cycle
+    const standing = (stage: BoardStage | null) => ({
+      ...board('board', stage),
+      papers: [paper('E', 'elementary')],
+    })
 
-    // The same with the olympiad's C paper beside them
-    const mixed = { ...mathcomps, papers: [...mathcomps.papers, paper('C', 'C')] }
+    // A problem from the pool
+    const pooled = proposal({})
 
-    // A board of one Junior paper, a hosted level under another name
-    const junior = { ...board('junior'), papers: [paper('J', 'Junior')] }
+    // A draft that can't be finalized, and one picking for no cycle, take the problem
+    expect(canPlaceOn(standing('unfinalizable'), pooled, ['elementary'])).toBe(true)
+    expect(canPlaceOn(standing(null), pooled, ['elementary'])).toBe(true)
 
-    // Every paper but the C one goes into a round
-    expect(mapsToRounds(mathcomps, CATEGORIES)).toBe(true)
-    expect(mapsToRounds(junior, JUNIOR_CATEGORIES)).toBe(true)
-    expect(mapsToRounds(mixed, CATEGORIES)).toBe(false)
+    // A finalized board does not
+    expect(canPlaceOn(standing('finalized'), pooled, ['elementary'])).toBe(false)
   })
 })
 
@@ -407,15 +296,26 @@ describe('pickActiveBoard', () => {
     expect(active?.id).toBe('round')
   })
 
-  it('falls back to the first draft once the picked board is gone', () => {
-    // A finalized board ahead of a draft
-    const boards = [board('round', 'finalized'), board('draft')]
+  it("falls back to a draft that can't be finalized once the picked board is gone, over a finalized one", () => {
+    // A finalized board ahead of a draft that can't be finalized
+    const boards = [board('round', 'finalized'), board('draft', 'unfinalizable')]
 
     // Picked a board the selection no longer holds
     const active = pickActiveBoard(boards, 'gone')
 
     // The draft goes on screen, the finalized board being passed over
     expect(active?.id).toBe('draft')
+  })
+
+  it("passes over a draft that can't be finalized for a later one that can", () => {
+    // A draft that can't be finalized, then one that can
+    const boards = [board('missed', 'unfinalizable'), board('next', 'finalizable')]
+
+    // Nothing picked
+    const active = pickActiveBoard(boards, null)
+
+    // The one that can still be finalized goes on screen
+    expect(active?.id).toBe('next')
   })
 
   it('takes the first board still to open when every board is finalized', () => {

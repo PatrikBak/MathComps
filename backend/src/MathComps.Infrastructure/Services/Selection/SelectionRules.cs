@@ -10,8 +10,8 @@ namespace MathComps.Infrastructure.Services.Selection;
 /// <summary>
 /// The rules every part of the problem selection shares: writes run one at a time, a board changes only while it is
 /// a draft, the reads and the writes agree on which problems are still in the pool, the read and the finalize agree
-/// on which groups still take a board and which round each paper fills, and the reads agree on which conversations
-/// belong to an organization.
+/// on whether a board can be finalized into its group and which round each paper fills, and the reads agree on which
+/// conversations belong to an organization.
 /// </summary>
 internal static class SelectionRules
 {
@@ -86,13 +86,17 @@ internal static class SelectionRules
     /// <exception cref="SelectionTargetNotFoundException">
     /// Thrown when no board of the organization has the id.
     /// </exception>
-    /// <exception cref="SelectionBoardOpenedException">Thrown when the board's group has opened.</exception>
-    /// <exception cref="SelectionBoardFinalizedException">Thrown when the board is finalized.</exception>
+    /// <exception cref="SelectionBoardOpenedException">
+    /// Thrown when the board is finalized and its group has opened.
+    /// </exception>
+    /// <exception cref="SelectionBoardFinalizedException">
+    /// Thrown when the board is finalized and its group is still to open.
+    /// </exception>
     public static async Task<SelectionBoard> ReadDraftAsync(
         MathCompsDbContext dbContext, string organizationSlug, Guid boardId, CancellationToken cancellationToken)
     {
-        // The board with everything on it, and the group it was finalized into, refused like one that is not there
-        // where it is another organization's
+        // The board with everything on it, and the group it picks for, refused like one that is not there where it
+        // is another organization's
         var board = await dbContext.SelectionBoards
             .Include(candidate => candidate.HostedGroup)
             .Include(candidate => candidate.Papers).ThenInclude(paper => paper.Slots)
@@ -102,13 +106,14 @@ internal static class SelectionRules
                 cancellationToken)
             ?? throw new SelectionTargetNotFoundException();
 
-        // Once its competitions run, students are sitting what the board holds
-        if (board.HostedGroup is { } group && group.OpensAt <= DateTimeOffset.UtcNow)
-            throw new SelectionBoardOpenedException();
-
-        // A finalized board's slots are its group's rounds, which take no change
-        if (board.HostedGroupId is not null)
-            throw new SelectionBoardFinalizedException();
+        // A finalized board's slots are its group's rounds, which take no change. A draft whose group has opened
+        // still takes changes, though it never finalizes.
+        if (board.IsFinalized)
+            throw board.HostedGroup is { } group && group.OpensAt <= DateTimeOffset.UtcNow
+                // Students are sitting its rounds
+                ? new SelectionBoardOpenedException()
+                // Its rounds still to open
+                : new SelectionBoardFinalizedException();
 
         // A draft
         return board;
@@ -226,17 +231,39 @@ internal static class SelectionRules
         hostedCategory is { } level && HostedTaxonomy.CategoryOf(competitionPath) == level;
 
     /// <summary>
-    /// Whether a hosted group still takes a board: it has not opened, it closes at some point, and it runs rounds
-    /// nothing has filled yet. A group that never closes is the practice one, which nobody picks papers for.
+    /// Whether a draft's papers can be finalized into its hosted group, whatever its slots hold: the group has not
+    /// opened, it closes at some point, it runs rounds nothing has filled yet, and the papers pair one to one with
+    /// those rounds by <see cref="IsRoundFor"/>, each paper with as many slots as the group's competitions have
+    /// problems. A group that never
+    /// closes is the practice one, which nobody picks papers for.
     /// </summary>
     /// <param name="opensAt"><inheritdoc cref="HostedGroup.OpensAt" path="/summary"/></param>
     /// <param name="closesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
-    /// <param name="problemsHeld">How many problems each of the group's rounds holds.</param>
+    /// <param name="problemCount"><inheritdoc cref="HostedGroup.ProblemCount" path="/summary"/></param>
+    /// <param name="rounds">
+    /// Each of the group's rounds, by the path of the competition it hangs off, with how many problems it holds.
+    /// </param>
+    /// <param name="papers">
+    /// Each of the board's papers, by the hosted level its category is, with how many slots it has.
+    /// </param>
     /// <param name="now">The instant the group's opening is read against.</param>
-    /// <returns>Whether a board can be finalized into it.</returns>
-    public static bool TakesBoard(
-        DateTimeOffset opensAt, DateTimeOffset? closesAt, IReadOnlyCollection<int> problemsHeld, DateTimeOffset now) =>
+    /// <returns>Whether the board can be finalized into the group.</returns>
+    public static bool CanFinalizeInto(
+        DateTimeOffset opensAt,
+        DateTimeOffset? closesAt,
+        int problemCount,
+        IReadOnlyList<(string CompetitionPath, int ProblemsHeld)> rounds,
+        IReadOnlyList<(HostedCompetitionCategory? Level, int SlotCount)> papers,
+        DateTimeOffset now) =>
         // Not yet open, closing at some point, with rounds that are all still empty
-        opensAt > now && closesAt is not null && problemsHeld.Count > 0 && problemsHeld.All(held => held == 0);
+        opensAt > now
+        && closesAt is not null
+        && rounds.Count > 0
+        && rounds.All(round => round.ProblemsHeld == 0)
+        // Each paper with as many slots as the group's competitions have problems, filling exactly one round
+        && papers.All(paper => paper.SlotCount == problemCount
+            && rounds.Count(round => IsRoundFor(round.CompetitionPath, paper.Level)) == 1)
+        // And each round filled by exactly one paper
+        && rounds.All(round => papers.Count(paper => IsRoundFor(round.CompetitionPath, paper.Level)) == 1);
 
 }

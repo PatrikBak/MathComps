@@ -73,7 +73,6 @@ public class ProblemSelectionEndpointsTests
                     isRecommended = true,
                     beauty = 3,
                     difficulty = 3,
-                    cycleId = Guid.CreateVersion7(),
                     proposals = new Dictionary<Guid, DateTimeOffset>
                     {
                         [Guid.CreateVersion7()] = DateTimeOffset.UtcNow,

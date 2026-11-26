@@ -1,5 +1,4 @@
 using MathComps.Domain.EfCoreEntities;
-using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Problems;
@@ -16,27 +15,20 @@ public sealed class BoardFinalizationService(IDbContextFactory<MathCompsDbContex
     : IBoardFinalizationService
 {
     /// <inheritdoc/>
-    public Task FinalizeAsync(
-        string organizationSlug, Guid boardId, Guid cycleId, CancellationToken cancellationToken = default) =>
+    public Task FinalizeAsync(string organizationSlug, Guid boardId, CancellationToken cancellationToken = default) =>
         // The finalize, as one selection write
         SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
-            // Only MathComps' boards fill the hosted groups, so no other organization's selection holds one to finalize
-            if (organizationSlug != Organization.MathCompsSlug)
-                throw new SelectionTargetNotFoundException();
-
             // The board, a draft of the organization's own
             var board = await SelectionRules.ReadDraftAsync(dbContext, organizationSlug, boardId, cancellationToken);
 
-            // The group taking the papers
-            var group = await dbContext.HostedGroups
-                .FirstOrDefaultAsync(candidate => candidate.Id == cycleId, cancellationToken)
-                ?? throw new SelectionTargetNotFoundException();
+            // The group the board picks for; a board picking for no group can't be finalized
+            var group = board.HostedGroup ?? throw new SelectionFinalizeBlockedException();
 
             // The group's rounds, with what each already holds
             var rounds = await ReadRoundsAsync(dbContext, group.Id, cancellationToken);
 
-            // Each paper with the round it fills, which only a group still taking a board offers
+            // Each paper with the round it fills
             var pairs = PairPapers(board, group, rounds, DateTimeOffset.UtcNow);
 
             // Every problem the board's papers hold
@@ -82,8 +74,8 @@ public sealed class BoardFinalizationService(IDbContextFactory<MathCompsDbContex
             // The board's own slot rows deleted, its slots being the rounds from here on
             dbContext.SelectionSlots.RemoveRange(board.Papers.SelectMany(paper => paper.Slots));
 
-            // The board tied to the group it filled
-            board.HostedGroupId = group.Id;
+            // The board finalized, its group's rounds holding its papers
+            board.IsFinalized = true;
 
             // And the problems leave every draft they still stood on
             await SelectionRules.RemoveSlotsAsync(dbContext, slotted, cancellationToken);
@@ -130,39 +122,33 @@ public sealed class BoardFinalizationService(IDbContextFactory<MathCompsDbContex
     }
 
     /// <summary>
-    /// Pairs a draft's papers one to one with the rounds of a group that still takes a board, by the hosted level each
-    /// paper's category is.
+    /// Pairs a draft's papers one to one with the rounds of its group, each paper with the round
+    /// <see cref="SelectionRules.IsRoundFor"/> gives it.
     /// </summary>
     /// <param name="board">The board, with its papers, their categories and slot rows.</param>
-    /// <param name="group">The group.</param>
+    /// <param name="group">The group the board picks for.</param>
     /// <param name="rounds">The group's rounds, with their competitions and problems.</param>
     /// <param name="now">The instant the group's opening is read against.</param>
     /// <returns>Each paper with the round it fills.</returns>
     /// <exception cref="SelectionFinalizeBlockedException">
-    /// Thrown when the board cannot be finalized into the group.
+    /// Thrown when the board cannot be finalized into the group, or a slot stands empty.
     /// </exception>
     private static List<(SelectionPaper Paper, Round Round)> PairPapers(
         SelectionBoard board, HostedGroup group, IReadOnlyList<Round> rounds, DateTimeOffset now)
     {
-        // A group that no longer takes a board has nothing to pair the papers with
-        if (!SelectionRules.TakesBoard(
-                group.OpensAt, group.ClosesAt, [.. rounds.Select(round => round.Problems.Count)], now))
+        // The board has to be finalizable into its group: the group still to open, its rounds empty, and the papers
+        // pairing with them
+        if (!SelectionRules.CanFinalizeInto(
+                group.OpensAt,
+                group.ClosesAt,
+                group.ProblemCount,
+                [.. rounds.Select(round => (round.Competition.Path, round.Problems.Count))],
+                [.. board.Papers.Select(paper => (paper.Category.HostedCategory, paper.SlotCount))],
+                now))
             throw new SelectionFinalizeBlockedException();
 
-        // The hosted level each round runs at
-        var roundLevels = rounds.Select(round => HostedTaxonomy.CategoryOf(round.Competition.Path)).ToList();
-
-        // The hosted level each paper's category is
-        var paperLevels = board.Papers.Select(paper => paper.Category.HostedCategory).ToList();
-
-        // Every round at a hosted level of its own, and the papers' categories at exactly those levels, one each
-        if (roundLevels.Contains(null)
-            || roundLevels.Distinct().Count() != roundLevels.Count
-            || !paperLevels.Order().SequenceEqual(roundLevels.Order()))
-            throw new SelectionFinalizeBlockedException();
-
-        // Every paper asking as many problems as the group's competitions do, and every slot filled
-        if (board.Papers.Any(paper => paper.SlotCount != group.ProblemCount || paper.Slots.Count != paper.SlotCount))
+        // And every slot has to be filled, since a round is either empty or full
+        if (board.Papers.Any(paper => paper.Slots.Count != paper.SlotCount))
             throw new SelectionFinalizeBlockedException();
 
         // Each paper with the round of its category's hosted level

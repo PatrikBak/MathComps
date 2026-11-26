@@ -9,7 +9,7 @@ import {
   ChevronsUpDown,
   X,
 } from 'lucide-react'
-import { useFormatter, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { type ReactNode, type Ref, useId, useState } from 'react'
 
 import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
@@ -35,11 +35,13 @@ import { useSlotWrites } from '../hooks/use-slot-writes'
 import {
   type BoardSlot,
   categoryHue,
-  finalizeBlockers,
+  isDraft,
   isLeadOf,
-  mapsToRounds,
+  picksForCycle,
 } from '../model/selection-state'
 import type { Board, Paper } from '../model/selection-types'
+import { BoardFooter } from './BoardFooter'
+import { BoardStatus } from './BoardStatus'
 import { SlotNumber, WARNING_MARK_CLASS } from './CategoryMarks'
 import { FinalizeDialog } from './FinalizeDialog'
 import { PaperLink, ProposalLink } from './SelectionLinks'
@@ -60,8 +62,10 @@ export function BoardPanel() {
   // whenever the open page changes, closing included, so the page a slot or a paper opens is what the screen shows
   const [isUnfolded, setIsUnfolded] = useKeyedState(detail?.id ?? null, false)
 
-  // Where the focus goes when a read finalizes the board on screen under it
-  const { statusRef } = useBoardFocusKeeper(selection?.activeBoard ?? null)
+  // Where the focus goes when a read takes the board's Finalize away under it, and the way to send it there
+  const { statusRef, boardMenuRef, focusPastFinalize } = useBoardFocusKeeper(
+    selection?.activeBoard ?? null
+  )
 
   // The board the finalize dialog asks about, by id; null while the dialog is closed
   const [finalizingBoardId, setFinalizingBoardId] = useState<string | null>(null)
@@ -100,13 +104,14 @@ export function BoardPanel() {
 
   return (
     <SurfacePanel as="section" radius="xl" aria-label={t('label')}>
-      {/* Which board, how full, and the rounds a finalized one went into */}
-      <div className="border-b border-foreground/10 px-4 py-3">
+      {/* Which board, how full, and the rounds it picks for or went into */}
+      <div className="px-4 py-3">
         {/* The board's name and how full it is */}
         <div className="flex items-center gap-2">
           {/* The board on screen, and the switch to any other */}
           <DropdownMenu>
             <DropdownMenuTrigger
+              ref={boardMenuRef}
               className={cn(
                 'inline-flex min-w-0 items-center gap-1.5 rounded-md text-base font-semibold text-foreground',
                 FOCUS_RING_CLASS
@@ -128,7 +133,7 @@ export function BoardPanel() {
 
                   {/* The board's stage: a draft until finalized */}
                   <span className="text-xs text-muted">
-                    {board.finalization === null ? t('draft') : t('finalized')}
+                    {isDraft(board) ? t('draft') : t('finalized')}
                   </span>
                 </DropdownMenuCheckboxItem>
               ))}
@@ -154,12 +159,12 @@ export function BoardPanel() {
           </Button>
         </div>
 
-        {/* The status line, for a finalized board, shown folded or not */}
+        {/* The status line, naming the board's rounds, shown folded or not */}
         <BoardStatus board={activeBoard} ref={statusRef} />
       </div>
 
       {/* The papers and what stands between them and the rounds, hidden on a narrow screen until unfolded */}
-      <div className={cn(!isUnfolded && 'hidden', 'lg:block')}>
+      <div className={cn('border-t border-foreground/10', !isUnfolded && 'hidden', 'lg:block')}>
         {/* Every paper, slot by slot */}
         {activeBoard.papers.map((paper) => (
           <PaperSlots key={paper.id} board={activeBoard} paper={paper} />
@@ -169,58 +174,16 @@ export function BoardPanel() {
         <BoardFooter board={activeBoard} onFinalize={openFinalize} />
       </div>
 
-      {/* Which rounds the board fills */}
-      <FinalizeDialog
-        board={activeBoard}
-        isOpen={finalizingBoardId === activeBoard.id}
-        onClose={closeFinalize}
-        focusAfterFinalizeRef={statusRef}
-      />
+      {/* Which rounds the board fills, for a board picking for a cycle */}
+      {picksForCycle(activeBoard) && (
+        <FinalizeDialog
+          board={activeBoard}
+          isOpen={finalizingBoardId === activeBoard.id}
+          onClose={closeFinalize}
+          onFinalizeGone={focusPastFinalize}
+        />
+      )}
     </SurfacePanel>
-  )
-}
-
-/**
- * Props for the {@link BoardStatus} component.
- */
-type BoardStatusProps = {
-  /** The board on screen. */
-  board: Board
-  /** Handle onto the line. */
-  ref: Ref<HTMLParagraphElement>
-}
-
-/**
- * The rounds a finalized board went into, and the day they open or opened, in one line.
- */
-function BoardStatus({ board, ref }: BoardStatusProps) {
-  // Board copy
-  const t = useTranslations('problemSelection.board')
-
-  // Dates in the reader's language
-  const format = useFormatter()
-
-  // A draft says nothing beyond its stage
-  if (board.finalization === null) return null
-
-  // The day the board's rounds open
-  const opens = format.dateTime(new Date(board.finalization.opensAt), {
-    day: 'numeric',
-    month: 'long',
-  })
-
-  // The line's copy, in the past once the rounds have opened
-  const statusKey = board.finalization.hasOpened ? 'statusOpened' : 'status'
-
-  return (
-    <p
-      ref={ref}
-      // Focused when a read finalizes the board under a control it takes away
-      tabIndex={-1}
-      className="mt-0.5 text-xs text-muted focus:outline-none"
-    >
-      {t(statusKey, { cycle: board.finalization.cycleName, date: opens })}
-    </p>
   )
 }
 
@@ -321,7 +284,7 @@ function SlotRow({ moves, ...slot }: SlotRowProps) {
   const { leadCategories } = useLoadedSelection()
 
   // Whether the slot takes changes: on a draft, and only in a paper the reader leads
-  const takesChanges = board.finalization === null && isLeadOf(leadCategories, paper)
+  const takesChanges = isDraft(board) && isLeadOf(leadCategories, paper)
 
   // An empty slot taking changes is one button: pick it, then pick a problem from the pool
   if (proposal === undefined && takesChanges) {
@@ -490,82 +453,5 @@ function SlotAction({ ref, label, disabled = false, onClick, children }: SlotAct
     >
       {children}
     </Button>
-  )
-}
-
-/**
- * Props for the {@link BoardFooter} component.
- */
-type BoardFooterProps = {
-  /** The board on screen. */
-  board: Board
-  /** Opens the finalize dialog. */
-  onFinalize: () => void
-}
-
-/**
- * What stands between a draft board and the rounds, and the way to send it there. A board with a paper no round takes
- * never goes, so it shows neither.
- */
-function BoardFooter({ board, onFinalize }: BoardFooterProps) {
-  // Board copy
-  const t = useTranslations('problemSelection.board')
-
-  // Every proposal by id, and the selection's categories
-  const { proposalsById, categories } = useLoadedSelection()
-
-  // Whether a write changing the slots is still out
-  const { isChangingSlots } = useSelectionWorkspace()
-
-  // The id of the list of what still has to happen, which describes the press
-  const blockersId = useId()
-
-  // A finalized board has nothing left to finalize, and a board with a paper no round takes never finalizes, each
-  // leaving the footer a bare gap
-  if (board.finalization !== null || !mapsToRounds(board, categories))
-    return <div className="h-3" />
-
-  // What stops the board going
-  const blockers = finalizeBlockers(board, proposalsById)
-
-  // Whether the board can go, with no slot empty and every problem ready
-  const isReady = blockers.emptySlots === 0 && blockers.unready.length === 0
-
-  return (
-    <div className="mt-3 space-y-3 border-t border-foreground/10 px-4 py-3">
-      {/* What still has to happen, if anything */}
-      <ul id={blockersId} className="space-y-1.5 text-xs text-muted">
-        {isReady && <li>{t('ready')}</li>}
-        {blockers.emptySlots > 0 && <li>{t('emptyCount', { count: blockers.emptySlots })}</li>}
-        {blockers.unready.map(({ proposal, languages }) => (
-          <li key={proposal.id} className="flex gap-1.5">
-            {/* The problem's number, opening it in full */}
-            <ProposalLink
-              proposalId={proposal.id}
-              className="text-link hover:text-link-hover"
-              plain
-            >
-              {`#${proposal.number}`}
-            </ProposalLink>
-
-            {/* What the problem still needs */}
-            <span>{t('needsLanguages', { languages: localeCodeList(languages) })}</span>
-          </li>
-        ))}
-      </ul>
-
-      {/* The press opening the finalize dialog, unavailable by its ARIA state alone, so the focus a closing
-          dialog hands back to it still lands once a refusal has left the board unable to go */}
-      <Button
-        variant="primary"
-        size="sm"
-        fullWidth
-        aria-disabled={!isReady || isChangingSlots}
-        aria-describedby={blockersId}
-        onClick={onFinalize}
-      >
-        {t('finalize')}
-      </Button>
-    </div>
   )
 }

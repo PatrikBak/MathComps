@@ -180,7 +180,7 @@ describe('matchPool', () => {
       id: 'october',
       name: 'October',
       papers: [{ id: 'e', name: 'E', category: 'elementary', slots: ['p1', null, 'p3'] }],
-      finalization: null,
+      cycle: null,
     }
 
     // The pool narrowed to what the board holds
@@ -242,7 +242,7 @@ describe('matchPool', () => {
         { id: 'e', name: 'E', category: 'elementary', slots: ['p5', null, 'p2'] },
         { id: 'i', name: 'I', category: 'intermediate', slots: ['p7'] },
       ],
-      finalization: null,
+      cycle: null,
     }
 
     // The pool, filtered by nothing
@@ -269,7 +269,7 @@ describe('matchPool', () => {
         { id: 'e', name: 'E', category: 'elementary', slots: [null] },
         { id: 'i', name: 'I', category: 'intermediate', slots: ['p7'] },
       ],
-      finalization: null,
+      cycle: null,
     }
 
     // The pool narrowed to intermediate
@@ -301,7 +301,7 @@ describe('matchPool', () => {
         { id: 'e', name: 'E', category: 'elementary', slots: ['p9', null, 'p4'] },
         { id: 'i', name: 'I', category: 'intermediate', slots: ['p7'] },
       ],
-      finalization: null,
+      cycle: null,
     }
 
     // The pool narrowed to intermediate
@@ -334,7 +334,7 @@ describe('matchPool', () => {
         { id: 'b', name: 'B', category: 'B', slots: ['p5'] },
         { id: 'c', name: 'C', category: 'C', slots: [null] },
       ],
-      finalization: null,
+      cycle: null,
     }
 
     // The pool, filtered by nothing
@@ -417,7 +417,7 @@ const DRAFT: Board = {
     { id: 'elementary-paper', name: 'Starters', category: 'elementary', slots: ['p1', null] },
     { id: 'intermediate-paper', name: 'I', category: 'intermediate', slots: ['p2'] },
   ],
-  finalization: null,
+  cycle: null,
 }
 
 /** A board finalized into October's rounds, its advanced paper holding problem 7, which the round took. */
@@ -425,7 +425,7 @@ const FINALIZED: Board = {
   id: 'finalized',
   name: 'October',
   papers: [{ id: 'advanced-paper', name: 'A', category: 'advanced', slots: ['p7'] }],
-  finalization: { cycleName: 'October', opensAt: '2026-10-20T08:00:00.000Z', hasOpened: false },
+  cycle: { name: 'October', opensAt: '2026-10-20T08:00:00.000Z', stage: 'finalized' },
 }
 
 /**

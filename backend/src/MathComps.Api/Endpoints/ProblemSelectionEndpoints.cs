@@ -59,7 +59,7 @@ public static class ProblemSelectionEndpoints
             // The reviewer reading the selection
             var reviewerId = await userManager.RequireUserIdAsync(context);
 
-            // The organization's selection, its cycles named in the caller's language
+            // The organization's selection, its boards' cycles named in the caller's language
             var selection = await selectionService.GetSelectionAsync(
                 organization, reviewerId, EndpointHelpers.GetRequestLanguage(), cancellationToken);
 
@@ -218,20 +218,15 @@ public static class ProblemSelectionEndpoints
         .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
-        // Finalize a board into a cycle's rounds
+        // Finalize a board into the rounds of the cycle it picks for
         app.MapPost($"{SelectionPath}/boards/{{boardId:guid}}/finalization", async (
             string organization,
             Guid boardId,
-            FinalizeBoardRequest request,
             IBoardFinalizationService finalization,
             CancellationToken cancellationToken) =>
         {
-            // A finalization naming no cycle has nowhere to put the papers
-            if (request.CycleId is not { } cycleId)
-                throw new BadHttpRequestException("A finalization must name the cycle.");
-
             // Finalize it
-            await finalization.FinalizeAsync(organization, boardId, cycleId, cancellationToken);
+            await finalization.FinalizeAsync(organization, boardId, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();

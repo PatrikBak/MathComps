@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react'
 
 import { useKeyedState } from '@/hooks/use-keyed-state'
 
-import { isLeadOf, pickActiveBoard, sameSlot } from '../model/selection-state'
+import { isDraft, isLeadOf, pickActiveBoard, sameSlot } from '../model/selection-state'
 import type { Board, SlotAddress } from '../model/selection-types'
 
 /**
@@ -60,7 +60,7 @@ export function useBoardPicking({
   if (activeBoard !== null && activeBoard.id !== shownBoardId) setShownBoardId(activeBoard.id)
 
   // Whether the board on screen has been finalized
-  const isShownBoardFinalized = activeBoard !== null && activeBoard.finalization !== null
+  const isShownBoardFinalized = activeBoard !== null && !isDraft(activeBoard)
 
   // The slot waiting for a problem, let go whenever the board on screen is finalized under it
   const [waitingSlot, setWaitingSlot] = useKeyedState<SlotAddress | null>(

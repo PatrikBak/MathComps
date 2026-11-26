@@ -1,10 +1,8 @@
 using System.Data;
-using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.Contracts.Selection;
 using MathComps.Domain.Contracts.Users;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
-using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Localization;
@@ -15,9 +13,9 @@ namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
 /// Implements <see cref="IProblemSelectionService"/> over the database, the reader's lead categories through the
-/// member service. The selection read takes in every hosted group that has not opened and every one a board was
-/// finalized into, since a finalized board's slots read off its group's rounds and the cycles are the groups still
-/// taking a board.
+/// member service. The selection read takes in every hosted group a board of the organization picks for: each
+/// such board shows its group's name, opening and stage, and a finalized board's slots read off the group's
+/// rounds.
 /// </summary>
 /// <param name="dbContextFactory">Creates the context each read runs on.</param>
 /// <param name="localization">The names the taxonomy gives the groups' nodes.</param>
@@ -53,17 +51,15 @@ public sealed class ProblemSelectionService(
         // One instant for everything the read weighs against a group opening.
         var now = DateTimeOffset.UtcNow;
 
-        // The groups the organization's finalized boards went into.
-        var finalizedIntoIds = dbContext.SelectionBoards
+        // The groups the organization's boards pick for.
+        var pickedForIds = dbContext.SelectionBoards
             .Where(board => board.Organization.Slug == organizationSlug && board.HostedGroupId != null)
             .Select(board => board.HostedGroupId!.Value);
 
-        // Every group that has not opened, and every one a board of the organization was finalized into, soonest
-        // first, its rounds in the taxonomy's order with what each holds.
+        // Every group a board of the organization picks for, its rounds in the taxonomy's order with what each holds.
         var groups = await dbContext.HostedGroups
             .AsNoTracking()
-            .Where(group => group.OpensAt > now || finalizedIntoIds.Contains(group.Id))
-            .OrderBy(group => group.OpensAt)
+            .Where(group => pickedForIds.Contains(group.Id))
             .Select(group => new
             {
                 group.Id,
@@ -171,6 +167,7 @@ public sealed class ProblemSelectionService(
                 board.Id,
                 board.Name,
                 board.HostedGroupId,
+                board.IsFinalized,
                 Papers = board.Papers
                     .OrderBy(paper => paper.Position)
                     .Select(paper => new
@@ -214,27 +211,41 @@ public sealed class ProblemSelectionService(
             .Select(organization => organization.NeedsEveryLanguage)
             .SingleAsync(cancellationToken);
 
-        // The cycles a board can be finalized into, by whether the boards are MathComps', the only ones filling any
-        List<SelectionCycleDto> cycles = organizationSlug == Organization.MathCompsSlug
-            // The groups still taking a board, each under its group's name
-            ?
-            [
-                .. groups
-                    .Where(group => SelectionRules.TakesBoard(
-                        group.OpensAt, group.ClosesAt, [.. group.Rounds.Select(round => round.Problems.Count)], now))
-                    .Select(group => new SelectionCycleDto(
-                        group.Id,
-                        groupNames[group.Id],
+        // Each board's cycle by the board's id: the group it picks for, under its name, with where the board stands
+        // against it; null for a board picking for no group.
+        var cycles = boards.ToDictionary(
+            board => board.Id,
+            BoardCycleDto? (board) =>
+            {
+                // A board picking for no group has no cycle
+                if (board.HostedGroupId is not { } groupId)
+                    return null;
+
+                // The group the board picks for
+                var group = groupsById[groupId];
+
+                // A finalized board, its stage set by whether its group has opened
+                if (board.IsFinalized)
+                    return new BoardCycleDto(
+                        groupNames[groupId],
                         group.OpensAt,
-                        [
-                            .. group.Rounds
-                                .Select(round => HostedTaxonomy.CategoryOf(round.CompetitionPath))
-                                .OfType<HostedCompetitionCategory>(),
-                        ],
-                        group.ProblemCount)),
-            ]
-            // Another organization's boards fill none
-            : [];
+                        group.OpensAt <= now ? BoardStage.Opened : BoardStage.Finalized);
+
+                // Whether the draft can be finalized into the group
+                var isFinalizable = SelectionRules.CanFinalizeInto(
+                    group.OpensAt,
+                    group.ClosesAt,
+                    group.ProblemCount,
+                    [.. group.Rounds.Select(round => (round.CompetitionPath, round.Problems.Count))],
+                    [.. board.Papers.Select(paper => (paper.HostedCategory, paper.SlotCount))],
+                    now);
+
+                // A draft, finalizable or not
+                return new BoardCycleDto(
+                    groupNames[groupId],
+                    group.OpensAt,
+                    isFinalizable ? BoardStage.Finalizable : BoardStage.Unfinalizable);
+            });
 
         // The selection.
         return new SelectionDto(
@@ -266,7 +277,7 @@ public sealed class ProblemSelectionService(
                             paper.Name,
                             paper.Category,
                             // The paper's slots, by whether its board has been finalized
-                            board.HostedGroupId is { } groupId
+                            board is { IsFinalized: true, HostedGroupId: { } groupId }
                                 // A finalized paper's slots are its group's round of the hosted level its
                                 // category is, empty where the group runs none
                                 ? groupsById[groupId].Rounds
@@ -280,16 +291,8 @@ public sealed class ProblemSelectionService(
                                         .FirstOrDefault(slot => slot.Position == index)?.ProblemId),
                                 ])),
                     ],
-                    // The group the board filled, named the way the cycles are, and whether it has opened; none on
-                    // a draft
-                    board.HostedGroupId is { } finalizedInto
-                        ? new BoardFinalizationDto(
-                            groupNames[finalizedInto],
-                            groupsById[finalizedInto].OpensAt,
-                            groupsById[finalizedInto].OpensAt <= now)
-                        : null)),
+                    cycles[board.Id])),
             ],
-            cycles,
             conversations,
             needsEveryLanguage);
     }

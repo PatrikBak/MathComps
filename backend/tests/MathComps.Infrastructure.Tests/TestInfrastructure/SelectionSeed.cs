@@ -290,14 +290,20 @@ public static class SelectionSeed
     /// from the ids given.
     /// </summary>
     /// <param name="context">The seeding context.</param>
+    /// <param name="group">
+    /// <inheritdoc cref="NewBoard(MathCompsDbContext, Guid, HostedGroup?, string, Guid?[])"
+    /// path="/param[@name='group']"/>
+    /// </param>
     /// <param name="name"><inheritdoc cref="SelectionBoard.Name" path="/summary"/></param>
     /// <param name="slots">
-    /// <inheritdoc cref="NewBoard(MathCompsDbContext, Guid, string, Guid?[])" path="/param[@name='slots']"/>
+    /// <inheritdoc cref="NewBoard(MathCompsDbContext, Guid, HostedGroup?, string, Guid?[])"
+    /// path="/param[@name='slots']"/>
     /// </param>
     /// <returns>The board, its papers tracked beside it.</returns>
-    public static SelectionBoard NewBoard(MathCompsDbContext context, string name, params Guid?[] slots) =>
+    public static SelectionBoard NewBoard(
+        MathCompsDbContext context, HostedGroup? group, string name, params Guid?[] slots) =>
         // MathComps' own
-        NewBoard(context, MathCompsId(context), name, slots);
+        NewBoard(context, MathCompsId(context), group, name, slots);
 
     /// <summary>
     /// Tracks a draft board of an organization with one paper per category, each of four slots, filled from the ids
@@ -305,6 +311,7 @@ public static class SelectionSeed
     /// </summary>
     /// <param name="context">The seeding context.</param>
     /// <param name="organizationId">The organization picking its papers.</param>
+    /// <param name="group">The hosted group the board picks papers for; null for none.</param>
     /// <param name="name"><inheritdoc cref="SelectionBoard.Name" path="/summary"/></param>
     /// <param name="slots">
     /// What stands in each slot, paper after paper in the order the categories run; null for an empty slot.
@@ -312,15 +319,16 @@ public static class SelectionSeed
     /// </param>
     /// <returns>The board, its papers tracked beside it.</returns>
     public static SelectionBoard NewBoard(
-        MathCompsDbContext context, Guid organizationId, string name, params Guid?[] slots)
+        MathCompsDbContext context, Guid organizationId, HostedGroup? group, string name, params Guid?[] slots)
     {
-        // The board, the organization's own
+        // The board, the organization's own, picking for the group given
         var board = new SelectionBoard
         {
             Id = Guid.CreateVersion7(),
             OrganizationId = organizationId,
             Name = name,
             CreatedAt = DateTimeOffset.UtcNow,
+            HostedGroupId = group?.Id,
         };
         context.SelectionBoards.Add(board);
 
