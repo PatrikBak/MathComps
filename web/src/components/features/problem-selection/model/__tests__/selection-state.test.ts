@@ -122,6 +122,18 @@ describe('canPlaceOn', () => {
     expect(canPlaceOn(draft, held, ['elementary', 'intermediate'])).toBe(true)
   })
 
+  it('places a problem on a paper with no category for a lead of any category, and for no one else', () => {
+    // A draft whose one paper has no category
+    const draft = { ...board('draft'), papers: [paper('School', null)] }
+
+    // A problem from the pool
+    const pooled = proposal({})
+
+    // A lead of a category the board has no paper of places it, while a reader leading nothing does not
+    expect(canPlaceOn(draft, pooled, ['C'])).toBe(true)
+    expect(canPlaceOn(draft, pooled, [])).toBe(false)
+  })
+
   it("places on a draft that can't be finalized and on one picking for no cycle, but on no finalized board", () => {
     // A function which builds a board with an elementary paper, standing as given against its cycle
     const standing = (stage: BoardStage | null) => ({

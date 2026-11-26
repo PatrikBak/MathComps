@@ -607,6 +607,49 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     });
 
     /// <summary>
+    /// A draft whose one paper has no category reads that paper with none, and as finalizable into a group whose one
+    /// competition runs at no level, which is the round such a paper fills.
+    /// </summary>
+    [Fact]
+    public Task A_paper_with_no_category_pairs_with_the_competition_with_no_level() => RunTestAsync(async service =>
+    {
+        // A school group still to open with its one competition at no level, and a board picking for it
+        var boardId = await QueryValueAsync(async context =>
+        {
+            // The season October's rounds sit in
+            var season = await context.Rounds
+                .Where(round => round.HostedGroupId == _octoberId)
+                .Select(round => round.Season)
+                .FirstAsync();
+
+            // The school group
+            var school = SelectionSeed.NewGroup(
+                context, season, "mc-school", DateTimeOffset.UtcNow.AddDays(20), ["mathcomps-special-school_a"]);
+
+            // The board, its one paper of no category
+            var board = SelectionSeed.NewBoardWithoutCategory(context, school, "School");
+
+            // Written
+            await context.SaveChangesAsync();
+
+            // The board's id
+            return board.Id;
+        });
+
+        // The selection
+        var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
+
+        // The school board as read
+        var board = selection.Boards.Single(candidate => candidate.Id == boardId);
+
+        // The school board's one paper, with no category
+        Assert.Null(Assert.Single(board.Papers).Category);
+
+        // And finalizable into the school group
+        Assert.Equal(BoardStage.Finalizable, board.Cycle?.Stage);
+    });
+
+    /// <summary>
     /// Conversations read newest first, each with who held it, how many messages it holds and whether the problem
     /// still has the statement it was argued against, in any of its languages. The author carries their username and
     /// address, or neither once their account is deleted, and a deleted account's conversations stay in the

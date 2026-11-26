@@ -42,14 +42,19 @@ type DraftSlot = {
 }
 
 /**
- * Refuses a write to a paper unless the writer leads the paper's category, as the backend does.
+ * Refuses a write to a paper unless the writer leads the paper's category, or any category at all where the paper
+ * has none, as the backend does.
  *
  * @param paper - The paper.
  * @param leadCategories - The names of the categories the writer leads.
  */
 function requireLead(paper: Paper, leadCategories: readonly string[]): void {
-  // A paper of one of the writer's categories, or refused
-  if (!leadCategories.includes(paper.category)) {
+  // Whether the writer leads the paper: any lead for a paper with no category, else a lead of its category
+  const leads =
+    paper.category === null ? leadCategories.length > 0 : leadCategories.includes(paper.category)
+
+  // A paper the writer leads, or refused
+  if (!leads) {
     refuseWith('SelectionNotLead')
   }
 }

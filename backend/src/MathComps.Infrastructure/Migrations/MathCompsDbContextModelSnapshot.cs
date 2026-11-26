@@ -2039,7 +2039,7 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("board_id");
 
-                    b.Property<Guid>("CategoryId")
+                    b.Property<Guid?>("CategoryId")
                         .HasColumnType("uuid")
                         .HasColumnName("category_id");
 
@@ -3213,7 +3213,6 @@ namespace MathComps.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
                         .HasConstraintName("fk_selection_papers_organization_categories_category_id");
 
                     b.Navigation("Board");

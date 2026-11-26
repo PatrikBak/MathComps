@@ -109,8 +109,8 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
-    /// Only the leads of a paper's category change its slots, so a member leading none places, moves and empties
-    /// nothing, and the paper stays as it stood.
+    /// Only a paper's leads change its slots, so a member leading no category places, moves and empties nothing on a
+    /// paper with a category, and the paper stays as it stood.
     /// </summary>
     [Fact]
     public Task A_member_who_leads_nothing_changes_no_slot() => RunTestAsync(async service =>
@@ -164,6 +164,31 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
         Assert.Equal(
             [null, null, null, null],
             await DraftSlotsAsync(SpareBoardId, HostedCompetitionCategory.Intermediate));
+    });
+
+    /// <summary>
+    /// A paper with no category takes any lead of the organization: the elementary lead fills its slot, and a member
+    /// leading no category is refused one.
+    /// </summary>
+    [Fact]
+    public Task Any_lead_changes_a_paper_with_no_category() => RunTestAsync(async service =>
+    {
+        // Problem 14 into the school paper's first slot by the elementary lead
+        await service.PlaceAsync(
+            Organization.MathCompsSlug,
+            ElementaryLeadId,
+            new SlotAddress(SchoolBoardId, SchoolPaperId, 0),
+            Proposals[14]);
+
+        // Problem 13 into the school paper's second slot by the member leading nothing, refused
+        await Assert.ThrowsAsync<SelectionNotLeadException>(() => service.PlaceAsync(
+            Organization.MathCompsSlug,
+            MemberId,
+            new SlotAddress(SchoolBoardId, SchoolPaperId, 1),
+            Proposals[13]));
+
+        // The paper holding the lead's problem alone
+        Assert.Equal([Proposals[14], null, null, null], await DraftSlotsAsync(SchoolPaperId));
     });
 
     /// <summary>

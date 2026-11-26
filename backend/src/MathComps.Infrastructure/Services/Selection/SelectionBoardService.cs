@@ -37,7 +37,7 @@ public sealed class SelectionBoardService(
             // The paper holding the slot
             var paper = PaperOf(board, slot);
 
-            // Only a lead of the paper's category fills its slot
+            // Only a lead of the paper fills its slot
             RequireLead(paper, leadCategoryIds);
 
             // The proposal going in, from the same organization's pool as the board
@@ -54,7 +54,7 @@ public sealed class SelectionBoardService(
                 .FirstOrDefault(candidate => candidate.ProblemId == proposal.ProblemId
                     && (candidate.PaperId != paper.Id || candidate.Position != slot.Index));
 
-            // The paper the problem leaves changes too, so only a lead of its category moves the problem out
+            // The paper the problem leaves changes too, so only a lead of that paper moves the problem out
             if (source is not null)
                 RequireLead(source.Paper, leadCategoryIds);
 
@@ -87,7 +87,7 @@ public sealed class SelectionBoardService(
             // The paper holding the slot
             var paper = PaperOf(board, slot);
 
-            // Only a lead of the paper's category empties its slot
+            // Only a lead of the paper empties its slot
             RequireLead(paper, leadCategoryIds);
 
             // The slot emptied, its problem back in the pool
@@ -113,7 +113,7 @@ public sealed class SelectionBoardService(
             // The paper holding the slot
             var paper = PaperOf(board, slot);
 
-            // Only a lead of the paper's category reorders its slots
+            // Only a lead of the paper reorders its slots
             RequireLead(paper, leadCategoryIds);
 
             // The neighbour's index, one above or below the slot
@@ -196,17 +196,21 @@ public sealed class SelectionBoardService(
     }
 
     /// <summary>
-    /// Refuses a change to a paper unless the account making it leads the paper's category.
+    /// Refuses a change to a paper unless the account making it leads the paper: its category, or any category at
+    /// all where the paper has none.
     /// </summary>
-    /// <param name="paper">The paper, with its category's id.</param>
+    /// <param name="paper">The paper, with its category's id where it has one.</param>
     /// <param name="leadCategoryIds">The ids of the categories the account leads.</param>
-    /// <exception cref="SelectionNotLeadException">
-    /// Thrown when the account does not lead the paper's category.
-    /// </exception>
+    /// <exception cref="SelectionNotLeadException">Thrown when the account does not lead the paper.</exception>
     private static void RequireLead(SelectionPaper paper, IReadOnlySet<Guid> leadCategoryIds)
     {
-        // Only a lead of the paper's category changes it
-        if (!leadCategoryIds.Contains(paper.CategoryId))
+        // Whether the account leads the paper: any category for a paper with none, else the paper's own
+        var leads = paper.CategoryId is { } categoryId
+            ? leadCategoryIds.Contains(categoryId)
+            : leadCategoryIds.Count > 0;
+
+        // Only a lead of the paper changes it
+        if (!leads)
             throw new SelectionNotLeadException();
     }
 

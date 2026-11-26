@@ -6,8 +6,8 @@ namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
 /// Fills a draft board's slots from its organization's pool. A finalized board is its group's rounds, which every
-/// change here refuses to touch. Only the leads of a paper's category make these changes to it. Every change runs
-/// after every one before it has finished.
+/// change here refuses to touch. Only a paper's leads make these changes to it: the leads of its category, or every
+/// lead of the organization for a paper with no category. Every change runs after every one before it has finished.
 /// </summary>
 public interface ISelectionBoardService
 {
@@ -19,7 +19,7 @@ public interface ISelectionBoardService
     /// The <see cref="Organization.Slug"/> of the organization whose selection the board is in.
     /// </param>
     /// <param name="userId">
-    /// The account making the change, which has to lead the category of every paper the change touches.
+    /// The account making the change, which has to lead every paper the change touches.
     /// </param>
     /// <param name="slot">The slot the proposal goes into.</param>
     /// <param name="proposalId">The proposal, which has to be in the organization's pool.</param>
@@ -36,7 +36,7 @@ public interface ISelectionBoardService
     /// </exception>
     /// <exception cref="SelectionProposalUsedException">Thrown when a paper has taken the proposal.</exception>
     /// <exception cref="SelectionNotLeadException">
-    /// Thrown when the account does not lead the category of a paper the change touches.
+    /// Thrown when the account does not lead a paper the change touches.
     /// </exception>
     Task PlaceAsync(
         string organizationSlug, Guid userId, SlotAddress slot, Guid proposalId,
@@ -48,7 +48,7 @@ public interface ISelectionBoardService
     /// <param name="organizationSlug">
     /// The <see cref="Organization.Slug"/> of the organization whose selection the board is in.
     /// </param>
-    /// <param name="userId">The account making the change, which has to lead the category of the slot's paper.</param>
+    /// <param name="userId">The account making the change, which has to lead the slot's paper.</param>
     /// <param name="slot">The slot.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the change is saved.</returns>
@@ -60,7 +60,7 @@ public interface ISelectionBoardService
     /// Thrown when the board is finalized and its group is still to open.
     /// </exception>
     /// <exception cref="SelectionNotLeadException">
-    /// Thrown when the account does not lead the category of a paper the change touches.
+    /// Thrown when the account does not lead a paper the change touches.
     /// </exception>
     Task ClearSlotAsync(
         string organizationSlug, Guid userId, SlotAddress slot, CancellationToken cancellationToken = default);
@@ -71,7 +71,7 @@ public interface ISelectionBoardService
     /// <param name="organizationSlug">
     /// The <see cref="Organization.Slug"/> of the organization whose selection the board is in.
     /// </param>
-    /// <param name="userId">The account making the change, which has to lead the category of the slot's paper.</param>
+    /// <param name="userId">The account making the change, which has to lead the slot's paper.</param>
     /// <param name="slot">The slot.</param>
     /// <param name="direction"><inheritdoc cref="SlotDirection" path="/summary"/></param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
@@ -84,7 +84,7 @@ public interface ISelectionBoardService
     /// Thrown when the board is finalized and its group is still to open.
     /// </exception>
     /// <exception cref="SelectionNotLeadException">
-    /// Thrown when the account does not lead the category of a paper the change touches.
+    /// Thrown when the account does not lead a paper the change touches.
     /// </exception>
     Task MoveSlotAsync(
         string organizationSlug, Guid userId, SlotAddress slot, SlotDirection direction,
@@ -110,10 +110,10 @@ public sealed class SelectionBoardFinalizedException()
         LogLevel.Information);
 
 /// <summary>
-/// Thrown when a paper's slots are changed by an account that does not lead the paper's category.
+/// Thrown when a paper's slots are changed by an account that does not lead the paper.
 /// </summary>
 public sealed class SelectionNotLeadException()
     : MathCompsException(
-        "Only the leads of this paper's category change it",
+        "Only the leads of this paper change it",
         RefusalKind.Forbidden,
         LogLevel.Information);

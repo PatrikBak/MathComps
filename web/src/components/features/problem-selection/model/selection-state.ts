@@ -85,15 +85,15 @@ export function indexSelection(data: SelectionData): SelectionIndex {
  * The hue a category wears, which is its index among the selection's categories.
  *
  * @param categories - The selection's categories, in the order they run.
- * @param category - The category, by name.
+ * @param category - The category, by name; null for none.
  *
- * @returns The hue's index, from zero; null for a category the selection doesn't list.
+ * @returns The hue's index, from zero; null for no category, or one the selection doesn't list.
  */
 export function categoryHue(
   categories: readonly SelectionCategory[],
-  category: string
+  category: string | null
 ): number | null {
-  // Where the category stands, -1 where nowhere
+  // Where the category stands, -1 where nowhere or where there is none
   const place = categories.findIndex((candidate) => candidate.name === category)
 
   // The place, or none where the category stands nowhere
@@ -166,16 +166,19 @@ export function canFinalize(board: Board): boolean {
 }
 
 /**
- * Whether the reader leads a paper's category, which is what lets them change its slots.
+ * Whether the reader leads a paper, which is what lets them change its slots: they lead its category, or any
+ * category at all where the paper has none.
  *
  * @param leadCategories - The names of the categories the reader leads.
  * @param paper - The paper.
  *
- * @returns True when the reader leads the paper's category.
+ * @returns True when the reader leads the paper.
  */
 export function isLeadOf(leadCategories: readonly string[], paper: Paper): boolean {
-  // The paper's category among the reader's
-  return leadCategories.includes(paper.category)
+  // Any lead for a paper with no category, else the paper's category among the reader's
+  return paper.category === null
+    ? leadCategories.length > 0
+    : leadCategories.includes(paper.category)
 }
 
 /**
@@ -234,15 +237,16 @@ export function pickActiveBoard(
 }
 
 /**
- * The letter a paper goes by in its slots' short labels: the initial of the category it fills, in capitals.
+ * The letter a paper goes by in its slots' short labels: the initial of the category it fills, or of its own name
+ * where it fills none, in capitals.
  *
  * @param paper - The paper.
  *
  * @returns The initial.
  */
 export function paperInitial(paper: Paper): string {
-  // The category's first letter, in capitals
-  return paper.category.charAt(0).toUpperCase()
+  // The category's first letter, or the paper's own name's where it has no category, in capitals
+  return (paper.category ?? paper.name).charAt(0).toUpperCase()
 }
 
 /**

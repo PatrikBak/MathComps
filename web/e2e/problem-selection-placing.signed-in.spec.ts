@@ -1316,6 +1316,31 @@ test.describe('a reader leading some categories or none', () => {
     await expect(slotOf(page, 'E2').getByRole('link', { name: OPENED.title })).toBeVisible()
   })
 
+  test("lets a lead of any category change a paper with no category, whose slots go by the paper's name", async ({
+    page,
+  }) => {
+    // A reviewer leading the elementary category alone, the one board a draft whose paper has no category
+    await stubSelection(page, 'schoolDraft', {
+      ...rememberedSelection(null),
+      leadCategories: ['elementary'],
+    })
+
+    // The pool
+    await openPool(page)
+
+    // A problem in the pool, its grid opened
+    await placeButton(cardOf(page, OPENED)).click()
+
+    // The paper's first slot, named by the initial of the paper's name, taking it
+    await expect(gridSlot(page, 'S1')).not.toHaveAttribute('aria-disabled', 'true')
+
+    // The problem, put there
+    await gridSlot(page, 'S1').click()
+
+    // Where it stands
+    await expect(slotOf(page, 'S1').getByRole('link', { name: OPENED.title })).toBeVisible()
+  })
+
   test('stops showing a slot as waiting once a read finds the reader no longer leads its paper', async ({
     page,
   }) => {
