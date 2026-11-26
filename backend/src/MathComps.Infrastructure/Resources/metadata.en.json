@@ -252,7 +252,8 @@
     "mathcomps-special-school_a": {
       "shortName": "School round A warm-up",
       "fullName": "School round A warm-up",
-      "urlSlug": "school-round-a-warm-up"
+      "urlSlug": "school-round-a-warm-up",
+      "description": "A mock of the Mathematical Olympiad's school round A, the week before the real one on 8 December. The problems are at its level, Mathilda gives you feedback during the competition, and a person awards the points, as in the other competitions."
     },
     "mathcomps-elementary": {
       "shortName": "Elementary",

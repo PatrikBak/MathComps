@@ -113,6 +113,11 @@ public sealed class HostedCompetitionService(
                 group.Id,
                 group.Slug,
                 HostedGroupName.Of(localization, group.Rounds.FirstOrDefault()?.CompetitionPath),
+                // What it is, off its first round's node, since every round of it runs under a node saying the same
+                group.Rounds.FirstOrDefault()?.CompetitionPath is { } firstRoundPath
+                    ? localization.GetNodeDescriptions(firstRoundPath)
+                    // A group with no rounds yet has no node to read it from
+                    : null,
                 group.ProblemCount,
                 group.ClockMinutes,
                 group.OpensAt,

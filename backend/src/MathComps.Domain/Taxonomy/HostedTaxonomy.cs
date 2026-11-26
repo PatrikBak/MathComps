@@ -17,9 +17,10 @@ public static class HostedTaxonomy
     /// a single competition needs no level to tell it apart, so its node may instead sit outside the category
     /// nodes: the practice one right under the root, every other under <c>special</c>
     /// (<c>mathcomps-special-school_a</c>). A group is called by its node's short name, so such a node needs a
-    /// name that reads on its own. A group node is shared across every season it runs in, so its registered name
-    /// has to be season-independent: <c>November</c>, never <c>November 2026</c>. Which year a group ran in is its
-    /// round's season, and a name carrying a year would be wrong for every season but the first.
+    /// name that reads on its own. One under <c>special</c> also says what the contest is, in a description. A
+    /// group node is shared across every season it runs in, so its registered name has to be season-independent:
+    /// <c>November</c>, never <c>November 2026</c>. Which year a group ran in is its round's season, and a name
+    /// carrying a year would be wrong for every season but the first.
     /// </remarks>
     public const string RootSlug = "mathcomps";
 

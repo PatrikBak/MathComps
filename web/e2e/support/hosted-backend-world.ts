@@ -40,6 +40,13 @@ export const COMPETITION_SLUG = 'open-intermediate'
 /** A competition of the group that has not opened yet, which nobody ordinary can enter or read. */
 export const UPCOMING_COMPETITION_SLUG = 'upcoming-intermediate'
 
+/** What the group named for the national round says its contest is. */
+export const PREPARATION_DESCRIPTION: LocalizedString = {
+  sk: 'Celoštátne kolo nanečisto.',
+  cs: 'Celostátní kolo nanečisto.',
+  en: 'A mock national round.',
+}
+
 /**
  * Names one competition in every language.
  *
@@ -269,6 +276,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
     id: 'practice',
     slug: 'practice',
     name: { sk: 'Skúšobná súťaž', cs: 'Zkušební soutěž', en: 'Practice competition' },
+    description: null,
     problemCount: PROBLEMS_PER_COMPETITION,
     clockMinutes: PRACTICE_CLOCK_MINUTES,
     opensAt: new Date(now - 200 * DAY_MS).toISOString(),
@@ -286,6 +294,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
       cs: 'Příprava na celostátní kolo A',
       en: 'National round A preparation',
     },
+    description: PREPARATION_DESCRIPTION,
     problemCount: PROBLEMS_PER_COMPETITION,
     clockMinutes: CLOCK_MINUTES,
     opensAt: new Date(preparationOpensAt).toISOString(),
@@ -299,6 +308,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
     id: 'upcoming',
     slug: 'upcoming',
     name: monthNames(upcomingOpensAt),
+    description: null,
     problemCount: PROBLEMS_PER_COMPETITION,
     clockMinutes: CLOCK_MINUTES,
     opensAt: new Date(upcomingOpensAt).toISOString(),
@@ -317,6 +327,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
     id: 'open',
     slug: 'open',
     name: monthNames(openOpensAt),
+    description: null,
     problemCount: PROBLEMS_PER_COMPETITION,
     clockMinutes: CLOCK_MINUTES,
     opensAt: new Date(openOpensAt).toISOString(),
@@ -338,6 +349,11 @@ export function buildView(state: HostedState): HostedCompetitionsView {
       cs: 'Příprava na krajské kolo A',
       en: 'Regional round A preparation',
     },
+    description: {
+      sk: 'Krajské kolo nanečisto.',
+      cs: 'Krajské kolo nanečisto.',
+      en: 'A mock regional round.',
+    },
     problemCount: PROBLEMS_PER_COMPETITION,
     clockMinutes: CLOCK_MINUTES,
     opensAt: new Date(openSpecialOpensAt).toISOString(),
@@ -354,6 +370,11 @@ export function buildView(state: HostedState): HostedCompetitionsView {
       sk: 'Príprava na školské kolo A',
       cs: 'Příprava na školní kolo A',
       en: 'School round A preparation',
+    },
+    description: {
+      sk: 'Školské kolo nanečisto.',
+      cs: 'Školní kolo nanečisto.',
+      en: 'A mock school round.',
     },
     problemCount: PROBLEMS_PER_COMPETITION,
     clockMinutes: CLOCK_MINUTES,
@@ -380,6 +401,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
       id,
       slug: id,
       name: monthNames(opensAt),
+      description: null,
       problemCount: PROBLEMS_PER_COMPETITION,
       clockMinutes: CLOCK_MINUTES,
       opensAt: new Date(opensAt).toISOString(),

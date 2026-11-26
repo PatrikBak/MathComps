@@ -382,4 +382,52 @@ public class MetadataLocalizationServiceTests
         Assert.Null(_service.FindNodePathByUrlSlug("nothing-is-called-this"));
 
     #endregion
+
+    #region Descriptions
+
+    /// <summary>
+    /// Every special competition says what it is in every language. Its name alone, like "Príprava na školské A",
+    /// does not say what the contest is for, so one shipped without a description would leave its tab unexplained.
+    /// </summary>
+    [Fact]
+    public void Every_special_competition_is_described_in_every_language()
+    {
+        // The shelf the special competitions sit on, which runs nothing itself and so says nothing
+        const string shelf = "mathcomps-special";
+
+        // Every node below it, at any depth
+        var specials = RealCompetitionPaths()
+            .Where(path => path != shelf && TaxonomySlugs.IsAtOrUnder(path, shelf))
+            .ToList();
+
+        // The shelf holds some, so the sweep below has something to check
+        Assert.NotEmpty(specials);
+
+        // Each one described, in every language the site is read in, by a sentence rather than a blank
+        Assert.All(specials, path =>
+        {
+            // What it says it is
+            var descriptions = _service.GetNodeDescriptions(path);
+
+            // Described at all
+            Assert.NotNull(descriptions);
+
+            // In every language the site is read in
+            Assert.Equal(Enum.GetValues<Language>().Order(), descriptions.Keys.Order());
+
+            // And none of them blank
+            Assert.All(descriptions.Values, description => Assert.False(string.IsNullOrWhiteSpace(description)));
+        });
+    }
+
+    /// <summary>
+    /// A node described in one language is described in all of them. Reading a description throws on the language
+    /// left out, and the competitions page reads every group's, so a gap here would take the whole page down.
+    /// </summary>
+    [Fact]
+    public void A_description_is_never_written_in_only_some_languages() =>
+        // Every node reads back without throwing, described in full or not at all
+        Assert.All(RealCompetitionPaths(), path => _service.GetNodeDescriptions(path));
+
+    #endregion
 }

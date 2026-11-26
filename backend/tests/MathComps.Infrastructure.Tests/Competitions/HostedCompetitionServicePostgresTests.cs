@@ -94,6 +94,11 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     private const string UnfilledSlug = "elementary-september-2024";
 
     /// <summary>
+    /// What addresses the round of the special competition, the one whose node says what it is.
+    /// </summary>
+    private const string SpecialSlug = "school-round-a-warm-up-2026";
+
+    /// <summary>
     /// The round of the open group's harder category, which is what the rows are seeded and read back under.
     /// </summary>
     private readonly Guid _advancedRoundId = Guid.CreateVersion7();
@@ -128,6 +133,11 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     /// announces two.
     /// </summary>
     private readonly Guid _unfilledRoundId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// The round of the special competition's group, announced and not open yet.
+    /// </summary>
+    private readonly Guid _specialRoundId = Guid.CreateVersion7();
 
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
@@ -1457,6 +1467,38 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     });
 
     /// <summary>
+    /// Verifies that a group says what it is when the node its round runs under does, and says nothing when the
+    /// node says nothing beyond its name, as a month does.
+    /// </summary>
+    [Fact]
+    public Task A_group_reads_its_description_off_its_rounds() => RunTestAsync(async service =>
+    {
+        // Every group on the page
+        var groups = (await service.GetViewAsync(_studentId)).Groups;
+
+        // The group the special competition runs in
+        var special = Assert.Single(
+            groups,
+            candidate => candidate.Competitions.Any(
+                competition => competition.Slug.Values.Contains(SpecialSlug)));
+
+        // The special group says what it is
+        Assert.NotNull(special.Description);
+
+        // In every language the site is read in
+        Assert.Equal(Enum.GetValues<Language>().Order(), special.Description.Keys.Order());
+
+        // The month the two categories run in
+        var month = Assert.Single(
+            groups,
+            candidate => candidate.Competitions.Any(
+                competition => competition.Slug.Values.Contains(AdvancedSlug)));
+
+        // The month says nothing beyond its name
+        Assert.Null(month.Description);
+    });
+
+    /// <summary>
     /// Verifies that what a student says about their own solution reads back on the problem it was about, and
     /// that saying it again revises the one claim rather than standing beside the first.
     /// </summary>
@@ -1991,6 +2033,14 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         SeedRound(
             context, season, unfilled, _unfilledRoundId, "mathcomps-elementary-september", closesAt, problems: 0,
             seasonYear: 2024);
+
+        // A special competition's group, announced and not open yet, whose node says what it is.
+        var special = Group(
+            context, "mc-special", DateTimeOffset.UtcNow.AddDays(40), DateTimeOffset.UtcNow.AddDays(47),
+            allowsReentry: false, problemCount: 1);
+        SeedRound(
+            context, season, special, _specialRoundId, "mathcomps-special-school_a",
+            DateTimeOffset.UtcNow.AddDays(47), problems: 1);
 
         // A group whose rounds have not been applied yet, which is what one looks like between the draft that
         // raises them and the problems that fill them.

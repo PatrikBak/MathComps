@@ -112,6 +112,7 @@ function groupOf(overrides: Partial<HostedCompetitionGroup> = {}): HostedCompeti
     problemCount: 3,
     clockMinutes: CLOCK_MINUTES,
     name: { sk: 'September 2026', cs: 'Září 2026', en: 'September 2026' },
+    description: null,
     opensAt: new Date(NOW - 6 * 24 * HOUR_MS).toISOString(),
     closesAt: new Date(NOW + 7 * 24 * HOUR_MS).toISOString(),
     competitions: [competitionOf()],

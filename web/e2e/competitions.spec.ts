@@ -1,7 +1,12 @@
 import { addressParams } from './support/address'
 import { BACKEND_ORIGIN } from './support/backend-routes'
 import { areaCopy, areaPath, authCopy, LIST_PATH, showRoundHolding } from './support/competitions'
-import { installHostedBackend, PROBLEM_COUNT, problemIdOf } from './support/hosted-backend'
+import {
+  installHostedBackend,
+  PREPARATION_DESCRIPTION,
+  PROBLEM_COUNT,
+  problemIdOf,
+} from './support/hosted-backend'
 import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 
 /** A competition that closed a month ago, whose problems the list offers to anybody. */
@@ -198,6 +203,22 @@ test.describe('the competitions list', () => {
         .getByRole('tabpanel')
         .filter({ visible: true })
         .getByText(areaCopy.closedLabel, { exact: true })
+    ).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+  })
+
+  test('says what a round named in its own right is, under its terms', async ({ page }) => {
+    // The competitions surface, read without a session
+    await installHostedBackend(page, 'first-entry')
+
+    // The round named for the national round, by the address naming it
+    await page.goto(`${LIST_PATH}?round=preparation`)
+
+    // The round's panel says what its contest is
+    await expect(
+      page
+        .getByRole('tabpanel')
+        .filter({ visible: true })
+        .getByText(PREPARATION_DESCRIPTION.en, { exact: true })
     ).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
   })
 
