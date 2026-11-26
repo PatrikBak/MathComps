@@ -13,7 +13,7 @@ namespace MathComps.Infrastructure.Services.Competitions;
 /// <param name="ClockMinutes"><inheritdoc cref="HostedGroup.ClockMinutes" path="/summary"/></param>
 /// <param name="AllowsReentry"><inheritdoc cref="HostedGroup.AllowsReentry" path="/summary"/></param>
 /// <param name="ProblemCount"><inheritdoc cref="HostedGroup.ProblemCount" path="/summary"/></param>
-/// <param name="Rounds">The rounds it runs, one per category.</param>
+/// <param name="Rounds"><inheritdoc cref="HostedGroup.Rounds" path="/summary"/></param>
 public record HostedGroupManifest(
     string Slug,
     DateTimeOffset OpensAt,

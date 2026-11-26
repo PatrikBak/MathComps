@@ -1,8 +1,8 @@
 namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
-/// One batch of competitions the site runs itself: the rounds that open and close together, one per category.
-/// A group is what a student enters and what their clock is set by.
+/// One batch of competitions the site runs itself: the rounds that open and close together, one per category or a
+/// single one at no level. A group is what a student enters and what their clock is set by.
 /// </summary>
 /// <remarks>
 /// The group carries no name of its own. Its rounds hang off competition nodes that already have a localized
@@ -57,7 +57,7 @@ public class HostedGroup
     public required int ProblemCount { get; set; }
 
     /// <summary>
-    /// The rounds the group runs, one per category.
+    /// The rounds the group runs, one per category or a single one at no level.
     /// </summary>
     public ICollection<Round> Rounds { get; } = [];
 }

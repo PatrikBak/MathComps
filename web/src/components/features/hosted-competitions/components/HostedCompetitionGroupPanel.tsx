@@ -317,8 +317,8 @@ function CompetitionRow({
     // Laid out alike whatever it says. On a narrow screen it is two columns, each stacked: the category over
     // where the student stands on the left, the presses under each other on the right. On a wider one it
     // takes the panel's three shared columns, category, standing and presses, so the rows line up. The row
-    // names which competition it is about, a category badge being absent on the practice one and worded on
-    // the rest
+    // names which competition it is about by its category badge, which every competition of a group of
+    // several carries
     <div
       className="flex items-center gap-x-4 px-4 py-3 text-sm sm:col-span-3 sm:grid sm:grid-cols-subgrid sm:px-6"
       data-competition-slug={competition.slug[locale]}

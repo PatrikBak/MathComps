@@ -870,8 +870,8 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
             e.ToTable(t => t.HasCheckConstraint(
                 "ck_hosted_group_problem_count_positive", "\"problem_count\" > 0"));
 
-            // The rounds the group runs, one per category. Restricted: a group whose rounds still hold problems
-            // is not something a delete should quietly take with it.
+            // The rounds the group runs. Restricted: a group whose rounds still hold problems is not something a
+            // delete should quietly take with it.
             e.HasMany(group => group.Rounds)
              .WithOne(round => round.HostedGroup)
              .HasForeignKey(round => round.HostedGroupId)

@@ -227,6 +227,37 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// Verifies that a round at no level is refused in a group of several. The level is what tells a group's
+    /// competitions apart, and everything reading one takes a missing level to mean the group's only
+    /// competition, so a second round beside it would be one nobody could address.
+    /// </summary>
+    [Fact]
+    public Task A_round_at_no_level_beside_others_is_refused() => RunTestAsync(async service =>
+    {
+        // A level's round, and one sitting outside the levels in the same group
+        await Assert.ThrowsAsync<HostedGroupManifestException>(
+            () => service.DeclareAsync(Manifest("mathcomps-advanced-september", "mathcomps-practice")));
+
+        // And nothing was written
+        Assert.Equal(0, await QueryValueAsync(context => context.HostedGroups.CountAsync()));
+    });
+
+    /// <summary>
+    /// Verifies that two rounds at one level are refused in a group of several. A board and a grader's link name
+    /// a competition by its level, so the second round would be one nobody could address.
+    /// </summary>
+    [Fact]
+    public Task Two_rounds_at_one_level_are_refused() => RunTestAsync(async service =>
+    {
+        // Two months' rounds of one level in the same group
+        await Assert.ThrowsAsync<HostedGroupManifestException>(
+            () => service.DeclareAsync(Manifest("mathcomps-intermediate-october", "mathcomps-intermediate-november")));
+
+        // And nothing was written
+        Assert.Equal(0, await QueryValueAsync(context => context.HostedGroups.CountAsync()));
+    });
+
+    /// <summary>
     /// Verifies that a round whose embargo disagrees with the group's closing instant is refused. The embargo is
     /// what actually holds the problems back, so a group promising a date its rounds do not keep would publish
     /// them early or late with nothing saying so.
@@ -574,7 +605,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     {
         // One category authored, two still to come
         var outcome = await service.DeclareAsync(Manifest(
-            "mathcomps-advanced-september", "mathcomps-intermediate-october", "mathcomps-intermediate-november"));
+            "mathcomps-advanced-september", "mathcomps-intermediate-october", "mathcomps-elementary-november"));
 
         // All three run in the group
         Assert.Equal(3, outcome.RoundsLinked);

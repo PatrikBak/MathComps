@@ -291,7 +291,8 @@ public sealed class HostedGroupService(
 
     /// <summary>
     /// Refuses a manifest that cannot be carried out whatever the database holds: a field the document left out,
-    /// a window that closes before it opens, or a round naming a competition the site does not host.
+    /// a window that closes before it opens, a round naming a competition the site does not host, or a round
+    /// beside others without a level of its own.
     /// </summary>
     /// <remarks>
     /// A field the JSON never named arrives as a blank rather than as a complaint, so what a group cannot run
@@ -345,6 +346,21 @@ public sealed class HostedGroupService(
                 throw new HostedGroupManifestException(
                     $"'{reference.CompetitionPath}' carries no seasonYear.");
         }
+
+        // The first round of a group of several without a level of its own: one at no level, or one at a level
+        // another round runs at too. The level is what tells a group's competitions apart, so each needs its own,
+        // and only a group's sole competition may go without one.
+        var roundWithoutOwnLevel = manifest.Rounds.Count > 1
+            ? manifest.Rounds
+                .GroupBy(reference => HostedTaxonomy.CategoryOf(reference.CompetitionPath))
+                .FirstOrDefault(level => level.Key is null || level.Count() > 1)
+                ?.First()
+            : null;
+
+        // A competition nothing could tell apart from its siblings.
+        if (roundWithoutOwnLevel is not null)
+            throw new HostedGroupManifestException(
+                $"'{roundWithoutOwnLevel.CompetitionPath}' needs a level no other round of the group runs at.");
     }
 
     /// <summary>

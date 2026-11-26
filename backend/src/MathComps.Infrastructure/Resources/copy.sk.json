@@ -12,6 +12,7 @@
     "greetingWithoutName": "Ahoj,",
     "intro": "v komentároch k hodnoteniu máš nové správy:",
     "competition": "{competition} ({category}, {season})",
+    "competitionAtNoLevel": "{competition} ({season})",
     "problem": "Úloha {number}",
     "messages": "{count, plural, one {# nová správa} few {# nové správy} other {# nových správ}}",
     "messagesFrom": "{student}: {messages}",

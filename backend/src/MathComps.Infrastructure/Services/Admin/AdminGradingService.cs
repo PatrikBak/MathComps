@@ -129,11 +129,8 @@ public class AdminGradingService(
                     // The competition.
                     return new GradingCompetitionDto(
                         round.Id,
-                        // A group that closes runs its rounds at the levels, so a round outside them is not one
-                        // this site set up.
-                        HostedTaxonomy.CategoryOf(round.CompetitionPath)
-                            ?? throw new InvalidOperationException(
-                                $"Round {round.Id} of a graded group has no level."),
+                        // The level, or none for a group's sole competition, the only kind declared without one
+                        HostedTaxonomy.CategoryOf(round.CompetitionPath),
                         round.Problems,
                         // The round's entrants who spoke while their entry counted, each with where they compete
                         // from, where they were in school when the group opened, when their clock started, when

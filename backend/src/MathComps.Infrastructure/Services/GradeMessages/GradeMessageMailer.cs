@@ -243,6 +243,9 @@ public sealed class GradeMessageMailer(
         // The site's addresses in the recipient's language
         var links = new SiteLinks(siteSettings.Value.Url, language);
 
+        // The level the competition runs at, or none for a group's sole competition
+        var category = HostedTaxonomy.CategoryOf(conversation.CompetitionPath);
+
         // The link from the recipient's side: the student's competition page, or a grader's board
         var link = recipientId == conversation.StudentId
             ? links.StudentThread(
@@ -250,18 +253,12 @@ public sealed class GradeMessageMailer(
                     localization.GetNodeUrlSlugs(conversation.CompetitionPath)[language],
                     conversation.SeasonStartYear),
                 conversation.ProblemId)
-            : links.GraderThread(
-                conversation.GroupSlug,
-                HostedTaxonomy.CategoryOf(conversation.CompetitionPath)
-                    ?? throw new InvalidOperationException(
-                        $"Competition {conversation.CompetitionPath} runs at no level, so no board grades it."),
-                conversation.StudentId,
-                conversation.ProblemId);
+            : links.GraderThread(conversation.GroupSlug, category, conversation.StudentId, conversation.ProblemId);
 
-        // The news, naming the student to a grader
+        // The news, naming the level where there is one and the student to a grader
         return new GradeThreadNews(
             CompetitionName: localization.GetNodeShortName(language, conversation.CompetitionPath),
-            CategoryName: localization.GetNodeShortName(language, conversation.CategoryPath),
+            CategoryName: category is null ? null : localization.GetNodeShortName(language, conversation.CategoryPath),
             SeasonStartYear: conversation.SeasonStartYear,
             ProblemNumber: conversation.ProblemNumber,
             Student: recipientId == conversation.StudentId ? null : new GradeThreadStudent(conversation.StudentName),
@@ -280,7 +277,9 @@ public sealed class GradeMessageMailer(
     /// <param name="ProblemNumber"><inheritdoc cref="Problem.Number" path="/summary"/></param>
     /// <param name="GroupSlug">What addresses the group the student entered.</param>
     /// <param name="CompetitionPath">The path of the competition the student's round ran under.</param>
-    /// <param name="CategoryPath">The path of the level the student's round ran at.</param>
+    /// <param name="CategoryPath">
+    /// The path of the node the student's competition hangs off, which is its level where it runs at one.
+    /// </param>
     /// <param name="SeasonStartYear"><inheritdoc cref="Season.StartYear" path="/summary"/></param>
     private sealed record NoticedMessage(
         DateTimeOffset CreatedAt,
