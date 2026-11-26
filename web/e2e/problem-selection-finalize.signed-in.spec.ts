@@ -1,11 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 
 import { detailQuery } from '@/components/features/problem-selection/model/selection-routes'
-import type {
-  Board,
-  Cycle,
-  Proposal,
-} from '@/components/features/problem-selection/model/selection-types'
+import type { Board, Proposal } from '@/components/features/problem-selection/model/selection-types'
 
 import messages from '../messages/en.json'
 import { createAnswerGate } from './support/answer-gate'
@@ -13,9 +9,10 @@ import { recordWrites } from './support/backend-routes'
 import { SELECTION_PATH } from './support/competitions'
 import {
   actionsButton,
+  boardMenu,
   boardPanel,
   cardOf,
-  DECEMBER,
+  cycleDate,
   DRAFT_BOARD,
   FIRST,
   FULL_DRAFT,
@@ -42,8 +39,8 @@ import {
   slotOf,
   statusLine,
   stubSelection,
+  untilSelectionReadAgain,
   USED,
-  WINTER,
 } from './support/problem-selection'
 import { expect, SETTLE_TIMEOUT_MS, test } from './support/test'
 import { recordNotices } from './support/watchers'
@@ -97,7 +94,7 @@ function finalizeButton(page: Page): Locator {
 }
 
 /**
- * The dialog asking which cycle's rounds a board fills.
+ * The dialog saying which cycle's rounds a board fills.
  *
  * @param page - The page.
  * @param board - The board being finalized.
@@ -110,20 +107,7 @@ function finalizeDialog(page: Page, board: Board): Locator {
 }
 
 /**
- * One cycle on offer in the finalize dialog.
- *
- * @param dialog - The dialog.
- * @param cycle - The cycle.
- *
- * @returns The cycle's radio.
- */
-function cycleOption(dialog: Locator, cycle: Cycle): Locator {
-  // The radio named first by the cycle, then by anything keeping the papers out of it and the day it opens
-  return dialog.getByRole('radio', { name: new RegExp(`^${cycle.name}`) })
-}
-
-/**
- * Opens the finalize dialog for the board on screen, and waits until its choice of cycles is drawn.
+ * Opens the finalize dialog for the board on screen, and waits until its Finalize button is drawn.
  *
  * @param page - The page.
  * @param board - The board on screen.
@@ -137,7 +121,7 @@ async function openFinalize(page: Page, board: Board): Promise<Locator> {
   // The dialog
   const dialog = finalizeDialog(page, board)
 
-  // Once its choice is drawn
+  // Once its Finalize button is drawn
   await expect(dialog.getByRole('button', { name: selectionCopy.finalize.confirm })).toBeVisible()
 
   // Handed back for the test to go on in
@@ -145,7 +129,7 @@ async function openFinalize(page: Page, board: Board): Promise<Locator> {
 }
 
 /**
- * Presses the finalize dialog's own Finalize, which sends the board into the cycle picked.
+ * Presses the finalize dialog's own Finalize, which sends the board into its cycle.
  *
  * @param dialog - The dialog.
  */
@@ -811,9 +795,10 @@ test.describe('finalizing a board', () => {
     await expect(finalizeButton(page)).not.toHaveAttribute('aria-disabled', 'true')
   })
 
-  test('offers no Finalize on a board with a paper no round takes', async ({ page }) => {
-    // A reviewer whose first draft's papers all go into rounds, and whose later one carries a spare C paper, which
-    // no hosted round takes
+  test("offers no Finalize on a draft that can't be finalized, which still takes changes", async ({
+    page,
+  }) => {
+    // A reviewer whose first draft can be finalized, and whose later one can't
     await stubSelection(page, 'selection')
 
     // The pool, the first draft on screen
@@ -827,16 +812,30 @@ test.describe('finalizing a board', () => {
 
     // Offering none
     await expect(finalizeButton(page)).toHaveCount(0)
+
+    // Though naming the round it picks for, and the day that opens
+    await expect(statusLine(page, LATER_DRAFT)).toBeVisible()
+
+    // Its first elementary slot, hovered so its actions show
+    await slotOf(page, 'E1').hover()
+
+    // Still offering to send its problem back to the pool
+    await expect(
+      slotOf(page, 'E1').getByRole('button', { name: selectionCopy.board.backToPool, exact: true })
+    ).toBeVisible()
   })
 
-  test('sends the board into the cycle picked, which takes its problems out of the pool and off every other draft', async ({
+  test('sends the board into its cycle, which takes its problems out of the pool and off every other draft', async ({
     page,
   }) => {
-    // A reviewer whose first draft is full of ready problems, and fits two cycles
-    await stubSelection(page, 'winterOnOffer')
+    // A reviewer whose first draft is full of ready problems, picking for November's cycle
+    await stubSelection(page, 'fullDraft')
 
     // Every finalization the page sends
     const writes = recordWrites(page, isFinalization)
+
+    // Every notice the page raises
+    const notices = await recordNotices(page)
 
     // The pool
     await openPool(page)
@@ -844,47 +843,27 @@ test.describe('finalizing a board', () => {
     // The finalize dialog
     const dialog = await openFinalize(page, FULL_DRAFT)
 
-    // Offering the cycles whose rounds the papers fit, the sooner picked, and the one they don't fit, with why
-    await expect(cycleOption(dialog, NOVEMBER)).toBeChecked()
-    await expect(cycleOption(dialog, WINTER)).toBeEnabled()
-    await expect(cycleOption(dialog, DECEMBER)).toBeDisabled()
+    // Naming the cycle the board's problems go to, and the day it opens
     await expect(dialog).toContainText(
-      [
-        selectionText('finalize.wrongSize', { paper: 'Elementary', slots: 1, count: 3 }),
-        selectionText('finalize.noPaper', { category: categoryCopy.intermediate }),
-        selectionText('finalize.noPaper', { category: categoryCopy.advanced }),
-      ].join('; ')
+      selectionText('finalize.intro', { cycle: NOVEMBER.name, date: cycleDate(NOVEMBER) })
     )
 
-    // The later one, picked
-    await cycleOption(dialog, WINTER).check()
-
-    // Sent into Winter
+    // Sent into November
     await confirmFinalize(dialog)
 
-    // The board as Winter's rounds take it
-    const finalized: Board = {
-      ...FULL_DRAFT,
-      finalization: { cycleName: WINTER.name, opensAt: WINTER.opensAt, hasOpened: false },
-    }
-
     // The board in its rounds
-    await expect(statusLine(page, finalized)).toBeVisible()
+    await expect(statusLine(page, FULL_DRAFT_FINALIZED)).toBeVisible()
 
     // The dialog gone, the focus on the line saying where the board went
     await expect(finalizeDialog(page, FULL_DRAFT)).toHaveCount(0)
-    await expect(statusLine(page, finalized)).toBeFocused()
+    await expect(statusLine(page, FULL_DRAFT_FINALIZED)).toBeFocused()
 
     // And no way to finalize it again
     await expect(finalizeButton(page)).toHaveCount(0)
 
-    // Sent once, naming the cycle picked
-    expect(writes().map((write) => [write.method(), write.url(), write.postDataJSON()])).toEqual([
-      [
-        'POST',
-        `${SELECTION_ENDPOINT}/boards/${FULL_DRAFT.id}/finalization`,
-        { cycleId: WINTER.id },
-      ],
+    // Sent once, with nothing to say beyond the board
+    expect(writes().map((write) => [write.method(), write.url(), write.postData()])).toEqual([
+      ['POST', `${SELECTION_ENDPOINT}/boards/${FULL_DRAFT.id}/finalization`, null],
     ])
 
     // The board's problem gone from the pool
@@ -896,6 +875,46 @@ test.describe('finalizing a board', () => {
 
     // Its slot that held the problem standing empty
     await expect(slotOf(page, 'E1')).toContainText(selectionCopy.board.empty)
+
+    // And no notice raised, the reviewer's own finalize being what took the Finalize away
+    expect(notices()).toEqual([])
+  })
+
+  test('closes once a read finds the board no longer finalizable, saying why, the focus on the board switch', async ({
+    page,
+  }) => {
+    // The clock under the test's hand, so the next read comes when the test says
+    await page.clock.install()
+
+    // A reviewer whose first draft is full of ready problems
+    const answerSelectionWith = await stubSelection(page, 'fullDraft')
+
+    // Every notice the page raises
+    const notices = await recordNotices(page)
+
+    // The pool
+    await openPool(page)
+
+    // The finalize dialog, open
+    await openFinalize(page, FULL_DRAFT)
+
+    // The cycle the board picks for filled by an import meanwhile
+    answerSelectionWith('novemberFilled')
+
+    // The selection read again on its own, the dialog still open
+    await untilSelectionReadAgain(page)
+
+    // The reader told why
+    await expect
+      .poll(notices)
+      .toEqual([selectionText('finalize.notTaken', { cycle: NOVEMBER.name })])
+
+    // The dialog closed
+    await expect(finalizeDialog(page, FULL_DRAFT)).toHaveCount(0)
+
+    // The board offering no Finalize, the focus on the switch to another board
+    await expect(finalizeButton(page)).toHaveCount(0)
+    await expect(boardMenu(page, FULL_DRAFT)).toBeFocused()
   })
 
   test('keeps the dialog open while the finalize is out, whatever the reader presses', async ({
@@ -928,12 +947,11 @@ test.describe('finalizing a board', () => {
     // And every read after the finalize
     const releaseReads = await holdReads(page)
 
-    // Sent into the cycle picked
+    // Sent into its cycle
     await confirmFinalize(dialog)
 
-    // Its Cancel unavailable while the finalize is out, and the cycles fixed as picked
+    // Its Cancel unavailable while the finalize is out
     await expect(dialog.getByRole('button', { name: messages.ui.actions.cancel })).toBeDisabled()
-    await expect(cycleOption(dialog, NOVEMBER)).toBeDisabled()
 
     // Escape pressed
     await page.keyboard.press('Escape')
@@ -986,7 +1004,7 @@ test.describe('a finalize the backend refuses', () => {
     // The finalize dialog
     const dialog = await openFinalize(page, FULL_DRAFT)
 
-    // Sent into the cycle picked all the same
+    // Sent into its cycle all the same
     await confirmFinalize(dialog)
 
     // Refused, the reader told why
@@ -1008,7 +1026,7 @@ test.describe('a finalize the backend refuses', () => {
     expect(notices()).toEqual([refusalCopy.SelectionProblemIncomplete])
   })
 
-  test('closes on rounds filled meanwhile, which then leave the cycles on offer', async ({
+  test('closes on rounds filled meanwhile, the board then offering no Finalize and the focus on the board switch', async ({
     page,
   }) => {
     // A reviewer whose first draft is full of ready problems
@@ -1020,14 +1038,14 @@ test.describe('a finalize the backend refuses', () => {
     // The pool
     await openPool(page)
 
-    // The cycle the board fits filled by an import meanwhile, which the page has not read
+    // The cycle the board picks for filled by an import meanwhile, which the page has not read
     answerSelectionWith('novemberFilled')
 
     // The finalize dialog
-    const firstDialog = await openFinalize(page, FULL_DRAFT)
+    const dialog = await openFinalize(page, FULL_DRAFT)
 
     // Sent into November all the same
-    await confirmFinalize(firstDialog)
+    await confirmFinalize(dialog)
 
     // Refused, the reader told why
     await expect.poll(notices).toEqual([refusalCopy.SelectionFinalizeBlocked])
@@ -1035,17 +1053,9 @@ test.describe('a finalize the backend refuses', () => {
     // The dialog closed
     await expect(finalizeDialog(page, FULL_DRAFT)).toHaveCount(0)
 
-    // The finalize dialog, opened again
-    const dialog = await openFinalize(page, FULL_DRAFT)
-
-    // Offering only the cycle the papers don't fit
-    await expect(dialog.getByRole('radio')).toHaveCount(1)
-    await expect(cycleOption(dialog, DECEMBER)).toBeDisabled()
-
-    // With nothing to send the board into
-    await expect(
-      dialog.getByRole('button', { name: selectionCopy.finalize.confirm })
-    ).toBeDisabled()
+    // The board offering no Finalize, and the focus on the switch to another board, the same board still on screen
+    await expect(finalizeButton(page)).toHaveCount(0)
+    await expect(boardMenu(page, FULL_DRAFT)).toBeFocused()
 
     // And no other notice raised
     expect(notices()).toEqual([refusalCopy.SelectionFinalizeBlocked])
@@ -1069,7 +1079,7 @@ test.describe('a finalize the backend refuses', () => {
     // Another reviewer finalizing the board meanwhile, which the page has not read
     answerSelectionWith('fullDraftFinalized')
 
-    // Sent into the cycle picked all the same
+    // Sent into its cycle all the same
     await confirmFinalize(dialog)
 
     // Refused, the reader told why

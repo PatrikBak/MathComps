@@ -1356,7 +1356,8 @@
       "progress": "{filled} of {total}",
       "ready": "Every slot is filled, and every problem has a statement and a solution in all three languages.",
       "replace": "Replace",
-      "status": "{cycle} round, from {date}",
+      "statusDraft": "For the {cycle} round, from {date}",
+      "statusFinalized": "{cycle} round, from {date}",
       "statusOpened": "{cycle} round, since {date}",
       "unfold": "Unfold the board"
     },
@@ -1395,14 +1396,10 @@
     },
     "finalize": {
       "confirm": "Finalize",
-      "intro": "Each paper fills the round of its category in the cycle you pick. The problems leave the pool, and any other draft board holding one of them gets that slot back empty.",
-      "legend": "Fill the rounds of",
-      "noCycles": "No cycle has empty rounds waiting.",
-      "noPaper": "no paper for the {category} round",
-      "noRound": "no round for {paper}",
-      "opens": "opens {date}",
-      "title": "Finalize {board}",
-      "wrongSize": "{paper} has {slots, plural, one {# slot} other {# slots}}, a round takes {count, plural, one {# problem} other {# problems}}"
+      "finalizedElsewhere": "Someone else finalized this board meanwhile.",
+      "intro": "This board's problems go to the {cycle} round, which opens {date}. They leave the pool, and any other draft board holding one of them gets that slot back empty.",
+      "notTaken": "The {cycle} round can no longer take this board: meanwhile it opened, took in other problems, or stopped matching its papers.",
+      "title": "Finalize {board}"
     },
     "goToSelection": "Open in the problem selection",
     "language": {

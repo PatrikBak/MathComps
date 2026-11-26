@@ -1999,6 +1999,10 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("hosted_group_id");
 
+                    b.Property<bool>("IsFinalized")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_finalized");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -2019,7 +2023,10 @@ namespace MathComps.Infrastructure.Migrations
                     b.HasIndex("OrganizationId")
                         .HasDatabaseName("ix_selection_boards_organization_id");
 
-                    b.ToTable("selection_boards", (string)null);
+                    b.ToTable("selection_boards", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_selection_board_finalized_has_group", "NOT \"is_finalized\" OR \"hosted_group_id\" IS NOT NULL");
+                        });
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.SelectionPaper", b =>

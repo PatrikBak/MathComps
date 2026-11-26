@@ -8,7 +8,6 @@ import type {
 import { countAllComments } from '@/components/features/comments/utils/comment-utils'
 import type {
   DiscussionsSeenUpTo,
-  SelectionData,
   SelectionDiscussions,
   SelectionDiscussionsSeen,
 } from '@/components/features/problem-selection/model/selection-types'
@@ -138,9 +137,8 @@ export type AnswerSelectionRead = (route: Route, read: () => unknown) => Promise
  * write that goes through changes.
  * @param seen - How far the reader has seen the discussions, which each mark written changes, and every mark the app
  * wrote.
- * @param held - A function reading what the backend holds right now, which a discussion hangs off.
- * @param shown - A function reading what the selection's read shows right now, whose discussions are all read at
- * once.
+ * @param held - A function reading what the backend holds right now, which a discussion hangs off and whose
+ * discussions are all read at once.
  * @param answer - {@link AnswerSelectionRead}.
  */
 export async function stubSelectionComments(
@@ -148,7 +146,6 @@ export async function stubSelectionComments(
   discussions: Map<string, CommentDto[]>,
   seen: SeenMemory,
   held: () => HeldSelection,
-  shown: () => Pick<SelectionData, 'proposals' | 'boards'>,
   answer: AnswerSelectionRead
 ): Promise<void> {
   // The discussions themselves, each hanging off something the backend holds
@@ -157,12 +154,12 @@ export async function stubSelectionComments(
     holds: (targetType, targetId) => holdsSubject(held(), targetType, targetId),
   })
 
-  // Every discussion of what the selection's read shows, the ones nothing has been said in left out
+  // Every discussion of what the backend holds, the ones nothing has been said in left out
   await page.route(`${BACKEND_ORIGIN}${SELECTION_API_PATH}/comments`, (route) =>
     // Answered as the selection's read is, refused alike
     answer(route, () => {
-      // What the read shows
-      const { proposals, boards } = shown()
+      // What the backend holds
+      const { proposals, boards } = held()
 
       // Who asked, whose own comments and reactions come back under their sign-in's id
       const sender = senderOf(route.request())
@@ -198,12 +195,12 @@ export async function stubSelectionComments(
     })
   )
 
-  // How far the reader has seen every discussion of what the selection's read shows, and the marks written
+  // How far the reader has seen every discussion of what the backend holds, and the marks written
   await page.route(`${BACKEND_ORIGIN}${SELECTION_API_PATH}/comments/seen`, async (route) => {
-    // A function which reads what the read shows, as the ids of each kind of discussion
+    // A function which reads what the backend holds, as the ids of each kind of discussion
     const subjectIds = () => {
-      // The problems and the boards shown
-      const { proposals, boards } = shown()
+      // The problems and the boards held
+      const { proposals, boards } = held()
 
       // Each kind's ids
       return {
@@ -212,8 +209,8 @@ export async function stubSelectionComments(
       } satisfies Record<SelectionThreadType, string[]>
     }
 
-    // A mark written, answered with each discussion marked and its moment, the discussions the read does not show
-    // passed over
+    // A mark written, answered with each discussion marked and its moment, the discussions of what the backend
+    // does not hold passed over
     if (route.request().method() === 'PUT') {
       // What was marked, as the app sent it
       const write = route.request().postDataJSON() as Partial<DiscussionsSeenUpTo>
@@ -236,10 +233,10 @@ export async function stubSelectionComments(
       // The moment the marks are written at
       const now = Date.now()
 
-      // The discussions shown
+      // The discussions held, by kind
       const ids = subjectIds()
 
-      // A function which reads the discussions of one kind named that the read shows, each with its moment held to now
+      // A function which reads the discussions of one kind named that the backend holds, each with its moment held to now
       const markedOf = (
         targetType: SelectionThreadType,
         moments: Record<string, string>
@@ -286,7 +283,7 @@ export async function stubSelectionComments(
 
     // Answered as the selection's read is, refused alike
     return answer(route, () => {
-      // The discussions shown
+      // The discussions held, by kind
       const ids = subjectIds()
 
       // A function which reads how far each discussion of one kind is seen, one nothing has happened in included

@@ -3,7 +3,6 @@ import type { ApiResult } from '@/types/api'
 
 import type {
   DiscussionsSeenUpTo,
-  FinalizationWrite,
   MoveWrite,
   Organization,
   PlacementWrite,
@@ -171,23 +170,20 @@ export function moveSlot(
 }
 
 /**
- * Finalizes a board into a cycle's rounds.
+ * Finalizes a board into the rounds of the cycle it picks for.
  *
  * @param apiCall - The authenticated API caller.
  * @param organization - The slug of the organization whose selection holds the board.
- * @param finalization - The board and the cycle it goes into.
+ * @param boardId - The board.
  *
  * @returns Success, or an error.
  */
 export function finalizeBoard(
   apiCall: ApiCaller,
   organization: string,
-  { boardId, cycleId }: FinalizationWrite
+  boardId: string
 ): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getFinalizationUrl(organization, boardId), {
-    method: 'POST',
-    body: JSON.stringify({ cycleId }),
-  })
+  return apiCall<void>(() => getFinalizationUrl(organization, boardId), { method: 'POST' })
 }
 
 /**

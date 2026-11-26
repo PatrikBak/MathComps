@@ -1356,7 +1356,8 @@
       "progress": "{filled} z {total}",
       "ready": "Všetky miesta sú obsadené a každá úloha má zadanie aj riešenie vo všetkých troch jazykoch.",
       "replace": "Vymeniť",
-      "status": "Kolo: {cycle}, od {date}",
+      "statusDraft": "Pre kolo {cycle}, od {date}",
+      "statusFinalized": "Kolo: {cycle}, od {date}",
       "statusOpened": "Kolo: {cycle}, beží od {date}",
       "unfold": "Rozbaliť zostavu"
     },
@@ -1395,14 +1396,10 @@
     },
     "finalize": {
       "confirm": "Uzavrieť",
-      "intro": "Kolá, ktoré vyberieš, dostanú úlohy z tejto zostavy: každá sada pôjde do kola svojej kategórie. Úlohy zmiznú zo zásobníka. Ak niektorú z nich má aj iná rozpracovaná zostava, jej miesto sa tam uvoľní.",
-      "legend": "Vyber kolá",
-      "noCycles": "Žiadne prázdne kolá nečakajú na úlohy.",
-      "noPaper": "kategória {category} nemá sadu",
-      "noRound": "sada {paper} nemá kolo",
-      "opens": "otvára sa {date}",
-      "title": "Uzavrieť zostavu: {board}",
-      "wrongSize": "sada {paper} má {slots, plural, one {# miesto} few {# miesta} other {# miest}}, kolo má {count, plural, one {# úlohu} few {# úlohy} other {# úloh}}"
+      "finalizedElsewhere": "Túto zostavu medzitým uzavrel niekto iný.",
+      "intro": "Úlohy z tejto zostavy dostane kolo {cycle}, ktoré sa otvára {date}. Úlohy zmiznú zo zásobníka. Ak niektorú z nich má aj iná rozpracovaná zostava, jej miesto sa tam uvoľní.",
+      "notTaken": "Kolo {cycle} už túto zostavu nemôže prijať: medzitým sa otvorilo, dostalo iné úlohy alebo mu prestali sedieť jej sady.",
+      "title": "Uzavrieť zostavu: {board}"
     },
     "goToSelection": "Otvoriť vo výbere úloh",
     "language": {

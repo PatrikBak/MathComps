@@ -15,10 +15,11 @@ namespace MathComps.Infrastructure.Tests.Selection;
 /// </summary>
 /// <remarks>
 /// The seed is sixteen of MathComps' proposals, the October and November groups not yet open with empty rounds, a
-/// September group already open, the full October board and a part-filled spare one sharing problem 1 with it.
-/// Problem 15 is written in English alone, and problem 16 sits in a September round rather than in the pool. The
-/// olympiad has one proposal of its own in the same pool, on a board of its own. Three accounts sit on MathComps'
-/// list: a lead of every one of its categories, a lead of the elementary one alone, and a member leading none.
+/// September group already open, the full October board picking for October and a part-filled spare one picking
+/// for November, sharing problem 1 with it. Problem 15 is written in English alone, and problem 16 sits in a
+/// September round rather than in the pool. The olympiad has one proposal of its own in the same pool, on a board
+/// of its own picking for no group. Three accounts sit on MathComps' list: a lead of every one of its categories,
+/// a lead of the elementary one alone, and a member leading none.
 /// </remarks>
 /// <typeparam name="TService">The service the derived suite tests.</typeparam>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
@@ -56,7 +57,7 @@ public abstract class SelectionBoardPostgresTestBase<TService>(PostgresContainer
     protected Guid OlympiadProposalId { get; private set; }
 
     /// <summary>
-    /// The olympiad's board, its one paper holding the olympiad's proposal.
+    /// The olympiad's board, picking for no group, its one paper holding the olympiad's proposal.
     /// </summary>
     protected Guid OlympiadBoardId { get; private set; }
 
@@ -81,12 +82,13 @@ public abstract class SelectionBoardPostgresTestBase<TService>(PostgresContainer
     protected Guid SeptemberId { get; private set; }
 
     /// <summary>
-    /// The October board: problems 1 to 12, four a paper.
+    /// The October board, picking for the October group: problems 1 to 12, four a paper.
     /// </summary>
     protected Guid OctoberBoardId { get; private set; }
 
     /// <summary>
-    /// A spare board: problem 1, then 13, in its elementary paper, everything else empty.
+    /// A spare board, picking for the November group: problem 1, then 13, in its elementary paper, everything else
+    /// empty.
     /// </summary>
     protected Guid SpareBoardId { get; private set; }
 
@@ -134,15 +136,19 @@ public abstract class SelectionBoardPostgresTestBase<TService>(PostgresContainer
         // Its proposal, in the same round
         OlympiadProposalId = SelectionSeed.NewProposal(context, olympiadId, pool, 1, 20);
 
-        // Its board, holding the proposal
-        OlympiadBoardId = SelectionSeed.NewBoard(context, olympiadId, "Olympiad", OlympiadProposalId).Id;
+        // Its board, picking for no group and holding the proposal
+        OlympiadBoardId = SelectionSeed.NewBoard(context, olympiadId, null, "Olympiad", OlympiadProposalId).Id;
 
         // The instant every group's opening is set against
         var now = DateTimeOffset.UtcNow;
 
-        // The groups a board can go into
-        OctoberId = SelectionSeed.NewGroup(context, season, "october", now.AddDays(10)).Id;
-        NovemberId = SelectionSeed.NewGroup(context, season, "november", now.AddDays(40)).Id;
+        // The October group, which the October board picks for
+        var october = SelectionSeed.NewGroup(context, season, "october", now.AddDays(10));
+        OctoberId = october.Id;
+
+        // The November group, which the spare board picks for
+        var november = SelectionSeed.NewGroup(context, season, "november", now.AddDays(40));
+        NovemberId = november.Id;
 
         // The September group, already open
         var september = SelectionSeed.NewGroup(context, season, "september", now.AddDays(-1));
@@ -151,12 +157,12 @@ public abstract class SelectionBoardPostgresTestBase<TService>(PostgresContainer
         // Problem 16, sitting in a September round
         Proposals[16] = SelectionSeed.NewProposal(context, september.Rounds.First(), 16, 1);
 
-        // The October board, full
+        // The October board, picking for October, full
         OctoberBoardId = SelectionSeed.NewBoard(
-            context, "October", [.. Enumerable.Range(1, 12).Select(number => (Guid?)Proposals[number])]).Id;
+            context, october, "October", [.. Enumerable.Range(1, 12).Select(number => (Guid?)Proposals[number])]).Id;
 
-        // The spare board, sharing problem 1
-        SpareBoardId = SelectionSeed.NewBoard(context, "Spare", Proposals[1], Proposals[13]).Id;
+        // The spare board, picking for November, sharing problem 1
+        SpareBoardId = SelectionSeed.NewBoard(context, november, "Spare", Proposals[1], Proposals[13]).Id;
 
         // Written
         await context.SaveChangesAsync();

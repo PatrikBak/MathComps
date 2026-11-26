@@ -96,20 +96,27 @@ export type Paper = {
 }
 
 /**
- * The rounds a board was finalized into.
+ * Where a board stands against the cycle it picks papers for: a draft that can be finalized into the cycle (still to
+ * open, its rounds empty, the papers pairing with them by level and size), a draft that can't, finalized into the
+ * cycle before it opens, or finalized and opened to students.
  */
-type Finalization = {
-  /** The name of the cycle whose rounds took the board's papers, in the language the site is read in. */
-  cycleName: string
-  /** When the cycle's rounds open, as an ISO-8601 string. */
+export type BoardStage = 'finalizable' | 'unfinalizable' | 'finalized' | 'opened'
+
+/**
+ * The batch of rounds opening together that a board picks papers for.
+ */
+export type BoardCycle = {
+  /** What the cycle is called, in the language the site is read in. */
+  name: string
+  /** When its rounds open, as an ISO-8601 string. */
   opensAt: string
-  /** Whether the cycle's rounds have opened to students. */
-  hasOpened: boolean
+  /** Where the board stands against it. */
+  stage: BoardStage
 }
 
 /**
- * One board of the selection: a named set of papers whose slots are filled from the pool, tied to no cycle
- * until it is finalized into one.
+ * One board of the selection: a named set of papers whose slots are filled from the pool, picked for one cycle or
+ * for none.
  */
 export type Board = {
   /** Identity of the board. */
@@ -118,25 +125,16 @@ export type Board = {
   name: string
   /** Its papers, in the order the board sets them out. */
   papers: Paper[]
-  /** The rounds it was finalized into, null while it is still a draft. */
-  finalization: Finalization | null
+  /** The cycle it picks papers for; null for a board picking for none. */
+  cycle: BoardCycle | null
 }
 
 /**
- * A batch of rounds that open together, one for each of its hosted levels, all still empty, so a board can be
- * finalized into them.
+ * A board picking papers for a cycle, the only kind that can be finalized.
  */
-export type Cycle = {
-  /** Identity of the cycle. */
-  id: string
-  /** What it is called, in the language the site is read in. */
-  name: string
-  /** When its rounds open, as an ISO-8601 string. */
-  opensAt: string
-  /** The hosted levels of its rounds, one paper's worth each. */
-  categories: HostedCompetitionCategory[]
-  /** How many problems each of its rounds takes. */
-  problemCount: number
+export type BoardPickingForCycle = Board & {
+  /** The cycle it picks papers for. */
+  cycle: BoardCycle
 }
 
 /**
@@ -207,16 +205,6 @@ export type RatingWrite = {
 }
 
 /**
- * A board going into a cycle's rounds.
- */
-export type FinalizationWrite = {
-  /** The board. */
-  boardId: string
-  /** The cycle whose rounds take the board's papers. */
-  cycleId: string
-}
-
-/**
  * A summary of one reviewer's conversation with Mathilda about a proposal.
  */
 export type ReviewConversation = {
@@ -267,8 +255,6 @@ export type SelectionData = {
   proposals: Proposal[]
   /** Every board, drafts and finalized ones alike, oldest first. */
   boards: Board[]
-  /** The cycles a board can be finalized into, soonest first. */
-  cycles: Cycle[]
   /**
    * Every conversation about a proposal in the selection, newest first: each one started before students were
    * given the proposal, and after that only the ones the organization's members start.

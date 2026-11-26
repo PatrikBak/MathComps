@@ -20,7 +20,7 @@ public interface IProblemSelectionService
     /// The reviewer reading it: their own ratings come back marked as theirs, and the categories they lead come
     /// back named.
     /// </param>
-    /// <param name="language">The language the cycles are named in.</param>
+    /// <param name="language">The language each board's cycle is named in.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The selection.</returns>
     Task<SelectionDto> GetSelectionAsync(

@@ -49,7 +49,7 @@ function board(id: string, slots: (string | null)[]): Board {
     id,
     name: id,
     papers: [{ id: `${id}-e`, name: 'Elementary', category: 'elementary', slots }],
-    finalization: null,
+    cycle: null,
   }
 }
 
@@ -73,7 +73,6 @@ function selection(boards: Board[], proposals: Proposal[]): SelectionData {
     leadCategories: [],
     proposals,
     boards,
-    cycles: [],
     conversations: [],
     needsEveryLanguage: true,
   }

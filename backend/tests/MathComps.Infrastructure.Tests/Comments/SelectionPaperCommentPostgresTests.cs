@@ -19,7 +19,7 @@ public class SelectionPaperCommentPostgresTests(PostgresContainerFixture fixture
     protected override void SeedSubjects(MathCompsDbContext context)
     {
         // A board with its papers, every slot empty
-        var board = SelectionSeed.NewBoard(context, "November");
+        var board = SelectionSeed.NewBoard(context, null, "November");
 
         // The board's papers, in their order
         var paperIds = context.SelectionPapers.Local

@@ -95,9 +95,14 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     private Guid _releasedId;
 
     /// <summary>
-    /// The October group, which still takes a board.
+    /// The October group, which the draft picks for and can still be finalized into.
     /// </summary>
     private Guid _octoberId;
+
+    /// <summary>
+    /// The draft, picking for the October group.
+    /// </summary>
+    private Guid _draftBoardId;
 
     /// <summary>
     /// The board finalized into the November group.
@@ -224,7 +229,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // The draft's papers, each naming its category
         Assert.Equal(
             ["elementary", "intermediate", "advanced"],
-            selection.Boards.Single(board => board.Finalization is null).Papers.Select(paper => paper.Category));
+            selection.Boards.Single(board => board.Id == _draftBoardId).Papers.Select(paper => paper.Category));
     });
 
     /// <summary>
@@ -255,7 +260,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
 
         // The draft
-        var board = selection.Boards.Single(candidate => candidate.Finalization is null);
+        var board = selection.Boards.Single(candidate => candidate.Id == _draftBoardId);
 
         // The draft's one problem, in the elementary paper's second slot
         Assert.Equal([null, _pool[2], null, null], board.Papers[0].Slots);
@@ -285,7 +290,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             board.Papers.SelectMany(paper => paper.Slots));
 
         // Read as finalized into a cycle still to open
-        Assert.False(board.Finalization?.HasOpened);
+        Assert.Equal(BoardStage.Finalized, board.Cycle?.Stage);
 
         // And its problems are in the selection, used beside the September one alone
         Assert.Equal(
@@ -308,7 +313,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         var board = selection.Boards.Single(candidate => candidate.Id == _septemberBoardId);
 
         // Read as finalized into a cycle that has opened
-        Assert.True(board.Finalization?.HasOpened);
+        Assert.Equal(BoardStage.Opened, board.Cycle?.Stage);
 
         // Its papers holding the September problem
         Assert.Contains(_openedId, board.Papers.SelectMany(paper => paper.Slots));
@@ -536,25 +541,29 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         });
 
     /// <summary>
-    /// The cycles are the groups still taking a board: not the opened one, nor one already filled. Each carries
-    /// its categories in the order the taxonomy sets them out, and its name in the language asked for.
+    /// A draft reads the cycle it picks for, named in the language asked for, with when it opens, and reads as
+    /// finalizable: the cycle still to open, its rounds empty, and the draft's papers pairing with them by level and
+    /// size. What the slots hold doesn't count, so the draft's empty slots leave it finalizable.
     /// </summary>
     [Fact]
-    public Task The_cycles_are_the_groups_still_taking_a_board() => RunTestAsync(async service =>
+    public Task A_draft_reads_as_finalizable_into_its_cycle() => RunTestAsync(async service =>
     {
         // The selection, read in Slovak
         var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.SK);
 
-        // October alone
-        var cycle = Assert.Single(selection.Cycles);
-        Assert.Equal(_octoberId, cycle.Id);
+        // The draft's cycle
+        var cycle = selection.Boards.Single(board => board.Id == _draftBoardId).Cycle;
 
-        // With every category, and how many problems each paper asks
+        // The draft finalizable into its cycle
+        Assert.Equal(BoardStage.Finalizable, cycle?.Stage);
+
+        // Opening when the October group does
         Assert.Equal(
-            [HostedCompetitionCategory.Elementary, HostedCompetitionCategory.Intermediate,
-                HostedCompetitionCategory.Advanced],
-            cycle.Categories);
-        Assert.Equal(4, cycle.ProblemCount);
+            await QueryValueAsync(context => context.HostedGroups
+                .Where(group => group.Id == _octoberId)
+                .Select(group => group.OpensAt)
+                .SingleAsync()),
+            cycle?.OpensAt);
 
         // Named in Slovak
         await QueryAsync<IMetadataLocalizationService>((_, localization) =>
@@ -562,7 +571,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             // The name the taxonomy gives its first round's node
             Assert.Equal(
                 localization.GetNodeShortName(Language.SK, SelectionSeed.RoundPaths("october")[0]),
-                cycle.Name);
+                cycle?.Name);
 
             // Nothing further to check
             return Task.CompletedTask;
@@ -570,11 +579,11 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     });
 
     /// <summary>
-    /// A group whose rounds are filled one at a time is no cycle once any of them holds a problem, since a board
-    /// fills every round of a group at once.
+    /// A draft can't be finalized into a group once one of the group's rounds holds a problem, since a board fills
+    /// every round of a group at once.
     /// </summary>
     [Fact]
-    public Task A_group_with_one_round_filled_is_no_cycle() => RunTestAsync(async service =>
+    public Task A_draft_whose_cycle_has_a_round_filled_is_unfinalizable() => RunTestAsync(async service =>
     {
         // One problem in one of October's rounds, the others still empty
         await QueryAsync(async context =>
@@ -592,8 +601,9 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // The selection
         var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
 
-        // So no group takes a board
-        Assert.Empty(selection.Cycles);
+        // So the draft can no longer be finalized into the October group
+        Assert.Equal(
+            BoardStage.Unfinalizable, selection.Boards.Single(board => board.Id == _draftBoardId).Cycle?.Stage);
     });
 
     /// <summary>
@@ -690,8 +700,8 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     /// <summary>
     /// An organization's selection holds its own categories, proposals, boards, conversations and discussions alone,
     /// and says whether its own problems need every language: the olympiad's reads its one of each and needs any one
-    /// language, and MathComps' reads none of the olympiad's. The hosted groups take MathComps' boards alone, so the
-    /// olympiad's has no cycle to finalize into.
+    /// language, and MathComps' reads none of the olympiad's. Only MathComps' boards pick for the hosted groups, so
+    /// the olympiad's has no cycle to finalize into.
     /// </summary>
     [Fact]
     public Task An_organizations_selection_holds_its_own_alone() => RunTestAsync(async service =>
@@ -708,8 +718,8 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         Assert.Equal([_olympiadBoardId], olympiad.Boards.Select(board => board.Id));
         Assert.Equal([_olympiadProposalId], olympiad.Conversations.Select(conversation => conversation.ProposalId));
 
-        // And no cycle
-        Assert.Empty(olympiad.Cycles);
+        // Its board picking for no cycle
+        Assert.Null(olympiad.Boards.Single().Cycle);
 
         // MathComps' selection, as the live reviewer reads it
         var mathComps = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
@@ -773,8 +783,9 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // The instant the groups and conversations are dated from
         var now = DateTimeOffset.UtcNow;
 
-        // October, still taking a board
-        _octoberId = SelectionSeed.NewGroup(context, season, "october", now.AddDays(10)).Id;
+        // October, still to open, which the draft picks for
+        var october = SelectionSeed.NewGroup(context, season, "october", now.AddDays(10));
+        _octoberId = october.Id;
 
         // November, not yet open
         var november = SelectionSeed.NewGroup(context, season, "november", now.AddDays(40));
@@ -828,8 +839,11 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // One problem in the December round
         _releasedId = SelectionSeed.NewProposal(context, released, 400, 1);
 
-        // A draft holding the second proposal in its second slot, and its first paper
-        _draftPaperId = FirstPaperOf(context, SelectionSeed.NewBoard(context, "Draft", null, _pool[2]).Id);
+        // A draft picking for October, holding the second proposal in its second slot
+        _draftBoardId = SelectionSeed.NewBoard(context, october, "Draft", null, _pool[2]).Id;
+
+        // The draft's first paper
+        _draftPaperId = FirstPaperOf(context, _draftBoardId);
 
         // The olympiad, listing a category of its own
         var olympiadId = SelectionSeed.NewOrganization(context, OlympiadSlug, "C");
@@ -844,7 +858,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         _olympiadProposalId = SelectionSeed.NewProposal(context, olympiadId, pool, 1, 10);
 
         // The olympiad's board, holding its proposal in its first slot
-        _olympiadBoardId = SelectionSeed.NewBoard(context, olympiadId, "Olympiad", _olympiadProposalId).Id;
+        _olympiadBoardId = SelectionSeed.NewBoard(context, olympiadId, null, "Olympiad", _olympiadProposalId).Id;
 
         // The olympiad board's first paper
         _olympiadPaperId = FirstPaperOf(context, _olympiadBoardId);
@@ -945,11 +959,11 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     /// <returns>The board's id.</returns>
     private static Guid SeedFinalizedBoard(MathCompsDbContext context, HostedGroup group)
     {
-        // A board with empty papers
-        var board = SelectionSeed.NewBoard(context, group.Slug);
+        // A board picking for the group, with empty papers
+        var board = SelectionSeed.NewBoard(context, group, group.Slug);
 
-        // Tied to the group
-        board.HostedGroupId = group.Id;
+        // Finalized into it
+        board.IsFinalized = true;
 
         // The id
         return board.Id;

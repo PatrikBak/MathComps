@@ -867,6 +867,41 @@ test.describe('a slot waiting for a problem', () => {
     // The focus, gone with the problem's way in, on the line saying where the board went
     await expect(statusLine(page, FULL_DRAFT_FINALIZED)).toBeFocused()
   })
+
+  test('hands the focus to the line saying where the board went once a draft offering no Finalize turns up finalized', async ({
+    page,
+  }) => {
+    // The clock under the test's hand, so the next read comes when the test says
+    await page.clock.install()
+
+    // A reviewer whose first draft can't be finalized, its cycle's rounds filled by an import
+    const answerSelectionWith = await stubSelection(page, 'novemberFilled')
+
+    // The pool
+    await openPool(page)
+
+    // Its slot, hovered so its actions show
+    await slotOf(page, 'E1').hover()
+
+    // The focus on the way back to the pool
+    await slotOf(page, 'E1')
+      .getByRole('button', { name: selectionCopy.board.backToPool, exact: true })
+      .focus()
+
+    // A later read, by which the rounds have been emptied and another reviewer has finalized the draft
+    answerSelectionWith('fullDraftFinalized')
+
+    // Long enough for the selection to be read again
+    await page.clock.fastForward(PAST_NEXT_READ)
+
+    // Once the read has landed, which the line about its rounds shows
+    await expect(statusLine(page, FULL_DRAFT_FINALIZED)).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The focus, gone with the slot's actions, on the line saying where the board went
+    await expect(statusLine(page, FULL_DRAFT_FINALIZED)).toBeFocused()
+  })
 })
 
 test.describe("moving and emptying a draft's slots", () => {

@@ -1345,17 +1345,23 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
                   .HasForeignKey(board => board.OrganizationId)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            // The group it was finalized into. Restricted: a group whose problems a board picked is not something
-            // a delete should quietly take the board with.
+            // The group it picks papers for. Restricted: a group a board picks papers for is not something a
+            // delete should quietly take the board with.
             entity.HasOne(board => board.HostedGroup)
                   .WithMany()
                   .HasForeignKey(board => board.HostedGroupId)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            // One board per group, since the board reads its slots off the group's rounds.
+            // One board per group, since a group's rounds are filled from one board's papers and a finalized board
+            // reads its slots off them.
             entity.HasIndex(board => board.HostedGroupId)
                   .IsUnique()
                   .HasDatabaseName("ux_selection_board_hosted_group_id");
+
+            // A board is finalized into its group, so a finalized board always picks for one.
+            entity.ToTable(table => table.HasCheckConstraint(
+                "ck_selection_board_finalized_has_group",
+                "NOT \"is_finalized\" OR \"hosted_group_id\" IS NOT NULL"));
         });
 
         #endregion SelectionBoard

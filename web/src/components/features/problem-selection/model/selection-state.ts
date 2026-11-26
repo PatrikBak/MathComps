@@ -1,10 +1,11 @@
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { type Locale, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
 import { STEPS_PER_POINT } from './rating-scale'
 import type {
   Board,
-  Cycle,
+  BoardPickingForCycle,
   Paper,
   Proposal,
   ProposalRating,
@@ -27,13 +28,13 @@ export type PaperOnBoard = {
 }
 
 /**
- * The selection as read: its categories, the reader's lead categories, its boards, its cycles and the languages its
- * problems need as they came, its papers looked up by id, and its proposals and their conversations looked up by
- * proposal id.
+ * The selection as read: its categories, the reader's lead categories, its boards and the languages its problems
+ * need as they came, its papers looked up by id, and its proposals and their conversations looked up by proposal
+ * id.
  */
 export type SelectionIndex = Pick<
   SelectionData,
-  'categories' | 'leadCategories' | 'boards' | 'cycles' | 'needsEveryLanguage'
+  'categories' | 'leadCategories' | 'boards' | 'needsEveryLanguage'
 > & {
   /** Every paper on the boards, with the board holding it, by the paper's id. */
   papersById: ReadonlyMap<string, PaperOnBoard>
@@ -67,13 +68,12 @@ export function indexSelection(data: SelectionData): SelectionIndex {
     (conversation) => conversation.proposalId
   )
 
-  // The categories, the reader's lead categories, the boards, the cycles and the languages needed as they came,
-  // with the lookups beside them
+  // The categories, the reader's lead categories, the boards and the languages needed as they came, with the
+  // lookups beside them
   return {
     categories: data.categories,
     leadCategories: data.leadCategories,
     boards: data.boards,
-    cycles: data.cycles,
     needsEveryLanguage: data.needsEveryLanguage,
     papersById,
     proposalsById,
@@ -117,17 +117,52 @@ export function hostedLevelOf(
 }
 
 /**
- * Whether every paper of a board goes into a round when the board is finalized: each fills a category that is a
- * hosted level.
+ * Whether a board is still a draft, open to changes: one picking for no cycle, or one not yet finalized into its
+ * cycle, finalizable or not.
  *
  * @param board - The board.
- * @param categories - The selection's categories.
  *
- * @returns True once every paper's category is a hosted level.
+ * @returns True until the board is finalized.
  */
-export function mapsToRounds(board: Board, categories: readonly SelectionCategory[]): boolean {
-  // Every paper of a category at some level
-  return board.papers.every((paper) => hostedLevelOf(paper.category, categories) !== null)
+export function isDraft(board: Board): boolean {
+  // A board picking for no cycle never leaves the drafts
+  if (board.cycle === null) return true
+
+  // Otherwise by where it stands against its cycle
+  switch (board.cycle.stage) {
+    case 'finalizable':
+    case 'unfinalizable':
+      return true
+    case 'finalized':
+    case 'opened':
+      return false
+    default:
+      return assertNever(board.cycle.stage)
+  }
+}
+
+/**
+ * Whether a board picks papers for a cycle.
+ *
+ * @param board - The board.
+ *
+ * @returns True for a board with a cycle, false for one picking for none.
+ */
+export function picksForCycle(board: Board): board is BoardPickingForCycle {
+  // A board with a cycle picks for it
+  return board.cycle !== null
+}
+
+/**
+ * Whether a board can be finalized into its cycle once its slots are full of ready problems, which its stage says.
+ *
+ * @param board - The board.
+ *
+ * @returns True for a draft at the finalizable stage.
+ */
+export function canFinalize(board: Board): boolean {
+  // A draft at the finalizable stage
+  return board.cycle?.stage === 'finalizable'
 }
 
 /**
@@ -166,15 +201,16 @@ export function canPlaceOn(
   return (
     !proposal.isSetAside &&
     !proposal.isUsed &&
-    board.finalization === null &&
+    isDraft(board) &&
     board.papers.some((paper) => isLeadOf(leadCategories, paper)) &&
     (holdingPaper === undefined || isLeadOf(leadCategories, holdingPaper))
   )
 }
 
 /**
- * The board to put on screen: the one kept there while the selection still holds it, else the first draft, else
- * the first board whose rounds are still to open, else the newest board, every one having opened.
+ * The board to put on screen: the one kept there while the selection still holds it, else the first finalizable
+ * draft, else the first draft, else the first finalized board whose rounds are still to open, else the newest board,
+ * every one having opened.
  *
  * @param boards - Every board.
  * @param keptBoardId - The board kept on screen, by id; null while none has been shown.
@@ -185,12 +221,13 @@ export function pickActiveBoard(
   boards: readonly Board[],
   keptBoardId: string | null
 ): Board | null {
-  // The board kept on screen, else the first one still being drafted, else the first one whose rounds are still to
-  // open, else the newest one there is
+  // The board kept on screen, else the first finalizable one, else the first one still being drafted, else the
+  // first one whose rounds are still to open, else the newest one there is
   return (
     boards.find((board) => board.id === keptBoardId) ??
-    boards.find((board) => board.finalization === null) ??
-    boards.find((board) => board.finalization?.hasOpened === false) ??
+    boards.find(canFinalize) ??
+    boards.find(isDraft) ??
+    boards.find((board) => board.cycle?.stage === 'finalized') ??
     boards.at(-1) ??
     null
   )
@@ -431,7 +468,7 @@ type UnreadyProposal = {
 }
 
 /**
- * What stands between a board and finalizing it, whichever cycle it goes into.
+ * What stands between a finalizable board and finalizing it.
  */
 export type FinalizeBlockers = {
   /** How many slots stand empty. */
@@ -441,7 +478,7 @@ export type FinalizeBlockers = {
 }
 
 /**
- * What stops the board from being finalized, whichever cycle it goes into.
+ * What stops a finalizable board from being finalized.
  *
  * @param board - The board.
  * @param proposals - Every proposal, by id.
@@ -469,67 +506,4 @@ export function finalizeBlockers(
       return languages.length === 0 ? [] : [{ proposal, languages }]
     }),
   }
-}
-
-/**
- * What keeps a board's papers from pairing up with a cycle's rounds, one paper to each round of its category's
- * level, each paper as long as the rounds are.
- */
-export type CycleMisfit = {
-  /** Papers no round of the cycle is left for: no level, one the cycle lacks, or one an earlier paper took. */
-  unmatched: Paper[]
-  /** Papers whose slot count differs from the problem count the cycle's rounds take. */
-  wrongSize: Paper[]
-  /** The levels of the cycle's rounds no paper fills. */
-  uncovered: HostedCompetitionCategory[]
-}
-
-/**
- * What keeps a board's papers from pairing up with one cycle's rounds, whatever their slots hold.
- *
- * @param board - The board.
- * @param cycle - The cycle.
- * @param categories - The selection's categories, which say the level of each paper's category.
- *
- * @returns The misfits, every list empty once the papers fit the rounds.
- */
-export function cycleMisfit(
-  board: Board,
-  cycle: Cycle,
-  categories: readonly SelectionCategory[]
-): CycleMisfit {
-  // The level of each paper's category, in the board's order
-  const levels = board.papers.map((paper) => hostedLevelOf(paper.category, categories))
-
-  // The papers left without a round, a round going to the first paper of its level and no other
-  const unmatched = board.papers.filter((_paper, index) => {
-    // The paper's level
-    const level = levels[index]
-
-    // No level, one the cycle runs no round in, or one an earlier paper took
-    return level === null || !cycle.categories.includes(level) || levels.indexOf(level) !== index
-  })
-
-  // The papers of the wrong length, every round of the cycle taking the same number of problems
-  const wrongSize = board.papers.filter((paper) => paper.slots.length !== cycle.problemCount)
-
-  // The levels of the rounds no paper stands for
-  const uncovered = cycle.categories.filter((level) => !levels.includes(level))
-
-  // Everything in the way
-  return { unmatched, wrongSize, uncovered }
-}
-
-/**
- * Whether nothing keeps a board's papers from pairing up with a cycle's rounds.
- *
- * @param misfit - Where a board's papers miss a cycle's rounds, as {@link cycleMisfit} found it.
- *
- * @returns True once the papers pair up with the rounds.
- */
-export function fitsCycle(misfit: CycleMisfit): boolean {
-  // Every paper with a round and the right length, and every round with a paper
-  return (
-    misfit.unmatched.length === 0 && misfit.wrongSize.length === 0 && misfit.uncovered.length === 0
-  )
 }

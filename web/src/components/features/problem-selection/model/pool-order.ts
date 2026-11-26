@@ -2,6 +2,7 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 
 import type { DiscussedSubject, DiscussionThread } from './selection-discussions'
 import type { CommentsOrder } from './selection-routes'
+import { isDraft } from './selection-state'
 import { type Board, type Paper, type Proposal, PROPOSAL_AREAS } from './selection-types'
 
 /**
@@ -181,10 +182,10 @@ function commentPlacerOf(
   const newestFirst = [...boards].reverse()
 
   // The drafts, newest first
-  const drafts = newestFirst.filter((board) => board.finalization === null)
+  const drafts = newestFirst.filter(isDraft)
 
   // The boards finalized into rounds, opened or not, newest first
-  const finalized = newestFirst.filter((board) => board.finalization !== null)
+  const finalized = newestFirst.filter((board) => !isDraft(board))
 
   // Each board's rank by id: the drafts, one rank left for the pool, then the finalized boards
   const rankById = new Map([

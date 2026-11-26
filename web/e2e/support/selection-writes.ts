@@ -1,6 +1,7 @@
+import { isDraft } from '@/components/features/problem-selection/model/selection-state'
 import type {
   Board,
-  Cycle,
+  BoardStage,
   Proposal,
   SelectionCategory,
 } from '@/components/features/problem-selection/model/selection-types'
@@ -52,50 +53,40 @@ export class SelectionWriteRefused extends Error {
 }
 
 /**
- * A hosted group the backend holds, which a board can be finalized into while it has not opened and its rounds are
- * still empty.
- */
-export type HeldCycle = Cycle & {
-  /** Whether its rounds already hold problems, a board having filled them or an import. */
-  isFilled: boolean
-}
-
-/**
- * Everything the backend holds about the boards, their problems and the cycles they go into, which the read answers
- * out of and every write changes.
+ * Everything the backend holds about the boards and their problems, which the read answers out of and every write
+ * changes. Each board holds where it stands against its cycle, as the backend reads it.
  */
 export type HeldSelection = {
   /** Every live proposal, the ones in the rounds of an opened board included. */
   proposals: Proposal[]
   /** Every board, oldest first, the opened ones included. */
   boards: Board[]
-  /** Every hosted group, the filled and the opened ones included, the ones yet to open soonest first. */
-  cycles: HeldCycle[]
 }
 
 /**
- * Whether a board's rounds have opened, which every write to it refuses.
+ * The refusal a write on a board meets at each stage: none for a draft, and one for each way of being finalized,
+ * since a finalized board's slots are its cycle's rounds.
+ */
+const WRITE_REFUSAL_AT_STAGE = {
+  finalizable: null,
+  unfinalizable: null,
+  finalized: 'SelectionBoardFinalized',
+  opened: 'SelectionBoardOpened',
+} as const satisfies Record<BoardStage, SelectionWriteRefusal | null>
+
+/**
+ * The refusal a write on a board meets, by where the board stands against its cycle.
  *
  * @param board - The board.
  *
- * @returns True for a finalized board whose rounds have opened.
+ * @returns The refusal; null for a draft, which takes the write.
  */
-function hasOpened(board: Board): boolean {
-  // Finalized, into rounds already open
-  return board.finalization?.hasOpened === true
-}
+function writeRefusalOf(board: Board): SelectionWriteRefusal | null {
+  // A board picking for no cycle stays a draft
+  if (board.cycle === null) return null
 
-/**
- * Whether a cycle still takes a board, as the backend weighs it: not yet open, with its rounds still empty. Every
- * cycle the fake holds closes at some point, which the backend asks too.
- *
- * @param cycle - The cycle.
- *
- * @returns True while a board can go into it.
- */
-export function takesBoard(cycle: HeldCycle): boolean {
-  // Not yet open, and nothing in its rounds
-  return Date.parse(cycle.opensAt) > Date.now() && !cycle.isFilled
+  // Otherwise by its stage
+  return WRITE_REFUSAL_AT_STAGE[board.cycle.stage]
 }
 
 /**
@@ -174,11 +165,11 @@ export function draftBoard(held: HeldSelection, boardId: string): Board {
     held.boards.find((candidate) => candidate.id === boardId) ??
     refuseWith('SelectionTargetNotFound')
 
-  // Its rounds, once open, being what students sit
-  if (hasOpened(board)) refuseWith('SelectionBoardOpened')
+  // The refusal a write on it meets, if any
+  const refusal = writeRefusalOf(board)
 
-  // And a draft, a finalized board's slots being its rounds, which take no change
-  if (board.finalization !== null) refuseWith('SelectionBoardFinalized')
+  // Refused unless a draft
+  if (refusal !== null) refuseWith(refusal)
 
   // The draft
   return board
@@ -196,9 +187,8 @@ export function draftBoard(held: HeldSelection, boardId: string): Board {
 export function emptiedOnDrafts(boards: Board[], problemIds: string[]): Board[] {
   // Each draft with the problems' slots emptied, each finalized board as it was
   return boards.map((board) =>
-    board.finalization !== null
-      ? board
-      : {
+    isDraft(board)
+      ? {
           ...board,
           papers: board.papers.map((paper) => ({
             ...paper,
@@ -207,5 +197,6 @@ export function emptiedOnDrafts(boards: Board[], problemIds: string[]): Board[] 
             ),
           })),
         }
+      : board
   )
 }

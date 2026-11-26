@@ -1356,7 +1356,8 @@
       "progress": "{filled} z {total}",
       "ready": "Všechna místa jsou obsazená a každá úloha má zadání i řešení ve všech třech jazycích.",
       "replace": "Vyměnit",
-      "status": "Kolo: {cycle}, od {date}",
+      "statusDraft": "Pro kolo {cycle}, od {date}",
+      "statusFinalized": "Kolo: {cycle}, od {date}",
       "statusOpened": "Kolo: {cycle}, běží od {date}",
       "unfold": "Rozbalit sestavu"
     },
@@ -1395,14 +1396,10 @@
     },
     "finalize": {
       "confirm": "Uzavřít",
-      "intro": "Kola, která vybereš, dostanou úlohy z této sestavy: každá sada půjde do kola své kategorie. Úlohy zmizí ze zásobníku. Pokud některou z nich má i jiná rozpracovaná sestava, její místo se tam uvolní.",
-      "legend": "Vyber kola",
-      "noCycles": "Žádná prázdná kola nečekají na úlohy.",
-      "noPaper": "kategorie {category} nemá sadu",
-      "noRound": "sada {paper} nemá kolo",
-      "opens": "otevírá se {date}",
-      "title": "Uzavřít sestavu: {board}",
-      "wrongSize": "sada {paper} má {slots, plural, one {# místo} few {# místa} other {# míst}}, kolo má {count, plural, one {# úlohu} few {# úlohy} other {# úloh}}"
+      "finalizedElsewhere": "Tuto sestavu mezitím uzavřel někdo jiný.",
+      "intro": "Úlohy z této sestavy dostane kolo {cycle}, které se otevírá {date}. Úlohy zmizí ze zásobníku. Pokud některou z nich má i jiná rozpracovaná sestava, její místo se tam uvolní.",
+      "notTaken": "Kolo {cycle} už tuto sestavu nemůže přijmout: mezitím se otevřelo, dostalo jiné úlohy nebo mu přestaly sedět její sady.",
+      "title": "Uzavřít sestavu: {board}"
     },
     "goToSelection": "Otevřít ve výběru úloh",
     "language": {

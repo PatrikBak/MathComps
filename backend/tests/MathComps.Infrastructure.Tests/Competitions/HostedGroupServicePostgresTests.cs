@@ -771,18 +771,32 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
         var declared = await service.DeclareAsync(Manifest("mathcomps-advanced-september"));
 
         // A selection board finalized into it
-        await QueryAsync(async context =>
-        {
-            // The board, tied to the group
-            SelectionSeed.NewBoard(context, "September").HostedGroupId = declared.GroupId;
-
-            // Written
-            await context.SaveChangesAsync();
-        });
+        await SeedBoardAsync(declared.GroupId, isFinalized: true);
 
         // The same manifest again is refused
         await Assert.ThrowsAsync<HostedGroupManifestException>(
             () => service.DeclareAsync(Manifest("mathcomps-advanced-september")));
+    });
+
+    /// <summary>
+    /// Verifies that a group a selection board only picks for can still be declared. A draft holds its problems in
+    /// its own slots, so the group's rounds stay the manifest's to change until the board is finalized.
+    /// </summary>
+    [Fact]
+    public Task A_group_a_draft_picks_for_can_be_declared_again() => RunTestAsync(async service =>
+    {
+        // The group as declared
+        var declared = await service.DeclareAsync(Manifest("mathcomps-advanced-september"));
+
+        // A draft picking for it
+        await SeedBoardAsync(declared.GroupId, isFinalized: false);
+
+        // The group declared again, now running a second round
+        var again = await service.DeclareAsync(
+            Manifest("mathcomps-elementary-september", "mathcomps-advanced-september"));
+
+        // Which lands on the group already there
+        Assert.Equal(declared.GroupId, again.GroupId);
     });
 
     /// <summary>
@@ -943,6 +957,26 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
             AllowsReentry: false,
             ProblemCount,
             [.. competitionPaths.Select(path => new HostedGroupRoundRef(path, SeasonYear))]);
+
+    /// <summary>
+    /// Seeds a selection board of the MathComps organization picking for a group.
+    /// </summary>
+    /// <param name="groupId">The group the board picks for.</param>
+    /// <param name="isFinalized"><inheritdoc cref="SelectionBoard.IsFinalized" path="/summary"/></param>
+    /// <returns>A task that completes once the board is written.</returns>
+    private Task SeedBoardAsync(Guid groupId, bool isFinalized) =>
+        // The board, written
+        QueryAsync(async context =>
+        {
+            // The group, tracked
+            var group = await context.HostedGroups.SingleAsync(candidate => candidate.Id == groupId);
+
+            // The board picking for it, finalized or not
+            SelectionSeed.NewBoard(context, group, "September").IsFinalized = isFinalized;
+
+            // Written
+            await context.SaveChangesAsync();
+        });
 
     /// <summary>
     /// Spends one student's entry into one of a group's rounds, which is what makes its terms no longer the

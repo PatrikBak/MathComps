@@ -241,7 +241,7 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     {
         // The October board finalized
         await QueryAsync<IBoardFinalizationService>((_, finalization) =>
-            finalization.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId, OctoberId));
+            finalization.FinalizeAsync(Organization.MathCompsSlug, OctoberBoardId));
 
         // Its first elementary slot
         var slot = await SlotAsync(OctoberBoardId, HostedCompetitionCategory.Elementary, 0);
@@ -260,21 +260,50 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
-    /// Once a board's group opens, students are sitting what it holds, so it takes no change.
+    /// Once a finalized board's group opens, students are sitting what it holds, so it takes no change.
     /// </summary>
     [Fact]
-    public Task A_board_whose_cycle_has_opened_takes_no_change() => RunTestAsync(async service =>
+    public Task A_finalized_board_whose_cycle_has_opened_takes_no_change() => RunTestAsync(async service =>
     {
         // The spare board, as though it had been finalized into the September group
         await QueryAsync(async context =>
             await context.SelectionBoards
                 .Where(board => board.Id == SpareBoardId)
-                .ExecuteUpdateAsync(setters => setters.SetProperty(board => board.HostedGroupId, SeptemberId)));
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(board => board.HostedGroupId, SeptemberId)
+                    .SetProperty(board => board.IsFinalized, true)));
 
         // Emptying the spare board's first elementary slot, refused for the opened group
         await Assert.ThrowsAsync<SelectionBoardOpenedException>(async () => await service.ClearSlotAsync(
             Organization.MathCompsSlug,
             LeadId,
             await SlotAsync(SpareBoardId, HostedCompetitionCategory.Elementary, 0)));
+    });
+
+    /// <summary>
+    /// A draft whose group has opened can never be finalized, but none of it reached students, so the reviewers
+    /// keep changing it.
+    /// </summary>
+    [Fact]
+    public Task A_draft_whose_cycle_has_opened_takes_changes() => RunTestAsync(async service =>
+    {
+        // The November group, which the spare board picks for, opened an hour ago
+        await QueryAsync(async context =>
+            await context.HostedGroups
+                .Where(group => group.Id == NovemberId)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(
+                    group => group.OpensAt, DateTimeOffset.UtcNow.AddHours(-1))));
+
+        // Problem 14 put into the spare board's third elementary slot
+        await service.PlaceAsync(
+            Organization.MathCompsSlug,
+            LeadId,
+            await SlotAsync(SpareBoardId, HostedCompetitionCategory.Elementary, 2),
+            Proposals[14]);
+
+        // Taken
+        Assert.Equal(
+            [Proposals[1], Proposals[13], Proposals[14], null],
+            await DraftSlotsAsync(SpareBoardId, HostedCompetitionCategory.Elementary));
     });
 }

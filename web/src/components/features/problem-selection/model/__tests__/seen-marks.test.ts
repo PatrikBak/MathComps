@@ -283,7 +283,7 @@ describe('poolDiscussionPartsOf', () => {
         { id: 'easy', name: 'Starters', category: 'elementary', slots: [] },
         { id: 'hard', name: 'Finals', category: 'advanced', slots: [] },
       ],
-      finalization: null,
+      cycle: null,
     }
 
     // Each paper's discussion, holding one comment of Zuzana's
