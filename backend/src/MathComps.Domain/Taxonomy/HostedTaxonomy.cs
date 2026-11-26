@@ -13,12 +13,13 @@ public static class HostedTaxonomy
     /// The root node every hosted competition hangs off.
     /// </summary>
     /// <remarks>
-    /// Below it sits one node per category, and below each of those one node per group the site runs. Beside them
-    /// sit the one-offs: the practice node, and under <c>special</c> every other group of a single competition
-    /// (<c>mathcomps-special-school_a</c>). A group is called by its node's short name, so a one-off's node needs
-    /// a name that reads on its own. A group node is shared across every season it runs in, so its registered
-    /// name has to be season-independent: <c>November</c>, never <c>November 2026</c>. Which year a group ran in
-    /// is its round's season, and a name carrying a year would be wrong for every season but the first.
+    /// Below it sits one node per category, and below each of those one node per group the site runs. A group of
+    /// a single competition needs no level to tell it apart, so its node may instead sit outside the category
+    /// nodes: the practice one right under the root, every other under <c>special</c>
+    /// (<c>mathcomps-special-school_a</c>). A group is called by its node's short name, so such a node needs a
+    /// name that reads on its own. A group node is shared across every season it runs in, so its registered name
+    /// has to be season-independent: <c>November</c>, never <c>November 2026</c>. Which year a group ran in is its
+    /// round's season, and a name carrying a year would be wrong for every season but the first.
     /// </remarks>
     public const string RootSlug = "mathcomps";
 
@@ -43,8 +44,8 @@ public static class HostedTaxonomy
     public static readonly DateTimeOffset ProposalsVisibleSince = new(9999, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
     /// <summary>
-    /// The level each category node stands for, keyed by that node's slug. A node outside this map is outside
-    /// the levels, which is what the practice one is.
+    /// The level each category node stands for, keyed by that node's slug. A node outside this map runs at no
+    /// level, which only a group's sole competition may do.
     /// </summary>
     private static readonly Dictionary<string, HostedCompetitionCategory> _categoriesBySlug = new()
     {

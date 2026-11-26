@@ -120,23 +120,24 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
         <>
           {/* The competitions of the group */}
           <div className="mt-4 flex flex-wrap items-center gap-1 sm:mt-6 sm:gap-2">
-            {/* Each competition, with how many students its board holds */}
-            {board.competitions.map((candidate) => (
-              <Button
-                key={candidate.roundId}
-                size="sm"
-                shape="pill"
-                className="min-h-7 gap-1 px-2.5 text-xs sm:min-h-9 sm:gap-2 sm:px-3 sm:text-sm"
-                variant={candidate.roundId === board.competition?.roundId ? 'primary' : 'secondary'}
-                aria-pressed={candidate.roundId === board.competition?.roundId}
-                onClick={() => board.selectCategory(candidate.category)}
-              >
-                {categoryName(candidate.category)}
-                <span className="text-[10px] text-muted sm:text-xs">
-                  {candidate.entrants.length}
-                </span>
-              </Button>
-            ))}
+            {/* Each competition at a level, with how many students its board holds */}
+            {board.competitions.map(({ roundId, category, entrants }) =>
+              // A group's sole competition runs at no level, so there is nothing to pick it by
+              category === null ? null : (
+                <Button
+                  key={roundId}
+                  size="sm"
+                  shape="pill"
+                  className="min-h-7 gap-1 px-2.5 text-xs sm:min-h-9 sm:gap-2 sm:px-3 sm:text-sm"
+                  variant={roundId === board.competition?.roundId ? 'primary' : 'secondary'}
+                  aria-pressed={roundId === board.competition?.roundId}
+                  onClick={() => board.selectCategory(category)}
+                >
+                  {categoryName(category)}
+                  <span className="text-[10px] text-muted sm:text-xs">{entrants.length}</span>
+                </Button>
+              )
+            )}
 
             {/* Students across every competition, each once */}
             <span className="ml-1 text-xs text-muted sm:ml-2 sm:text-sm">

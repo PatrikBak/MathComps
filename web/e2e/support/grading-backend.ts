@@ -178,6 +178,11 @@ type GradingBackendOptions = {
    * stand.
    */
   clocks?: Readonly<Record<string, Pick<GradingEntrant, 'startedAt' | 'finishedAt'>>>
+  /**
+   * Whether the group runs its first competition alone, at no level, as a group of one competition does. Absent
+   * while it runs every competition of the board at its level.
+   */
+  soleCompetitionAtNoLevel?: boolean
 }
 
 /**
@@ -338,6 +343,11 @@ export async function installGradingBackend(
 ): Promise<GradingBackend> {
   // The board as the backend holds it, written to by every change it takes
   const board = structuredClone(BOARD)
+
+  // A group of one competition runs only the first, at no level
+  if (options.soleCompetitionAtNoLevel === true) {
+    board.competitions = [{ ...board.competitions[0], category: null }]
+  }
 
   // Each student's clock where the test sets one, in every competition they entered
   board.competitions.forEach((competition) =>

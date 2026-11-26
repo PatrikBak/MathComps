@@ -76,7 +76,7 @@ public class GradeMessageMailTests
 
         /// <summary>
         /// A grader's mail: three students' conversations, two of them about one problem, one student's account
-        /// deleted.
+        /// deleted, and a fourth student's about a group's sole competition, which runs at no level.
         /// </summary>
         ToGrader,
     }
@@ -148,12 +148,16 @@ public class GradeMessageMailTests
         string BoardLink(int student, int number) => links.GraderThread(
             "mathilding-2026-1", HostedCompetitionCategory.Advanced, Student(student), Problem(round: 1, number));
 
-        // Two rounds and two levels as the competitions' pages name them in the language
-        var (september, october, advanced, intermediate) = language switch
+        // A grader's way into one student's conversation about one problem of the round at no level
+        string SoleBoardLink(int student, int number) => links.GraderThread(
+            "mathilding-2026-4", category: null, Student(student), Problem(round: 4, number));
+
+        // Three rounds and two levels as the competitions' pages name them in the language
+        var (september, october, prep, advanced, intermediate) = language switch
         {
-            Language.SK => ("September", "Október", "Pokročilá", "Stredná"),
-            Language.CS => ("Září", "Říjen", "Pokročilá", "Střední"),
-            Language.EN => ("September", "October", "Advanced", "Intermediate"),
+            Language.SK => ("September", "Október", "Príprava na školské A", "Pokročilá", "Stredná"),
+            Language.CS => ("Září", "Říjen", "Příprava na školní A", "Pokročilá", "Střední"),
+            Language.EN => ("September", "October", "School round A warm-up", "Advanced", "Intermediate"),
             _ => throw new ArgumentOutOfRangeException(nameof(language), language, "Unknown language")
         };
 
@@ -183,6 +187,7 @@ public class GradeMessageMailTests
                 new GradeThreadNews(september, advanced, 2026, 3, new GradeThreadStudent("Jana"), 2, BoardLink(1, 3)),
                 new GradeThreadNews(september, advanced, 2026, 3, new GradeThreadStudent("Marek"), 1, BoardLink(2, 3)),
                 new GradeThreadNews(september, advanced, 2026, 5, new GradeThreadStudent(null), 4, BoardLink(3, 5)),
+                new GradeThreadNews(prep, null, 2026, 1, new GradeThreadStudent("Lucia"), 1, SoleBoardLink(4, 1)),
             ]),
             _ => throw new ArgumentOutOfRangeException(nameof(scenario), scenario, "Unknown scenario")
         };

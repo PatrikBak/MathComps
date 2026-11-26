@@ -39,12 +39,7 @@ public static class GradeMessageMail
 
         // The conversations grouped by competition, level and school year, in the order each group first appears
         var competitions = content.Threads
-            .GroupBy(thread => copy.Format("competition", new
-            {
-                competition = thread.CompetitionName,
-                category = thread.CategoryName,
-                season = SchoolYearName(thread.SeasonStartYear),
-            }))
+            .GroupBy(thread => CompetitionHeading(copy, thread))
             .Select((competition, index) => RenderCompetition(copy, competition.Key, competition, isFirst: index == 0));
 
         // How to stop these mails
@@ -74,7 +69,7 @@ public static class GradeMessageMail
     /// Renders one competition's rows: its name, then a row per conversation in it.
     /// </summary>
     /// <param name="copy">The mail's lines in the recipient's language.</param>
-    /// <param name="name">The heading naming the competition, its level and its school year.</param>
+    /// <param name="name">The heading naming the competition, its level where it has one, and its school year.</param>
     /// <param name="threads">The competition's conversations, in the order given.</param>
     /// <param name="isFirst">Whether the competition opens the list, with none above to stand apart from.</param>
     /// <returns>The rows' HTML.</returns>
@@ -138,6 +133,30 @@ public static class GradeMessageMail
     }
 
     /// <summary>
+    /// Names a conversation's competition in its heading: its name, its level where it has one, and its school
+    /// year.
+    /// </summary>
+    /// <param name="copy">The mail's lines in the recipient's language.</param>
+    /// <param name="thread">The conversation.</param>
+    /// <returns>The heading.</returns>
+    private static string CompetitionHeading(LocalizedCopy copy, GradeThreadNews thread) =>
+        // Whether the competition runs at a level
+        thread.CategoryName is { } category
+            // A competition at a level, named with it
+            ? copy.Format("competition", new
+            {
+                competition = thread.CompetitionName,
+                category,
+                season = SchoolYearName(thread.SeasonStartYear),
+            })
+            // A group's sole competition, with no level to name
+            : copy.Format("competitionAtNoLevel", new
+            {
+                competition = thread.CompetitionName,
+                season = SchoolYearName(thread.SeasonStartYear),
+            });
+
+    /// <summary>
     /// Names a school year by the two calendar years it spans.
     /// </summary>
     /// <param name="startYear">The calendar year the school year starts in.</param>
@@ -161,7 +180,9 @@ public sealed record GradeMessageMailContent(
 /// What is new in one grade conversation.
 /// </summary>
 /// <param name="CompetitionName">The competition's short name.</param>
-/// <param name="CategoryName">The name of the level the competition ran at.</param>
+/// <param name="CategoryName">
+/// The name of the level the competition ran at, or null for a group's sole competition, which runs at none.
+/// </param>
 /// <param name="SeasonStartYear"><inheritdoc cref="Domain.EfCoreEntities.Season.StartYear" path="/summary"/></param>
 /// <param name="ProblemNumber"><inheritdoc cref="Domain.EfCoreEntities.Problem.Number" path="/summary"/></param>
 /// <param name="Student">The student who wrote the new messages, named in a grader's mail; null in the student's
@@ -170,7 +191,7 @@ public sealed record GradeMessageMailContent(
 /// <param name="Link">The address opening the conversation.</param>
 public sealed record GradeThreadNews(
     string CompetitionName,
-    string CategoryName,
+    string? CategoryName,
     int SeasonStartYear,
     int ProblemNumber,
     GradeThreadStudent? Student,

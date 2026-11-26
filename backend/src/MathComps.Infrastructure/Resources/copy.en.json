@@ -12,6 +12,7 @@
     "greetingWithoutName": "Hi,",
     "intro": "there are new comments on the marking:",
     "competition": "{competition} ({category}, {season})",
+    "competitionAtNoLevel": "{competition} ({season})",
     "problem": "Problem {number}",
     "messages": "{count, plural, one {# new message} other {# new messages}}",
     "messagesFrom": "{student}: {messages}",

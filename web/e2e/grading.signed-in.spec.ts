@@ -652,6 +652,31 @@ test.describe("the board's address", () => {
     )
   })
 
+  test('opens a group whose only competition runs at no level, with no level to pick', async ({
+    page,
+  }) => {
+    // A backend serving the test group's board, its first competition alone and at no level
+    await installGradingBackend(page, GROUP_SLUG, { soleCompetitionAtNoLevel: true })
+
+    // A link to Ada's first problem naming a level, the way links into a group of several do
+    await page.goto(`${BOARD_PATH}?category=elementary&student=ada&problem=p1`)
+
+    // Which opens her grade
+    const dialog = page.getByRole('dialog')
+    await expect(dialog.getByText('Answer 1 by ada on p1.')).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Whose address drops the level, naming what is on screen
+    await expect.poll(() => addressOf(page)).toBe(`${BOARD_PATH}?student=ada&problem=p1`)
+
+    // The dialog closed
+    await page.keyboard.press('Escape')
+
+    // Over a board offering no level to pick
+    await expect(page.getByRole('button', { name: /^Elementary/ })).toHaveCount(0)
+  })
+
   test('opens one dialog for a link naming a grade the board walks', async ({ page }) => {
     // Every dialog the page puts up, from the first document on
     const dialogs = await countDialogs(page)

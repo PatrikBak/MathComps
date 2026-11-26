@@ -443,6 +443,66 @@ public class GradeMessageMailerPostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// A grader's mail about a group's sole competition, which runs at no level, names none: its heading carries
+    /// the competition and the school year alone, and its link opens the board with no level in the address.
+    /// </summary>
+    [Fact]
+    public Task A_graders_mail_about_a_competition_at_no_level_names_none() => RunTestAsync(async mailer =>
+    {
+        // The one problem of the group's sole competition
+        var problemId = Guid.CreateVersion7();
+
+        // The classmate's message to the grader about it
+        await QueryAsync(async context =>
+        {
+            // The seeded season
+            var season = await context.Seasons.SingleAsync(candidate => candidate.EditionNumber == 76);
+
+            // A group of one competition, closed like the seeded one
+            var group = NewGroup(context, "mc-sole", _startedAt.AddDays(-5), _startedAt.AddDays(5));
+
+            // The group's one round
+            var roundId = Guid.CreateVersion7();
+
+            // The round, under a node at no level, with its one problem
+            NewRound(context, season, group, roundId, "mathcomps-practice", problemId);
+
+            // The classmate's entry into it
+            var entry = NewEntry(_classmateId, roundId, _startedAt);
+            context.HostedEntries.Add(entry);
+
+            // The entry's final grade, which puts the conversation out to the classmate
+            context.HostedGrades.Add(
+                NewGrade(entry.Id, problemId, _graderId, mark: 3, help: 0, isFinal: true, _startedAt.AddDays(6)));
+
+            // The classmate's message about the problem, owed to the grader
+            Notice(context, NewMessage(context, entry.Id, problemId, _classmateId, _writtenAt), _graderId);
+
+            // Save the group, its round, the entry, its grade and the message with its notice
+            await context.SaveChangesAsync();
+        });
+
+        // A pass once the classmate has gone quiet
+        await PassAsync(mailer, _writtenAt.AddMinutes(10));
+
+        // The grader's mail
+        var html = Assert.Single(_sender.Sent).Mail.Html;
+
+        // The competition's name in Slovak, the grader's language
+        var name = new MetadataLocalizationService().GetNodeShortName(Language.SK, "mathcomps-practice");
+
+        // Headed by the competition and its school year, with no level between them
+        Assert.Contains($">{name} (2026/27)<", html);
+
+        // Opening the classmate's grade on a board whose address names no level
+        Assert.Contains(
+            AsInHtml(new SiteLinks(SiteUrl, Language.SK).GraderThread(
+                "mc-sole", category: null, _classmateId, problemId)),
+            html);
+        Assert.DoesNotContain("category=", html);
+    });
+
+    /// <summary>
     /// What no longer stands by the time the mail is written falls out of it: a deleted message, and a conversation
     /// whose grade was taken back to a draft, so its student can no longer see it.
     /// </summary>
@@ -571,13 +631,13 @@ public class GradeMessageMailerPostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// A mail that breaks while being written holds up nobody else's: the student still gets theirs, the pass then
-    /// fails, and the grader's notice waits for the next pass. The grader's mail breaks because
-    /// its conversation sits in a round run at no level, which no grading board could link to.
+    /// fails, and the grader's notice waits for the next pass. The grader's mail breaks because its conversation
+    /// sits in a round under a node the taxonomy gives no name, so the mail has nothing to head it with.
     /// </summary>
     [Fact]
     public Task A_mail_that_breaks_while_being_written_holds_up_nobody_else() => RunTestAsync(async mailer =>
     {
-        // A message to the student, and one to the grader about a round run at no level
+        // A message to the student, and one to the grader about a round under a node nobody named
         await QueryAsync(async context =>
         {
             // The grader's message, owed to the student
@@ -587,12 +647,12 @@ public class GradeMessageMailerPostgresTests(PostgresContainerFixture fixture)
             var season = await context.Seasons.SingleAsync(candidate => candidate.EditionNumber == 76);
             var group = await context.HostedGroups.SingleAsync(candidate => candidate.Slug == "mc-graded");
 
-            // A round at no level in the seeded season and group, with one problem
+            // A round under an unnamed node in the seeded season and group, with one problem
             var roundId = Guid.CreateVersion7();
             var problemId = Guid.CreateVersion7();
             NewRound(context, season, group, roundId, "mathcomps-september", problemId);
 
-            // The classmate's entry into the round at no level
+            // The classmate's entry into the round under the unnamed node
             var entry = NewEntry(_classmateId, roundId, _startedAt);
             context.HostedEntries.Add(entry);
 
@@ -600,7 +660,7 @@ public class GradeMessageMailerPostgresTests(PostgresContainerFixture fixture)
             context.HostedGrades.Add(
                 NewGrade(entry.Id, problemId, _graderId, mark: 3, help: 0, isFinal: true, _startedAt.AddDays(6)));
 
-            // The classmate's message about the problem in the round at no level, owed to the grader
+            // The classmate's message about the problem in that round, owed to the grader
             Notice(context, NewMessage(context, entry.Id, problemId, _classmateId, _writtenAt), _graderId);
 
             // Save the round, its entry and grade, and both messages with their notices

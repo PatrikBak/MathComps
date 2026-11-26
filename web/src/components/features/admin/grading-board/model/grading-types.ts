@@ -56,8 +56,11 @@ export type GradeSummary = {
 export type GradingCompetition = {
   /** The round that is the competition. */
   roundId: string
-  /** Which level it runs at. */
-  category: HostedCompetitionCategory
+  /**
+   * Which level it runs at, or null for a group's sole competition, which needs no level to tell it
+   * apart.
+   */
+  category: HostedCompetitionCategory | null
   /** Its problems in order. */
   problems: GradingProblem[]
   /** Everyone graded in it who spoke about any of its problems while their entry counted. */
