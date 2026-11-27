@@ -78,15 +78,30 @@
         },
         {
           "slug": "elementary",
-          "children": [{ "slug": "september" }, { "slug": "october" }, { "slug": "november" }]
+          "children": [
+            { "slug": "september" },
+            { "slug": "october" },
+            { "slug": "november" },
+            { "slug": "december" }
+          ]
         },
         {
           "slug": "intermediate",
-          "children": [{ "slug": "september" }, { "slug": "october" }, { "slug": "november" }]
+          "children": [
+            { "slug": "september" },
+            { "slug": "october" },
+            { "slug": "november" },
+            { "slug": "december" }
+          ]
         },
         {
           "slug": "advanced",
-          "children": [{ "slug": "september" }, { "slug": "october" }, { "slug": "november" }]
+          "children": [
+            { "slug": "september" },
+            { "slug": "october" },
+            { "slug": "november" },
+            { "slug": "december" }
+          ]
         },
         { "slug": "proposals" }
       ]

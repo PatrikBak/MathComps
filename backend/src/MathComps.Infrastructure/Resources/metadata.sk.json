@@ -274,6 +274,11 @@
       "fullName": "November",
       "urlSlug": "zakladna-november"
     },
+    "mathcomps-elementary-december": {
+      "shortName": "December",
+      "fullName": "December",
+      "urlSlug": "zakladna-december"
+    },
     "mathcomps-intermediate": {
       "shortName": "Stredná",
       "fullName": "Stredná kategória"
@@ -293,6 +298,11 @@
       "fullName": "November",
       "urlSlug": "stredna-november"
     },
+    "mathcomps-intermediate-december": {
+      "shortName": "December",
+      "fullName": "December",
+      "urlSlug": "stredna-december"
+    },
     "mathcomps-advanced": {
       "shortName": "Pokročilá",
       "fullName": "Pokročilá kategória"
@@ -311,6 +321,11 @@
       "shortName": "November",
       "fullName": "November",
       "urlSlug": "pokrocila-november"
+    },
+    "mathcomps-advanced-december": {
+      "shortName": "December",
+      "fullName": "December",
+      "urlSlug": "pokrocila-december"
     },
     "mathcomps-proposals": {
       "shortName": "Návrhy",
