@@ -2,7 +2,7 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 
 import type { DiscussedSubject, DiscussionThread } from './selection-discussions'
 import type { CommentsOrder } from './selection-routes'
-import { isDraft } from './selection-state'
+import { isDraft, recommendablePapers } from './selection-state'
 import { type Board, type Paper, type Proposal, PROPOSAL_AREAS } from './selection-types'
 
 /**
@@ -28,8 +28,9 @@ type PoolPlace = {
 
 /**
  * Says where a board runs each problem of the pool. Under a Category filter only the papers of the categories picked
- * run. A problem a running paper holds runs at its slot; any other runs under the first running paper of a category it
- * is recommended for, what the board holds before the rest, and a problem no paper takes runs after every paper.
+ * run. A problem a running paper holds runs at its slot; any other runs under the first running paper taking it, what
+ * the board holds before the rest, and a problem no paper takes runs after every paper. A paper takes the problems
+ * recommended for its category, or, on a draft, for the paper itself where it has no category.
  *
  * @param board - The board on screen; null when there is none.
  * @param categories - The categories whose papers run, by name; empty for every paper.
@@ -57,10 +58,16 @@ function poolPlacerOf(
   const runs = (paper: Paper) =>
     categories.length === 0 || (paper.category !== null && categories.includes(paper.category))
 
-  // A function which says whether a paper takes a problem it doesn't hold: one recommended for its category, where
-  // the paper runs, which leaves a paper with no category taking none
+  // Whether the board is a draft, the only kind whose papers with no category take the problems recommended for them
+  const isBoardDraft = board !== null && isDraft(board)
+
+  // A function which says whether a paper takes a problem it doesn't hold, where the paper runs: one recommended for
+  // its category, or for the paper itself where it has none and the board is a draft
   const takes = (paper: Paper, problem: Proposal) =>
-    runs(paper) && paper.category !== null && problem.recommended.includes(paper.category)
+    runs(paper) &&
+    (paper.category === null
+      ? isBoardDraft && problem.recommendedPapers.includes(paper.id)
+      : problem.recommended.includes(paper.category))
 
   // A function which says where a problem runs: at its slot where a running paper holds it, else under the first
   // paper taking it, else after every paper
@@ -132,14 +139,15 @@ type PaperPart = (typeof PAPER_PARTS)[number]
 /**
  * Where a thread's subject sits in the comments' order by problem. The drafts come first, newest first, then the pool,
  * then the boards finalized into rounds, newest first. The pool runs like one more board whose papers are the
- * categories.
+ * categories, then the drafts' papers with no category.
  */
 type CommentPlace = {
   /** Its board's position among the drafts, the pool and the finalized boards, in that order. */
   rank: number
   /**
-   * Its paper's position on its board. In the pool, the position of the first category it is recommended for, one
-   * past the last category for a problem recommended for none.
+   * Its paper's position on its board. In the pool, the position of the first category it is recommended for, else
+   * of the first draft's paper with no category it is recommended for, counted after the categories, else one past
+   * those papers.
    */
   group: number
   /** The group it sits in under that paper; the slots for every problem in the pool. */
@@ -200,6 +208,9 @@ function commentPlacerOf(
   // A function which says a board's rank by its id
   const rankOf = (boardId: string) => rankById.get(boardId) ?? goneRank
 
+  // The drafts' papers with no category, which the pool runs after the categories
+  const papersWithoutCategory = recommendablePapers(boards)
+
   // Where each problem on a board sits, by id, under the first board holding it: the map keeps the last of each id,
   // so the slots go in from the last board to the first
   const slotPlaces = new Map(
@@ -222,11 +233,22 @@ function commentPlacerOf(
         // The first category in the order they run that the problem is recommended for, -1 where none
         const category = categories.findIndex((name) => subject.proposal.recommended.includes(name))
 
-        // At its slot where a board holds it, else in the pool under that category, by number
+        // The first draft's paper with no category the problem is recommended for, -1 where none
+        const paper = papersWithoutCategory.findIndex(({ id }) =>
+          subject.proposal.recommendedPapers.includes(id)
+        )
+
+        // Its group in the pool: that category, else that paper after every category, else after every paper
+        const group =
+          category !== -1
+            ? category
+            : categories.length + (paper !== -1 ? paper : papersWithoutCategory.length)
+
+        // At its slot where a board holds it, else in the pool in that group, by number
         return (
           slotPlaces.get(subject.proposal.id) ?? {
             rank: drafts.length,
-            group: category === -1 ? categories.length : category,
+            group,
             part: 'slots',
             spot: subject.proposal.number,
           }
@@ -281,7 +303,8 @@ export function threadsInOrder(
  * Sorts threads by problem. The drafts come first, the newest first, then the pool, then the boards finalized into
  * rounds, the newest first. A board runs paper by paper, each paper's own threads first, then its problems in slot
  * order. The pool runs its problems by the first category each is recommended for, in the order the categories run,
- * then by number. Within one problem or paper, the oldest thread comes first.
+ * then by the first draft's paper with no category each is recommended for, then by number. Within one problem or
+ * paper, the oldest thread comes first.
  *
  * @param threads - The threads.
  * @param boards - The selection's boards, oldest first.
@@ -308,10 +331,11 @@ function inProblemOrder(
 
 /**
  * Orders problems the way the board runs. Each paper brings its placed problems in slot order, then the rest of the
- * problems recommended for its category, by area and then by number. Under a Category filter only the papers of the
- * categories picked run, and a problem another paper holds runs under the first of them it is recommended for, after
- * its slots and before the rest, in the board's order. A problem recommended for several categories runs under the
- * first paper among them, and a problem no paper takes runs after every paper.
+ * problems recommended for its category, or on a draft for the paper itself where it has no category, by area and
+ * then by number. Under a Category filter only the papers of the categories picked run, and a problem another paper
+ * holds runs under the first of them it is recommended for, after its slots and before the rest, in the board's order.
+ * A problem recommended for several categories runs under the first paper among them, and a problem no paper takes
+ * runs after every paper.
  *
  * @param problems - The problems.
  * @param board - The board on screen; null when there is none, which leaves every problem by area and then by number.

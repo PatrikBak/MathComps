@@ -26,8 +26,8 @@ import { useCategoryLabel } from '../hooks/use-category-label'
 import { useOwnRating } from '../hooks/use-own-rating'
 import { useProposalDefenseProblem } from '../hooks/use-proposal-defense-problem'
 import { useProposalDeleteConfirmation } from '../hooks/use-proposal-delete-confirmation'
-import { useRecommend, useSetAside } from '../hooks/use-proposal-writes'
-import { canPlaceOn } from '../model/selection-state'
+import { useRecommend, useRecommendPaper, useSetAside } from '../hooks/use-proposal-writes'
+import { canPlaceOn, recommendablePapers } from '../model/selection-state'
 import { type Proposal, RATING_ASPECTS } from '../model/selection-types'
 import { ScoreBar } from './ScoreBar'
 import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
@@ -47,12 +47,13 @@ type ProposalActionsMenuProps = {
 }
 
 /**
- * The rarer things done to a problem: changing the categories it is recommended for, rating it, setting it aside,
- * bringing it back, deleting it. On a phone, where the card has no room for them beside its name, the menu also opens
- * the conversation with Mathilda and puts the problem onto the draft on screen while no slot waits for one. Only a lead
- * of some category changes a problem's categories, sets it aside or deletes it, whatever the problem is recommended
- * for, so everyone else is offered the rating alone. A problem a round has taken sits in no pool view and can't be deleted, so a lead is
- * offered its categories and the rating alone.
+ * The rarer things done to a problem: changing what it is recommended for, rating it, setting it aside, bringing it
+ * back, deleting it. What it is recommended for is the categories and each draft's paper with no category, which is
+ * its own category. On a phone, where the card has no room for them beside its name, the menu also opens the
+ * conversation with Mathilda and puts the problem onto the draft on screen while no slot waits for one. Only a lead of
+ * some category changes what a problem is recommended for, sets it aside or deletes it, and any lead may, whichever
+ * category they lead. Everyone else is offered the rating alone. A problem a round has taken sits in no pool view and
+ * can't be deleted, so a lead is offered what it is recommended for and the rating alone.
  */
 export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenuProps) {
   // Actions-menu copy
@@ -63,6 +64,9 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
 
   // Recommending the problem for one category, or taking it back
   const recommend = useRecommend()
+
+  // Recommending the problem for one paper with no category, or taking it back
+  const recommendPaper = useRecommendPaper()
 
   // Setting the problem aside, or bringing it back
   const setAside = useSetAside()
@@ -77,8 +81,11 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
   // Lists in the reader's language
   const format = useFormatter()
 
-  // The selection's categories in the order they run, the ones the reader leads, and the draft on screen
-  const { categories, leadCategories, activeBoard } = useLoadedSelection()
+  // The selection's categories in the order they run, the ones the reader leads, its boards, and the draft on screen
+  const { categories, leadCategories, boards, activeBoard } = useLoadedSelection()
+
+  // The drafts' papers with no category, each recommended for like a category
+  const papers = recommendablePapers(boards)
 
   // Whether the reader leads any category, whatever the problem is recommended for
   const isLead = leadCategories.length > 0
@@ -160,9 +167,9 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
             </>
           )}
 
-          {/* The categories the problem is recommended for, each switched on its own and the menu kept open, for a
-              lead where the organization lists any */}
-          {isLead && categories.length > 0 && (
+          {/* The categories and the papers with no category the problem is recommended for, each switched on its
+              own and the menu kept open, for a lead where there are any */}
+          {isLead && (categories.length > 0 || papers.length > 0) && (
             <>
               <DropdownMenuGroup aria-labelledby={recommendedId}>
                 <p id={recommendedId} className="px-2 pt-1.5 pb-1 text-xs font-semibold text-muted">
@@ -182,6 +189,22 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
                     }
                   >
                     {categoryLabel(name)}
+                  </DropdownMenuCheckboxItem>
+                ))}
+                {papers.map((paper) => (
+                  <DropdownMenuCheckboxItem
+                    key={paper.id}
+                    checked={proposal.recommendedPapers.includes(paper.id)}
+                    onSelect={(event) => event.preventDefault()}
+                    onCheckedChange={(isChecked) =>
+                      recommendPaper.mutate({
+                        proposalId: proposal.id,
+                        paperId: paper.id,
+                        isRecommended: isChecked,
+                      })
+                    }
+                  >
+                    {paper.name}
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuGroup>

@@ -42,6 +42,7 @@ function proposal(number: number, changes: Partial<Proposal> = {}): Proposal {
     title: `Problem ${number}`,
     area: 'algebra',
     recommended: [],
+    recommendedPapers: [],
     texts: { en: { statement: `Statement ${number}`, solution: null, hints: [] } },
     originalLanguage: 'en',
     gradingNote: null,
@@ -342,6 +343,56 @@ describe('matchPool', () => {
 
     // B's slot, the rest for B, then the rest for C, then what no paper takes
     expect(matches.shown.map((shown) => shown.number)).toEqual([5, 2, 3, 1, 4])
+  })
+
+  it('runs under a paper with no category the problems recommended for that paper itself', () => {
+    // Problems recommended for another paper with no category, for the warm-up paper, for elementary, or for nothing,
+    // in algebra unless told otherwise
+    const proposals = [
+      proposal(1, { recommendedPapers: ['school'] }),
+      proposal(2, { recommendedPapers: ['warm-up'], area: 'geometry' }),
+      proposal(3, { recommended: ['elementary'] }),
+      proposal(4, { recommendedPapers: ['warm-up'] }),
+      proposal(5),
+    ]
+
+    // A board whose one paper, the warm-up with no category, holds 5
+    const board: Board = {
+      id: 'warm-up-board',
+      name: 'Warm-up',
+      papers: [{ id: 'warm-up', name: 'Warm-up', category: null, slots: ['p5'] }],
+      cycle: null,
+    }
+
+    // The pool, filtered by nothing
+    const matches = matchPool(proposals, OPEN_POOL_FILTER, board, MATHCOMPS)
+
+    // The slot, the warm-up paper's other problems by area, then what no paper takes
+    expect(matches.shown.map((shown) => shown.number)).toEqual([5, 4, 2, 1, 3])
+  })
+
+  it("runs no problem under a finalized board's paper with no category, whatever was recommended for it", () => {
+    // Problems recommended for the paper, in algebra and in geometry, and one in algebra for nothing
+    const proposals = [
+      proposal(1, { recommendedPapers: ['warm-up'] }),
+      proposal(2),
+      proposal(3, { recommendedPapers: ['warm-up'], area: 'geometry' }),
+      proposal(4),
+    ]
+
+    // The board finalized, its one paper with no category holding 2
+    const board: Board = {
+      id: 'warm-up-board',
+      name: 'Warm-up',
+      papers: [{ id: 'warm-up', name: 'Warm-up', category: null, slots: ['p2'] }],
+      cycle: { name: 'Warm-up', opensAt: '2026-12-01T08:00:00.000Z', stage: 'finalized' },
+    }
+
+    // The pool, filtered by nothing
+    const matches = matchPool(proposals, OPEN_POOL_FILTER, board, MATHCOMPS)
+
+    // The slot, then everything else as what no paper takes, algebra first
+    expect(matches.shown.map((shown) => shown.number)).toEqual([2, 1, 4, 3])
   })
 
   it('finds a problem by its number, its name or a statement in any language, whatever the case', () => {

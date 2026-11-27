@@ -4,6 +4,7 @@ import {
   type Board,
   type MoveWrite,
   type Paper,
+  type PaperRecommendationWrite,
   type PlacementWrite,
   type Proposal,
   RATING_ASPECTS,
@@ -203,6 +204,28 @@ export function afterRecommendation(
       .map((candidate) => candidate.name)
       .filter((name) => (name === category ? isRecommended : proposal.recommended.includes(name))),
   }))
+}
+
+/**
+ * The selection once a proposal is recommended for one paper with no category, or the recommendation is taken back.
+ *
+ * @param data - The selection.
+ * @param change - The proposal, the paper and whether it is recommended for it afterwards.
+ *
+ * @returns The selection as the change leaves it.
+ */
+export function afterPaperRecommendation(
+  data: SelectionData,
+  { proposalId, paperId, isRecommended }: PaperRecommendationWrite
+): SelectionData {
+  // The proposal with the paper switched, its other papers left standing
+  return editProposal(data, proposalId, (proposal) => {
+    // Every other paper the proposal is recommended for
+    const others = proposal.recommendedPapers.filter((candidate) => candidate !== paperId)
+
+    // The proposal with those, and the paper too where it is recommended for it afterwards
+    return { ...proposal, recommendedPapers: isRecommended ? [...others, paperId] : others }
+  })
 }
 
 /**

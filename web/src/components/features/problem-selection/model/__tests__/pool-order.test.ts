@@ -22,6 +22,7 @@ function proposal(number: number, changes: Partial<Proposal> = {}): Proposal {
     title: `Problem ${number}`,
     area: 'algebra',
     recommended: [],
+    recommendedPapers: [],
     texts: { en: { statement: `Statement ${number}`, solution: null, hints: [] } },
     originalLanguage: 'en',
     gradingNote: null,
@@ -182,5 +183,43 @@ describe('threadsInOrder', () => {
       'september a',
       'p7',
     ])
+  })
+
+  it("runs a pool problem recommended for a draft's paper with no category after the categories' problems, and one recommended for a finalized board's with the problems recommended for nothing", () => {
+    // A finalized board and a draft, each with one paper with no category and no problem in it
+    const school: Board = {
+      id: 'school',
+      name: 'School',
+      papers: [{ id: 'school-paper', name: 'School', category: null, slots: [] }],
+      cycle: { name: 'School', opensAt: '2026-11-01T08:00:00.000Z', stage: 'finalized' },
+    }
+    const warmUp: Board = {
+      id: 'warm-up',
+      name: 'Warm-up',
+      papers: [{ id: 'warm-up-paper', name: 'Warm-up', category: null, slots: [] }],
+      cycle: null,
+    }
+
+    // The pool's problems: one for nothing, one for the finalized board's paper, one for the draft's, one for C
+    const [forNothing, forSchool, forWarmUp, forC] = [
+      proposal(1),
+      proposal(2, { recommendedPapers: ['school-paper'] }),
+      proposal(3, { recommendedPapers: ['warm-up-paper'] }),
+      proposal(4, { recommended: ['C'] }),
+    ].map((problem): DiscussedSubject => ({ kind: 'proposal', proposal: problem }))
+
+    // A thread on each, newest activity first
+    const threads = [
+      thread('for c', 4, forC),
+      thread('for warm-up', 3, forWarmUp),
+      thread('for school', 2, forSchool),
+      thread('for nothing', 1, forNothing),
+    ]
+
+    // The threads by problem
+    const ordered = threadsInOrder(threads, 'problem', [school, warmUp], CATEGORIES)
+
+    // C's problem, the draft paper's, then the rest by number, the finalized paper's among them
+    expect(threadIds(ordered)).toEqual(['for c', 'for warm-up', 'for nothing', 'for school'])
   })
 })

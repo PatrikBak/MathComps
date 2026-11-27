@@ -142,6 +142,21 @@ export function isDraft(board: Board): boolean {
 }
 
 /**
+ * The papers a proposal can be recommended for beside the categories: the drafts' papers with no category, each of
+ * which is its own category.
+ *
+ * @param boards - The selection's boards.
+ *
+ * @returns The papers, board by board, each board's in its order.
+ */
+export function recommendablePapers(boards: readonly Board[]): Paper[] {
+  // Each draft's papers with no category
+  return boards
+    .filter(isDraft)
+    .flatMap((board) => board.papers.filter((paper) => paper.category === null))
+}
+
+/**
  * Whether a board picks papers for a cycle.
  *
  * @param board - The board.

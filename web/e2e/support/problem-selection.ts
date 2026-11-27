@@ -154,6 +154,7 @@ function proposalNumbered(number: number, distinction: Partial<Proposal> = {}): 
     title: `Erasing game ${number}`,
     area: 'combinatorics',
     recommended: ['intermediate'],
+    recommendedPapers: [],
     texts: { en: { statement: statementOf(number), solution: null, hints: [] } },
     originalLanguage: 'en',
     gradingNote: null,
@@ -437,14 +438,17 @@ export const FULL_DRAFT_OPENED: BoardPickingForCycle = {
   cycle: { ...NOVEMBER, opensAt: new Date(Date.now() - DAY_MS).toISOString(), stage: 'opened' },
 }
 
+/** A paper with no category, for a competition that runs at no level, its three slots empty. */
+export const SCHOOL_PAPER = paperOf(9, 'School A', null, [null, null, null])
+
 /**
- * A draft picking for a cycle whose one competition runs at no level, so its one paper fills no category, its three
- * slots empty.
+ * A draft picking for a cycle whose one competition runs at no level, so its one paper, {@link SCHOOL_PAPER}, fills
+ * no category.
  */
 const SCHOOL_DRAFT: BoardPickingForCycle = {
   id: '00000000-0000-4000-8000-b00000000005',
   name: 'School 2026',
-  papers: [paperOf(9, 'School A', null, [null, null, null])],
+  papers: [SCHOOL_PAPER],
   cycle: cycleOf('School A', 5, 'finalizable'),
 }
 

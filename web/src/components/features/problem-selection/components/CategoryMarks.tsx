@@ -8,7 +8,14 @@ import { cn } from '@/components/shared/utils/css-utils'
 import { hueTextStyle } from '@/components/shared/utils/hue-colors'
 
 import { useCategoryLabel } from '../hooks/use-category-label'
-import { type BoardSlot, categoryHue, slotLabel, type SlotPosition } from '../model/selection-state'
+import {
+  type BoardSlot,
+  categoryHue,
+  recommendablePapers,
+  slotLabel,
+  type SlotPosition,
+} from '../model/selection-state'
+import type { Proposal } from '../model/selection-types'
 import { useLoadedSelection } from './SelectionWorkspaceProvider'
 
 /**
@@ -94,31 +101,45 @@ export function SlotNumber({ paper, index, state }: SlotNumberProps) {
  * Props for the {@link RecommendedMarks} component.
  */
 type RecommendedMarksProps = {
-  /** The categories a proposal is recommended for, by name. */
-  recommended: readonly string[]
+  /** The proposal whose recommendations are shown. */
+  proposal: Proposal
 }
 
 /**
- * The categories a proposal is recommended for, each in its own colour. A category the selection doesn't list shows
- * no badge.
+ * What a proposal is recommended for: each category in its own colour, then each draft's paper with no category, in
+ * the page's text colour. A category the selection doesn't list, or a paper no draft holds, shows no badge.
  */
-export function RecommendedMarks({ recommended }: RecommendedMarksProps) {
-  // The selection's categories, in the order they run
-  const { categories } = useLoadedSelection()
+export function RecommendedMarks({ proposal }: RecommendedMarksProps) {
+  // The selection's categories, in the order they run, and its boards
+  const { categories, boards } = useLoadedSelection()
 
   // What each category is called
   const categoryLabel = useCategoryLabel()
 
-  // A badge per category the selection lists
-  return recommended.map((category) => {
-    // The category's hue, where the selection lists it
-    const hue = categoryHue(categories, category)
+  // The drafts' papers with no category the proposal is recommended for, in board order
+  const papers = recommendablePapers(boards).filter((paper) =>
+    proposal.recommendedPapers.includes(paper.id)
+  )
 
-    // Its badge, or nothing for a category the selection doesn't list
-    return hue === null ? null : (
-      <HueBadge key={category} label={categoryLabel(category)} hue={hue} size="small" />
-    )
-  })
+  return (
+    <>
+      {/* A badge per category the selection lists */}
+      {proposal.recommended.map((category) => {
+        // The category's hue, where the selection lists it
+        const hue = categoryHue(categories, category)
+
+        // Its badge, or nothing for a category the selection doesn't list
+        return hue === null ? null : (
+          <HueBadge key={category} label={categoryLabel(category)} hue={hue} size="small" />
+        )
+      })}
+
+      {/* A badge per paper with no category */}
+      {papers.map((paper) => (
+        <HueBadge key={paper.id} label={paper.name} hue={null} size="small" />
+      ))}
+    </>
+  )
 }
 
 /**

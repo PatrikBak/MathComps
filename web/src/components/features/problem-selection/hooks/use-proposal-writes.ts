@@ -6,12 +6,14 @@ import { useSignedInIdentity } from '@/components/features/profile/hooks/use-sig
 
 import {
   afterDeletion,
+  afterPaperRecommendation,
   afterPlacement,
   afterRating,
   afterRecommendation,
   afterSetAside,
 } from '../model/selection-edits'
 import type {
+  PaperRecommendationWrite,
   PlacementWrite,
   RatingWrite,
   RecommendationWrite,
@@ -21,6 +23,7 @@ import {
   deleteProposal,
   placeProposal,
   setAside,
+  setPaperRecommended,
   setRating,
   setRecommended,
 } from '../services/selection-service'
@@ -57,6 +60,24 @@ export function useRecommend(): SelectionWrite<RecommendationWrite> {
   return useSelectionWrite<RecommendationWrite>({
     apiFn: setRecommended,
     edit: afterRecommendation,
+    changesSlots: false,
+    errorMessage: t('recommendFailed'),
+  })
+}
+
+/**
+ * Recommending a proposal for one paper with no category, or taking it back, the rest left as they stand.
+ *
+ * @returns The write.
+ */
+export function useRecommendPaper(): SelectionWrite<PaperRecommendationWrite> {
+  // Copy for the selection's writes
+  const t = useTranslations('problemSelection.writes')
+
+  // Switching the recommendation for the one paper, shown ahead of the server
+  return useSelectionWrite<PaperRecommendationWrite>({
+    apiFn: setPaperRecommended,
+    edit: afterPaperRecommendation,
     changesSlots: false,
     errorMessage: t('recommendFailed'),
   })

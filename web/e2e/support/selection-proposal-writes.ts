@@ -19,10 +19,11 @@ import {
 } from './selection-writes'
 
 /**
- * The path of a proposal write: the proposal, and a trailing set-aside, recommended or rating naming the change.
+ * The path of a proposal write: the proposal, and a trailing set-aside, recommended, recommended-paper or rating
+ * naming the change.
  */
 export const PROPOSAL_WRITE_PATH = new RegExp(
-  `^${SELECTION_API_PATH}/proposals/(${GUID})(/set-aside|/recommended|/rating)?$`
+  `^${SELECTION_API_PATH}/proposals/(${GUID})(/set-aside|/recommended-paper|/recommended|/rating)?$`
 )
 
 /** The reader, as the backend names the reviewer reading the selection. */
@@ -61,6 +62,16 @@ const SCORES: number[] = Array.from(
 type Recommendation = {
   /** The category, by name. */
   category: string
+  /** Whether the proposal is recommended for it afterwards. */
+  isRecommended: boolean
+}
+
+/**
+ * A proposal's recommendation for one paper with no category, as a write switches it.
+ */
+type PaperRecommendation = {
+  /** The paper, by id. */
+  paperId: string
   /** Whether the proposal is recommended for it afterwards. */
   isRecommended: boolean
 }
@@ -120,6 +131,27 @@ function readRecommendation(body: string | null): Recommendation {
 
   // The switch
   return { category, isRecommended }
+}
+
+/**
+ * Reads which paper a paper recommendation switches and which way, refusing a body missing either, as the backend
+ * does.
+ *
+ * @param body - The body as it went out; null when there was none.
+ *
+ * @returns The paper and which way it goes.
+ */
+function readPaperRecommendation(body: string | null): PaperRecommendation {
+  // The paper and the flag sent
+  const { paperId, isRecommended } = readFields(body)
+
+  // No paper, or a flag that says neither way
+  if (typeof paperId !== 'string' || typeof isRecommended !== 'boolean') {
+    refuseWith('MalformedRequest')
+  }
+
+  // The switch
+  return { paperId, isRecommended }
 }
 
 /**
@@ -296,6 +328,47 @@ function recommend(
 }
 
 /**
+ * Recommends a proposal for one paper with no category or takes it back, as the backend does, leaving the rest as
+ * they stand. A paper no board holds, or one with a category, is refused like a proposal the backend doesn't hold.
+ *
+ * @param held - What the backend holds.
+ * @param proposalId - The proposal.
+ * @param recommendation - The paper and which way it goes.
+ * @param leadCategories - The names of the categories the writer leads.
+ *
+ * @returns What the backend holds afterwards.
+ */
+function recommendPaper(
+  held: HeldSelection,
+  proposalId: string,
+  { paperId, isRecommended }: PaperRecommendation,
+  leadCategories: readonly string[]
+): HeldSelection {
+  // The proposal, as it stands
+  const proposal = liveProposal(held, proposalId)
+
+  // Only a lead of some category switches what the proposal is recommended for
+  if (leadCategories.length === 0) refuseWith('ProposalNotLead')
+
+  // Whether a board holds the paper with no category
+  const isPaperThere = held.boards.some((board) =>
+    board.papers.some((paper) => paper.id === paperId && paper.category === null)
+  )
+
+  // A paper no board holds, or one with a category, refused like a missing proposal
+  if (!isPaperThere) refuseWith('SelectionTargetNotFound')
+
+  // Every other paper the proposal is recommended for
+  const others = proposal.recommendedPapers.filter((candidate) => candidate !== paperId)
+
+  // The proposal with those, and the paper too where it is recommended for it afterwards
+  return withProposal(held, {
+    ...proposal,
+    recommendedPapers: isRecommended ? [...others, paperId] : others,
+  })
+}
+
+/**
  * Deletes a proposal from the selection, as the backend does: it leaves every read and every draft's slot it
  * stood in, while one a round has taken stays.
  *
@@ -329,8 +402,8 @@ function remove(
 
 /**
  * One write to a proposal, as the backend routes it: a delete at the proposal's own address, a set-aside, a
- * recommendation and a rating each at its own. A body is read before anything else, so a body the backend cannot
- * read is refused first.
+ * recommendation, a paper recommendation and a rating each at its own. A body is read before anything else, so a body
+ * the backend cannot read is refused first.
  *
  * @param held - What the backend holds.
  * @param leadCategories - The names of the categories the writer leads.
@@ -357,6 +430,11 @@ export function proposalWrite(
   // A recommendation, put at its address
   if (change === '/recommended' && method === 'PUT') {
     return recommend(held, proposalId, readRecommendation(body), leadCategories)
+  }
+
+  // A paper recommendation, put at its address
+  if (change === '/recommended-paper' && method === 'PUT') {
+    return recommendPaper(held, proposalId, readPaperRecommendation(body), leadCategories)
   }
 
   // A rating, put at its address
