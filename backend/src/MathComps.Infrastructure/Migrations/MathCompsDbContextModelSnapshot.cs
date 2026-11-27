@@ -1855,6 +1855,25 @@ namespace MathComps.Infrastructure.Migrations
                     b.ToTable("proposal_comments", (string)null);
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProposalPaperRecommendation", b =>
+                {
+                    b.Property<Guid>("ProposalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("proposal_id");
+
+                    b.Property<Guid>("PaperId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("paper_id");
+
+                    b.HasKey("ProposalId", "PaperId")
+                        .HasName("pk_proposal_paper_recommendations");
+
+                    b.HasIndex("PaperId")
+                        .HasDatabaseName("ix_proposal_paper_recommendations_paper_id");
+
+                    b.ToTable("proposal_paper_recommendations", (string)null);
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProposalRating", b =>
                 {
                     b.Property<Guid>("ProposalId")
@@ -3109,6 +3128,27 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("Proposal");
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProposalPaperRecommendation", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.SelectionPaper", "Paper")
+                        .WithMany()
+                        .HasForeignKey("PaperId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_proposal_paper_recommendations_selection_papers_paper_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Proposal", "Proposal")
+                        .WithMany("PaperRecommendations")
+                        .HasForeignKey("ProposalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_proposal_paper_recommendations_proposals_proposal_id");
+
+                    b.Navigation("Paper");
+
+                    b.Navigation("Proposal");
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProposalRating", b =>
                 {
                     b.HasOne("MathComps.Domain.EfCoreEntities.Proposal", "Proposal")
@@ -3400,6 +3440,8 @@ namespace MathComps.Infrastructure.Migrations
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Proposal", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("PaperRecommendations");
 
                     b.Navigation("Ratings");
 

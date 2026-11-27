@@ -287,6 +287,33 @@ public static class ProblemSelectionEndpoints
         .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
+        // Recommend a proposal for one paper with no category, or take it back
+        app.MapPut($"{ProposalPath}/recommended-paper", async (
+            string organization,
+            Guid proposalId,
+            SetPaperRecommendedRequest request,
+            HttpContext context,
+            IUserManager userManager,
+            IProposalService proposalService,
+            CancellationToken cancellationToken) =>
+        {
+            // A change naming no paper, or saying neither way, changes nothing
+            if (request is not { PaperId: { } paperId, IsRecommended: { } isRecommended })
+                throw new BadHttpRequestException("The change must name the paper and say which way it goes.");
+
+            // The reviewer switching the paper
+            var reviewerId = await userManager.RequireUserIdAsync(context);
+
+            // Change it
+            await proposalService.SetPaperRecommendedAsync(
+                organization, reviewerId, proposalId, paperId, isRecommended, cancellationToken);
+
+            // Nothing to return
+            return Results.NoContent();
+        })
+        .RequireAuthorization(AuthorizationPolicies.OrganizationMember)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
         // Rate a proposal, or take the rating back
         app.MapPut($"{ProposalPath}/rating", async (
             string organization,

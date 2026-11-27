@@ -372,8 +372,31 @@ public static class SelectionSeed
     /// <returns>The board, its paper tracked beside it.</returns>
     public static SelectionBoard NewBoardWithoutCategory(
         MathCompsDbContext context, HostedGroup? group, string name, params Guid?[] slots) =>
-        // MathComps' own, its one paper of no category
-        NewBoard(context, MathCompsId(context), group, name, [(name, null)], slots);
+        // MathComps' own
+        NewBoardWithoutCategory(context, MathCompsId(context), group, name, slots);
+
+    /// <summary>
+    /// Tracks a draft board of an organization with one paper of no category, named like the board, its four slots
+    /// filled from the ids given.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="organizationId">
+    /// <inheritdoc cref="NewBoard(MathCompsDbContext, Guid, HostedGroup?, string, Guid?[])"
+    /// path="/param[@name='organizationId']"/>
+    /// </param>
+    /// <param name="group">
+    /// <inheritdoc cref="NewBoard(MathCompsDbContext, Guid, HostedGroup?, string, Guid?[])"
+    /// path="/param[@name='group']"/>
+    /// </param>
+    /// <param name="name"><inheritdoc cref="SelectionBoard.Name" path="/summary"/></param>
+    /// <param name="slots">
+    /// What stands in each slot; null for an empty slot. Missing trailing entries stand empty.
+    /// </param>
+    /// <returns>The board, its paper tracked beside it.</returns>
+    public static SelectionBoard NewBoardWithoutCategory(
+        MathCompsDbContext context, Guid organizationId, HostedGroup? group, string name, params Guid?[] slots) =>
+        // Its one paper of no category
+        NewBoard(context, organizationId, group, name, [(name, null)], slots);
 
     /// <summary>
     /// Tracks a draft board of an organization with the papers given, each of four slots, filled from the ids given.

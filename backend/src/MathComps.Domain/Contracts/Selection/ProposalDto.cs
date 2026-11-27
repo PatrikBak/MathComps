@@ -14,6 +14,9 @@ namespace MathComps.Domain.Contracts.Selection;
 /// The categories the reviewers recommend it for, by their <see cref="OrganizationCategory.Name"/>, in the order the
 /// categories run.
 /// </param>
+/// <param name="RecommendedPapers">
+/// The papers with no category the reviewers recommend it for, by their <see cref="SelectionPaper.Id"/>.
+/// </param>
 /// <param name="Texts">
 /// Its text in every language it has a statement in, keyed by that language.
 /// </param>
@@ -36,6 +39,7 @@ public record ProposalDto(
     string Title,
     ProposalArea Area,
     IReadOnlyList<string> Recommended,
+    IReadOnlyList<Guid> RecommendedPapers,
     IReadOnlyDictionary<Language, ProposalTextDto> Texts,
     Language? OriginalLanguage,
     string? GradingNote,

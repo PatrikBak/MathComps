@@ -183,6 +183,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Join table: the categories the reviewers recommend the proposals for.</summary>
     public DbSet<ProposalRecommendation> ProposalRecommendations => Set<ProposalRecommendation>();
 
+    /// <summary>Join table: the papers with no category the reviewers recommend the proposals for.</summary>
+    public DbSet<ProposalPaperRecommendation> ProposalPaperRecommendations => Set<ProposalPaperRecommendation>();
+
     /// <summary>The boards papers are selected on.</summary>
     public DbSet<SelectionBoard> SelectionBoards => Set<SelectionBoard>();
 
@@ -1333,6 +1336,28 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion ProposalRecommendation
+
+        #region ProposalPaperRecommendation
+
+        modelBuilder.Entity<ProposalPaperRecommendation>(e =>
+        {
+            // A proposal is recommended for a paper once, so the pair is the row
+            e.HasKey(recommendation => new { recommendation.ProposalId, recommendation.PaperId });
+
+            // The proposal recommended, its recommendations going with it
+            e.HasOne(recommendation => recommendation.Proposal)
+             .WithMany(proposal => proposal.PaperRecommendations)
+             .HasForeignKey(recommendation => recommendation.ProposalId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // The paper, the recommendations for it going with it
+            e.HasOne(recommendation => recommendation.Paper)
+             .WithMany()
+             .HasForeignKey(recommendation => recommendation.PaperId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        #endregion ProposalPaperRecommendation
 
         #region SelectionBoard
 

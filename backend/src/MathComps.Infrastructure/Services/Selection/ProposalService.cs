@@ -60,6 +60,38 @@ public sealed class ProposalService(
         }, cancellationToken);
 
     /// <inheritdoc/>
+    public Task SetPaperRecommendedAsync(
+        string organizationSlug, Guid userId, Guid proposalId, Guid paperId, bool isRecommended,
+        CancellationToken cancellationToken = default) =>
+        // The recommendation switched by a lead
+        RunLeadWriteAsync(organizationSlug, userId, proposalId, async (dbContext, proposal) =>
+        {
+            // Whether the paper is one with no category on a board of the proposal's organization
+            var isPaperThere = await dbContext.SelectionPapers.AnyAsync(
+                paper => paper.Id == paperId
+                    && paper.CategoryId == null
+                    && paper.Board.OrganizationId == proposal.OrganizationId,
+                cancellationToken);
+
+            // A paper the organization's boards don't hold, or one with a category, is no paper to recommend for
+            if (!isPaperThere)
+                throw new SelectionTargetNotFoundException();
+
+            // The recommendation as it stands, if the proposal has it
+            var recommendation = await dbContext.ProposalPaperRecommendations
+                .FindAsync([proposalId, paperId], cancellationToken);
+
+            // A recommendation the proposal lacks, added
+            if (isRecommended && recommendation is null)
+                dbContext.ProposalPaperRecommendations.Add(
+                    new ProposalPaperRecommendation { ProposalId = proposalId, PaperId = paperId });
+
+            // A recommendation taken back, where the proposal has it
+            if (!isRecommended && recommendation is not null)
+                dbContext.ProposalPaperRecommendations.Remove(recommendation);
+        }, cancellationToken);
+
+    /// <inheritdoc/>
     public async Task RateAsync(
         string organizationSlug, Guid proposalId, Guid raterId, decimal? beauty, decimal? difficulty,
         CancellationToken cancellationToken = default)

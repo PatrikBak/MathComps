@@ -189,6 +189,39 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     });
 
     /// <summary>
+    /// A proposal reads with the papers with no category it is recommended for, by the papers' ids.
+    /// </summary>
+    [Fact]
+    public Task A_proposal_reads_with_the_papers_it_is_recommended_for() => RunTestAsync(async service =>
+    {
+        // A draft whose one paper has no category, the first proposal recommended for it
+        var paperId = await QueryValueAsync(async context =>
+        {
+            // The draft's one paper
+            var paper = SelectionSeed.NewBoardWithoutCategory(context, null, "Warm-up").Papers.Single();
+
+            // The first proposal recommended for it
+            context.ProposalPaperRecommendations.Add(
+                new ProposalPaperRecommendation { ProposalId = _pool[1], PaperId = paper.Id });
+
+            // Written
+            await context.SaveChangesAsync();
+
+            // The paper's id
+            return paper.Id;
+        });
+
+        // The selection
+        var selection = await service.GetSelectionAsync(Organization.MathCompsSlug, _reviewerId, Language.EN);
+
+        // The first proposal
+        var proposal = selection.Proposals.Single(candidate => candidate.Id == _pool[1]);
+
+        // Recommended for the paper
+        Assert.Equal([paperId], proposal.RecommendedPapers);
+    });
+
+    /// <summary>
     /// A proposal reads with its grading note where its problem carries one, and with none where not. A note is
     /// written in one language, so a reviewer reading in another still gets it.
     /// </summary>
