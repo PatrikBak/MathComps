@@ -37,6 +37,11 @@ public sealed class SilentChatEndpoint : IAsyncDisposable
     private readonly TaskCompletionSource _firstConnection = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     /// <summary>
+    /// The endpoint's shutdown signal, cancelled as its disposal begins.
+    /// </summary>
+    private readonly CancellationTokenSource _shutdown = new();
+
+    /// <summary>
     /// The loop taking connections until the endpoint is disposed.
     /// </summary>
     private readonly Task _accepting;
@@ -107,11 +112,14 @@ public sealed class SilentChatEndpoint : IAsyncDisposable
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
+        // Tell the accepting loop to stop taking connections.
+        await _shutdown.CancelAsync();
+
+        // Wait for the loop to end, since the loop may ask the port for a connection until then.
+        await _accepting;
+
         // Close the port.
         _listener.Stop();
-
-        // Let the accepting loop see it closed and end.
-        await _accepting;
 
         // Drop every connection taken.
         lock (_gate)
@@ -119,22 +127,25 @@ public sealed class SilentChatEndpoint : IAsyncDisposable
 
         // Shut down the chat stack registered for the test.
         await _provider.DisposeAsync();
+
+        // Release the shutdown signal.
+        _shutdown.Dispose();
     }
 
     /// <summary>
-    /// Takes connections until the port closes.
+    /// Takes connections until the endpoint is disposed.
     /// </summary>
-    /// <returns>A task that completes once the port is closed.</returns>
+    /// <returns>A task that completes once the endpoint's disposal begins.</returns>
     private async Task AcceptAsync()
     {
-        // Take connections until closing the port ends the wait.
+        // Take connections until disposing the endpoint ends the wait.
         try
         {
-            // One connection at a time, for as long as the port is open.
+            // One connection at a time, for as long as the endpoint lives.
             while (true)
             {
                 // The next connection the caller opens.
-                var connection = await _listener.AcceptTcpClientAsync();
+                var connection = await _listener.AcceptTcpClientAsync(_shutdown.Token);
 
                 // Hold it, never reading or answering.
                 lock (_gate)
@@ -144,9 +155,9 @@ public sealed class SilentChatEndpoint : IAsyncDisposable
                 _firstConnection.TrySetResult();
             }
         }
-        catch (Exception exception) when (exception is SocketException or ObjectDisposedException)
+        catch (OperationCanceledException) when (_shutdown.IsCancellationRequested)
         {
-            // The port was closed.
+            // The endpoint is being disposed.
         }
     }
 }
