@@ -124,7 +124,7 @@ export function RecommendedMarks({ proposal }: RecommendedMarksProps) {
   return (
     <>
       {/* A badge per category the selection lists */}
-      {proposal.recommended.map((category) => {
+      {proposal.recommendedCategories.map((category) => {
         // The category's hue, where the selection lists it
         const hue = categoryHue(categories, category)
 

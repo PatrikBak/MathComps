@@ -32,7 +32,7 @@ public sealed class ProposalService(
         }, cancellationToken);
 
     /// <inheritdoc/>
-    public Task SetRecommendedAsync(
+    public Task SetCategoryRecommendedAsync(
         string organizationSlug, Guid userId, Guid proposalId, string category, bool isRecommended,
         CancellationToken cancellationToken = default) =>
         // The recommendation switched by a lead

@@ -153,7 +153,7 @@ function proposalNumbered(number: number, distinction: Partial<Proposal> = {}): 
     number,
     title: `Erasing game ${number}`,
     area: 'combinatorics',
-    recommended: ['intermediate'],
+    recommendedCategories: ['intermediate'],
     recommendedPapers: [],
     texts: { en: { statement: statementOf(number), solution: null, hints: [] } },
     originalLanguage: 'en',
@@ -244,7 +244,10 @@ const READY_WITHOUT_CZECH_SOLUTION: Proposal = {
 }
 
 /** The pool's one geometry problem, recommended for the advanced category alone. */
-export const GEOMETRY = proposalNumbered(6, { area: 'geometry', recommended: ['advanced'] })
+export const GEOMETRY = proposalNumbered(6, {
+  area: 'geometry',
+  recommendedCategories: ['advanced'],
+})
 
 /** The problem a round has taken, written and solved in every language as the round needed it. */
 export const USED = proposalNumbered(7, { isUsed: true, texts: textsInEveryLanguage(7) })
@@ -276,7 +279,7 @@ function ratingByOtherRater(beauty: number | null, difficulty: number | null): P
  */
 export const ALGEBRA = proposalNumbered(8, {
   area: 'algebra',
-  recommended: ['elementary', 'intermediate'],
+  recommendedCategories: ['elementary', 'intermediate'],
   ratings: [
     ratingByOtherRater(3.5, null),
     { rater: READER, isOwn: true, beauty: 5, difficulty: 2 },

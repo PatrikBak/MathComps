@@ -74,21 +74,21 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_recommendation_switches_one_category_and_keeps_the_rest() => RunTestAsync(async service =>
     {
         // Elementary switched on beside the advanced one already there
-        await service.SetRecommendedAsync(
+        await service.SetCategoryRecommendedAsync(
             Organization.MathCompsSlug, _leadId, _pooledId, "elementary", isRecommended: true);
 
         // Both stand
         Assert.Equal(["elementary", "advanced"], await RecommendedAsync());
 
         // Advanced switched on again
-        await service.SetRecommendedAsync(
+        await service.SetCategoryRecommendedAsync(
             Organization.MathCompsSlug, _leadId, _pooledId, "advanced", isRecommended: true);
 
         // Both still stand
         Assert.Equal(["elementary", "advanced"], await RecommendedAsync());
 
         // Advanced switched off
-        await service.SetRecommendedAsync(
+        await service.SetCategoryRecommendedAsync(
             Organization.MathCompsSlug, _leadId, _pooledId, "advanced", isRecommended: false);
 
         // Leaving elementary alone
@@ -105,7 +105,7 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     {
         // The olympiad's category, switched on for MathComps' proposal, refused
         await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
-            () => service.SetRecommendedAsync(
+            () => service.SetCategoryRecommendedAsync(
                 Organization.MathCompsSlug, _leadId, _pooledId, "C", isRecommended: true));
 
         // The proposal still recommended for advanced alone
@@ -322,7 +322,7 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_lead_changes_a_proposal_recommended_for_none_of_their_categories() => RunTestAsync(async service =>
     {
         // The advanced recommendation taken back
-        await service.SetRecommendedAsync(
+        await service.SetCategoryRecommendedAsync(
             Organization.MathCompsSlug, _leadId, _pooledId, "advanced", isRecommended: false);
 
         // Leaving the proposal recommended for nothing
@@ -357,7 +357,7 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
             () => service.SetAsideAsync(Organization.MathCompsSlug, _memberId, _pooledId, isSetAside: true));
 
         // Recommending it for elementary, refused
-        await Assert.ThrowsAsync<ProposalNotLeadException>(() => service.SetRecommendedAsync(
+        await Assert.ThrowsAsync<ProposalNotLeadException>(() => service.SetCategoryRecommendedAsync(
             Organization.MathCompsSlug, _memberId, _pooledId, "elementary", isRecommended: true));
 
         // Recommending it for the paper with no category, refused

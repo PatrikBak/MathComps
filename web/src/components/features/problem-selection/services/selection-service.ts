@@ -2,13 +2,13 @@ import type { ApiCaller } from '@/hooks/use-api'
 import type { ApiResult } from '@/types/api'
 
 import type {
+  CategoryRecommendationWrite,
   DiscussionsSeenUpTo,
   MoveWrite,
   Organization,
   PaperRecommendationWrite,
   PlacementWrite,
   RatingWrite,
-  RecommendationWrite,
   SelectionData,
   SelectionDiscussions,
   SelectionDiscussionsSeen,
@@ -22,8 +22,8 @@ import {
   getOrganizationsUrl,
   getProposalUrl,
   getRatingUrl,
+  getRecommendedCategoryUrl,
   getRecommendedPaperUrl,
-  getRecommendedUrl,
   getSelectionUrl,
   getSetAsideUrl,
   getSlotMoveUrl,
@@ -217,12 +217,12 @@ export function setAside(
  *
  * @returns Success, or an error.
  */
-export function setRecommended(
+export function setCategoryRecommended(
   apiCall: ApiCaller,
   organization: string,
-  { proposalId, category, isRecommended }: RecommendationWrite
+  { proposalId, category, isRecommended }: CategoryRecommendationWrite
 ): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getRecommendedUrl(organization, proposalId), {
+  return apiCall<void>(() => getRecommendedCategoryUrl(organization, proposalId), {
     method: 'PUT',
     body: JSON.stringify({ category, isRecommended }),
   })

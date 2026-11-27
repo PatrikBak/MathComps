@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  afterCategoryRecommendation,
   afterClearing,
   afterDeletion,
   afterMove,
   afterPaperRecommendation,
   afterPlacement,
   afterRating,
-  afterRecommendation,
   afterSetAside,
 } from '../selection-edits'
 import type { Board, Proposal, SelectionData } from '../selection-types'
@@ -26,7 +26,7 @@ function proposal(id: string): Proposal {
     number: 1,
     title: id,
     area: 'algebra',
-    recommended: [],
+    recommendedCategories: [],
     recommendedPapers: [],
     texts: {},
     originalLanguage: null,
@@ -245,11 +245,11 @@ describe('afterDeletion', () => {
   })
 })
 
-describe('afterRecommendation', () => {
+describe('afterCategoryRecommendation', () => {
   it('keeps the categories in the order the organization runs them whichever one is switched on', () => {
     // a, recommended for A alone, in a selection whose categories run C, B, A
     const before: SelectionData = {
-      ...selection([], [{ ...proposal('a'), recommended: ['A'] }]),
+      ...selection([], [{ ...proposal('a'), recommendedCategories: ['A'] }]),
       categories: [
         { name: 'C', hostedCategory: null },
         { name: 'B', hostedCategory: null },
@@ -258,29 +258,32 @@ describe('afterRecommendation', () => {
     }
 
     // C goes on
-    const after = afterRecommendation(before, {
+    const after = afterCategoryRecommendation(before, {
       proposalId: 'a',
       category: 'C',
       isRecommended: true,
     })
 
     // C comes first, as the categories run
-    expect(after.proposals[0]?.recommended).toEqual(['C', 'A'])
+    expect(after.proposals[0]?.recommendedCategories).toEqual(['C', 'A'])
   })
 
   it('takes one category back and keeps the rest', () => {
     // a, recommended for elementary and advanced
-    const before = selection([], [{ ...proposal('a'), recommended: ['elementary', 'advanced'] }])
+    const before = selection(
+      [],
+      [{ ...proposal('a'), recommendedCategories: ['elementary', 'advanced'] }]
+    )
 
     // Elementary goes off
-    const after = afterRecommendation(before, {
+    const after = afterCategoryRecommendation(before, {
       proposalId: 'a',
       category: 'elementary',
       isRecommended: false,
     })
 
     // Only advanced is left
-    expect(after.proposals[0]?.recommended).toEqual(['advanced'])
+    expect(after.proposals[0]?.recommendedCategories).toEqual(['advanced'])
   })
 })
 
@@ -435,7 +438,11 @@ describe('every edit', () => {
     afterSetAside(before, { proposalId: 'a', isSetAside: true })
 
     // a recommended for elementary
-    afterRecommendation(before, { proposalId: 'a', category: 'elementary', isRecommended: true })
+    afterCategoryRecommendation(before, {
+      proposalId: 'a',
+      category: 'elementary',
+      isRecommended: true,
+    })
 
     // a recommended for a paper with no category
     afterPaperRecommendation(before, { proposalId: 'a', paperId: 'school', isRecommended: true })

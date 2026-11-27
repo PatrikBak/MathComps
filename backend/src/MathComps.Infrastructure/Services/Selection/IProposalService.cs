@@ -55,7 +55,7 @@ public interface IProposalService
     /// Thrown when no live proposal of the organization's pool has the id, or the organization lists no category of
     /// the name.
     /// </exception>
-    Task SetRecommendedAsync(
+    Task SetCategoryRecommendedAsync(
         string organizationSlug, Guid userId, Guid proposalId, string category, bool isRecommended,
         CancellationToken cancellationToken = default);
 
@@ -158,7 +158,7 @@ public sealed class SelectionProposalUsedException()
         LogLevel.Information);
 
 /// <summary>
-/// Thrown when a proposal is set aside, has its recommended categories changed or is deleted by an account leading
+/// Thrown when a proposal is set aside, has what it is recommended for changed or is deleted by an account leading
 /// none of its organization's categories.
 /// </summary>
 public sealed class ProposalNotLeadException()

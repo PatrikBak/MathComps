@@ -41,7 +41,7 @@ function proposal(number: number, changes: Partial<Proposal> = {}): Proposal {
     number,
     title: `Problem ${number}`,
     area: 'algebra',
-    recommended: [],
+    recommendedCategories: [],
     recommendedPapers: [],
     texts: { en: { statement: `Statement ${number}`, solution: null, hints: [] } },
     originalLanguage: 'en',
@@ -68,9 +68,9 @@ describe('matchPool', () => {
   it("counts each facet's options under the other filters but not its own", () => {
     // Geometry for advanced, algebra for elementary, geometry for elementary
     const proposals = [
-      proposal(1, { area: 'geometry', recommended: ['advanced'] }),
-      proposal(2, { area: 'algebra', recommended: ['elementary'] }),
-      proposal(3, { area: 'geometry', recommended: ['elementary'] }),
+      proposal(1, { area: 'geometry', recommendedCategories: ['advanced'] }),
+      proposal(2, { area: 'algebra', recommendedCategories: ['elementary'] }),
+      proposal(3, { area: 'geometry', recommendedCategories: ['elementary'] }),
     ]
 
     // The pool narrowed to the advanced category
@@ -115,8 +115,8 @@ describe('matchPool', () => {
   it('shows a problem recommended for any of the categories picked', () => {
     // One problem for advanced, one for elementary, one for nothing
     const proposals = [
-      proposal(1, { recommended: ['advanced'] }),
-      proposal(2, { recommended: ['elementary'] }),
+      proposal(1, { recommendedCategories: ['advanced'] }),
+      proposal(2, { recommendedCategories: ['elementary'] }),
       proposal(3),
     ]
 
@@ -225,14 +225,14 @@ describe('matchPool', () => {
     // Problems recommended for elementary, for intermediate, for both, for advanced, or for nothing, in algebra unless
     // told otherwise
     const proposals = [
-      proposal(1, { recommended: ['elementary'], area: 'geometry' }),
+      proposal(1, { recommendedCategories: ['elementary'], area: 'geometry' }),
       proposal(2),
-      proposal(3, { recommended: ['intermediate'] }),
+      proposal(3, { recommendedCategories: ['intermediate'] }),
       proposal(4, { area: 'numberTheory' }),
-      proposal(5, { recommended: ['elementary'] }),
-      proposal(6, { recommended: ['elementary', 'intermediate'] }),
-      proposal(7, { recommended: ['intermediate'] }),
-      proposal(8, { recommended: ['advanced'], area: 'combinatorics' }),
+      proposal(5, { recommendedCategories: ['elementary'] }),
+      proposal(6, { recommendedCategories: ['elementary', 'intermediate'] }),
+      proposal(7, { recommendedCategories: ['intermediate'] }),
+      proposal(8, { recommendedCategories: ['advanced'], area: 'combinatorics' }),
     ]
 
     // A board with no advanced paper, whose elementary paper holds 5 and 2 and whose intermediate paper holds 7
@@ -257,9 +257,9 @@ describe('matchPool', () => {
   it('runs a problem under the first of its categories the filter picked', () => {
     // Problems 3 and 7 recommended for intermediate alone, problem 6 for elementary as well
     const proposals = [
-      proposal(3, { recommended: ['intermediate'] }),
-      proposal(6, { recommended: ['elementary', 'intermediate'] }),
-      proposal(7, { recommended: ['intermediate'] }),
+      proposal(3, { recommendedCategories: ['intermediate'] }),
+      proposal(6, { recommendedCategories: ['elementary', 'intermediate'] }),
+      proposal(7, { recommendedCategories: ['intermediate'] }),
     ]
 
     // A board whose intermediate paper, after the elementary one, holds 7
@@ -288,10 +288,10 @@ describe('matchPool', () => {
   it("runs the picked category's slots first, then what the other papers hold in the board's order, then the rest", () => {
     // Problems recommended for intermediate, problem 9 for elementary as well
     const proposals = [
-      proposal(2, { recommended: ['intermediate'] }),
-      proposal(4, { recommended: ['intermediate'] }),
-      proposal(7, { recommended: ['intermediate'] }),
-      proposal(9, { recommended: ['elementary', 'intermediate'] }),
+      proposal(2, { recommendedCategories: ['intermediate'] }),
+      proposal(4, { recommendedCategories: ['intermediate'] }),
+      proposal(7, { recommendedCategories: ['intermediate'] }),
+      proposal(9, { recommendedCategories: ['elementary', 'intermediate'] }),
     ]
 
     // A board whose elementary paper holds 9 and 4, and whose intermediate paper, after it, holds 7
@@ -320,11 +320,11 @@ describe('matchPool', () => {
   it("runs an organization's own categories paper by paper, in the board's order", () => {
     // Problems recommended for C, for B, for both, or for A
     const proposals = [
-      proposal(1, { recommended: ['C'] }),
-      proposal(2, { recommended: ['B'] }),
-      proposal(3, { recommended: ['C', 'B'] }),
-      proposal(4, { recommended: ['A'] }),
-      proposal(5, { recommended: ['B'] }),
+      proposal(1, { recommendedCategories: ['C'] }),
+      proposal(2, { recommendedCategories: ['B'] }),
+      proposal(3, { recommendedCategories: ['C', 'B'] }),
+      proposal(4, { recommendedCategories: ['A'] }),
+      proposal(5, { recommendedCategories: ['B'] }),
     ]
 
     // A board setting B out before C, whose B paper holds 5, with no A paper
@@ -351,7 +351,7 @@ describe('matchPool', () => {
     const proposals = [
       proposal(1, { recommendedPapers: ['school'] }),
       proposal(2, { recommendedPapers: ['warm-up'], area: 'geometry' }),
-      proposal(3, { recommended: ['elementary'] }),
+      proposal(3, { recommendedCategories: ['elementary'] }),
       proposal(4, { recommendedPapers: ['warm-up'] }),
       proposal(5),
     ]
@@ -486,13 +486,13 @@ const FINALIZED: Board = {
  */
 const DISCUSSIONS: Discussion<DiscussedSubject>[] = [
   {
-    subject: { kind: 'proposal', proposal: proposal(1, { recommended: ['elementary'] }) },
+    subject: { kind: 'proposal', proposal: proposal(1, { recommendedCategories: ['elementary'] }) },
     comments: [commentDto('easy', 1, [commentDto('agreed', 2, [commentDto('too easy', 3)])])],
   },
   {
     subject: {
       kind: 'proposal',
-      proposal: proposal(2, { area: 'geometry', recommended: ['intermediate'] }),
+      proposal: proposal(2, { area: 'geometry', recommendedCategories: ['intermediate'] }),
     },
     comments: [
       commentDto('lovely', 4, [{ ...commentDto('withdrawn', 6, [], ''), isDeleted: true }]),
@@ -502,14 +502,18 @@ const DISCUSSIONS: Discussion<DiscussedSubject>[] = [
   {
     subject: {
       kind: 'proposal',
-      proposal: proposal(3, { recommended: ['elementary'], isSetAside: true }),
+      proposal: proposal(3, { recommendedCategories: ['elementary'], isSetAside: true }),
     },
     comments: [commentDto('broken', 7, [commentDto('fixable', 7)])],
   },
   {
     subject: {
       kind: 'proposal',
-      proposal: proposal(7, { area: 'geometry', recommended: ['advanced'], isUsed: true }),
+      proposal: proposal(7, {
+        area: 'geometry',
+        recommendedCategories: ['advanced'],
+        isUsed: true,
+      }),
     },
     comments: [commentDto('taken', 8)],
   },

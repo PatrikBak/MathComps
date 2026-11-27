@@ -12,4 +12,4 @@ namespace MathComps.Domain.Contracts.Selection;
 /// <param name="IsRecommended">
 /// Whether the proposal should be recommended for the category, null when the request sent null.
 /// </param>
-public record SetRecommendedRequest(string? Category, bool? IsRecommended);
+public record SetCategoryRecommendedRequest(string? Category, bool? IsRecommended);

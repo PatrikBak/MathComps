@@ -26,7 +26,7 @@ import { useCategoryLabel } from '../hooks/use-category-label'
 import { useOwnRating } from '../hooks/use-own-rating'
 import { useProposalDefenseProblem } from '../hooks/use-proposal-defense-problem'
 import { useProposalDeleteConfirmation } from '../hooks/use-proposal-delete-confirmation'
-import { useRecommend, useRecommendPaper, useSetAside } from '../hooks/use-proposal-writes'
+import { useRecommendCategory, useRecommendPaper, useSetAside } from '../hooks/use-proposal-writes'
 import { canPlaceOn, recommendablePapers } from '../model/selection-state'
 import { type Proposal, RATING_ASPECTS } from '../model/selection-types'
 import { ScoreBar } from './ScoreBar'
@@ -63,7 +63,7 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
   const tActions = useTranslations('ui.actions')
 
   // Recommending the problem for one category, or taking it back
-  const recommend = useRecommend()
+  const recommendCategory = useRecommendCategory()
 
   // Recommending the problem for one paper with no category, or taking it back
   const recommendPaper = useRecommendPaper()
@@ -178,10 +178,10 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
                 {categories.map(({ name }) => (
                   <DropdownMenuCheckboxItem
                     key={name}
-                    checked={proposal.recommended.includes(name)}
+                    checked={proposal.recommendedCategories.includes(name)}
                     onSelect={(event) => event.preventDefault()}
                     onCheckedChange={(isChecked) =>
-                      recommend.mutate({
+                      recommendCategory.mutate({
                         proposalId: proposal.id,
                         category: name,
                         isRecommended: isChecked,
