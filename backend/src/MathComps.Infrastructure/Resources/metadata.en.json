@@ -274,6 +274,11 @@
       "fullName": "November",
       "urlSlug": "elementary-november"
     },
+    "mathcomps-elementary-december": {
+      "shortName": "December",
+      "fullName": "December",
+      "urlSlug": "elementary-december"
+    },
     "mathcomps-intermediate": {
       "shortName": "Intermediate",
       "fullName": "Intermediate category"
@@ -293,6 +298,11 @@
       "fullName": "November",
       "urlSlug": "intermediate-november"
     },
+    "mathcomps-intermediate-december": {
+      "shortName": "December",
+      "fullName": "December",
+      "urlSlug": "intermediate-december"
+    },
     "mathcomps-advanced": {
       "shortName": "Advanced",
       "fullName": "Advanced category"
@@ -311,6 +321,11 @@
       "shortName": "November",
       "fullName": "November",
       "urlSlug": "advanced-november"
+    },
+    "mathcomps-advanced-december": {
+      "shortName": "December",
+      "fullName": "December",
+      "urlSlug": "advanced-december"
     },
     "mathcomps-proposals": {
       "shortName": "Proposals",
