@@ -219,6 +219,7 @@ function discussedProblem(id: string, changes: Partial<Proposal> = {}): Discusse
       title: id,
       area: 'algebra',
       recommended: [],
+      recommendedPapers: [],
       texts: {},
       originalLanguage: null,
       gradingNote: null,

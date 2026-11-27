@@ -70,6 +70,7 @@ public class ProblemSelectionEndpointsTests
                     direction = SlotDirection.Up,
                     isSetAside = true,
                     category = "elementary",
+                    paperId = Guid.CreateVersion7(),
                     isRecommended = true,
                     beauty = 3,
                     difficulty = 3,

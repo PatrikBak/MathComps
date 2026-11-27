@@ -54,8 +54,8 @@ export function ProposalFiling({ proposal }: ProposalFilingProps) {
 
   return (
     <>
-      {/* The categories the problem is recommended for */}
-      <RecommendedMarks recommended={proposal.recommended} />
+      {/* What the problem is recommended for */}
+      <RecommendedMarks proposal={proposal} />
 
       {/* The problem's area */}
       <AreaChip area={proposal.area} />

@@ -60,6 +60,32 @@ public interface IProposalService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Recommends a proposal for one paper with no category, which is its own category, or takes the recommendation
+    /// back, leaving the other recommendations as they stand.
+    /// </summary>
+    /// <param name="organizationSlug">
+    /// The <see cref="Organization.Slug"/> of the organization whose pool the proposal is in.
+    /// </param>
+    /// <param name="userId">
+    /// The account making the change, which has to lead one of the organization's categories.
+    /// </param>
+    /// <param name="proposalId">The proposal.</param>
+    /// <param name="paperId">The paper, one with no category on a board of the organization.</param>
+    /// <param name="isRecommended">Whether the proposal should be recommended for <paramref name="paperId"/>.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>A task that completes once the change is saved.</returns>
+    /// <exception cref="ProposalNotLeadException">
+    /// Thrown when the account leads none of the organization's categories.
+    /// </exception>
+    /// <exception cref="SelectionTargetNotFoundException">
+    /// Thrown when no live proposal of the organization's pool has the id, or no paper with no category on the
+    /// organization's boards has the paper id.
+    /// </exception>
+    Task SetPaperRecommendedAsync(
+        string organizationSlug, Guid userId, Guid proposalId, Guid paperId, bool isRecommended,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Sets one reviewer's rating of a proposal to the scores given, replacing whatever they gave before. Leaving
     /// out both scores takes the rating back.
     /// </summary>

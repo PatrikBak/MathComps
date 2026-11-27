@@ -5,6 +5,7 @@ import type {
   DiscussionsSeenUpTo,
   MoveWrite,
   Organization,
+  PaperRecommendationWrite,
   PlacementWrite,
   RatingWrite,
   RecommendationWrite,
@@ -21,6 +22,7 @@ import {
   getOrganizationsUrl,
   getProposalUrl,
   getRatingUrl,
+  getRecommendedPaperUrl,
   getRecommendedUrl,
   getSelectionUrl,
   getSetAsideUrl,
@@ -223,6 +225,26 @@ export function setRecommended(
   return apiCall<void>(() => getRecommendedUrl(organization, proposalId), {
     method: 'PUT',
     body: JSON.stringify({ category, isRecommended }),
+  })
+}
+
+/**
+ * Recommends a proposal for one paper with no category, or takes the recommendation back.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param organization - The slug of the organization whose pool holds the proposal.
+ * @param change - The proposal, the paper and whether it is recommended for it afterwards.
+ *
+ * @returns Success, or an error.
+ */
+export function setPaperRecommended(
+  apiCall: ApiCaller,
+  organization: string,
+  { proposalId, paperId, isRecommended }: PaperRecommendationWrite
+): Promise<ApiResult<void>> {
+  return apiCall<void>(() => getRecommendedPaperUrl(organization, proposalId), {
+    method: 'PUT',
+    body: JSON.stringify({ paperId, isRecommended }),
   })
 }
 

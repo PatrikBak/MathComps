@@ -4,6 +4,7 @@ import {
   afterClearing,
   afterDeletion,
   afterMove,
+  afterPaperRecommendation,
   afterPlacement,
   afterRating,
   afterRecommendation,
@@ -26,6 +27,7 @@ function proposal(id: string): Proposal {
     title: id,
     area: 'algebra',
     recommended: [],
+    recommendedPapers: [],
     texts: {},
     originalLanguage: null,
     gradingNote: null,
@@ -282,6 +284,40 @@ describe('afterRecommendation', () => {
   })
 })
 
+describe('afterPaperRecommendation', () => {
+  it('switches one paper on once and back off, keeping the others', () => {
+    // a, recommended for the warm-up paper
+    const before = selection([], [{ ...proposal('a'), recommendedPapers: ['warm-up'] }])
+
+    // The school paper goes on
+    const switchedOn = afterPaperRecommendation(before, {
+      proposalId: 'a',
+      paperId: 'school',
+      isRecommended: true,
+    })
+
+    // And on again
+    const switchedOnAgain = afterPaperRecommendation(switchedOn, {
+      proposalId: 'a',
+      paperId: 'school',
+      isRecommended: true,
+    })
+
+    // Both papers stand, the school one once
+    expect(switchedOnAgain.proposals[0]?.recommendedPapers).toEqual(['warm-up', 'school'])
+
+    // The warm-up paper goes off
+    const switchedOff = afterPaperRecommendation(switchedOnAgain, {
+      proposalId: 'a',
+      paperId: 'warm-up',
+      isRecommended: false,
+    })
+
+    // Only the school paper is left
+    expect(switchedOff.proposals[0]?.recommendedPapers).toEqual(['school'])
+  })
+})
+
 describe('afterRating', () => {
   // The reader, Rita, as the page knows them under their sign-in's id
   const reader = { id: 'signed-in-rita', username: 'Rita', email: 'rita@example.com' }
@@ -400,6 +436,9 @@ describe('every edit', () => {
 
     // a recommended for elementary
     afterRecommendation(before, { proposalId: 'a', category: 'elementary', isRecommended: true })
+
+    // a recommended for a paper with no category
+    afterPaperRecommendation(before, { proposalId: 'a', paperId: 'school', isRecommended: true })
 
     // a rated again
     afterRating(before, { proposalId: 'a', scores: { beauty: 5, difficulty: 2 } }, reader)

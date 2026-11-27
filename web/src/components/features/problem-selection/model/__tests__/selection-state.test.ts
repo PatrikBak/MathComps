@@ -61,6 +61,7 @@ function proposal(texts: Proposal['texts'], originalLanguage: Locale | null = nu
     title: 'p',
     area: 'geometry',
     recommended: [],
+    recommendedPapers: [],
     texts,
     originalLanguage,
     gradingNote: null,

@@ -61,6 +61,8 @@ export type Proposal = {
   area: ProposalArea
   /** The categories it is recommended for, by name, in the order the categories run. */
   recommended: string[]
+  /** The papers with no category it is recommended for, each its own category, by id. */
+  recommendedPapers: string[]
   /** Its text in each language it has a statement in. */
   texts: Partial<Record<Locale, ProposalText>>
   /** The language it was first written in, which its other texts translate; null where none is the original. */
@@ -191,6 +193,18 @@ export type RecommendationWrite = {
   /** The category, by name. */
   category: string
   /** Whether the proposal is recommended for the category afterwards. */
+  isRecommended: boolean
+}
+
+/**
+ * A proposal's recommendation for one paper with no category switching on or off.
+ */
+export type PaperRecommendationWrite = {
+  /** The proposal. */
+  proposalId: string
+  /** The paper, by id. */
+  paperId: string
+  /** Whether the proposal is recommended for the paper afterwards. */
   isRecommended: boolean
 }
 

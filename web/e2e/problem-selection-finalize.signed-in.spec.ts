@@ -33,6 +33,7 @@ import {
   problemCount,
   READY,
   rememberedSelection,
+  SCHOOL_PAPER,
   SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
@@ -237,6 +238,63 @@ test.describe('recommending a problem for a category', () => {
 
     // The focus back on its button
     await expect(actionsButton(cardOf(page, GEOMETRY), GEOMETRY)).toBeFocused()
+  })
+
+  test("switches a draft's paper with no category after the categories, naming it on the card", async ({
+    page,
+  }) => {
+    // A reviewer whose one board is a draft whose paper has no category
+    await stubSelection(page, 'schoolDraft')
+
+    // Every write the page sends to a problem
+    const writes = recordWrites(page, isProposalWrite)
+
+    // The pool
+    await openPool(page)
+
+    // The menu on the geometry problem's card
+    await actionsButton(cardOf(page, GEOMETRY), GEOMETRY).click()
+
+    // The paper's switch
+    const paperSwitch = page.getByRole('menuitemcheckbox', { name: SCHOOL_PAPER.name })
+
+    // Offered last, after the categories
+    await expect(page.getByRole('menuitemcheckbox').last()).toHaveAccessibleName(SCHOOL_PAPER.name)
+
+    // And off
+    await expect(paperSwitch).not.toBeChecked()
+
+    // Named nowhere on the card yet
+    await expect(cardOf(page, GEOMETRY).getByText(SCHOOL_PAPER.name, { exact: true })).toHaveCount(
+      0
+    )
+
+    // The answer to the read after the write
+    const readAfterWrite = page.waitForResponse(SELECTION_ENDPOINT)
+
+    // The paper, switched on
+    await paperSwitch.click()
+
+    // Checked
+    await expect(paperSwitch).toBeChecked()
+
+    // And named on the card
+    await expect(cardOf(page, GEOMETRY).getByText(SCHOOL_PAPER.name, { exact: true })).toBeVisible()
+
+    // Once the read has landed
+    await readAfterWrite
+
+    // Still checked
+    await expect(paperSwitch).toBeChecked()
+
+    // Sent once, as that paper switched on
+    expect(writes().map((write) => [write.method(), write.url(), write.postDataJSON()])).toEqual([
+      [
+        'PUT',
+        `${SELECTION_ENDPOINT}/proposals/${GEOMETRY.id}/recommended-paper`,
+        { paperId: SCHOOL_PAPER.id, isRecommended: true },
+      ],
+    ])
   })
 
   test('takes a second switch made while the first is out, and reads the selection once, after both', async ({

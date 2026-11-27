@@ -27,6 +27,21 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     private Guid _usedId;
 
     /// <summary>
+    /// MathComps' paper with no category, on a draft board of its own.
+    /// </summary>
+    private Guid _paperWithoutCategoryId;
+
+    /// <summary>
+    /// MathComps' elementary paper, on the draft board the pooled proposal stands on.
+    /// </summary>
+    private Guid _elementaryPaperId;
+
+    /// <summary>
+    /// The olympiad's paper with no category.
+    /// </summary>
+    private Guid _olympiadPaperId;
+
+    /// <summary>
     /// A reviewer rating the pooled proposal.
     /// </summary>
     private readonly Guid _raterId = Guid.CreateVersion7();
@@ -95,6 +110,53 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
 
         // The proposal still recommended for advanced alone
         Assert.Equal(["advanced"], await RecommendedAsync());
+    });
+
+    /// <summary>
+    /// A paper with no category is recommended for like a category: switched on, switched on again changing nothing,
+    /// and taken back, the pooled proposal's categories left standing throughout.
+    /// </summary>
+    [Fact]
+    public Task A_paper_with_no_category_is_recommended_for_and_taken_back() => RunTestAsync(async service =>
+    {
+        // The paper switched on
+        await service.SetPaperRecommendedAsync(
+            Organization.MathCompsSlug, _leadId, _pooledId, _paperWithoutCategoryId, isRecommended: true);
+
+        // Switched on again
+        await service.SetPaperRecommendedAsync(
+            Organization.MathCompsSlug, _leadId, _pooledId, _paperWithoutCategoryId, isRecommended: true);
+
+        // Standing once, beside the advanced category
+        Assert.Equal([_paperWithoutCategoryId], await RecommendedPapersAsync());
+        Assert.Equal(["advanced"], await RecommendedAsync());
+
+        // Taken back
+        await service.SetPaperRecommendedAsync(
+            Organization.MathCompsSlug, _leadId, _pooledId, _paperWithoutCategoryId, isRecommended: false);
+
+        // Gone, the advanced category still standing
+        Assert.Empty(await RecommendedPapersAsync());
+        Assert.Equal(["advanced"], await RecommendedAsync());
+    });
+
+    /// <summary>
+    /// Only a paper with no category of the proposal's own organization takes a recommendation. A paper with a
+    /// category goes by its category, and another organization's paper would put a stranger's board in the selection.
+    /// </summary>
+    [Fact]
+    public Task A_paper_with_a_category_or_of_another_organization_is_refused() => RunTestAsync(async service =>
+    {
+        // MathComps' elementary paper, refused
+        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(() => service.SetPaperRecommendedAsync(
+            Organization.MathCompsSlug, _leadId, _pooledId, _elementaryPaperId, isRecommended: true));
+
+        // The olympiad's paper with no category, refused too
+        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(() => service.SetPaperRecommendedAsync(
+            Organization.MathCompsSlug, _leadId, _pooledId, _olympiadPaperId, isRecommended: true));
+
+        // No paper recommended for
+        Assert.Empty(await RecommendedPapersAsync());
     });
 
     /// <summary>
@@ -298,6 +360,10 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
         await Assert.ThrowsAsync<ProposalNotLeadException>(() => service.SetRecommendedAsync(
             Organization.MathCompsSlug, _memberId, _pooledId, "elementary", isRecommended: true));
 
+        // Recommending it for the paper with no category, refused
+        await Assert.ThrowsAsync<ProposalNotLeadException>(() => service.SetPaperRecommendedAsync(
+            Organization.MathCompsSlug, _memberId, _pooledId, _paperWithoutCategoryId, isRecommended: true));
+
         // Deleting it, refused
         await Assert.ThrowsAsync<ProposalNotLeadException>(
             () => service.DeleteAsync(Organization.MathCompsSlug, _memberId, _pooledId));
@@ -311,8 +377,9 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
         // Neither set aside nor deleted
         Assert.Equal((false, null), (proposal.IsSetAside, proposal.DeletedAt));
 
-        // Still recommended for advanced alone
+        // Still recommended for advanced alone, and for no paper
         Assert.Equal(["advanced"], await RecommendedAsync());
+        Assert.Empty(await RecommendedPapersAsync());
 
         // Rated all the same
         await service.RateAsync(Organization.MathCompsSlug, _pooledId, _memberId, beauty: 4, difficulty: 2);
@@ -337,7 +404,10 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
         SelectionSeed.Recommend(context, _pooledId, "advanced");
 
         // Another organization, listing a category of its own
-        SelectionSeed.NewOrganization(context, "olympiad", "C");
+        var olympiadId = SelectionSeed.NewOrganization(context, "olympiad", "C");
+
+        // The olympiad's draft board, its one paper of no category
+        var olympiadBoard = SelectionSeed.NewBoardWithoutCategory(context, olympiadId, null, "Olympiad warm-up");
 
         // An October group
         var october = SelectionSeed.NewGroup(context, season, "october", DateTimeOffset.UtcNow.AddDays(10));
@@ -346,7 +416,10 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
         _usedId = SelectionSeed.NewProposal(context, october.Rounds.First(), 2, 1);
 
         // A draft board the pooled proposal stands on
-        SelectionSeed.NewBoard(context, null, "Draft", _pooledId);
+        var draft = SelectionSeed.NewBoard(context, null, "Draft", _pooledId);
+
+        // MathComps' draft board with its one paper of no category
+        var warmUp = SelectionSeed.NewBoardWithoutCategory(context, null, "Warm-up");
 
         // The reviewers rating the pooled proposal
         context.Users.AddRange(HostedSeed.NewUser(_raterId, "Rater"), HostedSeed.NewUser(_otherRaterId, "Other"));
@@ -363,6 +436,11 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
 
         // Written
         await context.SaveChangesAsync();
+
+        // The papers the recommendations name, read off their boards
+        _paperWithoutCategoryId = warmUp.Papers.Single().Id;
+        _elementaryPaperId = draft.Papers.Single(paper => paper.Name == "elementary").Id;
+        _olympiadPaperId = olympiadBoard.Papers.Single().Id;
     }
 
     /// <summary>
@@ -375,6 +453,17 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
             .Where(recommendation => recommendation.ProposalId == _pooledId)
             .OrderBy(recommendation => recommendation.Category.Position)
             .Select(recommendation => recommendation.Category.Name)
+            .ToListAsync());
+
+    /// <summary>
+    /// Reads which papers with no category the pooled proposal is recommended for.
+    /// </summary>
+    /// <returns>The papers' ids.</returns>
+    private Task<List<Guid>> RecommendedPapersAsync() =>
+        // The pooled proposal's paper recommendations
+        QueryValueAsync(context => context.ProposalPaperRecommendations
+            .Where(recommendation => recommendation.ProposalId == _pooledId)
+            .Select(recommendation => recommendation.PaperId)
             .ToListAsync());
 
     /// <summary>

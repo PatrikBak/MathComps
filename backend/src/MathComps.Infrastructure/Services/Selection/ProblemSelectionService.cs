@@ -100,6 +100,9 @@ public sealed class ProblemSelectionService(
                     .OrderBy(recommendation => recommendation.Category.Position)
                     .Select(recommendation => recommendation.Category.Name)
                     .ToList(),
+                RecommendedPapers = proposal.PaperRecommendations
+                    .Select(recommendation => recommendation.PaperId)
+                    .ToList(),
                 proposal.IsSetAside,
                 CompetitionPath = proposal.Problem.Round.Competition.Path,
                 IsHosted = proposal.Problem.Round.HostedGroupId != null,
@@ -257,6 +260,7 @@ public sealed class ProblemSelectionService(
                     proposal.Title,
                     proposal.Area,
                     proposal.Recommended,
+                    proposal.RecommendedPapers,
                     TextsOf(proposal.Texts),
                     proposal.OriginalLanguage,
                     // The problem's one grading note, whichever language it is written in

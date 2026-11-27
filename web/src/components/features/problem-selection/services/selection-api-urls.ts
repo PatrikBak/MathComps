@@ -184,6 +184,19 @@ export function getRecommendedUrl(organization: string, proposalId: string): str
 }
 
 /**
+ * Builds the API URL for recommending a proposal for a paper with no category or taking it back.
+ *
+ * @param organization - The slug of the organization whose pool holds the proposal.
+ * @param proposalId - The proposal.
+ *
+ * @returns The API URL.
+ */
+export function getRecommendedPaperUrl(organization: string, proposalId: string): string {
+  // The paper recommendation endpoint for the proposal
+  return buildApiUrl(`${proposalPath(organization, proposalId)}/recommended-paper`)
+}
+
+/**
  * Builds the API URL for setting the reader's rating of a proposal or taking it back.
  *
  * @param organization - The slug of the organization whose pool holds the proposal.

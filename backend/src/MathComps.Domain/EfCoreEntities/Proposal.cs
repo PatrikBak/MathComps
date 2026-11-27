@@ -75,4 +75,9 @@ public class Proposal
     /// The categories the reviewers recommend it for, each one of its organization's.
     /// </summary>
     public ICollection<ProposalRecommendation> Recommendations { get; } = [];
+
+    /// <summary>
+    /// The papers with no category the reviewers recommend it for, each on one of its organization's boards.
+    /// </summary>
+    public ICollection<ProposalPaperRecommendation> PaperRecommendations { get; } = [];
 }
