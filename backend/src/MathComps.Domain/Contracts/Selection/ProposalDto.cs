@@ -10,7 +10,7 @@ namespace MathComps.Domain.Contracts.Selection;
 /// <param name="Number"><inheritdoc cref="Proposal.Number" path="/summary"/></param>
 /// <param name="Title"><inheritdoc cref="Proposal.Title" path="/summary"/></param>
 /// <param name="Area"><inheritdoc cref="Proposal.Area" path="/summary"/></param>
-/// <param name="Recommended">
+/// <param name="RecommendedCategories">
 /// The categories the reviewers recommend it for, by their <see cref="OrganizationCategory.Name"/>, in the order the
 /// categories run.
 /// </param>
@@ -38,7 +38,7 @@ public record ProposalDto(
     int Number,
     string Title,
     ProposalArea Area,
-    IReadOnlyList<string> Recommended,
+    IReadOnlyList<string> RecommendedCategories,
     IReadOnlyList<Guid> RecommendedPapers,
     IReadOnlyDictionary<Language, ProposalTextDto> Texts,
     Language? OriginalLanguage,

@@ -261,10 +261,10 @@ public static class ProblemSelectionEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Recommend a proposal for one category, or take it back
-        app.MapPut($"{ProposalPath}/recommended", async (
+        app.MapPut($"{ProposalPath}/recommended-category", async (
             string organization,
             Guid proposalId,
-            SetRecommendedRequest request,
+            SetCategoryRecommendedRequest request,
             HttpContext context,
             IUserManager userManager,
             IProposalService proposalService,
@@ -278,7 +278,7 @@ public static class ProblemSelectionEndpoints
             var reviewerId = await userManager.RequireUserIdAsync(context);
 
             // Change it
-            await proposalService.SetRecommendedAsync(
+            await proposalService.SetCategoryRecommendedAsync(
                 organization, reviewerId, proposalId, category, isRecommended, cancellationToken);
 
             // Nothing to return

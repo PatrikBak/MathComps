@@ -2,6 +2,7 @@ import type { UserIdentity } from '@/components/features/profile/model/user-iden
 
 import {
   type Board,
+  type CategoryRecommendationWrite,
   type MoveWrite,
   type Paper,
   type PaperRecommendationWrite,
@@ -9,7 +10,6 @@ import {
   type Proposal,
   RATING_ASPECTS,
   type RatingWrite,
-  type RecommendationWrite,
   type SelectionData,
   type SetAsideWrite,
   type SlotAddress,
@@ -193,16 +193,18 @@ export function afterSetAside(
  *
  * @returns The selection as the change leaves it, the categories kept in the order they run.
  */
-export function afterRecommendation(
+export function afterCategoryRecommendation(
   data: SelectionData,
-  { proposalId, category, isRecommended }: RecommendationWrite
+  { proposalId, category, isRecommended }: CategoryRecommendationWrite
 ): SelectionData {
   // The proposal recommended for each category standing afterwards, in the order the categories run
   return editProposal(data, proposalId, (proposal) => ({
     ...proposal,
-    recommended: data.categories
+    recommendedCategories: data.categories
       .map((candidate) => candidate.name)
-      .filter((name) => (name === category ? isRecommended : proposal.recommended.includes(name))),
+      .filter((name) =>
+        name === category ? isRecommended : proposal.recommendedCategories.includes(name)
+      ),
   }))
 }
 

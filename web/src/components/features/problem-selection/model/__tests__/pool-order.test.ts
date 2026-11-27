@@ -21,7 +21,7 @@ function proposal(number: number, changes: Partial<Proposal> = {}): Proposal {
     number,
     title: `Problem ${number}`,
     area: 'algebra',
-    recommended: [],
+    recommendedCategories: [],
     recommendedPapers: [],
     texts: { en: { statement: `Statement ${number}`, solution: null, hints: [] } },
     originalLanguage: 'en',
@@ -114,11 +114,11 @@ describe('threadsInOrder', () => {
     // The boards' problems, then the pool's: one for B and C, one for C, one for A, one for nothing and another for C
     const [p1, p2, p3, p4, p5, p6, p7, forBAndC, forC, forA, forNothing, laterForC] = [
       ...[1, 2, 3, 4, 5, 6, 7].map((number) => proposal(number)),
-      proposal(8, { recommended: ['B', 'C'] }),
-      proposal(9, { recommended: ['C'] }),
-      proposal(10, { recommended: ['A'] }),
+      proposal(8, { recommendedCategories: ['B', 'C'] }),
+      proposal(9, { recommendedCategories: ['C'] }),
+      proposal(10, { recommendedCategories: ['A'] }),
       proposal(11),
-      proposal(12, { recommended: ['C'] }),
+      proposal(12, { recommendedCategories: ['C'] }),
     ].map((problem): DiscussedSubject => ({ kind: 'proposal', proposal: problem }))
 
     // A function which says the subject of a paper's discussion
@@ -205,7 +205,7 @@ describe('threadsInOrder', () => {
       proposal(1),
       proposal(2, { recommendedPapers: ['school-paper'] }),
       proposal(3, { recommendedPapers: ['warm-up-paper'] }),
-      proposal(4, { recommended: ['C'] }),
+      proposal(4, { recommendedCategories: ['C'] }),
     ].map((problem): DiscussedSubject => ({ kind: 'proposal', proposal: problem }))
 
     // A thread on each, newest activity first

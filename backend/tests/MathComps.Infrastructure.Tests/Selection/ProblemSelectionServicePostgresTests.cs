@@ -164,7 +164,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             (proposal.Number, proposal.Title, proposal.Area, proposal.IsSetAside, proposal.IsUsed));
 
         // Its categories in the order they run, whatever order they were recommended in
-        Assert.Equal(["elementary", "advanced"], proposal.Recommended);
+        Assert.Equal(["elementary", "advanced"], proposal.RecommendedCategories);
 
         // A text in English and Slovak, the two it has statements in
         Assert.Equal([Language.SK, Language.EN], proposal.Texts.Keys.Order());

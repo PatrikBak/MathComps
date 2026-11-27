@@ -67,7 +67,7 @@ function poolPlacerOf(
     runs(paper) &&
     (paper.category === null
       ? isBoardDraft && problem.recommendedPapers.includes(paper.id)
-      : problem.recommended.includes(paper.category))
+      : problem.recommendedCategories.includes(paper.category))
 
   // A function which says where a problem runs: at its slot where a running paper holds it, else under the first
   // paper taking it, else after every paper
@@ -231,7 +231,9 @@ function commentPlacerOf(
     switch (subject.kind) {
       case 'proposal': {
         // The first category in the order they run that the problem is recommended for, -1 where none
-        const category = categories.findIndex((name) => subject.proposal.recommended.includes(name))
+        const category = categories.findIndex((name) =>
+          subject.proposal.recommendedCategories.includes(name)
+        )
 
         // The first draft's paper with no category the problem is recommended for, -1 where none
         const paper = papersWithoutCategory.findIndex(({ id }) =>

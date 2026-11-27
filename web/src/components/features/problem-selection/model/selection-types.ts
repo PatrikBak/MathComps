@@ -60,7 +60,7 @@ export type Proposal = {
   /** The area it belongs to. */
   area: ProposalArea
   /** The categories it is recommended for, by name, in the order the categories run. */
-  recommended: string[]
+  recommendedCategories: string[]
   /** The papers with no category it is recommended for, each its own category, by id. */
   recommendedPapers: string[]
   /** Its text in each language it has a statement in. */
@@ -187,7 +187,7 @@ export type SetAsideWrite = {
 /**
  * A proposal's recommendation for one category switching on or off.
  */
-export type RecommendationWrite = {
+export type CategoryRecommendationWrite = {
   /** The proposal. */
   proposalId: string
   /** The category, by name. */

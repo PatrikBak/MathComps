@@ -508,9 +508,10 @@ function proposalFactsOf(
   proposal: Proposal,
   onBoard: ReadonlySet<string>
 ): Omit<FilterFacts, 'searchText' | 'weight'> {
-  // What the problem is recommended for, its area, whether the board holds it, whether it is set aside, its number
+  // The categories the problem is recommended for, its area, whether the board holds it, whether it is set aside,
+  // its number
   return {
-    categories: proposal.recommended,
+    categories: proposal.recommendedCategories,
     problem: {
       area: proposal.area,
       membership: onBoard.has(proposal.id) ? 'selected' : 'notSelected',

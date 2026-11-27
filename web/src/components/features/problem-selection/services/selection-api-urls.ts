@@ -178,9 +178,9 @@ export function getSetAsideUrl(organization: string, proposalId: string): string
  *
  * @returns The API URL.
  */
-export function getRecommendedUrl(organization: string, proposalId: string): string {
-  // The recommendation endpoint for the proposal
-  return buildApiUrl(`${proposalPath(organization, proposalId)}/recommended`)
+export function getRecommendedCategoryUrl(organization: string, proposalId: string): string {
+  // The category recommendation endpoint for the proposal
+  return buildApiUrl(`${proposalPath(organization, proposalId)}/recommended-category`)
 }
 
 /**

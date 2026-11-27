@@ -19,11 +19,11 @@ import {
 } from './selection-writes'
 
 /**
- * The path of a proposal write: the proposal, and a trailing set-aside, recommended, recommended-paper or rating
- * naming the change.
+ * The path of a proposal write: the proposal, and a trailing set-aside, recommended-category, recommended-paper or
+ * rating naming the change.
  */
 export const PROPOSAL_WRITE_PATH = new RegExp(
-  `^${SELECTION_API_PATH}/proposals/(${GUID})(/set-aside|/recommended-paper|/recommended|/rating)?$`
+  `^${SELECTION_API_PATH}/proposals/(${GUID})(/set-aside|/recommended-category|/recommended-paper|/rating)?$`
 )
 
 /** The reader, as the backend names the reviewer reading the selection. */
@@ -59,7 +59,7 @@ const SCORES: number[] = Array.from(
 /**
  * A proposal's recommendation for one category, as a write switches it.
  */
-type Recommendation = {
+type CategoryRecommendation = {
   /** The category, by name. */
   category: string
   /** Whether the proposal is recommended for it afterwards. */
@@ -120,7 +120,7 @@ function readSetAside(body: string | null): boolean {
  *
  * @returns The category and which way it goes.
  */
-function readRecommendation(body: string | null): Recommendation {
+function readCategoryRecommendation(body: string | null): CategoryRecommendation {
   // The category and the flag sent
   const { category, isRecommended } = readFields(body)
 
@@ -300,10 +300,10 @@ function setAside(
  *
  * @returns What the backend holds afterwards.
  */
-function recommend(
+function recommendCategory(
   held: HeldSelection,
   proposalId: string,
-  { category, isRecommended }: Recommendation,
+  { category, isRecommended }: CategoryRecommendation,
   leadCategories: readonly string[]
 ): HeldSelection {
   // The proposal, as it stands
@@ -319,12 +319,12 @@ function recommend(
   if (!names.includes(category)) refuseWith('SelectionTargetNotFound')
 
   // Every category recommended after the switch, in the order the categories run
-  const recommended = names.filter((candidate) =>
-    candidate === category ? isRecommended : proposal.recommended.includes(candidate)
+  const recommendedCategories = names.filter((candidate) =>
+    candidate === category ? isRecommended : proposal.recommendedCategories.includes(candidate)
   )
 
   // The proposal with them
-  return withProposal(held, { ...proposal, recommended })
+  return withProposal(held, { ...proposal, recommendedCategories })
 }
 
 /**
@@ -427,9 +427,9 @@ export function proposalWrite(
     return setAside(held, proposalId, readSetAside(body), leadCategories)
   }
 
-  // A recommendation, put at its address
-  if (change === '/recommended' && method === 'PUT') {
-    return recommend(held, proposalId, readRecommendation(body), leadCategories)
+  // A category recommendation, put at its address
+  if (change === '/recommended-category' && method === 'PUT') {
+    return recommendCategory(held, proposalId, readCategoryRecommendation(body), leadCategories)
   }
 
   // A paper recommendation, put at its address

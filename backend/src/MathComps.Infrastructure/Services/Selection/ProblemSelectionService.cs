@@ -81,8 +81,9 @@ public sealed class ProblemSelectionService(
             .ToListAsync(cancellationToken);
 
         // Every proposal of the organization's pool not deleted, lowest number first, with where its problem sits,
-        // the categories it is recommended for in the order they run, every text it carries, the language it was
-        // first written in, and every rating it was given, by the raters' usernames with a rater showing none last.
+        // the categories it is recommended for in the order they run, the papers with no category it is recommended
+        // for, every text it carries, the language it was first written in, and every rating it was given, by the
+        // raters' usernames with a rater showing none last.
         // Split, because its recommendations, texts and ratings are each a collection off one row: joined in a
         // single query the database would return every pairing of them, each repeating the text.
         var proposals = await dbContext.Proposals
@@ -96,7 +97,7 @@ public sealed class ProblemSelectionService(
                 proposal.Number,
                 proposal.Title,
                 proposal.Area,
-                Recommended = proposal.Recommendations
+                RecommendedCategories = proposal.Recommendations
                     .OrderBy(recommendation => recommendation.Category.Position)
                     .Select(recommendation => recommendation.Category.Name)
                     .ToList(),
@@ -259,7 +260,7 @@ public sealed class ProblemSelectionService(
                     proposal.Number,
                     proposal.Title,
                     proposal.Area,
-                    proposal.Recommended,
+                    proposal.RecommendedCategories,
                     proposal.RecommendedPapers,
                     TextsOf(proposal.Texts),
                     proposal.OriginalLanguage,

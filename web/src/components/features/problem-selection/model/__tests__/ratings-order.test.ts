@@ -32,7 +32,7 @@ function proposal(number: number, ratings: ProposalRating[]): Proposal {
     number,
     title: `Problem ${number}`,
     area: 'algebra',
-    recommended: [],
+    recommendedCategories: [],
     recommendedPapers: [],
     texts: {},
     originalLanguage: null,

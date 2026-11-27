@@ -5,27 +5,27 @@ import { useTranslations } from 'next-intl'
 import { useSignedInIdentity } from '@/components/features/profile/hooks/use-signed-in-identity'
 
 import {
+  afterCategoryRecommendation,
   afterDeletion,
   afterPaperRecommendation,
   afterPlacement,
   afterRating,
-  afterRecommendation,
   afterSetAside,
 } from '../model/selection-edits'
 import type {
+  CategoryRecommendationWrite,
   PaperRecommendationWrite,
   PlacementWrite,
   RatingWrite,
-  RecommendationWrite,
   SetAsideWrite,
 } from '../model/selection-types'
 import {
   deleteProposal,
   placeProposal,
   setAside,
+  setCategoryRecommended,
   setPaperRecommended,
   setRating,
-  setRecommended,
 } from '../services/selection-service'
 import { type SelectionWrite, useSelectionWrite } from './use-selection-write'
 
@@ -52,14 +52,14 @@ export function useSetAside(): SelectionWrite<SetAsideWrite> {
  *
  * @returns The write.
  */
-export function useRecommend(): SelectionWrite<RecommendationWrite> {
+export function useRecommendCategory(): SelectionWrite<CategoryRecommendationWrite> {
   // Copy for the selection's writes
   const t = useTranslations('problemSelection.writes')
 
   // Switching the recommendation for the one category, shown ahead of the server
-  return useSelectionWrite<RecommendationWrite>({
-    apiFn: setRecommended,
-    edit: afterRecommendation,
+  return useSelectionWrite<CategoryRecommendationWrite>({
+    apiFn: setCategoryRecommended,
+    edit: afterCategoryRecommendation,
     changesSlots: false,
     errorMessage: t('recommendFailed'),
   })

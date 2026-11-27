@@ -228,7 +228,7 @@ test.describe('recommending a problem for a category', () => {
     expect(writes().map((write) => [write.method(), write.url(), write.postDataJSON()])).toEqual([
       [
         'PUT',
-        `${SELECTION_ENDPOINT}/proposals/${GEOMETRY.id}/recommended`,
+        `${SELECTION_ENDPOINT}/proposals/${GEOMETRY.id}/recommended-category`,
         { category: 'elementary', isRecommended: true },
       ],
     ])
