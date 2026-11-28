@@ -1,20 +1,39 @@
 import { describe, expect, it } from 'vitest'
 
-import { OPEN_POOL_FILTER, withListedCategories } from '../pool-filter'
-import type { SelectionCategory } from '../selection-types'
+import { OPEN_POOL_FILTER, withListedTargets } from '../pool-filter'
+import { recommendationTargetsOf } from '../recommendation-targets'
+import type { Board } from '../selection-types'
 
-describe('withListedCategories', () => {
-  it("keeps the categories the selection lists, in the selection's order", () => {
-    // A selection running elementary, then advanced
-    const categories: SelectionCategory[] = [
-      { name: 'elementary', hostedCategory: 'elementary' },
-      { name: 'advanced', hostedCategory: 'advanced' },
-    ]
+describe('withListedTargets', () => {
+  it('keeps the targets a problem can be recommended for, in the order they run', () => {
+    // A draft whose one paper, the warm-up, has no category
+    const warmUp: Board = {
+      id: 'warm-up',
+      name: 'Warm-up',
+      papers: [{ id: 'warm-up-paper', name: 'Warm-up', category: null, slots: [] }],
+      cycle: null,
+    }
 
-    // An address naming advanced, a category nobody lists, and elementary, in that order
-    const picked = { ...OPEN_POOL_FILTER, categories: ['advanced', 'nowhere', 'elementary'] }
+    // A selection running elementary, then advanced, with the warm-up draft
+    const targets = recommendationTargetsOf(
+      [
+        { name: 'elementary', hostedCategory: 'elementary' },
+        { name: 'advanced', hostedCategory: 'advanced' },
+      ],
+      [warmUp]
+    )
 
-    // The categories the selection lists, in the order they run
-    expect(withListedCategories(picked, categories).categories).toEqual(['elementary', 'advanced'])
+    // A filter picking the warm-up paper, advanced, a target nobody lists, and elementary, in that order
+    const picked = {
+      ...OPEN_POOL_FILTER,
+      targets: ['warm-up-paper', 'advanced', 'nowhere', 'elementary'],
+    }
+
+    // The categories in the order they run, then the paper
+    expect(withListedTargets(picked, targets).targets).toEqual([
+      'elementary',
+      'advanced',
+      'warm-up-paper',
+    ])
   })
 })

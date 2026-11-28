@@ -14,6 +14,7 @@ import { onceAnswerLands, oncePageShows } from '@/lib/query-config'
 
 import { useSelectionWorkspace } from '../components/SelectionWorkspaceProvider'
 import type { PoolFilter } from '../model/pool-filter'
+import { recommendationTargetsOf } from '../model/recommendation-targets'
 import { type DiscussionPart, poolDiscussionPartsOf } from '../model/seen-marks'
 import {
   discussedSubjectsOf,
@@ -230,7 +231,7 @@ function tabViewOf(
             cachedDiscussionsOf(queryClient, readerId, discussedSubjectsOf(selection)),
             poolFilter,
             selection.activeBoard,
-            selection.categories,
+            recommendationTargetsOf(selection.categories, selection.boards),
             readerId
           )
 

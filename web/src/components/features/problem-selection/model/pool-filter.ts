@@ -1,7 +1,8 @@
 import { assertNever } from '@/components/shared/utils/assert-never'
 
+import { type RecommendationTarget, targetKeyOf } from './recommendation-targets'
 import type { PoolViewMode } from './selection-routes'
-import type { Board, ProposalArea, SelectionCategory } from './selection-types'
+import type { Board, ProposalArea } from './selection-types'
 
 /** Every answer to whether the board on screen holds a problem. */
 const BOARD_MEMBERSHIPS = ['selected', 'notSelected'] as const
@@ -60,8 +61,8 @@ export const OFFERED_STANDINGS: Record<PoolViewMode, readonly PoolStanding[]> = 
 export type PoolFilter = {
   /** Text a problem or a thread must contain, or a number like #7 naming one problem. */
   query: string
-  /** The categories, by name, a problem or a thread must count toward at least one of; empty for any. */
-  categories: string[]
+  /** The keys of the recommendation targets a problem or a thread must count toward one of; empty for any. */
+  targets: string[]
   /** The areas a problem, or a thread's problem, must belong to one of; empty for any. */
   areas: ProposalArea[]
   /** Where what the pool lists must stand; null for anywhere. */
@@ -73,30 +74,28 @@ export type PoolFilter = {
 /** A filter narrowing the pool by nothing. */
 export const OPEN_POOL_FILTER: PoolFilter = {
   query: '',
-  categories: [],
+  targets: [],
   areas: [],
   standing: null,
   isShowingSetAside: false,
 }
 
 /**
- * A filter narrowed to the categories the selection lists, in the order they run.
+ * A filter whose Category picks keep only what a problem can be recommended for, in the order it runs.
  *
  * @param filter - What the pool is narrowed to.
- * @param categories - The selection's categories, in the order they run.
+ * @param targets - What a problem can be recommended for, in the order it runs.
  *
- * @returns The filter without the categories the selection doesn't list.
+ * @returns The filter, keeping only the picks a problem can still be recommended for, in the order they run.
  */
-export function withListedCategories(
+export function withListedTargets(
   filter: PoolFilter,
-  categories: readonly SelectionCategory[]
+  targets: readonly RecommendationTarget[]
 ): PoolFilter {
-  // The filter, holding each of the selection's categories it picked
+  // The filter, holding each target it picked that a problem can still be recommended for
   return {
     ...filter,
-    categories: categories
-      .map((category) => category.name)
-      .filter((name) => filter.categories.includes(name)),
+    targets: targets.map(targetKeyOf).filter((key) => filter.targets.includes(key)),
   }
 }
 
@@ -140,7 +139,7 @@ export function countActiveFilters(filter: PoolFilter): number {
   // How many of the fields narrow the pool
   return [
     filter.query.trim() !== '',
-    filter.categories.length > 0,
+    filter.targets.length > 0,
     filter.areas.length > 0,
     filter.standing !== null,
     filter.isShowingSetAside,

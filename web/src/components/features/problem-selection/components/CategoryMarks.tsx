@@ -7,14 +7,14 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { hueTextStyle } from '@/components/shared/utils/hue-colors'
 
-import { useCategoryLabel } from '../hooks/use-category-label'
+import { useRecommendationTargetName } from '../hooks/use-recommendation-target-name'
 import {
-  type BoardSlot,
-  categoryHue,
-  recommendablePapers,
-  slotLabel,
-  type SlotPosition,
-} from '../model/selection-state'
+  recommendationTargetsOf,
+  recommendedKeysOf,
+  targetHue,
+  targetKeyOf,
+} from '../model/recommendation-targets'
+import { type BoardSlot, categoryHue, slotLabel, type SlotPosition } from '../model/selection-state'
 import type { Proposal } from '../model/selection-types'
 import { useLoadedSelection } from './SelectionWorkspaceProvider'
 
@@ -106,40 +106,31 @@ type RecommendedMarksProps = {
 }
 
 /**
- * What a proposal is recommended for: each category in its own colour, then each draft's paper with no category, in
- * the page's text colour. A category the selection doesn't list, or a paper no draft holds, shows no badge.
+ * What a proposal is recommended for, a badge per recommendation target in the order they run: a category in its own
+ * colour, a paper in the page's text colour. A recommendation for anything that isn't a target, such as a finalized
+ * board's paper, shows no badge.
  */
 export function RecommendedMarks({ proposal }: RecommendedMarksProps) {
   // The selection's categories, in the order they run, and its boards
   const { categories, boards } = useLoadedSelection()
 
-  // What each category is called
-  const categoryLabel = useCategoryLabel()
+  // What each recommendation target is called
+  const targetName = useRecommendationTargetName()
 
-  // The drafts' papers with no category the proposal is recommended for, in board order
-  const papers = recommendablePapers(boards).filter((paper) =>
-    proposal.recommendedPapers.includes(paper.id)
-  )
+  // The keys of what the proposal is recommended for
+  const recommended = recommendedKeysOf(proposal)
 
-  return (
-    <>
-      {/* A badge per category the selection lists */}
-      {proposal.recommendedCategories.map((category) => {
-        // The category's hue, where the selection lists it
-        const hue = categoryHue(categories, category)
-
-        // Its badge, or nothing for a category the selection doesn't list
-        return hue === null ? null : (
-          <HueBadge key={category} label={categoryLabel(category)} hue={hue} size="small" />
-        )
-      })}
-
-      {/* A badge per paper with no category */}
-      {papers.map((paper) => (
-        <HueBadge key={paper.id} label={paper.name} hue={null} size="small" />
-      ))}
-    </>
-  )
+  // A badge per target the proposal is recommended for
+  return recommendationTargetsOf(categories, boards)
+    .filter((target) => recommended.includes(targetKeyOf(target)))
+    .map((target) => (
+      <HueBadge
+        key={targetKeyOf(target)}
+        label={targetName(target)}
+        hue={targetHue(categories, target)}
+        size="small"
+      />
+    ))
 }
 
 /**

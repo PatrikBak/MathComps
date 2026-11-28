@@ -7,8 +7,9 @@ import {
 import type { CommentThreadSeenDto } from '@/components/features/comments/services/comment-api-types'
 import { convertToCommentData } from '@/components/features/comments/utils/comment-utils'
 
-import { type PoolFilter } from './pool-filter'
+import type { PoolFilter } from './pool-filter'
 import { matchDiscussions } from './pool-matches'
+import type { RecommendationTarget } from './recommendation-targets'
 import {
   type DiscussedSubject,
   type Discussion,
@@ -18,12 +19,7 @@ import {
   type DiscussionThread,
   type InView,
 } from './selection-discussions'
-import type {
-  Board,
-  DiscussionsSeenUpTo,
-  SelectionCategory,
-  SelectionDiscussionsSeen,
-} from './selection-types'
+import type { Board, DiscussionsSeenUpTo, SelectionDiscussionsSeen } from './selection-types'
 
 /**
  * How far the reader has seen one discussion, as the server holds it, beside how many comments somebody else posted in
@@ -268,7 +264,7 @@ export function discussionPartsIn(
  * @param discussions - The discussions, each with its top-level comments.
  * @param filter - What the pool is narrowed to.
  * @param activeBoard - The board on screen; null when there is none.
- * @param categories - The selection's categories, in the order they run.
+ * @param targets - What a problem can be recommended for, in the order it runs.
  * @param readerId - The reader's id with the sign-in provider, or null when nobody is signed in.
  *
  * @returns The view's discussions, one per thread.
@@ -277,12 +273,12 @@ export function poolDiscussionPartsOf(
   discussions: readonly Discussion<DiscussedSubject>[],
   filter: PoolFilter,
   activeBoard: Board | null,
-  categories: readonly SelectionCategory[],
+  targets: readonly RecommendationTarget[],
   readerId: string | null
 ): InView<DiscussionPart> {
   // The threads the filter lets through and those it keeps out, laid out afresh, each read for the reader
   return discussionPartsIn(
-    matchDiscussions(discussions, filter, activeBoard, categories, []),
+    matchDiscussions(discussions, filter, activeBoard, targets, []),
     readerId
   )
 }

@@ -88,7 +88,7 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
   const index = useMemo(() => (data === undefined ? null : indexSelection(data)), [data])
 
   // What the pool is narrowed to, and the ways of changing it
-  const poolFilters = usePoolFilters(index?.categories ?? null)
+  const poolFilters = usePoolFilters(index)
 
   // How the pool is laid out, and the way of changing it
   const poolView = useAddressedChoice(POOL_VIEW)

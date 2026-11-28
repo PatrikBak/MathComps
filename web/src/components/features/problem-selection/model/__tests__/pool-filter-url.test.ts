@@ -14,7 +14,7 @@ import {
 /** A pool narrowed every way the address can say, for the round trip to carry. */
 const FULLY_NARROWED: AddressedPoolFilter = {
   query: 'triangle ',
-  categories: ['elementary', 'advanced'],
+  targets: ['elementary', 'advanced'],
   areas: ['geometry', 'numberTheory'],
   isShowingSetAside: true,
   standing: 'wholePaper',
@@ -88,7 +88,7 @@ describe('fromPoolFilterQuery', () => {
     )
 
     // Every category once, the selection's own categories not known yet, and no area
-    expect(filter.categories).toEqual(['advanced', 'bogus', 'elementary'])
+    expect(filter.targets).toEqual(['advanced', 'bogus', 'elementary'])
     expect(filter.areas).toEqual([])
   })
 })

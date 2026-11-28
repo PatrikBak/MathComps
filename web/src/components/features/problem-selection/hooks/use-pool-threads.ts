@@ -9,6 +9,7 @@ import { useLoadedSelection, useSelectionWorkspace } from '../components/Selecti
 import { followsBoard, poolFilterKey } from '../model/pool-filter'
 import { matchDiscussions, type PoolCounts } from '../model/pool-matches'
 import { threadsInOrder } from '../model/pool-order'
+import { recommendationTargetsOf } from '../model/recommendation-targets'
 import { poolDiscussionPartsOf } from '../model/seen-marks'
 import {
   type DiscussedSubject,
@@ -141,6 +142,10 @@ export function usePoolThreads(): UsePoolThreadsResult {
   // The discussions as the threads were last laid out afresh, whose comments a search reads as they said then
   const [laidOutDiscussions] = useKeyedState(layoutKey, shown?.discussions ?? [])
 
+  // What a problem can be recommended for as the selection now stands, the Category facet's own options, so each of
+  // them gets its count
+  const targetsNow = recommendationTargetsOf(categories, selection.boards)
+
   // The threads as shown, run through the filters against the subjects, the board and the comments they are let
   // through against, with the counts; null until the first read has landed
   const matches =
@@ -150,16 +155,13 @@ export function usePoolThreads(): UsePoolThreadsResult {
           underSubjectsOf(shown.discussions, against.subjects),
           filter,
           matchedBoard,
-          categories,
+          targetsNow,
           laidOutDiscussions
         )
 
-  // The names of the selection's categories, in the order they run
-  const categoryNames = categories.map(({ name }) => name)
-
   // The threads let through, in the order picked; none until the first read has landed
   const ordered =
-    matches === null ? [] : threadsInOrder(matches.shown, order, against.boards, categoryNames)
+    matches === null ? [] : threadsInOrder(matches.shown, order, against.boards, categories)
 
   // The threads let through, held where they stood as they were last laid out afresh
   const held = useFirstSeenOrder({
@@ -181,7 +183,7 @@ export function usePoolThreads(): UsePoolThreadsResult {
   const latest =
     shown === null || shown.latest === null
       ? null
-      : matchDiscussions(shown.latest, filter, activeBoard, categories, laidOutDiscussions).shown
+      : matchDiscussions(shown.latest, filter, activeBoard, targetsNow, laidOutDiscussions).shown
 
   // Whether showing the latest read would change the threads let through: never before the first read has landed,
   // and as last told while the latest read can't be told
@@ -201,7 +203,7 @@ export function usePoolThreads(): UsePoolThreadsResult {
           ? null
           : [...held, ...latest].map((thread) => discussionTargetOf(thread.subject)),
       seen: (discussions, readerId) =>
-        poolDiscussionPartsOf(discussions, filter, activeBoard, categories, readerId),
+        poolDiscussionPartsOf(discussions, filter, activeBoard, targetsNow, readerId),
     })
 
   // The threads kept out, none until the first read has landed
