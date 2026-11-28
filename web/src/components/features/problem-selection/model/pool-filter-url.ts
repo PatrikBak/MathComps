@@ -3,13 +3,13 @@ import {
   followsBoard,
   type PoolFilter,
   type PoolStanding,
-} from './pool-filters'
+} from './pool-filter'
 import { PROPOSAL_AREAS } from './selection-types'
 
 /** The query parameter carrying the search text. */
 const QUERY_PARAM = 'q'
 
-/** The query parameter naming a category a problem must be recommended for, by its name, once per category. */
+/** The query parameter naming a recommendation target a problem must count toward, by its key, once per target. */
 const CATEGORY_PARAM = 'category'
 
 /** The query parameter naming an area a problem must belong to, once per area. */
@@ -79,8 +79,8 @@ export function toPoolFilterQuery(filter: PoolFilter): string {
   // The search as typed, once it holds more than spaces
   if (filter.query.trim() !== '') params.set(QUERY_PARAM, filter.query)
 
-  // Each category picked, in the order the facet lists them
-  filter.categories.forEach((category) => params.append(CATEGORY_PARAM, category))
+  // Each target picked, in the order the facet lists them
+  filter.targets.forEach((key) => params.append(CATEGORY_PARAM, key))
 
   // Each area picked, in the order the facet lists them
   filter.areas.forEach((area) => params.append(AREA_PARAM, area))
@@ -99,24 +99,24 @@ export function toPoolFilterQuery(filter: PoolFilter): string {
 
 /**
  * Reads back what {@link toPoolFilterQuery} wrote. An area the facet has no option for is left out rather than
- * trusted, since a query string is somebody's typing. Each category is kept once, as named.
+ * trusted, since a query string is somebody's typing. Each target is kept once, as named.
  *
  * @param params - The address's query parameters.
  *
  * @returns What the address narrows the pool to.
  */
 export function fromPoolFilterQuery(params: URLSearchParams): AddressedPoolFilter {
-  // The categories the address names
-  const categories = params.getAll(CATEGORY_PARAM)
+  // The targets the address names
+  const targets = params.getAll(CATEGORY_PARAM)
 
   // The areas the address names
   const areas = params.getAll(AREA_PARAM)
 
-  // The filter, the areas among their own options in the order the facet lists them, each category once, and the
+  // The filter, the areas among their own options in the order the facet lists them, each target once, and the
   // State answer only where it names a whole paper
   return {
     query: params.get(QUERY_PARAM) ?? '',
-    categories: [...new Set(categories)],
+    targets: [...new Set(targets)],
     areas: PROPOSAL_AREAS.filter((area) => areas.includes(area)),
     isShowingSetAside: params.get(SET_ASIDE_PARAM) === '1',
     standing: params.get(STANDING_PARAM) === 'wholePaper' ? 'wholePaper' : null,

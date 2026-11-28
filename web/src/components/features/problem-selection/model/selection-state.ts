@@ -1,4 +1,3 @@
-import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { type Locale, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
@@ -101,22 +100,6 @@ export function categoryHue(
 }
 
 /**
- * The hosted level a category is, which picks the round a paper of that category goes into.
- *
- * @param category - The category, by name.
- * @param categories - The selection's categories.
- *
- * @returns The level; null for a category the selection doesn't list, or one no hosted round runs.
- */
-export function hostedLevelOf(
-  category: string,
-  categories: readonly SelectionCategory[]
-): HostedCompetitionCategory | null {
-  // The level of the category of that name, where the selection lists one
-  return categories.find((candidate) => candidate.name === category)?.hostedCategory ?? null
-}
-
-/**
  * Whether a board is still a draft, open to changes: one picking for no cycle, or one not yet finalized into its
  * cycle, finalizable or not.
  *
@@ -139,21 +122,6 @@ export function isDraft(board: Board): boolean {
     default:
       return assertNever(board.cycle.stage)
   }
-}
-
-/**
- * The papers a proposal can be recommended for beside the categories: the drafts' papers with no category, each of
- * which is its own category.
- *
- * @param boards - The selection's boards.
- *
- * @returns The papers, board by board, each board's in its order.
- */
-export function recommendablePapers(boards: readonly Board[]): Paper[] {
-  // Each draft's papers with no category
-  return boards
-    .filter(isDraft)
-    .flatMap((board) => board.papers.filter((paper) => paper.category === null))
 }
 
 /**

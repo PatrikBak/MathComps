@@ -30,7 +30,7 @@ import type { QueryUiState } from '@/lib/query-ui-state'
 import { type DrawnThread, useDrawnThreads } from '../hooks/use-drawn-threads'
 import { usePoolThreads } from '../hooks/use-pool-threads'
 import { useProposalReference } from '../hooks/use-proposal-reference'
-import { isNarrowed } from '../model/pool-filters'
+import { isNarrowed } from '../model/pool-filter'
 import {
   type DiscussedSubject,
   discussionTargetOf,

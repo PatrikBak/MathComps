@@ -18,16 +18,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/shared/components/DropdownMenu'
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { dataAttribute } from '@/components/shared/utils/dom-utils'
 import { MATHILDA_NAME } from '@/constants/mathilda'
 import { useMinWidth } from '@/hooks/use-breakpoint'
 
-import { useCategoryLabel } from '../hooks/use-category-label'
 import { useOwnRating } from '../hooks/use-own-rating'
 import { useProposalDefenseProblem } from '../hooks/use-proposal-defense-problem'
 import { useProposalDeleteConfirmation } from '../hooks/use-proposal-delete-confirmation'
 import { useRecommendCategory, useRecommendPaper, useSetAside } from '../hooks/use-proposal-writes'
-import { canPlaceOn, recommendablePapers } from '../model/selection-state'
+import { useRecommendationTargetName } from '../hooks/use-recommendation-target-name'
+import {
+  type RecommendationTarget,
+  recommendationTargetsOf,
+  recommendedKeysOf,
+  targetKeyOf,
+} from '../model/recommendation-targets'
+import { canPlaceOn } from '../model/selection-state'
 import { type Proposal, RATING_ASPECTS } from '../model/selection-types'
 import { ScoreBar } from './ScoreBar'
 import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
@@ -68,6 +75,30 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
   // Recommending the problem for one paper with no category, or taking it back
   const recommendPaper = useRecommendPaper()
 
+  // A function which recommends the problem for a target, or takes the recommendation back, through the write the
+  // target's kind takes
+  const recommend = (target: RecommendationTarget, isRecommended: boolean) => {
+    // By the kind of target
+    switch (target.kind) {
+      case 'category':
+        return recommendCategory.mutate({
+          proposalId: proposal.id,
+          category: target.category.name,
+          isRecommended,
+        })
+      case 'paper':
+        return recommendPaper.mutate({
+          proposalId: proposal.id,
+          paperId: target.paper.id,
+          isRecommended,
+        })
+
+      // Every kind is handled above
+      default:
+        return assertNever(target)
+    }
+  }
+
   // Setting the problem aside, or bringing it back
   const setAside = useSetAside()
 
@@ -84,16 +115,19 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
   // The selection's categories in the order they run, the ones the reader leads, its boards, and the draft on screen
   const { categories, leadCategories, boards, activeBoard } = useLoadedSelection()
 
-  // The drafts' papers with no category, each recommended for like a category
-  const papers = recommendablePapers(boards)
+  // What the problem can be recommended for, in the order it runs
+  const targets = recommendationTargetsOf(categories, boards)
+
+  // The keys of what the problem is recommended for
+  const recommended = recommendedKeysOf(proposal)
 
   // Whether the reader leads any category, whatever the problem is recommended for
   const isLead = leadCategories.length > 0
 
-  // What each category is called
-  const categoryLabel = useCategoryLabel()
+  // What each recommendation target is called
+  const targetName = useRecommendationTargetName()
 
-  // The id of the label naming the categories' rows
+  // The id of the label naming the targets' rows
   const recommendedId = useId()
 
   // Whether the screen is a phone's, where the card's own buttons for Mathilda and for placing move in here
@@ -167,44 +201,22 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
             </>
           )}
 
-          {/* The categories and the papers with no category the problem is recommended for, each switched on its
-              own and the menu kept open, for a lead where there are any */}
-          {isLead && (categories.length > 0 || papers.length > 0) && (
+          {/* What the problem is recommended for, each target switched on its own and the menu kept open, for a
+              lead where there are any */}
+          {isLead && targets.length > 0 && (
             <>
               <DropdownMenuGroup aria-labelledby={recommendedId}>
                 <p id={recommendedId} className="px-2 pt-1.5 pb-1 text-xs font-semibold text-muted">
                   {t('recommendedFor')}
                 </p>
-                {categories.map(({ name }) => (
+                {targets.map((target) => (
                   <DropdownMenuCheckboxItem
-                    key={name}
-                    checked={proposal.recommendedCategories.includes(name)}
+                    key={targetKeyOf(target)}
+                    checked={recommended.includes(targetKeyOf(target))}
                     onSelect={(event) => event.preventDefault()}
-                    onCheckedChange={(isChecked) =>
-                      recommendCategory.mutate({
-                        proposalId: proposal.id,
-                        category: name,
-                        isRecommended: isChecked,
-                      })
-                    }
+                    onCheckedChange={(isChecked) => recommend(target, isChecked)}
                   >
-                    {categoryLabel(name)}
-                  </DropdownMenuCheckboxItem>
-                ))}
-                {papers.map((paper) => (
-                  <DropdownMenuCheckboxItem
-                    key={paper.id}
-                    checked={proposal.recommendedPapers.includes(paper.id)}
-                    onSelect={(event) => event.preventDefault()}
-                    onCheckedChange={(isChecked) =>
-                      recommendPaper.mutate({
-                        proposalId: proposal.id,
-                        paperId: paper.id,
-                        isRecommended: isChecked,
-                      })
-                    }
-                  >
-                    {paper.name}
+                    {targetName(target)}
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuGroup>

@@ -10,15 +10,16 @@ import { MultiSelectFacet } from '@/components/shared/components/facets/componen
 import type { FacetSelectionMode } from '@/components/shared/components/facets/model/facet-types'
 
 import { useAreaName } from '../hooks/use-area-name'
-import { useCategoryLabel } from '../hooks/use-category-label'
 import type { UsePoolFiltersResult } from '../hooks/use-pool-filters'
+import { useRecommendationTargetName } from '../hooks/use-recommendation-target-name'
 import {
   countActiveFilters,
   filterForView,
   OFFERED_STANDINGS,
-  type PoolCounts,
   type PoolStanding,
-} from '../model/pool-filters'
+} from '../model/pool-filter'
+import type { PoolCounts } from '../model/pool-matches'
+import { recommendationTargetsOf, targetKeyOf } from '../model/recommendation-targets'
 import type { PoolViewMode } from '../model/selection-routes'
 import { PROPOSAL_AREAS } from '../model/selection-types'
 import { useSelectionWorkspace } from './SelectionWorkspaceProvider'
@@ -43,12 +44,15 @@ export function PoolFilterBar({ mode, filters, counts }: PoolFilterBarProps) {
   // Filter copy
   const t = useTranslations('problemSelection.filters')
 
-  // The selection's categories by name, in the order they run; none until its read lands
-  const categoryNames =
-    useSelectionWorkspace().selection?.categories.map((category) => category.name) ?? []
+  // The selection; null until its read lands
+  const { selection } = useSelectionWorkspace()
 
-  // What each category is called
-  const categoryLabel = useCategoryLabel()
+  // What a problem can be recommended for, in the order it runs; none until the selection's read lands
+  const targets =
+    selection === null ? [] : recommendationTargetsOf(selection.categories, selection.boards)
+
+  // What each recommendation target is called
+  const targetName = useRecommendationTargetName()
 
   // What each area is called
   const areaName = useAreaName()
@@ -71,29 +75,32 @@ export function PoolFilterBar({ mode, filters, counts }: PoolFilterBarProps) {
       {/* Where what the layout lists stands */}
       <PoolFacet
         title={t('state')}
-        values={OFFERED_STANDINGS[mode]}
-        nameOf={(standing) => standingNames[standing]}
+        options={OFFERED_STANDINGS[mode].map((standing) => ({
+          value: standing,
+          name: standingNames[standing],
+        }))}
         counts={counts?.standingCounts}
         selected={filter.standing === null ? [] : [filter.standing]}
         onChange={(standings) => setField('standing', standings.at(-1) ?? null)}
         selectionMode="single"
       />
 
-      {/* Which categories what the layout lists counts toward */}
+      {/* Which recommendation targets what the layout lists counts toward */}
       <PoolFacet
         title={t('category')}
-        values={categoryNames}
-        nameOf={categoryLabel}
-        counts={counts?.categoryCounts}
-        selected={filter.categories}
-        onChange={(categories) => setField('categories', categories)}
+        options={targets.map((target) => ({
+          value: targetKeyOf(target),
+          name: targetName(target),
+        }))}
+        counts={counts?.targetCounts}
+        selected={filter.targets}
+        onChange={(picked) => setField('targets', picked)}
       />
 
       {/* Which area a problem belongs to */}
       <PoolFacet
         title={t('area')}
-        values={PROPOSAL_AREAS}
-        nameOf={areaName}
+        options={PROPOSAL_AREAS.map((area) => ({ value: area, name: areaName(area) }))}
         counts={counts?.areaCounts}
         selected={filter.areas}
         onChange={(areas) => setField('areas', areas)}
@@ -115,6 +122,18 @@ export function PoolFilterBar({ mode, filters, counts }: PoolFilterBarProps) {
 }
 
 /**
+ * One value a pool facet offers, with what it is called.
+ *
+ * @template TValue - The values the facet offers.
+ */
+type PoolFacetOption<TValue extends string> = {
+  /** The value. */
+  value: TValue
+  /** What the value is called. */
+  name: string
+}
+
+/**
  * Props for the {@link PoolFacet} component.
  *
  * @template TValue - The values the facet offers.
@@ -122,10 +141,8 @@ export function PoolFilterBar({ mode, filters, counts }: PoolFilterBarProps) {
 type PoolFacetProps<TValue extends string> = {
   /** What the facet is called. */
   title: string
-  /** Every value the facet offers, in the order it lists them. */
-  values: readonly TValue[]
-  /** Names a value. */
-  nameOf: (value: TValue) => string
+  /** Every value the facet offers with its name, in the order it lists them. */
+  options: readonly PoolFacetOption<TValue>[]
   /** How much of what the layout lists holds each value; undefined until it arrives. */
   counts: Record<TValue, number> | undefined
   /** The values picked; empty for any. */
@@ -141,8 +158,7 @@ type PoolFacetProps<TValue extends string> = {
  */
 function PoolFacet<TValue extends string>({
   title,
-  values,
-  nameOf,
+  options,
   counts,
   selected,
   onChange,
@@ -156,13 +172,15 @@ function PoolFacet<TValue extends string>({
       variant="pill"
       title={title}
       closedLabel={t('any')}
-      options={values.map((value) => ({
+      options={options.map(({ value, name }) => ({
         id: value,
-        displayName: nameOf(value),
+        displayName: name,
         count: counts?.[value],
       }))}
       selected={selected}
-      onChange={(picked) => onChange(values.filter((value) => picked.includes(value)))}
+      onChange={(picked) =>
+        onChange(options.map(({ value }) => value).filter((value) => picked.includes(value)))
+      }
       selectionMode={selectionMode}
     />
   )

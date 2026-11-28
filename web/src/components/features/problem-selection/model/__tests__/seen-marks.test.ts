@@ -6,7 +6,8 @@ import {
 } from '@/components/features/comments/model/__tests__/support/comment-fixtures'
 import type { CommentNewness } from '@/components/features/comments/model/comment-newness'
 
-import { OPEN_POOL_FILTER } from '../pool-filters'
+import { OPEN_POOL_FILTER } from '../pool-filter'
+import { recommendationTargetsOf } from '../recommendation-targets'
 import {
   advanceMarks,
   holdMarks,
@@ -295,12 +296,15 @@ describe('poolDiscussionPartsOf', () => {
     // What the pool shows of the papers' discussions, narrowed to the elementary category
     const view = poolDiscussionPartsOf(
       discussions,
-      { ...OPEN_POOL_FILTER, categories: ['elementary'] },
+      { ...OPEN_POOL_FILTER, targets: ['elementary'] },
       board,
-      [
-        { name: 'elementary', hostedCategory: 'elementary' },
-        { name: 'advanced', hostedCategory: 'advanced' },
-      ],
+      recommendationTargetsOf(
+        [
+          { name: 'elementary', hostedCategory: 'elementary' },
+          { name: 'advanced', hostedCategory: 'advanced' },
+        ],
+        [board]
+      ),
       READER
     )
 

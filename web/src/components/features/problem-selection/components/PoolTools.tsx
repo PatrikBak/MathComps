@@ -7,7 +7,7 @@ import { LIGHT_CONTROL_SURFACE_CLASS } from '@/components/shared/components/face
 import { cn } from '@/components/shared/utils/css-utils'
 
 import type { UsePoolFiltersResult } from '../hooks/use-pool-filters'
-import type { PoolCounts } from '../model/pool-filters'
+import type { PoolCounts } from '../model/pool-matches'
 import type { PoolViewMode } from '../model/selection-routes'
 import { PoolFilterBar } from './PoolFilterBar'
 

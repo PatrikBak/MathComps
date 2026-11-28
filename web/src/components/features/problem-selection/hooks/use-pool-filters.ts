@@ -6,6 +6,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { useAddressSync } from '@/hooks/use-address-sync'
 import { useInitialUrlState } from '@/hooks/use-initial-url-state'
 
+import { OPEN_POOL_FILTER, type PoolFilter, withListedTargets } from '../model/pool-filter'
 import {
   fromPoolFilterQuery,
   POOL_FILTER_PARAMS,
@@ -14,8 +15,8 @@ import {
   withAddressed,
   withPickedFilter,
 } from '../model/pool-filter-url'
-import { OPEN_POOL_FILTER, type PoolFilter, withListedCategories } from '../model/pool-filters'
-import type { SelectionCategory } from '../model/selection-types'
+import { recommendationTargetsOf } from '../model/recommendation-targets'
+import type { SelectionIndex } from '../model/selection-state'
 
 /**
  * Return type for {@link usePoolFilters}.
@@ -35,26 +36,34 @@ export type UsePoolFiltersResult = {
  * back to the same pool, and a step back or forward through history takes the pool to the filter that step's address
  * holds, while the pool is hidden behind a problem as well. A State answer on or off the board follows the board on
  * screen, so it lasts until a reload, through every step in history, and comes back once a step leaves an address
- * naming a whole paper. Once the selection arrives, a category it doesn't list narrows nothing and leaves the address.
+ * naming a whole paper. Once the selection arrives, a pick no problem can be recommended for narrows nothing and
+ * leaves the address, a paper whose board has been finalized among them.
  *
- * @param categories - The selection's categories; null until its read lands.
+ * @param selection - The selection's categories and boards; null until its read lands.
  *
  * @returns The filter, and the ways to change it.
  */
 export function usePoolFilters(
-  categories: readonly SelectionCategory[] | null
+  selection: Pick<SelectionIndex, 'categories' | 'boards'> | null
 ): UsePoolFiltersResult {
   // What the address narrowed the pool to when the page opened
   const addressedFilter = useInitialUrlState(fromPoolFilterQuery)
 
-  // What the pool is narrowed to as picked, the address's filter at first, whatever categories it names, with no answer
+  // What the pool is narrowed to as picked, the address's filter at first, whatever targets it names, with no answer
   // on or off the board picked yet
   const [picks, setPicks] = useState<PoolPicks>({ filter: addressedFilter, boardPick: null })
 
-  // What the pool is narrowed to: the filter as picked, once the selection arrives with only the categories it lists
+  // What the pool is narrowed to: the filter as picked, once the selection arrives with only the picks a problem can
+  // be recommended for
   const filter = useMemo(
-    () => (categories === null ? picks.filter : withListedCategories(picks.filter, categories)),
-    [picks.filter, categories]
+    () =>
+      selection === null
+        ? picks.filter
+        : withListedTargets(
+            picks.filter,
+            recommendationTargetsOf(selection.categories, selection.boards)
+          ),
+    [picks.filter, selection]
   )
 
   // The address carrying the filter as far as it can, every other parameter left as it stands
