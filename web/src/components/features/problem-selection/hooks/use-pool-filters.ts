@@ -6,6 +6,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { useAddressSync } from '@/hooks/use-address-sync'
 import { useInitialUrlState } from '@/hooks/use-initial-url-state'
 
+import { OPEN_POOL_FILTER, type PoolFilter, withListedCategories } from '../model/pool-filter'
 import {
   fromPoolFilterQuery,
   POOL_FILTER_PARAMS,
@@ -14,7 +15,6 @@ import {
   withAddressed,
   withPickedFilter,
 } from '../model/pool-filter-url'
-import { OPEN_POOL_FILTER, type PoolFilter, withListedCategories } from '../model/pool-filters'
 import type { SelectionCategory } from '../model/selection-types'
 
 /**

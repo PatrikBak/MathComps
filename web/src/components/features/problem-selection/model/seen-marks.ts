@@ -7,7 +7,8 @@ import {
 import type { CommentThreadSeenDto } from '@/components/features/comments/services/comment-api-types'
 import { convertToCommentData } from '@/components/features/comments/utils/comment-utils'
 
-import { matchDiscussions, type PoolFilter } from './pool-filters'
+import { type PoolFilter } from './pool-filter'
+import { matchDiscussions } from './pool-matches'
 import {
   type DiscussedSubject,
   type Discussion,

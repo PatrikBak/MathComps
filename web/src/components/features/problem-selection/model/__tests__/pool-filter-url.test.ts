@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { OPEN_POOL_FILTER, type PoolFilter } from '../pool-filter'
 import {
   type AddressedPoolFilter,
   fromPoolFilterQuery,
@@ -9,7 +10,6 @@ import {
   withAddressed,
   withPickedFilter,
 } from '../pool-filter-url'
-import { OPEN_POOL_FILTER, type PoolFilter } from '../pool-filters'
 
 /** A pool narrowed every way the address can say, for the round trip to carry. */
 const FULLY_NARROWED: AddressedPoolFilter = {

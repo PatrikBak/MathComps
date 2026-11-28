@@ -6,12 +6,8 @@ import { useFirstSeenOrder } from '@/hooks/use-first-seen-order'
 import { useKeyedState } from '@/hooks/use-keyed-state'
 
 import { useLoadedSelection, useSelectionWorkspace } from '../components/SelectionWorkspaceProvider'
-import {
-  followsBoard,
-  matchDiscussions,
-  type PoolCounts,
-  poolFilterKey,
-} from '../model/pool-filters'
+import { followsBoard, poolFilterKey } from '../model/pool-filter'
+import { matchDiscussions, type PoolCounts } from '../model/pool-matches'
 import { threadsInOrder } from '../model/pool-order'
 import { poolDiscussionPartsOf } from '../model/seen-marks'
 import {

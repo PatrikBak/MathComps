@@ -13,7 +13,7 @@ import { useKeyedState } from '@/hooks/use-keyed-state'
 import { onceAnswerLands, oncePageShows } from '@/lib/query-config'
 
 import { useSelectionWorkspace } from '../components/SelectionWorkspaceProvider'
-import type { PoolFilter } from '../model/pool-filters'
+import type { PoolFilter } from '../model/pool-filter'
 import { type DiscussionPart, poolDiscussionPartsOf } from '../model/seen-marks'
 import {
   discussedSubjectsOf,

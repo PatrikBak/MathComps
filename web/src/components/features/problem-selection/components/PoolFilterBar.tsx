@@ -16,9 +16,9 @@ import {
   countActiveFilters,
   filterForView,
   OFFERED_STANDINGS,
-  type PoolCounts,
   type PoolStanding,
-} from '../model/pool-filters'
+} from '../model/pool-filter'
+import { type PoolCounts } from '../model/pool-matches'
 import type { PoolViewMode } from '../model/selection-routes'
 import { PROPOSAL_AREAS } from '../model/selection-types'
 import { useSelectionWorkspace } from './SelectionWorkspaceProvider'

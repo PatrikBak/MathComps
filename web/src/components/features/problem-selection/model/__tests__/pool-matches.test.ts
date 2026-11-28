@@ -2,13 +2,8 @@ import { describe, expect, it } from 'vitest'
 
 import { commentDto } from '@/components/features/comments/model/__tests__/support/comment-fixtures'
 
-import {
-  matchDiscussions,
-  matchPool,
-  OPEN_POOL_FILTER,
-  type PoolFilter,
-  withListedCategories,
-} from '../pool-filters'
+import { OPEN_POOL_FILTER, type PoolFilter } from '../pool-filter'
+import { matchDiscussions, matchPool } from '../pool-matches'
 import type { DiscussedSubject, Discussion, DiscussionThread } from '../selection-discussions'
 import type { Board, Proposal, SelectionCategory } from '../selection-types'
 
@@ -742,15 +737,5 @@ describe('matchDiscussions', () => {
 
     // Each thread by what it says now
     expect(threadIds(afresh.shown)).toEqual(['paper', 'taken edited'])
-  })
-})
-
-describe('withListedCategories', () => {
-  it("keeps the categories the selection lists, in the selection's order", () => {
-    // An address naming advanced, a category nobody lists, and elementary, in that order
-    const picked = { ...OPEN_POOL_FILTER, categories: ['advanced', 'nowhere', 'elementary'] }
-
-    // The categories the selection lists, in the order they run
-    expect(withListedCategories(picked, MATHCOMPS).categories).toEqual(['elementary', 'advanced'])
   })
 })

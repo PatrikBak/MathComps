@@ -3,7 +3,7 @@ import {
   followsBoard,
   type PoolFilter,
   type PoolStanding,
-} from './pool-filters'
+} from './pool-filter'
 import { PROPOSAL_AREAS } from './selection-types'
 
 /** The query parameter carrying the search text. */
